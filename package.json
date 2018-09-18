@@ -1,0 +1,21 @@
+{
+  "name": "amoscript",
+  "version": "0.0.1",
+  "description": "Transpile tokenized AMOS basic programs into Javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "kitty:git/amoscript"
+  },
+  "keywords": [
+    "AMOS",
+    "basic",
+    "javascript",
+    "transpiler"
+  ],
+  "author": "Daniel Schwen",
+  "license": "GPL-3.0-or-later"
+}
