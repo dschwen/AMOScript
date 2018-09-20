@@ -17,5 +17,8 @@
     "transpiler"
   ],
   "author": "Daniel Schwen",
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "binary-search-bounds": "^2.0.4"
+  }
 }
