@@ -4,7 +4,7 @@
   "description": "Transpile tokenized AMOS basic programs into Javascript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/run.js"
   },
   "repository": {
     "type": "git",
