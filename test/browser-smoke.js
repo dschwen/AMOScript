@@ -7,92 +7,53 @@ const path = require('path');
 const { pathToFileURL } = require('url');
 process.env.PLAYWRIGHT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH || path.join(__dirname, '../.cache/ms-playwright');
 const { chromium } = require('playwright');
-const Transpiler = require('../lib/Transpiler');
-const { binary, token: t, integer: n, text } = require('./helpers/tokens');
+const { comparePixels } = require('./helpers/displayFrames');
+const { encodePng } = require('./helpers/displayPng');
+const { runScenario } = require('./helpers/browserScenarios');
 
 async function run() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true,
+    args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   try {
     const page = await browser.newPage({ viewport: { width: 1000, height: 900 } });
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
-    await page.goto(pathToFileURL(path.join(__dirname, '../index.html')).href);
-    const trig = (name, value) => [t(name), t('('), n(value), t(')')];
-    const trigSource = new Transpiler(binary([
-      [t('Cls Colour'), n(0)], [t('Colour'), n(3), t(','), n(0xf00)], [t('Ink'), n(3)], [t('Degree')],
-      [t('Plot'), n(10), t(','), n(100), t('-'), trig('Sin', 90), t('*'), n(20)],
-      [t('Plot'), n(20), t(','), n(100), t('-'), trig('Cos', 0), t('*'), n(20)],
-      [t('Print'), trig('Sin', 90), t(','), trig('Cos', 0), t(','), trig('Tan', 0)],
-      [t('Radian')], [t('Print'), trig('Sin', 0)]
-    ])).toModule();
-    const trigResult = await page.evaluate(source => {
-      const module = { exports: {} };
-      new Function('module', source)(module);
-      const logs = [];
-      const program = module.exports({ print: (...args) => logs.push(args) });
+    await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const gpu = await runScenario('webgl-integers', page);
+    const artifacts = path.join(__dirname, 'artifacts');
+    fs.mkdirSync(artifacts, { recursive: true });
+    const readback = Uint8ClampedArray.from(gpu.pixels);
+    const diff = comparePixels(2, 2, readback,
+      Uint8ClampedArray.from([131, 124, 2, 255, 251, 4, 3, 255, 17, 238, 0, 255, 67, 188, 1, 255]));
+    const png = encodePng(2, 2, readback);
+    fs.writeFileSync(path.join(artifacts, 'webgl-readback.png'), png);
+    fs.writeFileSync(path.join(artifacts, 'webgl-readback-diff.png'), encodePng(2, 2, diff.diff));
+    // Check our artifact writer with Chromium's independent PNG decoder.
+    const decoded = await page.evaluate(async url => {
+      const image = new Image();
+      image.src = url; await image.decode();
       const canvas = document.createElement('canvas');
-      const host = AMOS_BROWSER.createCanvasHost(canvas);
-      host.attach(program);
-      program.tick(100);
-      host.render();
-      const pixels = [[10, 80], [20, 80], [10, 79]].map(([x, y]) => Array.from(canvas.getContext('2d').getImageData(x, y, 1, 1).data));
-      host.detach();
-      return { logs, pixels, halted: program.state.halted };
-    }, trigSource);
-    assert.deepStrictEqual(trigResult, { logs: [[1, 1, 0], [0]],
-      pixels: [[255, 0, 0, 255], [255, 0, 0, 255], [0, 0, 0, 255]], halted: true });
-    const bankBytes = Buffer.from(fs.readFileSync(path.join(__dirname, 'fixtures/image-banks.hex'), 'utf8').replace(/\s/g, ''), 'hex');
-    const bankSource = new Transpiler(binary([
-      [t('Load'), text('objects.abk')], [t('Get Sprite Palette')], [t('Cls Colour'), n(0)],
-      [t('Paste Bob'), n(10), t(','), n(10), t(','), n(1)],
-      [t('Load Bank'), text('objects.abk'), t(','), n(1)],
-      [t('Paste Bob'), n(30), t(','), n(10), t(','), n(3)],
-      [t('Paste Bob'), n(50), t(','), n(30), t(','), t('Hrev'), t('('), n(1), t(')')],
-      [t('Save Bank'), text('saved.abk'), t(','), n(1)], [t('Erase'), n(1)], [t('Load'), text('saved.abk')],
-      [t('Paste Bob'), n(10), t(','), n(40), t(','), n(1)],
-      [t('Reserve As Work'), n(5), t(','), n(3)], [t('Reserve As Data'), n(6), t(','), n(4)],
-      [t('Bank Shrink'), n(6), t('To'), n(2)],
-      [t('Hot Spot'), n(1), t(','), n(0), t(','), n(0)], [t('Double Buffer')], [t('Bob Update Off')],
-      [t('Bob'), n(0), t(','), n(60), t(','), n(10), t(','), n(1)], [t('Bob Update')], [t('Wait Key')],
-      [t('Bank Swap'), n(1), t(','), n(10)], [t('Bob Update')], [t('Wait Key')],
-      [t('Bank Swap'), n(1), t(','), n(10)], [t('Bob Update')], [t('Wait Key')],
-      [t('Erase'), n(1)], [t('Bob Update')], [t('Erase Temp')]
-    ])).toModule();
-    const bankResult = await page.evaluate(({ source, bytes }) => {
-      const module = { exports: {} };
-      new Function('module', source)(module);
-      const assets = new Map([['objects.abk', bytes]]);
-      const program = module.exports({ files: { read: name => assets.get(name), write: (name, contents) => { assets.set(name, contents); } } });
-      const canvas = document.createElement('canvas');
-      const host = AMOS_BROWSER.createCanvasHost(canvas);
-      host.attach(program);
-      program.tick(100);
-      host.render();
-      const pixels = [[10, 10], [11, 10], [30, 10], [31, 10], [9, 10], [10, 40], [11, 40]].map(([x, y]) =>
-        Array.from(canvas.getContext('2d').getImageData(x, y, 1, 1).data));
-      const images = program.banks.get(1).images.length;
-      const bobPixel = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
-      program.sendKey('x');
-      program.tick(100);
-      host.render();
-      const swappedOut = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
-      program.sendKey('x');
-      program.tick(100);
-      host.render();
-      const swappedBack = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
-      program.sendKey('x');
-      program.tick(100);
-      host.render();
-      const restored = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
-      host.detach();
-      return { pixels, images, bobPixel, swappedOut, swappedBack, restored,
-        savedBytes: assets.get('saved.abk').length, savedHeader: assets.get('saved.abk').slice(0, 4),
-        work: program.bankLength(5), data: program.bankLength(6), halted: program.state.halted };
-    }, { source: bankSource, bytes: bankBytes.subarray(26, 124).toString('latin1') });
-    assert.deepStrictEqual(bankResult, { pixels: [[255, 0, 0, 255], [0, 255, 0, 255],
-      [255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255]], images: 4,
-      bobPixel: [255, 0, 0, 255], swappedOut: [0, 0, 0, 255], swappedBack: [255, 0, 0, 255],
-      restored: [0, 0, 0, 255], savedBytes: 126, savedHeader: 'AmSp', work: 0, data: 2, halted: true });
+      canvas.width = image.width; canvas.height = image.height;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      return Array.from(context.getImageData(0, 0, image.width, image.height).data);
+    }, `data:image/png;base64,${png.toString('base64')}`);
+    assert.deepStrictEqual(decoded, gpu.pixels);
+    console.log('WebGL2 probe passed: R8UI chip bytes, uint addressing, integer framebuffer and top-left readback (SwiftShader).');
+    await runScenario('webgl-resources', page);
+    console.log('WebGL2 resources passed: exact chip/table readback, independent dirty uploads and loss/restore/disposal.');
+    const gpuRenderer = await runScenario('webgl-renderer', page, artifacts);
+    console.log(`WebGL2 renderer passed: ${gpuRenderer.checked} GPU/CPU frames (${gpuRenderer.imageCount} independent image fields, ${gpuRenderer.namedCount} mode/sprite/copper matrices, 100 seeded frames), decode traces and restoration.`);
+    const dma = await runScenario('sprite-dma', page);
+    fs.writeFileSync(path.join(artifacts, 'sprite-dma.png'), Buffer.from(dma.png.split(',')[1], 'base64'));
+    console.log('Sprite DMA probe passed: standalone CPU factories, chained reuse, armed-row retention and Canvas pixels.');
+    await runScenario('trigonometry', page, artifacts);
+    const ehbResult = await runScenario('ehb', page, artifacts);
+    fs.writeFileSync(path.join(artifacts, 'ehb.png'), Buffer.from(ehbResult.png.split(',')[1], 'base64'));
+    const hamResult = await runScenario('ham', page, artifacts);
+    fs.writeFileSync(path.join(artifacts, 'ham.png'), Buffer.from(hamResult.png.split(',')[1], 'base64'));
+    await runScenario('sprites', page, artifacts);
+    await runScenario('banks', page, artifacts);
     await page.click('#run');
     assert.strictEqual(await page.locator('#output').textContent(), 'Start\nOne\nTwo\nThree\nEnd\n');
     await page.click('#graphics');
@@ -133,8 +94,6 @@ async function run() {
       return [[256, 128], [200, 128], [267, 136], [260, 136], [204, 135], [204, 136]].map(([x, y]) => Array.from(context.getImageData(x, y, 1, 1).data));
     });
     assert.deepStrictEqual(flippedPixels, [[0, 136, 255, 255], [0, 0, 0, 255], [255, 255, 255, 255], [34, 204, 136, 255], [255, 255, 255, 255], [34, 204, 136, 255]]);
-    const artifacts = path.join(__dirname, 'artifacts');
-    fs.mkdirSync(artifacts, { recursive: true });
     await page.screenshot({ path: path.join(artifacts, 'graphics.png'), fullPage: true });
     await page.click('#bobs');
     assert.strictEqual(await page.evaluate(() => AMOS.state.waiting), 'key');
@@ -164,8 +123,9 @@ async function run() {
     await page.click('#bobs');
     await page.click('#stop');
     assert.strictEqual(await page.evaluate(() => AMOS.state.stopped), true);
+    await require('./helpers/checkBrowserDemos')(browser);
     assert.deepStrictEqual(errors, []);
-    console.log('Browser smoke passed: standalone bank load/save/reload/appending/reservation/swap/shrink/erasure, trigonometry/angle modes and pixels, Canvas shapes, bank images, flipping/masks, buffered Bobs with modes/limits and collisions, swaps, restoration, input, switching, and Stop.');
+    console.log('Browser smoke passed: standalone bank load/save/reload/appending/reservation/swap/shrink/erasure, trigonometry/angle modes and pixels, Canvas shapes, direct sprite manual updates/movement/isolation/cursor restoration, bank images, flipping/masks, buffered Bobs with modes/limits and collisions, swaps, restoration, input, switching, and Stop.');
   } finally {
     await browser.close();
   }

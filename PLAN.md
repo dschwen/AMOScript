@@ -14,17 +14,39 @@ browser runtime. Full Amiga hardware behavior, extension libraries, and every
 AMOS dialect are longer-term targets. ASCII AMOS input should eventually share
 the same AST and backend, after the binary frontend and core semantics stabilize.
 
-## Verified current state
+## Recorded baseline and current state
 
-- `npm test`: **248 passed, 0 failed**.
-- `npm run test:browser`: **passed in Chromium**, covering rendered pixels,
-  keyboard resumption, pointer mapping, program switching, and Stop.
+- Current local baseline: `npm run check`, **328 passed, 0 failed**, including
+  sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
+  independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
+  explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
+- Every browser scenario now has a self-contained HTML demo and HTML Preview
+  link in [the gallery](demos/README.md). Shared evaluators/assertions and generated
+  checks keep them aligned; Chromium verifies each scenario page offline.
+- Current `npm run test:browser`: **passed in Chromium/SwiftShader**, covering
+  Canvas/input/lifecycle, direct-sprite updates and cursor restoration, plus a
+  WebGL2 integer-texture/framebuffer readback capability probe.
 - The original Test7, Test14, and Test21 regressions are fixed and covered.
-- The generated-artifact gate and full suite pass in a clean-install project
-  copy on Node 22.23.4 and 24.22.1, and locally on Node 18.19.1. Chromium passes
+- At the earlier 248-test baseline, the generated-artifact gate and full suite passed in a clean-install project
+  copy on Node 22.23.4 and 24.22.1, and locally on Node 18.19.1. Chromium passed
   under Node 24. The GitHub workflow is configured for Node 22/24 and browser
   checks on Ubuntu 24.04; fresh hosted execution/system installation is pending.
   AGENTS.md now documents the active pipeline. See [development](docs/development.md).
+- The stale-demo baseline is restored. A real WebGL2 readback probe now runs in
+  the existing browser CI command. ABI v1, the PNG-diff harness, basic reference
+  decoding, physical playfield snapshots and an OCS copper builder/interpreter
+  are implemented, as are EHB screens, static scroll/DPF and explicit IFF fields.
+  AMOS display/copper commands, superhires and live field timing,
+  sprite contention/computed allocation, GPU presentation/switching and remaining
+  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 151
+  local GPU/CPU frames; see [renderer contract](docs/webgl-renderer.md).
+  WebGL2 resources, exact table readback, dirty uploads and context restoration
+  are implemented; see [resource contract](docs/webgl-resources.md). Direct AMOS
+  sprite snapshots and CPU attached/priority composition are implemented; see
+  [sprite contract](docs/sprite-display.md). See
+  [mode and field implementation](docs/display-modes.md), [copper implementation](docs/copper-display.md),
+  [planar implementation](docs/planar-display.md), [display snapshots](docs/display-snapshots.md) and
+  [display architecture](docs/display-architecture.md).
 - Generated modules run without a runtime import, including from a separate
   directory. The CLI has error exit codes and overwrite protection.
 - Integer arithmetic now shares helpers for static expressions and Val results;
@@ -118,10 +140,10 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 | Binary frontend | Header/code/line bounds, location-aware token decoding, bounded bank/trailer parsing, explicit unsupported-token errors | Broader independent file coverage, more bank formats, dialect and extension contracts |
 | Compiler | Separate AST parser and lowerer, typed symbols, control-flow IR, source locations, standalone code generation | Remaining statement/function variants, consistent numeric lowering, legacy-code cleanup |
 | Core language | Assignments, expressions, conditions, loops, labels, Gosub/Return, procedures and results | Float fidelity, additional operators/functions, procedure variants, broader reference verification |
-| Data and strings | Arrays, scoped DATA/READ/RESTORE, common string functions | Substring assignment, full byte-string/length rules and edge cases |
+| Data and strings | Arrays, scoped DATA/READ/RESTORE, substring retrieval/assignment, common string functions | Remaining memory-dependent byte-string/length rules and edge cases |
 | Files | Sequential I/O through explicit memory/Node adapters | Seek/random-file variants, other documented file operations |
 | Execution | Instruction budget, waits, key queue, timer cancellation, stop/resume, per-instance state | Regression coverage as new asynchronous hosts are added |
-| Browser graphics | Indexed screens, text, embedded images, flipping/masks, moving Bobs, double buffering/Autoback, Canvas rendering and input | Sprites, remaining drawing/screen modes, hardware timing and Amiga coordinate semantics |
+| Browser graphics | Indexed drawing, Bobs/buffers/Autoback, Canvas/input/direct sprites; ABI/chip memory, physical planar export, basic CPU reference, normal ILBM, bounded copper/stack builder and WebGL2 probe | AMOS screen/copper commands, advanced modes, structured hardware sprites, WebGL2 backend, computed/attached sprites, exact timing and hardware coordinates |
 | Audio | No implementation | Sample/music assets, playback hosts, timing/lifecycle contracts |
 | ASCII frontend | No implementation | Lexer/parser producing the shared AST |
 
@@ -152,6 +174,48 @@ mutable runtime state separately for every program.
 The current instruction-function table is suitable for AMOS jumps and waits.
 A switch dispatcher or optimizer is optional future work, justified by profiling
 after correctness is established.
+
+### Display evolution: reference and WebGL2
+
+Adopt [the Amiga display proposal](docs/amiga-webgl-display-plan.md) as the target
+for graphics milestone 4, with [repository integration](docs/display-architecture.md)
+defining migration and interfaces. Its P0–P12/M0–M12 acceptance catalogue remains
+in scope; ECS/OCS come first and AGA remains an explicit optional expansion.
+
+Keep language/runtime semantics on the CPU. AMOS screen/palette/rainbow state
+feeds a shared copper builder/interpreter and physical sprite-line builder.
+An immutable chip-memory + FrameState snapshot feeds both a pure-JS reference
+renderer and a WebGL2 host backend. Pixel comparison, fallback and explainPixel
+all use that same revision. Renderers never run program instructions or update
+Bob/sprite state. Preserve standalone headless output and per-instance state.
+
+Begin with indexed physical buffers as authority and a one-way planar bridge.
+After parity, migrate CPU drawing/text/paste and Bob saved backgrounds to planar
+storage, then retire the duplicate writable representation. Point continues to
+read logical pixels; Screen Swap exchanges logical/physical identities; sprites
+compose independently. Preserve the existing buffering, bank and collision
+contracts throughout.
+
+Keep JavaScript, the existing test runner and Playwright. Add planned CPU modules
+under `lib/display/`, retaining `lib/amos/display.js` as the AMOS facade. GPU
+context/textures/shaders belong to the browser host. Use separate CPU/WebGL canvas
+surfaces for switching/context-loss fallback; a canvas already using WebGL cannot
+be changed to 2D. No TypeScript/Vitest rewrite or instruction-driver replacement
+is required by this workstream.
+
+Freeze the snapshot ABI before GPU work: explicit native/field dimensions,
+integer sampling units including ECS superhires, signed sprite positions and an
+active flag, endian-independent RGBA bytes, revisioned dirty history, exact event
+overflow handling and explicit interlace history. The driver owns emulated time;
+requestAnimationFrame only presents committed frames. Hardware mouse semantics
+and true VBL timing are separately tested migrations, not backend side effects.
+
+Delivery gates D0–D6 in the integration document map the proposal phases to this
+repository: baseline/ABI → CPU bridge → copper/screens → HAM/sprite reference →
+GPU parity/lifecycle → authoritative planar storage → real-program/performance
+evidence. GPU/reference equality does not replace emulator validation. Keep the
+proposal's capture, fuzz, context-loss, 60-second replay and pacing gates visible;
+performance targets are unmeasured until profiling proves them.
 
 ## Ordered milestones
 
@@ -238,9 +302,19 @@ updates and cooperative automatic updates. The
 animated Bobs example is covered in fake-clock and Chromium tests. See
 [the Bob contract](docs/bobs.md) and [buffering contract](docs/buffering.md).
 Double buffering, Screen Swap and Autoback 0/1/2 now have pixel and browser
-coverage. Bob Col/Col now have unit, independent-byte and Chromium coverage;
-sprites, sprite/cross-type collisions, hardware timing and advanced blitter edge
+coverage. Bob Col/Col and direct sprites now have unit and Chromium coverage;
+computed/attached sprites, sprite/cross-type collisions, hardware timing and advanced blitter edge
 effects are still required.
+
+The shared snapshot/reference/WebGL2 workstream above supplies the target display
+architecture for this milestone. Direct sprites now publish structured physical line state to both
+Canvas and the CPU reference, sharing one priority resolver. The opaque Canvas
+RGBA callback has been retired. Finish computed allocation and DMA contention/timing
+before claiming the complete sprite-reference workstream. Canvas assertions alone do not establish
+WebGL2 availability or GPU parity; the separate integer readback probe now proves
+local WebGL2 capability. The native non-HAM GPU renderer now passes 151 local
+GPU/CPU frames, including 100 seeded inputs. Presentation/switching, HAM/events
+and unfinished mode/capture gates remain open.
 
 - Model object creation, movement, image selection, visibility, priority,
   hotspots, and removal using the verified AMOS contracts.
@@ -291,7 +365,44 @@ patches. Describe coverage precisely rather than claiming full AMOS support.
 
 ## Immediate implementation sequence
 
-### Next bounded work package: numeric compatibility
+### Display foundation progress and next work (D0–D2)
+
+1. Completed locally: direct-sprite verification, regenerated demo baseline and
+   existing artifact/unit/browser gates (255 tests; Node 18.19.1).
+2. Implemented: ABI v1 chip/frame serialization, structural validation, independent
+   planar/endian/PNG-filter fixtures and byte/PNG mismatch reporting with a stub.
+   Independent plane-order/odd-width/stride patterns now pass with the P1 renderer.
+   The actual WebGL2 integer framebuffer-readback probe
+   is implemented and passes locally; it runs in the existing CI browser command,
+   with hosted execution pending. Context creation alone cannot satisfy M0.
+3. Implemented locally: ChipMemory/independent dirty queries, basic pure-JS
+   reference/explainPixel, bounded normal ILBM/ByteRun1 and physical playfield
+   snapshots in standalone factories. Existing text/images/Bobs, Autoback and
+   logical/physical semantics pass migration comparisons. Sprites are explicitly
+   outside this playfield-only export; indexed storage remains authoritative.
+4. Implemented locally: bounded OCS copper MOVE/WAIT/SKIP/jumps, per-line palettes,
+   signed modulos, pointer latches and a shared screen-stack builder. Standalone
+   snapshotDisplay/renderDisplay use it and preserve physical-buffer semantics.
+   EHB, static scroll/DPF and explicit IFF fields/weaving now pass independent
+   fixtures. HAM6 now passes ten independent six-plane ILBM goldens, five-plane
+   and laced cases, standalone Canvas/planar/copper and buffer comparisons; see
+   [HAM contract](docs/ham-display.md). Physical sprite reference and direct AMOS export now pass synthetic
+   priority/attachment/edge cases; bounded DMA/reuse and manual register output are implemented too.
+   Computed allocation and bus/latch timing remain in D3.
+   Also verify AMOS screen/rainbow/copper command tokens and source
+   semantics; add positioning/offsets, ECS superhires and live field/input timing.
+   Keep M2's three-capture gate and exact DMA timing limits open.
+5. Implemented locally: WebGL2 resource storage/readback, owned dirty-row
+   comparisons and forced context loss/restoration/disposal (M6 infrastructure).
+   Implemented next: GPU decode/resolve for the current non-HAM CPU subset,
+   with 151 GPU/CPU comparisons and restored-shader rerendering.
+   Next add scale/presentation, switching/live diff, HAM and event support;
+   [resource boundaries](docs/webgl-resources.md) remain explicit.
+6. Continue through D2–D6 and all associated M0–M12 gates. Build CPU/GPU parity
+   on shared snapshots before replacing drawing storage or enabling new modes.
+   Preserve numeric, audio, release and ASCII requirements as separate workstreams.
+
+### Numeric compatibility work package (continuing)
 
 The compiler architecture is already in place. Continue it incrementally;
 do not restart the parser or replace the dispatcher before measuring a need.
@@ -341,9 +452,10 @@ are available; passing synthetic tests does not satisfy it.
 - Core completeness: memory-dependent string cases, missing functions/procedure
   forms, and selected file variants, each
   delivered with binary execution fixtures.
-- Practical graphics: sprite composition and coordinate conversion first,
-  then sprite/cross-type collisions, remaining screen operations and additional
-  bank formats/manipulation. Retain buffered Bob and external-load browser cases.
+- Practical graphics: D0–D1 display foundations first, then D2–D6 with the full
+  reference/WebGL proposal gates. Complete computed/attached sprites and
+  sprite/cross-type collisions alongside the shared sprite-line model. Retain
+  buffered Bob and external bank round-trip cases; add copper/mode captures.
 - Audio: choose one bank format and playback command set, implement a
   deterministic host first, then verify browser playback and lifecycle.
 - Release: obtain hosted CI evidence, settle legacy deep-import compatibility,
@@ -368,8 +480,9 @@ continues across every package rather than blocking all independent work.
 3. Extend reference execution coverage for the implemented static-image slice;
    flipping, mask commands and mixed-depth behavior follow original routines and
    have unit and real browser coverage.
-4. Extend moving Bobs with remaining modes and sprite composition, retaining the
-   buffered browser acceptance case and broadening reference timing coverage.
+4. Follow the integrated display gates while extending Bobs/sprites and hardware
+   screen composition. Retain buffered browser acceptance cases; verify reference
+   snapshots, explicit GPU execution/parity, context lifecycle and captured timing.
 5. Continue through graphics and audio, updating the compatibility matrix
    after each accepted increment.
 

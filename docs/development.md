@@ -8,6 +8,11 @@ runtime is not in the CI matrix.
 
 ## Reproduce the checks
 
+The [display architecture](display-architecture.md) retains the JavaScript test
+runner and Playwright. Planned snapshot fixtures and WebGL readback checks extend
+these tools; existing Canvas checks do not establish GPU parity. SwiftShader
+results alone will not establish hardware performance.
+
 ```sh
 npm ci
 npm run check
@@ -15,7 +20,8 @@ npm run install:browser
 npm run test:browser
 ```
 
-`npm run check` verifies all three generated modules and then runs the full unit,
+`npm run check` verifies all three generated modules and browser gallery pages,
+then runs the full unit,
 CLI and integration suite, including Test7/14/21. The browser test separately
 checks Canvas pixels, input, buffering/Bob composition, program switching and Stop.
 
@@ -45,7 +51,8 @@ system libraries to be present.
 | examples/Bobs.AMOS | examples/compiled-bobs.js |
 
 After codegen/runtime changes, run `npm run build:demo` and include the regenerated
-modules. `npm run check:generated` compares bytes against fresh compiler output,
+modules and gallery pages. `npm run check:generated` compares bytes against fresh
+compiler/scenario output,
 reports every missing/stale module and exits nonzero without writing files.
 `npm run test:browser` checks instead of automatically rebuilding, so browser
 verification cannot conceal stale output.
@@ -72,6 +79,32 @@ forwarding was checked with `--dry-run`; system dependencies were already presen
 locally. Fresh Ubuntu system installation and hosted workflow execution remain
 pending until CI runs. Inspect that result before claiming CI is green.
 
+Those cross-version results predate the direct-sprite source increment. D0
+baseline restoration regenerated all three demos; local `npm run check` now
+passes 328 tests including snapshots, chip memory, physical-buffer export,
+planar/copper/stack fixtures, EHB/DPF/scroll, HAM6 and explicit interlace goldens. `npm run test:browser`
+also passes, adding direct-sprite manual
+updates, movement, instance isolation and cursor restoration. The browser command
+explicitly selects SwiftShader and requires WebGL2: its new probe samples R8UI
+chip bytes at row boundaries/high addresses, writes an RGBA8UI framebuffer and
+checks exact readback after converting bottom-up rows to top-left order. The same
+command runs in CI; no new hosted result or hardware performance is claimed.
+
+The [snapshot contract](display-snapshots.md) documents ABI v1, the hashed fixture
+loader and exact RGBA/PNG mismatch reports. Its test inputs use independent wire
+and PNG encodings, not production-encoder round trips alone. Chromium separately
+decodes an emitted PNG artifact and compares its bytes to WebGL readback. Artifacts
+`webgl-readback.png` and `webgl-readback-diff.png` join the existing screenshots.
+The same browser command now also checks native planar pixels from an embedded
+generated module, plus pixels from the same buffer after copper-built scanout.
+See [the planar contract](planar-display.md) and [copper contract](copper-display.md) for scope and the
+distinction between migration parity and hardware evidence.
+
+The [mode contract](display-modes.md) records source-backed EHB/palette/hires rules,
+independent EHB and laced IFF/PNG fixtures, and explicit field composition. Chromium
+also checks EHB bytes through Canvas, planar and copper output and saves `ehb.png`.
+These checks do not establish live interlace timing or external hardware captures.
+
 ## Legacy code inventory
 
 The package entry, CLI, dump tools and tests use the active
@@ -84,3 +117,15 @@ These files remain in place. The package has no exports map restricting deep
 imports, so repository searches cannot prove absence of external consumers.
 Set a compatibility/removal policy before deleting them. Contributor architecture
 guidance and commands are documented in [AGENTS.md](../AGENTS.md).
+
+The browser command now also runs the native non-HAM GPU parity corpus: 151
+frames, including independent image fields, mode/sprite/copper matrices and 100
+fixed-seed cases. Context restoration reruns the actual decode/resolve passes.
+See [GPU renderer coverage and limits](webgl-renderer.md); local SwiftShader
+results do not establish hosted CI, remaining mode/capture gates or performance.
+
+All browser scenarios also ship as self-contained HTML in the
+[demo gallery](../demos/README.md), with local and htmlpreview.github.io links.
+The generated-artifact gate covers those pages. Chromium opens all nine scenario
+pages with HTTP requests blocked and exercises input/lifecycle checks on the
+generated interactive page. Scenario inputs and assertions share one catalogue.

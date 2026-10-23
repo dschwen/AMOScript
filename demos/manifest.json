@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "file": "webgl-integers.html",
+      "title": "WebGL2 integer readback",
+      "description": "Exact chip bytes, unsigned addressing, integer framebuffer and PNG decoding.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-integers.html"
+    },
+    {
+      "file": "webgl-resources.html",
+      "title": "GPU uploads and context restoration",
+      "description": "All chip sizes and ABI tables, dirty rows, independent consumers, loss/restore and disposal.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-resources.html"
+    },
+    {
+      "file": "webgl-renderer.html",
+      "title": "GPU / CPU rendering gallery",
+      "description": "Independent IFF images, scroll and sprite matrices, copper stacks, 100 seeded frames and restored shaders.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html"
+    },
+    {
+      "file": "sprite-dma.html",
+      "title": "Sprite DMA and channel reuse",
+      "description": "Chained descriptors, blank control lines, held rows and native Canvas pixels.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
+    },
+    {
+      "file": "trigonometry.html",
+      "title": "Trigonometry and angle modes",
+      "description": "Source-compiled Sin/Cos/Tan, degree/radian modes and matching Canvas/planar/copper pixels.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/trigonometry.html"
+    },
+    {
+      "file": "ehb.html",
+      "title": "Extra Half Brite",
+      "description": "Six-bit pixel codes, masked palette registers and exact four-bit halving.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/ehb.html"
+    },
+    {
+      "file": "ham.html",
+      "title": "HAM6 colour history",
+      "description": "Palette and component commands, row resets, independent factories and three matching output paths.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/ham.html"
+    },
+    {
+      "file": "sprites.html",
+      "title": "Direct sprites and manual updates",
+      "description": "Frozen/pending positions, movement, hiding, palette priority, mouse reservation and cursor restoration.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprites.html"
+    },
+    {
+      "file": "banks.html",
+      "title": "Banks, buffers and Bobs",
+      "description": "External load/save/reload, appending, swaps, reservation, shrinking, erasure and saved Bob backgrounds.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/banks.html"
+    },
+    {
+      "file": "programs.html",
+      "title": "Interactive programs, input and lifecycle",
+      "description": "Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/programs.html"
+    }
+  ]
+}

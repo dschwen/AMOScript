@@ -28,18 +28,19 @@ function buildDemos({ check = false, directory = path.join(__dirname, '..') } = 
 }
 
 if (require.main === module) {
-  try {
+  (async () => {
     const args = process.argv.slice(2);
     if (args.length && (args.length !== 1 || args[0] !== '--check')) throw new Error('Usage: node tools/build_demo.js [--check]');
-    const stale = buildDemos({ check: args[0] === '--check' });
+    const options = { check: args[0] === '--check' };
+    const stale = [...buildDemos(options), ...await require('./build_browser_demos').buildBrowserDemos(options)];
     if (stale.length) {
       console.error(`Generated demos are missing or stale:\n${stale.join('\n')}\nRun npm run build:demo and include the regenerated files.`);
       process.exitCode = 1;
     }
-  } catch (error) {
+  })().catch(error => {
     console.error(error.message);
     process.exitCode = 1;
-  }
+  });
 }
 
 module.exports = { buildDemos };

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WebGL2 integer readback · AMOScript</title><style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:2rem auto;padding:0 1rem;color:#17202a;background:#f5f6f8}a{color:#07569c}button,select{font:inherit;padding:.5rem;margin:.4rem .5rem .6rem 0}button{cursor:pointer}pre{padding:1rem;background:white;white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}#stage{overflow:auto;max-height:65vh}canvas,img{image-rendering:pixelated;max-width:100%;border:1px solid #b8c5cf}#stage img{min-width:128px}article{padding:1rem;background:white;margin:1rem 0;border:1px solid #dae2e8}#status{display:block;margin:1rem 0}body[data-status=failed] #status{color:#a00020}body[data-status=passed] #status{color:#126238}</style></head><body><nav><a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a></nav>
+<h1>WebGL2 integer readback</h1><p>Exact chip bytes, unsigned addressing, integer framebuffer and PNG decoding.</p><p>Run the same scenario and assertions as the browser test suite. Select a captured frame to inspect it.</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><div id="stage"></div><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>
+<script>/* jshint esversion: 6 */
+'use strict';
+
+function createCanvasHost(canvas, options = {}) {
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Canvas 2D rendering is not available');
+  const request = options.requestAnimationFrame || (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : callback => setTimeout(callback, 0));
+  const cancel = options.cancelAnimationFrame || (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout);
+  let program = null;
+  let unsubscribe = null;
+  let pending = null;
+  let previousCursor = null;
+
+  function render() {
+    if (!program) return;
+    const display = program.display;
+    if (canvas.style && program.mouseVisible) canvas.style.cursor = program.mouseVisible() ? previousCursor || '' : 'none';
+    if (display.current == null) { canvas.width = 0; canvas.height = 0; return; }
+    const screen = display.screen();
+    if (canvas.width !== screen.width) canvas.width = screen.width;
+    if (canvas.height !== screen.height) canvas.height = screen.height;
+    const frame = context.createImageData(screen.width, screen.height);
+    frame.data.set(display.rgba());
+    context.putImageData(frame, 0, 0);
+  }
+  function schedule() {
+    if (pending) return;
+    const task = { id: null };
+    pending = task;
+    task.id = request(() => {
+      if (pending !== task) return;
+      pending = null;
+      render();
+    });
+  }
+  function keydown(event) {
+    if (!program || event.ctrlKey || event.metaKey || event.altKey) return;
+    const key = event.key.length === 1 ? event.key : { Enter: '\r', Escape: '\x1b', Backspace: '\b' }[event.key];
+    if (key == null) return;
+    event.preventDefault();
+    program.sendKey(key);
+  }
+  function pointer(event) {
+    if (!program || program.display.current == null) return;
+    const screen = program.display.screen();
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    const scaleX = canvas.offsetWidth ? bounds.width / canvas.offsetWidth : 1;
+    const scaleY = canvas.offsetHeight ? bounds.height / canvas.offsetHeight : 1;
+    const width = canvas.clientWidth ? canvas.clientWidth * scaleX : bounds.width;
+    const height = canvas.clientHeight ? canvas.clientHeight * scaleY : bounds.height;
+    const left = bounds.left + (canvas.clientLeft || 0) * scaleX;
+    const top = bounds.top + (canvas.clientTop || 0) * scaleY;
+    const x = Math.max(0, Math.min(screen.width - 1, Math.floor((event.clientX - left) * screen.width / width)));
+    const y = Math.max(0, Math.min(screen.height - 1, Math.floor((event.clientY - top) * screen.height / height)));
+    program.setMouse(x, y, event.buttons & 7);
+  }
+  function pointerdown(event) {
+    if (canvas.focus) canvas.focus();
+    if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+    pointer(event);
+  }
+  function blur() {
+    if (program) program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
+  }
+  const events = { keydown, pointermove: pointer, pointerdown, pointerup: pointer, blur };
+
+  function detach() {
+    if (unsubscribe) unsubscribe();
+    unsubscribe = null;
+    if (pending) { cancel(pending.id); pending = null; }
+    for (const [name, listener] of Object.entries(events)) canvas.removeEventListener(name, listener);
+    program = null;
+    if (canvas.style && previousCursor != null) canvas.style.cursor = previousCursor;
+    previousCursor = null;
+  }
+  function attach(next) {
+    detach();
+    program = next;
+    if (canvas.style) previousCursor = canvas.style.cursor;
+    unsubscribe = program.display.subscribe(schedule);
+    for (const [name, listener] of Object.entries(events)) canvas.addEventListener(name, listener);
+    render();
+  }
+  return { attach, detach, render, focus: () => canvas.focus() };
+}
+
+if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost };
+else globalThis.AMOS_BROWSER = { createCanvasHost };
+</script><script>(function installDemo(config) {
+  const button = document.getElementById('run-demo'), status = document.getElementById('status');
+  const output = document.getElementById('results'), selector = document.getElementById('frames');
+  const stage = document.getElementById('stage');
+  const zoom = document.getElementById('zoom');
+  const equal = (a, b) => {
+    if (Object.is(a, b)) return true;
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+    const keys = Object.keys(a).sort(), other = Object.keys(b).sort();
+    return keys.length === other.length && keys.every((key, i) => key === other[i] && equal(a[key], b[key]));
+  };
+  const assert = {
+    ok(value) { if (!value) throw new Error('Expected a truthy result'); },
+    strictEqual(a, b) { if (!Object.is(a, b)) throw new Error(`Expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
+    deepStrictEqual(a, b) { if (!equal(a, b)) throw new Error(`Result differs: expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
+    match(value, expression) { if (!expression.test(value)) throw new Error(`${value} does not match ${expression}`); }
+  };
+  let frames = [];
+  function show() {
+    stage.replaceChildren();
+    const frame = frames[Number(selector.value)]; if (!frame) return;
+    if (frame.png) {
+      const image = new Image(); image.alt = frame.name;
+      image.onload = () => { image.style.width = `${image.naturalWidth * Number(zoom.value)}px`; };
+      image.src = frame.png; stage.append(image);
+    } else {
+      const canvas = document.createElement('canvas'); canvas.width = frame.width; canvas.height = frame.height;
+      canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(frame.rgba), frame.width, frame.height), 0, 0);
+      canvas.style.width = `${frame.width * Number(zoom.value)}px`;
+      canvas.setAttribute('aria-label', frame.name); stage.append(canvas);
+    }
+  }
+  selector.addEventListener('change', show);
+  zoom.addEventListener('change', show);
+  button.addEventListener('click', async () => {
+    button.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
+    frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
+    const previousObserver = globalThis.AMOS_DEMO_OBSERVE;
+    const originalPut = CanvasRenderingContext2D.prototype.putImageData;
+    let previousPng = null;
+    globalThis.AMOS_DEMO_OBSERVE = frame => frames.push({ ...frame, rgba: new Uint8ClampedArray(frame.rgba) });
+    CanvasRenderingContext2D.prototype.putImageData = function(...args) {
+      const result = originalPut.apply(this, args);
+      const png = this.canvas.toDataURL('image/png');
+      if (png !== previousPng) frames.push({ name: `Frame ${frames.length + 1}`, png });
+      previousPng = png; return result;
+    };
+    try {
+      // Yield so the running state paints before the larger GPU corpus starts.
+      await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+      const result = await config.evaluate(config.argument);
+      config.check(result, assert);
+      if (result.failure) throw new Error(`GPU comparison failed: ${result.failure.name}`);
+      if (config.pngReference) {
+        const image = new Image(); image.src = config.pngReference; await image.decode();
+        const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+        const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+        assert.deepStrictEqual(Array.from(context.getImageData(0, 0, image.width, image.height).data), result.pixels);
+        frames.push({ name: 'Integer readback / independent PNG decode', png: config.pngReference });
+      }
+      if (result.sample && !frames.length) {
+        const bytes = Uint8ClampedArray.from(atob(result.sample.rgba), ch => ch.charCodeAt(0));
+        frames.push({ name: 'Native GPU copper stack', width: result.sample.width, height: result.sample.height, rgba: bytes });
+      }
+      if (result.png && !frames.length) frames.push({ name: 'Rendered output', png: result.png });
+      output.textContent = JSON.stringify(result, (key, value) => ['png', 'rgba', 'chip', 'tables'].includes(key) ? '(image/binary data)' : value, 2);
+      status.textContent = 'Passed — the browser test assertions succeeded.'; document.body.dataset.status = 'passed';
+    } catch (error) {
+      output.textContent = error.stack || String(error); status.textContent = 'Failed'; document.body.dataset.status = 'failed';
+    } finally {
+      CanvasRenderingContext2D.prototype.putImageData = originalPut;
+      if (previousObserver === undefined) delete globalThis.AMOS_DEMO_OBSERVE;
+      else globalThis.AMOS_DEMO_OBSERVE = previousObserver;
+      frames.forEach((frame, i) => { const option = document.createElement('option'); option.value = i; option.textContent = frame.name; selector.append(option); });
+      selector.hidden = frames.length === 0;
+      if (frames.length) {
+        const copper = frames.findIndex(frame => frame.name === 'copper-stack-dma');
+        selector.value = copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
+      }
+      button.disabled = false;
+    }
+  });
+  document.body.dataset.status = 'idle';
+})({evaluate:(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2; canvas.height = 2;
+    const gl = canvas.getContext('webgl2', { antialias: false, depth: false, stencil: false });
+    if (!gl) throw new Error('Display probe requires WebGL2');
+    const shaders = [], textures = [];
+    let program, framebuffer, vao;
+    try {
+      const compile = (type, source) => {
+        const shader = gl.createShader(type);
+        shaders.push(shader);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          throw new Error(`Display probe shader: ${gl.getShaderInfoLog(shader)}`);
+        }
+        return shader;
+      };
+      program = gl.createProgram();
+      gl.attachShader(program, compile(gl.VERTEX_SHADER, `#version 300 es
+        void main() {
+          vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+          gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+        }`));
+      gl.attachShader(program, compile(gl.FRAGMENT_SHADER, `#version 300 es
+        precision highp float;
+        precision highp int;
+        uniform highp usampler2D chip;
+        layout(location = 0) out uvec4 colour;
+        void main() {
+          uint pixel = uint(gl_FragCoord.x) + 2u * uint(gl_FragCoord.y);
+          uint address = pixel == 0u ? 0u : pixel == 1u ? 2047u : pixel == 2u ? 2048u : 524287u;
+          uint value = texelFetch(chip, ivec2(int(address & 2047u), int(address >> 11u)), 0).r;
+          colour = uvec4(value, value ^ 255u, pixel, 255u);
+        }`));
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        throw new Error(`Display probe link: ${gl.getProgramInfoLog(program)}`);
+      }
+      const texture = () => {
+        const result = gl.createTexture();
+        textures.push(result);
+        gl.bindTexture(gl.TEXTURE_2D, result);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return result;
+      };
+      const chip = texture();
+      const bytes = new Uint8Array(512 * 1024);
+      bytes[0] = 17; bytes[2047] = 67; bytes[2048] = 131; bytes[524287] = 251;
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8UI, 2048, 256, 0, gl.RED_INTEGER, gl.UNSIGNED_BYTE, bytes);
+      const output = texture();
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8UI, 2, 2, 0, gl.RGBA_INTEGER, gl.UNSIGNED_BYTE, null);
+      framebuffer = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, output, 0);
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+        throw new Error('Display probe integer framebuffer is incomplete');
+      }
+      gl.useProgram(program);
+      vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, chip);
+      gl.uniform1i(gl.getUniformLocation(program, 'chip'), 0);
+      gl.disable(gl.BLEND); gl.disable(gl.DITHER);
+      gl.viewport(0, 0, 2, 2);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      const pixels = new Uint8Array(16);
+      gl.readPixels(0, 0, 2, 2, gl.RGBA_INTEGER, gl.UNSIGNED_BYTE, pixels);
+      const error = gl.getError();
+      if (error !== gl.NO_ERROR) throw new Error(`Display probe GL error ${error}`);
+      // readPixels is bottom-up; return canonical top-left rows explicitly.
+      return { pixels: Array.from(pixels.slice(8)).concat(Array.from(pixels.slice(0, 8))),
+        version: gl.getParameter(gl.VERSION), maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE) };
+    } finally {
+      if (vao) gl.deleteVertexArray(vao);
+      if (framebuffer) gl.deleteFramebuffer(framebuffer);
+      for (const texture of textures) gl.deleteTexture(texture);
+      if (program) gl.deleteProgram(program);
+      for (const shader of shaders) gl.deleteShader(shader);
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    }
+  }),argument:undefined,check:(function check(result, assert) {
+    assert.match(result.version, /^WebGL 2/); assert.ok(result.maxTextureSize >= 2048);
+    assert.deepStrictEqual(result.pixels, [131,124,2,255,251,4,3,255,17,238,0,255,67,188,1,255]);
+  }),pngReference:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVR4nGNormH6/5uF+T+D4DuG/857GP8DAEXhB/9VE99/AAAAAElFTkSuQmCC"});</script></body></html>

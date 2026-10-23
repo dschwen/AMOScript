@@ -1,11 +1,12 @@
 # Compatibility and implementation status
 
-Updated 2026-10-23. The test suite currently has **248 passing tests**, plus a
-passing real-Chromium rendering/input smoke test.
+Updated 2026-10-23. The current local baseline has **328 passing tests**, plus a
+passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
-Artifact/unit/CLI checks pass in a clean-install copy on Node 22 and 24; the
-Chromium smoke check also passes on Node 24. A workflow is configured, with hosted
-execution still pending. See [development evidence](development.md).
+The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
+The current run includes direct sprites and refreshed demos; the expanded suite
+has not been rerun across those Node versions. Hosted CI is still pending. See
+[development evidence](development.md).
 
 ## Feature matrix
 
@@ -34,14 +35,16 @@ execution still pending. See [development evidence](development.md).
 | Arrays | Implemented core | Typed multidimensional arrays with inclusive bounds, scalar/array namespaces, local and shared arrays, default elements and bounds errors. Sparse storage; dimension bounds 0–65535, total size must be a safe integer. Re-dimensioning an existing array is rejected. |
 | Data/Read/Restore | Implemented core | Read-time expression evaluation, empty entries, array destinations, fresh procedure cursors, caller cursor restoration. Named Restore targets must directly label a Data statement; other forms fail explicitly. |
 | Sequential file I/O | Implemented subset | Explicit memory/Node host adapters; `Open In/Out`, `Append`, `Close`, `Print #`, `Input #`, `Line Input #`, `Eof/Lof/Pof`. Latin-1 byte strings, channels 1–10, CRLF records, synchronous adapters, commit on Close. Random records, devices, seek assignments and async adapters remain unsupported. |
-| Screens and graphics | Implemented subset | Indexed screens 0–7, 2–32 colours, Lowres/Hires, palette updates, Point/Plot, clipped lines/boxes/bars, text cursors, 8×8 bitmap text and scrolling. See [display contract](display.md). One screen is presented; hardware display modes/composition and remaining drawing operations are unfinished. |
+| Screens and graphics | Implemented subset | Indexed screens 0–7, 2–64 colours and lowres 4096-colour HAM6 (Hires maximum 16), EHB/HAM pixel conversion, source-derived palette masks, Point/Plot, lines/boxes/bars and text. See [display contract](display.md). Canvas presents one screen; AMOS positioning/offsets/dual commands, live modes and other drawing operations remain. |
 | Input | Implemented subset | Shared FIFO key queue, Inkey$/Put Key/Clear Key/Wait Key, injected mouse state and canvas-local mouse queries. Browser focus, borders and CSS scaling are covered. Hardware coordinate offsets and the full Amiga input API remain unfinished. |
 | Asset banks and static images | Implemented subset | Bounded trailer and external AmBs/AmSp/AmIc/AmBk decoding, independent per-instance banks, Load with generic overrides/image appending/group replacement, Paste Bob/Icon, palette transfers, Hrev/Vrev/Rev, image masks and mixed-depth pasting. External bytes use a synchronous files adapter; generated modules embed the decoder. See [bank contract](banks.md). More formats, manipulation and failure/hardware edge fidelity remain unfinished. |
 | Bank lifecycle | Implemented subset | Four Reserve As Work/Data/Chip forms, single/all/temp Erase, integer Length, Bank Swap, generic Bank Shrink and single/group Save through synchronous files. Save includes work banks, preserves source bank order, normalizes live image flips and writes planar bytes. Object-bank changes restore saved Bob backgrounds. Missing-bank Save truncates before error; two-absent Swap is an explicit unsupported-memory error. Physical memory, addresses, oversized/corrupt image-save paths and other manipulation remain unfinished. |
 | Moving Bobs | Implemented subset | Saved-background drawing, movement, priority, hotspots, Set Bob background/plane/minterm options, Limit Bob clipping, hiding/removal, explicit/manual and cooperative automatic updates, per-buffer snapshots, screen cleanup and animated browser fixture. See [Bob contract](bobs.md) for creation/limit quirks derived from source. Hardware VBL timing and blitter edge effects remain unfinished. |
 | Bob collisions | Implemented subset | Bob Col, inclusive first To last range, Col status and repeatable negative searches, cached image masks, current coordinates and screen ownership. Independent-byte fixture and Chromium verify results. See [collision contract](collisions.md). Sprite/cross-type/hardware collision APIs and further hardware edge cases remain unfinished. |
 | Double buffering / Autoback | Implemented subset | Separate logical/physical buffers, Double Buffer, Screen Swap selected/all, Autoback 0/1/2 with Bob background synchronization and single cursor/output advancement. Chromium verifies hidden drawing until swap. See [buffering contract](buffering.md). Hardware swap scheduling and multi-screen interrupt side effects remain unverified. |
-| Hardware sprites and audio | Not implemented | Hardware/computed sprites, sample/music decoding and playback remain unfinished. Unsupported platform/extension commands fail explicitly. |
+| Hardware sprites | Implemented subset | Direct 16-pixel, 1/2-plane sprites with structured rows/shared Canvas-reference composition, pending/presented updates, palette/priority and coordinate helpers have unit coverage; Chromium verifies manual updates, movement, indexed-pixel separation, instance isolation and cursor restoration. Computed/attached AMOS sprites, DMA contention/timing and channel allocation remain unfinished; bounded raw DMA/reuse/manual registers are implemented. See [display architecture](display-architecture.md). |
+| Amiga reference/WebGL display | CPU/GPU subset implemented | ABI/chip memory, planar/copper/stack paths, static scroll/DPF, EHB/HAM6 and explicit normal/hires/EHB/HAM IFF fields have synthetic goldens. Weave/line-double take explicit history and handle odd heights. Eight-channel/attached sprite reference, bounded DMA/reuse/manual registers and direct AMOS sprite snapshots pass synthetic tests; Canvas/planar/copper EHB/HAM pixels and WebGL2 probe pass locally. AMOS display/copper commands, superhires/HAM8, live fields, sprite contention/computed allocation, GPU presentation/switching and remaining GPU modes remain open; WebGL2 resource uploads/readback/loss restoration pass locally (see [contract](webgl-resources.md)); 151 local non-HAM GPU/CPU frames pass, including 100 seeded frames and shader restoration (see [renderer contract](webgl-renderer.md)); full mode/capture gates remain open. See [mode contract](display-modes.md). |
+| Audio | Not implemented | Sample/music decoding and playback remain unfinished. Unsupported platform/extension commands fail explicitly. |
 | Encrypted/compiled procedures | Explicitly rejected | Rejected from header flags before parsing their bodies. |
 | ASCII input | Not implemented | Planned as a separate frontend sharing the AST/backend. |
 

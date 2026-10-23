@@ -2,6 +2,13 @@
 
 **Implementation plan: data model, JS reference renderer, WebGL2 renderer, copper, AMOS integration**
 
+**Repository integration:** adopted as the target display workstream in
+[PLAN.md](../PLAN.md). Read [the integrated architecture](display-architecture.md)
+for the mapping to current modules, storage migration, snapshot ABI, host lifecycle
+and delivery gates. This document describes proposed functionality; unchecked
+milestones are not implemented capabilities. Type notation below specifies data
+shapes, not a prerequisite TypeScript/Vitest migration.
+
 ---
 
 ## 1. Goals and non-goals
@@ -45,14 +52,14 @@
  │  ┌───────────────────────┐        ┌────────────────────────────┐  │
  │  │ Reference renderer    │   OR   │ WebGL2 renderer            │  │
  │  │ render(chip, frame)   │        │ upload → decode → resolve  │  │
- │  │  → Uint32Array RGBA   │        │  → FBO → scale → canvas     │  │
+ │  │  → RGBA bytes        │        │  → FBO → scale → canvas     │  │
  │  └───────────────────────┘        └────────────────────────────┘  │
  └───────────────────────────────────────────────────────────────────┘
 ```
 
 Key design decisions:
 
-1. **Chip RAM is the single source of pixel data.** Bitplanes, sprite data and bob graphics all live in a `Uint8Array` laid out exactly like Amiga chip memory: big-endian words, MSB = leftmost pixel.
+1. **Chip RAM is the target source of pixel data.** Bitplanes, sprite data and bob graphics live in a `Uint8Array`: big-endian words, MSB = leftmost pixel. The current indexed buffers first feed a one-way planar bridge; planar storage becomes authoritative only after CPU parity and drawing/Bob migration. There are never two independent writable authorities.
 2. **The copper is evaluated on the CPU, once per frame.** It is cheap because copper lists are short. Its output is a per-scanline snapshot of display registers. Neither renderer ever interprets copper instructions.
 3. **Bitplane pointer advance (fetch width + modulo) is resolved by the copper interpreter.** Each line's table stores the pointers *at the start of that line*. Renderers never see modulos. Copper pointer rewrites, negative-modulo line repeats and split screens therefore come for free.
 4. **Both renderers consume the identical `FrameState`.** This is what makes the reference renderer a usable oracle.
@@ -72,13 +79,14 @@ interface ChipMemory {
 
 - Layout: Amiga byte order, unchanged. Word `n` occupies `bytes[2n]` (high byte) and `bytes[2n+1]`.
 - The GPU texture is `R8UI` with **2048 bytes per row**: 512 KB → 2048×256, 2 MB → 2048×1024. Address `a` maps to `(a & 2047, a >> 11)`.
-- `DirtyTracker` records row ranges touched by drawing ops. A full upload is acceptable as a fallback (0.5–2 MB per frame).
+- `DirtyTracker` records revisioned row ranges touched by drawing ops. Each renderer tracks its own uploaded revision; consuming one upload must not clear another consumer's dirtiness. A new/restored context or expired history requires a full upload (0.5–2 MB per frame).
 
 ### 3.2 Coordinate conventions
 
-- **Native output buffer**: fixed width in the finest supported resolution unit. That is 640 (hires units) for OCS/ECS builds, 1280 (superhires units) for AGA builds, and 256/512 lines (PAL; 200/400 NTSC), or ×2 for interlace.
-- Each line's **pixel scale** comes from its own BPLCON0 (lowres = 2 hires units, hires = 1, shres = ½). This allows mixed-resolution AMOS screens stacked vertically.
-- Horizontal positions in tables are stored in **lowres pixel units relative to the display window origin**. Copper/hardware hpos values are converted on the CPU. Renderers convert output x to playfield pixel x per line.
+- **Native output buffer**: an integer grid in the finest supported resolution unit. A standard window uses 640 samples for OCS and 1280 for ECS-superhires/AGA profiles. A 640-wide buffer cannot preserve ECS superhires pixels. Cropping/overscan width is explicit, not inferred from a selected AMOS bitmap.
+- Each line's **samples per playfield pixel** comes from BPLCON0 and the profile: lowres/hires = 2/1 on the OCS grid, and lowres/hires/superhires = 4/2/1 on the finer grid. This permits mixed resolution without fractional output samples.
+- Frame metadata separates **field lines** (normally PAL 256, NTSC 200) from **woven output height** (normally PAL 512, NTSC 400 when interlaced). Do not double an already woven height.
+- Table window bounds, sprite starts and events use **native output sample units**. Signed positions preserve left-edge clipping. Hardware-to-output conversion is done on the CPU; fetch offsets and scroll delays are separately interpreted in source-pixel units.
 
 ### 3.3 Per-line register table (`lineRegs`)
 
@@ -92,9 +100,9 @@ interface ChipMemory {
 | 10   | BPLCON2 (playfield/sprite priorities, PF2PRI)                            |
 | 11   | BPLCON3 (AGA: palette bank, PF2OF, LOCT, border blank)                   |
 | 12   | BPLCON4 (AGA: BPLAM xor, sprite colour banks)                            |
-| 13   | Display window start x (lowres units, output space)                      |
-| 14   | Display window stop x                                                    |
-| 15   | Fetch offset in pixels (extra leading word when scrolling, see §3.7)     |
+| 13   | Display window start x (signed native output samples)                    |
+| 14   | Display window stop x (signed native output samples)                     |
+| 15   | Signed source-pixel fetch offset (prefix/late fetch, see §3.7)            |
 | 16   | Flags: bit0 = line inside vertical DIW, bit1 = bitplane DMA on, bit2 = sprite DMA on |
 | 17   | Number of mid-line events on this line (see §3.6)                        |
 | 18–31| Reserved                                                                 |
@@ -112,54 +120,84 @@ interface ChipMemory {
 
 | Component | Meaning                                                         |
 |-----------|------------------------------------------------------------------|
-| r         | hstart (lowres units, output space); 0xFFFFFFFF = inactive       |
+| r         | hstart (signed native output samples, stored as 32-bit bits)    |
 | g         | DATA word (plane A); for AGA 32/64-bit sprites, see Phase 10      |
 | b         | DATB word (plane B)                                              |
-| a         | flags: bit0 = attached to previous (odd sprite), bits 1–2 = width mode (AGA) |
+| a         | flags: bit31 = active, bit0 = attached to previous (odd sprite), bits 1–2 = width mode (AGA) |
 
 The CPU computes this from sprite DMA state (VSTART/VSTOP, data pointers, reuse). For AMOS this can instead come directly from the sprite manager.
+Use the active bit rather than an x sentinel: `0xFFFFFFFF` also represents a valid
+signed x=-1. Logical/computed AMOS IDs are allocated to physical per-line channels
+by the manager; neither renderer performs that allocation.
 
 ### 3.6 Mid-line events (`lineEvents`)
 
 `Uint32Array`, `LINES × MAX_EVENTS × 4`. GPU texture `RGBA32UI`, MAX_EVENTS × LINES. `MAX_EVENTS` defaults to 32 and is configurable.
 
-Entries are sorted by hpos: `(hpos, register, value, 0)`. Supported registers:
+Entries are stably sorted by native output x: `(x, register, value, 0)`. Supported registers:
 
 - `COLORxx`: palette change from hpos onward.
 - `BPLCON1`: mid-line scroll changes (rare).
 - `BPLCON0`/`BPLCON2`: optional, low priority.
 
-Overflow policy: if a line exceeds `MAX_EVENTS`, log once and fall back to a **segment palette** mode for that frame. This is a `LINES × 40 segments × 32` palette, using the copper's MOVE granularity of 8 lowres pixels.
+Overflow policy: retain the full ordered CPU event stream. Use exact variable
+segments (including decode-register state when needed), or select CPU reference
+rendering for that frame. A fixed 40-segment palette is an optimization only for
+scenes whose event boundaries it represents exactly; no writes may be dropped or
+quantized. Bound total interpreter work/storage and diagnose exhaustion. Tests
+must distinguish GPU execution from a CPU fallback, even when their pixels match.
 
 ### 3.7 Horizontal scroll and fetch alignment
 
-Hardware scrolling delays the plane data by 0–15 pixels (more on AGA). When scrolling, the data fetch starts one word earlier. The model is:
+Hardware scroll nibbles delay the plane data by 0–15 lowres units (more on AGA).
+Convert those units to source pixels (×2 in hires). Scrolling fetches one extra
+word in lowres or two in hires. The model is:
 
 ```
-playfieldX(outputX, line)  = (outputX - diwStart) * scaleFactor
+playfieldX(outputX, line)  = floor((outputX - diwStart) / samplesPerPlayfieldPixel)
 bitX(plane)                = playfieldX + fetchOffset - delay(plane)
-   delay(odd plane)  = PF1H,  delay(even plane) = PF2H
+   delay(odd plane)  = PF1H * sourcePixelsPerLowresPixel
+   delay(even plane) = PF2H * sourcePixelsPerLowresPixel
 bit = (chip[ptr + (bitX >> 3)] >> (7 - (bitX & 7))) & 1     // bitX < 0 → 0
 ```
 
-`fetchOffset` is 16 if the screen fetches an extra leading word and 0 otherwise. The copper interpreter sets it from DDFSTRT, or the AMOS runtime sets it when a screen uses `Screen Offset` with a non-word-aligned x.
+`fetchOffset` uses signed source-pixel bits: normally 16 for the lowres prefix or
+32 for hires, and zero without an early fetch. The current x=128 profile derives
+it relative to DDFSTRT $38/$3C; arbitrary DIW/DDF phases and AMOS Screen Offset
+remain open. See [the implemented mode contract](display-modes.md).
 
 ### 3.8 FrameState
 
 ```ts
 interface FrameState {
+  schemaVersion: number;
+  revision: number;
   chipset: 'OCS' | 'ECS' | 'AGA';
+  samplesPerLowresPixel: 2 | 4;
+  outputWidth: number;        // native output samples
+  outputHeight: number;       // full presentation height, including both fields
   lines: number;              // visible lines this field
   interlaceField: 0 | 1 | null;
+  maxEvents: number;
+  videoRate: { numerator: number; denominator: number };
+  pixelAspect: { numerator: number; denominator: number };
+  origin: { x: number; y: number };
   lineRegs: Uint32Array;
   linePal: Uint8Array;
   lineSprites: Uint32Array;
   lineEvents: Uint32Array;
-  segmentPal?: Uint8Array;    // only when events overflowed
+  eventOffsets: Uint32Array;   // ABI v1: lines+1 offsets into full overflow records
+  overflowEvents: Uint32Array; // ABI v1: complete ordered streams for overflow lines
 }
 ```
 
-`FrameState` plus a chip RAM snapshot is **serialisable** (JSON header + binary blobs). This is the basis of the whole test strategy.
+`FrameState` plus immutable chip bytes is **serialisable** (versioned JSON header
++ binary blobs, with explicit byte order, strides, lengths and bounds). Woven
+fixtures also supply explicit previous-field state. The repository ABI is frozen
+in P0 following [the integration contract](display-architecture.md#snapshot-and-coordinate-contract).
+ABI v1 is now implemented; [the snapshot contract](display-snapshots.md) specifies
+required sampling/rate/aspect/origin metadata, overflow streams and exact wire
+layout. Structural validation does not implement renderer mode semantics.
 
 ---
 
@@ -171,12 +209,12 @@ The reference renderer is a deliberate, readable, non-optimised JS implementatio
 
 1. **Executable specification.** When there is a question about what the hardware does, the answer is encoded here first, with comments citing the Hardware Reference Manual section.
 2. **Test oracle.** The GPU renderer must match it bit-for-bit on every test frame.
-3. **Fallback.** It runs on devices without WebGL2, or when the context is lost, ideally in a worker with OffscreenCanvas. Lowres 320×256 is about 82k pixels and runs comfortably at 50/60 fps.
+3. **Fallback.** It runs on devices without WebGL2, or when the context is lost, optionally in a worker with OffscreenCanvas. Cost depends on the native sampling grid, field composition and mode; the M12 frame-rate target must be measured.
 4. **Debugging instrument.** It supports per-pixel introspection ("why is this pixel this colour?") that is impractical in a shader.
 
 ### 4.2 Design rules
 
-- **Pure function:** `render(chip: Uint8Array, frame: FrameState, opts) → Uint32Array` (RGBA, native buffer size). No hidden state and no reads of runtime objects.
+- **Pure function:** `render(chip: Uint8Array, frame: FrameState, opts) → Uint8ClampedArray` (top-left-origin RGBA bytes for the current field). No hidden state or reads of runtime objects. Packed Uint32 values are internal only; output/fixture bytes must not depend on host endianness. A separate composer takes explicit previous output and field parity for weaving.
 - **Same structure as the shader.** Mirror the GPU pass structure (decode → resolve → sprites/priority) as separate functions, so that a divergence can be bisected to a stage.
 - **Integer-only math.** Colours stay as 4-bit (OCS) or 8-bit (AGA) channel integers until final packing, matching the shader's integer pipeline.
 - **No optimisation tricks in the core path.** Keep a straightforward per-pixel loop. A separate "fast CPU" variant (chunky-to-planar style, word-at-a-time) can exist later for the fallback role, but it must itself be tested against the reference.
@@ -184,48 +222,55 @@ The reference renderer is a deliberate, readable, non-optimised JS implementatio
 ### 4.3 Module layout
 
 ```
-display/
+lib/display/
   model/
-    chip.ts              ChipMemory, DirtyTracker
-    frameState.ts        FrameState types, (de)serialisation
-    registers.ts         register numbers, bit field helpers (BPLCON0 etc.)
+    ChipMemory.js        chip bytes, allocation, revisioned dirty ranges
+    frameState.js        versioned FrameState validation/(de)serialisation
+    registers.js         register numbers and bit-field helpers
   copper/
-    interpreter.ts       copper list → FrameState
-    builder.ts           AMOS screen/rainbow state → copper list
+    interpreter.js       copper list → FrameState
+    builder.js           AMOS screen/rainbow state → copper list
   reference/
-    render.ts            top-level render()
-    decode.ts            planar → per-pixel raw index (+ dual playfield split)
-    resolve.ts           index → colour (palette, EHB, HAM, events)
-    sprites.ts           sprite pixel + priority
-    explain.ts           explainPixel(x, y) → structured trace
-  gpu/
-    context.ts           WebGL2 setup, texture allocation, uploads
+    render.js            pure current-field render()
+    decode.js            planar → raw index (+ dual playfield split)
+    resolve.js           index → colour (palette, EHB, HAM, events)
+    sprites.js           sprite pixel + priority
+    explainPixel.js      structured pixel trace
+  presentation/
+    composeField.js      explicit weave/line-double operation
+  webgl/
+    context.js           WebGL2 setup, texture allocation, uploads
     shaders/*.glsl       decode, resolve, scale
-    render.ts            same signature semantics as reference
-  test/
-    fixtures/            *.frame.json + *.chip.bin + *.png (golden)
-    harness.ts           run renderer(s), diff, report
+    render.js            same current-field semantics as reference
+test/
+  fixtures/display/      *.frame.json + binary blobs + *.png (golden)
+  helpers/displayFrames.js   load/run/diff/report
 ```
+
+These are planned modules. `lib/amos/display.js` remains the AMOS facade and
+`lib/amos/browser.js` the host boundary; the existing runner and Playwright remain.
 
 ### 4.4 Core algorithm (reference)
 
 ```ts
 for (let line = 0; line < frame.lines; line++) {
-  const regs = rowView(frame.lineRegs, line);
-  for (let ox = 0; ox < OUT_W; ox++) {
-    if (!insideDisplay(regs, ox)) { out[line*OUT_W + ox] = colour0(frame, line, ox); continue; }
+    const regs = rowView(frame.lineRegs, line);
+  for (let ox = 0; ox < frame.outputWidth; ox++) {
+    const active = insideDisplay(regs, ox);
     const px  = playfieldX(regs, ox);
-    const raw = decodeIndex(chip, regs, px);           // planes → raw index
-    const pf  = splitPlayfields(regs, raw);            // DPF or single
-    let rgb   = resolveColour(frame, line, ox, pf, hamState);
+    const raw = active ? decodeIndex(chip, regsAt(frame, line, ox), px) : 0;
+    const pf  = splitPlayfields(regs, raw);
+    let rgb   = active ? resolveColour(frame, line, ox, pf, hamState)
+                       : colour0(frame, line, ox);
     rgb       = applySprites(frame, line, ox, pf, rgb);
-    out[line*OUT_W + ox] = pack(rgb);
+    storeRGBA(out, line*frame.outputWidth + ox, rgb);
   }
 }
 ```
 
 - **HAM in the reference** uses a running left-to-right state per line. This is the natural hardware model. It differs on purpose from the GPU backward scan, so the two implementations cross-check each other.
-- **Palette lookup with events:** `paletteAt(frame, line, ox, index)` applies events with `hpos <= ox` in order. The HAM running state picks up palette changes at the exact pixel where a palette-set occurs.
+- **Palette lookup with events:** `paletteAt(frame, line, ox, index)` applies events with native output `x <= ox` in order. The HAM running state picks up palette changes at the exact pixel where a palette-set occurs.
+- **Decode events and border:** scroll/mode changes affect decode, not only palette resolution. Evaluate sprites outside the bitplane window wherever the video profile permits; do not skip them through a border early return. HAM advances in source-pixel order, independently of duplicated lowres output samples.
 
 ### 4.5 `explainPixel` debugging tool
 
@@ -294,6 +339,9 @@ The reference is only an oracle if it is correct. Validate it against reality:
 Passes 1 and 2 can be merged for non-HAM frames as an optimisation, but only after parity is established.
 
 ### 5.4 Reference shader core (decode + palette, from the design discussion)
+
+The snippet illustrates the passes; it is not a complete implementation of the
+snapshot ABI, bounds, coordinate transforms, mode gates or mid-line decode events.
 
 ```glsl
 #version 300 es
@@ -375,8 +423,8 @@ Optional optimisation, only if profiling demands it: log-step pointer jumping th
 
 ### 5.6 Interlace
 
-- Laced screens: each frame renders one field (odd or even lines). The runtime alternates `interlaceField`.
-- Output buffer of 512/400 lines. Each field writes its lines, and the other field's lines persist from the previous frame (render to a persistent FBO and composite).
+- Laced screens: each emulated field renders its rows. The runtime field clock, not browser requestAnimationFrame, advances `interlaceField`.
+- Weave produces 512/400 output lines for standard PAL/NTSC profiles. A separate composer receives previous output and the new field explicitly. Persistent FBOs cache that result; CPU-owned history remains sufficient for fallback and context restoration.
 - Optional deinterlace modes: weave (default) or line-double.
 
 ---
@@ -388,17 +436,17 @@ Optional optimisation, only if profiling demands it: log-step pointer jumping th
 Input: chip RAM and the copper list start address (COP1LC). Output: `FrameState`.
 
 - Instructions: `MOVE reg,value`, `WAIT vp,hp (with masks)`, `SKIP`. Also handle `COPJMP1/2` and `COP2LC` writes.
-- Beam model: a current `(vpos, hpos)`. A MOVE advances hpos by 4 colour clocks (8 lowres pixels). A WAIT jumps to its target if it is in the future.
+- Beam model: a current `(vpos, hpos)`. MOVE/SKIP use four colour clocks; WAIT reads in four then uses two wake-up clocks after its masked comparison succeeds. V7 cannot be masked; BFD controls blitter completion independently. The bounded implementation and capture limits are documented in [the copper contract](copper-display.md).
 - For each register write:
   - If `hpos` is before the start of the visible playfield on that line → update the **line-start state** (applies to the whole line).
   - Otherwise, for `COLORxx`/`BPLCON1`/etc. → append a **line event** with hpos converted to output space.
-  - For `BPLxPT` writes → update the pointer state; these take effect from the next fetch (in practice the next line).
-- At each line boundary: snapshot state into `lineRegs[line]` and `linePal[line]`, then advance the pointers: `ptr += fetchBytes + (odd ? BPL1MOD : BPL2MOD)`, using signed 16-bit modulos.
+  - For `BPLxPT` writes after fetch → update the next fetch's pointer without changing the current line's latched base. Writes during active fetch need word-level arbitration and currently reject.
+- Latch bases at DDF start, capture palette/register state at the crop's left edge, and advance pointers at fetch completion: `ptr += fetchBytes + (odd ? BPL1MOD : BPL2MOD)`, using signed 16-bit modulos. Process lines outside the crop too.
 - `fetchBytes` is derived from DDFSTRT/DDFSTOP and the resolution:
   - lowres: `((DDFSTOP - DDFSTRT) / 8 + 1) * 2`
   - hires:  `((DDFSTOP - DDFSTRT) / 4 + 2) * 2`
   - AGA fetch modes (FMODE) widen this. Handle in Phase 10.
-- Unhandled registers are logged once per frame in debug builds.
+- Unsupported/protected register effects reject with PC/beam context rather than silently disappearing from scanout.
 - End of list or `WAIT $FFFF,$FFFE` → hold the state to the end of the frame.
 
 ### 6.2 Builder (AMOS side)
@@ -420,14 +468,20 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 ### Phase 0: Foundations and test harness
 
 **Work**
-- Repo structure as in §4.3. TypeScript, Vitest (unit), Playwright (browser/GPU tests).
+- Repo structure as in §4.3, using JavaScript and the current `test/run.js` runner. Retain Playwright for browser/GPU tests; no compiler/toolchain rewrite is required.
+- Baseline restored locally: refreshed demos and 328 passing tests including ABI, planar/ILBM and copper/screen-stack checks. Chromium covers sprite/cursor, native planar/copper pixels and integer WebGL2 readback. Hosted execution remains pending.
 - FrameState + chip snapshot serialisation format (`.frame.json` + `.chip.bin`).
 - Golden-image harness: render → PNG → compare with golden, produce a diff image (mismatches in magenta), and report the first N mismatching pixels.
 - Test-pattern generator utilities (fill planes with patterns, build simple FrameStates by hand).
 
 **Milestone M0**
-- [ ] `harness.ts` can load a fixture, call a renderer stub, and produce a pass/fail report plus a diff PNG.
+- [x] `test/helpers/displayFrames.js` can load a fixture, call a renderer stub, and produce a pass/fail report plus a diff PNG (local suite; hosted execution pending).
 - [ ] Playwright runs headless Chromium with WebGL2 (SwiftShader) in CI and can read back a framebuffer.
+
+The WebGL2 probe is implemented in `test/helpers/webglProbe.js` and invoked by
+`npm run test:browser`, including in the configured CI job. Local Chromium passes
+integer texture sampling, high-address/row-boundary reads and exact framebuffer
+readback. The checkbox remains open until hosted execution is observed.
 
 ### Phase 1: Chip RAM model and basic reference renderer
 
@@ -437,9 +491,13 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - IFF ILBM loader (BMHD, CMAP, BODY with ByteRun1 decompression, CAMG for the mode).
 
 **Milestone M1**
-- [ ] Synthetic fixtures: each plane alone produces the expected stripe patterns. Bit order and byte order are verified.
-- [ ] 2/4/8/16/32-colour IFF pictures render identically to their decoded reference PNGs.
-- [ ] `explainPixel` works for normal mode.
+- [x] Synthetic fixtures: each plane alone produces the expected stripe patterns. Bit order and byte order are verified (local suite).
+- [x] 2/4/8/16/32-colour IFF pictures render identically to independently encoded PNGs, raw and ByteRun1 (local suite).
+- [x] `explainPixel` works for normal mode (local suite).
+
+See [the implemented P1 contract](planar-display.md). These checks are synthetic,
+not external AMOS captures; hosted CI is still unobserved. The physical bridge is
+playfield-only, with indexed drawing authoritative until the later migration.
 
 ### Phase 2: Copper interpreter and per-line state
 
@@ -449,10 +507,10 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - Reference renderer reads everything from `lineRegs`/`linePal`.
 
 **Milestone M2**
-- [ ] Rainbow fixture: a COLOR00 change on every line produces correct bands.
-- [ ] Split-screen fixture: two screens with different plane counts and palettes at a line boundary.
-- [ ] Negative modulo fixture: repeating a single line N times produces the expected stretch.
-- [ ] Pointer rewrite mid-frame (copper MOVE to BPL1PT) shows the new data from the following line.
+- [x] Rainbow fixture: a COLOR00 change on every line produces correct bands (local synthetic/source-derived fixture).
+- [x] Split-screen fixture: two screens with different plane counts and palettes at a line boundary (local builder/interpreter fixture).
+- [x] Negative modulo fixture: repeating a single line N times produces the expected stretch (local fixture).
+- [x] Pointer rewrite mid-frame after fetch (copper MOVE to BPL1PT) shows the new data from the following line (local fixture; active-fetch writes remain unsupported).
 - [ ] At least 3 emulator-captured copper scenes match (within documented allowed regions).
 
 ### Phase 3: Reference renderer, full OCS/ECS feature set
@@ -467,10 +525,10 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 
 **Milestone M3**
 - [ ] Scroll sweep fixture: delays 0–15 on odd/even planes independently, compared with emulator captures.
-- [ ] EHB IFF pictures match.
-- [ ] DPF fixtures: both priority settings and transparency through to COLOR00.
-- [ ] Mixed-resolution stack: lowres screen above a hires screen on one frame.
-- [ ] Interlaced IFF pictures match after two fields.
+- [x] EHB IFF pictures match independent raw/ByteRun1 PNGs (local synthetic fixtures).
+- [x] DPF fixtures: both priority settings and transparency through to COLOR00 (local 2/4/6-plane fixtures).
+- [x] Mixed-resolution stack: lowres screen above a hires screen on one frame (local synthetic builder/interpreter fixture; captures remain separate).
+- [x] Interlaced IFF pictures match after two fields, including odd heights and either arrival order (local independent normal/hires/EHB fixtures; live field timing remains open).
 
 ### Phase 4: Reference HAM
 
@@ -478,8 +536,8 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - HAM6 with a running left-to-right state per line, and COLOR00 as the initial state.
 
 **Milestone M4**
-- [ ] A set of at least 10 HAM6 IFF images matches the decoded references.
-- [ ] Synthetic: long modify-only runs, a line starting with a modify, and a 5-plane HAM edge case.
+- [x] Ten six-plane HAM6 IFF images match independently generated PNG references, in raw and ByteRun1 forms. These are synthetic fixtures, not external execution captures; see [HAM contract](ham-display.md).
+- [x] Synthetic: long modify-only runs, a line starting with a modify, and a 5-plane HAM edge case. Laced HAM and standalone Canvas/planar/copper pixels also pass locally. Mid-line events remain P9.
 
 ### Phase 5: Reference sprites
 
@@ -489,9 +547,15 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - Sprite DMA emulation (VSTART/VSTOP/reuse) in the copper/frame builder, and a direct AMOS sprite-manager path.
 
 **Milestone M5**
-- [ ] Sprite fixtures: every priority setting × both playfields.
-- [ ] Attached sprites render 16 colours correctly.
-- [ ] Sprite at x positions straddling the display window edges.
+- [x] Local synthetic sprite fixtures: all five documented priority settings for each playfield, both PF2PRI settings, transparency combinations and all channel pairs. External captures remain separate.
+- [x] Raw physical attached-pair fixtures render indices 1–15 plus transparent zero; AMOS attached-image allocation remains open.
+- [x] Synthetic signed starts and right-edge clipping, independent of playfield resolution, including native sample grids of two/four. Hardware border/DMA captures remain open.
+
+CPU reference and direct AMOS snapshot publication are implemented; see
+[sprite contract](sprite-display.md). Bounded DMA VSTART/VSTOP/reuse and manual
+register output are implemented. Canvas now shares structured rows and the
+resolver, retiring its opaque RGBA callback. Bus contention/latch timing and
+computed allocation remain open.
 
 ### Phase 6: WebGL2 infrastructure
 
@@ -502,9 +566,13 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - Runtime renderer switch (reference ↔ GPU) and a "diff mode" that shows mismatches live.
 
 **Milestone M6**
-- [ ] Test: upload chip RAM, read the texture back via a debug pass, and get byte-identical results.
-- [ ] Dirty tracking: only touched rows are uploaded (verified by an upload counter).
-- [ ] Context loss restores all textures without a page reload.
+- [x] Local Chromium: all three chip sizes and all ABI tables round-trip through actual integer/normalized textures and a shader debug pass; see [resource contract](webgl-resources.md).
+- [x] Local Chromium: only changed rows upload, checked with counters, instrumented GL calls, CPU dirty queries and two independent consumers. The snapshot bridge currently compares owned rows; canonical revision-cursor optimization remains later work.
+- [x] Forced WEBGL_lose_context cycle recreates textures/programs/framebuffers and uploads the latest owned snapshot without reload. Disposal checks resource deletion.
+
+Resource infrastructure is implemented; scale/presentation, runtime backend
+switching and live diff remain open. This milestone does not claim GPU Amiga
+decode/resolve or host fallback.
 
 ### Phase 7: GPU parity, non-HAM modes
 
@@ -513,8 +581,8 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - Sprites in the resolve pass.
 
 **Milestone M7**
-- [ ] **Parity** on every fixture from M1–M3 and M5.
-- [ ] Parity on 100 randomly generated FrameStates (fuzzing: random modes, pointers, palettes, delays, sprites), with a fixed seed in CI.
+- [ ] **Full parity** on every fixture from M1–M3 and M5, including their unfinished mode/capture gates. Current subset: 151 local GPU/CPU frames pass, including independent normal/EHB/laced images and batched scroll/DPF/sprite/copper cases; see [renderer contract](webgl-renderer.md).
+- [x] Local Chromium parity on 100 fixed-seed valid non-HAM FrameStates, varying modes, pointers, palettes, delays, windows and physical sprites across all three chip sizes. The browser CI command runs this corpus; hosted execution remains pending. Failures reduce/save replay fixtures, with a deliberate harness-mismatch self-check.
 
 ### Phase 8: GPU HAM
 
@@ -532,12 +600,12 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 - Interpreter emits events with correct hpos conversion.
 - Reference: `paletteAt` with events, HAM-aware.
 - GPU: event-table lookup in resolve.
-- Overflow → segment palette fallback in both renderers.
+- Overflow → exact segment/register representation, or an explicitly reported CPU frame fallback. Never count fallback output as successful GPU coverage.
 
 **Milestone M9**
 - [ ] A fixture with a colour change every 8 lowres pixels across a line (copper "plasma"/chunky) shows parity, and matches an emulator capture.
 - [ ] HAM + mid-line palette change fixture shows parity.
-- [ ] An overflow fixture (more than MAX_EVENTS on a line) shows parity via the segment fallback.
+- [ ] An overflow fixture (more than MAX_EVENTS on a line) preserves every write and demonstrates reference/GPU parity through exact segments. A separately tested CPU fallback is allowed during migration, but does not satisfy this GPU gate.
 
 ### Phase 10: AGA extensions (optional, if targeting AGA AMOS / AMOS Pro AGA extensions)
 
@@ -596,7 +664,7 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 
 | Layer            | What                                                     | Tooling                 |
 |------------------|----------------------------------------------------------|-------------------------|
-| Unit             | register bitfields, ByteRun1, copper decode, pointer math, drawing primitives | Vitest |
+| Unit             | register bitfields, ByteRun1, copper decode, pointer math, drawing primitives | existing npm test runner |
 | Reference golden | reference renderer vs decoded IFF / emulator captures    | harness + PNG diff      |
 | Parity           | GPU vs reference, fixtures + seeded fuzzing              | Playwright + SwiftShader|
 | Integration      | AMOS test programs vs emulator captures                  | transpiler + harness    |
@@ -614,7 +682,7 @@ Fuzzing generator rules: random chipset-valid BPLCON0 values, 1–6/8 planes, ra
 | Integer textures sample as 0 (wrong filtering) | `NEAREST` everywhere; an M6 readback test catches it |
 | Float precision in shaders corrupting addresses | uint-only addressing; fuzz tests with high addresses (2 MB) |
 | HAM worst-case GPU cost | Measure in M8; pointer-jumping fallback designed but deferred |
-| Mid-line copper complexity grows unbounded | Event cap + segment fallback; prioritise only effects AMOS games actually use |
+| Mid-line copper complexity grows unbounded | Bound interpreter work/storage; exact segments or explicit CPU fallback preserve writes |
 | WebGL2 unavailable / context loss | CPU fallback path shares the same FrameState; restore logic in M6 |
 | Emulator capture mismatch due to overscan/filtering | Per-fixture allowed regions; disable emulator filtering for captures |
 | AGA scope creep | Phase 10 is optional and isolated behind the `chipset` flag |
@@ -631,4 +699,4 @@ P0 ─► P1 ─► P2 ─► P3 ─► P4 ─► P5 ─┐
 ```
 
 - P6 (WebGL infrastructure) can start in parallel once P2 fixes the FrameState format.
-- P11 (AMOS integration) can begin with the reference renderer as soon as P3 is done. The GPU renderer is then a drop-in replacement.
+- P11 begins with a static physical-buffer bridge at P1, moves to the shared copper builder at P2–P3, and completes planar drawing/storage migration after parity. The GPU renderer consumes the same snapshots throughout. See D0–D6 in the integrated architecture.

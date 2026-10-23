@@ -1,0 +1,92 @@
+{
+  "evidence": {
+    "kind": "synthetic",
+    "description": "Independent Python pixel formulas and IFF/PNG encodings, not AMOS or emulator captures."
+  },
+  "fixtures": [
+    {
+      "name": "even",
+      "width": 33,
+      "height": 4,
+      "depth": 2,
+      "mode": 4,
+      "files": {
+        "raw": {
+          "file": "laced-even-raw.ilbm",
+          "sha256": "f1836c4d4fdb33fab7115de8d499261af5128f934559fe81c48d7c676c5ccbcb"
+        },
+        "byterun": {
+          "file": "laced-even-byterun.ilbm",
+          "sha256": "b4e85bfb4d10dc39674f397aeed76c557d1ace6fcbf1049b307b3da8ea01d274"
+        },
+        "golden": {
+          "file": "laced-even.png",
+          "sha256": "b8ed22b9f37fd941d94f8e1833007b7aa3aad35d3c6e5933a3e705c248caae36"
+        }
+      }
+    },
+    {
+      "name": "odd",
+      "width": 33,
+      "height": 5,
+      "depth": 2,
+      "mode": 4,
+      "files": {
+        "raw": {
+          "file": "laced-odd-raw.ilbm",
+          "sha256": "fe9e1e6b7212743a9328636cd2b830df737943c18e3fd750cd5816a4444261a2"
+        },
+        "byterun": {
+          "file": "laced-odd-byterun.ilbm",
+          "sha256": "fcdff8d91fb16f3831f2bee89ae4d33fbd66013b24b745ef517ddc244cf5e9e5"
+        },
+        "golden": {
+          "file": "laced-odd.png",
+          "sha256": "3b2cea9593a9ceb7c1f16b6cc853fb05bc8838af512128e533b443d77f437d07"
+        }
+      }
+    },
+    {
+      "name": "hires",
+      "width": 33,
+      "height": 5,
+      "depth": 4,
+      "mode": 32772,
+      "files": {
+        "raw": {
+          "file": "laced-hires-raw.ilbm",
+          "sha256": "897b170ea14f03e3117f12323cfbf22eaf002ee7190321bf4244fe8a880fd406"
+        },
+        "byterun": {
+          "file": "laced-hires-byterun.ilbm",
+          "sha256": "0d095d5a6e5eac00df6be11b4b20d58fff5fc727787fcba7a26e8636cf3ca8e6"
+        },
+        "golden": {
+          "file": "laced-hires.png",
+          "sha256": "c00f8eea6c62d22853d57aa51be7541630d8cbd049fd4f9bb906ddcccefe5c80"
+        }
+      }
+    },
+    {
+      "name": "ehb",
+      "width": 33,
+      "height": 5,
+      "depth": 6,
+      "mode": 132,
+      "files": {
+        "raw": {
+          "file": "laced-ehb-raw.ilbm",
+          "sha256": "77e15238ffd166ba2095d41bd034fc2a60f27794515f26b1792355d3ef2a8d75"
+        },
+        "byterun": {
+          "file": "laced-ehb-byterun.ilbm",
+          "sha256": "7422c03040afb86dc1d140d62505e2878feacf6c9a7a6e6d667663b82299bec2"
+        },
+        "golden": {
+          "file": "laced-ehb.png",
+          "sha256": "33d90241bc9cac57c7eaf77a90c039137fd5887ea04ab1e5820f13a1390bea4e"
+        }
+      }
+    }
+  ]
+}

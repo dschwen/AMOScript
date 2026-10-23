@@ -64,10 +64,10 @@ test('display: invalid screens, colours, cursors and modes fail explicitly', () 
   const display = createDisplay();
   assert.throws(() => display.open(8, 320, 200, 16, 0), /screen number/);
   assert.throws(() => display.open(1, 0, 200, 16, 0), /dimensions/);
-  assert.throws(() => display.open(1, 320, 200, 4096, 0), /Unsupported screen colour/);
+  assert.throws(() => display.open(1, 320, 200, 128, 0), /Unsupported screen colour/);
   assert.throws(() => display.open(1, 320, 200, 16, 1), /resolution/);
-  assert.throws(() => display.setColour(32, 0xfff), /colour index/);
-  assert.throws(() => display.setColour(0, 0x1000), /12-bit/);
+  assert.throws(() => display.setColour(1.5, 0xfff), /safe integer/);
+  assert.throws(() => display.setColour(0, NaN), /safe integer/);
   assert.throws(() => display.locate(40, 0), /cursor out of bounds/);
   assert.throws(() => display.draw(-1e308, 0, 1e308, 0), /safe integer/);
   display.open(1, 16, 1, 2, 0);

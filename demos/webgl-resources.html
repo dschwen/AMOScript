@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GPU uploads and context restoration · AMOScript</title><style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:2rem auto;padding:0 1rem;color:#17202a;background:#f5f6f8}a{color:#07569c}button,select{font:inherit;padding:.5rem;margin:.4rem .5rem .6rem 0}button{cursor:pointer}pre{padding:1rem;background:white;white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}#stage{overflow:auto;max-height:65vh}canvas,img{image-rendering:pixelated;max-width:100%;border:1px solid #b8c5cf}#stage img{min-width:128px}article{padding:1rem;background:white;margin:1rem 0;border:1px solid #dae2e8}#status{display:block;margin:1rem 0}body[data-status=failed] #status{color:#a00020}body[data-status=passed] #status{color:#126238}</style></head><body><nav><a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a></nav>
+<h1>GPU uploads and context restoration</h1><p>All chip sizes and ABI tables, dirty rows, independent consumers, loss/restore and disposal.</p><p>Run the same scenario and assertions as the browser test suite. Select a captured frame to inspect it.</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><div id="stage"></div><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>
+<script>/* jshint esversion: 6 */
+'use strict';
+
+function createCanvasHost(canvas, options = {}) {
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Canvas 2D rendering is not available');
+  const request = options.requestAnimationFrame || (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : callback => setTimeout(callback, 0));
+  const cancel = options.cancelAnimationFrame || (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout);
+  let program = null;
+  let unsubscribe = null;
+  let pending = null;
+  let previousCursor = null;
+
+  function render() {
+    if (!program) return;
+    const display = program.display;
+    if (canvas.style && program.mouseVisible) canvas.style.cursor = program.mouseVisible() ? previousCursor || '' : 'none';
+    if (display.current == null) { canvas.width = 0; canvas.height = 0; return; }
+    const screen = display.screen();
+    if (canvas.width !== screen.width) canvas.width = screen.width;
+    if (canvas.height !== screen.height) canvas.height = screen.height;
+    const frame = context.createImageData(screen.width, screen.height);
+    frame.data.set(display.rgba());
+    context.putImageData(frame, 0, 0);
+  }
+  function schedule() {
+    if (pending) return;
+    const task = { id: null };
+    pending = task;
+    task.id = request(() => {
+      if (pending !== task) return;
+      pending = null;
+      render();
+    });
+  }
+  function keydown(event) {
+    if (!program || event.ctrlKey || event.metaKey || event.altKey) return;
+    const key = event.key.length === 1 ? event.key : { Enter: '\r', Escape: '\x1b', Backspace: '\b' }[event.key];
+    if (key == null) return;
+    event.preventDefault();
+    program.sendKey(key);
+  }
+  function pointer(event) {
+    if (!program || program.display.current == null) return;
+    const screen = program.display.screen();
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    const scaleX = canvas.offsetWidth ? bounds.width / canvas.offsetWidth : 1;
+    const scaleY = canvas.offsetHeight ? bounds.height / canvas.offsetHeight : 1;
+    const width = canvas.clientWidth ? canvas.clientWidth * scaleX : bounds.width;
+    const height = canvas.clientHeight ? canvas.clientHeight * scaleY : bounds.height;
+    const left = bounds.left + (canvas.clientLeft || 0) * scaleX;
+    const top = bounds.top + (canvas.clientTop || 0) * scaleY;
+    const x = Math.max(0, Math.min(screen.width - 1, Math.floor((event.clientX - left) * screen.width / width)));
+    const y = Math.max(0, Math.min(screen.height - 1, Math.floor((event.clientY - top) * screen.height / height)));
+    program.setMouse(x, y, event.buttons & 7);
+  }
+  function pointerdown(event) {
+    if (canvas.focus) canvas.focus();
+    if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+    pointer(event);
+  }
+  function blur() {
+    if (program) program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
+  }
+  const events = { keydown, pointermove: pointer, pointerdown, pointerup: pointer, blur };
+
+  function detach() {
+    if (unsubscribe) unsubscribe();
+    unsubscribe = null;
+    if (pending) { cancel(pending.id); pending = null; }
+    for (const [name, listener] of Object.entries(events)) canvas.removeEventListener(name, listener);
+    program = null;
+    if (canvas.style && previousCursor != null) canvas.style.cursor = previousCursor;
+    previousCursor = null;
+  }
+  function attach(next) {
+    detach();
+    program = next;
+    if (canvas.style) previousCursor = canvas.style.cursor;
+    unsubscribe = program.display.subscribe(schedule);
+    for (const [name, listener] of Object.entries(events)) canvas.addEventListener(name, listener);
+    render();
+  }
+  return { attach, detach, render, focus: () => canvas.focus() };
+}
+
+if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost };
+else globalThis.AMOS_BROWSER = { createCanvasHost };
+</script><script>(function installDemo(config) {
+  const button = document.getElementById('run-demo'), status = document.getElementById('status');
+  const output = document.getElementById('results'), selector = document.getElementById('frames');
+  const stage = document.getElementById('stage');
+  const zoom = document.getElementById('zoom');
+  const equal = (a, b) => {
+    if (Object.is(a, b)) return true;
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+    const keys = Object.keys(a).sort(), other = Object.keys(b).sort();
+    return keys.length === other.length && keys.every((key, i) => key === other[i] && equal(a[key], b[key]));
+  };
+  const assert = {
+    ok(value) { if (!value) throw new Error('Expected a truthy result'); },
+    strictEqual(a, b) { if (!Object.is(a, b)) throw new Error(`Expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
+    deepStrictEqual(a, b) { if (!equal(a, b)) throw new Error(`Result differs: expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
+    match(value, expression) { if (!expression.test(value)) throw new Error(`${value} does not match ${expression}`); }
+  };
+  let frames = [];
+  function show() {
+    stage.replaceChildren();
+    const frame = frames[Number(selector.value)]; if (!frame) return;
+    if (frame.png) {
+      const image = new Image(); image.alt = frame.name;
+      image.onload = () => { image.style.width = `${image.naturalWidth * Number(zoom.value)}px`; };
+      image.src = frame.png; stage.append(image);
+    } else {
+      const canvas = document.createElement('canvas'); canvas.width = frame.width; canvas.height = frame.height;
+      canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(frame.rgba), frame.width, frame.height), 0, 0);
+      canvas.style.width = `${frame.width * Number(zoom.value)}px`;
+      canvas.setAttribute('aria-label', frame.name); stage.append(canvas);
+    }
+  }
+  selector.addEventListener('change', show);
+  zoom.addEventListener('change', show);
+  button.addEventListener('click', async () => {
+    button.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
+    frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
+    const previousObserver = globalThis.AMOS_DEMO_OBSERVE;
+    const originalPut = CanvasRenderingContext2D.prototype.putImageData;
+    let previousPng = null;
+    globalThis.AMOS_DEMO_OBSERVE = frame => frames.push({ ...frame, rgba: new Uint8ClampedArray(frame.rgba) });
+    CanvasRenderingContext2D.prototype.putImageData = function(...args) {
+      const result = originalPut.apply(this, args);
+      const png = this.canvas.toDataURL('image/png');
+      if (png !== previousPng) frames.push({ name: `Frame ${frames.length + 1}`, png });
+      previousPng = png; return result;
+    };
+    try {
+      // Yield so the running state paints before the larger GPU corpus starts.
+      await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+      const result = await config.evaluate(config.argument);
+      config.check(result, assert);
+      if (result.failure) throw new Error(`GPU comparison failed: ${result.failure.name}`);
+      if (config.pngReference) {
+        const image = new Image(); image.src = config.pngReference; await image.decode();
+        const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+        const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+        assert.deepStrictEqual(Array.from(context.getImageData(0, 0, image.width, image.height).data), result.pixels);
+        frames.push({ name: 'Integer readback / independent PNG decode', png: config.pngReference });
+      }
+      if (result.sample && !frames.length) {
+        const bytes = Uint8ClampedArray.from(atob(result.sample.rgba), ch => ch.charCodeAt(0));
+        frames.push({ name: 'Native GPU copper stack', width: result.sample.width, height: result.sample.height, rgba: bytes });
+      }
+      if (result.png && !frames.length) frames.push({ name: 'Rendered output', png: result.png });
+      output.textContent = JSON.stringify(result, (key, value) => ['png', 'rgba', 'chip', 'tables'].includes(key) ? '(image/binary data)' : value, 2);
+      status.textContent = 'Passed — the browser test assertions succeeded.'; document.body.dataset.status = 'passed';
+    } catch (error) {
+      output.textContent = error.stack || String(error); status.textContent = 'Failed'; document.body.dataset.status = 'failed';
+    } finally {
+      CanvasRenderingContext2D.prototype.putImageData = originalPut;
+      if (previousObserver === undefined) delete globalThis.AMOS_DEMO_OBSERVE;
+      else globalThis.AMOS_DEMO_OBSERVE = previousObserver;
+      frames.forEach((frame, i) => { const option = document.createElement('option'); option.value = i; option.textContent = frame.name; selector.append(option); });
+      selector.hidden = frames.length === 0;
+      if (frames.length) {
+        const copper = frames.findIndex(frame => frame.name === 'copper-stack-dma');
+        selector.value = copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
+      }
+      button.disabled = false;
+    }
+  });
+  document.body.dataset.status = 'idle';
+})({evaluate:(async sources => {
+    const model = new Function(`return (${sources.model})();`)();
+    const createResources = new Function('model', `return (${sources.resources})(model);`)(model);
+    const makeFrame = new Function(`return (${sources.frame});`)();
+    const Memory = new Function(`return (${sources.memory});`)();
+    const assert = (condition, message) => { if (!condition) throw new Error(`WebGL resources: ${message}`); };
+    const equal = (actual, expected, name) => {
+      assert(actual.constructor.name === expected.constructor.name && actual.length === expected.length, `${name} type/length`);
+      for (let i = 0; i < actual.length; i++) assert(actual[i] === expected[i], `${name} at ${i}: ${actual[i]} != ${expected[i]}`);
+    };
+    const canvas = document.createElement('canvas'), states = [];
+    const resources = createResources(canvas, { onStateChange: value => states.push(value.state) });
+    const secondCanvas = document.createElement('canvas'), second = createResources(secondCanvas);
+    const gl = resources.context, extension = gl.getExtension('WEBGL_lose_context');
+    assert(extension, 'context loss extension unavailable');
+    const actualUploads = [], restoredPrograms = [], restoredVaos = [];
+    const texSubImage2D = gl.texSubImage2D.bind(gl), createProgram = gl.createProgram.bind(gl), createVertexArray = gl.createVertexArray.bind(gl);
+    gl.texSubImage2D = (...args) => {
+      if (args[4] === 2048 && args[6] === gl.RED_INTEGER && args[7] === gl.UNSIGNED_BYTE) actualUploads.push([args[3], args[3] + args[5]]);
+      return texSubImage2D(...args);
+    };
+    gl.createProgram = () => { const value = createProgram(); restoredPrograms.push(value); return value; };
+    gl.createVertexArray = () => { const value = createVertexArray(); restoredVaos.push(value); return value; };
+    const event = name => new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { canvas.removeEventListener(name, listener); reject(new Error(`Timeout waiting for ${name}`)); }, 5000);
+      // Restoration may only be requested after the lost-event dispatch has
+      // completed, including its cancellation/default-action processing.
+      const listener = () => { clearTimeout(timer); setTimeout(resolve, 0); };
+      canvas.addEventListener(name, listener, { once: true });
+    });
+    const beforeDispose = [];
+    try {
+      const checkedSizes = [];
+      for (const size of [524288, 1048576, 2097152]) {
+        const memory = new Memory(size);
+        for (let i = 0; i < size; i++) memory.bytes[i] = (i * 17 + (i >>> 11) * 29) & 255;
+        memory.markDirty(0, size);
+        const frame = makeFrame({ width: 17, height: 3, depth: 1, pointers: [0], rowBytes: 4,
+          palette: Array.from({ length: 32 }, (_, i) => ((i & 15) << 8) | (((i * 3) & 15) << 4) | ((i * 7) & 15)) });
+        frame.lineRegs[15] = (-7) >>> 0;
+        frame.lineSprites.set([0xffffffff, 0x8123, 0xfedc, 0x80000001], 4);
+        frame.lineRegs[17] = 1; frame.lineEvents.set([0xffffffff, 0x180, 0x123, 0]);
+        const publish = () => model.createSnapshot({ chip: memory.bytes, frame });
+        const snapshot = publish(), initialCalls = actualUploads.length; resources.upload(snapshot);
+        assert(JSON.stringify(actualUploads.slice(initialCalls)) === JSON.stringify([[0, size / 2048]]), 'actual full texSubImage2D call');
+        assert(resources.stats.lastUpload.full && resources.stats.lastUpload.chipRows === size / 2048, 'full upload after size change');
+        equal(resources.readTexture('chip'), memory.bytes, `chip ${size}`);
+        for (const name of ['lineRegs', 'linePal', 'lineSprites', 'lineEvents', 'eventOffsets', 'overflowEvents']) {
+          equal(resources.readTexture(name), frame[name], name);
+        }
+        assert(resources.readTexture('indexBuf').every(value => value === 0), 'index target initialization');
+        assert(resources.readTexture('colourBuf').every(value => value === 0), 'colour target initialization');
+        const unchangedCalls = actualUploads.length;
+        resources.upload(snapshot); assert(resources.stats.lastUpload.chipRows === 0, 'unchanged snapshot uploads no chip rows');
+        assert(actualUploads.length === unchangedCalls, 'no actual chip upload for unchanged bytes');
+        second.upload(snapshot);
+        const revision = memory.revision;
+        memory.writeBytes(2047, Uint8Array.of(memory.bytes[2047] ^ 255, memory.bytes[2048] ^ 255));
+        memory.writeWord(size - 2, memory.readWord(size - 2) ^ 65535);
+        const updated = publish(), dirtyCalls = actualUploads.length; resources.upload(updated);
+        assert(resources.stats.lastUpload.chipRows === 3, 'three changed rows');
+        assert(JSON.stringify(resources.stats.lastUpload.ranges) === JSON.stringify(memory.dirtySince(revision).rows), 'upload ranges agree with CPU dirty tracking');
+        assert(JSON.stringify(actualUploads.slice(dirtyCalls)) === JSON.stringify(memory.dirtySince(revision).rows), 'actual GL calls cover only dirty rows');
+        second.upload(updated); assert(second.stats.lastUpload.chipRows === 3, 'independent consumer uploads all changed rows');
+        equal(resources.readTexture('chip'), memory.bytes, 'dirty chip');
+        equal(second.readTexture('chip'), memory.bytes, 'independent chip');
+        frame.linePal[0] ^= 17; resources.upload(publish());
+        assert(resources.stats.lastUpload.chipRows === 0 && resources.stats.lastUpload.tableBytes > 0, 'palette-only update');
+        equal(resources.readTexture('linePal'), frame.linePal, 'palette update');
+        checkedSizes.push(size);
+      }
+      // Exercise overflow padding and dimension changes independently of fast tables.
+      const memory = new Memory(524288), frame = makeFrame({ width: 33, height: 2, depth: 1,
+        pointers: [0], rowBytes: 6, palette: [0, 0xf00] });
+      frame.maxEvents = 1; frame.lineEvents = new Uint32Array(8);
+      frame.lineRegs[17] = 2049; frame.lineEvents.set([0, 0x180, 0, 0]);
+      frame.overflowEvents = new Uint32Array(2049 * 4);
+      for (let i = 0; i < 2049; i++) frame.overflowEvents.set([i, 0x180, i & 0xfff, 0], i * 4);
+      frame.eventOffsets.set([0, 2049, 2049]);
+      const snapshot = model.createSnapshot({ chip: memory.bytes, frame });
+      resources.upload(snapshot);
+      equal(resources.readTexture('overflowEvents'), frame.overflowEvents, 'overflow table');
+      const oldTexture = resources.getTexture('chip').texture, oldIndex = resources.getTexture('indexBuf').texture;
+      const lost = event('webglcontextlost'); extension.loseContext(); await lost;
+      assert(resources.state === 'lost', 'lost state');
+      assert(!gl.isTexture(oldTexture), 'old texture invalidated');
+      memory.writeBytes(1, Uint8Array.of(71, 93));
+      const latest = model.createSnapshot({ chip: memory.bytes, frame });
+      assert(resources.upload(latest) === false, 'lost upload retains without drawing');
+      latest.chip[1] = 0; latest.frame.linePal[0] = 99;
+      const restored = event('webglcontextrestored'); extension.restoreContext(); await restored;
+      assert(resources.state === 'ready', `restore state: ${resources.stats.error}`);
+      assert(resources.stats.lastUpload.full && resources.stats.lastUpload.chipRows === 256, 'restore forces full upload');
+      assert(resources.getTexture('chip').texture !== oldTexture && resources.getTexture('indexBuf').texture !== oldIndex, 'restore recreates textures');
+      equal(resources.readTexture('chip'), memory.bytes, 'retained latest chip after restore');
+      for (const name of ['lineRegs', 'linePal', 'lineSprites', 'lineEvents', 'eventOffsets', 'overflowEvents']) equal(resources.readTexture(name), frame[name], `restored ${name}`);
+      const savedStats = resources.stats; savedStats.lastUpload.ranges[0][1] = 0;
+      assert(resources.stats.lastUpload.ranges[0][1] === 256, 'statistics are owned copies');
+      assert(resources.stats.losses === 1 && resources.stats.restores === 1 && resources.stats.generation === 2, 'lifecycle counters');
+      assert(JSON.stringify(states) === JSON.stringify(['lost', 'ready']), 'lifecycle notifications');
+      const empty = makeFrame({ width: 17, height: 0, depth: 1, pointers: [0], rowBytes: 4, palette: [0], interlaceField: 1, outputHeight: 1 });
+      resources.upload(model.createSnapshot({ chip: memory.bytes, frame: empty }));
+      for (const name of ['lineRegs', 'linePal', 'lineSprites', 'lineEvents']) equal(resources.readTexture(name), empty[name], `empty field ${name}`);
+      assert(resources.readTexture('indexBuf').length === 0, 'empty field has no output samples');
+      let unavailable = false;
+      const occupied = document.createElement('canvas'); occupied.getContext('2d');
+      try { createResources(occupied); } catch (error) { unavailable = /unavailable/.test(error.message); }
+      assert(unavailable, 'unavailable context reports failure explicitly');
+      for (const name of ['chip', 'lineRegs', 'linePal', 'lineSprites', 'lineEvents', 'eventOffsets', 'overflowEvents', 'indexBuf', 'colourBuf']) beforeDispose.push(resources.getTexture(name));
+      const result = { checkedSizes, dirtyRows: 3, generation: resources.stats.generation, uploads: resources.stats.uploads };
+      resources.dispose(); resources.dispose();
+      assert(resources.state === 'disposed', 'disposed state');
+      for (const record of beforeDispose) {
+        assert(!gl.isTexture(record.texture), 'texture deleted on dispose');
+        if (record.framebuffer) assert(!gl.isFramebuffer(record.framebuffer), 'framebuffer deleted on dispose');
+      }
+      assert(restoredPrograms.length === 2 && restoredVaos.length === 1, 'restoration recreated programs and VAO');
+      for (const program of restoredPrograms) assert(!gl.isProgram(program), 'program deleted on dispose');
+      for (const vao of restoredVaos) assert(!gl.isVertexArray(vao), 'VAO deleted on dispose');
+      let rejected = false;
+      try { resources.upload(snapshot); } catch (error) { rejected = /disposed/.test(error.message); }
+      assert(rejected, 'disposed upload rejects');
+      return result;
+    } finally {
+      resources.dispose(); second.dispose();
+      if (!gl.isContextLost()) extension.loseContext();
+      const loseSecond = second.context.getExtension('WEBGL_lose_context'); if (loseSecond) loseSecond.loseContext();
+    }
+  }),argument:{"resources":"function createResourceFactory(snapshotModel) {\n  return function createResources(canvas, options = {}) {\n    const fail = message => { throw new Error(`WebGL display: ${message}`); };\n    if (!canvas || typeof canvas.getContext !== 'function' || typeof canvas.addEventListener !== 'function') fail('canvas is required');\n    if (options.onStateChange != null && typeof options.onStateChange !== 'function') fail('invalid state listener');\n    const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false });\n    if (!gl) fail('WebGL2 is unavailable');\n    const capabilities = Object.freeze({ version: gl.getParameter(gl.VERSION),\n      maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE), textureUnits: gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS),\n      maxViewport: Object.freeze(Array.from(gl.getParameter(gl.MAX_VIEWPORT_DIMS))) });\n    if (capabilities.maxTextureSize \u003c 2048 || capabilities.textureUnits \u003c 8 || capabilities.maxViewport.some(value => value \u003c 2048)) fail('insufficient integer texture/viewport capabilities');\n    const precision = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_INT);\n    // The signed highp range reports 31 for the minimum and 30 for the\n    // maximum exponent (2^31-1), as specified by GetShaderPrecisionFormat.\n    if (!precision || precision.rangeMin \u003c 31 || precision.rangeMax \u003c 30) fail('32-bit fragment integers are required');\n    const textures = new Map(), programs = new Map(), passSources = new Map();\n    let vao = null, debugTarget = null, state = 'initializing', lastError = null;\n    let retained = null, uploadedChip = null;\n    const counters = { generation: 0, losses: 0, restores: 0, textureAllocations: 0, uploads: 0,\n      chipUploadCalls: 0, chipRowsUploaded: 0, tableBytesUploaded: 0, passDraws: 0 };\n    let lastUpload = null;\n    const vertexSource = `#version 300 es\n      void main() {\n        vec2 p = vec2(float((gl_VertexID \u003c\u003c 1) & 2), float(gl_VertexID & 2));\n        gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);\n      }`;\n    function notify() {\n      if (options.onStateChange) options.onStateChange({ state, generation: counters.generation, error: lastError });\n    }\n    function ready() { if (state !== 'ready' || gl.isContextLost()) fail(`context is ${state}`); }\n    function check() {\n      const error = gl.getError();\n      if (error !== gl.NO_ERROR) fail(`GL error ${error}`);\n    }\n    function compile(fragment) {\n      const shaders = [], program = gl.createProgram();\n      try {\n        for (const [type, source] of [[gl.VERTEX_SHADER, vertexSource], [gl.FRAGMENT_SHADER, fragment]]) {\n          const shader = gl.createShader(type); shaders.push(shader);\n          gl.shaderSource(shader, source); gl.compileShader(shader);\n          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) fail(`shader compilation: ${gl.getShaderInfoLog(shader)}`);\n          gl.attachShader(program, shader);\n        }\n        gl.linkProgram(program);\n        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) fail(`program link: ${gl.getProgramInfoLog(program)}`);\n        return program;\n      } catch (error) { gl.deleteProgram(program); throw error; }\n      finally { for (const shader of shaders) gl.deleteShader(shader); }\n    }\n    function removeTexture(record) {\n      if (!record) return;\n      if (record.framebuffer) gl.deleteFramebuffer(record.framebuffer);\n      gl.deleteTexture(record.texture);\n    }\n    function allocate(name, width, height, kind, channels, length, target = false) {\n      if (width > capabilities.maxTextureSize || height > capabilities.maxTextureSize ||\n          width > capabilities.maxViewport[0] || height > capabilities.maxViewport[1]) fail(`texture dimensions exceed capabilities: ${name}`);\n      let record = textures.get(name);\n      if (record && (record.width !== width || record.height !== height || record.kind !== kind)) {\n        removeTexture(record); textures.delete(name); record = null;\n      }\n      if (!record) {\n        const formats = { byte: [gl.R8UI, gl.RED_INTEGER, gl.UNSIGNED_BYTE],\n          word: [gl.R16UI, gl.RED_INTEGER, gl.UNSIGNED_SHORT], uint: [gl.R32UI, gl.RED_INTEGER, gl.UNSIGNED_INT],\n          rgba: [gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE], uint4: [gl.RGBA32UI, gl.RGBA_INTEGER, gl.UNSIGNED_INT],\n          byte4: [gl.RGBA8UI, gl.RGBA_INTEGER, gl.UNSIGNED_BYTE] };\n        const [internal, format, type] = formats[kind];\n        record = { name, width, height, kind, channels, length, format, type, texture: gl.createTexture(), framebuffer: null };\n        textures.set(name, record);\n        gl.bindTexture(gl.TEXTURE_2D, record.texture);\n        for (const parameter of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_2D, parameter, gl.NEAREST);\n        for (const parameter of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_2D, parameter, gl.CLAMP_TO_EDGE);\n        gl.texImage2D(gl.TEXTURE_2D, 0, internal, width, height, 0, format, type, null);\n        counters.textureAllocations++;\n      }\n      record.length = length;\n      if (target && !record.framebuffer) {\n        record.framebuffer = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, record.framebuffer);\n        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, record.texture, 0);\n        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) fail(`incomplete framebuffer: ${name}`);\n      }\n      return record;\n    }\n    function table(name, width, height, kind, channels, data) {\n      const record = allocate(name, width, height, kind, channels, data.length);\n      let padded = data;\n      if (data.length !== width * height * channels) { padded = new data.constructor(width * height * channels); padded.set(data); }\n      gl.bindTexture(gl.TEXTURE_2D, record.texture);\n      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, width, height, record.format, record.type, padded);\n      return padded.byteLength;\n    }\n    function uploadCurrent() {\n      const { chip, frame } = retained, rows = chip.length / 2048;\n      const full = !uploadedChip || uploadedChip.length !== chip.length;\n      const ranges = [];\n      for (let row = 0; row \u003c rows; row++) {\n        let dirty = full;\n        if (!dirty) for (let at = row * 2048; at \u003c (row + 1) * 2048; at++) {\n          if (chip[at] !== uploadedChip[at]) { dirty = true; break; }\n        }\n        if (dirty) {\n          const previous = ranges[ranges.length - 1];\n          if (previous && previous[1] === row) previous[1]++;\n          else ranges.push([row, row + 1]);\n        }\n      }\n      const memory = allocate('chip', 2048, rows, 'byte', 1, chip.length);\n      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, memory.texture);\n      let changedRows = 0;\n      for (const [start, end] of ranges) {\n        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, start, 2048, end - start, gl.RED_INTEGER, gl.UNSIGNED_BYTE, chip.subarray(start * 2048, end * 2048));\n        changedRows += end - start;\n      }\n      const height = Math.max(1, frame.lines);\n      let tableBytes = table('lineRegs', 32, height, 'uint', 1, frame.lineRegs);\n      tableBytes += table('linePal', 256, height, 'rgba', 4, frame.linePal);\n      tableBytes += table('lineSprites', 8, height, 'uint4', 4, frame.lineSprites);\n      tableBytes += table('lineEvents', frame.maxEvents, height, 'uint4', 4, frame.lineEvents);\n      for (const [name, channels] of [['eventOffsets', 1], ['overflowEvents', 4]]) {\n        const data = frame[name], count = Math.max(1, data.length / channels), width = Math.min(2048, count);\n        tableBytes += table(name, width, Math.ceil(count / width), channels === 1 ? 'uint' : 'uint4', channels, data);\n      }\n      allocate('indexBuf', frame.outputWidth, height, 'word', 1, frame.outputWidth * frame.lines, true);\n      allocate('colourBuf', frame.outputWidth, height, 'rgba', 4, frame.outputWidth * frame.lines * 4, true);\n      check();\n      uploadedChip = chip;\n      counters.uploads++; counters.chipUploadCalls += ranges.length; counters.chipRowsUploaded += changedRows;\n      counters.tableBytesUploaded += tableBytes;\n      lastUpload = { full, chipRows: changedRows, ranges, tableBytes };\n    }\n    function upload(snapshot) {\n      if (state === 'disposed') fail('resources are disposed');\n      const owned = snapshotModel.createSnapshot(snapshot);\n      // Bounds are checked before replacing the retained restoration source.\n      if (owned.frame.outputWidth > Math.min(capabilities.maxTextureSize, capabilities.maxViewport[0]) ||\n          Math.max(1, owned.frame.lines) > Math.min(capabilities.maxTextureSize, capabilities.maxViewport[1])) fail('frame exceeds texture capabilities');\n      retained = owned;\n      if (state === 'lost' || gl.isContextLost()) return false;\n      ready();\n      try { uploadCurrent(); return true; }\n      catch (error) { uploadedChip = null; throw error; }\n    }\n    function readTexture(name) {\n      ready();\n      const source = textures.get(name);\n      if (!source || name === 'debug') fail(`unknown texture: ${name}`);\n      const byte = ['byte', 'rgba', 'byte4'].includes(source.kind), kind = byte ? 'byte4' : 'uint4';\n      debugTarget = allocate('debug', source.width, source.height, kind, 4, source.width * source.height * 4, true);\n      const program = programs.get(source.kind === 'rgba' ? 'normalized' : 'integer');\n      gl.bindFramebuffer(gl.FRAMEBUFFER, debugTarget.framebuffer); gl.viewport(0, 0, source.width, source.height);\n      gl.useProgram(program); gl.bindVertexArray(vao); gl.activeTexture(gl.TEXTURE0);\n      gl.bindTexture(gl.TEXTURE_2D, source.texture); gl.uniform1i(gl.getUniformLocation(program, 'source'), 0);\n      gl.drawArrays(gl.TRIANGLES, 0, 3);\n      const raw = byte ? new Uint8Array(source.width * source.height * 4) : new Uint32Array(source.width * source.height * 4);\n      gl.readPixels(0, 0, source.width, source.height, gl.RGBA_INTEGER, byte ? gl.UNSIGNED_BYTE : gl.UNSIGNED_INT, raw);\n      check();\n      const Type = source.kind === 'word' ? Uint16Array : byte ? Uint8Array : Uint32Array, result = new Type(source.length);\n      // Raw texture row zero is uploaded/read as row zero. The later screen\n      // presentation pass, rather than the table codec, owns the Y conversion.\n      for (let i = 0; i \u003c result.length; i++) result[i] = raw[Math.floor(i / source.channels) * 4 + i % source.channels];\n      return result;\n    }\n    function initialize() {\n      gl.disable(gl.BLEND); gl.disable(gl.DITHER); gl.disable(gl.DEPTH_TEST); gl.disable(gl.STENCIL_TEST);\n      gl.disable(gl.SCISSOR_TEST); gl.disable(gl.CULL_FACE);\n      gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null); gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);\n      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1); gl.pixelStorei(gl.PACK_ALIGNMENT, 1);\n      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);\n      gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);\n      const common = `#version 300 es\n        precision highp float; precision highp int;\n        layout(location = 0) out uvec4 value;\n      `;\n      programs.set('integer', compile(`${common}\n        uniform highp usampler2D source;\n        void main() { value = texelFetch(source, ivec2(gl_FragCoord.xy), 0); }\n      `));\n      programs.set('normalized', compile(`${common}\n        uniform highp sampler2D source;\n        void main() { value = uvec4(round(texelFetch(source, ivec2(gl_FragCoord.xy), 0) * 255.0)); }\n      `));\n      for (const [name, source] of passSources) programs.set(name, compile(source));\n      vao = gl.createVertexArray(); uploadedChip = null; lastError = null;\n      counters.generation++; state = 'ready';\n      if (retained) uploadCurrent();\n      check();\n    }\n    function lost(event) {\n      event.preventDefault();\n      if (state === 'disposed') return;\n      state = 'lost'; uploadedChip = null; lastError = null; counters.losses++;\n      textures.clear(); programs.clear(); vao = null; debugTarget = null;\n      notify();\n    }\n    function restored() {\n      if (state === 'disposed') return;\n      try { initialize(); counters.restores++; }\n      catch (error) { state = 'error'; lastError = error.message; }\n      notify();\n    }\n    function release() {\n      // Deleting a current program only marks it for deletion. Unbind owned\n      // state first so disposal releases the program and attached shaders now.\n      gl.useProgram(null); gl.bindVertexArray(null); gl.bindFramebuffer(gl.FRAMEBUFFER, null);\n      for (const record of textures.values()) removeTexture(record);\n      for (const program of programs.values()) gl.deleteProgram(program);\n      if (vao) gl.deleteVertexArray(vao);\n      textures.clear(); programs.clear(); vao = null; debugTarget = null;\n    }\n    function dispose() {\n      if (state === 'disposed') return;\n      canvas.removeEventListener('webglcontextlost', lost); canvas.removeEventListener('webglcontextrestored', restored);\n      if (!gl.isContextLost()) release();\n      else { textures.clear(); programs.clear(); vao = null; debugTarget = null; }\n      retained = null; uploadedChip = null; passSources.clear(); state = 'disposed'; notify();\n    }\n    function addPass(name, fragmentSource) {\n      if (state === 'disposed') fail('resources are disposed');\n      if (typeof name !== 'string' || !/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(name) ||\n          ['integer', 'normalized'].includes(name) || passSources.has(name) || passSources.size >= 16 ||\n          typeof fragmentSource !== 'string' || fragmentSource.length > 65536) fail('invalid/duplicate render pass');\n      if (state === 'ready') programs.set(name, compile(fragmentSource));\n      passSources.set(name, fragmentSource);\n    }\n    function runPass(name, targetName, bindings, uintUniforms = {}) {\n      ready();\n      const program = programs.get(name), target = textures.get(targetName), inputs = Object.entries(bindings);\n      if (!passSources.has(name) || !program || !target || !target.framebuffer || targetName === 'debug') fail('invalid render pass target');\n      if (inputs.length > capabilities.textureUnits) fail('too many pass textures');\n      gl.disable(gl.BLEND); gl.disable(gl.DITHER); gl.disable(gl.SCISSOR_TEST); gl.disable(gl.DEPTH_TEST);\n      gl.disable(gl.STENCIL_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.RASTERIZER_DISCARD); gl.colorMask(true, true, true, true);\n      gl.bindFramebuffer(gl.FRAMEBUFFER, target.framebuffer); gl.viewport(0, 0, target.width, target.height);\n      gl.useProgram(program); gl.bindVertexArray(vao);\n      inputs.forEach(([uniform, textureName], unit) => {\n        const texture = textures.get(textureName);\n        if (!texture || texture === target || textureName === 'debug') fail('invalid/feedback pass texture');\n        gl.activeTexture(gl.TEXTURE0 + unit); gl.bindSampler(unit, null); gl.bindTexture(gl.TEXTURE_2D, texture.texture);\n        gl.uniform1i(gl.getUniformLocation(program, uniform), unit);\n      });\n      for (const [uniform, value] of Object.entries(uintUniforms)) {\n        if (!Number.isInteger(value) || value \u003c 0 || value > 0xffffffff) fail('invalid uint pass uniform');\n        gl.uniform1ui(gl.getUniformLocation(program, uniform), value);\n      }\n      gl.drawArrays(gl.TRIANGLES, 0, 3); check(); counters.passDraws++;\n    }\n    canvas.addEventListener('webglcontextlost', lost); canvas.addEventListener('webglcontextrestored', restored);\n    try { initialize(); }\n    catch (error) { dispose(); throw error; }\n    return { upload, readTexture, addPass, runPass, dispose, capabilities,\n      get state() { return state; }, get context() { return gl; },\n      getTexture(name) {\n        ready(); const record = textures.get(name);\n        if (!record || name === 'debug') fail(`unknown texture: ${name}`);\n        return Object.freeze({ texture: record.texture, framebuffer: record.framebuffer, width: record.width, height: record.height, kind: record.kind });\n      },\n      get stats() { return { ...counters, state, error: lastError,\n        lastUpload: lastUpload ? { ...lastUpload, ranges: lastUpload.ranges.map(range => range.slice()) } : null }; }\n    };\n  };\n}","model":"function createFrameStateModel() {\n  // ABI v1: see docs/display-snapshots.md. No DOM, filesystem or Node dependencies.\n  const VERSION = 1;\n  const metadataKeys = ['schemaVersion', 'revision', 'chipset', 'samplesPerLowresPixel',\n    'outputWidth', 'outputHeight', 'lines', 'interlaceField', 'maxEvents',\n    'videoRate', 'pixelAspect', 'origin'];\n  const tableTypes = { lineRegs: Uint32Array, linePal: Uint8Array, lineSprites: Uint32Array,\n    lineEvents: Uint32Array, eventOffsets: Uint32Array, overflowEvents: Uint32Array };\n  const MAX_OVERFLOW_EVENTS = 65536;\n\n  function fail(message) { throw new Error(`Display snapshot: ${message}`); }\n  function isTypedArray(value, Type) {\n    return ArrayBuffer.isView(value) && Object.prototype.toString.call(value) === `[object ${Type.name}]`;\n  }\n  function integer(value, min, max, name) {\n    if (!Number.isSafeInteger(value) || value \u003c min || value > max) fail(`invalid ${name}`);\n  }\n  function keys(object, expected, name) {\n    if (!object || typeof object !== 'object' || Array.isArray(object) ||\n        Object.keys(object).length !== expected.length || expected.some(key => !Object.prototype.hasOwnProperty.call(object, key))) {\n      fail(`invalid ${name} fields`);\n    }\n  }\n  function rational(value, name) {\n    keys(value, ['numerator', 'denominator'], name);\n    integer(value.numerator, 1, 1000000, `${name} numerator`);\n    integer(value.denominator, 1, 1000000, `${name} denominator`);\n  }\n  function validateDimensions(frame) {\n    integer(frame.outputWidth, 1, 4096, 'output width');\n    integer(frame.outputHeight, 1, 4096, 'output height');\n    integer(frame.lines, 0, 2048, 'field lines');\n    if (![null, 0, 1].includes(frame.interlaceField)) fail('invalid field parity');\n    const expected = frame.interlaceField == null ? frame.outputHeight : Math.ceil((frame.outputHeight - frame.interlaceField) / 2);\n    if (frame.lines !== expected) fail('inconsistent field dimensions');\n  }\n  function validateMetadata(frame) {\n    if (frame.schemaVersion !== VERSION) fail(`unsupported schema version ${frame.schemaVersion}`);\n    integer(frame.revision, 0, Number.MAX_SAFE_INTEGER, 'revision');\n    if (!['OCS', 'ECS', 'AGA'].includes(frame.chipset)) fail('invalid chipset');\n    if ((frame.chipset === 'OCS' && frame.samplesPerLowresPixel !== 2) ||\n        (frame.chipset === 'AGA' && frame.samplesPerLowresPixel !== 4) ||\n        ![2, 4].includes(frame.samplesPerLowresPixel)) fail('invalid native sampling grid');\n    validateDimensions(frame);\n    integer(frame.maxEvents, 1, 256, 'event capacity');\n    rational(frame.videoRate, 'video rate');\n    rational(frame.pixelAspect, 'pixel aspect');\n    keys(frame.origin, ['x', 'y'], 'origin');\n    integer(frame.origin.x, -2147483648, 2147483647, 'origin x');\n    integer(frame.origin.y, -2147483648, 2147483647, 'origin y');\n  }\n  function tableLengths(frame, overflowLength) {\n    return { lineRegs: frame.lines * 32, linePal: frame.lines * 1024,\n      lineSprites: frame.lines * 32, lineEvents: frame.lines * frame.maxEvents * 4,\n      eventOffsets: frame.lines + 1, overflowEvents: overflowLength };\n  }\n  function validateEvents(events, start, count) {\n    let previous = -2147483648;\n    for (let i = start; i \u003c start + count * 4; i += 4) {\n      const x = events[i] | 0;\n      if (x \u003c previous) fail('events are not ordered');\n      previous = x;\n      if (events[i + 1] > 0x1fe || events[i + 1] % 2 || events[i + 2] > 0xffff || events[i + 3] !== 0) fail('invalid register event');\n    }\n  }\n  function validateSnapshot(snapshot) {\n    keys(snapshot, ['chip', 'frame'], 'snapshot');\n    const { chip, frame } = snapshot;\n    if (!isTypedArray(chip, Uint8Array) || ![524288, 1048576, 2097152].includes(chip.length)) fail('invalid chip memory size');\n    keys(frame, metadataKeys.concat(Object.keys(tableTypes)), 'frame');\n    validateMetadata(frame);\n    if (!isTypedArray(frame.overflowEvents, Uint32Array) || frame.overflowEvents.length % 4 ||\n        frame.overflowEvents.length > MAX_OVERFLOW_EVENTS * 4) fail('invalid overflow event storage');\n    const lengths = tableLengths(frame, frame.overflowEvents.length);\n    for (const [name, Type] of Object.entries(tableTypes)) {\n      if (!isTypedArray(frame[name], Type) || frame[name].length !== lengths[name]) fail(`invalid ${name} table`);\n    }\n    if (frame.eventOffsets[0] !== 0 || frame.eventOffsets[frame.lines] * 4 !== frame.overflowEvents.length) fail('invalid overflow offsets');\n    for (let line = 0; line \u003c frame.lines; line++) {\n      const row = line * 32;\n      for (let plane = 0; plane \u003c 8; plane++) {\n        const pointer = frame.lineRegs[row + plane];\n        if (pointer % 2 || pointer > chip.length - 2) fail(`invalid plane pointer on line ${line}`);\n      }\n      for (let col = 8; col \u003c= 12; col++) if (frame.lineRegs[row + col] > 65535) fail('invalid register word');\n      if (frame.lineRegs[row + 16] > 7) fail('invalid DMA flags');\n      for (let col = 18; col \u003c 32; col++) if (frame.lineRegs[row + col] !== 0) fail('nonzero reserved register');\n      const count = frame.lineRegs[row + 17];\n      const start = frame.eventOffsets[line], end = frame.eventOffsets[line + 1];\n      if (end \u003c start || end * 4 > frame.overflowEvents.length ||\n          end - start !== (count > frame.maxEvents ? count : 0)) fail('inconsistent overflow event count');\n      const fastStart = line * frame.maxEvents * 4;\n      validateEvents(frame.lineEvents, fastStart, Math.min(count, frame.maxEvents));\n      if (count > frame.maxEvents) {\n        validateEvents(frame.overflowEvents, start * 4, count);\n        for (let i = 0; i \u003c frame.maxEvents * 4; i++) {\n          if (frame.lineEvents[fastStart + i] !== frame.overflowEvents[start * 4 + i]) fail('overflow prefix differs from fast events');\n        }\n      }\n    }\n    return snapshot;\n  }\n\n  function copyMetadata(frame) {\n    const result = {};\n    for (const key of metadataKeys) result[key] = typeof frame[key] === 'object' && frame[key] !== null ? { ...frame[key] } : frame[key];\n    return result;\n  }\n  function createSnapshot(input) {\n    validateSnapshot(input);\n    const frame = copyMetadata(input.frame);\n    for (const [name, Type] of Object.entries(tableTypes)) frame[name] = Type.from(input.frame[name]);\n    Object.freeze(frame.videoRate); Object.freeze(frame.pixelAspect); Object.freeze(frame.origin);\n    // Typed arrays cannot be frozen. These owned copies are read-only by contract;\n    // producers must publish a new snapshot rather than mutate a published one.\n    return Object.freeze({ chip: Uint8Array.from(input.chip), frame: Object.freeze(frame) });\n  }\n\n  function serializeSnapshot(input) {\n    validateSnapshot(input);\n    const tables = {};\n    let offset = 0;\n    for (const [name, Type] of Object.entries(tableTypes)) {\n      const length = input.frame[name].length;\n      tables[name] = { type: Type === Uint32Array ? 'u32be' : 'u8', offset, length,\n        stride: name === 'lineRegs' || name === 'lineSprites' ? 32 : name === 'linePal' ? 1024 :\n          name === 'lineEvents' ? input.frame.maxEvents * 4 : name === 'overflowEvents' ? 4 : 1 };\n      offset += length * Type.BYTES_PER_ELEMENT;\n    }\n    const bytes = new Uint8Array(offset), view = new DataView(bytes.buffer);\n    for (const [name, Type] of Object.entries(tableTypes)) {\n      const start = tables[name].offset, source = input.frame[name];\n      if (Type === Uint8Array) bytes.set(source, start);\n      else for (let i = 0; i \u003c source.length; i++) view.setUint32(start + i * 4, source[i], false);\n    }\n    return { header: { format: 'amos-display', schemaVersion: VERSION, frame: copyMetadata(input.frame),\n      chipByteLength: input.chip.length, tablesByteLength: bytes.length, tables },\n    chip: Uint8Array.from(input.chip), tables: bytes };\n  }\n\n  function deserializeSnapshot(header, chip, bytes) {\n    keys(header, ['format', 'schemaVersion', 'frame', 'chipByteLength', 'tablesByteLength', 'tables'], 'header');\n    if (header.format !== 'amos-display' || header.schemaVersion !== VERSION) fail('unsupported snapshot format/version');\n    keys(header.frame, metadataKeys, 'frame metadata');\n    validateMetadata(header.frame);\n    if (!isTypedArray(chip, Uint8Array) || chip.length !== header.chipByteLength ||\n        ![524288, 1048576, 2097152].includes(chip.length)) fail('truncated/invalid chip blob');\n    if (!isTypedArray(bytes, Uint8Array) || bytes.length !== header.tablesByteLength) fail('truncated table blob');\n    keys(header.tables, Object.keys(tableTypes), 'table descriptors');\n    const overflow = header.tables.overflowEvents;\n    keys(overflow, ['type', 'offset', 'length', 'stride'], 'overflowEvents descriptor');\n    integer(overflow.length, 0, MAX_OVERFLOW_EVENTS * 4, 'overflow length');\n    const lengths = tableLengths(header.frame, overflow.length), frame = copyMetadata(header.frame);\n    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);\n    let offset = 0;\n    for (const [name, Type] of Object.entries(tableTypes)) {\n      const descriptor = header.tables[name];\n      keys(descriptor, ['type', 'offset', 'length', 'stride'], `${name} descriptor`);\n      const stride = name === 'lineRegs' || name === 'lineSprites' ? 32 : name === 'linePal' ? 1024 :\n        name === 'lineEvents' ? frame.maxEvents * 4 : name === 'overflowEvents' ? 4 : 1;\n      if (descriptor.type !== (Type === Uint32Array ? 'u32be' : 'u8') || descriptor.offset !== offset ||\n          descriptor.length !== lengths[name] || descriptor.stride !== stride) fail(`invalid ${name} descriptor`);\n      const length = descriptor.length, size = length * Type.BYTES_PER_ELEMENT;\n      if (offset + size > bytes.length) fail(`truncated ${name}`);\n      const data = new Type(length);\n      if (Type === Uint8Array) data.set(bytes.subarray(offset, offset + size));\n      else for (let i = 0; i \u003c length; i++) data[i] = view.getUint32(offset + i * 4, false);\n      frame[name] = data;\n      offset += size;\n    }\n    if (offset !== bytes.length) fail('trailing table bytes');\n    return createSnapshot({ chip, frame });\n  }\n\n  return { VERSION, createSnapshot, validateSnapshot, validateDimensions, serializeSnapshot, deserializeSnapshot };\n}","frame":"function staticFrame(options) {\n  const { width, height, depth, pointers, rowBytes, palette } = options;\n  const field = options.interlaceField == null ? null : options.interlaceField;\n  const outputHeight = options.outputHeight == null ? height * (field == null ? 1 : 2) : options.outputHeight;\n  if (![null, 0, 1].includes(field) || !Number.isInteger(width) || width \u003c 1 || width > 2048 ||\n      !Number.isInteger(height) || height \u003c 0 || (height === 0 && !(field === 1 && outputHeight === 1)) || height > 2048 ||\n      !Number.isInteger(depth) || depth \u003c 1 || depth > 6 || !Number.isInteger(rowBytes) || rowBytes % 2 ||\n      rowBytes \u003c Math.ceil(width / 16) * 2 || !pointers || pointers.length !== depth ||\n      !palette || palette.length > 32) throw new Error('Invalid static planar screen');\n  for (const pointer of pointers) if (!Number.isSafeInteger(pointer) || pointer \u003c 0 || pointer % 2 || pointer > 0xffffffff) throw new Error('Invalid static plane pointer');\n  for (const colour of palette) if (!Number.isInteger(colour) || colour \u003c 0 || colour > 0xfff) throw new Error('Invalid static palette');\n  const hires = options.hires === true, samples = hires ? 1 : 2;\n  if (options.ham && (![5, 6].includes(depth) || hires || options.dualPlayfield)) throw new Error('Invalid static HAM mode');\n  const scroll = options.scroll == null ? 0 : options.scroll, fetchOffset = options.fetchOffset == null ? 0 : options.fetchOffset;\n  if ((hires && depth > 4) || !Number.isInteger(scroll) || scroll \u003c 0 || scroll > 255 ||\n      !Number.isInteger(fetchOffset) || Math.abs(fetchOffset) > 65535) throw new Error('Invalid static screen mode/scroll');\n  const frame = {\n    schemaVersion: 1, revision: options.revision == null ? 0 : options.revision,\n    chipset: 'OCS', samplesPerLowresPixel: 2, outputWidth: width * samples,\n    outputHeight, lines: height, interlaceField: field, maxEvents: 32,\n    videoRate: options.videoRate || { numerator: 50, denominator: 1 },\n    pixelAspect: options.pixelAspect || { numerator: 1, denominator: samples },\n    origin: options.origin || { x: 128, y: 50 },\n    lineRegs: new Uint32Array(height * 32), linePal: new Uint8Array(height * 1024),\n    lineSprites: new Uint32Array(height * 32), lineEvents: new Uint32Array(height * 32 * 4),\n    eventOffsets: new Uint32Array(height + 1), overflowEvents: new Uint32Array(0)\n  };\n  for (let y = 0; y \u003c height; y++) {\n    for (let plane = 0; plane \u003c depth; plane++) {\n      const pointer = pointers[plane] + y * rowBytes;\n      if (!Number.isSafeInteger(pointer) || pointer > 0xffffffff) throw new Error('Static plane address overflow');\n      frame.lineRegs[y * 32 + plane] = pointer;\n    }\n    frame.lineRegs[y * 32 + 8] = (depth \u003c\u003c 12) | (hires ? 0x8000 : 0) | (options.dualPlayfield ? 0x400 : 0) | (options.ham ? 0x800 : 0) | (field == null ? 0 : 4);\n    frame.lineRegs[y * 32 + 9] = scroll;\n    frame.lineRegs[y * 32 + 10] = options.pf2Priority ? 0x40 : 0;\n    frame.lineRegs[y * 32 + 14] = frame.outputWidth;\n    frame.lineRegs[y * 32 + 15] = fetchOffset >>> 0;\n    frame.lineRegs[y * 32 + 16] = 3;\n    for (let index = 0; index \u003c 256; index++) {\n      const rgb = palette[index] || 0, at = y * 1024 + index * 4;\n      frame.linePal[at] = ((rgb >> 8) & 15) * 17;\n      frame.linePal[at + 1] = ((rgb >> 4) & 15) * 17;\n      frame.linePal[at + 2] = (rgb & 15) * 17;\n      frame.linePal[at + 3] = 255;\n    }\n  }\n  return frame;\n}","memory":"class ChipMemory {\n  constructor(size = 2097152, historyLimit = 128) {\n    if (![524288, 1048576, 2097152].includes(size)) throw new Error('Invalid chip memory size');\n    if (!Number.isInteger(historyLimit) || historyLimit \u003c 1 || historyLimit > 4096) throw new Error('Invalid chip dirty history limit');\n    this.bytes = new Uint8Array(size);\n    this.revision = 0;\n    this.historyLimit = historyLimit;\n    this.history = [];\n    this.allocations = new Set();\n    this.freeRanges = [{ address: 0, length: size }];\n  }\n  check(address, length) {\n    if (!Number.isSafeInteger(address) || !Number.isSafeInteger(length) || address \u003c 0 || length \u003c 0 ||\n        address > this.bytes.length - length) throw new Error('Chip memory access out of bounds');\n  }\n  readWord(address) {\n    this.check(address, 2);\n    if (address % 2) throw new Error('Unaligned chip word address');\n    return this.bytes[address] * 256 + this.bytes[address + 1];\n  }\n  writeWord(address, value) {\n    this.check(address, 2);\n    if (address % 2) throw new Error('Unaligned chip word address');\n    if (!Number.isInteger(value) || value \u003c 0 || value > 65535) throw new Error('Invalid chip word');\n    this.writeBytes(address, Uint8Array.of(value >> 8, value & 255));\n  }\n  readBytes(address, length) { this.check(address, length); return this.bytes.slice(address, address + length); }\n  writeBytes(address, bytes) {\n    if (!ArrayBuffer.isView(bytes) || Object.prototype.toString.call(bytes) !== '[object Uint8Array]') throw new Error('Chip write requires bytes');\n    this.check(address, bytes.length);\n    let first = -1, last = 0;\n    for (let i = 0; i \u003c bytes.length; i++) if (this.bytes[address + i] !== bytes[i]) {\n      if (first === -1) first = i;\n      last = i;\n    }\n    if (first === -1) return;\n    if (this.revision === Number.MAX_SAFE_INTEGER) throw new Error('Chip revision exhausted');\n    this.bytes.set(bytes, address);\n    this.markDirty(address + first, last - first + 1);\n  }\n  markDirty(address, length) {\n    this.check(address, length);\n    if (!length) return;\n    if (this.revision === Number.MAX_SAFE_INTEGER) throw new Error('Chip revision exhausted');\n    this.revision++;\n    this.history.push({ revision: this.revision, start: Math.floor(address / 2048), end: Math.ceil((address + length) / 2048) });\n    if (this.history.length > this.historyLimit) this.history.shift();\n  }\n  dirtySince(revision) {\n    if (!Number.isSafeInteger(revision) || revision \u003c -1 || revision > this.revision) throw new Error('Invalid chip upload revision');\n    const oldest = this.history.length ? this.history[0].revision - 1 : this.revision;\n    const full = revision === -1 || revision \u003c oldest;\n    if (full) return { revision: this.revision, full: true, rows: [[0, this.bytes.length / 2048]] };\n    const ranges = this.history.filter(entry => entry.revision > revision).map(entry => [entry.start, entry.end]).sort((a, b) => a[0] - b[0]);\n    const rows = [];\n    for (const range of ranges) {\n      const previous = rows[rows.length - 1];\n      if (previous && previous[1] >= range[0]) previous[1] = Math.max(previous[1], range[1]);\n      else rows.push(range);\n    }\n    return { revision: this.revision, full: false, rows };\n  }\n  allocate(length, alignment = 2) {\n    if (!Number.isSafeInteger(length) || length \u003c 1 || !Number.isInteger(alignment) || alignment \u003c 1 ||\n        alignment > 2048 || (alignment & (alignment - 1))) throw new Error('Invalid chip allocation');\n    for (let i = 0; i \u003c this.freeRanges.length; i++) {\n      const range = this.freeRanges[i];\n      const address = Math.ceil(range.address / alignment) * alignment;\n      const end = address + length, rangeEnd = range.address + range.length;\n      if (end > rangeEnd) continue;\n      const replacements = [];\n      if (address > range.address) replacements.push({ address: range.address, length: address - range.address });\n      if (end \u003c rangeEnd) replacements.push({ address: end, length: rangeEnd - end });\n      this.freeRanges.splice(i, 1, ...replacements);\n      const allocation = Object.freeze({ address, length });\n      this.allocations.add(allocation);\n      return allocation;\n    }\n    throw new Error('Chip memory exhausted');\n  }\n  free(allocation) {\n    if (!this.allocations.has(allocation)) throw new Error('Invalid chip allocation handle');\n    this.writeBytes(allocation.address, new Uint8Array(allocation.length));\n    this.allocations.delete(allocation);\n    this.freeRanges.push({ address: allocation.address, length: allocation.length });\n    this.freeRanges.sort((a, b) => a.address - b.address);\n    this.freeRanges = this.freeRanges.reduce((ranges, range) => {\n      const last = ranges[ranges.length - 1];\n      if (last && last.address + last.length === range.address) last.length += range.length;\n      else ranges.push({ ...range });\n      return ranges;\n    }, []);\n  }\n  snapshot() { return this.bytes.slice(); }\n}"},check:(function check(result, assert) {
+    assert.deepStrictEqual(result.checkedSizes, [524288,1048576,2097152]); assert.strictEqual(result.dirtyRows, 3); assert.strictEqual(result.generation, 2);
+  }),pngReference:null});</script></body></html>

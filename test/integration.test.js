@@ -95,7 +95,7 @@ test('integration: browser facade retains support for the original driver demo',
   const logs = [];
   const context = vm.createContext({ setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, console: { log: (...args) => logs.push(args.join(' ')) } });
   vm.runInContext('window = globalThis;', context);
-  for (const file of ['lib/amos/font.js', 'lib/amos/display.js', 'lib/amos/operations.js', 'lib/amos/driver.js', 'lib/amos/background.js', 'examples/driver-demo.js']) {
+  for (const file of ['lib/display/model/color.js', 'lib/display/reference/sprites.js', 'lib/amos/font.js', 'lib/amos/display.js', 'lib/amos/operations.js', 'lib/amos/driver.js', 'lib/amos/background.js', 'examples/driver-demo.js']) {
     vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context);
   }
   context.driverDemoRun();
@@ -104,6 +104,12 @@ test('integration: browser facade retains support for the original driver demo',
     '[demo] start', '[demo] proc enter', '[demo] proc work', '[demo] proc return', '[demo] after call'
   ]);
   assert.strictEqual(context.AMOS.state.halted, true);
+  const program = context.AMOS._program;
+  program.display.clear(0); program.display.setColour(17, 0xf00);
+  program.banks.set(1, { type: 'sprites', images: [{ width: 16, height: 1, depth: 1,
+    hotspotX: 0, hotspotY: 0, pixels: Uint8Array.from([1, ...new Array(15).fill(0)]) }] });
+  program.hideOn(); program.setSprite(0, 128, 50, 1); program.updateSprites();
+  assert.deepStrictEqual(Array.from(program.display.rgba().slice(0, 4)), [255, 0, 0, 255]);
 });
 
 test('integration: browser output runs sequential files through the browser memory adapter', () => {

@@ -135,6 +135,969 @@
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   ]);
 };
+  const chipMemoryClass = class ChipMemory {
+  constructor(size = 2097152, historyLimit = 128) {
+    if (![524288, 1048576, 2097152].includes(size)) throw new Error('Invalid chip memory size');
+    if (!Number.isInteger(historyLimit) || historyLimit < 1 || historyLimit > 4096) throw new Error('Invalid chip dirty history limit');
+    this.bytes = new Uint8Array(size);
+    this.revision = 0;
+    this.historyLimit = historyLimit;
+    this.history = [];
+    this.allocations = new Set();
+    this.freeRanges = [{ address: 0, length: size }];
+  }
+  check(address, length) {
+    if (!Number.isSafeInteger(address) || !Number.isSafeInteger(length) || address < 0 || length < 0 ||
+        address > this.bytes.length - length) throw new Error('Chip memory access out of bounds');
+  }
+  readWord(address) {
+    this.check(address, 2);
+    if (address % 2) throw new Error('Unaligned chip word address');
+    return this.bytes[address] * 256 + this.bytes[address + 1];
+  }
+  writeWord(address, value) {
+    this.check(address, 2);
+    if (address % 2) throw new Error('Unaligned chip word address');
+    if (!Number.isInteger(value) || value < 0 || value > 65535) throw new Error('Invalid chip word');
+    this.writeBytes(address, Uint8Array.of(value >> 8, value & 255));
+  }
+  readBytes(address, length) { this.check(address, length); return this.bytes.slice(address, address + length); }
+  writeBytes(address, bytes) {
+    if (!ArrayBuffer.isView(bytes) || Object.prototype.toString.call(bytes) !== '[object Uint8Array]') throw new Error('Chip write requires bytes');
+    this.check(address, bytes.length);
+    let first = -1, last = 0;
+    for (let i = 0; i < bytes.length; i++) if (this.bytes[address + i] !== bytes[i]) {
+      if (first === -1) first = i;
+      last = i;
+    }
+    if (first === -1) return;
+    if (this.revision === Number.MAX_SAFE_INTEGER) throw new Error('Chip revision exhausted');
+    this.bytes.set(bytes, address);
+    this.markDirty(address + first, last - first + 1);
+  }
+  markDirty(address, length) {
+    this.check(address, length);
+    if (!length) return;
+    if (this.revision === Number.MAX_SAFE_INTEGER) throw new Error('Chip revision exhausted');
+    this.revision++;
+    this.history.push({ revision: this.revision, start: Math.floor(address / 2048), end: Math.ceil((address + length) / 2048) });
+    if (this.history.length > this.historyLimit) this.history.shift();
+  }
+  dirtySince(revision) {
+    if (!Number.isSafeInteger(revision) || revision < -1 || revision > this.revision) throw new Error('Invalid chip upload revision');
+    const oldest = this.history.length ? this.history[0].revision - 1 : this.revision;
+    const full = revision === -1 || revision < oldest;
+    if (full) return { revision: this.revision, full: true, rows: [[0, this.bytes.length / 2048]] };
+    const ranges = this.history.filter(entry => entry.revision > revision).map(entry => [entry.start, entry.end]).sort((a, b) => a[0] - b[0]);
+    const rows = [];
+    for (const range of ranges) {
+      const previous = rows[rows.length - 1];
+      if (previous && previous[1] >= range[0]) previous[1] = Math.max(previous[1], range[1]);
+      else rows.push(range);
+    }
+    return { revision: this.revision, full: false, rows };
+  }
+  allocate(length, alignment = 2) {
+    if (!Number.isSafeInteger(length) || length < 1 || !Number.isInteger(alignment) || alignment < 1 ||
+        alignment > 2048 || (alignment & (alignment - 1))) throw new Error('Invalid chip allocation');
+    for (let i = 0; i < this.freeRanges.length; i++) {
+      const range = this.freeRanges[i];
+      const address = Math.ceil(range.address / alignment) * alignment;
+      const end = address + length, rangeEnd = range.address + range.length;
+      if (end > rangeEnd) continue;
+      const replacements = [];
+      if (address > range.address) replacements.push({ address: range.address, length: address - range.address });
+      if (end < rangeEnd) replacements.push({ address: end, length: rangeEnd - end });
+      this.freeRanges.splice(i, 1, ...replacements);
+      const allocation = Object.freeze({ address, length });
+      this.allocations.add(allocation);
+      return allocation;
+    }
+    throw new Error('Chip memory exhausted');
+  }
+  free(allocation) {
+    if (!this.allocations.has(allocation)) throw new Error('Invalid chip allocation handle');
+    this.writeBytes(allocation.address, new Uint8Array(allocation.length));
+    this.allocations.delete(allocation);
+    this.freeRanges.push({ address: allocation.address, length: allocation.length });
+    this.freeRanges.sort((a, b) => a.address - b.address);
+    this.freeRanges = this.freeRanges.reduce((ranges, range) => {
+      const last = ranges[ranges.length - 1];
+      if (last && last.address + last.length === range.address) last.length += range.length;
+      else ranges.push({ ...range });
+      return ranges;
+    }, []);
+  }
+  snapshot() { return this.bytes.slice(); }
+};
+  const frameStateModel = (function createFrameStateModel() {
+  // ABI v1: see docs/display-snapshots.md. No DOM, filesystem or Node dependencies.
+  const VERSION = 1;
+  const metadataKeys = ['schemaVersion', 'revision', 'chipset', 'samplesPerLowresPixel',
+    'outputWidth', 'outputHeight', 'lines', 'interlaceField', 'maxEvents',
+    'videoRate', 'pixelAspect', 'origin'];
+  const tableTypes = { lineRegs: Uint32Array, linePal: Uint8Array, lineSprites: Uint32Array,
+    lineEvents: Uint32Array, eventOffsets: Uint32Array, overflowEvents: Uint32Array };
+  const MAX_OVERFLOW_EVENTS = 65536;
+
+  function fail(message) { throw new Error(`Display snapshot: ${message}`); }
+  function isTypedArray(value, Type) {
+    return ArrayBuffer.isView(value) && Object.prototype.toString.call(value) === `[object ${Type.name}]`;
+  }
+  function integer(value, min, max, name) {
+    if (!Number.isSafeInteger(value) || value < min || value > max) fail(`invalid ${name}`);
+  }
+  function keys(object, expected, name) {
+    if (!object || typeof object !== 'object' || Array.isArray(object) ||
+        Object.keys(object).length !== expected.length || expected.some(key => !Object.prototype.hasOwnProperty.call(object, key))) {
+      fail(`invalid ${name} fields`);
+    }
+  }
+  function rational(value, name) {
+    keys(value, ['numerator', 'denominator'], name);
+    integer(value.numerator, 1, 1000000, `${name} numerator`);
+    integer(value.denominator, 1, 1000000, `${name} denominator`);
+  }
+  function validateDimensions(frame) {
+    integer(frame.outputWidth, 1, 4096, 'output width');
+    integer(frame.outputHeight, 1, 4096, 'output height');
+    integer(frame.lines, 0, 2048, 'field lines');
+    if (![null, 0, 1].includes(frame.interlaceField)) fail('invalid field parity');
+    const expected = frame.interlaceField == null ? frame.outputHeight : Math.ceil((frame.outputHeight - frame.interlaceField) / 2);
+    if (frame.lines !== expected) fail('inconsistent field dimensions');
+  }
+  function validateMetadata(frame) {
+    if (frame.schemaVersion !== VERSION) fail(`unsupported schema version ${frame.schemaVersion}`);
+    integer(frame.revision, 0, Number.MAX_SAFE_INTEGER, 'revision');
+    if (!['OCS', 'ECS', 'AGA'].includes(frame.chipset)) fail('invalid chipset');
+    if ((frame.chipset === 'OCS' && frame.samplesPerLowresPixel !== 2) ||
+        (frame.chipset === 'AGA' && frame.samplesPerLowresPixel !== 4) ||
+        ![2, 4].includes(frame.samplesPerLowresPixel)) fail('invalid native sampling grid');
+    validateDimensions(frame);
+    integer(frame.maxEvents, 1, 256, 'event capacity');
+    rational(frame.videoRate, 'video rate');
+    rational(frame.pixelAspect, 'pixel aspect');
+    keys(frame.origin, ['x', 'y'], 'origin');
+    integer(frame.origin.x, -2147483648, 2147483647, 'origin x');
+    integer(frame.origin.y, -2147483648, 2147483647, 'origin y');
+  }
+  function tableLengths(frame, overflowLength) {
+    return { lineRegs: frame.lines * 32, linePal: frame.lines * 1024,
+      lineSprites: frame.lines * 32, lineEvents: frame.lines * frame.maxEvents * 4,
+      eventOffsets: frame.lines + 1, overflowEvents: overflowLength };
+  }
+  function validateEvents(events, start, count) {
+    let previous = -2147483648;
+    for (let i = start; i < start + count * 4; i += 4) {
+      const x = events[i] | 0;
+      if (x < previous) fail('events are not ordered');
+      previous = x;
+      if (events[i + 1] > 0x1fe || events[i + 1] % 2 || events[i + 2] > 0xffff || events[i + 3] !== 0) fail('invalid register event');
+    }
+  }
+  function validateSnapshot(snapshot) {
+    keys(snapshot, ['chip', 'frame'], 'snapshot');
+    const { chip, frame } = snapshot;
+    if (!isTypedArray(chip, Uint8Array) || ![524288, 1048576, 2097152].includes(chip.length)) fail('invalid chip memory size');
+    keys(frame, metadataKeys.concat(Object.keys(tableTypes)), 'frame');
+    validateMetadata(frame);
+    if (!isTypedArray(frame.overflowEvents, Uint32Array) || frame.overflowEvents.length % 4 ||
+        frame.overflowEvents.length > MAX_OVERFLOW_EVENTS * 4) fail('invalid overflow event storage');
+    const lengths = tableLengths(frame, frame.overflowEvents.length);
+    for (const [name, Type] of Object.entries(tableTypes)) {
+      if (!isTypedArray(frame[name], Type) || frame[name].length !== lengths[name]) fail(`invalid ${name} table`);
+    }
+    if (frame.eventOffsets[0] !== 0 || frame.eventOffsets[frame.lines] * 4 !== frame.overflowEvents.length) fail('invalid overflow offsets');
+    for (let line = 0; line < frame.lines; line++) {
+      const row = line * 32;
+      for (let plane = 0; plane < 8; plane++) {
+        const pointer = frame.lineRegs[row + plane];
+        if (pointer % 2 || pointer > chip.length - 2) fail(`invalid plane pointer on line ${line}`);
+      }
+      for (let col = 8; col <= 12; col++) if (frame.lineRegs[row + col] > 65535) fail('invalid register word');
+      if (frame.lineRegs[row + 16] > 7) fail('invalid DMA flags');
+      for (let col = 18; col < 32; col++) if (frame.lineRegs[row + col] !== 0) fail('nonzero reserved register');
+      const count = frame.lineRegs[row + 17];
+      const start = frame.eventOffsets[line], end = frame.eventOffsets[line + 1];
+      if (end < start || end * 4 > frame.overflowEvents.length ||
+          end - start !== (count > frame.maxEvents ? count : 0)) fail('inconsistent overflow event count');
+      const fastStart = line * frame.maxEvents * 4;
+      validateEvents(frame.lineEvents, fastStart, Math.min(count, frame.maxEvents));
+      if (count > frame.maxEvents) {
+        validateEvents(frame.overflowEvents, start * 4, count);
+        for (let i = 0; i < frame.maxEvents * 4; i++) {
+          if (frame.lineEvents[fastStart + i] !== frame.overflowEvents[start * 4 + i]) fail('overflow prefix differs from fast events');
+        }
+      }
+    }
+    return snapshot;
+  }
+
+  function copyMetadata(frame) {
+    const result = {};
+    for (const key of metadataKeys) result[key] = typeof frame[key] === 'object' && frame[key] !== null ? { ...frame[key] } : frame[key];
+    return result;
+  }
+  function createSnapshot(input) {
+    validateSnapshot(input);
+    const frame = copyMetadata(input.frame);
+    for (const [name, Type] of Object.entries(tableTypes)) frame[name] = Type.from(input.frame[name]);
+    Object.freeze(frame.videoRate); Object.freeze(frame.pixelAspect); Object.freeze(frame.origin);
+    // Typed arrays cannot be frozen. These owned copies are read-only by contract;
+    // producers must publish a new snapshot rather than mutate a published one.
+    return Object.freeze({ chip: Uint8Array.from(input.chip), frame: Object.freeze(frame) });
+  }
+
+  function serializeSnapshot(input) {
+    validateSnapshot(input);
+    const tables = {};
+    let offset = 0;
+    for (const [name, Type] of Object.entries(tableTypes)) {
+      const length = input.frame[name].length;
+      tables[name] = { type: Type === Uint32Array ? 'u32be' : 'u8', offset, length,
+        stride: name === 'lineRegs' || name === 'lineSprites' ? 32 : name === 'linePal' ? 1024 :
+          name === 'lineEvents' ? input.frame.maxEvents * 4 : name === 'overflowEvents' ? 4 : 1 };
+      offset += length * Type.BYTES_PER_ELEMENT;
+    }
+    const bytes = new Uint8Array(offset), view = new DataView(bytes.buffer);
+    for (const [name, Type] of Object.entries(tableTypes)) {
+      const start = tables[name].offset, source = input.frame[name];
+      if (Type === Uint8Array) bytes.set(source, start);
+      else for (let i = 0; i < source.length; i++) view.setUint32(start + i * 4, source[i], false);
+    }
+    return { header: { format: 'amos-display', schemaVersion: VERSION, frame: copyMetadata(input.frame),
+      chipByteLength: input.chip.length, tablesByteLength: bytes.length, tables },
+    chip: Uint8Array.from(input.chip), tables: bytes };
+  }
+
+  function deserializeSnapshot(header, chip, bytes) {
+    keys(header, ['format', 'schemaVersion', 'frame', 'chipByteLength', 'tablesByteLength', 'tables'], 'header');
+    if (header.format !== 'amos-display' || header.schemaVersion !== VERSION) fail('unsupported snapshot format/version');
+    keys(header.frame, metadataKeys, 'frame metadata');
+    validateMetadata(header.frame);
+    if (!isTypedArray(chip, Uint8Array) || chip.length !== header.chipByteLength ||
+        ![524288, 1048576, 2097152].includes(chip.length)) fail('truncated/invalid chip blob');
+    if (!isTypedArray(bytes, Uint8Array) || bytes.length !== header.tablesByteLength) fail('truncated table blob');
+    keys(header.tables, Object.keys(tableTypes), 'table descriptors');
+    const overflow = header.tables.overflowEvents;
+    keys(overflow, ['type', 'offset', 'length', 'stride'], 'overflowEvents descriptor');
+    integer(overflow.length, 0, MAX_OVERFLOW_EVENTS * 4, 'overflow length');
+    const lengths = tableLengths(header.frame, overflow.length), frame = copyMetadata(header.frame);
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let offset = 0;
+    for (const [name, Type] of Object.entries(tableTypes)) {
+      const descriptor = header.tables[name];
+      keys(descriptor, ['type', 'offset', 'length', 'stride'], `${name} descriptor`);
+      const stride = name === 'lineRegs' || name === 'lineSprites' ? 32 : name === 'linePal' ? 1024 :
+        name === 'lineEvents' ? frame.maxEvents * 4 : name === 'overflowEvents' ? 4 : 1;
+      if (descriptor.type !== (Type === Uint32Array ? 'u32be' : 'u8') || descriptor.offset !== offset ||
+          descriptor.length !== lengths[name] || descriptor.stride !== stride) fail(`invalid ${name} descriptor`);
+      const length = descriptor.length, size = length * Type.BYTES_PER_ELEMENT;
+      if (offset + size > bytes.length) fail(`truncated ${name}`);
+      const data = new Type(length);
+      if (Type === Uint8Array) data.set(bytes.subarray(offset, offset + size));
+      else for (let i = 0; i < length; i++) data[i] = view.getUint32(offset + i * 4, false);
+      frame[name] = data;
+      offset += size;
+    }
+    if (offset !== bytes.length) fail('trailing table bytes');
+    return createSnapshot({ chip, frame });
+  }
+
+  return { VERSION, createSnapshot, validateSnapshot, validateDimensions, serializeSnapshot, deserializeSnapshot };
+})();
+  const staticFrameFactory = function staticFrame(options) {
+  const { width, height, depth, pointers, rowBytes, palette } = options;
+  const field = options.interlaceField == null ? null : options.interlaceField;
+  const outputHeight = options.outputHeight == null ? height * (field == null ? 1 : 2) : options.outputHeight;
+  if (![null, 0, 1].includes(field) || !Number.isInteger(width) || width < 1 || width > 2048 ||
+      !Number.isInteger(height) || height < 0 || (height === 0 && !(field === 1 && outputHeight === 1)) || height > 2048 ||
+      !Number.isInteger(depth) || depth < 1 || depth > 6 || !Number.isInteger(rowBytes) || rowBytes % 2 ||
+      rowBytes < Math.ceil(width / 16) * 2 || !pointers || pointers.length !== depth ||
+      !palette || palette.length > 32) throw new Error('Invalid static planar screen');
+  for (const pointer of pointers) if (!Number.isSafeInteger(pointer) || pointer < 0 || pointer % 2 || pointer > 0xffffffff) throw new Error('Invalid static plane pointer');
+  for (const colour of palette) if (!Number.isInteger(colour) || colour < 0 || colour > 0xfff) throw new Error('Invalid static palette');
+  const hires = options.hires === true, samples = hires ? 1 : 2;
+  if (options.ham && (![5, 6].includes(depth) || hires || options.dualPlayfield)) throw new Error('Invalid static HAM mode');
+  const scroll = options.scroll == null ? 0 : options.scroll, fetchOffset = options.fetchOffset == null ? 0 : options.fetchOffset;
+  if ((hires && depth > 4) || !Number.isInteger(scroll) || scroll < 0 || scroll > 255 ||
+      !Number.isInteger(fetchOffset) || Math.abs(fetchOffset) > 65535) throw new Error('Invalid static screen mode/scroll');
+  const frame = {
+    schemaVersion: 1, revision: options.revision == null ? 0 : options.revision,
+    chipset: 'OCS', samplesPerLowresPixel: 2, outputWidth: width * samples,
+    outputHeight, lines: height, interlaceField: field, maxEvents: 32,
+    videoRate: options.videoRate || { numerator: 50, denominator: 1 },
+    pixelAspect: options.pixelAspect || { numerator: 1, denominator: samples },
+    origin: options.origin || { x: 128, y: 50 },
+    lineRegs: new Uint32Array(height * 32), linePal: new Uint8Array(height * 1024),
+    lineSprites: new Uint32Array(height * 32), lineEvents: new Uint32Array(height * 32 * 4),
+    eventOffsets: new Uint32Array(height + 1), overflowEvents: new Uint32Array(0)
+  };
+  for (let y = 0; y < height; y++) {
+    for (let plane = 0; plane < depth; plane++) {
+      const pointer = pointers[plane] + y * rowBytes;
+      if (!Number.isSafeInteger(pointer) || pointer > 0xffffffff) throw new Error('Static plane address overflow');
+      frame.lineRegs[y * 32 + plane] = pointer;
+    }
+    frame.lineRegs[y * 32 + 8] = (depth << 12) | (hires ? 0x8000 : 0) | (options.dualPlayfield ? 0x400 : 0) | (options.ham ? 0x800 : 0) | (field == null ? 0 : 4);
+    frame.lineRegs[y * 32 + 9] = scroll;
+    frame.lineRegs[y * 32 + 10] = options.pf2Priority ? 0x40 : 0;
+    frame.lineRegs[y * 32 + 14] = frame.outputWidth;
+    frame.lineRegs[y * 32 + 15] = fetchOffset >>> 0;
+    frame.lineRegs[y * 32 + 16] = 3;
+    for (let index = 0; index < 256; index++) {
+      const rgb = palette[index] || 0, at = y * 1024 + index * 4;
+      frame.linePal[at] = ((rgb >> 8) & 15) * 17;
+      frame.linePal[at + 1] = ((rgb >> 4) & 15) * 17;
+      frame.linePal[at + 2] = (rgb & 15) * 17;
+      frame.linePal[at + 3] = 255;
+    }
+  }
+  return frame;
+};
+  const planarBridgeFactory = function createPhysicalBridge(display, options, ChipMemory, snapshotModel, staticFrame, copperBuilder, copperInterpreter) {
+  const memory = new ChipMemory(options.snapshotChipBytes);
+  const records = new Map();
+  let revision = 0;
+  let copperAllocation = null;
+  function prune() {
+    for (const [target, buffers] of records) {
+      const active = display.screens.get(target.id) === target;
+      for (const [buffer, record] of buffers) {
+        if (active && (buffer === target.pixels || buffer === target.physicalPixels)) continue;
+        memory.free(record.allocation); buffers.delete(buffer);
+      }
+      if (!active) records.delete(target);
+    }
+    if (!records.size && copperAllocation) { memory.free(copperAllocation); copperAllocation = null; }
+  }
+  function prepare(target) {
+    prune();
+    if (!ArrayBuffer.isView(target.physicalPixels) ||
+        Object.prototype.toString.call(target.physicalPixels) !== '[object Uint8Array]' ||
+        target.physicalPixels.length !== target.width * target.height) throw new Error('Invalid physical indexed buffer');
+    const rowBytes = Math.ceil(target.width / 16) * 2, depth = Math.log2(target.colours);
+    let buffers = records.get(target);
+    if (!buffers) { buffers = new Map(); records.set(target, buffers); }
+    let record = buffers.get(target.physicalPixels);
+    if (!record) {
+      const allocation = memory.allocate(rowBytes * target.height * depth);
+      record = { allocation, packed: new Uint8Array(allocation.length) };
+      buffers.set(target.physicalPixels, record);
+    }
+    // Repack exposed indexed arrays in full, including unannounced host writes.
+    // Padding is always zero. writeBytes compares bytes and tracks only changes.
+    const packed = record.packed;
+    packed.fill(0);
+    for (let y = 0; y < target.height; y++) for (let x = 0; x < target.width; x++) {
+      const index = target.physicalPixels[y * target.width + x];
+      if (index >= target.colours) throw new Error('Invalid indexed pixel in physical screen');
+      for (let plane = 0; plane < depth; plane++) if (index & (1 << plane)) {
+        packed[plane * rowBytes * target.height + y * rowBytes + (x >> 3)] |= 0x80 >> (x & 7);
+      }
+    }
+    memory.writeBytes(record.allocation.address, packed);
+    const pointers = Array.from({ length: depth }, (_, plane) => record.allocation.address + plane * rowBytes * target.height);
+    return { width: target.width, height: target.height, depth, pointers, rowBytes,
+      palette: target.palette, hires: target.mode === 0x8000, ham: target.ham, x: target.hardwareX, y: target.hardwareY,
+      bplcon2: (target.spritePriority << 3) | target.spritePriority };
+  }
+  function snapshot(target) {
+    const { rowBytes, depth, pointers } = prepare(target);
+    const frame = staticFrame({ width: target.width, height: target.height, depth, pointers, rowBytes,
+      palette: target.palette, hires: target.mode === 0x8000, ham: target.ham, revision: ++revision,
+      videoRate: options.snapshotVideoRate, pixelAspect: options.snapshotPixelAspect,
+      origin: { x: target.hardwareX, y: target.hardwareY } });
+    return snapshotModel.createSnapshot({ chip: memory.bytes, frame });
+  }
+  function snapshotDisplay(targets, geometry) {
+    if (!targets.length) throw new Error('Display snapshot needs at least one screen');
+    const views = targets.map(prepare), top = Math.min(...views.map(view => view.y));
+    const compiled = copperBuilder(views, { origin: { x: 128, y: top },
+      outputWidth: Math.max(...views.map(view => view.width * (view.hires ? 1 : 2))),
+      lines: Math.max(...views.map(view => view.y + view.height)) - top,
+      standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
+      pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
+    if (copperAllocation) { memory.free(copperAllocation); copperAllocation = null; }
+    copperAllocation = memory.allocate(compiled.bytes.length);
+    memory.writeBytes(copperAllocation.address, compiled.bytes);
+    const result = copperInterpreter(memory.bytes, { ...compiled.interpretOptions, initialRegisters: compiled.initialRegisters,
+      address: copperAllocation.address, revision: ++revision }).snapshot;
+    if (display.writeSprites) display.writeSprites(result.frame);
+    return snapshotModel.createSnapshot(result);
+  }
+  return { snapshot, snapshotDisplay, prune };
+};
+  const colorModel = (function createColorModel() {
+  function hamWord(code, previous, paletteColour) {
+    const operation = (code >> 4) & 3, value = code & 15;
+    if (operation === 0) return paletteColour & 0xfff;
+    if (operation === 1) return (previous & 0xff0) | value;
+    if (operation === 2) return (previous & 0x0ff) | (value << 8);
+    return (previous & 0xf0f) | (value << 4);
+  }
+  function halfbriteWord(word) { return (word >> 1) & 0x777; }
+  function rgbaWord(word) { return [((word >> 8) & 15) * 17, ((word >> 4) & 15) * 17, (word & 15) * 17, 255]; }
+  return Object.freeze({ hamWord, halfbriteWord, rgbaWord });
+})();
+  const spriteModel = (function createSpriteModel() {
+  function validate(frame, line) {
+    let active = false;
+    for (let channel = 0; channel < 8; channel++) {
+      const at = line * 32 + channel * 4, flags = frame.lineSprites[at + 3];
+      if ((flags & 0x7ffffffe) || ((flags & 1) && !(channel & 1))) {
+        throw new Error(`Display reference: unsupported sprite flags on line ${line}, channel ${channel}`);
+      }
+      if (frame.lineSprites[at + 1] > 65535 || frame.lineSprites[at + 2] > 65535) {
+        throw new Error(`Display reference: unsupported sprite data width on line ${line}, channel ${channel}`);
+      }
+      active = active || !!(flags & 0x80000000);
+    }
+    const priority = frame.lineRegs[line * 32 + 10];
+    if (active && ((priority & 7) > 4 || ((priority >> 3) & 7) > 4)) {
+      throw new Error(`Display reference: unsupported sprite/playfield priority on line ${line}`);
+    }
+    return active;
+  }
+  function sample(frame, line, x, rawIndex) {
+    const row = line * 32;
+    const samples = frame.samplesPerLowresPixel, data = frame.lineSprites;
+    function pixel(channel) {
+      const at = row + channel * 4;
+      if (!(data[at + 3] & 0x80000000)) return 0;
+      const sourceX = Math.floor((x - (data[at] | 0)) / samples);
+      if (sourceX < 0 || sourceX >= 16) return 0;
+      const bit = 15 - sourceX;
+      return ((data[at + 1] >> bit) & 1) | (((data[at + 2] >> bit) & 1) << 1);
+    }
+    // Select the first nontransparent hardware pair before applying playfield
+    // masks. A blocked sprite must not expose a lower-priority sprite.
+    for (let pair = 0; pair < 4; pair++) {
+      const even = pair * 2, a = pixel(even), b = pixel(even + 1);
+      const attached = !!(data[row + (even + 1) * 4 + 3] & 1);
+      const value = attached ? a | (b << 2) : a || b;
+      if (!value) continue;
+      const control = frame.lineRegs[row + 8], priority = frame.lineRegs[row + 10];
+      const blockers = [];
+      if (control & 0x400) {
+        if ((rawIndex & 0x15) && pair >= (priority & 7)) blockers.push(1);
+        if ((rawIndex & 0x2a) && pair >= ((priority >> 3) & 7)) blockers.push(2);
+      } else if (rawIndex && pair >= ((priority >> 3) & 7)) blockers.push(2);
+      return { channel: attached || a ? even : even + 1, pair, attached, value,
+        paletteIndex: 16 + (attached ? value : pair * 4 + value),
+        visible: blockers.length === 0, blockedBy: blockers };
+    }
+    return null;
+  }
+  return Object.freeze({ validate, sample });
+})();
+  const referenceRenderer = (function createReferenceRenderer(snapshotModel, colorModel, spriteModel) {
+  function fail(message, line, x = null) {
+    throw new Error(`Display reference: ${message} on line ${line}${x == null ? '' : `, x ${x}`}`);
+  }
+  function prepare(chip, frame) {
+    snapshotModel.validateSnapshot({ chip, frame });
+    if (frame.chipset === 'AGA') throw new Error('Display reference: AGA modes are not implemented');
+    for (let line = 0; line < frame.lines; line++) {
+      const row = line * 32, control = frame.lineRegs[row + 8];
+      const planes = (control >> 12) & 7;
+      if (planes > (control & 0x8000 ? 4 : 6) || (control & ~0xfe04) ||
+          ((control & 0x800) && (![5, 6].includes(planes) || (control & 0x8400)))) fail('unsupported bitplane mode', line);
+      if (frame.lineRegs[row + 9] > 255 || frame.lineRegs[row + 10] > 127 || frame.lineRegs[row + 11] ||
+          frame.lineRegs[row + 12] || Math.abs(frame.lineRegs[row + 15] | 0) > 65535) fail('extended registers are not implemented', line);
+      if (frame.lineRegs[row + 17]) fail('mid-line events are not implemented', line);
+      if ((frame.lineRegs[row + 14] | 0) < (frame.lineRegs[row + 13] | 0)) fail('invalid horizontal window', line);
+      spriteModel.validate(frame, line);
+      for (let index = 0; index < 32; index++) {
+        const offset = line * 1024 + index * 4;
+        if (frame.linePal[offset] % 17 || frame.linePal[offset + 1] % 17 ||
+            frame.linePal[offset + 2] % 17 || frame.linePal[offset + 3] !== 255) fail('invalid OCS/ECS palette', line);
+      }
+    }
+  }
+  function decode(chip, frame, x, line, trace = null) {
+    const row = line * 32, control = frame.lineRegs[row + 8];
+    const samples = frame.samplesPerLowresPixel / (control & 0x8000 ? 2 : 1);
+    const start = frame.lineRegs[row + 13] | 0, stop = frame.lineRegs[row + 14] | 0;
+    const active = (frame.lineRegs[row + 16] & 3) === 3 && x >= start && x < stop;
+    const sourceX = Math.floor((x - start) / samples);
+    let index = 0;
+    if (active) for (let plane = 0; plane < ((control >> 12) & 7); plane++) {
+      // OCS/ECS scroll nibbles are lowres units, including on hires lines.
+      const delay = ((frame.lineRegs[row + 9] >> (plane % 2 ? 4 : 0)) & 15) * (control & 0x8000 ? 2 : 1);
+      const bitX = sourceX + (frame.lineRegs[row + 15] | 0) - delay;
+      const pointer = frame.lineRegs[row + plane], address = bitX < 0 ? null : pointer + Math.floor(bitX / 8);
+      if (address != null && address >= chip.length) fail(`bitplane ${plane + 1} fetch out of bounds`, line, x);
+      const bitPosition = bitX < 0 ? null : 7 - (bitX % 8), bit = bitX < 0 ? 0 : (chip[address] >> bitPosition) & 1;
+      index |= bit << plane;
+      if (trace) trace.push({ plane: plane + 1, pointer, byteAddress: address, byte: address == null ? 0 : chip[address], bitPosition, bit,
+        ...(bitX !== sourceX ? { sourceBit: bitX } : {}) });
+    }
+    return { index, active, sourceX, samples };
+  }
+  function paletteWord(frame, line, index) {
+    const at = line * 1024 + index * 4;
+    return ((frame.linePal[at] >> 4) << 8) | ((frame.linePal[at + 1] >> 4) << 4) | (frame.linePal[at + 2] >> 4);
+  }
+  function hamLine(chip, frame, line, lastX, visit) {
+    const row = line * 32, start = frame.lineRegs[row + 13] | 0, stop = frame.lineRegs[row + 14] | 0;
+    if ((frame.lineRegs[row + 16] & 3) !== 3 || lastX < start || stop <= Math.max(0, start)) return;
+    const samples = frame.samplesPerLowresPixel;
+    const lastPixel = Math.floor((Math.min(lastX, stop - 1) - start) / samples);
+    // Bitmap widths are bounded to 2048. A cropped prefix may extend that span,
+    // but malformed signed windows must not cause billions of hidden decodes.
+    if (lastPixel >= 4096) fail('HAM source span exceeds supported limit', line, lastX);
+    let previous = paletteWord(frame, line, 0);
+    for (let pixel = 0; pixel <= lastPixel; pixel++) {
+      const nativeX = start + pixel * samples, decoded = decode(chip, frame, nativeX, line);
+      const before = previous;
+      previous = colorModel.hamWord(decoded.index, previous, paletteWord(frame, line, decoded.index & 15));
+      visit(nativeX, decoded, previous, before);
+    }
+  }
+  function resolve(frame, line, decoded) {
+    const control = frame.lineRegs[line * 32 + 8];
+    let index = decoded.index, playfields = null, halfbrite = false, mode = 'normal';
+    if (control & 0x400) {
+      let pf1 = 0, pf2 = 0;
+      for (let bit = 0; bit < 3; bit++) {
+        pf1 |= ((index >> (bit * 2)) & 1) << bit;
+        pf2 |= ((index >> (bit * 2 + 1)) & 1) << bit;
+      }
+      const front2 = !!(frame.lineRegs[line * 32 + 10] & 0x40);
+      const selected = pf2 && (front2 || !pf1) ? 2 : pf1 ? 1 : 0;
+      index = selected === 2 ? pf2 + 8 : selected === 1 ? pf1 : 0;
+      playfields = { pf1, pf2, selected }; mode = 'dual-playfield';
+    } else if (!(control & 0x800) && ((control >> 12) & 7) === 6) {
+      halfbrite = !!(index & 32); index &= 31; mode = 'EHB';
+    }
+    const word = paletteWord(frame, line, index);
+    const rgba = colorModel.rgbaWord(halfbrite ? colorModel.halfbriteWord(word) : word);
+    return { index, rgba, mode, halfbrite, playfields };
+  }
+  function render(chip, frame) {
+    prepare(chip, frame);
+    const out = new Uint8ClampedArray(frame.outputWidth * frame.lines * 4);
+    for (let line = 0; line < frame.lines; line++) {
+      if (frame.lineRegs[line * 32 + 8] & 0x800) {
+        const border = colorModel.rgbaWord(paletteWord(frame, line, 0));
+        for (let x = 0; x < frame.outputWidth; x++) out.set(border, (line * frame.outputWidth + x) * 4);
+        hamLine(chip, frame, line, frame.outputWidth - 1, (nativeX, decoded, word) => {
+          const rgba = colorModel.rgbaWord(word), stop = frame.lineRegs[line * 32 + 14] | 0;
+          for (let x = Math.max(0, nativeX); x < Math.min(frame.outputWidth, stop, nativeX + decoded.samples); x++) {
+            out.set(rgba, (line * frame.outputWidth + x) * 4);
+          }
+        });
+      } else for (let x = 0; x < frame.outputWidth; x++) {
+        const resolved = resolve(frame, line, decode(chip, frame, x, line));
+        out.set(resolved.rgba, (line * frame.outputWidth + x) * 4);
+      }
+      let spritesActive = false;
+      for (let channel = 0; channel < 8; channel++) spritesActive = spritesActive || !!(frame.lineSprites[line * 32 + channel * 4 + 3] & 0x80000000);
+      if (spritesActive) for (let x = 0; x < frame.outputWidth; x++) {
+        const sprite = spriteModel.sample(frame, line, x, decode(chip, frame, x, line).index);
+        if (sprite && sprite.visible) out.set(colorModel.rgbaWord(paletteWord(frame, line, sprite.paletteIndex)), (line * frame.outputWidth + x) * 4);
+      }
+    }
+    return out;
+  }
+  function explainPixel(chip, frame, x, line) {
+    prepare(chip, frame);
+    if (!Number.isInteger(x) || !Number.isInteger(line) || x < 0 || x >= frame.outputWidth || line < 0 || line >= frame.lines) {
+      throw new Error('Display reference: pixel out of bounds');
+    }
+    const planes = [], decoded = decode(chip, frame, x, line, planes);
+    let resolved, ham = null;
+    if (frame.lineRegs[line * 32 + 8] & 0x800) {
+      resolved = { mode: 'HAM6', halfbrite: false, index: 0, rgba: colorModel.rgbaWord(paletteWord(frame, line, 0)) };
+      if (decoded.active) hamLine(chip, frame, line, x, (nativeX, current, word, before) => {
+        if (current.sourceX !== decoded.sourceX) return;
+        const operation = (current.index >> 4) & 3;
+        resolved.index = operation === 0 ? current.index & 15 : null;
+        resolved.rgba = colorModel.rgbaWord(word);
+        ham = { operation: ['palette', 'blue', 'red', 'green'][operation], value: current.index & 15,
+          previous: colorModel.rgbaWord(before), sourcePixelsProcessed: current.sourceX + 1 };
+      });
+    } else resolved = resolve(frame, line, decoded);
+    const sprite = spriteModel.sample(frame, line, x, decoded.index);
+    const rgba = sprite && sprite.visible ? colorModel.rgbaWord(paletteWord(frame, line, sprite.paletteIndex)) : resolved.rgba;
+    return { line, outputX: x, playfieldX: decoded.sourceX, samplesPerPixel: decoded.samples,
+      active: decoded.active, planes, rawIndex: decoded.index, mode: resolved.mode, halfbrite: resolved.halfbrite,
+      ...(resolved.playfields ? { playfields: resolved.playfields } : {}),
+      ...(ham ? { ham } : {}),
+      palette: { source: ham && ham.operation !== 'palette' ? 'hold-modify' : 'line', index: resolved.index, rgba: resolved.rgba }, sprite,
+      final: `#${rgba.slice(0, 3).map(value => value.toString(16).padStart(2, '0')).join('')}` };
+  }
+  return { render, explainPixel };
+})(frameStateModel, colorModel, spriteModel);
+  const copperRegisters = (function createRegisterModel() {
+  const R = Object.freeze({ COP1LCH: 0x80, COP1LCL: 0x82, COP2LCH: 0x84, COP2LCL: 0x86,
+    COPJMP1: 0x88, COPJMP2: 0x8a, DIWSTRT: 0x8e, DIWSTOP: 0x90,
+    DDFSTRT: 0x92, DDFSTOP: 0x94, DMACON: 0x96, BPL1PTH: 0xe0,
+    BPLCON0: 0x100, BPLCON1: 0x102, BPLCON2: 0x104, BPL1MOD: 0x108, BPL2MOD: 0x10a,
+    SPR0PTH: 0x120, SPR0POS: 0x140, SPR0CTL: 0x142, SPR0DATA: 0x144, SPR0DATB: 0x146,
+    COLOR00: 0x180, NOOP: 0x1fe });
+  function fetchBytes(control, start, stop) {
+    const step = control & 0x8000 ? 4 : 8;
+    start = dataFetchPosition(control, start); stop = dataFetchPosition(control, stop);
+    if (start < 0x18 || stop < start || stop + 8 > 226 || (stop - start) % step) throw new Error('Unsupported OCS data-fetch window');
+    return ((stop - start) / step + (control & 0x8000 ? 2 : 1)) * 2;
+  }
+  function dataFetchPosition(control, value) { return value & (control & 0x8000 ? 0xfc : 0xf8); }
+  function fetchOffset(control, start) {
+    return ((control & 0x8000 ? 0x3c : 0x38) - dataFetchPosition(control, start)) * (control & 0x8000 ? 4 : 2);
+  }
+  return { R, fetchBytes, dataFetchPosition, fetchOffset };
+})();
+  const copperBuilder = (function createCopperBuilder(registerModel) {
+  const { R, fetchBytes } = registerModel;
+  return function build(screens, options = {}) {
+    const fail = message => { throw new Error(`Copper builder: ${message}`); };
+    if (options.standard && !['PAL', 'NTSC'].includes(options.standard)) fail('unsupported video standard');
+    if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
+    const views = screens.slice().sort((a, b) => a.y - b.y);
+    const initialRegisters = new Uint16Array(256), words = [];
+    let previous = null;
+    const emit = (first, second) => { words.push(first, second); };
+    const wait = y => emit(((y & 255) << 8) | 1, 0xfffe);
+    for (const view of views) {
+      const { width, height, depth, pointers, rowBytes, palette, x, y } = view;
+      const hires = view.hires === true, sourceWidth = hires ? Math.ceil(width / 2) : width;
+      const endX = x + sourceWidth, endY = y + height;
+      if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 1 ||
+          !Number.isInteger(depth) || depth < 1 || depth > (hires ? 4 : 6) ||
+          x !== 128 || !Number.isInteger(y) || y < 0 || y > 255 || endX < 256 || endX > 511 ||
+          endY < 128 || endY > (options.standard === 'NTSC' ? 262 : 312) ||
+          !Number.isInteger(rowBytes) || rowBytes % 2 || rowBytes < Math.ceil(width / 16) * 2 ||
+          !pointers || pointers.length !== depth || !palette || palette.length > 32) fail('unsupported OCS screen geometry/depth');
+      if (previous && y < previous.endY) fail('overlapping screen windows are not implemented');
+      const setup = new Map();
+      if (view.ham && (![5, 6].includes(depth) || hires || view.dualPlayfield)) fail('invalid HAM mode');
+      const scroll = view.scroll == null ? 0 : view.scroll;
+      if (!Number.isInteger(scroll) || scroll < 0 || scroll > 255) fail('invalid scroll');
+      const control = (depth << 12) | (hires ? 0x8000 : 0) | (view.dualPlayfield ? 0x400 : 0) | (view.ham ? 0x800 : 0);
+      const fetchWords = hires ? Math.ceil(width / 32) * 2 : Math.ceil(width / 16);
+      const normalStart = hires ? 0x3c : 0x38, ddfStart = normalStart - (scroll ? 8 : 0);
+      const ddfStop = normalStart + (fetchWords - (hires ? 2 : 1)) * (hires ? 4 : 8);
+      let fetchedBytes;
+      try { fetchedBytes = fetchBytes(control, ddfStart, ddfStop); } catch (error) { fail(error.message); }
+      const mod = rowBytes - fetchedBytes;
+      if (mod < -32768 || mod > 32766) fail('modulo out of range');
+      setup.set(R.DIWSTRT, (y << 8) | x);
+      setup.set(R.DIWSTOP, ((endY & 255) << 8) | (endX & 255));
+      setup.set(R.DDFSTRT, ddfStart); setup.set(R.DDFSTOP, ddfStop);
+      const priority = view.bplcon2 == null ? (view.pf2Priority ? 0x40 : 0) : view.bplcon2;
+      if (!Number.isInteger(priority) || priority < 0 || priority > 127) fail('invalid playfield/sprite priority');
+      setup.set(R.BPLCON0, control); setup.set(R.BPLCON1, scroll); setup.set(R.BPLCON2, priority);
+      setup.set(R.BPL1MOD, mod & 65535); setup.set(R.BPL2MOD, mod & 65535);
+      for (let plane = 0; plane < depth; plane++) {
+        const pointer = pointers[plane];
+        if (!Number.isSafeInteger(pointer) || pointer < 0 || pointer > 0xffffffff || pointer % 2) fail('invalid plane pointer');
+        setup.set(R.BPL1PTH + plane * 4, pointer >>> 16);
+        setup.set(R.BPL1PTH + plane * 4 + 2, pointer & 65535);
+      }
+      for (let index = 0; index < 32; index++) {
+        const colour = palette[index] == null ? 0 : palette[index];
+        if (!Number.isInteger(colour) || colour < 0 || colour > 0xfff) fail('invalid palette');
+        setup.set(R.COLOR00 + index * 2, colour);
+      }
+      if (!previous) for (const [reg, value] of setup) initialRegisters[reg / 2] = value;
+      else {
+        const changes = Array.from(setup).filter(([reg, value]) =>
+          (reg >= R.BPL1PTH && reg < R.BPL1PTH + 32) || previous.setup.get(reg) !== value);
+        // Reprogram in the left blanking interval. Never pretend an oversized
+        // palette/pointer update fit before DMA; wider scheduling is a later gate.
+        if (2 + changes.length * 4 >= ddfStart) fail('screen setup exceeds pre-fetch copper budget');
+        wait(y);
+        for (const [reg, value] of changes) emit(reg, value);
+      }
+      previous = { setup, endY };
+    }
+    const spritePointers = options.spritePointers;
+    if (spritePointers != null) {
+      if ((!Array.isArray(spritePointers) && !ArrayBuffer.isView(spritePointers)) || spritePointers.length !== 8) fail('eight sprite pointers are required');
+      for (let channel = 0; channel < 8; channel++) {
+        const address = spritePointers[channel];
+        if (!Number.isSafeInteger(address) || address < 0 || address > 0xfffffffe || address % 2) fail('invalid sprite pointer');
+        initialRegisters[(R.SPR0PTH + channel * 4) / 2] = address >>> 16;
+        initialRegisters[(R.SPR0PTH + channel * 4 + 2) / 2] = address & 65535;
+      }
+    }
+    initialRegisters[R.DMACON / 2] = spritePointers == null ? 0x380 : 0x3a0;
+    emit(0xffff, 0xfffe);
+    const bytes = new Uint8Array(words.length * 2), output = new DataView(bytes.buffer);
+    words.forEach((word, index) => output.setUint16(index * 2, word, false));
+    return { bytes, initialRegisters,
+      interpretOptions: { standard: options.standard || 'PAL', origin: options.origin || { x: 128, y: 50 },
+        outputWidth: options.outputWidth == null ? 640 : options.outputWidth,
+        lines: options.lines == null ? 200 : options.lines,
+        videoRate: options.videoRate, pixelAspect: options.pixelAspect, maxSpriteWords: options.maxSpriteWords } };
+  };
+})(copperRegisters);
+  const spriteDmaFactory = (function createSpriteDmaFactory(registerModel) {
+  const { R } = registerModel;
+  return function createSpriteDma(chip, registers, options, fail, event, bitplaneBusy) {
+    const channels = Array.from({ length: 8 }, () => ({ armed: false, fetching: false, second: null }));
+    const resetLine = options.standard === 'NTSC' ? 20 : 25;
+    const maxWords = options.maxSpriteWords == null ? 16384 : options.maxSpriteWords;
+    if (!Number.isInteger(maxWords) || maxWords < 0 || maxWords > 16384) fail('invalid sprite word budget');
+    let words = 0;
+    const get = reg => registers[reg / 2];
+    const enabled = () => (get(R.DMACON) & 0x220) === 0x220;
+    const handles = reg => reg >= R.SPR0PTH && reg < R.SPR0PTH + 32 || reg >= R.SPR0POS && reg < R.SPR0POS + 64;
+    function vertical(channel) {
+      const pos = get(R.SPR0POS + channel * 8), ctl = get(R.SPR0CTL + channel * 8);
+      return { start: (pos >> 8) | ((ctl & 4) << 6), stop: (ctl >> 8) | ((ctl & 2) << 7) };
+    }
+    function compare(channel, line) {
+      const bounds = vertical(channel), state = channels[channel];
+      if (line === bounds.start) state.fetching = true;
+      if (line === bounds.stop || line === resetLine) state.fetching = false;
+    }
+    function write(reg, value, line) {
+      registers[reg / 2] = value;
+      if (reg >= R.SPR0POS && reg < R.SPR0POS + 64) {
+        const channel = Math.floor((reg - R.SPR0POS) / 8), slot = (reg - R.SPR0POS) % 8;
+        if (slot === 2) channels[channel].armed = false;
+        if (slot === 4) channels[channel].armed = true;
+        if (slot === 0 || slot === 2) compare(channel, line);
+      }
+    }
+    function fetch(channel, target, line) {
+      if (bitplaneBusy()) fail(`sprite ${channel} and bitplane DMA contention is not implemented`);
+      const reg = R.SPR0PTH + channel * 4, address = get(reg) * 65536 + (get(reg + 2) & 0xfffe);
+      if (address > chip.length - 2) fail(`sprite ${channel} fetch out of bounds at address ${address}`);
+      if (++words > maxWords) fail('sprite word budget exceeded');
+      const value = chip[address] * 256 + chip[address + 1], next = address + 2;
+      registers[reg / 2] = next >>> 16; registers[(reg + 2) / 2] = next & 65535;
+      event(target, value);
+      write(target, value, line);
+    }
+    function tick(line, horizontal) {
+      // Two OCS word slots per channel, before the normal bitplane fetch.
+      const position = horizontal - 0x15;
+      if (position < 0 || position >= 32 || (position & 1)) return;
+      const channel = Math.floor(position / 4), second = !!(position & 2), state = channels[channel];
+      if (!second) {
+        state.second = null;
+        if (line < resetLine) return;
+        compare(channel, line);
+        const control = line === resetLine || line === vertical(channel).stop;
+        if (!enabled() || (!control && !state.fetching)) return;
+        const target = R.SPR0POS + channel * 8 + (control ? 0 : 4);
+        state.second = target + 2;
+        fetch(channel, target, line);
+      } else if (state.second != null) {
+        const target = state.second; state.second = null;
+        if (enabled()) fetch(channel, target, line);
+      }
+    }
+    function capture(frame, outputLine) {
+      const row = outputLine * 32;
+      for (let channel = 0; channel < 8; channel++) {
+        const at = row + channel * 4, reg = R.SPR0POS + channel * 8, ctl = get(reg + 2);
+        const start = ((get(reg) & 255) << 1) | (ctl & 1);
+        frame.lineSprites[at] = ((start - frame.origin.x) * frame.samplesPerLowresPixel) >>> 0;
+        frame.lineSprites[at + 1] = get(reg + 4); frame.lineSprites[at + 2] = get(reg + 6);
+        frame.lineSprites[at + 3] = (channels[channel].armed ? 0x80000000 : 0) | (channel & 1 && ctl & 128 ? 1 : 0);
+      }
+    }
+    return { handles, write, tick, capture, get words() { return words; } };
+  };
+})(copperRegisters);
+  const copperInterpreter = (function createCopperInterpreter(snapshotModel, registerModel, spriteDmaFactory) {
+  const { R, fetchBytes, dataFetchPosition, fetchOffset } = registerModel;
+  return function interpret(chip, options = {}) {
+    let line = 0, horizontal = 0, elapsed = 0, pc = options.address, instructions = 0;
+    const fail = message => { throw new Error(`Copper: ${message} at byte ${pc}, beam ${line}:${horizontal}`); };
+    if (!ArrayBuffer.isView(chip) || Object.prototype.toString.call(chip) !== '[object Uint8Array]' ||
+        ![524288, 1048576, 2097152].includes(chip.length)) fail('invalid chip memory');
+    const standard = options.standard || 'PAL';
+    if (!['PAL', 'NTSC'].includes(standard)) fail('unsupported video standard');
+    const fieldLines = standard === 'PAL' ? 312 : 262;
+    const origin = options.origin || { x: 128, y: 50 };
+    const width = options.outputWidth == null ? 640 : options.outputWidth;
+    const lines = options.lines == null ? 200 : options.lines;
+    if (!Number.isInteger(origin.x) || origin.x < 0 || !Number.isInteger(origin.y) || origin.y < 0 ||
+        !Number.isInteger(width) || width < 1 || origin.x * 2 + width > 908 ||
+        !Number.isInteger(lines) || lines < 1 || origin.y + lines > fieldLines) fail('invalid physical crop');
+    const maxInstructions = options.maxInstructions == null ? 65536 : options.maxInstructions;
+    const maxEvents = options.maxEvents == null ? 32 : options.maxEvents;
+    const maxTotalEvents = options.maxTotalEvents == null ? 65536 : options.maxTotalEvents;
+    const busyUntil = options.blitterBusyUntil == null ? 0 : options.blitterBusyUntil;
+    if (!Number.isInteger(maxInstructions) || maxInstructions < 1 || maxInstructions > 1000000 ||
+        !Number.isInteger(maxEvents) || maxEvents < 1 || maxEvents > 256 ||
+        !Number.isInteger(maxTotalEvents) || maxTotalEvents < 0 || maxTotalEvents > 65536 ||
+        !Number.isSafeInteger(busyUntil) || busyUntil < 0) fail('invalid resource/timing limit');
+    const registers = new Uint16Array(256);
+    if (options.initialRegisters) {
+      if (!ArrayBuffer.isView(options.initialRegisters) || Object.prototype.toString.call(options.initialRegisters) !== '[object Uint16Array]' ||
+          options.initialRegisters.length !== 256) fail('invalid initial register table');
+      registers.set(options.initialRegisters);
+    } else registers[R.DMACON / 2] = 0x380;
+    function checkPc(address) {
+      if (!Number.isSafeInteger(address) || address < 0 || address % 2 || address > chip.length - 4) fail('invalid instruction pointer');
+    }
+    checkPc(pc);
+    registers[R.COP1LCH / 2] = pc >>> 16; registers[R.COP1LCL / 2] = pc & 65535;
+    const frame = { schemaVersion: 1, revision: options.revision == null ? 0 : options.revision,
+      chipset: 'OCS', samplesPerLowresPixel: 2, outputWidth: width, outputHeight: lines, lines,
+      interlaceField: null, maxEvents, origin: { ...origin },
+      videoRate: options.videoRate || { numerator: standard === 'PAL' ? 50 : 60, denominator: 1 },
+      pixelAspect: options.pixelAspect || { numerator: 1, denominator: 2 },
+      lineRegs: new Uint32Array(lines * 32), linePal: new Uint8Array(lines * 1024),
+      lineSprites: new Uint32Array(lines * 32), lineEvents: new Uint32Array(lines * maxEvents * 4),
+      eventOffsets: new Uint32Array(lines + 1), overflowEvents: new Uint32Array(0) };
+    const events = Array.from({ length: lines }, () => []);
+    let totalEvents = 0, fetched = null, captured = false, halted = false;
+    const get = reg => registers[reg / 2];
+    const set = (reg, value) => { registers[reg / 2] = value; };
+    const pointer = reg => get(reg) * 65536 + (get(reg + 2) & 0xfffe);
+    const setPointer = (reg, value) => {
+      if (!Number.isSafeInteger(value) || value < 0 || value > 0xffffffff || value % 2) fail('bitplane pointer arithmetic overflow');
+      set(reg, value >>> 16); set(reg + 2, value & 65535);
+    };
+    const verticalWindow = () => {
+      const start = get(R.DIWSTRT) >> 8, low = get(R.DIWSTOP) >> 8;
+      return line >= start && line < (low | (low & 128 ? 0 : 256));
+    };
+    const dma = () => (get(R.DMACON) & 0x300) === 0x300;
+    const spriteDma = spriteDmaFactory(chip, registers, { ...options, standard }, fail, event,
+      () => !!(fetched && !fetched.finished));
+    function saveFetch() {
+      const outputLine = line - origin.y;
+      if (!fetched || outputLine < 0 || outputLine >= lines) return;
+      const row = outputLine * 32;
+      for (let plane = 0; plane < fetched.pointers.length; plane++) frame.lineRegs[row + plane] = fetched.pointers[plane];
+      frame.lineRegs[row + 16] |= 2;
+      const offset = fetchOffset(fetched.control, fetched.start);
+      frame.lineRegs[row + 15] = offset >>> 0;
+      const start = frame.lineRegs[row + 13] | 0, stop = frame.lineRegs[row + 14] | 0;
+      if (verticalWindow() && Math.min(width, stop) > Math.max(0, start)) {
+        const samples = fetched.control & 0x8000 ? 1 : 2;
+        for (let plane = 0; plane < fetched.pointers.length; plane++) {
+          const delay = ((get(R.BPLCON1) >> (plane % 2 ? 4 : 0)) & 15) * (fetched.control & 0x8000 ? 2 : 1);
+          if (Math.floor((Math.min(width, stop) - 1 - start) / samples) + offset - delay >= fetched.bytes * 8) fail('visible window exceeds fetched data');
+        }
+      }
+    }
+    function capture() {
+      captured = true;
+      const outputLine = line - origin.y;
+      if (outputLine < 0 || outputLine >= lines) return;
+      const row = outputLine * 32;
+      frame.lineRegs[row + 8] = fetched ? fetched.control : get(R.BPLCON0);
+      frame.lineRegs[row + 9] = get(R.BPLCON1); frame.lineRegs[row + 10] = get(R.BPLCON2);
+      const start = ((get(R.DIWSTRT) & 255) - origin.x) * 2;
+      const stop = (((get(R.DIWSTOP) & 255) | 256) - origin.x) * 2;
+      frame.lineRegs[row + 13] = start >>> 0; frame.lineRegs[row + 14] = stop >>> 0;
+      frame.lineRegs[row + 16] = (verticalWindow() ? 1 : 0) | (fetched ? 2 : 0) |
+        ((get(R.DMACON) & 0x220) === 0x220 ? 4 : 0);
+      spriteDma.capture(frame, outputLine);
+      saveFetch();
+      for (let colour = 0; colour < 256; colour++) {
+        const value = colour < 32 ? get(R.COLOR00 + colour * 2) : 0, at = outputLine * 1024 + colour * 4;
+        frame.linePal[at] = ((value >> 8) & 15) * 17; frame.linePal[at + 1] = ((value >> 4) & 15) * 17;
+        frame.linePal[at + 2] = (value & 15) * 17; frame.linePal[at + 3] = 255;
+      }
+    }
+    function tick() {
+      spriteDma.tick(line, horizontal);
+      if (!fetched && horizontal === dataFetchPosition(get(R.BPLCON0), get(R.DDFSTRT)) && verticalWindow() && dma()) {
+        const control = get(R.BPLCON0), count = (control >> 12) & 7;
+        if (control & ~0xfe00 || count > 6 || (control & 0x8000 && count > 4)) fail('unsupported OCS bitplane mode');
+        if (count) {
+          let length;
+          try { length = fetchBytes(control, get(R.DDFSTRT), get(R.DDFSTOP)); } catch (error) { fail(error.message); }
+          const pointers = Array.from({ length: count }, (_, plane) => pointer(R.BPL1PTH + plane * 4));
+          for (const address of pointers) if (address % 2 || address > chip.length - length) fail('bitplane fetch out of bounds');
+          fetched = { pointers, control, bytes: length, start: dataFetchPosition(control, get(R.DDFSTRT)),
+            end: dataFetchPosition(control, get(R.DDFSTOP)) + 8, finished: false };
+          if (captured) saveFetch();
+        }
+      }
+      if (fetched && !fetched.finished && horizontal >= fetched.end) {
+        for (let plane = 0; plane < fetched.pointers.length; plane++) {
+          const mod = (get(plane % 2 ? R.BPL2MOD : R.BPL1MOD) & 0xfffe) << 16 >> 16;
+          setPointer(R.BPL1PTH + plane * 4, fetched.pointers[plane] + fetched.bytes + mod);
+        }
+        fetched.finished = true;
+      }
+      if (!captured && horizontal * 2 >= origin.x) capture();
+    }
+    function advance(clocks) {
+      for (let i = 0; i < clocks && line < fieldLines; i++) {
+        horizontal++; elapsed++;
+        const length = standard === 'NTSC' && line % 2 ? 228 : 227;
+        if (horizontal >= length) {
+          if (!captured) capture();
+          line++; horizontal = 0; fetched = null; captured = false;
+        }
+        if (line < fieldLines) tick();
+      }
+    }
+    function compare(first, second) {
+      const mask = (second & 0x7ffe) | 0x8000;
+      const beam = ((line & 255) << 8) | (horizontal & 0xfe);
+      return (beam & mask) >= (first & mask) && ((second & 0x8000) || elapsed >= busyUntil);
+    }
+    function event(reg, value) {
+      const outputLine = line - origin.y, x = horizontal * 4 - origin.x * 2;
+      if (outputLine < 0 || outputLine >= lines || x >= width) return;
+      const mode = [R.BPLCON0, R.BPLCON1, R.BPLCON2].includes(reg);
+      if (x < 0 && !(mode && fetched)) return;
+      if (++totalEvents > maxTotalEvents) fail('event storage limit exceeded');
+      events[outputLine].push(x >>> 0, reg, value, 0);
+    }
+    function move(reg, value) {
+      const palette = reg >= R.COLOR00 && reg <= R.COLOR00 + 62;
+      const bitplanePointer = reg >= R.BPL1PTH && reg < R.BPL1PTH + 32;
+      if (reg === R.NOOP) return;
+      const spriteRegister = spriteDma.handles(reg);
+      const supported = palette || bitplanePointer || spriteRegister || Object.values(R).includes(reg);
+      if (reg < 0x80 || !supported) fail(`unsupported/protected register $${reg.toString(16)}`);
+      if (fetched && !fetched.finished && (bitplanePointer ||
+          [R.DIWSTRT, R.DIWSTOP, R.DDFSTRT, R.DDFSTOP, R.DMACON].includes(reg) ||
+          (reg === R.BPLCON0 && ((get(reg) ^ value) & 0xf000)))) fail('DMA configuration writes during active fetch are not implemented');
+      if (palette || (spriteRegister && reg >= R.SPR0POS) || [R.BPLCON0, R.BPLCON1, R.BPLCON2, R.DIWSTRT, R.DIWSTOP, R.DDFSTRT, R.DDFSTOP, R.DMACON].includes(reg)) event(reg, value);
+      if (reg === R.DMACON) set(reg, value & 0x8000 ? get(reg) | (value & 0x7fff) : get(reg) & ~value);
+      else if (spriteRegister) spriteDma.write(reg, value, line);
+      else set(reg, value);
+      if (reg === R.COPJMP1 || reg === R.COPJMP2) { pc = pointer(reg === R.COPJMP1 ? R.COP1LCH : R.COP2LCH); checkPc(pc); }
+    }
+    tick();
+    while (line < fieldLines) {
+      if (halted || (get(R.DMACON) & 0x280) !== 0x280) { advance(1); continue; }
+      if (++instructions > maxInstructions) fail('instruction budget exceeded');
+      checkPc(pc);
+      const first = chip[pc] * 256 + chip[pc + 1], second = chip[pc + 2] * 256 + chip[pc + 3];
+      pc += 4; advance(4);
+      if (line >= fieldLines) break;
+      if (!(first & 1)) {
+        if (first > 0x1fe) fail('invalid MOVE register address');
+        move(first, second);
+      } else if (second & 1) {
+        if (compare(first, second)) pc += 4;
+      } else {
+        if (first === 0xffff && second === 0xfffe) { halted = true; continue; }
+        while (line < fieldLines && !compare(first, second)) advance(1);
+        advance(2); // WAIT wake-up; MOVE/SKIP use four colour clocks, WAIT six.
+      }
+    }
+    const overflow = [];
+    for (let y = 0; y < lines; y++) {
+      const words = events[y], count = words.length / 4;
+      frame.lineRegs[y * 32 + 17] = count;
+      frame.lineEvents.set(words.slice(0, maxEvents * 4), y * maxEvents * 4);
+      frame.eventOffsets[y] = overflow.length / 4;
+      if (count > maxEvents) for (const word of words) overflow.push(word);
+    }
+    frame.eventOffsets[lines] = overflow.length / 4;
+    frame.overflowEvents = Uint32Array.from(overflow);
+    return { snapshot: snapshotModel.createSnapshot({ chip, frame }),
+      diagnostics: { instructions, pc, elapsed, stopped: halted, registers: registers.slice(), spriteWords: spriteDma.words } };
+  };
+})(frameStateModel, copperRegisters, spriteDmaFactory);
   const displayFactory = function createDisplay(options = {}) {
   const font = options.font || fontFactory();
   const screens = new Map();
@@ -142,9 +1105,15 @@
   let current = null;
   let version = 0;
   let drawingHooks = null;
+  let spriteWriter = null;
+  let planarBridge = null;
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
 
-  function changed() { version++; listeners.forEach(listener => listener(version)); }
+  function changed() {
+    version++;
+    if (planarBridge) planarBridge.prune();
+    listeners.forEach(listener => listener(version));
+  }
   function whole(value) {
     if (!Number.isSafeInteger(value)) throw new Error('Display argument must be a safe integer');
     return value;
@@ -158,17 +1127,24 @@
     if (!Number.isInteger(value) || value < 0 || value >= target.colours) throw new Error('Invalid colour index');
     return value;
   }
+  function registerIndex(value) {
+    return whole(value) & 31;
+  }
   function open(id, width, height, colours, mode) {
     if (!Number.isInteger(id) || id < 0 || id > 7) throw new Error('Invalid screen number');
     if (!Number.isInteger(width) || width < 1 || width > 1024 || !Number.isInteger(height) || height < 1 || height > 1023) throw new Error('Invalid screen dimensions');
-    if (![2, 4, 8, 16, 32].includes(colours)) throw new Error('Unsupported screen colour mode');
+    if (![2, 4, 8, 16, 32, 64, 4096].includes(colours)) throw new Error('Unsupported screen colour mode');
     if (mode !== 0 && mode !== 0x8000) throw new Error('Unsupported screen resolution mode');
+    if (mode === 0x8000 && colours > 16) throw new Error('Hires screens support at most 16 colours');
+    const ham = colours === 4096;
+    colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode,
+      id, width, height, colours, mode, ham,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
-      palette: Array.from({ length: colours }, (_, i) => palette[i] == null ? 0 : palette[i]),
+      palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
+      hardwareX: 128, hardwareY: 50, spritePriority: 4,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
       inkBackground: 0, inkBorder: 0, x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
       columns: Math.floor(width / 8), rows: Math.floor(height / 8)
@@ -232,15 +1208,15 @@
   }
   function setColour(index, rgb) {
     const target = screen();
-    colourIndex(index, target);
-    if (!Number.isInteger(rgb) || rgb < 0 || rgb > 0xfff) throw new Error('Invalid 12-bit palette colour');
+    index = registerIndex(index);
+    rgb = whole(rgb) & 0xfff;
     target.palette[index] = rgb;
     changed();
   }
   function setPalette(...values) {
     const target = screen();
-    if (values.length > target.colours) throw new Error('Too many palette colours');
-    values.forEach((rgb, index) => { if (rgb != null) setColour(index, rgb); });
+    if (values.length > 32) throw new Error('Too many palette colours');
+    values.forEach((rgb, index) => { if (rgb != null && ((whole(rgb) << 16) >> 16) >= 0) setColour(index, rgb); });
   }
   function pixel(target, x, y, colour) {
     if (x >= 0 && y >= 0 && x < target.width && y < target.height) target.pixels[y * target.width + x] = colour;
@@ -461,7 +1437,7 @@
   }
   function info(name, ...args) {
     if (name === 'Screen Number') return current == null ? -1 : current;
-    if (name === 'Colour Value') { const target = screen(); return target.palette[colourIndex(args[0], target)]; }
+    if (name === 'Colour Value') { const target = screen(); return target.palette[registerIndex(args[0])]; }
     const target = screen(args[0] == null ? current : args[0]);
     if (name.startsWith('Screen Width')) return target.width;
     if (name.startsWith('Screen Height')) return target.height;
@@ -469,11 +1445,50 @@
     if (name === 'Y Curs') return target.y;
     throw new Error(`Unsupported display query ${name}`);
   }
+  function coordinate(name, ...args) {
+    const target = screen(args.length === 2 ? args[0] : current);
+    const value = whole(args[args.length - 1]);
+    const word = value => (value << 16) >> 16;
+    const horizontal = name.startsWith('X');
+    const origin = horizontal ? target.hardwareX : target.hardwareY;
+    if (name.endsWith('Hard')) return word((horizontal && target.mode === 0x8000 ? word(value) >> 1 : word(value)) + origin);
+    const offset = word(value - origin);
+    return word(horizontal && target.mode === 0x8000 ? offset * 2 : offset);
+  }
   function rgba(id = current) {
     const target = screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
+    let spriteFrame = null, spriteRows = null;
+    const samples = target.mode === 0x8000 ? 1 : 2;
+    if (spriteWriter) {
+      if (!spriteModel) throw new Error('Sprite helpers are not loaded');
+      spriteFrame = { origin: { x: target.hardwareX, y: target.hardwareY }, lines: target.height,
+        samplesPerLowresPixel: 2, lineRegs: new Uint32Array(target.height * 32), lineSprites: new Uint32Array(target.height * 32) };
+      spriteRows = new Uint8Array(target.height);
+      const control = (Math.log2(target.colours) << 12) | target.mode | (target.ham ? 0x800 : 0);
+      for (let y = 0; y < target.height; y++) {
+        spriteFrame.lineRegs[y * 32 + 8] = control;
+        spriteFrame.lineRegs[y * 32 + 10] = target.spritePriority | (target.spritePriority << 3);
+      }
+      spriteWriter(spriteFrame);
+      for (let y = 0; y < target.height; y++) spriteRows[y] = spriteModel.validate(spriteFrame, y) ? 1 : 0;
+    }
+    let previous = target.palette[0];
     for (let i = 0; i < target.physicalPixels.length; i++) {
-      const rgb = target.palette[target.physicalPixels[i]];
+      const index = target.physicalPixels[i];
+      let rgb = target.palette[target.colours === 64 ? index & 31 : index];
+      if (target.ham) {
+        if (!colorModel) throw new Error('HAM colour helpers are not loaded');
+        if (index > 63) throw new Error('Invalid HAM pixel code');
+        if (i % target.width === 0) previous = target.palette[0];
+        rgb = colorModel.hamWord(index, previous, target.palette[index & 15]);
+        previous = rgb;
+      } else if (target.colours === 64 && (index & 32)) rgb = (rgb >> 1) & 0x777;
+      const y = Math.floor(i / target.width);
+      if (spriteFrame && spriteRows[y]) {
+        const sprite = spriteModel.sample(spriteFrame, y, (i % target.width) * samples, index);
+        if (sprite && sprite.visible) rgb = target.palette[sprite.paletteIndex];
+      }
       result[i * 4] = ((rgb >> 8) & 15) * 17;
       result[i * 4 + 1] = ((rgb >> 4) & 15) * 17;
       result[i * 4 + 2] = (rgb & 15) * 17;
@@ -481,10 +1496,33 @@
     }
     return result;
   }
+  function getPlanarBridge() {
+    if (!planarBridge) {
+      if (!planarBridgeFactory || !chipMemoryClass || !frameStateModel || !staticFrameFactory) throw new Error('Planar snapshot helpers are not loaded');
+      planarBridge = planarBridgeFactory({ screens, writeSprites: frame => { if (spriteWriter) spriteWriter(frame); } }, options, chipMemoryClass, frameStateModel, staticFrameFactory, copperBuilder, copperInterpreter);
+    }
+    return planarBridge;
+  }
+  function snapshotPlayfield(id = current) { return getPlanarBridge().snapshot(screen(id)); }
+  function renderPlayfield(id = current) {
+    if (!referenceRenderer) throw new Error('Planar reference renderer is not loaded');
+    const snapshot = snapshotPlayfield(id);
+    return referenceRenderer.render(snapshot.chip, snapshot.frame);
+  }
+  function snapshotDisplay(ids = current, geometry = {}) {
+    if (!copperBuilder || !copperInterpreter) throw new Error('Copper helpers are not loaded');
+    const targets = (Array.isArray(ids) ? ids : [ids]).map(id => screen(id));
+    return getPlanarBridge().snapshotDisplay(targets, geometry);
+  }
+  function renderDisplay(ids = current, geometry = {}) {
+    if (!referenceRenderer) throw new Error('Planar reference renderer is not loaded');
+    const snapshot = snapshotDisplay(ids, geometry);
+    return referenceRenderer.render(snapshot.chip, snapshot.frame);
+  }
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, setColour, setPalette,
-    ink, point, grLocate, locate, home, pen, paper, setTab, info, rgba,
+    ink, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => drawing(draw, args),
@@ -493,6 +1531,8 @@
     text: (...args) => drawing(text, args), centre: (...args) => drawing(centre, args),
     pasteGraphic: (...args) => drawing(paste, args),
     setDrawingHooks(hooks) { drawingHooks = hooks; },
+    setSpriteWriter(fn) { spriteWriter = fn; changed(); },
+    invalidate: changed,
     get current() { return current; }, get version() { return version; },
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
   };
@@ -684,6 +1724,11 @@
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
   let bankOrder = Array.from(banks.keys()).reverse();
   const bobs = new Map();
+  const sprites = new Map();
+  let spriteFrames = new Map();
+  let spritesDirty = false;
+  let automaticSprites = true;
+  let pointerVisible = true;
   let drawnBobs = [];
   let bobsDirty = false;
   let automaticBobs = true;
@@ -691,6 +1736,86 @@
   let reversePriority = false;
   const collisionHits = new Uint8Array(256);
   let degrees = false;
+
+  function spriteNumber(number) {
+    number = integer(number);
+    if (number < 0 || number > 63) throw new Error('Invalid Sprite number');
+    return number;
+  }
+  function setSprite(number, x, y, image) {
+    number = spriteNumber(number);
+    if (number >= 8) throw new Error('Computed Sprite allocation is not implemented');
+    const old = sprites.get(number) || { number, x: 0, y: 0, image: 0 };
+    // HsNxya cannot reuse a zero coordinate, even on an existing Sprite.
+    if ((x == null && old.x === 0) || (y == null && old.y === 0)) throw new Error('Missing Sprite coordinate');
+    sprites.set(number, { number, x: x == null ? old.x : (integer(x) << 16) >> 16,
+      y: y == null ? old.y : (integer(y) << 16) >> 16, image: image == null ? old.image : integer(image) & 65535 });
+    spritesDirty = true;
+  }
+  function spriteInfo(name, number) {
+    const sprite = sprites.get(spriteNumber(number)) || { x: 0, y: 0, image: 0 };
+    return name === 'X Sprite' ? sprite.x : name === 'Y Sprite' ? sprite.y : (sprite.image << 16) >> 16;
+  }
+  function spriteOff(number = null) {
+    if (number != null) number = spriteNumber(number);
+    if (number == null) for (const sprite of sprites.values()) sprite.image = 0;
+    else {
+      const sprite = sprites.get(number);
+      if (sprite) sprite.image = 0;
+    }
+    // Off explicitly clears the presented object at the next update.
+    for (const [id, frame] of spriteFrames) if (number == null || id === number) frame.off = true;
+    spritesDirty = true;
+  }
+  function updateSprites() {
+    const bank = banks.get(1);
+    const frames = new Map();
+    for (const [number, sprite] of sprites) {
+      const previous = spriteFrames.get(number);
+      const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
+      // HsAct leaves an existing presentation unchanged for an invalid image.
+      if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
+      if (image.width !== 16 || image.depth > 2) throw new Error('Attached or wide hardware Sprites are not implemented');
+      if (image.height > 270) throw new Error('Unsupported Sprite height');
+      const word = value => (value << 16) >> 16;
+      frames.set(number, { number, image,
+        pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
+        width: image.width, height: image.height,
+        x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
+        y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
+    }
+    spriteFrames = frames;
+    spritesDirty = false;
+    display.invalidate();
+  }
+  function spritePriority(priority) {
+    priority = integer(priority);
+    if (priority < 0 || priority > 4) throw new Error('Invalid Sprite priority');
+    display.screen().spritePriority = priority;
+    display.invalidate();
+  }
+  display.setSpriteWriter(frame => {
+    // Publish the frozen presentation, never pending logical Sprite commands.
+    // AMOS direct coordinates are lowres hardware units in either screen mode.
+    for (const sprite of spriteFrames.values()) {
+      if (sprite.number === 0 && pointerVisible) continue;
+      const left = (sprite.x - frame.origin.x) * frame.samplesPerLowresPixel;
+      for (let line = 0; line < frame.lines; line++) {
+        const sourceY = frame.origin.y + line - sprite.y;
+        if (sourceY < 0 || sourceY >= sprite.height) continue;
+        const at = line * 32 + sprite.number * 4;
+        let a = 0, b = 0;
+        for (let x = 0; x < 16; x++) {
+          const value = sprite.pixels[sourceY * 16 + x];
+          a |= (value & 1) << (15 - x); b |= ((value >> 1) & 1) << (15 - x);
+        }
+        frame.lineSprites[at] = left >>> 0;
+        frame.lineSprites[at + 1] = a; frame.lineSprites[at + 2] = b;
+        frame.lineSprites[at + 3] = 0x80000000;
+        frame.lineRegs[line * 32 + 16] |= 4;
+      }
+    }
+  });
 
   function pruneBobs() {
     for (const [id, bob] of bobs) if (display.screens.get(bob.screen.id) !== bob.screen) bobs.delete(id);
@@ -861,7 +1986,10 @@
     drawBothBuffers(target);
   }
   function updateBobs() { clearBobs(); drawBobs(); display.swap(); bobsDirty = false; }
-  function flushBobs() { if (automaticBobs && bobsDirty) updateBobs(); }
+  function flushBobs() {
+    if (automaticBobs && bobsDirty) updateBobs();
+    if (automaticSprites && spritesDirty) updateSprites();
+  }
   function imageBobsChanged() { if (bobs.size || drawnBobs.length) bobsDirty = true; }
   function hotSpot(number, x, y) {
     const image = bankImage(1, number);
@@ -910,6 +2038,7 @@
       bankOrder = [bank.number, ...bankOrder.filter(number => number !== bank.number)];
     }
     if (objectsChanged) imageBobsChanged();
+    if (objectsChanged) spritesDirty = true;
   }
 
   function reserveBank(number, length, permanent, memory) {
@@ -955,6 +2084,7 @@
     if (b) { b.number = first; banks.set(first, b); }
     bankOrder = bankOrder.map(number => number === first ? second : number === second ? first : number);
     if (objectsChanged) imageBobsChanged();
+    if (objectsChanged) spritesDirty = true;
   }
 
   function shrinkBank(number, length) {
@@ -1708,6 +2838,12 @@
     reserveChipWork: (number, length) => reserveBank(number, length, false, 'chip'),
     reserveData: (number, length) => reserveBank(number, length, true, 'fast'),
     reserveChipData: (number, length) => reserveBank(number, length, true, 'chip'),
+    sprites, setSprite, spriteInfo, spriteOff, updateSprites, spritePriority,
+    spriteUpdateOn: () => { automaticSprites = true; },
+    spriteUpdateOff: () => { automaticSprites = false; },
+    hideOn: () => { pointerVisible = false; display.invalidate(); },
+    showOn: () => { pointerVisible = true; display.invalidate(); },
+    mouseVisible: () => pointerVisible,
     bobs, setBob, configureBob, bobInfo, bobOff, updateBobs, flushBobs, doubleBuffer,
     bobCollision, collisionInfo,
     limitBob: (number, x1, y1, x2, y2) => setBobLimit(number, x1, y1, x2, y2),

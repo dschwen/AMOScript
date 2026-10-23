@@ -14,6 +14,32 @@ const query = (name, value) => [t(name), t('('), n(value), t(')')];
 const pixel = (display, x, y) => Array.from(display.rgba().slice((y * display.screen().width + x) * 4, (y * display.screen().width + x) * 4 + 4));
 const red = [255, 0, 0, 255], black = [0, 0, 0, 255], yellow = [255, 255, 0, 255];
 
+test('sprites: standalone copper snapshots publish frozen physical channels and preserve manual updates', () => {
+  const { program } = execute(withBanks([...palette, [t('Sprite Update Off')], sprite(1)]));
+  const read = snapshot => Array.from(require('../lib/display/reference/render').render(snapshot.chip, snapshot.frame).slice((10 * 640 + 20) * 4, (10 * 640 + 20) * 4 + 4));
+  const before = program.display.snapshotDisplay();
+  assert.deepStrictEqual(read(before), black);
+  program.updateSprites();
+  const snapshot = program.display.snapshotDisplay();
+  assert.strictEqual(snapshot.frame.lineSprites[10 * 32 + 7], 0x80000000);
+  assert.strictEqual(snapshot.frame.lineSprites[10 * 32 + 4], 20);
+  assert.deepStrictEqual(read(snapshot), red);
+  assert.deepStrictEqual(Array.from(program.display.renderDisplay().slice((10 * 640 + 20) * 4, (10 * 640 + 20) * 4 + 4)), red);
+  assert.deepStrictEqual(read(before), black);
+  assert.strictEqual(program.display.snapshotPlayfield().frame.lineSprites.some(value => value), false);
+  program.setSprite(1, 149, 59, 1);
+  assert.deepStrictEqual(read(program.display.snapshotDisplay()), red);
+  program.updateSprites();
+  assert.deepStrictEqual(read(program.display.snapshotDisplay()), black);
+  assert.deepStrictEqual(read(snapshot), red);
+  program.setSprite(1, 139, 59, 1); program.updateSprites();
+  program.spriteOff(1);
+  assert.deepStrictEqual(read(program.display.snapshotDisplay()), red);
+  assert.deepStrictEqual(pixel(program.display, 10, 10), red);
+  program.updateSprites();
+  assert.deepStrictEqual(read(program.display.snapshotDisplay()), black);
+});
+
 test('sprites: direct sprites compose in hardware coordinates without changing indexed pixels', () => {
   const { program, logs } = execute(withBanks([...palette, sprite(1),
     [t('Print'), query('X Sprite', 1), t(','), query('Y Sprite', 1), t(','), query('I Sprite', 1)]]));

@@ -1,0 +1,108 @@
+{
+  "evidence": {
+    "kind": "synthetic",
+    "description": "Python struct/zlib encodings, direct pixel-index formula and hand-defined palette; no production encoder and no AMOS capture."
+  },
+  "fixtures": [
+    {
+      "depth": 1,
+      "width": 33,
+      "height": 3,
+      "rowBytes": 6,
+      "files": {
+        "raw": {
+          "file": "ilbm-2-raw.ilbm",
+          "sha256": "18eb761a87405a4ad43e195cd5cde40e8fc90c3eb8dd01ac99c158b5497ecbcb"
+        },
+        "byterun": {
+          "file": "ilbm-2-byterun.ilbm",
+          "sha256": "14cf6b8d64569a1d001393e91279108bf5157dbdb058e567df9cc6d92834bb53"
+        },
+        "golden": {
+          "file": "ilbm-2.png",
+          "sha256": "4ed7c64209fc59cf04a6818b3c6838b62bade64de2e7b3336d3bfee0904b122f"
+        }
+      }
+    },
+    {
+      "depth": 2,
+      "width": 33,
+      "height": 3,
+      "rowBytes": 6,
+      "files": {
+        "raw": {
+          "file": "ilbm-4-raw.ilbm",
+          "sha256": "cce88fc26e524dbeacf077cfdca61e78f3c01cb2d19329c2731b99051ca2c40c"
+        },
+        "byterun": {
+          "file": "ilbm-4-byterun.ilbm",
+          "sha256": "0a046412e313b3039b043196ea8d1659f93d14d061db8373f10c8740d7004d74"
+        },
+        "golden": {
+          "file": "ilbm-4.png",
+          "sha256": "1dd89f2b6cc15cd60a677d51fc017036388158dbdb96ce8582322ab685172bf2"
+        }
+      }
+    },
+    {
+      "depth": 3,
+      "width": 33,
+      "height": 3,
+      "rowBytes": 6,
+      "files": {
+        "raw": {
+          "file": "ilbm-8-raw.ilbm",
+          "sha256": "4eabc4bfccb6b38caf9db2b2ab077022f9b05e42c6968dde522e33c6eab9476c"
+        },
+        "byterun": {
+          "file": "ilbm-8-byterun.ilbm",
+          "sha256": "fc072018d91525c4b790a0a244ef1e7140d53093e83a5fc222b5e2664f8c87da"
+        },
+        "golden": {
+          "file": "ilbm-8.png",
+          "sha256": "f20387cd2a2ecad8740e614badee8731de49ed6a8f3d7a762f29231b7bb4e6f2"
+        }
+      }
+    },
+    {
+      "depth": 4,
+      "width": 33,
+      "height": 3,
+      "rowBytes": 6,
+      "files": {
+        "raw": {
+          "file": "ilbm-16-raw.ilbm",
+          "sha256": "be5a0f0ceff562b21ff8b12e1c83b4c91b623b46636001376c30abe45794d882"
+        },
+        "byterun": {
+          "file": "ilbm-16-byterun.ilbm",
+          "sha256": "7f68d4ae8bc3bfb91dcce2dc88c008bdea125d201c634fcd758e9d5d79ba2897"
+        },
+        "golden": {
+          "file": "ilbm-16.png",
+          "sha256": "c4dce0c8575f82ce6ef99d0cbbdce5f70a8e6f6fbc2e8c7451d20b65fac7865c"
+        }
+      }
+    },
+    {
+      "depth": 5,
+      "width": 33,
+      "height": 3,
+      "rowBytes": 6,
+      "files": {
+        "raw": {
+          "file": "ilbm-32-raw.ilbm",
+          "sha256": "825b51ee966b2092d48294137656e3575120921aa33da0a80d28505d0d803181"
+        },
+        "byterun": {
+          "file": "ilbm-32-byterun.ilbm",
+          "sha256": "619922b0ab56fa2470fa2cbeec3aefdfe18090f8b09e52721cfcc26395c4fa78"
+        },
+        "golden": {
+          "file": "ilbm-32.png",
+          "sha256": "aa71ed794e750373908e130c01ba16e2b06b844b746a4b9c7e3f7af8d7b2af1e"
+        }
+      }
+    }
+  ]
+}

@@ -54,6 +54,12 @@ in both copies. Program instances have independent buffers and snapshots.
 
 ## Timing and limits
 
+The planned [shared display snapshot](display-architecture.md) exports physical
+buffers during the indexed-to-planar bridge. Preserve buffer identities and
+per-buffer Bob snapshots when storage changes. GPU FBO rotation and interlace
+field composition are presentation operations; neither performs AMOS Screen Swap.
+Hardware sprite overlays remain separate from saved Bob backgrounds.
+
 Buffer exchanges happen synchronously in the runtime. Canvas presentation is
 coalesced through animation frames; exact Amiga copper/VBL scheduling and the
 original suppression of duplicate swaps before a VBL are not implemented.
@@ -62,7 +68,7 @@ execution boundaries as described in [the Bob contract](bobs.md).
 
 Autoback synchronization currently applies to the selected screen. Original
 multi-screen interrupt side effects need further reference execution coverage.
-Screen-copy/scrolling commands, Logic/Physic screen selectors, hardware sprites,
+Screen-copy/scrolling commands, Logic/Physic screen selectors, full hardware sprites,
 and the remaining screen modes are separate unfinished features.
 
 ## Evidence and checks

@@ -1,0 +1,260 @@
+{
+  "evidence": {
+    "kind": "synthetic",
+    "description": "Independent Python IFF/PNG encodings and tuple-based HAM reference formulas. Ten six-plane images plus five-plane and laced cases; not AMOS/emulator captures."
+  },
+  "fixtures": [
+    {
+      "seed": 0,
+      "width": 17,
+      "height": 2,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-00-raw.ilbm",
+          "sha256": "83b8dfbf8e21fd344ce65b2473472d54123b7f6ddba687fedb7003533b3e5298"
+        },
+        "byterun": {
+          "file": "ham-00-byterun.ilbm",
+          "sha256": "a65be2f57752d1800d835f20d53e55cd7f30186d11884cdb920f538bd2ea1345"
+        },
+        "golden": {
+          "file": "ham-00.png",
+          "sha256": "2c9a115094c301e427d0c4d588c0d05c502b3dec7d2f2f67d93591071347f746"
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "width": 33,
+      "height": 3,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-01-raw.ilbm",
+          "sha256": "b40073325e78c626f3cc080312bad7f88f34bb91c3f939dc39a215a97f151470"
+        },
+        "byterun": {
+          "file": "ham-01-byterun.ilbm",
+          "sha256": "2b79e3581923a4c4ce749055391e08a400089aee2aad694c8c779e40dc71e630"
+        },
+        "golden": {
+          "file": "ham-01.png",
+          "sha256": "c60cb12b9348136deab1677c3710464cc356cbbcb6413c01833279c2f79bc16e"
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "width": 47,
+      "height": 4,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-02-raw.ilbm",
+          "sha256": "e906bdfc5678ae5e0a0d4570452d027922f7b1995015a427008c559fd33eb887"
+        },
+        "byterun": {
+          "file": "ham-02-byterun.ilbm",
+          "sha256": "72c176bba296e464d9a7d1b2601e5b4ed8d69b1282112308fb512e5c3083fdbe"
+        },
+        "golden": {
+          "file": "ham-02.png",
+          "sha256": "cee68de933721e49167609cc9e1c97e5f84e7d2330d39be3783dc6a36498df16"
+        }
+      }
+    },
+    {
+      "seed": 3,
+      "width": 64,
+      "height": 2,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-03-raw.ilbm",
+          "sha256": "6ab51dde5bb08a25f433c2d99a24d2378e31657248322db5b838e14070318732"
+        },
+        "byterun": {
+          "file": "ham-03-byterun.ilbm",
+          "sha256": "15d57c03b0760dbddcfb3518ab24075a2b05d7c51ecf0df02612e7ab62b9f56c"
+        },
+        "golden": {
+          "file": "ham-03.png",
+          "sha256": "4c860cd7ba03c0c0484a4502da76d842141cc5dc641ee8663b14380023888481"
+        }
+      }
+    },
+    {
+      "seed": 4,
+      "width": 79,
+      "height": 3,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-04-raw.ilbm",
+          "sha256": "f643446e9009d0bd84f323c084fe843cc846f37e19d9f829c55483916f09f4ab"
+        },
+        "byterun": {
+          "file": "ham-04-byterun.ilbm",
+          "sha256": "bbeb966157d98d4a4d27263ff1f708d73f77c01817f786bdbb6bf11ca7819ad5"
+        },
+        "golden": {
+          "file": "ham-04.png",
+          "sha256": "bc920e30ad41096cb04344a3b20cb45b30a837ab5ddf568e9309306e9fbd614c"
+        }
+      }
+    },
+    {
+      "seed": 5,
+      "width": 95,
+      "height": 4,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-05-raw.ilbm",
+          "sha256": "254ca71a71cf3ca96b323a0eca51014ae29f12ac47d9460d7872166d4e42b91d"
+        },
+        "byterun": {
+          "file": "ham-05-byterun.ilbm",
+          "sha256": "c027ae9548f5d8156e3f6057827bd2bcd4e4ed1370179f3a8e3440c57ac20728"
+        },
+        "golden": {
+          "file": "ham-05.png",
+          "sha256": "fe38d6860b407c543b556d18d97b38a4412895d8ea8228c0dfda9c84b438a498"
+        }
+      }
+    },
+    {
+      "seed": 6,
+      "width": 113,
+      "height": 2,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-06-raw.ilbm",
+          "sha256": "3a35d1f688630a73993d5648dcc4d4430820a642cb3d1d0b48de9aab4abda056"
+        },
+        "byterun": {
+          "file": "ham-06-byterun.ilbm",
+          "sha256": "59bfd82144886fd1eea02726e20fb569deb03afcdcea9cb6cfe2a0e992fb8cd2"
+        },
+        "golden": {
+          "file": "ham-06.png",
+          "sha256": "13487ddff5e245cbea2f0e740a916fe198758355312d6caf25b6569b544e4b0b"
+        }
+      }
+    },
+    {
+      "seed": 7,
+      "width": 129,
+      "height": 3,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-07-raw.ilbm",
+          "sha256": "28a9ac01707921cd6784c068e3b54d211c290a0702f0ba27d5248908a4957470"
+        },
+        "byterun": {
+          "file": "ham-07-byterun.ilbm",
+          "sha256": "2d18784b1ff6bd9b3f711e9d912a203345602497cdc6c9c5d0b6456caf09716b"
+        },
+        "golden": {
+          "file": "ham-07.png",
+          "sha256": "c65138c7ec44368d2112c543653c23564d1f4054a85c1d9c82a59cee603e448b"
+        }
+      }
+    },
+    {
+      "seed": 8,
+      "width": 161,
+      "height": 4,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-08-raw.ilbm",
+          "sha256": "a175f3f873e843547a1d73b7ff9cca80e0dff39c471a1dfe8cf11310f17fb385"
+        },
+        "byterun": {
+          "file": "ham-08-byterun.ilbm",
+          "sha256": "edea9b9984b96ddcd1301783930198335bd5e91261566d24ddcac864f5f4148a"
+        },
+        "golden": {
+          "file": "ham-08.png",
+          "sha256": "64198c14ade268c17c7be9237340efdf0ba5fab6622e06877470a75daaf27e49"
+        }
+      }
+    },
+    {
+      "seed": 9,
+      "width": 257,
+      "height": 2,
+      "depth": 6,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-09-raw.ilbm",
+          "sha256": "0850f0d1df849505c385f21b273aaa7afa583566036739f32b8b6726fef9c18d"
+        },
+        "byterun": {
+          "file": "ham-09-byterun.ilbm",
+          "sha256": "4c1691102dd6e068b691f10d55abd40a86dc1a863f029d35f3cc782de5646735"
+        },
+        "golden": {
+          "file": "ham-09.png",
+          "sha256": "119fc71c16b4c5c1af3bff9927719c6f698e1beb264ac7b56dfc7ac8161cbdea"
+        }
+      }
+    },
+    {
+      "seed": 10,
+      "width": 97,
+      "height": 3,
+      "depth": 5,
+      "mode": 2048,
+      "files": {
+        "raw": {
+          "file": "ham-10-raw.ilbm",
+          "sha256": "5ea814a79fc6d7eaca803c787b84d10ca150ab9161546654528802a859d57210"
+        },
+        "byterun": {
+          "file": "ham-10-byterun.ilbm",
+          "sha256": "ff288979698ddaa21271f95a96f098ae92e8302260e6feb9833c17a7b74bcc72"
+        },
+        "golden": {
+          "file": "ham-10.png",
+          "sha256": "78b12171a2e7dd86b064be1acc3e2ed016908625aff3196910661c6d45ce43e8"
+        }
+      }
+    },
+    {
+      "seed": 11,
+      "width": 67,
+      "height": 5,
+      "depth": 6,
+      "mode": 2052,
+      "files": {
+        "raw": {
+          "file": "ham-11-raw.ilbm",
+          "sha256": "9dd998fcb2dac430eac83b717d80fb1cb3e378ccb436120f3f072d3a3b973510"
+        },
+        "byterun": {
+          "file": "ham-11-byterun.ilbm",
+          "sha256": "b4f0c710fc7a616619bae1c9fba83471dd0db39bebcc0a0d38173b61230764dc"
+        },
+        "golden": {
+          "file": "ham-11.png",
+          "sha256": "a95dbee5f2e4cdb54bd5ae445b6152021c8f6067baeae7b674d83eef5f6a8aa6"
+        }
+      }
+    }
+  ]
+}

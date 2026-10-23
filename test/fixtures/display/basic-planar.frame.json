@@ -1,0 +1,92 @@
+{
+  "fixtureVersion": 1,
+  "name": "basic-planar",
+  "evidence": {
+    "kind": "synthetic",
+    "description": "Hand-defined two-line one-plane bit pattern, with independent Python struct/zlib encoding. Not an AMOS capture."
+  },
+  "snapshot": {
+    "format": "amos-display",
+    "schemaVersion": 1,
+    "frame": {
+      "schemaVersion": 1,
+      "revision": 0,
+      "chipset": "OCS",
+      "samplesPerLowresPixel": 2,
+      "outputWidth": 4,
+      "outputHeight": 2,
+      "lines": 2,
+      "interlaceField": null,
+      "maxEvents": 2,
+      "videoRate": {
+        "numerator": 50,
+        "denominator": 1
+      },
+      "pixelAspect": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "origin": {
+        "x": 128,
+        "y": 50
+      }
+    },
+    "chipByteLength": 524288,
+    "tablesByteLength": 2636,
+    "tables": {
+      "lineRegs": {
+        "type": "u32be",
+        "offset": 0,
+        "length": 64,
+        "stride": 32
+      },
+      "linePal": {
+        "type": "u8",
+        "offset": 256,
+        "length": 2048,
+        "stride": 1024
+      },
+      "lineSprites": {
+        "type": "u32be",
+        "offset": 2304,
+        "length": 64,
+        "stride": 32
+      },
+      "lineEvents": {
+        "type": "u32be",
+        "offset": 2560,
+        "length": 16,
+        "stride": 8
+      },
+      "eventOffsets": {
+        "type": "u32be",
+        "offset": 2624,
+        "length": 3,
+        "stride": 1
+      },
+      "overflowEvents": {
+        "type": "u32be",
+        "offset": 2636,
+        "length": 0,
+        "stride": 4
+      }
+    }
+  },
+  "blobs": {
+    "chip": {
+      "file": "basic-planar.chip.bin",
+      "byteLength": 524288,
+      "sha256": "860cacd5d62948b5c9517a43877b81009816bafbe3c75769b7031b87a4366f26"
+    },
+    "tables": {
+      "file": "basic-planar.tables.bin",
+      "byteLength": 2636,
+      "sha256": "8717272037b094ca55633e67e933191fabda9e2ae3734e19ffe0edb6a974758e"
+    },
+    "golden": {
+      "file": "basic-planar.png",
+      "byteLength": 77,
+      "sha256": "1cec57f54af827230bcaa73edb59b198abb21aafab4cac58f6b6efacb64142fc"
+    }
+  }
+}

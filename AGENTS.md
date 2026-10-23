@@ -20,6 +20,34 @@
   memory/Node file adapters. Host-specific APIs belong in adapters.
 - `lib/amos/browser.js` handles Canvas/input; `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
+- `lib/display/model/` contains the versioned snapshot codec, revisioned chip
+  memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
+  `lib/display/reference/render.js` provides basic planar render/explainPixel.
+  Generated modules embed CPU snapshot/reference helpers; `snapshotPlayfield`
+  exports physical pixels only, with sprites still a separate presentation layer.
+  See `docs/planar-display.md` for the implemented subset and remaining gates.
+- `lib/display/reference/sprites.js` resolves eight physical channels, attached
+  pairs and playfield priorities. `snapshotDisplay` publishes direct AMOS sprite
+  rows; `snapshotPlayfield` remains sprite-free. Bounded DMA/reuse/manual registers
+  live in `lib/display/copper/spriteDma.js`. Contention/timing and computed allocation
+  remain open; see `docs/sprite-display.md`. Canvas consumes the same structured
+  sprite writer/resolver; do not reintroduce an opaque RGBA compositor callback.
+  HAM6 uses shared packed colour helpers
+  in `lib/display/model/color.js`; see `docs/ham-display.md`.
+- `lib/display/copper/` has the bounded OCS interpreter and shared stack builder.
+  `snapshotDisplay`/`renderDisplay` use it in standalone factories, preserving the
+  full-bitmap `snapshotPlayfield` migration API. AMOS display/copper commands,
+  exact DMA timing and capture gates remain open; see `docs/copper-display.md`.
+- `lib/display/presentation/composeField.js` owns pure weave/line-double
+  composition with explicit previous output. The renderer supports static
+  scroll, EHB and DPF; the IFF reader selects laced fields. Live field timing,
+  ECS superhires and AMOS display command integration remain open. See
+  `docs/display-modes.md`, including source-backed Colour masks and Hires limits.
+- `lib/display/webgl/resources.js` owns WebGL2 ABI textures, dirty-row snapshot
+  uploads, debug readback and context restoration/disposal. `webgl/renderer.js`
+  runs non-HAM decode/resolve/sprite shader passes on shared snapshots; see
+  `docs/webgl-renderer.md`. Presentation/switching, HAM/events and full mode/capture
+  parity remain open. Never count a CPU fallback as GPU execution.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.
 - `examples/` contains Test1–27 and synthetic programs with `.Asc` references.
   ASCII is not an accepted compiler input yet.
@@ -32,15 +60,16 @@
 - `npm ci`: install locked dependencies.
 - `npm run check`: verify generated demos, then run unit/CLI/integration tests.
 - `npm test`: discover `*.test.js` and `test-*.js` through `test/run.js`.
-- `npm run build:demo`: regenerate the three standalone browser modules.
-- `npm run check:generated`: report missing/stale demo modules without writes.
+- `npm run build:demo`: regenerate the three standalone browser modules and
+  self-contained browser-test gallery in `demos/`.
+- `npm run check:generated`: report missing/stale modules and gallery pages without writes.
 - `npm run build:examples`: regenerate additional synthetic examples.
 - `npm run install:browser`: install pinned Playwright Chromium in the ignored
   `.cache/ms-playwright`, unless PLAYWRIGHT_BROWSERS_PATH overrides it.
 - `npm run install:browser -- --with-deps`: also install browser system libraries
   on supported Linux hosts; this can require elevated system permissions.
 - `npm run test:browser`: check demos, then run real Chromium Canvas/input/lifecycle
-  tests. Screenshots go to ignored `test/artifacts/`.
+  tests and every gallery scenario offline. Screenshots go to ignored `test/artifacts/`.
 - `node bin/amoscript examples/Test21.AMOS /tmp/program.js`: compile without
   overwriting existing files. Omit the output path to use stdout.
 - `node -e "require('/tmp/program.js')({ setTimeout }).tick(1000)"`: execute it.
@@ -83,6 +112,9 @@ also been used locally. Hosted CI evidence exists only after the workflow runs.
   input and browser lifecycle changes also require `npm run test:browser`.
 - Passing synthetic tests does not prove full AMOS compatibility. Document limits
   in the appropriate `docs/` contract and compatibility matrix.
+- Keep browser scenarios in `test/helpers/browserScenarios.js` so Playwright and
+  generated demos share evaluator inputs and assertions. Every browser test must
+  have a runnable demo and an HTML Preview link from `demos/index.html`.
 
 ## Commits and pull requests
 
@@ -96,3 +128,11 @@ Follow `PLAN.md` and `docs/compatibility.md`. Numeric formatting, base-10 Log,
 remaining functions, target-library reference captures, sprites, audio, remaining
 bank/file forms and an ASCII frontend remain open. Replacing the established
 parser/dispatcher or optimizing it needs measured evidence.
+
+For display work, follow `docs/display-architecture.md` and the detailed
+`docs/amiga-webgl-display-plan.md` acceptance gates. Keep the JavaScript runner
+and headless CPU runtime. Begin with a versioned physical-buffer snapshot bridge;
+make planar storage authoritative only after parity. CPU and GPU consume the same
+immutable snapshot. Keep AMOS timing independent of requestAnimationFrame and
+preserve logical/physical buffers, Autoback, Bob snapshots and input contracts.
+Distinguish CPU/GPU parity, source-derived fixtures and external Amiga captures.

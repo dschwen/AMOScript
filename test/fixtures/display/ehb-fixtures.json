@@ -1,0 +1,20 @@
+{
+  "evidence": {
+    "kind": "synthetic",
+    "description": "Independent Python struct/zlib encodings and pixel/palette formulas. Four-bit channels are halved before expansion; not an AMOS capture."
+  },
+  "files": {
+    "raw": {
+      "file": "ehb-raw.ilbm",
+      "sha256": "c228484824bc9400684e55ebf1cd6fa200aa1c2a3d010d427de0df368f00c7fd"
+    },
+    "byterun": {
+      "file": "ehb-byterun.ilbm",
+      "sha256": "620628b354ac888c7cfd6e0f6e0b2f321ac1ffa0a40a39d883e788d03804b7bb"
+    },
+    "golden": {
+      "file": "ehb.png",
+      "sha256": "f5a104d7530d6df4ac225f7ccf28d6f4ec0d16241877bb5795ad84f90221e64d"
+    }
+  }
+}

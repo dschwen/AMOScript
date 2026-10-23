@@ -4,6 +4,13 @@ AMOScript transpiles tokenized AMOS `.AMOS` programs into self-contained
 JavaScript modules for Node and browsers. The core language is implemented;
 full AMOS/Amiga compatibility is still in progress. See
 [compatibility and remaining work](docs/compatibility.md) and [the plan](PLAN.md).
+Every browser test is available in the [demo gallery](demos/index.html), with
+[HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
+See [demo instructions and coverage](demos/README.md).
+The integrated [Amiga display design](docs/display-architecture.md) has CPU
+planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
+[native non-HAM GPU renderer](docs/webgl-renderer.md). GPU presentation, switching
+and remaining modes are still planned.
 
 ## Compile and run
 
@@ -140,6 +147,18 @@ code. Focus the canvas to send keyboard or mouse input. Rebuild the demos after
 code generation or runtime changes; the integration suite checks their artifacts.
 See [the display contract](docs/display.md) for supported drawing and input forms.
 
+The [integrated Amiga display design](docs/display-architecture.md) works the
+[WebGL proposal](docs/amiga-webgl-display-plan.md) into the current runtime:
+shared immutable frames, a CPU reference and WebGL2 presentation, with a staged
+move to planar storage. The [basic CPU reference and physical playfield
+export](docs/planar-display.md) are implemented. The browser host still uses
+Canvas 2D. A [bounded OCS copper builder/interpreter](docs/copper-display.md) now
+also exports physical screen stacks. WebGL2 presentation and authoritative planar
+drawing remain planned.
+The [CPU mode path](docs/display-modes.md) supports EHB screens, static scroll/dual
+playfields and explicit interlaced IFF field composition; live field timing and
+the remaining AMOS display commands are still open.
+
 Generated scripts expose `globalThis.AMOS_MODULE`, the same factory exported in
 Node. Load `lib/amos/background.js` for the optional facade:
 
@@ -150,8 +169,9 @@ AMOS.run();
 document.addEventListener('keydown', event => AMOS.sendKey(event.key));
 ```
 
-The facade also accepts instruction tables when `font.js`, `display.js`,
-`operations.js` and `driver.js` from `lib/amos/` are loaded, in that order.
+The facade also accepts instruction tables. For that direct-runtime mode, first
+load `lib/display/model/color.js` and `lib/display/reference/sprites.js`, then
+`font.js`, `display.js`, `operations.js` and `driver.js` from `lib/amos/`, in that order.
 For external bank loading in this direct-runtime mode, load `lib/BankReader.js`
 before `operations.js` as well; Save also needs `lib/BankWriter.js` there.
 Generated modules embed those implementations and need no separate runtime
