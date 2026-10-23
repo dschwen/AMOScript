@@ -16,7 +16,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **328 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **332 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
@@ -396,7 +396,8 @@ patches. Describe coverage precisely rather than claiming full AMOS support.
    comparisons and forced context loss/restoration/disposal (M6 infrastructure).
    Implemented next: GPU decode/resolve for the current non-HAM CPU subset,
    with 151 GPU/CPU comparisons and restored-shader rerendering.
-   Next add scale/presentation, switching/live diff, HAM and event support;
+   GPU nearest/aspect/letterbox presentation now passes six canvas/restore checks.
+   Next add switching/input integration, live diff, HAM and event support;
    [resource boundaries](docs/webgl-resources.md) remain explicit.
 6. Continue through D2–D6 and all associated M0–M12 gates. Build CPU/GPU parity
    on shared snapshots before replacing drawing storage or enabling new modes.

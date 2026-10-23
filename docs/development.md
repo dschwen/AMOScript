@@ -81,7 +81,7 @@ pending until CI runs. Inspect that result before claiming CI is green.
 
 Those cross-version results predate the direct-sprite source increment. D0
 baseline restoration regenerated all three demos; local `npm run check` now
-passes 328 tests including snapshots, chip memory, physical-buffer export,
+passes 332 tests including snapshots, chip memory, physical-buffer export,
 planar/copper/stack fixtures, EHB/DPF/scroll, HAM6 and explicit interlace goldens. `npm run test:browser`
 also passes, adding direct-sprite manual
 updates, movement, instance isolation and cursor restoration. The browser command

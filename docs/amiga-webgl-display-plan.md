@@ -469,7 +469,7 @@ Each milestone has **acceptance tests** that must pass in CI before moving on. "
 
 **Work**
 - Repo structure as in §4.3, using JavaScript and the current `test/run.js` runner. Retain Playwright for browser/GPU tests; no compiler/toolchain rewrite is required.
-- Baseline restored locally: refreshed demos and 328 passing tests including ABI, planar/ILBM and copper/screen-stack checks. Chromium covers sprite/cursor, native planar/copper pixels and integer WebGL2 readback. Hosted execution remains pending.
+- Baseline restored locally: refreshed demos and 332 passing tests including ABI, planar/ILBM and copper/screen-stack checks. Chromium covers sprite/cursor, native planar/copper pixels and integer WebGL2 readback. Hosted execution remains pending.
 - FrameState + chip snapshot serialisation format (`.frame.json` + `.chip.bin`).
 - Golden-image harness: render → PNG → compare with golden, produce a diff image (mismatches in magenta), and report the first N mismatching pixels.
 - Test-pattern generator utilities (fill planes with patterns, build simple FrameStates by hand).
@@ -570,9 +570,10 @@ computed allocation remain open.
 - [x] Local Chromium: only changed rows upload, checked with counters, instrumented GL calls, CPU dirty queries and two independent consumers. The snapshot bridge currently compares owned rows; canonical revision-cursor optimization remains later work.
 - [x] Forced WEBGL_lose_context cycle recreates textures/programs/framebuffers and uploads the latest owned snapshot without reload. Disposal checks resource deletion.
 
-Resource infrastructure is implemented; scale/presentation, runtime backend
-switching and live diff remain open. This milestone does not claim GPU Amiga
-decode/resolve or host fallback.
+Resource infrastructure and the direct GPU nearest/aspect presentation pass
+are implemented. Runtime backend switching/input integration and live diff remain
+open. Native non-HAM decode/resolve now has its own local parity evidence below;
+this milestone does not claim host fallback or complete mode support.
 
 ### Phase 7: GPU parity, non-HAM modes
 

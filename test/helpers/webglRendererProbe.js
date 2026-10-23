@@ -19,6 +19,7 @@ module.exports = async function webglRendererProbe(page, artifacts) {
     resources: require('../../lib/display/webgl/resources').createResourceFactory.toString(),
     renderer: require('../../lib/display/webgl/renderer').createRendererFactory.toString(),
     shaders: require('../../lib/display/webgl/shaders').toString(),
+    layout: require('../../lib/display/presentation/layout').toString(),
     registers: require('../../lib/display/model/registers').createRegisterModel.toString(),
     builder: require('../../lib/display/copper/builder').createCopperBuilder.toString(),
     dma: require('../../lib/display/copper/spriteDma').createSpriteDmaFactory.toString(),
@@ -53,7 +54,7 @@ module.exports = async function webglRendererProbe(page, artifacts) {
     const frame = factory('frame'), Memory = factory('memory'), regs = factory('registers')();
     const build = factory('builder')(regs), dma = factory('dma')(regs), interpret = factory('copper')(model, regs, dma);
     const reference = factory('reference')(model, colours, sprites), createResources = factory('resources')(model);
-    const createRenderer = factory('renderer')(model, sprites, createResources, factory('shaders'));
+    const createRenderer = factory('renderer')(model, sprites, createResources, factory('shaders'), factory('layout'));
     const readIlbm = factory('ilbm')(Memory, model, frame), cases = factory('cases')(frame, build, interpret, regs);
     const canvas = document.createElement('canvas'), gpu = createRenderer(canvas);
     const from64 = text => Uint8Array.from(atob(text), ch => ch.charCodeAt(0));
@@ -64,7 +65,7 @@ module.exports = async function webglRendererProbe(page, artifacts) {
     const same = (a, b) => a.length === b.length && a.every((value, i) => value === b[i]);
     const assert = (condition, message) => { if (!condition) throw new Error(`GPU parity: ${message}`); };
     let checked = 0, randomCount = 0, namedCount = 0, imageCount = 0;
-    let injectMismatch = false, sample = null;
+    let injectMismatch = false, sample = null, presentationChecks = 0;
     function compare(snapshot) {
       const before = gpu.stats.drawCalls, result = gpu.render(snapshot);
       assert(result.backend === 'gpu' && result.passes === 2 && gpu.stats.drawCalls === before + 2, 'actual GPU passes required');
@@ -152,8 +153,44 @@ module.exports = async function webglRendererProbe(page, artifacts) {
         rejected = false; try { gpu.render({ chip: new Uint8Array(524288), frame: f }); } catch (error) { rejected = /not implemented/.test(error.message); }
         assert(rejected && gpu.stats.drawCalls === before, 'unsupported mode rejects without fallback');
       }
+      const readCanvas = () => {
+        const gl = gpu.resources.context, bytes = new Uint8Array(canvas.width * canvas.height * 4), top = new Uint8ClampedArray(bytes.length);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, bytes);
+        for (let y = 0; y < canvas.height; y++) top.set(bytes.subarray((canvas.height - 1 - y) * canvas.width * 4, (canvas.height - y) * canvas.width * 4), y * canvas.width * 4);
+        assert(gl.getError() === gl.NO_ERROR, 'canvas readback'); return top;
+      };
+      const quad = { chip: new Uint8Array(524288), frame: frame({ width: 2, height: 2, depth: 2, pointers: [0, 4], rowBytes: 2, palette: [0, 0xf00, 0x0f0, 0x00f] }) };
+      quad.chip.set([0x80, 0, 0x80, 0, 0x40, 0, 0x80, 0]); gpu.render(quad);
+      const nativeQuad = reference.render(quad.chip, quad.frame);
+      const colours = [[0,0,0,255],[255,0,0,255],[0,255,0,255],[0,0,255,255]];
+      const presentationCases = [
+        { name: 'presentation-integer-aspect', options: { width: 12, height: 10 }, rect: [2,1,8,8], integer: true,
+          at: (x,y) => y >= 1 && y <= 4 ? (x >= 2 && x <= 5 ? 1 : x >= 6 && x <= 9 ? 2 : 0) : y >= 5 && y <= 8 && x >= 2 && x <= 5 ? 3 : 0 },
+        { name: 'presentation-square-aspect', options: { width: 8, height: 8, pixelAspect: { numerator: 1, denominator: 1 } }, rect: [0,2,8,4], integer: true,
+          at: (x,y) => y >= 2 && y <= 3 ? (x < 4 ? 1 : 2) : y >= 4 && y <= 5 && x < 4 ? 3 : 0 },
+        { name: 'presentation-fractional-fit', options: { width: 3, height: 3, integerScale: false, pixelAspect: { numerator: 1, denominator: 1 } }, rect: [0,0,3,2], integer: false,
+          at: (x,y) => [[1,2,2],[3,0,0],[0,0,0]][y][x] },
+        { name: 'presentation-downsample', options: { width: 2, height: 2 }, rect: [0,0,2,2], integer: false,
+          at: (x,y) => [[1,2],[3,0]][y][x] }
+      ];
+      for (const item of presentationCases) {
+        const draws = gpu.stats.drawCalls, shown = gpu.present(item.options), r = shown.layout;
+        assert(shown.backend === 'gpu' && shown.passes === 1 && gpu.stats.drawCalls === draws + 1, `${item.name} actual presentation draw`);
+        assert(same([r.x,r.y,r.width,r.height], item.rect) && r.integerScale === item.integer, `${item.name} layout`);
+        const actual = readCanvas(), expected = new Uint8ClampedArray(actual.length);
+        for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) expected.set(colours[item.at(x,y)], (y * canvas.width + x) * 4);
+        assert(same(actual, expected), `${item.name} nearest samples, orientation and opaque borders`);
+        assert(same(gpu.readPixels(), nativeQuad), 'presentation preserves native framebuffer');
+        if (typeof globalThis.AMOS_DEMO_OBSERVE === 'function') globalThis.AMOS_DEMO_OBSERVE({ name: item.name, width: canvas.width, height: canvas.height, rgba: actual });
+        presentationChecks++;
+      }
+      let invalidViewport = false;
+      try { gpu.present({ width: 0, height: 10 }); } catch (error) { invalidViewport = /viewport/.test(error.message); }
+      assert(invalidViewport, 'invalid viewport rejects');
       const empty = frame({ width: 17, height: 0, depth: 1, pointers: [0], rowBytes: 4, palette: [0], interlaceField: 1, outputHeight: 1 });
       assert(gpu.render({ chip: new Uint8Array(524288), frame: empty }).backend === 'gpu-empty' && gpu.readPixels().length === 0, 'empty field');
+      assert(gpu.present({ width: 3, height: 2 }).backend === 'gpu-empty' && readCanvas().every((value, i) => value === (i % 4 === 3 ? 255 : 0)), 'empty field clears presentation without inventing rows');
+      presentationChecks++;
       const gl = gpu.resources.context, extension = gl.getExtension('WEBGL_lose_context'); assert(extension, 'loss extension');
       const event = name => new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error(`GPU timeout: ${name}`)), 5000);
@@ -162,10 +199,22 @@ module.exports = async function webglRendererProbe(page, artifacts) {
       const lost = event('webglcontextlost'); extension.loseContext(); await lost;
       const snapshot = cases.random(9173), expected = reference.render(snapshot.chip, snapshot.frame);
       assert(gpu.render(snapshot).backend === 'unavailable', 'lost context is not GPU coverage');
+      assert(gpu.present({ width: 12, height: 10, integerScale: false, pixelAspect: { numerator: 1, denominator: 1 } }).backend === 'unavailable', 'lost presentation is not GPU coverage');
       const restored = event('webglcontextrestored'); extension.restoreContext(); await restored;
       assert(gpu.state === 'ready' && gpu.stats.lastResult.backend === 'gpu', 'restored shaders rerender');
       assert(same(gpu.readPixels(), expected), 'restored GPU pixels match latest frame');
-      return { checked, imageCount, namedCount, randomCount, drawCalls: gpu.stats.drawCalls, restored: true, reducerVerified: true, sample };
+      const restoredView = gpu.stats.lastPresentation;
+      assert(restoredView.backend === 'gpu' && canvas.width === 12 && canvas.height === 10, 'restore presents the latest requested viewport');
+      const shown = readCanvas(), r = restoredView.layout, wanted = new Uint8ClampedArray(shown.length);
+      for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+        const at = (y * canvas.width + x) * 4;
+        wanted[at + 3] = 255;
+        if (x < r.x || y < r.y || x >= r.x + r.width || y >= r.y + r.height) continue;
+        const sx = Math.floor((x - r.x + 0.5) * snapshot.frame.outputWidth / r.width), sy = Math.floor((y - r.y + 0.5) * snapshot.frame.lines / r.height);
+        wanted.set(expected.subarray((sy * snapshot.frame.outputWidth + sx) * 4, (sy * snapshot.frame.outputWidth + sx + 1) * 4), at);
+      }
+      assert(same(shown, wanted), 'restored canvas presents latest owned GPU pixels'); presentationChecks++;
+      return { checked, imageCount, namedCount, randomCount, presentationChecks, drawCalls: gpu.stats.drawCalls, restored: true, reducerVerified: true, sample };
     } finally {
       const gl = gpu.resources.context; gpu.dispose();
       const extension = gl.getExtension('WEBGL_lose_context'); if (extension && !gl.isContextLost()) extension.loseContext();

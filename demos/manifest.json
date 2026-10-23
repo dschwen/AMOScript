@@ -16,7 +16,7 @@
     {
       "file": "webgl-renderer.html",
       "title": "GPU / CPU rendering gallery",
-      "description": "Independent IFF images, scroll and sprite matrices, copper stacks, 100 seeded frames and restored shaders.",
+      "description": "Independent IFF images, scroll and sprite matrices, copper stacks, 100 seeded frames, GPU presentation/aspect scaling and restored shaders.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html"
     },
     {

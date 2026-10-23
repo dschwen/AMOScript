@@ -17,7 +17,7 @@ authoritative and the logical/physical and Bob rules here still apply.
 
 Current source also contains direct 16-pixel, 1/2-plane sprite composition,
 hardware-coordinate helpers and all 32 palette registers. The refreshed baseline
-passes 328 tests plus Chromium sprite/native-planar/copper/cursor checks. A separate
+passes 332 tests plus Chromium sprite/native-planar/copper/cursor checks. A separate
 WebGL2 integer readback probe verifies capability, not a GPU display backend.
 
 ## Supported AMOS instructions

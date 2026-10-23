@@ -3,8 +3,9 @@
 [resources.js](../lib/display/webgl/resources.js) owns GPU storage and debug
 readback for ABI v1 snapshots. It is implemented and tested in Chromium/SwiftShader.
 The [non-HAM renderer](webgl-renderer.md) now uses it for actual GPU decode/resolve.
-The resource owner itself does not replace the Canvas host; scale/presentation,
-backend switching, live diff and remaining mode/parity gates stay open.
+The renderer also draws its scale/aspect pass to the canvas. The resource owner
+itself does not replace the application host; backend switching, live diff and
+remaining mode/parity gates stay open.
 
 CommonJS exports `createResources(canvas, options)` and
 `createResourceFactory(snapshotModel)`. The browser script exposes
@@ -59,8 +60,8 @@ instrument actual GL calls, alongside counters and byte readback.
 
 `readTexture(name)` runs a fullscreen debug shader into an integer framebuffer,
 reads exact components and returns an owned Uint8Array/Uint16Array/Uint32Array.
-Table row zero stays row zero through upload/readback. Screen presentation will
-own the conversion from this storage convention to a top-left canvas image.
+Table row zero stays row zero through upload/readback. The renderer's presentation shader owns the conversion from this storage
+convention to a top-left canvas image.
 An output target reads as zero initialization until a render pass writes it.
 The resource-only checks do not establish Amiga rendering; the separate
 [shader parity suite](webgl-renderer.md) exercises real decode/resolve output.

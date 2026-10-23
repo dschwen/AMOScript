@@ -11,7 +11,7 @@ Every current browser scenario is included:
 | --- | --- |
 | [Integer GPU readback and PNG decode](webgl-integers.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-integers.html) |
 | [GPU uploads, dirty rows and context lifecycle](webgl-resources.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-resources.html) |
-| [GPU/CPU image, mode, sprite and seeded-frame gallery](webgl-renderer.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html) |
+| [GPU/CPU image, mode, sprite, scaling and seeded-frame gallery](webgl-renderer.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html) |
 | [Sprite DMA and channel reuse](sprite-dma.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html) |
 | [Trigonometry and angle modes](trigonometry.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/trigonometry.html) |
 | [Extra Half Brite](ehb.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/ehb.html) |

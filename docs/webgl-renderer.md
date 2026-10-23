@@ -7,7 +7,7 @@ ILBM image fields, 22 mode/sprite/copper matrices and 100 fixed-seed frames.
 These are local SwiftShader results, not Amiga captures or hardware performance.
 
 CommonJS exports `createRenderer(canvas, options)` and
-`createRendererFactory(snapshotModel, spriteModel, createResources, createShaderSources)`.
+`createRendererFactory(snapshotModel, spriteModel, createResources, createShaderSources, presentationLayout)`.
 The browser script exposes `AMOS_WEBGL_RENDERER_FACTORY`. Factories take the same
 dependency-free CPU model and [resource owner](webgl-resources.md) used by the
 test harness. Generated AMOS modules retain their headless CPU runtime; GPU code
@@ -20,6 +20,32 @@ and performs two fullscreen shader draws. Successful nonempty results report
 Uint8ClampedArray of current-field RGBA in canonical top-left row order. It reads
 the colour framebuffer directly; CPU colour conversion and CPU fallback do not
 produce those pixels. Normal drawing does not require readback.
+
+## Canvas presentation
+
+`present({ width, height, pixelAspect, integerScale })` draws `colourBuf` directly
+to the WebGL canvas in a third shader pass; no CPU readback or Canvas 2D upload
+is involved. Width/height default to the canvas drawing-buffer dimensions. The
+shared [layout helper](../lib/display/presentation/layout.js) applies frame pixel
+aspect (or a rational override), centers the image and fills unused space with
+opaque black. Sampling uses nearest source-pixel centers and explicitly converts
+storage rows to top-left canvas orientation.
+
+Integer scaling is preferred on the reduced rational aspect grid. For example,
+640×200 native samples with aspect 1/2 form a 640×400 integer cell grid; a
+1280×900 viewport displays 1280×800 with 50-pixel top/bottom borders.
+`integerScale: false` instead fits the largest contained rectangle. Undersized
+viewports use nearest downsampling; returned `layout.integerScale` reports that
+the actual factor is fractional. Layout and aspect results are owned/frozen;
+viewport sizes are bounded to 16384 and the context capability limits.
+
+The method returns backend/pass/layout diagnostics and preserves the native
+framebuffer. Empty fields clear the canvas without inventing rows or draws.
+This presents one current field; full interlace weaving remains separate. The
+last requested viewport/options survive context loss, and restoration rerenders
+and presents the latest owned frame before notifying the host. Calls never run
+VM instructions or advance language time. The current application still uses its
+Canvas host; backend switching/input integration remains open.
 
 ## Shader passes
 
@@ -40,9 +66,9 @@ produce those pixels. Normal drawing does not require readback.
 The operations use integer texel coordinates and bitwise unsigned arithmetic
 from the [GLSL ES specification](https://registry.khronos.org/OpenGL/specs/es/3.0/GLSL_ES_Specification_3.00.pdf).
 Palette bytes expand/resolve exactly, with blending and dithering disabled.
-Storage row zero is semantic field row zero; the future canvas presentation pass
-must perform its own Y conversion. No interpolation, scaling or CRT filtering is
-part of these native comparisons.
+Storage row zero is semantic field row zero; the canvas presentation pass
+performs its own Y conversion. No interpolation, scaling or CRT filtering is
+part of the native decode/resolve comparisons.
 
 Supported profiles match normal CPU OCS/ECS grids of two/four native samples per
 lowres pixel, lowres up to six planes and hires up to four. Zero-plane lines,
@@ -57,7 +83,8 @@ because their data could fit these textures.
 
 The resource owner now accepts named fullscreen passes through `addPass` and
 `runPass`. It retains bounded shader source descriptions, rejects texture feedback,
-recompiles passes after loss and deletes programs on disposal. Inputs are texture
+recompiles passes after loss and deletes programs on disposal. A null pass target
+selects the canvas drawing buffer; texture targets remain owned framebuffers. Inputs are texture
 bindings plus unsigned scalar uniforms; output is an owned framebuffer target.
 Custom passes share the owner's GL state and are not a separate scheduler.
 
@@ -80,7 +107,10 @@ mixed-resolution copper stacks, sprite DMA/reuse, signed modulos, palette change
 texture-row boundaries and final chip bytes. The seed corpus varies valid modes,
 pointers, palettes, windows, delays and sprites across all three chip capacities.
 Unsupported mode/bounds tests verify no GPU draws; forced context restoration
-checks actual rerendered pixels. `test/artifacts/gpu-copper-stack.png` records a
+checks actual rerendered pixels. Six additional presentation checks cover
+integer/aspect/fractional/downsample layouts, orientation/borders, empty fields
+and latest-viewport restoration. Hand-defined four-colour rectangles are compared
+against actual drawing-buffer readback, and those outputs appear in the demo. `test/artifacts/gpu-copper-stack.png` records a
 native GPU image.
 
 Reproducible mismatches are reduced to a row and fewer planes/sprites where the
@@ -89,7 +119,7 @@ fixture in `test/fixtures/display/gpu-regressions/`, with CPU-reference expectat
 explicitly labelled synthetic. A deliberate readback perturbation verifies this
 reduction/replay path without inventing a real GPU failure.
 
-Scale/aspect presentation, browser backend switching/live diff, HAM, mid-line
+Browser backend switching/live diff, HAM, mid-line
 events, full interlace presentation, remaining ECS modes and target-device timing
 budgets remain open. The full M7 gate still includes modes/captures that earlier
 milestones have not supplied; current-subset parity does not close those gates.

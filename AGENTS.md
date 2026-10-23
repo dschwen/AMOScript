@@ -46,7 +46,8 @@
 - `lib/display/webgl/resources.js` owns WebGL2 ABI textures, dirty-row snapshot
   uploads, debug readback and context restoration/disposal. `webgl/renderer.js`
   runs non-HAM decode/resolve/sprite shader passes on shared snapshots; see
-  `docs/webgl-renderer.md`. Presentation/switching, HAM/events and full mode/capture
+  `docs/webgl-renderer.md`. Its presentation shader uses shared rational layout
+  from `presentation/layout.js`. Host switching/input, HAM/events and full mode/capture
   parity remain open. Never count a CPU fallback as GPU execution.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.
 - `examples/` contains Test1–27 and synthetic programs with `.Asc` references.

@@ -43,7 +43,7 @@ async function run() {
     await runScenario('webgl-resources', page);
     console.log('WebGL2 resources passed: exact chip/table readback, independent dirty uploads and loss/restore/disposal.');
     const gpuRenderer = await runScenario('webgl-renderer', page, artifacts);
-    console.log(`WebGL2 renderer passed: ${gpuRenderer.checked} GPU/CPU frames (${gpuRenderer.imageCount} independent image fields, ${gpuRenderer.namedCount} mode/sprite/copper matrices, 100 seeded frames), decode traces and restoration.`);
+    console.log(`WebGL2 renderer passed: ${gpuRenderer.checked} GPU/CPU frames (${gpuRenderer.imageCount} independent image fields, ${gpuRenderer.namedCount} mode/sprite/copper matrices, 100 seeded frames), decode traces, ${gpuRenderer.presentationChecks} presentation checks and restoration.`);
     const dma = await runScenario('sprite-dma', page);
     fs.writeFileSync(path.join(artifacts, 'sprite-dma.png'), Buffer.from(dma.png.split(',')[1], 'base64'));
     console.log('Sprite DMA probe passed: standalone CPU factories, chained reuse, armed-row retention and Canvas pixels.');

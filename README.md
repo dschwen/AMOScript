@@ -9,7 +9,7 @@ Every browser test is available in the [demo gallery](demos/index.html), with
 See [demo instructions and coverage](demos/README.md).
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
-[native non-HAM GPU renderer](docs/webgl-renderer.md). GPU presentation, switching
+[native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching
 and remaining modes are still planned.
 
 ## Compile and run

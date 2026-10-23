@@ -226,11 +226,11 @@ keeps working without DOM/WebGL; browser GPU code stays host-owned and instance-
 
 | Gate | Proposal phases | Work and acceptance |
 | --- | --- | --- |
-| D0: baseline and ABI | P0 | Baseline restored; ABI v1 codec, hashed fixture loader, byte diff/PNG artifacts and independent planar/PNG fixtures implemented. 328 tests pass locally. Chromium covers sprite/input, actual WebGL2 readback, native planar/copper pixels and PNG decode. Hosted CI remains unobserved. |
+| D0: baseline and ABI | P0 | Baseline restored; ABI v1 codec, hashed fixture loader, byte diff/PNG artifacts and independent planar/PNG fixtures implemented. 332 tests pass locally. Chromium covers sprite/input, actual WebGL2 readback, native planar/copper pixels and PNG decode. Hosted CI remains unobserved. |
 | D1: CPU bridge | P1 + early P11 | Implemented: ChipMemory/dirty queries, planar reference/explainPixel, bounded ILBM/ByteRun1 and standalone physical playfield export, now including EHB. Text/images/Bobs/Autoback, padding and logical/physical comparisons pass. See [planar contract](planar-display.md); physical sprites remain outside this bridge. |
 | D2: copper and screens | P2–P3 + P11 | OCS interpreter/stack builder, EHB screens, static scroll/DPF, laced IFF fields and explicit composition implemented. General AMOS positioning/offset/rainbow/copper commands, superhires and live field/input timing remain. M2/M3 capture gates remain open; see [mode contract](display-modes.md). |
 | D3: hardware reference | P4–P5 + P11 | HAM6 CPU/ILBM/Canvas path implemented with independent synthetic goldens (see [contract](ham-display.md)); eight-channel reference composition, attached pairs, priority matrices and direct AMOS snapshot export now pass local synthetic tests (see [sprite contract](sprite-display.md)). Bounded DMA/reuse/manual registers are implemented. Canvas now shares structured rows and the resolver. DMA contention/latch timing and computed allocation remain open. Retain M4/M5 fixtures/captures. |
-| D4: GPU path | P6–P9 | Integer/table texture infrastructure, exact shader readback, dirty-row uploads and context loss/restore/disposal pass locally; see [resource contract](webgl-resources.md). Non-HAM decode/resolve now passes 151 local GPU/CPU frames, including 100 seeded inputs; see [renderer contract](webgl-renderer.md). Scaling, switching/live diff, full mode/capture coverage and HAM/event parity remain open. No silent fallback counted as GPU parity. |
+| D4: GPU path | P6–P9 | Integer/table texture infrastructure, exact shader readback, dirty-row uploads and context loss/restore/disposal pass locally; see [resource contract](webgl-resources.md). Non-HAM decode/resolve now passes 151 local GPU/CPU frames, including 100 seeded inputs; see [renderer contract](webgl-renderer.md). Direct nearest/aspect presentation and restored canvas output pass six additional checks. Switching/live diff, full mode/capture coverage and HAM/event parity remain open. No silent fallback counted as GPU parity. |
 | D5: canonical storage | P11 | Move drawing, Bob saved backgrounds and display-visible assets to authoritative planes; compare to bridge, then remove duplicate writable pixel storage. Keep CLI/bank serialization/collision behavior. |
 | D6: release/performance | P12 + M11 | Captured command suites, 60-second real-game replay with zero native mismatches, measured CPU/GPU budgets and ten-minute refresh-rate pacing. Workers/CRT and optional P10 AGA follow their own gates. |
 
@@ -241,7 +241,7 @@ AGA is an explicit optional expansion after OCS/ECS. WebGL delivery does not era
 the broader PLAN.md requirements for numeric fidelity, audio or the ASCII frontend.
 
 Baseline restoration regenerated all three demos; `npm run check` now passes
-328 tests. `npm run test:browser` covers native planar/copper exports, direct-sprite/cursor checks and a WebGL2
+332 tests. `npm run test:browser` covers native planar/copper exports, direct-sprite/cursor checks and a WebGL2
 SwiftShader probe exercising R8UI memory, uint address arithmetic, RGBA8UI
 framebuffer output and normalized readback. GPU resource tests also verify all
 ABI textures, dirty uploads and real loss/restore/disposal. This establishes infrastructure,

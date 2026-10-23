@@ -235,8 +235,9 @@ const scenarios = [
   { id: 'webgl-resources', title: 'GPU uploads and context restoration', description: 'All chip sizes and ABI tables, dirty rows, independent consumers, loss/restore and disposal.', run: require('./webglResourcesProbe'), check(result, assert) {
     assert.deepStrictEqual(result.checkedSizes, [524288,1048576,2097152]); assert.strictEqual(result.dirtyRows, 3); assert.strictEqual(result.generation, 2);
   } },
-  { id: 'webgl-renderer', title: 'GPU / CPU rendering gallery', description: 'Independent IFF images, scroll and sprite matrices, copper stacks, 100 seeded frames and restored shaders.', run: require('./webglRendererProbe'), check(result, assert) {
+  { id: 'webgl-renderer', title: 'GPU / CPU rendering gallery', description: 'Independent IFF images, scroll and sprite matrices, copper stacks, 100 seeded frames, GPU presentation/aspect scaling and restored shaders.', run: require('./webglRendererProbe'), check(result, assert) {
     assert.strictEqual(result.randomCount, 100); assert.strictEqual(result.restored, true); assert.strictEqual(result.reducerVerified, true);
+    assert.strictEqual(result.presentationChecks, 6);
   } },
   { id: 'sprite-dma', title: 'Sprite DMA and channel reuse', description: 'Chained descriptors, blank control lines, held rows and native Canvas pixels.', run: require('./spriteDmaProbe'), check(result, assert) {
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
