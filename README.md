@@ -7,6 +7,9 @@ full AMOS/Amiga compatibility is still in progress. See
 Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).
+The next program milestone is **Dithell's Wonderland**: see the
+[readiness assessment and implementation order](docs/wonderland.md) and
+[original-asset preview](demos/wonderland.html). The game does not compile or run yet.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
 [native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching

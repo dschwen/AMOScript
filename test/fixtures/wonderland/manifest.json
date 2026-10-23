@@ -1,0 +1,33 @@
+{
+  "evidence": "Original ILBM assets independently decoded by tools/wonderland_goldens.py; OCS high-nibble palette, doubled lowres samples. No Amiga execution capture.",
+  "images": [
+    {
+      "source": "Title_Screen.Iff",
+      "file": "Title_Screen.Iff.png",
+      "width": 640,
+      "height": 256,
+      "sha256": "15c1e17d268f8653a255c21ac5edef16fe75d5e38585f07fe71cfacd4ecba4ff"
+    },
+    {
+      "source": "Landscape.Iff",
+      "file": "Landscape.Iff.png",
+      "width": 1920,
+      "height": 288,
+      "sha256": "3a6d927236fdfed5786f1da92b77496450b65b0e9d8e722581d9625ee2c35bba"
+    },
+    {
+      "source": "Score_Panel.Iff",
+      "file": "Score_Panel.Iff.png",
+      "width": 640,
+      "height": 256,
+      "sha256": "7e55011b321d734564e69ef9569b9821afdeba14c4e6e80f218057e1f3d282c2"
+    },
+    {
+      "source": "Editor_Panel.Iff",
+      "file": "Editor_Panel.Iff.png",
+      "width": 640,
+      "height": 256,
+      "sha256": "9037d31fb3238b50d788183316922b7a4aa6d8d3a459db47346c52bfd4b3782c"
+    }
+  ]
+}

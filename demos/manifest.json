@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "wonderland.html",
+      "title": "Wonderland milestone: original assets",
+      "description": "Four original screens checked against independently decoded PNGs, embedded-bank inventory and current compiler blockers. Asset preview only; the game is not running yet.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html"
+    },
+    {
       "file": "webgl-integers.html",
       "title": "WebGL2 integer readback",
       "description": "Exact chip bytes, unsigned addressing, integer framebuffer and PNG decoding.",

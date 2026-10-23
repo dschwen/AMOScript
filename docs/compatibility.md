@@ -1,12 +1,17 @@
 # Compatibility and implementation status
 
-Updated 2026-10-23. The current local baseline has **332 passing tests**, plus a
+Updated 2026-10-23. The current local baseline has **339 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
 The current run includes direct sprites and refreshed demos; the expanded suite
 has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
+
+The next end-to-end target is [Wonderland in the browser](wonderland.md).
+Its original source currently stops at `Set Buffer` on line 2; a bounded full
+inventory finds 44 unrecognized encodings. Four original images and embedded
+banks are checked, with a standalone asset-preview demo. The game is not running.
 
 ## Feature matrix
 

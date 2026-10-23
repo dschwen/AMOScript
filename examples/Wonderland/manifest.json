@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "title": "Dithell's Wonderland",
+  "source": {
+    "repository": "https://github.com/AOZ-Studio/AMOS-Professional-Official",
+    "revision": "7f32e0abe1b6b415c9502b598cd3e4cb131018f8",
+    "path": "AMOS/Productivity2/Wonderland",
+    "evidence": "Original program/assets; no reference execution capture."
+  },
+  "files": {
+    "Editor_Panel.Iff": {
+      "byteLength": 4716,
+      "sha256": "5f18bb936177d64cfa316e5c5361c8677ce7ec919301a536d5eb0dac7f208dd6"
+    },
+    "Game1.lev": {
+      "byteLength": 7205,
+      "sha256": "2f94728a161edfebdeffcf455fc79deb57b3284daba4a2f284d9f26f0d8651f6"
+    },
+    "Game2.lev": {
+      "byteLength": 7205,
+      "sha256": "6956b3ed54bc02cdf6593094efbfe6806b3b42647fc17363db2bbcc3ba2ad5c0"
+    },
+    "Landscape.Iff": {
+      "byteLength": 20138,
+      "sha256": "38adea11b8920881f622287b4d45c3a78681ddcb60d9c6df419a07b420c351ee"
+    },
+    "Score_Panel.Iff": {
+      "byteLength": 4372,
+      "sha256": "7a92a3be0eacde0a25001c6aceef7b80b5b51722dfc971212fad8c272ee6aade"
+    },
+    "Title_Screen.Iff": {
+      "byteLength": 7044,
+      "sha256": "1d8b615d9beb1a3433b274a9caa5fe5611177443b4eebe22407e7665229f7f10"
+    },
+    "Wonderland.AMOS": {
+      "byteLength": 51424,
+      "sha256": "0ce13c006150237086c0787bfbd717c8bfa2862d2b8a61ac83d5637cb2082389"
+    },
+    "Wonderland_Samples.Abk": {
+      "byteLength": 20814,
+      "sha256": "907ffd9c78cad1011579ad7e16b73d94465769a9f2c341eef2c221f50ab029fd"
+    }
+  }
+}

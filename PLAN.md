@@ -2,6 +2,22 @@
 
 Assessment updated: 2026-10-23.
 
+## Current priority: Wonderland in the browser
+
+Use the unmodified, pinned `examples/Wonderland/Wonderland.AMOS` as the next
+end-to-end milestone. [The Wonderland assessment](docs/wonderland.md) records
+the source inventory, current blockers and ordered acceptance gates. Prioritize
+the language/runtime/display features exercised by this program over unrelated
+compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
+runtime and shared immutable display snapshots; integrate the required display
+commands through the existing design. The broader milestones below remain open.
+
+Initial assessment: 753 physical lines, 142 distinct token encodings, 44 not
+recognized by the compiler decoder. Compilation stops at `Set Buffer` on line 2.
+The 75-image bank and level-data bank decode; all four original ILBMs now match
+independently decoded PNGs in CPU and browser asset tests. This is asset readiness,
+not a running game or an Amiga reference capture.
+
 ## Objective and scope
 
 Transpile tokenized AMOS `.AMOS` programs into self-contained JavaScript
@@ -16,7 +32,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **332 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **339 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

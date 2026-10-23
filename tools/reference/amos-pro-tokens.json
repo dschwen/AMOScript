@@ -1,0 +1,3615 @@
+{
+  "version": 1,
+  "description": "Original assembled token offsets/signatures for diagnostic inventory, not compiler support or reference execution.",
+  "source": "https://github.com/AOZ-Studio/AMOS-Professional-Official",
+  "libraries": {
+    "AMOSPro.Lib": {
+      "byteLength": 44276,
+      "sha256": "c303367d3d6d17b21e1bdeda75631f4114a59c8320fc27a8c8f93eaa5ef81c33"
+    },
+    "AMOSPro_Music.Lib": {
+      "byteLength": 12712,
+      "sha256": "e35b2c6727740289532836e032f4e590d91d5b6f7ae5487c5e3a9bd02bd02ce7"
+    },
+    "AMOSPro_Compact.Lib": {
+      "byteLength": 1540,
+      "sha256": "5d3b9089bb98c7d58eccbeec91f21e14ab847f39c6979b74c7f5afac33000151"
+    },
+    "AMOSPro_Request.Lib": {
+      "byteLength": 264,
+      "sha256": "c74c476529b7606aa8f74afe306804d781a67c8b06ce6367f90faaf0ca23c015"
+    },
+    "AMOSPro_IOPorts.Lib": {
+      "byteLength": 3680,
+      "sha256": "9705ebe7212299e521bbae067b41e6022e8d87af67cb8665f79568080c343e2e"
+    }
+  },
+  "main": {
+    "1002": {
+      "name": "set slider",
+      "signature": "I0,0,0,0,0,0,0,0"
+    },
+    "1022": {
+      "name": "set pattern",
+      "signature": "I0"
+    },
+    "1034": {
+      "name": "set line",
+      "signature": "I0"
+    },
+    "1044": {
+      "name": "ink",
+      "signature": "I0"
+    },
+    "1050": {
+      "name": "ink",
+      "signature": "I0,0"
+    },
+    "1066": {
+      "name": "gr writing",
+      "signature": "I0"
+    },
+    "1078": {
+      "name": "clip",
+      "signature": "I"
+    },
+    "1084": {
+      "name": "clip",
+      "signature": "I0,0t0,0"
+    },
+    "1092": {
+      "name": "set tempras",
+      "signature": "I"
+    },
+    "1120": {
+      "name": "put cblock",
+      "signature": "I0,0,0"
+    },
+    "1146": {
+      "name": "get block",
+      "signature": "I0,0,0,0,0"
+    },
+    "1160": {
+      "name": "get block",
+      "signature": "I0,0,0,0,0,0"
+    },
+    "1172": {
+      "name": "put block",
+      "signature": "I0"
+    },
+    "1184": {
+      "name": "put block",
+      "signature": "I0,0,0"
+    },
+    "1190": {
+      "name": "put block",
+      "signature": "I0,0,0,0"
+    },
+    "1202": {
+      "name": "jup",
+      "signature": "00"
+    },
+    "1218": {
+      "name": "jleft",
+      "signature": "00"
+    },
+    "1224": {
+      "name": "jright",
+      "signature": "00"
+    },
+    "1232": {
+      "name": "fire",
+      "signature": "00"
+    },
+    "1248": {
+      "name": "false",
+      "signature": "0"
+    },
+    "1254": {
+      "name": "put key",
+      "signature": "I2"
+    },
+    "1262": {
+      "name": "scancode",
+      "signature": "0"
+    },
+    "1270": {
+      "name": "scanshift",
+      "signature": "0"
+    },
+    "1280": {
+      "name": "clear key",
+      "signature": "I"
+    },
+    "1290": {
+      "name": "wait key",
+      "signature": "I"
+    },
+    "1306": {
+      "name": "wind open",
+      "signature": "I0,0,0,0,0,0,0"
+    },
+    "1378": {
+      "name": "locate",
+      "signature": "I0,0"
+    },
+    "1388": {
+      "name": "clw",
+      "signature": "I"
+    },
+    "1392": {
+      "name": "home",
+      "signature": "I"
+    },
+    "1408": {
+      "name": "writing",
+      "signature": "I0"
+    },
+    "1418": {
+      "name": "writing",
+      "signature": "I0,0"
+    },
+    "1422": {
+      "name": "title top",
+      "signature": "I2"
+    },
+    "1432": {
+      "name": "title bottom",
+      "signature": "I2"
+    },
+    "1446": {
+      "name": "curs off",
+      "signature": "I"
+    },
+    "1454": {
+      "name": "curs on",
+      "signature": "I"
+    },
+    "1462": {
+      "name": "inverse off",
+      "signature": "I"
+    },
+    "1474": {
+      "name": "inverse on",
+      "signature": "I"
+    },
+    "1484": {
+      "name": "under off",
+      "signature": "I"
+    },
+    "1494": {
+      "name": "under on",
+      "signature": "I"
+    },
+    "1504": {
+      "name": "cleft$",
+      "signature": "2"
+    },
+    "1510": {
+      "name": "cright$",
+      "signature": "2"
+    },
+    "1528": {
+      "name": "cdown",
+      "signature": "I"
+    },
+    "1534": {
+      "name": "cleft",
+      "signature": "I"
+    },
+    "1540": {
+      "name": "cright",
+      "signature": "I"
+    },
+    "1596": {
+      "name": "cline",
+      "signature": "I0"
+    },
+    "1628": {
+      "name": "ygr",
+      "signature": "0"
+    },
+    "1632": {
+      "name": "reserve zone",
+      "signature": "I"
+    },
+    "1646": {
+      "name": "reserve zone",
+      "signature": "I0"
+    },
+    "1660": {
+      "name": "reset zone",
+      "signature": "I0"
+    },
+    "1668": {
+      "name": "set zone",
+      "signature": "I0,0,0t0,0"
+    },
+    "1680": {
+      "name": "zone",
+      "signature": "00,0"
+    },
+    "1704": {
+      "name": "close workbench",
+      "signature": "I"
+    },
+    "1766": {
+      "name": "ldir/w",
+      "signature": "I"
+    },
+    "1774": {
+      "name": "ldir/w",
+      "signature": "I2"
+    },
+    "1788": {
+      "name": "dir/w",
+      "signature": "I2"
+    },
+    "1790": {
+      "name": "ldir",
+      "signature": "I"
+    },
+    "1838": {
+      "name": "save",
+      "signature": "I2"
+    },
+    "1844": {
+      "name": "save",
+      "signature": "I2,0"
+    },
+    "1864": {
+      "name": "dfree",
+      "signature": "0"
+    },
+    "1870": {
+      "name": "mkdir",
+      "signature": "I2"
+    },
+    "1886": {
+      "name": "eof",
+      "signature": "00"
+    },
+    "1890": {
+      "name": "pof",
+      "signature": "V00"
+    },
+    "1900": {
+      "name": "close",
+      "signature": "I"
+    },
+    "1914": {
+      "name": "parent",
+      "signature": "I"
+    },
+    "1920": {
+      "name": "rename",
+      "signature": "I2t2"
+    },
+    "1930": {
+      "name": "kill",
+      "signature": "I2"
+    },
+    "1948": {
+      "name": "field",
+      "signature": "I"
+    },
+    "1954": {
+      "name": "fsel$",
+      "signature": "22"
+    },
+    "1962": {
+      "name": "fsel$",
+      "signature": "22,2"
+    },
+    "1978": {
+      "name": "fsel$",
+      "signature": "22,2,2,2"
+    },
+    "1986": {
+      "name": "set sprite buffer",
+      "signature": "I0"
+    },
+    "2004": {
+      "name": "amalerr",
+      "signature": "0"
+    },
+    "2012": {
+      "name": "amal",
+      "signature": "I0,3"
+    },
+    "2020": {
+      "name": "amal",
+      "signature": "I0,2t0"
+    },
+    "2128": {
+      "name": "reserve as data",
+      "signature": "I0,0"
+    },
+    "2140": {
+      "name": "reserve as chip data",
+      "signature": "I0,0"
+    },
+    "2218": {
+      "name": "bclr",
+      "signature": "I0,0"
+    },
+    "2226": {
+      "name": "bchg",
+      "signature": "I0,0"
+    },
+    "2234": {
+      "name": "btst",
+      "signature": "00,0"
+    },
+    "2242": {
+      "name": "ror.b",
+      "signature": "I0,0"
+    },
+    "2250": {
+      "name": "ror.w",
+      "signature": "I0,0"
+    },
+    "2288": {
+      "name": "rol.l",
+      "signature": "I0,0"
+    },
+    "2296": {
+      "name": "areg",
+      "signature": "V00"
+    },
+    "2330": {
+      "name": "cop logic",
+      "signature": "0"
+    },
+    "2340": {
+      "name": "prg first$",
+      "signature": "22"
+    },
+    "2352": {
+      "name": "prg next$",
+      "signature": "2"
+    },
+    "2362": {
+      "name": "psel$",
+      "signature": "22"
+    },
+    "2370": {
+      "name": "psel$",
+      "signature": "22,2"
+    },
+    "2386": {
+      "name": "psel$",
+      "signature": "22,2,2,2"
+    },
+    "2394": {
+      "name": "prun",
+      "signature": "I2"
+    },
+    "2416": {
+      "name": "priority reverse off",
+      "signature": "I"
+    },
+    "2430": {
+      "name": "dev first$",
+      "signature": "22"
+    },
+    "2442": {
+      "name": "dev next$",
+      "signature": "2"
+    },
+    "2452": {
+      "name": "hrev block",
+      "signature": "I0"
+    },
+    "2464": {
+      "name": "vrev block",
+      "signature": "I0"
+    },
+    "2476": {
+      "name": "hrev",
+      "signature": "00"
+    },
+    "2482": {
+      "name": "vrev",
+      "signature": "00"
+    },
+    "2498": {
+      "name": "bank swap",
+      "signature": "I0,0"
+    },
+    "2502": {
+      "name": "display height",
+      "signature": "0"
+    },
+    "2516": {
+      "name": "ntsc",
+      "signature": "0"
+    },
+    "2520": {
+      "name": "laced",
+      "signature": "0"
+    },
+    "2550": {
+      "name": "disc info$",
+      "signature": "22"
+    },
+    "2562": {
+      "name": "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/",
+      "signature": "I"
+    },
+    "2578": {
+      "name": "set accessory",
+      "signature": "I"
+    },
+    "2600": {
+      "name": "frame play",
+      "signature": "00,0,0"
+    },
+    "2648": {
+      "name": "frame skip",
+      "signature": "00"
+    },
+    "2664": {
+      "name": "frame param",
+      "signature": "0"
+    },
+    "2676": {
+      "name": "call editor",
+      "signature": "I0"
+    },
+    "2694": {
+      "name": "call editor",
+      "signature": "I0,0,2"
+    },
+    "2704": {
+      "name": "dialog box",
+      "signature": "03,0,2"
+    },
+    "2710": {
+      "name": "dialog box",
+      "signature": "03,0,2,0,0"
+    },
+    "2720": {
+      "name": "dialog open",
+      "signature": "I0,3"
+    },
+    "2736": {
+      "name": "dialog open",
+      "signature": "I0,3,0"
+    },
+    "2742": {
+      "name": "dialog open",
+      "signature": "I0,3,0,0"
+    },
+    "2750": {
+      "name": "dialog close",
+      "signature": "I"
+    },
+    "2764": {
+      "name": "dialog close",
+      "signature": "I0"
+    },
+    "2788": {
+      "name": "dialog run",
+      "signature": "00,0,0,0"
+    },
+    "2796": {
+      "name": "dialog",
+      "signature": "00"
+    },
+    "2804": {
+      "name": "edialog",
+      "signature": "0"
+    },
+    "2812": {
+      "name": "dialog clr",
+      "signature": "I0"
+    },
+    "2824": {
+      "name": "dialog update",
+      "signature": "I0,0"
+    },
+    "2848": {
+      "name": "dialog update",
+      "signature": "I0,0,3,0"
+    },
+    "2856": {
+      "name": "dialog update",
+      "signature": "I0,0,3,0,0"
+    },
+    "2866": {
+      "name": "dialog freeze",
+      "signature": "I"
+    },
+    "2882": {
+      "name": "dialog unfreeze",
+      "signature": "I"
+    },
+    "2898": {
+      "name": "dialog unfreeze",
+      "signature": "I0"
+    },
+    "2910": {
+      "name": "resource unpack",
+      "signature": "I0,0,0"
+    },
+    "2946": {
+      "name": "err$",
+      "signature": "20"
+    },
+    "2952": {
+      "name": "assign",
+      "signature": "I2t2"
+    },
+    "2962": {
+      "name": "errtrap",
+      "signature": "0"
+    },
+    "2970": {
+      "name": "dev open",
+      "signature": "I0,2,0,0,0"
+    },
+    "2988": {
+      "name": "dev close",
+      "signature": "I"
+    },
+    "2998": {
+      "name": "dev close",
+      "signature": "I0"
+    },
+    "0006": {
+      "name": "",
+      "signature": ""
+    },
+    "000c": {
+      "name": "",
+      "signature": ""
+    },
+    "0012": {
+      "name": "",
+      "signature": ""
+    },
+    "0018": {
+      "name": "",
+      "signature": ""
+    },
+    "001e": {
+      "name": "",
+      "signature": "C0"
+    },
+    "0026": {
+      "name": "",
+      "signature": "C2"
+    },
+    "002e": {
+      "name": "",
+      "signature": "C2"
+    },
+    "0036": {
+      "name": "",
+      "signature": "C0"
+    },
+    "003e": {
+      "name": "",
+      "signature": "C0"
+    },
+    "0046": {
+      "name": "",
+      "signature": "C1"
+    },
+    "004e": {
+      "name": "",
+      "signature": ""
+    },
+    "0054": {
+      "name": ":",
+      "signature": ""
+    },
+    "005c": {
+      "name": ",",
+      "signature": "O"
+    },
+    "0064": {
+      "name": ";",
+      "signature": "O"
+    },
+    "006c": {
+      "name": "#",
+      "signature": "O"
+    },
+    "0074": {
+      "name": "(",
+      "signature": "O"
+    },
+    "007c": {
+      "name": ")",
+      "signature": "O"
+    },
+    "0084": {
+      "name": "[",
+      "signature": "O"
+    },
+    "008c": {
+      "name": "]",
+      "signature": "O"
+    },
+    "0094": {
+      "name": "to",
+      "signature": ""
+    },
+    "009c": {
+      "name": "not",
+      "signature": ""
+    },
+    "00a6": {
+      "name": "swap",
+      "signature": ""
+    },
+    "00b0": {
+      "name": "def fn",
+      "signature": ""
+    },
+    "00bc": {
+      "name": "fn",
+      "signature": ""
+    },
+    "00c4": {
+      "name": "follow off",
+      "signature": "I"
+    },
+    "00d4": {
+      "name": "follow",
+      "signature": "I"
+    },
+    "00e0": {
+      "name": "resume next",
+      "signature": "I"
+    },
+    "00f2": {
+      "name": "inkey$",
+      "signature": "2"
+    },
+    "00fe": {
+      "name": "repeat$",
+      "signature": "22,0"
+    },
+    "010e": {
+      "name": "zone$",
+      "signature": "22,0"
+    },
+    "011c": {
+      "name": "border$",
+      "signature": "22,0"
+    },
+    "012c": {
+      "name": "double buffer",
+      "signature": "I"
+    },
+    "0140": {
+      "name": "start",
+      "signature": "00"
+    },
+    "014c": {
+      "name": "length",
+      "signature": "00"
+    },
+    "015a": {
+      "name": "doke",
+      "signature": "I0,0"
+    },
+    "0168": {
+      "name": "on menu del",
+      "signature": "I"
+    },
+    "017a": {
+      "name": "on menu on",
+      "signature": "I"
+    },
+    "018a": {
+      "name": "on menu off",
+      "signature": "I"
+    },
+    "019c": {
+      "name": "every on",
+      "signature": "I"
+    },
+    "01aa": {
+      "name": "every off",
+      "signature": "I"
+    },
+    "01ba": {
+      "name": "logbase",
+      "signature": "00"
+    },
+    "01c8": {
+      "name": "logic",
+      "signature": "0"
+    },
+    "01d4": {
+      "name": "logic",
+      "signature": "00"
+    },
+    "01dc": {
+      "name": "asc",
+      "signature": "02"
+    },
+    "01e6": {
+      "name": "as",
+      "signature": "I"
+    },
+    "01ee": {
+      "name": "call",
+      "signature": "I"
+    },
+    "01f8": {
+      "name": "execall",
+      "signature": "00"
+    },
+    "0206": {
+      "name": "gfxcall",
+      "signature": "00"
+    },
+    "0214": {
+      "name": "doscall",
+      "signature": "00"
+    },
+    "0222": {
+      "name": "intcall",
+      "signature": "00"
+    },
+    "0230": {
+      "name": "freeze",
+      "signature": "I"
+    },
+    "023c": {
+      "name": "for",
+      "signature": ""
+    },
+    "0246": {
+      "name": "next",
+      "signature": ""
+    },
+    "0250": {
+      "name": "repeat",
+      "signature": ""
+    },
+    "025c": {
+      "name": "until",
+      "signature": ""
+    },
+    "0268": {
+      "name": "while",
+      "signature": ""
+    },
+    "0274": {
+      "name": "wend",
+      "signature": ""
+    },
+    "027e": {
+      "name": "do",
+      "signature": ""
+    },
+    "0286": {
+      "name": "loop",
+      "signature": ""
+    },
+    "0290": {
+      "name": "exit if",
+      "signature": ""
+    },
+    "029e": {
+      "name": "exit",
+      "signature": ""
+    },
+    "02a8": {
+      "name": "goto",
+      "signature": ""
+    },
+    "02b2": {
+      "name": "gosub",
+      "signature": ""
+    },
+    "02be": {
+      "name": "if",
+      "signature": ""
+    },
+    "02c6": {
+      "name": "then",
+      "signature": ""
+    },
+    "02d0": {
+      "name": "else",
+      "signature": ""
+    },
+    "02da": {
+      "name": "end if",
+      "signature": ""
+    },
+    "02e6": {
+      "name": "on error",
+      "signature": ""
+    },
+    "02f4": {
+      "name": "on break proc",
+      "signature": ""
+    },
+    "0308": {
+      "name": "on menu",
+      "signature": "I0"
+    },
+    "0316": {
+      "name": "on",
+      "signature": ""
+    },
+    "031e": {
+      "name": "resume label",
+      "signature": ""
+    },
+    "0330": {
+      "name": "resume",
+      "signature": ""
+    },
+    "033c": {
+      "name": "pop proc",
+      "signature": ""
+    },
+    "034a": {
+      "name": "every",
+      "signature": "I"
+    },
+    "0356": {
+      "name": "step",
+      "signature": ""
+    },
+    "0360": {
+      "name": "return",
+      "signature": "I"
+    },
+    "036c": {
+      "name": "pop",
+      "signature": "I"
+    },
+    "0376": {
+      "name": "procedure",
+      "signature": ""
+    },
+    "0386": {
+      "name": "proc",
+      "signature": ""
+    },
+    "0390": {
+      "name": "end proc",
+      "signature": ""
+    },
+    "039e": {
+      "name": "shared",
+      "signature": ""
+    },
+    "03aa": {
+      "name": "global",
+      "signature": ""
+    },
+    "03b6": {
+      "name": "end",
+      "signature": "I"
+    },
+    "03c0": {
+      "name": "stop",
+      "signature": "I"
+    },
+    "03ca": {
+      "name": "param#",
+      "signature": "0"
+    },
+    "03d6": {
+      "name": "param$",
+      "signature": "2"
+    },
+    "03e2": {
+      "name": "param",
+      "signature": "0"
+    },
+    "03ee": {
+      "name": "error",
+      "signature": "I0"
+    },
+    "03fa": {
+      "name": "errn",
+      "signature": "0"
+    },
+    "0404": {
+      "name": "data",
+      "signature": ""
+    },
+    "040e": {
+      "name": "read",
+      "signature": ""
+    },
+    "0418": {
+      "name": "restore",
+      "signature": ""
+    },
+    "0426": {
+      "name": "break off",
+      "signature": "I"
+    },
+    "0436": {
+      "name": "break on",
+      "signature": "I"
+    },
+    "0444": {
+      "name": "inc",
+      "signature": "I"
+    },
+    "044e": {
+      "name": "dec",
+      "signature": "I"
+    },
+    "0458": {
+      "name": "add",
+      "signature": "I"
+    },
+    "0462": {
+      "name": "add",
+      "signature": "I"
+    },
+    "046a": {
+      "name": "print #",
+      "signature": ""
+    },
+    "0476": {
+      "name": "print",
+      "signature": "I"
+    },
+    "0482": {
+      "name": "lprint",
+      "signature": "I"
+    },
+    "048e": {
+      "name": "input$",
+      "signature": "20"
+    },
+    "049c": {
+      "name": "input$",
+      "signature": "20,0"
+    },
+    "04a6": {
+      "name": "using",
+      "signature": "I"
+    },
+    "04b2": {
+      "name": "input #",
+      "signature": ""
+    },
+    "04be": {
+      "name": "line input #",
+      "signature": ""
+    },
+    "04d0": {
+      "name": "input",
+      "signature": "I"
+    },
+    "04dc": {
+      "name": "line input",
+      "signature": "I"
+    },
+    "04ec": {
+      "name": "run",
+      "signature": "I"
+    },
+    "04f6": {
+      "name": "run",
+      "signature": "I2"
+    },
+    "04fe": {
+      "name": "set buffer",
+      "signature": "I"
+    },
+    "050e": {
+      "name": "mid$",
+      "signature": "22,0,0"
+    },
+    "051e": {
+      "name": "mid$",
+      "signature": "22,0"
+    },
+    "0528": {
+      "name": "left$",
+      "signature": "22,0"
+    },
+    "0536": {
+      "name": "right$",
+      "signature": "22,0"
+    },
+    "0546": {
+      "name": "flip$",
+      "signature": "22"
+    },
+    "0552": {
+      "name": "chr$",
+      "signature": "20"
+    },
+    "055e": {
+      "name": "space$",
+      "signature": "20"
+    },
+    "056c": {
+      "name": "string$",
+      "signature": "22,0"
+    },
+    "057c": {
+      "name": "upper$",
+      "signature": "22"
+    },
+    "058a": {
+      "name": "lower$",
+      "signature": "22"
+    },
+    "0598": {
+      "name": "str$",
+      "signature": "24"
+    },
+    "05a4": {
+      "name": "val",
+      "signature": "02"
+    },
+    "05ae": {
+      "name": "bin$",
+      "signature": "20"
+    },
+    "05ba": {
+      "name": "bin$",
+      "signature": "20,0"
+    },
+    "05c4": {
+      "name": "hex$",
+      "signature": "20"
+    },
+    "05d0": {
+      "name": "hex$",
+      "signature": "20,0"
+    },
+    "05da": {
+      "name": "len",
+      "signature": "02"
+    },
+    "05e4": {
+      "name": "instr",
+      "signature": "02,2"
+    },
+    "05f4": {
+      "name": "instr",
+      "signature": "02,2,0"
+    },
+    "0600": {
+      "name": "tab$",
+      "signature": "2"
+    },
+    "060a": {
+      "name": "free",
+      "signature": "0"
+    },
+    "0614": {
+      "name": "varptr",
+      "signature": "0"
+    },
+    "0620": {
+      "name": "remember x",
+      "signature": "I"
+    },
+    "0630": {
+      "name": "remember y",
+      "signature": "I"
+    },
+    "0640": {
+      "name": "dim",
+      "signature": "I"
+    },
+    "064a": {
+      "name": "rem",
+      "signature": ""
+    },
+    "0652": {
+      "name": "'",
+      "signature": ""
+    },
+    "0658": {
+      "name": "sort",
+      "signature": "I"
+    },
+    "0662": {
+      "name": "match",
+      "signature": "03,3"
+    },
+    "0670": {
+      "name": "edit",
+      "signature": "I"
+    },
+    "067a": {
+      "name": "direct",
+      "signature": "I"
+    },
+    "0686": {
+      "name": "rnd",
+      "signature": "00"
+    },
+    "0690": {
+      "name": "randomize",
+      "signature": "I0"
+    },
+    "06a0": {
+      "name": "sgn",
+      "signature": "04"
+    },
+    "06aa": {
+      "name": "abs",
+      "signature": "44"
+    },
+    "06b4": {
+      "name": "int",
+      "signature": "44"
+    },
+    "06be": {
+      "name": "radian",
+      "signature": "I"
+    },
+    "06ca": {
+      "name": "degree",
+      "signature": "I"
+    },
+    "06d6": {
+      "name": "pi#",
+      "signature": "1"
+    },
+    "06e0": {
+      "name": "fix",
+      "signature": "I0"
+    },
+    "06ea": {
+      "name": "min",
+      "signature": "00,0"
+    },
+    "06f6": {
+      "name": "max",
+      "signature": "00,0"
+    },
+    "0702": {
+      "name": "sin",
+      "signature": "15"
+    },
+    "070c": {
+      "name": "cos",
+      "signature": "15"
+    },
+    "0716": {
+      "name": "tan",
+      "signature": "15"
+    },
+    "0720": {
+      "name": "asin",
+      "signature": "11"
+    },
+    "072c": {
+      "name": "acos",
+      "signature": "11"
+    },
+    "0738": {
+      "name": "atan",
+      "signature": "11"
+    },
+    "0744": {
+      "name": "hsin",
+      "signature": "15"
+    },
+    "0750": {
+      "name": "hcos",
+      "signature": "15"
+    },
+    "075c": {
+      "name": "htan",
+      "signature": "15"
+    },
+    "0768": {
+      "name": "sqr",
+      "signature": "11"
+    },
+    "0772": {
+      "name": "log",
+      "signature": "11"
+    },
+    "077c": {
+      "name": "ln",
+      "signature": "11"
+    },
+    "0786": {
+      "name": "exp",
+      "signature": "11"
+    },
+    "0790": {
+      "name": "menu to bank",
+      "signature": "I0"
+    },
+    "07a4": {
+      "name": "bank to menu",
+      "signature": "I0"
+    },
+    "07b8": {
+      "name": "menu on",
+      "signature": "I"
+    },
+    "07c6": {
+      "name": "menu off",
+      "signature": "I"
+    },
+    "07d4": {
+      "name": "menu calc",
+      "signature": "I"
+    },
+    "07e4": {
+      "name": "menu mouse on",
+      "signature": "I"
+    },
+    "07f8": {
+      "name": "menu mouse off",
+      "signature": "I"
+    },
+    "080c": {
+      "name": "menu base",
+      "signature": "I0,0"
+    },
+    "081e": {
+      "name": "set menu",
+      "signature": "I0t0,0"
+    },
+    "0832": {
+      "name": "x menu",
+      "signature": "00"
+    },
+    "0840": {
+      "name": "y menu",
+      "signature": "00"
+    },
+    "084e": {
+      "name": "menu key",
+      "signature": "I0t0,0"
+    },
+    "0862": {
+      "name": "menu bar",
+      "signature": "I0"
+    },
+    "0872": {
+      "name": "menu line",
+      "signature": "I0"
+    },
+    "0882": {
+      "name": "menu tline",
+      "signature": "I0"
+    },
+    "0894": {
+      "name": "menu movable",
+      "signature": "I0"
+    },
+    "08a8": {
+      "name": "menu static",
+      "signature": "I0"
+    },
+    "08ba": {
+      "name": "menu item movable",
+      "signature": "I0"
+    },
+    "08d2": {
+      "name": "menu item static",
+      "signature": "I0"
+    },
+    "08ea": {
+      "name": "menu active",
+      "signature": "I0"
+    },
+    "08fc": {
+      "name": "menu inactive",
+      "signature": "I0"
+    },
+    "0910": {
+      "name": "menu separate",
+      "signature": "I0"
+    },
+    "0924": {
+      "name": "menu link",
+      "signature": "I0"
+    },
+    "0934": {
+      "name": "menu called",
+      "signature": "I0"
+    },
+    "0946": {
+      "name": "menu once",
+      "signature": "I0"
+    },
+    "0956": {
+      "name": "menu del",
+      "signature": "I"
+    },
+    "0964": {
+      "name": "menu$",
+      "signature": "V"
+    },
+    "0970": {
+      "name": "choice",
+      "signature": "0"
+    },
+    "097e": {
+      "name": "choice",
+      "signature": "00"
+    },
+    "0986": {
+      "name": "screen copy",
+      "signature": "I0t0"
+    },
+    "099c": {
+      "name": "screen copy",
+      "signature": "I0t00"
+    },
+    "09a8": {
+      "name": "screen copy",
+      "signature": "I0,0,0,0,0t0,0,0"
+    },
+    "09be": {
+      "name": "screen copy",
+      "signature": "I0,0,0,0,0t0,0,0,0"
+    },
+    "09d6": {
+      "name": "screen clone",
+      "signature": "I0"
+    },
+    "09ea": {
+      "name": "screen open",
+      "signature": "I0,0,0,0,0"
+    },
+    "0a04": {
+      "name": "screen close",
+      "signature": "I0"
+    },
+    "0a18": {
+      "name": "screen display",
+      "signature": "I0,0,0,0,0"
+    },
+    "0a36": {
+      "name": "screen offset",
+      "signature": "I0,0,0"
+    },
+    "0a4e": {
+      "name": "screen size",
+      "signature": ""
+    },
+    "0a5e": {
+      "name": "screen colour",
+      "signature": "0"
+    },
+    "0a72": {
+      "name": "screen to front",
+      "signature": "I"
+    },
+    "0a88": {
+      "name": "screen to front",
+      "signature": "I0"
+    },
+    "0a90": {
+      "name": "screen to back",
+      "signature": "I"
+    },
+    "0aa6": {
+      "name": "screen to back",
+      "signature": "I0"
+    },
+    "0aae": {
+      "name": "screen hide",
+      "signature": "I"
+    },
+    "0ac0": {
+      "name": "screen hide",
+      "signature": "I0"
+    },
+    "0ac8": {
+      "name": "screen show",
+      "signature": "I"
+    },
+    "0ada": {
+      "name": "screen show",
+      "signature": "I0"
+    },
+    "0ae2": {
+      "name": "screen swap",
+      "signature": "I"
+    },
+    "0af4": {
+      "name": "screen swap",
+      "signature": "I0"
+    },
+    "0afc": {
+      "name": "save iff",
+      "signature": "I2"
+    },
+    "0b0c": {
+      "name": "save iff",
+      "signature": "I2,0"
+    },
+    "0b16": {
+      "name": "view",
+      "signature": "I"
+    },
+    "0b20": {
+      "name": "auto view off",
+      "signature": "I"
+    },
+    "0b34": {
+      "name": "auto view on",
+      "signature": "I"
+    },
+    "0b46": {
+      "name": "screen base",
+      "signature": "0"
+    },
+    "0b58": {
+      "name": "screen width",
+      "signature": "0"
+    },
+    "0b6c": {
+      "name": "screen width",
+      "signature": "00"
+    },
+    "0b74": {
+      "name": "screen height",
+      "signature": "0"
+    },
+    "0b88": {
+      "name": "screen height",
+      "signature": "00"
+    },
+    "0b90": {
+      "name": "get palette",
+      "signature": "I0"
+    },
+    "0ba4": {
+      "name": "get palette",
+      "signature": "I0,0"
+    },
+    "0bae": {
+      "name": "cls",
+      "signature": "I"
+    },
+    "0bb8": {
+      "name": "cls",
+      "signature": "I0"
+    },
+    "0bc0": {
+      "name": "cls",
+      "signature": "I0,0,0t0,0"
+    },
+    "0bd0": {
+      "name": "def scroll",
+      "signature": "I0,0,0t0,0,0,0"
+    },
+    "0bee": {
+      "name": "x hard",
+      "signature": "00"
+    },
+    "0bfc": {
+      "name": "x hard",
+      "signature": "00,0"
+    },
+    "0c06": {
+      "name": "y hard",
+      "signature": "00"
+    },
+    "0c14": {
+      "name": "y hard",
+      "signature": "00,0"
+    },
+    "0c1e": {
+      "name": "x screen",
+      "signature": "00"
+    },
+    "0c2e": {
+      "name": "x screen",
+      "signature": "00,0"
+    },
+    "0c38": {
+      "name": "y screen",
+      "signature": "00"
+    },
+    "0c48": {
+      "name": "y screen",
+      "signature": "00,0"
+    },
+    "0c52": {
+      "name": "x text",
+      "signature": "00"
+    },
+    "0c60": {
+      "name": "y text",
+      "signature": "00"
+    },
+    "0c6e": {
+      "name": "screen",
+      "signature": "I0"
+    },
+    "0c7c": {
+      "name": "screen",
+      "signature": "0"
+    },
+    "0c84": {
+      "name": "hires",
+      "signature": "0"
+    },
+    "0c90": {
+      "name": "lowres",
+      "signature": "0"
+    },
+    "0c9c": {
+      "name": "dual playfield",
+      "signature": "I0,0"
+    },
+    "0cb4": {
+      "name": "dual priority",
+      "signature": "I0,0"
+    },
+    "0cca": {
+      "name": "wait vbl",
+      "signature": "I"
+    },
+    "0cd8": {
+      "name": "default palette",
+      "signature": "I"
+    },
+    "0cee": {
+      "name": "default",
+      "signature": "I"
+    },
+    "0cfc": {
+      "name": "palette",
+      "signature": "I"
+    },
+    "0d0a": {
+      "name": "colour back",
+      "signature": "I0"
+    },
+    "0d1c": {
+      "name": "colour",
+      "signature": "I0,0"
+    },
+    "0d2c": {
+      "name": "colour",
+      "signature": "00"
+    },
+    "0d34": {
+      "name": "flash off",
+      "signature": "I"
+    },
+    "0d44": {
+      "name": "flash",
+      "signature": "I0,2"
+    },
+    "0d52": {
+      "name": "shift off",
+      "signature": "I"
+    },
+    "0d62": {
+      "name": "shift up",
+      "signature": "I0,0,0,0"
+    },
+    "0d78": {
+      "name": "shift down",
+      "signature": "I0,0,0,0"
+    },
+    "0d90": {
+      "name": "set rainbow",
+      "signature": "I0,0,0,2,2,2"
+    },
+    "0dae": {
+      "name": "set rainbow",
+      "signature": "I0,0,0,2,2,2,0"
+    },
+    "0dc2": {
+      "name": "rainbow del",
+      "signature": "I"
+    },
+    "0dd4": {
+      "name": "rainbow del",
+      "signature": "I0"
+    },
+    "0ddc": {
+      "name": "rainbow",
+      "signature": "I0,0,0,0"
+    },
+    "0df0": {
+      "name": "rain",
+      "signature": "V00,0"
+    },
+    "0dfe": {
+      "name": "fade",
+      "signature": "I"
+    },
+    "0e08": {
+      "name": "phybase",
+      "signature": "00"
+    },
+    "0e16": {
+      "name": "physic",
+      "signature": "0"
+    },
+    "0e24": {
+      "name": "physic",
+      "signature": "00"
+    },
+    "0e2c": {
+      "name": "autoback",
+      "signature": "I0"
+    },
+    "0e3c": {
+      "name": "plot",
+      "signature": "I0,0"
+    },
+    "0e4a": {
+      "name": "plot",
+      "signature": "I0,0,0"
+    },
+    "0e56": {
+      "name": "point",
+      "signature": "00,0"
+    },
+    "0e64": {
+      "name": "draw to",
+      "signature": "I0,0"
+    },
+    "0e74": {
+      "name": "draw",
+      "signature": "I0,0t0,0"
+    },
+    "0e86": {
+      "name": "ellipse",
+      "signature": "I0,0,0,0"
+    },
+    "0e9a": {
+      "name": "circle",
+      "signature": "I0,0,0"
+    },
+    "0eac": {
+      "name": "polyline",
+      "signature": "I"
+    },
+    "0eba": {
+      "name": "polygon",
+      "signature": "I"
+    },
+    "0ec8": {
+      "name": "bar",
+      "signature": "I0,0t0,0"
+    },
+    "0ed8": {
+      "name": "box",
+      "signature": "I0,0t0,0"
+    },
+    "0ee8": {
+      "name": "paint",
+      "signature": "I0,0"
+    },
+    "0ef8": {
+      "name": "paint",
+      "signature": "I0,0,0"
+    },
+    "0f04": {
+      "name": "gr locate",
+      "signature": "I0,0"
+    },
+    "0f16": {
+      "name": "text length",
+      "signature": "02"
+    },
+    "0f28": {
+      "name": "text styles",
+      "signature": "0"
+    },
+    "0f3a": {
+      "name": "text base",
+      "signature": "0"
+    },
+    "0f4a": {
+      "name": "text",
+      "signature": "I0,0,2"
+    },
+    "0f5a": {
+      "name": "set text",
+      "signature": "I0"
+    },
+    "0f6a": {
+      "name": "set paint",
+      "signature": "I0"
+    },
+    "0f7a": {
+      "name": "get fonts",
+      "signature": "I"
+    },
+    "0f8a": {
+      "name": "get disc fonts",
+      "signature": "I"
+    },
+    "0f9e": {
+      "name": "get rom fonts",
+      "signature": "I"
+    },
+    "0fb2": {
+      "name": "set font",
+      "signature": "I0"
+    },
+    "0fc2": {
+      "name": "font$",
+      "signature": "20"
+    },
+    "0fce": {
+      "name": "hslider",
+      "signature": "I0,0t0,0,0,0,0"
+    },
+    "0fe8": {
+      "name": "vslider",
+      "signature": "I0,0t0,0,0,0,0"
+    },
+    "105a": {
+      "name": "ink",
+      "signature": "I0,0,0"
+    },
+    "10a4": {
+      "name": "set tempras",
+      "signature": "I0"
+    },
+    "10ac": {
+      "name": "set tempras",
+      "signature": "I0,0"
+    },
+    "10b6": {
+      "name": "appear",
+      "signature": "I0t0,0"
+    },
+    "10c8": {
+      "name": "appear",
+      "signature": "I0t0,0,0"
+    },
+    "10d6": {
+      "name": "zoom",
+      "signature": "I0,0,0,0,0t0,0,0,0,0"
+    },
+    "10f4": {
+      "name": "get cblock",
+      "signature": "I0,0,0,0,0"
+    },
+    "110e": {
+      "name": "put cblock",
+      "signature": "I0"
+    },
+    "112c": {
+      "name": "del cblock",
+      "signature": "I"
+    },
+    "113e": {
+      "name": "del cblock",
+      "signature": "I0"
+    },
+    "119e": {
+      "name": "put block",
+      "signature": "I0,0,0,0,0"
+    },
+    "11ae": {
+      "name": "del block",
+      "signature": "I"
+    },
+    "11be": {
+      "name": "del block",
+      "signature": "I0"
+    },
+    "11c6": {
+      "name": "key speed",
+      "signature": "I0,0"
+    },
+    "11d8": {
+      "name": "key state",
+      "signature": "00"
+    },
+    "11e8": {
+      "name": "key shift",
+      "signature": "0"
+    },
+    "11f8": {
+      "name": "joy",
+      "signature": "00"
+    },
+    "120c": {
+      "name": "jdown",
+      "signature": "00"
+    },
+    "123e": {
+      "name": "true",
+      "signature": "0"
+    },
+    "129e": {
+      "name": "wait",
+      "signature": "I0"
+    },
+    "12aa": {
+      "name": "key$",
+      "signature": "V20"
+    },
+    "12b6": {
+      "name": "scan$",
+      "signature": "20"
+    },
+    "12c4": {
+      "name": "scan$",
+      "signature": "20,0"
+    },
+    "12ce": {
+      "name": "timer",
+      "signature": "V0"
+    },
+    "12da": {
+      "name": "wind open",
+      "signature": "I0,0,0,0,0"
+    },
+    "12f4": {
+      "name": "wind open",
+      "signature": "I0,0,0,0,0,0"
+    },
+    "131a": {
+      "name": "wind close",
+      "signature": "I"
+    },
+    "132a": {
+      "name": "wind save",
+      "signature": "I"
+    },
+    "133a": {
+      "name": "wind move",
+      "signature": "I0,0"
+    },
+    "134c": {
+      "name": "wind size",
+      "signature": "I0,0"
+    },
+    "135e": {
+      "name": "window",
+      "signature": "I0"
+    },
+    "136c": {
+      "name": "windon",
+      "signature": "0"
+    },
+    "139c": {
+      "name": "curs pen",
+      "signature": "I0"
+    },
+    "13ac": {
+      "name": "pen$",
+      "signature": "20"
+    },
+    "13b8": {
+      "name": "paper$",
+      "signature": "20"
+    },
+    "13c6": {
+      "name": "at",
+      "signature": "20,0"
+    },
+    "13d2": {
+      "name": "pen",
+      "signature": "I0"
+    },
+    "13dc": {
+      "name": "paper",
+      "signature": "I0"
+    },
+    "13e8": {
+      "name": "centre",
+      "signature": "I2"
+    },
+    "13f6": {
+      "name": "border",
+      "signature": "I0,0,0"
+    },
+    "14a2": {
+      "name": "shade off",
+      "signature": "I"
+    },
+    "14b2": {
+      "name": "shade on",
+      "signature": "I"
+    },
+    "14c0": {
+      "name": "scroll off",
+      "signature": "I"
+    },
+    "14d0": {
+      "name": "scroll on",
+      "signature": "I"
+    },
+    "14e0": {
+      "name": "scroll",
+      "signature": "I0"
+    },
+    "14ee": {
+      "name": "cup$",
+      "signature": "2"
+    },
+    "14f8": {
+      "name": "cdown$",
+      "signature": "2"
+    },
+    "151e": {
+      "name": "cup",
+      "signature": "I"
+    },
+    "154c": {
+      "name": "memorize x",
+      "signature": "I"
+    },
+    "155c": {
+      "name": "memorize y",
+      "signature": "I"
+    },
+    "156c": {
+      "name": "cmove$",
+      "signature": "20,0"
+    },
+    "157c": {
+      "name": "cmove",
+      "signature": "I0,0"
+    },
+    "158a": {
+      "name": "cline",
+      "signature": "I"
+    },
+    "159e": {
+      "name": "hscroll",
+      "signature": "I0"
+    },
+    "15ac": {
+      "name": "vscroll",
+      "signature": "I0"
+    },
+    "15ba": {
+      "name": "set tab",
+      "signature": "I0"
+    },
+    "15c8": {
+      "name": "set curs",
+      "signature": "I0,0,0,0,0,0,0,0"
+    },
+    "15e6": {
+      "name": "x curs",
+      "signature": "0"
+    },
+    "15f2": {
+      "name": "y curs",
+      "signature": "0"
+    },
+    "15fe": {
+      "name": "x graphic",
+      "signature": "00"
+    },
+    "160e": {
+      "name": "y graphic",
+      "signature": "00"
+    },
+    "161e": {
+      "name": "xgr",
+      "signature": "0"
+    },
+    "164e": {
+      "name": "reset zone",
+      "signature": "I"
+    },
+    "168e": {
+      "name": "zone",
+      "signature": "00,0,0"
+    },
+    "169a": {
+      "name": "hzone",
+      "signature": "00,0"
+    },
+    "16aa": {
+      "name": "hzone",
+      "signature": "00,0,0"
+    },
+    "16b6": {
+      "name": "scin",
+      "signature": "00,0"
+    },
+    "16c4": {
+      "name": "scin",
+      "signature": "00,0,0"
+    },
+    "16d0": {
+      "name": "mouse screen",
+      "signature": "0"
+    },
+    "16e2": {
+      "name": "mouse zone",
+      "signature": "0"
+    },
+    "16f2": {
+      "name": "set input",
+      "signature": "I0,0"
+    },
+    "171a": {
+      "name": "close editor",
+      "signature": "I"
+    },
+    "172c": {
+      "name": "dir first$",
+      "signature": "22"
+    },
+    "173e": {
+      "name": "dir next$",
+      "signature": "2"
+    },
+    "174e": {
+      "name": "exist",
+      "signature": "02"
+    },
+    "175a": {
+      "name": "dir$",
+      "signature": "V2"
+    },
+    "177c": {
+      "name": "dir/w",
+      "signature": "I"
+    },
+    "179c": {
+      "name": "ldir",
+      "signature": "I2"
+    },
+    "17a4": {
+      "name": "dir",
+      "signature": "I"
+    },
+    "17ae": {
+      "name": "dir",
+      "signature": "I2"
+    },
+    "17b6": {
+      "name": "set dir",
+      "signature": "I0"
+    },
+    "17c4": {
+      "name": "set dir",
+      "signature": "I0,2"
+    },
+    "17d4": {
+      "name": "load iff",
+      "signature": "I2"
+    },
+    "17e4": {
+      "name": "load iff",
+      "signature": "I2,0"
+    },
+    "17ee": {
+      "name": "mask iff",
+      "signature": "I0"
+    },
+    "17fe": {
+      "name": "picture",
+      "signature": "0"
+    },
+    "180c": {
+      "name": "bload",
+      "signature": "I2,0"
+    },
+    "181a": {
+      "name": "bsave",
+      "signature": "I2,0t0"
+    },
+    "182a": {
+      "name": "pload",
+      "signature": "I2,0"
+    },
+    "184e": {
+      "name": "load",
+      "signature": "I2"
+    },
+    "185a": {
+      "name": "load",
+      "signature": "I2,0"
+    },
+    "187c": {
+      "name": "lof",
+      "signature": "00"
+    },
+    "189c": {
+      "name": "port",
+      "signature": "00"
+    },
+    "18a8": {
+      "name": "open random",
+      "signature": "I0,2"
+    },
+    "18bc": {
+      "name": "open in",
+      "signature": "I0,2"
+    },
+    "18cc": {
+      "name": "open out",
+      "signature": "I0,2"
+    },
+    "18de": {
+      "name": "open port",
+      "signature": "I0,2"
+    },
+    "18f0": {
+      "name": "append",
+      "signature": "I0,2"
+    },
+    "190c": {
+      "name": "close",
+      "signature": "I0"
+    },
+    "193c": {
+      "name": "drive",
+      "signature": "02"
+    },
+    "196c": {
+      "name": "fsel$",
+      "signature": "22,2,2"
+    },
+    "199e": {
+      "name": "sprite off",
+      "signature": "I"
+    },
+    "19b0": {
+      "name": "sprite off",
+      "signature": "I0"
+    },
+    "19b8": {
+      "name": "sprite priority",
+      "signature": "I0"
+    },
+    "19ce": {
+      "name": "sprite update off",
+      "signature": "I"
+    },
+    "19e6": {
+      "name": "sprite update on",
+      "signature": "I"
+    },
+    "19fc": {
+      "name": "sprite update",
+      "signature": "I"
+    },
+    "1a10": {
+      "name": "spritebob col",
+      "signature": "00"
+    },
+    "1a26": {
+      "name": "spritebob col",
+      "signature": "00,0t0"
+    },
+    "1a32": {
+      "name": "sprite col",
+      "signature": "00"
+    },
+    "1a44": {
+      "name": "sprite col",
+      "signature": "00,0t0"
+    },
+    "1a50": {
+      "name": "set hardcol",
+      "signature": "I0,0"
+    },
+    "1a64": {
+      "name": "hardcol",
+      "signature": "00"
+    },
+    "1a72": {
+      "name": "sprite base",
+      "signature": "00"
+    },
+    "1a84": {
+      "name": "icon base",
+      "signature": "00"
+    },
+    "1a94": {
+      "name": "sprite",
+      "signature": "I0,0,0,0"
+    },
+    "1aa8": {
+      "name": "bob off",
+      "signature": "I"
+    },
+    "1ab6": {
+      "name": "bob off",
+      "signature": "I0"
+    },
+    "1abe": {
+      "name": "bob update off",
+      "signature": "I"
+    },
+    "1ad2": {
+      "name": "bob update on",
+      "signature": "I"
+    },
+    "1ae6": {
+      "name": "bob update",
+      "signature": "I"
+    },
+    "1af6": {
+      "name": "bob clear",
+      "signature": "I"
+    },
+    "1b06": {
+      "name": "bob draw",
+      "signature": "I"
+    },
+    "1b14": {
+      "name": "bobsprite col",
+      "signature": "00"
+    },
+    "1b2a": {
+      "name": "bobsprite col",
+      "signature": "00,0t0"
+    },
+    "1b36": {
+      "name": "bob col",
+      "signature": "00"
+    },
+    "1b46": {
+      "name": "bob col",
+      "signature": "00,0t0"
+    },
+    "1b52": {
+      "name": "col",
+      "signature": "00"
+    },
+    "1b5c": {
+      "name": "limit bob",
+      "signature": "I"
+    },
+    "1b6c": {
+      "name": "limit bob",
+      "signature": "I0,0t0,0"
+    },
+    "1b7a": {
+      "name": "limit bob",
+      "signature": "I0,0,0t0,0"
+    },
+    "1b8a": {
+      "name": "set bob",
+      "signature": "I0,0,0,0"
+    },
+    "1b9e": {
+      "name": "bob",
+      "signature": "I0,0,0,0"
+    },
+    "1bae": {
+      "name": "get sprite palette",
+      "signature": "I"
+    },
+    "1bc8": {
+      "name": "get sprite palette",
+      "signature": "I0"
+    },
+    "1bd0": {
+      "name": "get sprite",
+      "signature": "I0,0,0t0,0"
+    },
+    "1bea": {
+      "name": "get sprite",
+      "signature": "I0,0,0,0t0,0"
+    },
+    "1bfc": {
+      "name": "get bob",
+      "signature": "I0,0,0t0,0"
+    },
+    "1c14": {
+      "name": "get bob",
+      "signature": "I0,0,0,0t0,0"
+    },
+    "1c26": {
+      "name": "del sprite",
+      "signature": "I0"
+    },
+    "1c38": {
+      "name": "del sprite",
+      "signature": "I0t0"
+    },
+    "1c42": {
+      "name": "del bob",
+      "signature": "I0"
+    },
+    "1c52": {
+      "name": "del bob",
+      "signature": "I0t0"
+    },
+    "1c5c": {
+      "name": "del icon",
+      "signature": "I0"
+    },
+    "1c6c": {
+      "name": "del icon",
+      "signature": "I0t0"
+    },
+    "1c76": {
+      "name": "ins sprite",
+      "signature": "I0"
+    },
+    "1c88": {
+      "name": "ins bob",
+      "signature": "I0"
+    },
+    "1c96": {
+      "name": "ins icon",
+      "signature": "I0"
+    },
+    "1ca6": {
+      "name": "get icon palette",
+      "signature": "I"
+    },
+    "1cbe": {
+      "name": "get icon palette",
+      "signature": "I0"
+    },
+    "1cc6": {
+      "name": "get icon",
+      "signature": "I0,0,0t0,0"
+    },
+    "1cde": {
+      "name": "get icon",
+      "signature": "I0,0,0,0t0,0"
+    },
+    "1cf0": {
+      "name": "put bob",
+      "signature": "I0"
+    },
+    "1cfe": {
+      "name": "paste bob",
+      "signature": "I0,0,0"
+    },
+    "1d12": {
+      "name": "paste icon",
+      "signature": "I0,0,0"
+    },
+    "1d28": {
+      "name": "make mask",
+      "signature": "I"
+    },
+    "1d38": {
+      "name": "make mask",
+      "signature": "I0"
+    },
+    "1d40": {
+      "name": "no mask",
+      "signature": "I"
+    },
+    "1d4e": {
+      "name": "no mask",
+      "signature": "I0"
+    },
+    "1d56": {
+      "name": "make icon mask",
+      "signature": "I"
+    },
+    "1d6c": {
+      "name": "make icon mask",
+      "signature": "I0"
+    },
+    "1d74": {
+      "name": "no icon mask",
+      "signature": "I"
+    },
+    "1d88": {
+      "name": "no icon mask",
+      "signature": "I0"
+    },
+    "1d90": {
+      "name": "hot spot",
+      "signature": "I0,0"
+    },
+    "1da2": {
+      "name": "hot spot",
+      "signature": "I0,0,0"
+    },
+    "1dae": {
+      "name": "priority on",
+      "signature": "I"
+    },
+    "1dc0": {
+      "name": "priority off",
+      "signature": "I"
+    },
+    "1dd2": {
+      "name": "hide on",
+      "signature": "I"
+    },
+    "1de0": {
+      "name": "hide",
+      "signature": "I"
+    },
+    "1dea": {
+      "name": "show on",
+      "signature": "I"
+    },
+    "1df8": {
+      "name": "show",
+      "signature": "I"
+    },
+    "1e02": {
+      "name": "change mouse",
+      "signature": "I0"
+    },
+    "1e16": {
+      "name": "x mouse",
+      "signature": "V0"
+    },
+    "1e24": {
+      "name": "y mouse",
+      "signature": "V0"
+    },
+    "1e32": {
+      "name": "mouse key",
+      "signature": "0"
+    },
+    "1e42": {
+      "name": "mouse click",
+      "signature": "0"
+    },
+    "1e54": {
+      "name": "limit mouse",
+      "signature": "I"
+    },
+    "1e66": {
+      "name": "limit mouse",
+      "signature": "I0"
+    },
+    "1e6e": {
+      "name": "limit mouse",
+      "signature": "I0,0t0,0"
+    },
+    "1e7c": {
+      "name": "unfreeze",
+      "signature": "I"
+    },
+    "1e8a": {
+      "name": "move x",
+      "signature": "I0,3"
+    },
+    "1e9a": {
+      "name": "move x",
+      "signature": "I0,2t0"
+    },
+    "1ea6": {
+      "name": "move y",
+      "signature": "I0,3"
+    },
+    "1eb6": {
+      "name": "move y",
+      "signature": "I0,2t0"
+    },
+    "1ec2": {
+      "name": "move off",
+      "signature": "I"
+    },
+    "1ed2": {
+      "name": "move off",
+      "signature": "I0"
+    },
+    "1eda": {
+      "name": "move on",
+      "signature": "I"
+    },
+    "1ee8": {
+      "name": "move on",
+      "signature": "I0"
+    },
+    "1ef0": {
+      "name": "move freeze",
+      "signature": "I"
+    },
+    "1f02": {
+      "name": "move freeze",
+      "signature": "I0"
+    },
+    "1f0a": {
+      "name": "anim off",
+      "signature": "I"
+    },
+    "1f1a": {
+      "name": "anim off",
+      "signature": "I0"
+    },
+    "1f22": {
+      "name": "anim on",
+      "signature": "I"
+    },
+    "1f30": {
+      "name": "anim on",
+      "signature": "I0"
+    },
+    "1f38": {
+      "name": "anim freeze",
+      "signature": "I"
+    },
+    "1f4a": {
+      "name": "anim freeze",
+      "signature": "I0"
+    },
+    "1f52": {
+      "name": "anim",
+      "signature": "I0,3"
+    },
+    "1f60": {
+      "name": "anim",
+      "signature": "I0,2t0"
+    },
+    "1f6c": {
+      "name": "movon",
+      "signature": "00"
+    },
+    "1f78": {
+      "name": "chanan",
+      "signature": "00"
+    },
+    "1f86": {
+      "name": "chanmv",
+      "signature": "00"
+    },
+    "1f94": {
+      "name": "channel",
+      "signature": "I"
+    },
+    "1fa2": {
+      "name": "amreg",
+      "signature": "V00"
+    },
+    "1fb0": {
+      "name": "amreg",
+      "signature": "V00,0"
+    },
+    "1fbc": {
+      "name": "amal on",
+      "signature": "I"
+    },
+    "1fca": {
+      "name": "amal on",
+      "signature": "I0"
+    },
+    "1fd2": {
+      "name": "amal off",
+      "signature": "I"
+    },
+    "1fe2": {
+      "name": "amal off",
+      "signature": "I0"
+    },
+    "1fea": {
+      "name": "amal freeze",
+      "signature": "I"
+    },
+    "1ffc": {
+      "name": "amal freeze",
+      "signature": "I0"
+    },
+    "202c": {
+      "name": "amplay",
+      "signature": "I0,0"
+    },
+    "203c": {
+      "name": "amplay",
+      "signature": "I0,0,0t0"
+    },
+    "204a": {
+      "name": "synchro on",
+      "signature": "I"
+    },
+    "205a": {
+      "name": "synchro off",
+      "signature": "I"
+    },
+    "206c": {
+      "name": "synchro",
+      "signature": "I"
+    },
+    "207a": {
+      "name": "update off",
+      "signature": "I"
+    },
+    "208a": {
+      "name": "update on",
+      "signature": "I"
+    },
+    "209a": {
+      "name": "update every",
+      "signature": "I0"
+    },
+    "20ae": {
+      "name": "update",
+      "signature": "I"
+    },
+    "20ba": {
+      "name": "x bob",
+      "signature": "00"
+    },
+    "20c6": {
+      "name": "y bob",
+      "signature": "00"
+    },
+    "20d2": {
+      "name": "x sprite",
+      "signature": "00"
+    },
+    "20e2": {
+      "name": "y sprite",
+      "signature": "00"
+    },
+    "20f2": {
+      "name": "reserve as work",
+      "signature": "I0,0"
+    },
+    "210a": {
+      "name": "reserve as chip work",
+      "signature": "I0,0"
+    },
+    "215e": {
+      "name": "erase",
+      "signature": "I0"
+    },
+    "216a": {
+      "name": "list bank",
+      "signature": "I"
+    },
+    "217a": {
+      "name": "chip free",
+      "signature": "0"
+    },
+    "218a": {
+      "name": "fast free",
+      "signature": "0"
+    },
+    "219a": {
+      "name": "fill",
+      "signature": "I0t0,0"
+    },
+    "21aa": {
+      "name": "copy",
+      "signature": "I0,0t0"
+    },
+    "21ba": {
+      "name": "hunt",
+      "signature": "00t0,2"
+    },
+    "21ca": {
+      "name": "poke",
+      "signature": "I0,0"
+    },
+    "21d8": {
+      "name": "loke",
+      "signature": "I0,0"
+    },
+    "21e6": {
+      "name": "peek",
+      "signature": "00"
+    },
+    "21f2": {
+      "name": "deek",
+      "signature": "00"
+    },
+    "21fe": {
+      "name": "leek",
+      "signature": "00"
+    },
+    "220a": {
+      "name": "bset",
+      "signature": "I0,0"
+    },
+    "225e": {
+      "name": "ror.l",
+      "signature": "I0,0"
+    },
+    "226c": {
+      "name": "rol.b",
+      "signature": "I0,0"
+    },
+    "227a": {
+      "name": "rol.w",
+      "signature": "I0,0"
+    },
+    "22a2": {
+      "name": "dreg",
+      "signature": "V00"
+    },
+    "22ae": {
+      "name": "copper on",
+      "signature": "I"
+    },
+    "22be": {
+      "name": "copper off",
+      "signature": "I"
+    },
+    "22ce": {
+      "name": "cop swap",
+      "signature": "I"
+    },
+    "22dc": {
+      "name": "cop reset",
+      "signature": "I"
+    },
+    "22ec": {
+      "name": "cop wait",
+      "signature": "I0,0"
+    },
+    "22fe": {
+      "name": "cop wait",
+      "signature": "I0,0,0,0"
+    },
+    "230c": {
+      "name": "cop movel",
+      "signature": "I0,0"
+    },
+    "231e": {
+      "name": "cop move",
+      "signature": "I0,0"
+    },
+    "237a": {
+      "name": "psel$",
+      "signature": "22,2,2"
+    },
+    "23a0": {
+      "name": "bgrab",
+      "signature": "I0"
+    },
+    "23ac": {
+      "name": "put",
+      "signature": "I0,0"
+    },
+    "23b8": {
+      "name": "get",
+      "signature": "I0,0"
+    },
+    "23c4": {
+      "name": "system",
+      "signature": "I"
+    },
+    "23d0": {
+      "name": "multi wait",
+      "signature": "I"
+    },
+    "23e0": {
+      "name": "i bob",
+      "signature": "00"
+    },
+    "23ec": {
+      "name": "i sprite",
+      "signature": "00"
+    },
+    "23fc": {
+      "name": "priority reverse on",
+      "signature": "I"
+    },
+    "248e": {
+      "name": "rev",
+      "signature": "00"
+    },
+    "24aa": {
+      "name": "amos to front",
+      "signature": "I"
+    },
+    "24be": {
+      "name": "amos to back",
+      "signature": "I"
+    },
+    "24d0": {
+      "name": "amos here",
+      "signature": "0"
+    },
+    "24e0": {
+      "name": "amos lock",
+      "signature": "I"
+    },
+    "24f0": {
+      "name": "amos unlock",
+      "signature": "I"
+    },
+    "252c": {
+      "name": "prg state",
+      "signature": "0"
+    },
+    "253c": {
+      "name": "command line$",
+      "signature": "V2"
+    },
+    "258c": {
+      "name": "@_apml_@",
+      "signature": "I"
+    },
+    "259a": {
+      "name": "trap",
+      "signature": "I"
+    },
+    "25a4": {
+      "name": "else if",
+      "signature": ""
+    },
+    "25b2": {
+      "name": "include",
+      "signature": "I2"
+    },
+    "25c0": {
+      "name": "array",
+      "signature": "03"
+    },
+    "25cc": {
+      "name": "frame load",
+      "signature": "00t0"
+    },
+    "25e0": {
+      "name": "frame load",
+      "signature": "00t0,0"
+    },
+    "25ec": {
+      "name": "frame play",
+      "signature": "00,0"
+    },
+    "260c": {
+      "name": "iff anim",
+      "signature": "I2t0"
+    },
+    "261e": {
+      "name": "iff anim",
+      "signature": "I2t0,0"
+    },
+    "262a": {
+      "name": "frame length",
+      "signature": "00"
+    },
+    "263e": {
+      "name": "frame length",
+      "signature": "00,0"
+    },
+    "265a": {
+      "name": "frame skip",
+      "signature": "00,0"
+    },
+    "268a": {
+      "name": "call editor",
+      "signature": "I0,0"
+    },
+    "26a0": {
+      "name": "ask editor",
+      "signature": "I0"
+    },
+    "26b2": {
+      "name": "ask editor",
+      "signature": "I0,0"
+    },
+    "26bc": {
+      "name": "ask editor",
+      "signature": "I0,0,2"
+    },
+    "26c8": {
+      "name": "erase temp",
+      "signature": "I"
+    },
+    "26d8": {
+      "name": "erase all",
+      "signature": "I"
+    },
+    "26e8": {
+      "name": "dialog box",
+      "signature": "03"
+    },
+    "26fa": {
+      "name": "dialog box",
+      "signature": "03,0"
+    },
+    "276c": {
+      "name": "dialog run",
+      "signature": "00"
+    },
+    "277e": {
+      "name": "dialog run",
+      "signature": "00,0"
+    },
+    "27a4": {
+      "name": "vdialog",
+      "signature": "V00,0"
+    },
+    "27b6": {
+      "name": "vdialog$",
+      "signature": "V20,0"
+    },
+    "27c8": {
+      "name": "rdialog",
+      "signature": "00,0"
+    },
+    "27da": {
+      "name": "rdialog",
+      "signature": "00,0,0"
+    },
+    "27e6": {
+      "name": "rdialog$",
+      "signature": "20,0"
+    },
+    "27f8": {
+      "name": "rdialog$",
+      "signature": "20,0,0"
+    },
+    "283c": {
+      "name": "dialog update",
+      "signature": "I0,0,3"
+    },
+    "287a": {
+      "name": "dialog freeze",
+      "signature": "I0"
+    },
+    "28a0": {
+      "name": "poke$",
+      "signature": "I0,2"
+    },
+    "28ae": {
+      "name": "peek$",
+      "signature": "20,0"
+    },
+    "28be": {
+      "name": "peek$",
+      "signature": "20,0,2"
+    },
+    "28ca": {
+      "name": "resource bank",
+      "signature": "I0"
+    },
+    "28de": {
+      "name": "resource$",
+      "signature": "20"
+    },
+    "28ee": {
+      "name": "resource screen open",
+      "signature": "I0,0,0,0"
+    },
+    "292a": {
+      "name": "read text",
+      "signature": "I2"
+    },
+    "293a": {
+      "name": "read text",
+      "signature": "I2,0,0"
+    },
+    "29a0": {
+      "name": "dev base",
+      "signature": "00"
+    },
+    "29b0": {
+      "name": "dev do",
+      "signature": "I0,0"
+    },
+    "29c0": {
+      "name": "dev send",
+      "signature": "I0,0"
+    },
+    "29d2": {
+      "name": "dev abort",
+      "signature": "I0"
+    },
+    "29e2": {
+      "name": "dev check",
+      "signature": "00"
+    },
+    "29f2": {
+      "name": "lib open",
+      "signature": "I0,2,0"
+    },
+    "2a06": {
+      "name": "lib close",
+      "signature": "I"
+    },
+    "2a16": {
+      "name": "lib close",
+      "signature": "I0"
+    },
+    "2a1e": {
+      "name": "lib call",
+      "signature": "00,0"
+    },
+    "2a30": {
+      "name": "lib base",
+      "signature": "00"
+    },
+    "2a40": {
+      "name": "equ",
+      "signature": "02"
+    },
+    "2a4a": {
+      "name": "lvo",
+      "signature": "02"
+    },
+    "2a54": {
+      "name": "struc",
+      "signature": "V00,2"
+    },
+    "2a64": {
+      "name": "struc$",
+      "signature": "V20,2"
+    },
+    "2a74": {
+      "name": "bstart",
+      "signature": "00"
+    },
+    "2a82": {
+      "name": "blength",
+      "signature": "00"
+    },
+    "2a90": {
+      "name": "bsend",
+      "signature": "I0"
+    },
+    "2a9c": {
+      "name": "bank shrink",
+      "signature": "I0t0"
+    },
+    "2ab0": {
+      "name": "prg under",
+      "signature": "0"
+    },
+    "2ac0": {
+      "name": "arexx open",
+      "signature": "I2"
+    },
+    "2ad2": {
+      "name": "arexx close",
+      "signature": "I"
+    },
+    "2ae4": {
+      "name": "arexx exist",
+      "signature": "02"
+    },
+    "2af6": {
+      "name": "arexx",
+      "signature": "0"
+    },
+    "2b02": {
+      "name": "arexx$",
+      "signature": "20"
+    },
+    "2b10": {
+      "name": "arexx wait",
+      "signature": "I"
+    },
+    "2b20": {
+      "name": "arexx answer",
+      "signature": "I0"
+    },
+    "2b34": {
+      "name": "arexx answer",
+      "signature": "I0,2"
+    },
+    "2b3e": {
+      "name": "exec",
+      "signature": "I2"
+    },
+    "2b4a": {
+      "name": "monitor",
+      "signature": "I"
+    },
+    "2b58": {
+      "name": "screen mode",
+      "signature": "0"
+    },
+    "2b6a": {
+      "name": "screen mode",
+      "signature": "C3"
+    },
+    "2b72": {
+      "name": "kill editor",
+      "signature": "I"
+    },
+    "2b84": {
+      "name": "set double precision",
+      "signature": "I"
+    },
+    "2b9e": {
+      "name": "set stack",
+      "signature": "I"
+    },
+    "2bae": {
+      "name": "get bob palette",
+      "signature": "I"
+    },
+    "2bc4": {
+      "name": "get bob palette",
+      "signature": "I0"
+    },
+    "2bcc": {
+      "name": "set equate bank",
+      "signature": "I0"
+    },
+    "2be2": {
+      "name": "zdialog",
+      "signature": "00,0,0"
+    },
+    "2bf4": {
+      "name": "||apcmp||",
+      "signature": "I"
+    }
+  },
+  "extensions": {
+    "1": {
+      "0006": {
+        "name": "mubase",
+        "signature": "0"
+      },
+      "0012": {
+        "name": "vumeter",
+        "signature": "00"
+      },
+      "0020": {
+        "name": "voice",
+        "signature": "I0"
+      },
+      "002c": {
+        "name": "music off",
+        "signature": "I"
+      },
+      "003c": {
+        "name": "music stop",
+        "signature": "I"
+      },
+      "004c": {
+        "name": "tempo",
+        "signature": "I0"
+      },
+      "0058": {
+        "name": "music",
+        "signature": "I0"
+      },
+      "0064": {
+        "name": "noise to",
+        "signature": "I0"
+      },
+      "0074": {
+        "name": "boom",
+        "signature": "I"
+      },
+      "007e": {
+        "name": "shoot",
+        "signature": "I"
+      },
+      "008a": {
+        "name": "sam bank",
+        "signature": "I0"
+      },
+      "009a": {
+        "name": "sam loop on",
+        "signature": "I"
+      },
+      "00ac": {
+        "name": "sam loop on",
+        "signature": "I"
+      },
+      "00b4": {
+        "name": "sam loop off",
+        "signature": "I"
+      },
+      "00c6": {
+        "name": "sam loop off",
+        "signature": "I0"
+      },
+      "00ce": {
+        "name": "sample",
+        "signature": "I0t0"
+      },
+      "00de": {
+        "name": "sam play",
+        "signature": "I0"
+      },
+      "00ee": {
+        "name": "sam play",
+        "signature": "I0,0"
+      },
+      "00f8": {
+        "name": "sam play",
+        "signature": "I0,0,0"
+      },
+      "0104": {
+        "name": "sam raw",
+        "signature": "I0,0,0,0"
+      },
+      "0118": {
+        "name": "bell",
+        "signature": "I"
+      },
+      "0124": {
+        "name": "bell",
+        "signature": "I0"
+      },
+      "012c": {
+        "name": "play off",
+        "signature": "I"
+      },
+      "013c": {
+        "name": "play off",
+        "signature": "I0"
+      },
+      "0144": {
+        "name": "play",
+        "signature": "I0,0"
+      },
+      "0152": {
+        "name": "play",
+        "signature": "I0,0,0"
+      },
+      "015e": {
+        "name": "set wave",
+        "signature": "I0,2"
+      },
+      "0170": {
+        "name": "del wave",
+        "signature": "I0"
+      },
+      "0180": {
+        "name": "set envel",
+        "signature": "I0,0t0,0"
+      },
+      "0196": {
+        "name": "mvolume",
+        "signature": "I0"
+      },
+      "01a4": {
+        "name": "volume",
+        "signature": "I0"
+      },
+      "01b2": {
+        "name": "volume",
+        "signature": "I0,0"
+      },
+      "01bc": {
+        "name": "wave",
+        "signature": "I0t0"
+      },
+      "01ca": {
+        "name": "led on",
+        "signature": "I"
+      },
+      "01d6": {
+        "name": "led off",
+        "signature": "I"
+      },
+      "01e4": {
+        "name": "say",
+        "signature": "I2"
+      },
+      "01f0": {
+        "name": "say",
+        "signature": "I2,0"
+      },
+      "01fa": {
+        "name": "set talk",
+        "signature": "I0,0,0,0"
+      },
+      "0210": {
+        "name": "sload",
+        "signature": "I0t0,0"
+      },
+      "0220": {
+        "name": "sam swapped",
+        "signature": "00"
+      },
+      "0232": {
+        "name": "sam swap",
+        "signature": "I0t0,0"
+      },
+      "0246": {
+        "name": "sam stop",
+        "signature": "I"
+      },
+      "0256": {
+        "name": "sam stop",
+        "signature": "I0"
+      },
+      "025e": {
+        "name": "track stop",
+        "signature": "I"
+      },
+      "026e": {
+        "name": "track loop on",
+        "signature": "I"
+      },
+      "0282": {
+        "name": "track loop of",
+        "signature": "I"
+      },
+      "0296": {
+        "name": "track play",
+        "signature": "I"
+      },
+      "02a8": {
+        "name": "track play",
+        "signature": "I0"
+      },
+      "02b0": {
+        "name": "track play",
+        "signature": "I0,0"
+      },
+      "02ba": {
+        "name": "track load",
+        "signature": "I2,0"
+      },
+      "02ce": {
+        "name": "mouth width",
+        "signature": "0"
+      },
+      "02e0": {
+        "name": "mouth height",
+        "signature": "0"
+      },
+      "02f2": {
+        "name": "mouth read",
+        "signature": "I"
+      },
+      "0302": {
+        "name": "talk stop",
+        "signature": "I"
+      },
+      "0312": {
+        "name": "talk misc",
+        "signature": "I0,0"
+      },
+      "0324": {
+        "name": "ssave",
+        "signature": "I0,0t0"
+      },
+      "0334": {
+        "name": "med load",
+        "signature": "I2,0"
+      },
+      "0346": {
+        "name": "med play",
+        "signature": "I"
+      },
+      "0356": {
+        "name": "med play",
+        "signature": "I0"
+      },
+      "035e": {
+        "name": "med play",
+        "signature": "I0,0"
+      },
+      "0368": {
+        "name": "med stop",
+        "signature": "I"
+      },
+      "0376": {
+        "name": "med cont",
+        "signature": "I"
+      },
+      "0384": {
+        "name": "med midi on",
+        "signature": "I"
+      }
+    },
+    "2": {
+      "0006": {
+        "name": "pack",
+        "signature": "I0t0"
+      },
+      "0014": {
+        "name": "pack",
+        "signature": "I0t0,0,0,0,0"
+      },
+      "0026": {
+        "name": "spack",
+        "signature": "I0t0"
+      },
+      "0036": {
+        "name": "spack",
+        "signature": "I0t0,0,0,0,0"
+      },
+      "0048": {
+        "name": "unpack",
+        "signature": "I0"
+      },
+      "0056": {
+        "name": "unpack",
+        "signature": "I0t0"
+      },
+      "0060": {
+        "name": "unpack",
+        "signature": "I0,0,0"
+      }
+    },
+    "3": {
+      "0006": {
+        "name": "request on",
+        "signature": "I"
+      },
+      "0016": {
+        "name": "request off",
+        "signature": "I"
+      },
+      "0028": {
+        "name": "request wb",
+        "signature": "I"
+      }
+    },
+    "6": {
+      "0006": {
+        "name": "serial open",
+        "signature": "I0,0"
+      },
+      "001c": {
+        "name": "serial open",
+        "signature": "I0,0,0,0,0"
+      },
+      "002c": {
+        "name": "serial close",
+        "signature": "I"
+      },
+      "0040": {
+        "name": "serial close",
+        "signature": "I0"
+      },
+      "0048": {
+        "name": "serial speed",
+        "signature": "I0,0"
+      },
+      "005e": {
+        "name": "serial check",
+        "signature": "00"
+      },
+      "0072": {
+        "name": "serial send",
+        "signature": "I0,2"
+      },
+      "0086": {
+        "name": "serial speed",
+        "signature": "I0,0"
+      },
+      "009c": {
+        "name": "serial bits",
+        "signature": "I0,0,0"
+      },
+      "00b2": {
+        "name": "serial x",
+        "signature": "I0,0"
+      },
+      "00c4": {
+        "name": "serial buf",
+        "signature": "I0,0"
+      },
+      "00d8": {
+        "name": "serial parity",
+        "signature": "I0,0"
+      },
+      "00ee": {
+        "name": "serial get",
+        "signature": "00"
+      },
+      "0100": {
+        "name": "serial input$",
+        "signature": "20"
+      },
+      "0114": {
+        "name": "serial fast",
+        "signature": "I0"
+      },
+      "0126": {
+        "name": "serial slow",
+        "signature": "I0"
+      },
+      "0138": {
+        "name": "serial error",
+        "signature": "00"
+      },
+      "014c": {
+        "name": "serial out",
+        "signature": "I0,0,0"
+      },
+      "0162": {
+        "name": "serial status",
+        "signature": "00"
+      },
+      "0176": {
+        "name": "serial base",
+        "signature": "00"
+      },
+      "0188": {
+        "name": "serial abort",
+        "signature": "I0"
+      },
+      "019c": {
+        "name": "printer open",
+        "signature": "I"
+      },
+      "01ae": {
+        "name": "printer close",
+        "signature": "I"
+      },
+      "01c2": {
+        "name": "printer send",
+        "signature": "I2"
+      },
+      "01d6": {
+        "name": "printer out",
+        "signature": "I0,0"
+      },
+      "01ea": {
+        "name": "printer dump",
+        "signature": "I"
+      },
+      "01fe": {
+        "name": "printer dump",
+        "signature": "I0,0t0,0"
+      },
+      "020c": {
+        "name": "printer dump",
+        "signature": "I0,0t0,0,0,0,0"
+      },
+      "0220": {
+        "name": "printer abort",
+        "signature": "I"
+      },
+      "0234": {
+        "name": "printer check",
+        "signature": "0"
+      },
+      "0248": {
+        "name": "printer online",
+        "signature": "0"
+      },
+      "025c": {
+        "name": "printer base",
+        "signature": "0"
+      },
+      "026e": {
+        "name": "printer error",
+        "signature": "0"
+      },
+      "0282": {
+        "name": "parallel open",
+        "signature": "I"
+      },
+      "0296": {
+        "name": "parallel close",
+        "signature": "I"
+      },
+      "02aa": {
+        "name": "parallel send",
+        "signature": "I2"
+      },
+      "02be": {
+        "name": "parallel out",
+        "signature": "I0,0"
+      },
+      "02d4": {
+        "name": "parallel abort",
+        "signature": "I"
+      },
+      "02e8": {
+        "name": "parallel check",
+        "signature": "0"
+      },
+      "02fc": {
+        "name": "parallel status",
+        "signature": "0"
+      },
+      "0312": {
+        "name": "parallel base",
+        "signature": "0"
+      },
+      "0326": {
+        "name": "parallel error",
+        "signature": "0"
+      },
+      "033a": {
+        "name": "parallel input$",
+        "signature": "20"
+      },
+      "0352": {
+        "name": "parallel input$",
+        "signature": "20,0"
+      }
+    }
+  }
+}

@@ -114,7 +114,11 @@ the [original ILBM specification](https://wiki.amigaos.net/wiki/ILBM_IFF_Interle
 
 CMAP high nibbles become OCS RGB and expand by 17. Missing colours use a documented
 evenly spaced grayscale default. Absent CAMG defaults to lowres; unsupported
-mode IDs reject instead of being guessed. BMHD aspect is converted from source
+mode IDs reject instead of being guessed. Legacy CAMG SPRITES (`$4000`) is
+retained as metadata and removed from display-mode interpretation. PAL/NTSC
+monitor IDs (`$21000`/`$11000`) select nominal 50/60 Hz unless overridden;
+their extended marker is removed before checking supported pixel-mode bits.
+Other monitor IDs remain unsupported. BMHD aspect is converted from source
 pixels to native samples. Signed image position/page metadata is retained; it
 does not move the standalone crop window. Options include `chipBytes`, `origin`
 and nominal `videoRate`.
@@ -123,7 +127,10 @@ Mask planes are decoded separately and returned in `mask`; transparent-colour
 metadata is retained. These describe brush/paste transparency, which is not an
 extra hardware display plane. The returned standalone snapshot is opaque.
 Lasso masking, other extended CAMG modes, deep colour, DEST merging
-and known palette-changing/cycling extensions reject. Unknown nonsemantic chunks
+and active palette-changing/cycling extensions reject. Up to 256 inactive CRNG
+records are retained as frozen metadata; size, reserved word, flag bits, range
+ordering and placement before BODY are checked. This enables the original
+Wonderland assets without implementing animated cycling. Unknown nonsemantic chunks
 are skipped with bounds checks. There is no AMOS Load Iff command wired to this
 utility yet, and existing bank Load behavior is unchanged.
 

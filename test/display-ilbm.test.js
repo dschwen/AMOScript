@@ -32,6 +32,38 @@ function small(body, options = {}) {
   return Buffer.concat([form, payload]);
 }
 
+test('ILBM: inactive CRNG metadata is retained; active, malformed and excessive cycles reject', () => {
+  const cycle = Buffer.from('000000240002070f', 'hex');
+  const result = readIlbm(small([0, 0], { extra: [chunk('CRNG', cycle), chunk('CRNG', cycle)] }));
+  assert.deepStrictEqual(result.image.cycles, [{ rate: 36, flags: 2, low: 7, high: 15 }, { rate: 36, flags: 2, low: 7, high: 15 }]);
+  assert.ok(Object.isFrozen(result.image.cycles)); assert.ok(Object.isFrozen(result.image.cycles[0]));
+  for (const [value, error] of [
+    ['000000240003070f', /active CRNG/], ['000100240002070f', /invalid CRNG metadata/],
+    ['000000240004070f', /invalid CRNG metadata/], ['0000002400020f07', /invalid CRNG metadata/],
+    ['00000024', /invalid CRNG size/]
+  ]) assert.throws(() => readIlbm(small([0, 0], { extra: [chunk('CRNG', Buffer.from(value, 'hex'))] })), error);
+  assert.throws(() => readIlbm(small([0, 0], { extra: Array.from({ length: 257 }, () => chunk('CRNG', cycle)) })), /too many CRNG/);
+  const late = Buffer.concat([small([0, 0]), chunk('CRNG', cycle)]); late.writeUInt32BE(late.length - 8, 4);
+  assert.throws(() => readIlbm(late), /properties must precede BODY/);
+});
+
+test('ILBM: legacy SPRITES and PAL/NTSC ModeIDs normalize without becoming plane-count bits', () => {
+  for (const [mode, displayMode, monitor, hz] of [[0x4000, 0, null, 50], [0x21000, 0, 'PAL', 50], [0x11000, 0, 'NTSC', 60], [0x2d000, 0x8000, 'PAL', 50]]) {
+    const data = Buffer.alloc(4); data.writeUInt32BE(mode);
+    const { image, snapshot } = readIlbm(small([0x80, 0], { extra: [chunk('CAMG', data)] }));
+    assert.deepStrictEqual([image.mode, image.displayMode, image.monitor], [mode, displayMode, monitor]);
+    assert.strictEqual(snapshot.frame.lineRegs[8], 0x1000 | displayMode);
+    assert.deepStrictEqual(snapshot.frame.videoRate, { numerator: hz, denominator: 1 });
+    assert.deepStrictEqual(Array.from(reference.render(snapshot.chip, snapshot.frame).slice(0, 4)), [255, 0, 0, 255]);
+    const overridden = readIlbm(small([0, 0], { extra: [chunk('CAMG', data)] }), { videoRate: { numerator: 55, denominator: 1 } });
+    assert.deepStrictEqual(overridden.snapshot.frame.videoRate, { numerator: 55, denominator: 1 });
+  }
+  for (const mode of [0x31000, 0x20000, 0x1000, 0x21020]) {
+    const data = Buffer.alloc(4); data.writeUInt32BE(mode);
+    assert.throws(() => readIlbm(small([0, 0], { extra: [chunk('CAMG', data)] })), /unsupported CAMG/);
+  }
+});
+
 test('ILBM: independent 2/4/8/16/32-colour files match PNGs with raw and ByteRun1 row decoding', () => {
   assert.strictEqual(fixtures.evidence.kind, 'synthetic');
   for (const fixture of fixtures.fixtures) {
