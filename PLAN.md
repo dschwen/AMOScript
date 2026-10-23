@@ -1,0 +1,384 @@
+# AMOScript development plan
+
+Assessment updated: 2026-10-23.
+
+## Objective and scope
+
+Transpile tokenized AMOS `.AMOS` programs into self-contained JavaScript
+modules that run in Node and browsers. Preserve AMOS behavior through explicit
+language semantics and host adapters. A program must compile completely within
+the documented supported subset or fail with a useful diagnostic.
+
+The first compatibility target is the core AMOS language plus a practical 2D
+browser runtime. Full Amiga hardware behavior, extension libraries, and every
+AMOS dialect are longer-term targets. ASCII AMOS input should eventually share
+the same AST and backend, after the binary frontend and core semantics stabilize.
+
+## Verified current state
+
+- `npm test`: **248 passed, 0 failed**.
+- `npm run test:browser`: **passed in Chromium**, covering rendered pixels,
+  keyboard resumption, pointer mapping, program switching, and Stop.
+- The original Test7, Test14, and Test21 regressions are fixed and covered.
+- The generated-artifact gate and full suite pass in a clean-install project
+  copy on Node 22.23.4 and 24.22.1, and locally on Node 18.19.1. Chromium passes
+  under Node 24. The GitHub workflow is configured for Node 22/24 and browser
+  checks on Ubuntu 24.04; fresh hosted execution/system installation is pending.
+  AGENTS.md now documents the active pipeline. See [development](docs/development.md).
+- Generated modules run without a runtime import, including from a separate
+  directory. The CLI has error exit codes and overwrite protection.
+- Integer arithmetic now shares helpers for static expressions and Val results;
+  Mod, division boundaries, and multiplication paths have independent-byte
+  conformance fixtures. Their evidence is labeled source-analysis; reference
+  AMOS execution and floating-point fidelity remain outstanding.
+- Integer-to-float promotion now rounds to a normalized 24-bit mantissa across
+  typed storage, mixed operations/comparisons and numeric functions, including
+  Val-derived integers. Independent bytes and execution tests cover the paths;
+  result rounding and reference execution remain outstanding. See
+  [numeric compatibility](docs/numbers.md).
+- Floating addition/subtraction and For/Next increments now share a mantissa
+  implementation based on preserved Motorola FFP routines, including alignment,
+  cancellation, saturation and underflow. A sixth independent-byte fixture
+  distinguishes its rounding paths from JavaScript. Other float operations and
+  comparison with the selected AMOS/Kickstart library remain unfinished.
+- Floating multiplication and division now use shared mantissa helpers derived
+  from preserved FFPMUL2/FFPDIV routines, with two more independent-byte fixtures.
+  Tests include product carries, recurring quotients, exponent guards and DIVU
+  estimate boundaries. The intended Kickstart multiply variant and library
+  behavior still need reference verification.
+- Val and numeric file input now share an AMOS-source-derived scanner and FFP
+  decimal converter, including intermediate rounding/scaling, runtime type,
+  signed exponent wrapping and source-derived integer/based boundaries. A ninth
+  independent-byte fixture covers conversion separately from arithmetic.
+- Ln, Exp and power now use shared FFP/CORDIC routines derived from preserved
+  Motorola source, with domain/range checks and typed execution coverage. Pi#
+  uses AMOS's stored single-precision constant. A tenth independent-byte fixture
+  records selected results. Base-10 Log and target-library equivalence remain
+  unfinished.
+- Sin/Cos/Tan now share circular CORDIC, source-derived reductions and pole/
+  precision-limit paths. Degree/Radian are per-program modes. An eleventh
+  independent-byte fixture and standalone Chromium drawing/pixel checks cover
+  this slice; comparison with the target mathtrans version remains outstanding.
+- Abs/Int preserve static or Val-derived integer/float type; Sgn returns an
+  integer. Original handlers establish unchecked integer Abs and float-preserving
+  floor. Typed storage and a twelfth independent-byte fixture cover this slice;
+  captured reference execution remains outstanding.
+- Float-to-integer conversion now follows preserved FFPFPI truncation and signed
+  saturation, separate from arithmetic overflow checks. Static bitwise and
+  Val-derived expressions agree. Typed storage, file input and a thirteenth
+  independent-byte fixture cover the paths; target-library capture is pending.
+- Left$/Right$/Mid$ assignment now supports scalar/array string lvalues,
+  procedure scopes, bounded overwrites and self-replacement. Length-prefixed
+  literals retain embedded zero bytes while identifiers retain padding handling.
+  Seven execution groups and a fourteenth independent-byte fixture cover the
+  source-derived contract. See [string behavior](docs/strings.md).
+- Substring retrieval now follows RFnMid validation order. Concatenation checks
+  String_Max only for nonempty operands, and repeated-string results follow
+  RString's word length. A fifteenth independent-byte fixture and execution
+  coverage include typed storage and all 256 bytes through case/reversal.
+  AMOS heap exhaustion and extreme raw-memory search offsets remain unmodeled.
+- Embedded Object/Icon banks, static pasting, flipping, image masks, mixed-depth
+  drawing and palette transfers are
+  implemented and exercised by the browser Graphics demo. See the
+  [bank contract](docs/banks.md) for supported depths and remaining limitations.
+- External Load now reuses the bounded decoder embedded in standalone modules.
+  Synchronous memory/Node adapters support single-bank overrides, image append
+  and whole-group replacement. Seven execution groups, a sixteenth independent
+  fixture and Chromium pixels cover loading/appending and Bob background cleanup.
+  Source/manual numbering edges and partial-file failure semantics are documented.
+- Four Reserve forms, Erase/Erase All/Erase Temp and Length now support basic bank
+  lifecycle. Zeroed storage, permanence/memory metadata, replacement failure order
+  and buffered Bob restoration have seven execution groups and a seventeenth
+  independent fixture. Chromium verifies reservation/erasure and restored pixels.
+  Physical Amiga memory pools and remaining bank manipulation remain open.
+- Bank Swap now preserves bank/data identity and flags while renumbering; generic
+  Bank Shrink retains prefix bytes and rejects growth/image banks. Five execution
+  groups and an eighteenth independent fixture cover the source-derived rules;
+  Chromium verifies active Object-bank swap-out/swap-back composition. The
+  original two-absent null-pointer path is explicitly rejected.
+- Single/group bank Save now embeds a writer, emits generic/planar formats through
+  synchronous file adapters, includes work banks in source-list order, and
+  normalizes live image flips before writing. Seven execution groups and a
+  nineteenth independent fixture check exact bytes, metadata, ordering, failures
+  and Node round trips. Chromium verifies image Save/reload pixels. Oversized
+  corrupt-image save paths, physical allocation and partial disk writes remain open.
+- Moving Bobs now use saved backgrounds with explicit/manual or cooperative
+  automatic updates, hotspots and priorities. The animated Bobs fixture passes
+  pixel checks in Chromium. Double buffering, screen swaps and Autoback modes
+  are implemented; exact hardware timing remains unfinished.
+- Set Bob background modes, selected planes and minterms, plus Limit Bob
+  clipping, are implemented with source-derived creation/alignment rules.
+  The browser fixture now checks a clipped selected-plane XOR Bob.
+- Bob Col and Col status/search queries are implemented with inclusive ranges
+  and existing image-mask comparisons. An independent-byte fixture and the
+  animated browser example check collision results. See [the contract](docs/collisions.md).
+
+| Area | Implemented | Remaining work |
+| --- | --- | --- |
+| Binary frontend | Header/code/line bounds, location-aware token decoding, bounded bank/trailer parsing, explicit unsupported-token errors | Broader independent file coverage, more bank formats, dialect and extension contracts |
+| Compiler | Separate AST parser and lowerer, typed symbols, control-flow IR, source locations, standalone code generation | Remaining statement/function variants, consistent numeric lowering, legacy-code cleanup |
+| Core language | Assignments, expressions, conditions, loops, labels, Gosub/Return, procedures and results | Float fidelity, additional operators/functions, procedure variants, broader reference verification |
+| Data and strings | Arrays, scoped DATA/READ/RESTORE, common string functions | Substring assignment, full byte-string/length rules and edge cases |
+| Files | Sequential I/O through explicit memory/Node adapters | Seek/random-file variants, other documented file operations |
+| Execution | Instruction budget, waits, key queue, timer cancellation, stop/resume, per-instance state | Regression coverage as new asynchronous hosts are added |
+| Browser graphics | Indexed screens, text, embedded images, flipping/masks, moving Bobs, double buffering/Autoback, Canvas rendering and input | Sprites, remaining drawing/screen modes, hardware timing and Amiga coordinate semantics |
+| Audio | No implementation | Sample/music assets, playback hosts, timing/lifecycle contracts |
+| ASCII frontend | No implementation | Lexer/parser producing the shared AST |
+
+See [the compatibility matrix](docs/compatibility.md) for precise limitations
+and [the display contract](docs/display.md) for graphics behavior.
+
+The test suite is a strong regression baseline, but several newer features use
+synthetic token fixtures. Passing those tests alone does not establish AMOS
+compatibility. Test19 deliberately reaches an invalid Return; Test25 is an
+intentional infinite loop and must remain bounded during verification.
+
+## Architecture to retain
+
+```text
+.AMOS bytes
+  -> Buffer / TokenReader          validated binary input and locations
+  -> Parser                        statement and expression AST
+  -> Lowerer                       types, scopes, labels, control-flow IR
+  -> Transpiler                    standalone JavaScript program factory
+  -> driver + operations           scheduler and language runtime
+  -> display / files / host APIs   Node and browser integration
+```
+
+Keep parsing free of code-emission side effects. Preserve locations through
+every stage. Keep host APIs separate from language semantics and instantiate
+mutable runtime state separately for every program.
+
+The current instruction-function table is suitable for AMOS jumps and waits.
+A switch dispatcher or optimizer is optional future work, justified by profiling
+after correctness is established.
+
+## Ordered milestones
+
+### 1. Establish reference-backed compatibility evidence
+
+The highest risk is behavior that appears correct under JavaScript but differs
+from AMOS.
+
+- Inventory accepted headers, token variants, unsupported commands, and trailing
+  data. Distinguish decoded, accepted, and behaviorally verified support.
+- Add small AMOS-authored binary fixtures with paired source and captured
+  reference output/state where an AMOS installation or emulator is available.
+  Record dialect, provenance, and how each result was obtained.
+- Prioritize numeric boundaries, mixed integer/float expressions, strings,
+  procedure scope/results, DATA behavior, and loop edge cases.
+- Retain independently encoded byte fixtures for decoder regressions; avoid
+  relying exclusively on the project's token encoder to validate decoding.
+- Where reference execution is unavailable, document source/manual evidence and
+  mark the behavior provisional rather than claiming exact compatibility.
+
+Acceptance: a reproducible reference-fixture convention and a comparison harness,
+with clear separation between reference-verified and inferred semantics.
+
+### 2. Complete numeric semantics and remaining core language
+
+FFP literals are decoded and basic arithmetic uses explicit mantissa helpers.
+Decimal input follows the private AMOS FFP converter; Ln/Exp/power use explicit
+CORDIC helpers, as do Sin/Cos/Tan with Degree/Radian modes. Base-10 Log still
+uses a JavaScript Math call.
+Library-version fidelity and those remaining paths can affect branches,
+loops, stored values and printed results.
+
+- Specify integer overflow/conversion, default floating precision, rounding,
+  range errors, function domain errors, numeric formatting, and trig modes.
+  Define double-precision support or reject its unsupported forms explicitly.
+- Route numeric operations through shared helpers where AMOS behavior differs.
+  Keep statically typed and runtime-typed values such as Val consistent.
+- Complete missing core operators/functions in small groups, each with verified
+  token encodings, argument/type checks, and execution coverage.
+- Substring assignment/retrieval, concatenation bounds and byte case rules are
+  implemented; finish memory-dependent string cases and remaining procedure/file
+  variants selected by the compatibility target.
+- Keep unsupported syntax explicit; do not add token names without semantics.
+
+Acceptance: reference cases cover rounding-sensitive calculations, overflow,
+division/domain errors, numeric output, mixed types, and each newly supported
+language feature. Existing examples retain their correct results.
+
+### 3. Decode asset banks and render static images
+
+Implemented core: AmBs/AmSp/AmIc/AmBk decoding, embedded assets, per-instance
+storage, static pasting, palette transfers, flipping, image masks, mixed-depth
+pasting, malformed-input tests and a real bank-backed browser demo. External
+single-bank/group Load is now implemented, with standalone Node and Chromium
+coverage. Basic reservation/erasure/Length, Bank Swap/Shrink and supported bank
+Save are implemented. Additional formats, remaining manipulation and fidelity
+cases remain to be completed.
+
+Token decoding is bounded by the declared code section; BankReader separately
+loads supported trailing banks. The embedded-bank slice below is complete.
+The same bounded decoder now handles external files. Use these acceptance
+criteria as regression gates while adding bank manipulation and more formats.
+
+- Add a bounded bank reader for the program trailer and supported bank formats.
+  Validate counts, lengths, dimensions, bitplanes, palette data, and empty slots.
+  Report bank/byte context for malformed or unsupported formats.
+- Decode sprite/icon images into a documented internal representation. Verify
+  bitplane order, hotspots, transparency, and palette semantics independently.
+- Embed assets into generated modules and create independent mutable bank state
+  for each program instance.
+- Implement the minimum image/palette/paste commands needed for a complete
+  bank-backed demo, including clipping and missing-image diagnostics.
+- Explicitly handle nonempty unsupported banks instead of silently discarding
+  assets. Preserve intentional support for code-only synthetic fixtures.
+
+Acceptance: malformed-bank tests, exact decoded pixels from independent fixture
+bytes, standalone Node execution, and a real browser demo using embedded images.
+
+### 4. Add Bobs, sprites, and practical 2D screen behavior
+
+Implemented Bob subset: movement, hiding/removal, hotspots, priorities,
+background/plane/minterm modes, clipping, saved backgrounds, explicit/manual
+updates and cooperative automatic updates. The
+animated Bobs example is covered in fake-clock and Chromium tests. See
+[the Bob contract](docs/bobs.md) and [buffering contract](docs/buffering.md).
+Double buffering, Screen Swap and Autoback 0/1/2 now have pixel and browser
+coverage. Bob Col/Col now have unit, independent-byte and Chromium coverage;
+sprites, sprite/cross-type collisions, hardware timing and advanced blitter edge
+effects are still required.
+
+- Model object creation, movement, image selection, visibility, priority,
+  hotspots, and removal using the verified AMOS contracts.
+- Separate destructive image pasting from movable object composition.
+- Define update timing, palette interaction, screen ownership, coordinate
+  conversion, and supported flipping/collision behavior.
+- Add remaining drawing and screen operations according to real program needs.
+  Document approximations for Amiga hardware composition and input.
+- Ensure object and screen resources are released or detached when programs
+  stop, are replaced, or close screens.
+
+Acceptance: a small animated AMOS program runs from generated output, with exact
+composition/state tests and browser input/lifecycle checks.
+
+### 5. Add audio through host adapters
+
+- Decode the selected sample-bank format with bounded reads and reference
+  fixtures; add music formats as separate capabilities.
+- Define playback, looping, volume/rate, channel ownership, and stop behavior.
+- Implement a deterministic test host and a browser audio host. Handle browser
+  activation through the page's existing Run interaction.
+- Specify completion and timer behavior, including stopping or replacing a
+  program while audio is active.
+
+Acceptance: a sample-playing fixture works in the browser and deterministic host;
+unsupported formats and unavailable hosts produce clear diagnostics.
+
+### 6. Consolidate the supported subset into a usable release
+
+- AGENTS.md architecture/commands now describe the active pipeline and tests.
+- Repository legacy-consumer inventory is recorded in docs/development.md. No
+  active imports were found; settle external deep-import compatibility before
+  retiring legacy files.
+- Keep README, compatibility documentation, examples, and generated demos aligned.
+- Unit/CLI and browser checks are configured in CI; Node/browser baselines and
+  reproducible installation are documented. The same check commands pass locally
+  on both CI Node majors. Obtain a hosted run to verify runner/system setup.
+- Choose representative real AMOS programs, list every unsupported dependency,
+  and close gaps in bounded increments rather than promising general support.
+- Add source-to-generated-code mapping/debugging support when required by those
+  programs; defer optimization until measured.
+- Add an ASCII lexer/parser sharing the existing AST once the core contracts
+  are stable, with binary/ASCII equivalence tests.
+
+Acceptance: a versioned, documented compatibility target, reproducible checks,
+and representative programs that compile and run without manual generated-code
+patches. Describe coverage precisely rather than claiming full AMOS support.
+
+## Immediate implementation sequence
+
+### Next bounded work package: numeric compatibility
+
+The compiler architecture is already in place. Continue it incrementally;
+do not restart the parser or replace the dispatcher before measuring a need.
+
+1. Inventory numeric paths in `lib/Lowerer.js` and
+   `lib/amos/operations.js`: literals, static expressions, Val-derived values,
+   assignments, arrays, procedure parameters/results, and DATA. Record where
+   conversion or arithmetic currently falls through to JavaScript.
+2. Add independent cases for mixed types, rounding-sensitive arithmetic,
+   float-to-integer boundaries, and invalid function domains to
+   `test/fixtures/conformance/`. Use the existing evidence categories; obtaining
+   reference AMOS captures requires access to an AMOS installation or emulator.
+   Source-derived cases can proceed while that dependency remains unavailable.
+3. Implement shared numeric conversion and floating arithmetic helpers in
+   `lib/amos/operations.js`, then route both static and dynamic expressions in
+   `lib/Lowerer.js` through them. Verify the intended FFP rounding and error
+   behavior before treating JavaScript results as compatible. Keep exact print
+   formatting as a separately tested part of this package.
+4. Cover the same calculations through scalar assignments, arrays, DATA and
+   procedure returns so type conversions agree across storage boundaries.
+   Preserve exact Tests7/14/21 regressions and the full unit/CLI suite.
+
+Progress: the numeric path inventory is in `docs/numbers.md`. Shared
+integer-to-float promotion is implemented with typed storage and mixed-operation
+coverage. Floating addition/subtraction and loop increments use a shared FFP
+adder. Multiplication/division now have shared helpers and two more independent
+fixtures. Decimal input now uses the private AMOS conversion algorithm. Numeric
+source-analysis additions include Ln/Exp/power, Pi,
+circular trigonometry/angle modes, Abs/Sgn/Int with preserved result types, and
+float-to-integer truncation/saturation across storage and bitwise operations.
+Including string behavior, external I/O and bank operations, nineteen independent-byte
+fixtures are present.
+Next identify the
+target mathffp multiply variant and verify the source-derived division boundaries;
+complete base-10 Log, inverse trigonometry and remaining function semantics;
+compare float-to-integer saturation with captured execution of the selected
+mathffp version. The implemented source model and that evidence gate are separate.
+
+Done when: numeric paths use an explicit documented contract, the new boundary
+cases pass through standalone generated modules, unsupported precision modes
+fail clearly, and the compatibility matrix identifies remaining provisional
+behavior. Reference execution remains a separate evidence gate until captures
+are available; passing synthetic tests does not satisfy it.
+
+### Following work packages
+
+- Core completeness: memory-dependent string cases, missing functions/procedure
+  forms, and selected file variants, each
+  delivered with binary execution fixtures.
+- Practical graphics: sprite composition and coordinate conversion first,
+  then sprite/cross-type collisions, remaining screen operations and additional
+  bank formats/manipulation. Retain buffered Bob and external-load browser cases.
+- Audio: choose one bank format and playback command set, implement a
+  deterministic host first, then verify browser playback and lifecycle.
+- Release: obtain hosted CI evidence, settle legacy deep-import compatibility,
+  and validate representative real AMOS programs against a versioned supported
+  subset. Architecture guidance, internal consumer inventory and workflow setup
+  are implemented; they do not complete this release milestone by themselves.
+- ASCII input: add a frontend producing the same AST; require binary/ASCII
+  programs to execute equivalently before exposing it through the CLI.
+
+These packages follow the ordered milestones above. Reference verification
+continues across every package rather than blocking all independent work.
+
+### Continuing verification
+
+1. Extend the conformance-fixture convention and initial integer boundary cases
+   with actual AMOS captures and floating-point cases. The convention and nineteen
+   independent-byte source-analysis fixtures are implemented.
+2. Continue numeric compatibility: consistent conversion/rounding and
+   errors across static expressions and Val-derived values, using verified
+   behavior. Shared integer arithmetic, division boundaries and Mod are
+   implemented; full floating-format work remains explicitly scoped.
+3. Extend reference execution coverage for the implemented static-image slice;
+   flipping, mask commands and mixed-depth behavior follow original routines and
+   have unit and real browser coverage.
+4. Extend moving Bobs with remaining modes and sprite composition, retaining the
+   buffered browser acceptance case and broadening reference timing coverage.
+5. Continue through graphics and audio, updating the compatibility matrix
+   after each accepted increment.
+
+For every slice: verify the encoding and semantics, implement decoder/parser/
+lowerer/runtime changes as needed, add meaningful execution tests, update docs,
+and run the relevant checks. Use fake clocks and finite budgets for waits and
+loops. Require the real browser check for rendering, input, or browser lifecycle
+changes.
+
+This plan does not require restarting the compiler or reopening the resolved
+Tests7/14/21 work. Existing uncommitted files, including the format notes and
+out14.module.js, are working-tree material to preserve during implementation.
