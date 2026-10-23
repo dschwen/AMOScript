@@ -12,8 +12,10 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Initial assessment: 753 physical lines, 142 distinct token encodings, 44 not
-recognized by the compiler decoder. Compilation stops at `Set Buffer` on line 2.
+Current assessment: 753 physical lines, 142 distinct token encodings, 40 not
+recognized by the compiler decoder (initially 44). Compilation now stops at the
+music-extension `Led Off` on line 10. The exact first nine lines execute both
+startup speed-test branches with injected VBL time; see [startup support](docs/startup.md).
 The 75-image bank and level-data bank decode; all four original ILBMs now match
 independently decoded PNGs in CPU and browser asset tests. This is asset readiness,
 not a running game or an Amiga reference capture.
@@ -32,7 +34,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **339 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **348 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

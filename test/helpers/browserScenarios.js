@@ -228,7 +228,7 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
-  { id: 'wonderland', title: 'Wonderland milestone: original assets', description: 'Four original screens checked against independently decoded PNGs, embedded-bank inventory and current compiler blockers. Asset preview only; the game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
+  { id: 'wonderland', title: 'Wonderland milestone: startup and assets', description: 'Original nine-line startup benchmark in both timing branches, four original screens checked against independent PNGs, bank inventory and current compiler blockers. The game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
     assert.strictEqual(result.gameRunning, false); assert.strictEqual(result.physicalLines, 753);
     assert.deepStrictEqual(result.images, [
       { name: 'Title_Screen.Iff', width: 640, height: 256, exact: true },
@@ -237,6 +237,10 @@ const scenarios = [
       { name: 'Editor_Panel.Iff', width: 640, height: 256, exact: true }
     ]);
     assert.ok(result.unrecognizedEncodings <= 44);
+    assert.deepStrictEqual(result.startup, { physicalLines: 9, runs: [
+      { speedFlag: 1, halted: true, variableBufferBytes: 10240, commands: ['Amos Lock', 'Close Editor'] },
+      { speedFlag: 0, halted: true, variableBufferBytes: 10240, commands: ['Amos Lock', 'Close Editor'] }
+    ] });
   } },
   { id: 'webgl-integers', title: 'WebGL2 integer readback', description: 'Exact chip bytes, unsigned addressing, integer framebuffer and PNG decoding.', run: require('./webglProbe'), check(result, assert) {
     assert.match(result.version, /^WebGL 2/); assert.ok(result.maxTextureSize >= 2048);

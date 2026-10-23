@@ -1,0 +1,22 @@
+{
+  "name": "wonderland-startup",
+  "source": "Set Buffer 10\nAmos Lock\nClose Editor\nTimer=7\nPrint Timer\n",
+  "programHex": "414d4f532042617369632076312e30300000002e060004fe003e0000000a0000030024e000000300171a0000070012ceffa2003e0000000700000400047612ce0000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original token offsets 04fe, 24e0, 171a, 12ce, ffa2 and 0476; decimal integer token 003e, explicit physical line lengths and terminators. No production encoder or name table."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/ccfefa080fa5ee725947284155bf835631c0ae6c/%2BLib.s",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/91cb726389e8535543e047b4da7224e7fca8cbf5/%2BVerif.s",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/ccfefa080fa5ee725947284155bf835631c0ae6c/%2BLib.s",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/0567f52798f5d7a10c38299379b8716682a0b329/%2BLib.s",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/%2BILib.s"
+    ],
+    "symbols": ["VerSBu", "InTimer", "FnTimer", "InAmosLock", "InCloseEditorCLI", "CSBuf"],
+    "notes": "Source-derived expectations, not AMOS execution captures. Buffer request is preserved as compile metadata; AMOS heap capacity is not enforced. Host lock/editor effects use the explicit adapter contract. VBL increment and wrap are checked separately with injected clocks."
+  },
+  "expected": { "values": [[7]], "halted": true, "variableBufferBytes": 10240, "amosLocked": true }
+}

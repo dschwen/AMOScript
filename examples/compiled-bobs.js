@@ -1736,6 +1736,16 @@
   let reversePriority = false;
   const collisionHits = new Uint8Array(256);
   let degrees = false;
+  state.system = { amosLocked: false, amosFront: true, editorOpen: false };
+  function systemCommand(name) {
+    if (options.system != null) {
+      if (typeof options.system.command !== 'function') throw new Error('System host requires a synchronous command method');
+      const result = options.system.command(name);
+      if (result && typeof result.then === 'function') throw new Error('System host commands must complete synchronously');
+    }
+    if (name === 'Amos Lock') { state.system.amosLocked = true; state.system.amosFront = true; }
+    if (name === 'Close Editor') state.system.editorOpen = false;
+  }
 
   function spriteNumber(number) {
     number = integer(number);
@@ -2873,6 +2883,8 @@
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
     radian: () => { degrees = false; },
+    amosLock: () => systemCommand('Amos Lock'),
+    closeEditor: () => systemCommand('Close Editor'),
     stringFunction, replaceSubstring, fileOpen, fileClose, filePrint, fileRead, fileInfo,
     min: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, false),
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
@@ -2890,6 +2902,17 @@
   if (!timing.setTimeout) throw new Error('setTimeout not available: provide via options');
   if (!(timing.vblHz > 0) || !Number.isFinite(timing.vblHz) || timing.sleepScale < 0 || !Number.isFinite(timing.sleepScale)) {
     throw new Error('Invalid runtime timing options');
+  }
+
+  // TIMER is a VBL counter, not an instruction counter. Assigning it preserves
+  // the field phase, and Stop suspends execution without stopping the clock.
+  const timerEpoch = timing.now();
+  if (!Number.isFinite(timerEpoch)) throw new Error('Invalid runtime clock');
+  let timerBase = 0, timerWrittenAt = 0;
+  function vblCount() {
+    const count = Math.floor((timing.now() - timerEpoch) * timing.vblHz / 1000);
+    if (!Number.isSafeInteger(count) || count < 0) throw new Error('Invalid runtime clock');
+    return count;
   }
 
   const state = {
@@ -3072,6 +3095,11 @@
   const operations = operationsFactory(state, options);
   return {
     state, tick, stop, resume, sendKey, print,
+    timer: () => (timerBase + (vblCount() - timerWrittenAt) % 4294967296) | 0,
+    setTimer(value) {
+      const number = operations.integer(value), count = vblCount();
+      timerBase = number; timerWrittenAt = count;
+    },
     setMouse(x, y, buttons = state.input.mouse.buttons) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(buttons) || buttons < 0 || buttons > 7) throw new Error('Invalid mouse state');
       state.input.mouse = { x, y, buttons };
@@ -3131,6 +3159,7 @@
     cases[38] = function(state){ state.location = {"line":35,"offset":774}; program.updateBobs(); return {}; };
     cases[39] = function(state){ state.location = {"line":36,"offset":780}; return { halt: true }; };
     const program = createProgram(cases, Object.assign({}, opts, { banks: [{"number":1,"type":"sprites","images":[{"width":16,"height":16,"depth":4,"hotspotX":8,"hotspotY":8,"pixels":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,2,2,5,5,2,2,5,3,0,0,0,0,0,0,3,5,2,2,5,5,2,2,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,2,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,3,3,3,3,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"palette":[0,291,4095,3968,143,712,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}] }));
+    program.compilation = Object.freeze({ variableBufferBytes: null });
     program.state.data = { entries: dataTables["@main"], index: 0 };
     program.state.variables = Object.create(null);
     Object.defineProperty(program.state.variables, "int_hitstart", { enumerable: true, get: () => int_hitstart });

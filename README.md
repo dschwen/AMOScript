@@ -9,7 +9,8 @@ Every browser test is available in the [demo gallery](demos/index.html), with
 See [demo instructions and coverage](demos/README.md).
 The next program milestone is **Dithell's Wonderland**: see the
 [readiness assessment and implementation order](docs/wonderland.md) and
-[original-asset preview](demos/wonderland.html). The game does not compile or run yet.
+[startup and asset demo](demos/wonderland.html). Its original first nine lines
+execute both benchmark branches; the full game does not compile or run yet.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
 [native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching

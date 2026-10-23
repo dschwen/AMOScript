@@ -3,8 +3,8 @@
   "scenarios": [
     {
       "file": "wonderland.html",
-      "title": "Wonderland milestone: original assets",
-      "description": "Four original screens checked against independently decoded PNGs, embedded-bank inventory and current compiler blockers. Asset preview only; the game is not running yet.",
+      "title": "Wonderland milestone: startup and assets",
+      "description": "Original nine-line startup benchmark in both timing branches, four original screens checked against independent PNGs, bank inventory and current compiler blockers. The game is not running yet.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html"
     },
     {

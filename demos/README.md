@@ -9,7 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
-| [Wonderland original assets and milestone readiness (game not running)](wonderland.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html) |
+| [Wonderland original startup benchmark, assets and readiness (game not running)](wonderland.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html) |
 | [Integer GPU readback and PNG decode](webgl-integers.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-integers.html) |
 | [GPU uploads, dirty rows and context lifecycle](webgl-resources.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-resources.html) |
 | [GPU/CPU image, mode, sprite, scaling and seeded-frame gallery](webgl-renderer.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html) |

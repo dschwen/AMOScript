@@ -20,6 +20,7 @@ async function run() {
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
     const wonderland = await runScenario('wonderland', page);
+    console.log('Wonderland startup: original first nine lines execute both speed-test branches with injected VBL time.');
     console.log(`Wonderland: ${wonderland.images.length} original images match independent PNGs; ${wonderland.unrecognizedEncodings} encodings still unrecognized; gameRunning=${wonderland.gameRunning}`);
     const gpu = await runScenario('webgl-integers', page);
     const artifacts = path.join(__dirname, 'artifacts');
