@@ -95,7 +95,7 @@ test('integration: browser facade retains support for the original driver demo',
   const logs = [];
   const context = vm.createContext({ setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout, console: { log: (...args) => logs.push(args.join(' ')) } });
   vm.runInContext('window = globalThis;', context);
-  for (const file of ['lib/display/model/color.js', 'lib/display/reference/sprites.js', 'lib/amos/font.js', 'lib/amos/display.js', 'lib/amos/operations.js', 'lib/amos/driver.js', 'lib/amos/background.js', 'examples/driver-demo.js']) {
+  for (const file of ['lib/display/model/color.js', 'lib/display/reference/sprites.js', 'lib/amos/font.js', 'lib/amos/display.js', 'lib/amos/audio.js', 'lib/amos/operations.js', 'lib/amos/driver.js', 'lib/amos/background.js', 'examples/driver-demo.js']) {
     vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context);
   }
   context.driverDemoRun();

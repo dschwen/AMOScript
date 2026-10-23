@@ -1,9 +1,11 @@
 # Startup directives and VBL timer
 
-This is the first executable Wonderland slice: the original first nine physical
+The initial executable Wonderland slice covered the original first nine physical
 lines, including its 20,001-iteration speed test and both resulting `a3000` values,
-run unchanged in standalone JavaScript and the shared browser demo. The fixture
-ends before `Led Off`; it is not a shortened playable version of the game.
+running unchanged in standalone JavaScript. That nine-line regression remains;
+the shared browser demo now executes the first fifteen lines through original
+sample-bank loading and setup. See [audio support](audio.md). These startup
+fixtures are not shortened playable versions of the game.
 
 ## Set Buffer
 
@@ -78,6 +80,6 @@ These expectations are source analysis, not AMOS execution captures.
 Tests execute generated modules without `require`, checking VBL boundaries,
 assignment phase, signed wrap, factory isolation, Stop, 50/60 Hz, typed values,
 invalid forms and adapter failures. The
-[Wonderland demo](../demos/wonderland.html) executes the exact nine-line original
+[Wonderland demo](../demos/wonderland.html) executes the exact fifteen-line original
 prefix under two fake-clock schedules and displays both benchmark outcomes,
 alongside the four independently checked image assets and remaining blockers.

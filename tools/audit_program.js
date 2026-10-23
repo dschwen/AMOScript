@@ -8,6 +8,7 @@ const BankReader = require('../lib/BankReader');
 const Transpiler = require('../lib/Transpiler');
 const { token_by_name: names } = require('../lib/TokenTable');
 const catalog = require('./reference/amos-pro-tokens.json');
+const extensions = require('../lib/ExtensionTable');
 const known = new Map(Object.entries(names).map(([name, code]) => [code, name]));
 
 function auditProgram(data) {
@@ -48,7 +49,9 @@ function auditProgram(data) {
       let definition = definitions.get(key);
       if (!definition) {
         definition = { code: key, name: entry ? entry.name : known.get(code) || 'literal/identifier',
-          signature: entry ? entry.signature : null, decoderRecognized: code !== 0x4e && (special.has(code) || known.has(code)), count: 0, locations: [] };
+          signature: entry ? entry.signature : null,
+          decoderRecognized: code === 0x4e ? !!(extensions[data[offset + 2]] && extensions[data[offset + 2]][word(offset + 4)]) : special.has(code) || known.has(code),
+          count: 0, locations: [] };
         definitions.set(key, definition);
       }
       definition.count++; definition.locations.push({ line: line + 1, offset });

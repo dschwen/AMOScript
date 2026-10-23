@@ -18,6 +18,12 @@
 - `lib/amos/operations.js` implements language operations; `display.js` models
   indexed screens; `font.js` supplies glyphs; `files.js` provides synchronous
   memory/Node file adapters. Host-specific APIs belong in adapters.
+- `lib/ExtensionTable.js` records implemented extension slots/offsets; slot-1
+  Music sample commands use `lib/amos/audio.js` for bounded Samples records and
+  voice commands. `webAudio.js` is the optional browser adapter. Generated
+  modules embed the pure controller; headless execution needs no AudioContext.
+  Keep source-derived expectations distinct from native Web Audio control-graph
+  comparisons and Amiga captures. See `docs/audio.md` for the subset and limits.
 - `lib/amos/browser.js` handles Canvas/input; `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip

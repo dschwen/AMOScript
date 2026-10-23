@@ -2,9 +2,15 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "music.html",
+      "title": "Wonderland samples and Web Audio",
+      "description": "Six original PCM samples, independent offline stereo/rate comparisons, loops, replacement and Stop/disposal checks. Explicit buttons audition each sample.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/music.html"
+    },
+    {
       "file": "wonderland.html",
       "title": "Wonderland milestone: startup and assets",
-      "description": "Original nine-line startup benchmark in both timing branches, four original screens checked against independent PNGs, bank inventory and current compiler blockers. The game is not running yet.",
+      "description": "Original fifteen-line startup, sample-bank load/setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html"
     },
     {

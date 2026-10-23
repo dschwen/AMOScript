@@ -1,0 +1,19 @@
+{
+  "name": "music-samples",
+  "source": "Led Off\nSam Bank 5\nSam Loop Off\nLoad \"samples\"\nSam Play 1,1\nSam Stop 1\n",
+  "programHex": "414d4f532042617369632076312e30300000005e0500004e010001d600000800004e0100008a003e0000000500000500004e010000b400000900184e0026000773616d706c65730000000c00004e010000ee003e00000001005c003e0000000100000800004e01000256003e000000010000",
+  "files": {
+    "samples": "416d426b000500008000002053616d706c657320000100000006546f6e65202020200fa000000004007f80ff"
+  },
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit physical line lengths, main token offsets and extension 004e payloads: slot 1, reference byte 0, offsets 01d6/008a/00b4/00ee/0256. Independent single-sample AmBk bytes: count, relative offset, 8-byte name, word frequency, long length and signed PCM. No production encoder or token-name table."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/extensions/%2BMusic.s",
+    "symbols": ["InSamBank", "InSamLoopOff0", "InSamPlay2", "GetSam", "GoSam", "SPlay", "InSamStop1", "InLedOf"],
+    "notes": "Source-derived token, descriptor and command expectations, not captured Amiga execution. Audio event assertions and browser native-control-graph PCM checks are separate from this language-output fixture."
+  },
+  "expected": { "values": [], "halted": true }
+}

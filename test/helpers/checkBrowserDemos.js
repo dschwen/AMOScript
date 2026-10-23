@@ -18,6 +18,14 @@ module.exports = async function checkBrowserDemos(browser) {
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
+      if (scenario.id === 'music') {
+        for (let number = 1; number <= 6; number++) {
+          await page.click(`#audio-sample-${number}`);
+          await page.waitForFunction(number => document.getElementById('sample-status').dataset.playing === String(number), number);
+        }
+        await page.click('#audio-stop');
+        assert.strictEqual(await page.locator('#sample-status').textContent(), 'Stopped');
+      }
       if (scenario.id === 'webgl-renderer') {
         assert.ok(status.frames >= 151, 'GPU demo exposes every compared frame');
         await page.selectOption('#frames', { label: 'sprite-priority-matrix' });

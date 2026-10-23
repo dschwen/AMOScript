@@ -228,7 +228,12 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
-  { id: 'wonderland', title: 'Wonderland milestone: startup and assets', description: 'Original nine-line startup benchmark in both timing branches, four original screens checked against independent PNGs, bank inventory and current compiler blockers. The game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
+  { id: 'music', title: 'Wonderland samples and Web Audio', description: 'Six original PCM samples, independent offline stereo/rate comparisons, loops, replacement and Stop/disposal checks. Explicit buttons audition each sample.', run: require('./musicProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.samples.map(sample => [sample.number, sample.channel, sample.nonzero]), [[1,0,true],[2,1,true],[3,1,true],[4,0,true],[5,0,true],[6,1,true]]);
+    assert.ok(result.samples.every(sample => sample.maxDifference <= 1e-6));
+    assert.strictEqual(result.loopChecks, 2); assert.strictEqual(result.lifecycleChecks, 5);
+  } },
+  { id: 'wonderland', title: 'Wonderland milestone: startup and assets', description: 'Original fifteen-line startup, sample-bank load/setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
     assert.strictEqual(result.gameRunning, false); assert.strictEqual(result.physicalLines, 753);
     assert.deepStrictEqual(result.images, [
       { name: 'Title_Screen.Iff', width: 640, height: 256, exact: true },
@@ -236,11 +241,11 @@ const scenarios = [
       { name: 'Score_Panel.Iff', width: 640, height: 256, exact: true },
       { name: 'Editor_Panel.Iff', width: 640, height: 256, exact: true }
     ]);
-    assert.ok(result.unrecognizedEncodings <= 44);
-    assert.deepStrictEqual(result.startup, { physicalLines: 9, runs: [
-      { speedFlag: 1, halted: true, variableBufferBytes: 10240, commands: ['Amos Lock', 'Close Editor'] },
-      { speedFlag: 0, halted: true, variableBufferBytes: 10240, commands: ['Amos Lock', 'Close Editor'] }
-    ] });
+    assert.ok(result.unrecognizedEncodings <= 35);
+    assert.strictEqual(result.startup.physicalLines, 15);
+    assert.deepStrictEqual(result.startup.runs, [1, 0].map(speedFlag => ({ speedFlag, halted: true, variableBufferBytes: 10240,
+      commands: ['Amos Lock', 'Close Editor'], reads: ['AMOSPro_Productivity2:Wonderland/Wonderland_Samples.Abk'],
+      audio: { bank: 5, loopMask: 0, filterEnabled: false }, sampleCount: 6 })));
   } },
   { id: 'webgl-integers', title: 'WebGL2 integer readback', description: 'Exact chip bytes, unsigned addressing, integer framebuffer and PNG decoding.', run: require('./webglProbe'), check(result, assert) {
     assert.match(result.version, /^WebGL 2/); assert.ok(result.maxTextureSize >= 2048);

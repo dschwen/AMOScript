@@ -9,8 +9,10 @@ Every browser test is available in the [demo gallery](demos/index.html), with
 See [demo instructions and coverage](demos/README.md).
 The next program milestone is **Dithell's Wonderland**: see the
 [readiness assessment and implementation order](docs/wonderland.md) and
-[startup and asset demo](demos/wonderland.html). Its original first nine lines
-execute both benchmark branches; the full game does not compile or run yet.
+[startup and asset demo](demos/wonderland.html). Its original first fifteen lines
+execute both benchmark branches and load/setup its sample bank. An
+[audio demo](demos/music.html) plays the six original samples; see the
+[audio contract](docs/audio.md). The full game does not compile or run yet.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
 [native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching
@@ -175,7 +177,7 @@ document.addEventListener('keydown', event => AMOS.sendKey(event.key));
 
 The facade also accepts instruction tables. For that direct-runtime mode, first
 load `lib/display/model/color.js` and `lib/display/reference/sprites.js`, then
-`font.js`, `display.js`, `operations.js` and `driver.js` from `lib/amos/`, in that order.
+`font.js`, `display.js`, `audio.js`, `operations.js` and `driver.js` from `lib/amos/`, in that order.
 For external bank loading in this direct-runtime mode, load `lib/BankReader.js`
 before `operations.js` as well; Save also needs `lib/BankWriter.js` there.
 Generated modules embed those implementations and need no separate runtime

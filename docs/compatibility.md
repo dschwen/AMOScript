@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-23. The current local baseline has **348 passing tests**, plus a
+Updated 2026-10-23. The current local baseline has **356 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,15 +9,17 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
-Its original first nine lines now execute both startup benchmark branches;
-full-source decoding stops at the music extension on line 10. A bounded full
-inventory finds 40 unrecognized encodings. Four original images and embedded
-banks are checked, with a standalone startup/asset demo. The game is not running.
+Its original first fifteen lines now execute both startup benchmark branches and
+sample-bank load/setup; full-source decoding stops at `Key Speed` on line 16.
+A bounded full inventory finds 35 unrecognized encodings. Four original images,
+embedded banks and six samples are checked, with standalone startup/asset and
+audio demos. The game is not running.
 
 ## Feature matrix
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Music extension / sample audio | Implemented subset | Bounded slot-1 decoding for bank selection, sample play/stop, loop settings and Led On/Off. Original Samples descriptors, four voice masks, Paula-derived rates, optional Web Audio stereo adapter, lifecycle cleanup and offline PCM comparisons. Analog response is approximate; other music commands remain unsupported. [Contract](audio.md). |
 | Startup / host environment | Implemented subset | Leading literal `Set Buffer` is preserved as compile metadata, without AMOS heap capacity enforcement. `Amos Lock`/`Close Editor` update logical host state and call an optional synchronous adapter. [Contract and limits](startup.md). |
 | Timer | Implemented nominal VBL counter | Bare integer read and numeric assignment, signed 32-bit wrap, preserved VBL phase, injected 50/60 Hz clock and independent factories; continues while stopped/waiting. [Source-derived tests and limits](startup.md). |
 | Tokenized source | Implemented core | All 27 existing `.AMOS` fixtures decode and parse. Invalid lengths, truncated payloads, unknown tokens, incomplete syntax and unmatched blocks are errors. |

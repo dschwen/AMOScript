@@ -7,7 +7,8 @@ module.exports = async function wonderlandProbe(page) {
   const directory = path.join(__dirname, '../../examples/Wonderland');
   const goldenDirectory = path.join(__dirname, '../fixtures/wonderland');
   const report = auditProgram(fs.readFileSync(path.join(directory, 'Wonderland.AMOS')));
-  const startup = new (require('../../lib/Transpiler'))(require('./wonderlandStartup')()).toModule();
+  const startup = new (require('../../lib/Transpiler'))(require('./wonderlandStartup')(15)).toModule();
+  const sampleBank = fs.readFileSync(path.join(directory, 'Wonderland_Samples.Abk')).toString('base64');
   const { createFrameStateModel } = require('../../lib/display/model/frameState');
   const { createIlbmReader } = require('../../lib/display/model/ilbm');
   const { createColorModel } = require('../../lib/display/model/color');
@@ -25,16 +26,21 @@ module.exports = async function wonderlandProbe(page) {
     bytes: fs.readFileSync(path.join(directory, entry.source)).toString('base64'),
     png: fs.readFileSync(path.join(goldenDirectory, entry.file)).toString('base64')
   }));
-  return page.evaluate(async ({ source, assets, readiness, startup }) => {
+  return page.evaluate(async ({ source, assets, readiness, startup, sampleBank }) => {
     const module = { exports: {} }; new Function('module', startup)(module);
     const runs = [false, true].map(slow => {
-      let time = 0; const commands = [];
+      let time = 0; const commands = [], reads = [];
       const program = module.exports({ now: () => time, setTimeout: () => 1, clearTimeout() {},
+        files: { read(name) {
+          if (name !== 'AMOSPro_Productivity2:Wonderland/Wonderland_Samples.Abk') throw new Error('Unexpected original asset path');
+          reads.push(name); return atob(sampleBank);
+        } },
         system: { command: name => { commands.push(name); } } });
       if (slow) { program.tick(10); time = 600; }
       program.tick(100000);
       return { speedFlag: program.state.variables.int_a3000, halted: program.state.halted,
-        variableBufferBytes: program.compilation.variableBufferBytes, commands };
+        variableBufferBytes: program.compilation.variableBufferBytes, commands, reads,
+        audio: { ...program.state.audio }, sampleCount: program.banks.get(5).data[1] };
     });
     const { read, reference } = new Function(source)(), images = [];
     for (const asset of assets) {
@@ -51,9 +57,9 @@ module.exports = async function wonderlandProbe(page) {
       if (globalThis.AMOS_DEMO_OBSERVE) globalThis.AMOS_DEMO_OBSERVE({ name: asset.name, width: image.width, height: image.height, rgba });
       images.push({ name: asset.name, width: image.width, height: image.height, exact: true });
     }
-    return { milestone: 'startup benchmark and original asset preview', gameRunning: false, startup: { physicalLines: 9, runs },
+    return { milestone: 'startup, sample-bank setup and original asset preview', gameRunning: false, startup: { physicalLines: 15, runs },
       evidence: 'Original assets / independent PNG decoding; no Amiga execution capture.', images, ...readiness };
-  }, { source, assets, startup, readiness: { compiler: report.compiler, physicalLines: report.physicalLines,
+  }, { source, assets, startup, sampleBank, readiness: { compiler: report.compiler, physicalLines: report.physicalLines,
     unrecognizedEncodings: report.unrecognizedEncodings,
     missing: report.missing.map(token => ({ code: token.code, name: token.name, count: token.count, firstLine: token.locations[0].line })),
     banks: report.banks } });
