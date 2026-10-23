@@ -63,10 +63,10 @@ with seven-day retention. Actions are pinned to immutable commits, checkout does
 not persist credentials, and workflow permissions are read-only.
 
 Local verification used a separate project copy, clean `npm ci`, and SHA-256-checked
-official Node 22.23.4 and 24.22.1 Linux binaries. Both passed all 234 tests and the
+official Node 22.23.4 and 24.22.1 Linux binaries. Both passed all 248 tests and the
 generated-artifact gate. Node 18.19.1 passed as well. Chromium passed under Node 24
 using the matching pinned browser from the existing local cache, including
-standalone bank loading/appending/reservation/erasure and exact image/Bob
+standalone bank load/save/reload/appending/reservation/swap/shrink/erasure and exact image/Bob
 restoration pixels. Installer flag
 forwarding was checked with `--dry-run`; system dependencies were already present
 locally. Fresh Ubuntu system installation and hosted workflow execution remain

@@ -11,6 +11,8 @@
   `lib/Transpiler.js` emits standalone program factories.
 - `lib/BankReader.js` decodes supported trailing and external asset banks; generated
   modules embed it for runtime Load through the synchronous files adapter.
+- `lib/BankWriter.js` encodes supported ABK/ABS files and is also embedded for
+  runtime Save. Serialization coverage includes independent expected bytes.
 - `lib/amos/driver.js` executes an instruction-function table using `state.ip`,
   call/procedure stacks, cooperative budgets and waits. It is not a switch emitter.
 - `lib/amos/operations.js` implements language operations; `display.js` models

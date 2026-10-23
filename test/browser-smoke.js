@@ -47,34 +47,52 @@ async function run() {
       [t('Paste Bob'), n(10), t(','), n(10), t(','), n(1)],
       [t('Load Bank'), text('objects.abk'), t(','), n(1)],
       [t('Paste Bob'), n(30), t(','), n(10), t(','), n(3)],
+      [t('Paste Bob'), n(50), t(','), n(30), t(','), t('Hrev'), t('('), n(1), t(')')],
+      [t('Save Bank'), text('saved.abk'), t(','), n(1)], [t('Erase'), n(1)], [t('Load'), text('saved.abk')],
+      [t('Paste Bob'), n(10), t(','), n(40), t(','), n(1)],
       [t('Reserve As Work'), n(5), t(','), n(3)], [t('Reserve As Data'), n(6), t(','), n(4)],
+      [t('Bank Shrink'), n(6), t('To'), n(2)],
       [t('Hot Spot'), n(1), t(','), n(0), t(','), n(0)], [t('Double Buffer')], [t('Bob Update Off')],
       [t('Bob'), n(0), t(','), n(60), t(','), n(10), t(','), n(1)], [t('Bob Update')], [t('Wait Key')],
+      [t('Bank Swap'), n(1), t(','), n(10)], [t('Bob Update')], [t('Wait Key')],
+      [t('Bank Swap'), n(1), t(','), n(10)], [t('Bob Update')], [t('Wait Key')],
       [t('Erase'), n(1)], [t('Bob Update')], [t('Erase Temp')]
     ])).toModule();
     const bankResult = await page.evaluate(({ source, bytes }) => {
       const module = { exports: {} };
       new Function('module', source)(module);
-      const program = module.exports({ files: { read: () => bytes } });
+      const assets = new Map([['objects.abk', bytes]]);
+      const program = module.exports({ files: { read: name => assets.get(name), write: (name, contents) => { assets.set(name, contents); } } });
       const canvas = document.createElement('canvas');
       const host = AMOS_BROWSER.createCanvasHost(canvas);
       host.attach(program);
       program.tick(100);
       host.render();
-      const pixels = [[10, 10], [11, 10], [30, 10], [31, 10], [9, 10]].map(([x, y]) =>
+      const pixels = [[10, 10], [11, 10], [30, 10], [31, 10], [9, 10], [10, 40], [11, 40]].map(([x, y]) =>
         Array.from(canvas.getContext('2d').getImageData(x, y, 1, 1).data));
       const images = program.banks.get(1).images.length;
       const bobPixel = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
       program.sendKey('x');
       program.tick(100);
       host.render();
+      const swappedOut = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
+      program.sendKey('x');
+      program.tick(100);
+      host.render();
+      const swappedBack = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
+      program.sendKey('x');
+      program.tick(100);
+      host.render();
       const restored = Array.from(canvas.getContext('2d').getImageData(60, 10, 1, 1).data);
       host.detach();
-      return { pixels, images, bobPixel, restored, work: program.bankLength(5), data: program.bankLength(6), halted: program.state.halted };
+      return { pixels, images, bobPixel, swappedOut, swappedBack, restored,
+        savedBytes: assets.get('saved.abk').length, savedHeader: assets.get('saved.abk').slice(0, 4),
+        work: program.bankLength(5), data: program.bankLength(6), halted: program.state.halted };
     }, { source: bankSource, bytes: bankBytes.subarray(26, 124).toString('latin1') });
     assert.deepStrictEqual(bankResult, { pixels: [[255, 0, 0, 255], [0, 255, 0, 255],
-      [255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 0, 255]], images: 4,
-      bobPixel: [255, 0, 0, 255], restored: [0, 0, 0, 255], work: 0, data: 4, halted: true });
+      [255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 0, 255], [255, 0, 0, 255], [0, 255, 0, 255]], images: 4,
+      bobPixel: [255, 0, 0, 255], swappedOut: [0, 0, 0, 255], swappedBack: [255, 0, 0, 255],
+      restored: [0, 0, 0, 255], savedBytes: 126, savedHeader: 'AmSp', work: 0, data: 2, halted: true });
     await page.click('#run');
     assert.strictEqual(await page.locator('#output').textContent(), 'Start\nOne\nTwo\nThree\nEnd\n');
     await page.click('#graphics');
@@ -147,7 +165,7 @@ async function run() {
     await page.click('#stop');
     assert.strictEqual(await page.evaluate(() => AMOS.state.stopped), true);
     assert.deepStrictEqual(errors, []);
-    console.log('Browser smoke passed: standalone bank loading/appending/reservation/erasure, trigonometry/angle modes and pixels, Canvas shapes, bank images, flipping/masks, buffered Bobs with modes/limits and collisions, swaps, restoration, input, switching, and Stop.');
+    console.log('Browser smoke passed: standalone bank load/save/reload/appending/reservation/swap/shrink/erasure, trigonometry/angle modes and pixels, Canvas shapes, bank images, flipping/masks, buffered Bobs with modes/limits and collisions, swaps, restoration, input, switching, and Stop.');
   } finally {
     await browser.close();
   }

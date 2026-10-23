@@ -1,0 +1,58 @@
+{
+  "name": "bank-manipulation",
+  "source": "Load \"data.abk\"\nReserve As Work 6,7\nPrint Length(5),Length(6)\nBank Swap 5,6\nPrint Length(5),Length(6)\nBank Shrink 6 To 2\nPrint Length(6)\nBank Swap 6,9\nPrint Length(6),Length(9)\nErase Temp\nPrint Length(5),Length(9)\nBank Swap 1,10\nPrint Length(1),Length(10)\nBank Swap 1,10\nPrint Length(1),Length(10)\n",
+  "programHex": "414d4f532042617369632076312e3030000001620900184e00260008646174612e61626b00000a0020f2003e00000006005c003e00000007000010000476014c0074003e00000005007c005c014c0074003e00000006007c00000a002498003e00000005005c003e00000006000010000476014c0074003e00000005007c005c014c0074003e00000006007c00000a002a9c003e000000060094003e00000002000009000476014c0074003e00000006007c00000a002498003e00000006005c003e00000009000010000476014c0074003e00000006007c005c014c0074003e00000009007c0000030026c8000010000476014c0074003e00000005007c005c014c0074003e00000009007c00000a002498003e00000001005c003e0000000a000010000476014c0074003e00000001007c005c014c0074003e0000000a007c00000a002498003e00000001005c003e0000000a000010000476014c0074003e00000001007c005c014c0074003e0000000a007c0000416d42730002416d53700002000100020002c001ffffa0004000600080000000000000000000000000000f0000f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000416d49630001000100020002c001ffffa00040006000800000000f0000f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "files": {
+    "data.abk": "416d426b000500018000000b44617461202020200080ff"
+  },
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit original token offsets Bank Swap=0x2498, Bank Shrink=0x2a9c, To=0x0094, Length=0x014c and existing Load/Reserve/Erase offsets. Independent payload/line assembly, generic file bytes and image-banks.hex trailer; no production token table or encoder."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+    "sources": [
+      "https://amospromanual.dev/05-09-memory-banks.html"
+    ],
+    "symbols": [
+      "InBankSwap",
+      "Bnk.Schrink",
+      "FnLength",
+      "Bnk.EffTemp"
+    ],
+    "notes": "Swap exchanges bank numbers only, retaining type and permanent/data flags; a single present bank is renamed to the absent slot. Shrink accepts positive generic lengths no greater than current size. Image banks can move away from and back to slot 1 while retaining image-slot Length. Values are source-derived, not captured AMOS execution. Null-pointer behavior for two absent swap operands, raw addresses and physical allocation timing are not modeled."
+  },
+  "expected": {
+    "values": [
+      [
+        3,
+        7
+      ],
+      [
+        7,
+        3
+      ],
+      [
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

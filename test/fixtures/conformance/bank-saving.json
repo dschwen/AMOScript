@@ -1,0 +1,44 @@
+{
+  "name": "bank-saving",
+  "source": "Reserve As Work 5,3\nReserve As Chip Data 6,2\nSave \"all.abs\"\nSave \"work.abk\",5\nSave \"data.abk\",6\nErase All\nLoad \"all.abs\"\nPrint Length(5),Length(6)\nErase Temp\nPrint Length(5),Length(6)\n",
+  "programHex": "414d4f532042617369632076312e3030000000cc0a0020f2003e00000005005c003e0000000300000a002140003e00000006005c003e0000000200000900183800260007616c6c2e6162730000000d00184400260008776f726b2e61626b005c003e0000000500000d00184400260008646174612e61626b005c003e000000060000030026d800000900184e00260007616c6c2e61627300000010000476014c0074003e00000005007c005c014c0074003e00000006007c0000030026c8000010000476014c0074003e00000005007c005c014c0074003e00000006007c0000416d42730000",
+  "files": {},
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit original Save=0x1838 and Save-with-number=0x1844 offsets and existing Reserve/Erase/Load/Length encodings. Program and expected AmBk/AmBs bytes are specified independently of the production writer/encoder. Generic lengths include the eight-byte name; bit 31 marks permanent data."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BB.s",
+      "https://amospromanual.dev/05-09-memory-banks.html"
+    ],
+    "symbols": [
+      "InSave1",
+      "InSave2",
+      "Bnk.SaveAll",
+      "Bnk.SaveA0",
+      "Lst.Cree"
+    ],
+    "notes": "Single-bank Save emits AmBk with number, chip/fast indicator, name-inclusive length and permanent flag. Grouped bank Save includes work banks and traverses the newest-first bank list, so bank 6 precedes 5. These explicit byte expectations and reload results are source-derived, not captured AMOS execution. Editor program-save work filtering is a separate path."
+  },
+  "expected": {
+    "values": [
+      [
+        3,
+        2
+      ],
+      [
+        0,
+        2
+      ]
+    ],
+    "halted": true,
+    "files": {
+      "work.abk": "416d426b000500010000000b576f726b20202020000000",
+      "data.abk": "416d426b000600008000000a44617461202020200000",
+      "all.abs": "416d42730002416d426b000600008000000a44617461202020200000416d426b000500010000000b576f726b20202020000000"
+    }
+  }
+}

@@ -600,6 +600,79 @@
     return banks;
   }
 };
+  const bankWriterFactory = class BankWriter {
+  constructor() { this.chunks = []; this.length = 0; }
+  bytes(data) { this.chunks.push(data); this.length += data.length; }
+  word(value) { this.bytes(Uint8Array.of((value >>> 8) & 255, value & 255)); }
+  long(value) { this.word(value >>> 16); this.word(value); }
+  text(value) {
+    if (typeof value !== 'string' || /[^\x00-\xff]/.test(value)) throw new Error('Invalid bank byte string');
+    this.bytes(Uint8Array.from(value, char => char.charCodeAt(0)));
+  }
+
+  bank(bank) {
+    if (bank.type === 'data') {
+      if (!Number.isInteger(bank.number) || bank.number < 0 || bank.number > 65535) throw new Error('Invalid saved bank number');
+      if (bank.memory !== 'chip' && bank.memory !== 'fast') throw new Error('Invalid saved bank memory');
+      if (bank.name.length !== 8 || bank.data.length + 8 > 0x0fffffff) throw new Error('Invalid saved bank length/name');
+      this.text('AmBk');
+      this.word(bank.number);
+      this.word(bank.memory === 'chip' ? 0 : 1);
+      this.long((bank.data.length + 8) | (bank.permanent ? 0x80000000 : 0));
+      this.text(bank.name);
+      this.bytes(bank.data);
+      return;
+    }
+    if (!['sprites', 'icons'].includes(bank.type)) throw new Error('Unsupported saved bank type');
+    if (bank.images.length > 32768) throw new Error('Unsupported image save count');
+    if (bank.palette.length !== 32 || bank.palette.some(rgb => !Number.isInteger(rgb) || rgb < 0 || rgb > 0xfff)) throw new Error('Invalid saved bank palette');
+    this.text(bank.type === 'sprites' ? 'AmSp' : 'AmIc');
+    this.word(bank.images.length);
+    for (const image of bank.images) {
+      if (!image) { this.bytes(new Uint8Array(10)); continue; }
+      const { width, height, depth } = image;
+      if (!Number.isInteger(width) || width <= 0 || width % 16 || width / 16 > 65535 ||
+          !Number.isInteger(height) || height < 1 || height > 65535 ||
+          !Number.isInteger(depth) || depth < 1 || depth > 6 || image.pixels.length !== width * height) throw new Error('Invalid saved image dimensions');
+      const planeSize = width / 8 * height;
+      // SB_Sp uses a word shift for the byte count; larger images produce
+      // truncated/malformed output on that path. Do not emit a repaired file
+      // while claiming the original Save behavior for this unsupported case.
+      if (planeSize * depth >= 65536) throw new Error('Unsupported image save size');
+      this.word(width / 16); this.word(height); this.word(depth);
+      this.word(image.hotspotX); this.word(image.hotspotY);
+      const planar = new Uint8Array(planeSize * depth);
+      for (let pixel = 0; pixel < image.pixels.length; pixel++) {
+        const value = image.pixels[pixel];
+        if (!Number.isInteger(value) || value < 0 || value >= (1 << depth)) throw new Error('Invalid saved image pixel');
+        for (let plane = 0; plane < depth; plane++) {
+          if (value & (1 << plane)) planar[plane * planeSize + (pixel >>> 3)] |= 128 >>> (pixel & 7);
+        }
+      }
+      this.bytes(planar);
+    }
+    for (const rgb of bank.palette) this.word(rgb);
+  }
+
+  static write(banks, grouped = false) {
+    const writer = new BankWriter();
+    if (grouped) {
+      if (banks.length > 65535) throw new Error('Too many saved banks');
+      writer.text('AmBs'); writer.word(banks.length);
+    } else if (banks.length !== 1) throw new Error('A standalone file requires one bank');
+    for (const bank of banks) writer.bank(bank);
+    const bytes = new Uint8Array(writer.length);
+    let offset = 0;
+    for (const chunk of writer.chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+    return bytes;
+  }
+
+  static byteString(bytes) {
+    const chunks = [];
+    for (let offset = 0; offset < bytes.length; offset += 32768) chunks.push(String.fromCharCode(...bytes.subarray(offset, offset + 32768)));
+    return chunks.join('');
+  }
+};
   const operationsFactory = function createOperations(state, options) {
   const display = options.display || displayFactory(options.displayOptions);
   if (options.tabSize != null) display.setTab(options.tabSize);
@@ -609,6 +682,7 @@
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
+  let bankOrder = Array.from(banks.keys()).reverse();
   const bobs = new Map();
   let drawnBobs = [];
   let bobsDirty = false;
@@ -828,9 +902,13 @@
   function installBanks(loaded, removed = [], clear = false) {
     const objectsChanged = (clear && banks.has(1)) || removed.includes(1) || loaded.some(bank => bank.number === 1);
     if (objectsChanged) clearBobs(null, true);
-    if (clear) banks.clear();
+    if (clear) { banks.clear(); bankOrder = []; }
     for (const number of removed) banks.delete(number);
-    for (const bank of loaded) banks.set(bank.number, bank);
+    bankOrder = bankOrder.filter(number => !removed.includes(number));
+    for (const bank of loaded) {
+      banks.set(bank.number, bank);
+      bankOrder = [bank.number, ...bankOrder.filter(number => number !== bank.number)];
+    }
     if (objectsChanged) imageBobsChanged();
   }
 
@@ -858,6 +936,57 @@
   function bankLength(number) {
     const bank = banks.get(integer(number));
     return !bank ? 0 : bank.images ? bank.images.length : bank.data.length;
+  }
+
+  function swapBanks(first, second) {
+    first = integer(first);
+    second = integer(second);
+    if (first < 1 || second < 1 || first >= 65536 || second >= 65536) throw new Error('Invalid bank number');
+    const a = banks.get(first), b = banks.get(second);
+    // InBankSwap's two-absent path writes through a null bank pointer.
+    // Explicitly reject that unsupported raw-memory behavior.
+    if (!a && !b) throw new Error('Cannot swap two missing banks');
+    if (first === second) return;
+    const objectsChanged = first === 1 || second === 1;
+    if (objectsChanged) clearBobs(null, true);
+    banks.delete(first);
+    banks.delete(second);
+    if (a) { a.number = second; banks.set(second, a); }
+    if (b) { b.number = first; banks.set(first, b); }
+    bankOrder = bankOrder.map(number => number === first ? second : number === second ? first : number);
+    if (objectsChanged) imageBobsChanged();
+  }
+
+  function shrinkBank(number, length) {
+    number = integer(number);
+    length = integer(length);
+    if (length <= 0) throw new Error('Invalid bank length');
+    const bank = banks.get(number);
+    if (!bank) throw new Error('Bank not reserved');
+    if (bank.images) throw new Error('Cannot shrink an image bank');
+    if (length > bank.data.length) throw new Error('Invalid bank length');
+    if (length !== bank.data.length) bank.data = bank.data.slice(0, length);
+  }
+
+  function saveBanks(filename, number = null) {
+    if (!options.files || typeof options.files.write !== 'function') throw new Error('Bank saving requires a files host adapter');
+    if (typeof bankWriterFactory !== 'function') throw new Error('Bank saving requires the BankWriter runtime');
+    const write = contents => {
+      const result = options.files.write(filename, contents);
+      if (result && typeof result.then === 'function') throw new Error('Files host must write bank bytes synchronously');
+    };
+    if (number != null) number = integer(number);
+    const grouped = number == null;
+    // MODE_NEW opens/truncates the destination before bank lookup or UnRev.
+    write('');
+    if (!grouped && !banks.has(number)) {
+      throw new Error('Bank not reserved');
+    }
+    const order = [...bankOrder.filter(key => banks.has(key)), ...Array.from(banks.keys()).filter(key => !bankOrder.includes(key))];
+    const selected = grouped ? order.map(key => banks.get(key)) : [banks.get(number)];
+    // Bnk.UnRev normalizes the live image and mask, not a temporary copy.
+    for (const bank of selected) if (bank.images) for (const image of bank.images) if (image) orientImage(image, 0);
+    write(bankWriterFactory.byteString(bankWriterFactory.write(selected, grouped)));
   }
 
   function imageBank(number) {
@@ -1573,7 +1702,7 @@
   }
 
   return {
-    display, inputValue, banks, loadBanks, eraseBank, eraseTemp, bankLength,
+    display, inputValue, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,
     eraseAll: () => installBanks([], [], true),
     reserveWork: (number, length) => reserveBank(number, length, false, 'fast'),
     reserveChipWork: (number, length) => reserveBank(number, length, false, 'chip'),

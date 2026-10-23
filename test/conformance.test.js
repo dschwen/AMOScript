@@ -27,5 +27,8 @@ for (const filename of fs.readdirSync(directory).filter(name => name.endsWith('.
     assert.deepStrictEqual(logs, fixture.expected.values);
     assert.strictEqual(program.state.halted, fixture.expected.halted);
     assert.strictEqual(timers.pending(), 0);
+    for (const [name, hex] of Object.entries(fixture.expected.files || {})) {
+      assert.strictEqual(Buffer.from(files.read(name), 'latin1').toString('hex'), hex);
+    }
   });
 }

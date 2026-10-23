@@ -133,8 +133,102 @@ alignment. [Lifecycle tests](../test/bank-lifecycle.test.js) cover metadata,
 initialization, replacement failure order, erasure, queries and buffered Bob
 restoration. An [independent-byte fixture](../test/fixtures/conformance/bank-lifecycle.json)
 and Chromium restoration checks add source-derived execution coverage. Actual
-AMOS reference capture remains outstanding. Save, Bank Swap/Shrink, raw addresses
-and additional bank formats remain separate work.
+AMOS reference capture remains outstanding. Raw addresses and additional
+bank formats remain separate work.
+
+## Swap and shrink
+
+```basic
+Bank Swap 5,6
+Bank Shrink 6 To 128
+```
+
+Bank Swap accepts numbers 1..65535 and exchanges only the numbers of the selected
+banks. Contents, bank type, memory preference, permanence and mutable image state
+stay with the same bank. If exactly one slot exists, the bank moves to the empty
+slot. Swapping an existing number with itself changes nothing. Work/data flags
+are preserved, so Erase Temp still selects the same bank after renumbering.
+
+Object/Icon banks can move to another slot, where Length still returns their
+image-slot count. Object rendering requires a sprites-type bank at number 1, and
+Icon operations require icons at number 2; a swap does not convert image types.
+Moving an Object bank away from slot 1 restores saved Bob backgrounds on both
+buffers. Bob definitions remain and can draw again when the bank returns. Images,
+masks, hotspots and orientation are retained rather than decoded again.
+
+The original InBankSwap path writes through a null bank pointer when both numbers
+are absent. The portable runtime rejects this unsupported raw-memory case with
+`Cannot swap two missing banks`, without changing banks. It does not simulate
+memory corruption or a hardware exception.
+
+Bank Shrink applies to generic byte banks, retaining prefix bytes and metadata.
+The new length must be positive and no greater than the old one; equal size is
+allowed. Validation rejects nonpositive lengths first, then missing banks,
+image-bank types, and growth. The bank object remains the same, while its byte
+storage is reduced. The runtime does not model raw pointers, FreeMem/AllocAbs or
+Amiga scheduler locking around physical relocation.
+
+These rules follow [InBankSwap and Bnk.Schrink](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s)
+and the [memory-bank manual](https://amospromanual.dev/05-09-memory-banks.html).
+[Standalone tests](../test/bank-manipulation.test.js) cover identity, metadata,
+byte retention, numeric conversion, errors and buffered composition. An
+[independent-byte fixture](../test/fixtures/conformance/bank-manipulation.json)
+covers renumbering and shrinking. Chromium checks pixels after swapping an active
+Object bank away and back. These remain source-analysis expectations pending AMOS
+reference execution.
+
+## Saving banks
+
+```basic
+Save "all-banks.abs"
+Save "objects.abk",1
+Save "data.abk",7
+```
+
+Save uses a synchronous `files.write(name,byteString)` host, compatible with the
+memory and Node file adapters. Generated modules embed BankWriter, so Save/reload
+works without runtime imports in both Node and browsers. Existing files are
+truncated, matching MODE_NEW. The adapter first receives an empty byte string to
+open/truncate, then the completed output. A missing selected bank raises an error
+after that initial truncation. Failed opening leaves image orientation unchanged;
+Promise results are rejected by the synchronous host contract.
+
+Single-bank Save writes AmBk, AmSp or AmIc according to bank type. Generic output
+contains its current number, memory preference, permanent/data flag, eight-byte
+name and bytes. Encoded length includes the name. An image bank's number is not
+part of the image file: saving an Object bank currently at 10 still produces
+AmSp, which reloads into bank 1. Image output stores consecutive complete
+bitplanes, empty ten-byte slot records and 32 twelve-bit palette entries.
+
+Before image output, Bnk.UnRev restores the live pixels, masks and hotspots to
+unflipped orientation; Save is not just a snapshot of currently flipped pixels.
+Signed X hotspots are stored as sign-extended words. Masks and No Mask settings
+are not serialized, so reloading restores the normal Object/Icon defaults.
+
+Save without a number writes an AmBs group containing all current banks, including
+work banks. This is the explicit bank-save path; Editor program-save work-bank
+filtering is separate. Output follows the original newest-first bank list.
+Creation, replacement and external loading add new nodes at its head; Swap changes
+numbers without reordering nodes, and Shrink retains its node. Reloading a group
+prepends its entries, so saving it again can reverse their order. Empty output is
+the six bytes `AmBs` followed by a zero count.
+
+The image writer explicitly rejects more than 32768 slots or planar payloads of
+65536 bytes or more per image. The preserved Save path uses signed word loop
+guards and a word byte-count shift that produce truncated output beyond these
+bounds. Emulating that corrupt output/raw-memory behavior is unfinished. Generic
+output retains the decoder's 28-bit name-inclusive length limit. Physical memory
+capacity and exact partial-write contents after disk failure are not modeled.
+Grouped files containing duplicate implicit image-bank numbers remain outside
+the decoder's supported subset.
+
+The format and order follow [Bnk.SaveAll/SaveA0/UnRev](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s)
+and [Lst.Cree](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BB.s).
+[Exact-byte tests](../test/bank-saving.test.js) check independent generic/planar
+encodings, empty slots, masks/hotspots, ordering, failure behavior and real Node
+file round trips. The [Save fixture](../test/fixtures/conformance/bank-saving.json)
+records explicit output bytes; Chromium checks flipped-image Save/reload and
+rendered pixels. These are source-derived expectations pending AMOS captures.
 
 ## Supported instructions
 
