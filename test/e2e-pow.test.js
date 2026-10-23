@@ -1,45 +1,21 @@
+/* jshint esversion: 6 */
 'use strict';
 
 const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
-const Transpiler = require('../lib/Transpiler');
-const driver = require('../lib/amos/driver');
+const { execute, example } = require('./helpers/program');
 
-function compileModuleFromBuffer(buf) {
-  const t = new Transpiler(buf);
-  const js = t.toModule();
-  const sandbox = {
-    module: { exports: {} },
-    exports: {},
-    console: console,
-    require: (p) => (p === './amos/driver' ? driver : require(p)),
-  };
-  vm.runInNewContext(js, sandbox, { filename: 'out.module.js' });
-  return sandbox.module.exports;
-}
-
-test('e2e: exponent precedence from Test27.AMOS', () => {
-  const buf = fs.readFileSync(path.join(__dirname, '..', 'examples', 'Test27.AMOS'));
-  const create = compileModuleFromBuffer(buf);
-
-  const logs = [];
-  const origLog = console.log;
-  console.log = (...args) => logs.push(args);
-  try {
-    const prog = create({ setTimeout: (fn) => fn() });
-    prog.tick(100);
-
-    const flat = logs.flat();
-    const nums = flat.filter(v => typeof v === 'number');
-    // Expect 27, 128, 2187 (order may interleave with comments; just check presence)
-    function has(n) { return nums.includes(n); }
-    assert.ok(has(27));
-    assert.ok(has(128));
-    assert.ok(has(2187));
-  } finally {
-    console.log = origLog;
+test('e2e: exponent precedence from Tests26/27.AMOS at FFP precision', () => {
+  for (const [number, values] of [[26, [11]], [27, [27, 128, 2187]]]) {
+    const { logs, program } = execute(example(number));
+    assert.deepStrictEqual(logs.map(args => args.length), values.map(() => 1));
+    // FFPPWR uses FFP log/multiply/exp, rather than exact integer powers.
+    // Keep the output order strict and allow its documented six-digit error.
+    values.forEach((expected, i) => {
+      const actual = logs[i][0];
+      assert.ok(Number.isFinite(actual));
+      assert.ok(Math.abs(actual - expected) <= expected * 1e-6);
+    });
+    assert.strictEqual(program.state.halted, true);
   }
 });
 

@@ -1,0 +1,48 @@
+{
+  "name": "ffp-addition",
+  "source": "Print 1.0+0.0000000894069671630859375\nPrint 1.0+0.00000011920928955078125\nPrint 1.0+1.00000011920928955078125\nPrint 1.0-0.999999940395355224609375\nPrint MAX_FFP+MAX_FFP\nPrint FFP($80000101)-FFP($80000001)\n",
+  "programHex": "414d4f532042617369632076312e3030000000780a000476004680000041ffc00046c000002900000a000476004680000041ffc000468000002a00000a000476004680000041ffc000468000014100000a000476004680000041ffca0046ffffff4000000a0004760046ffffff7fffc00046ffffff7f00000a000476004680000101ffca0046800000010000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Raw opcodes Print=0x0476, FFP literal=0x0046, +=0xffc0, -=0xffca, with explicit big-endian FFP words. No production token encoder/table was used. Source uses descriptive MAX_FFP and FFP(bits) notation for values that are not ordinary source functions. The final case subtracts adjacent mantissas at the smallest positive exponent."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/bayerf42/MotoFFP/blob/main/FFPADD.asm",
+    "symbols": [
+      "FPALS",
+      "FPA2GC",
+      "FPAMSS",
+      "FPANRM",
+      "FPAZRO",
+      "FPA2OS"
+    ],
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s"
+    ],
+    "notes": "Preserved Motorola FFPADD/FFPSUB returns the stronger operand for exponent gaps >=24; adds a rounding byte before carry normalization; biases unequal-exponent subtraction before discarding residue on cancellation; saturates overflow and flushes underflow. AMOS Op_Plus/Op_Moins call mathffp through Float_Operation without checking its overflow flag. The fixture models the preserved Motorola routine, not captured execution of an AMOS installation or a particular Kickstart mathffp version. Library-version equivalence remains provisional."
+  },
+  "expected": {
+    "values": [
+      [
+        1
+      ],
+      [
+        1.0000001192092896
+      ],
+      [
+        2
+      ],
+      [
+        1.1920928955078125e-7
+      ],
+      [
+        9223371487098962000
+      ],
+      [
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

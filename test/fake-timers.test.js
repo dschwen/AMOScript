@@ -22,3 +22,15 @@ test('fakeTimers: schedule order and tick', () => {
   assert.strictEqual(ft.pending(), 0);
 });
 
+test('fakeTimers: time advances even when no callback runs', () => {
+  const ft = createFakeTimers();
+  let fired = false;
+  ft.setTimeout(() => { fired = true; }, 10);
+  ft.tick(9);
+  assert.strictEqual(ft.now(), 9);
+  assert.strictEqual(fired, false);
+  ft.tick(1);
+  assert.strictEqual(ft.now(), 10);
+  assert.strictEqual(fired, true);
+});
+

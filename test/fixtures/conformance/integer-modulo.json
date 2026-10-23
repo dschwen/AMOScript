@@ -1,0 +1,46 @@
+{
+  "name": "integer-modulo",
+  "source": "Print 17 Mod 5\nPrint 17 Mod (-5)\nPrint (-7) Mod 4\nPrint (-1) Mod 10\nPrint (-2147483648) Mod 3\nPrint 7 Mod 0\nPrint (-7) Mod 0\n",
+  "programHex": "414d4f532042617369632076312e30300000008c0a000476003e00000011ffd4003e0000000500000a000476003e00000011ffd4003efffffffb00000a000476003efffffff9ffd4003e0000000400000a000476003effffffffffd4003e0000000a00000a000476003e80000000ffd4003e0000000300000a000476003e00000007ffd4003e0000000000000a000476003efffffff9ffd4003e000000000000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Hand-specified instruction bytes, independent of TokenTable and test/helpers/tokens.js. Print=0x0476, integer=0x003e, /=0xffec, Mod=0xffd4. Negative constants are signed raw words. Source is a readable semantic equivalent, not an exported ASCII/binary pair."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+    "symbols": [
+      "Op_Modulo",
+      "mdv3",
+      "mdv2",
+      "mdv1"
+    ],
+    "notes": "Op_Modulo normalizes the divisor sign only and performs unsigned restoring division on all 32 bits of the dividend. It has no zero-divisor branch; subtraction of zero leaves the dividend bits as the remainder. This records interpreter source behavior, including unusual negative/zero cases; it is not an emulator capture."
+  },
+  "expected": {
+    "values": [
+      [
+        2
+      ],
+      [
+        2
+      ],
+      [
+        1
+      ],
+      [
+        5
+      ],
+      [
+        2
+      ],
+      [
+        7
+      ],
+      [
+        -7
+      ]
+    ],
+    "halted": true
+  }
+}

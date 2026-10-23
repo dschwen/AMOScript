@@ -2,4 +2,4 @@
 
 var path = require('path');
 
-require(path.join(__dirname, '../lib/command')).run();
+process.exitCode = require(path.join(__dirname, '../lib/command')).run();

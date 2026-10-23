@@ -1,0 +1,48 @@
+{
+  "name": "ffp-division",
+  "source": "Print FFP($80000041)/FFP($c0000042)\nPrint FFP($80000041)/FFP($a0000044)\nPrint FFP($80000041)/FFP($80000141)\nPrint FFP($ffa3de41)/FFP($e2b9a541)\nPrint FFP($88596c41)/FFP($8885db41)\nPrint FFP($80000081)/FFP($80000042)\n",
+  "programHex": "414d4f532042617369632076312e3030000000780a000476004680000041ffec0046c000004200000a000476004680000041ffec0046a000004400000a000476004680000041ffec00468000014100000a0004760046ffa3de41ffec0046e2b9a54100000a000476004688596c41ffec00468885db4100000a000476004680000081ffec0046800000420000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Hand-specified Print=0x0476, FFP literal=0x0046 and arithmetic=0xffec opcodes, big-endian literal words and line lengths. Independent of the production token table/encoder. FFP(bits) in source is descriptive notation rather than an implemented AMOS function."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/bayerf42/MotoFFP/blob/main/FFPDIV.asm",
+    "symbols": [
+      "FFPDIV",
+      "FPDQOK",
+      "FPDISN",
+      "FPDOUF",
+      "FPDOV2"
+    ],
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+      "https://www.nxp.com/docs/en/reference-manual/M68000PM.pdf"
+    ],
+    "notes": "Expectations follow the preserved Motorola FFPDIV routine's exponent guards, high-word estimate, single correction, wrapped remainder and second high-word estimate. The fourth/fifth cases overflow the second 16-bit DIVU; the CPU leaves its cleared-low-word dividend unchanged, producing source-specific quotients. The final case underflows at the initial exponent guard. See NXP M68000PM for DIVU overflow behavior. These are source-analysis expectations, not captured execution of a particular AMOS/Kickstart version."
+  },
+  "expected": {
+    "values": [
+      [
+        0.3333333432674408
+      ],
+      [
+        0.10000000149011612
+      ],
+      [
+        0.9999998807907104
+      ],
+      [
+        1.12750244140625
+      ],
+      [
+        0.9987335205078125
+      ],
+      [
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

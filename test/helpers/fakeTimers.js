@@ -33,7 +33,7 @@ function createFakeTimers() {
       now = t.time;
       t.fn();
     }
-    now = Math.min(until, now);
+    if (ms !== Infinity) now = until;
   }
 
   function runAll() {

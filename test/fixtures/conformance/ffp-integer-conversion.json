@@ -1,0 +1,54 @@
+{
+  "name": "ffp-integer-conversion",
+  "source": "X=1.5 : Print X\nX=-1.5 : Print X\nX=2147483520.0 : Print X\nX=2147483648.0 : Print X\nX=-2147483648.0 : Print X\nX=-2147483904.0 : Print X\nX=4294967296.0 : Print X\nX=-4294967296.0 : Print X\n",
+  "programHex": "414d4f532042617369632076312e3030000001100a000006000001007800ffa20046c0000041000007000476000600000100780000000a000006000001007800ffa20046c00000c1000007000476000600000100780000000a000006000001007800ffa20046ffffff5f000007000476000600000100780000000a000006000001007800ffa2004680000060000007000476000600000100780000000a000006000001007800ffa20046800000e0000007000476000600000100780000000a000006000001007800ffa20046800001e0000007000476000600000100780000000a000006000001007800ffa2004680000061000007000476000600000100780000000a000006000001007800ffa20046800000e100000700047600060000010078000000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit assignment=0xffa2, Print=0x0476, integer variable=0x0006 with the padded name x, and raw FFP=0x0046 payloads. No production token table or encoder is used."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+    "sources": [
+      "https://github.com/bayerf42/MotoFFP/blob/main/FFPFPI.asm"
+    ],
+    "symbols": [
+      "FlToInt1",
+      "FlToInt2",
+      "FFPFPI",
+      "FPIOVP",
+      "FPICHM",
+      "FPIOVM"
+    ],
+    "notes": "AMOS FlToInt1/2 call SPFix and retain the integer result without checking overflow. Preserved FFPFPI truncates fractions toward zero, saturates positive overflow to 0x7fffffff, accepts exactly -2^31, and saturates more negative input to 0x80000000. These are instruction-derived expectations, not AMOS execution captures. Target Kickstart library equivalence remains provisional; the AROS implementation has differing edge paths and is not the selected algorithm."
+  },
+  "expected": {
+    "values": [
+      [
+        1
+      ],
+      [
+        -1
+      ],
+      [
+        2147483520
+      ],
+      [
+        2147483647
+      ],
+      [
+        -2147483648
+      ],
+      [
+        -2147483648
+      ],
+      [
+        2147483647
+      ],
+      [
+        -2147483648
+      ]
+    ],
+    "halted": true
+  }
+}

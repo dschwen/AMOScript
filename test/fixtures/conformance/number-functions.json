@@ -1,0 +1,57 @@
+{
+  "name": "number-functions",
+  "source": "Print Abs($80000000)\nPrint Abs(-3)/2\nPrint Abs(-3.5)/2\nPrint Int(3)/2\nPrint Int(3.5)/2\nPrint Int(-3.5)\nPrint Int(4294967296.0)\nPrint Sgn(3.5)/2\n",
+  "programHex": "414d4f532042617369632076312e3030000000b80900047606aa0074003e80000000007c00000d00047606aa0074003efffffffd007cffec003e0000000200000d00047606aa00740046e00000c2007cffec003e0000000200000d00047606b40074003e00000003007cffec003e0000000200000d00047606b400740046e0000042007cffec003e0000000200000900047606b400740046e00000c2007c00000900047606b40074004680000061007c00000d00047606a000740046e0000042007cffec003e000000020000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal opcode and line bytes: Abs=0x06aa, Sgn=0x06a0, Int=0x06b4, Print=0x0476, divide=0xffec; independent of the production token table and encoder. Function offsets follow original C_Tk records."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+      "https://amospromanual.dev/05-03-maths.html"
+    ],
+    "symbols": [
+      "FnAbs",
+      "FnAbsF",
+      "FnInt",
+      "FnIntF",
+      "FnSgn",
+      "FnSgnF",
+      "Float_Fonction",
+      "Float_Test"
+    ],
+    "notes": "FnAbs performs NEG.L without an overflow guard. FnInt is integer identity; FnIntF dispatches SPFloor through Float_Fonction, retaining float type. FnSgnF returns Ret_Int after SPTst. The manual specifies floor for negative fractional input. Expectations are derived from source and documented mathffp contracts, not captured AMOS execution. Library-version edge behavior remains provisional."
+  },
+  "expected": {
+    "values": [
+      [
+        -2147483648
+      ],
+      [
+        1
+      ],
+      [
+        1.75
+      ],
+      [
+        1
+      ],
+      [
+        1.5
+      ],
+      [
+        -4
+      ],
+      [
+        4294967296
+      ],
+      [
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

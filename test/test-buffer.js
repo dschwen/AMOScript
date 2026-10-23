@@ -8,10 +8,9 @@ function makeBuf() {
   const arr = new Uint8Array(40);
   const magic = 'AMOS Basic v1.00'; // 16 bytes
   for (let i = 0; i < 16; i++) arr[i] = magic.charCodeAt(i);
-  // code_bytes = 2 (big-endian)
-  arr[16] = 0x00; arr[17] = 0x00; arr[18] = 0x00; arr[19] = 0x02;
-  // line table content to allow constructor scan to progress: at 20 -> 1 (so i += 2 to 22 and stop)
-  arr[20] = 0x01;
+  // A line needs a two-byte header and a two-byte terminator.
+  arr[16] = 0x00; arr[17] = 0x00; arr[18] = 0x00; arr[19] = 0x04;
+  arr[20] = 0x02;
   // data for reads starting at ip=20
   arr[21] = 0x12; // popWord high
   arr[22] = 0x34; // popWord low
@@ -31,7 +30,7 @@ test('Buffer: magic and basic reads', () => {
 
   // ip starts at 20
   assert.strictEqual(buf.ip, 20);
-  assert.strictEqual(buf.popByte(), 0x01); // line length byte
+  assert.strictEqual(buf.popByte(), 0x02); // line length byte
   assert.strictEqual(buf.popWord(), 0x1234);
   assert.strictEqual(buf.popDWord(), 0x2A);
   assert.strictEqual(buf.ip, 27);

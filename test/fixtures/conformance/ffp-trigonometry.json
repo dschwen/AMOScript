@@ -1,0 +1,56 @@
+{
+  "name": "ffp-trigonometry",
+  "source": "Print Sin(1)\nDegree\nPrint Sin(90)\nPrint Cos(90)\nPrint Tan(90)\nRadian\nPrint Sin(1048576)\nPrint Cos(1048576)\nPrint Tan(0)\n",
+  "programHex": "414d4f532042617369632076312e30300000008a0900047607020074003e00000001007c0000030006ca00000900047607020074003e0000005a007c000009000476070c0074003e0000005a007c00000900047607160074003e0000005a007c0000030006be00000900047607020074003e00100000007c000009000476070c0074003e00100000007c00000900047607160074003e00000000007c0000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit Print=0x0476, Sin=0x0702, Cos=0x070c, Tan=0x0716, Degree=0x06ca, Radian=0x06be, integer=0x003e and parentheses=0x0074/0x007c opcodes. Independent of the production token table/encoder; the command offsets were derived from the original C_Tk records."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/bayerf42/MotoFFP/blob/main/FFPSIN.asm",
+    "sources": [
+      "https://github.com/bayerf42/MotoFFP/blob/main/FFPTHETA.asm",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s"
+    ],
+    "symbols": [
+      "FPSCHL",
+      "FPSCOM",
+      "FPSNLR",
+      "FSINLP",
+      "FSFLOAT",
+      "FSTINF",
+      "FFAngle",
+      "InDegree",
+      "InRadian"
+    ],
+    "notes": "Preserved circular CORDIC computes sine/cosine together and tangent through FFP division. AMOS FFAngle divides degrees by 180 then multiplies by stored Pi. The excessive-input path returns after doubling D7's low byte without restoring it, despite the source prologue describing unchanged input; at 2^20 this decodes to -2^-23. Expectations follow the instruction path and AMOS's unchecked math return flags, not captured execution. Equivalence to the selected Kickstart mathtrans library remains unverified."
+  },
+  "expected": {
+    "values": [
+      [
+        0.8414710760116577
+      ],
+      [
+        1
+      ],
+      [
+        0
+      ],
+      [
+        9223371487098962000
+      ],
+      [
+        -1.1920928955078125e-7
+      ],
+      [
+        -1.1920928955078125e-7
+      ],
+      [
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

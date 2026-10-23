@@ -1,0 +1,38 @@
+{
+  "name": "external-bank-load",
+  "source": "Cls 0\nLoad \"objects.abk\"\nPaste Bob 10,10,1\nLoad \"objects.abk\",1\nPaste Bob 30,10,3\nPrint Point(10,10),Point(11,10),Point(30,10),Point(31,10)\n",
+  "programHex": "414d4f532042617369632076312e3030000000d406000bb8003e0000000000000b00184e0026000b6f626a656374732e61626b0000000e001cfe003e0000000a005c003e0000000a005c003e0000000100000f00185a0026000b6f626a656374732e61626b00005c003e0000000100000e001cfe003e0000001e005c003e0000000a005c003e0000000300002e0004760e560074003e0000000a005c003e0000000a007c005c0e560074003e0000000b005c003e0000000a007c005c0e560074003e0000001e005c003e0000000a007c005c0e560074003e0000001f005c003e0000000a007c0000416d42730000",
+  "files": {
+    "objects.abk": "416d53700002000100020002c001ffffa0004000600080000000000000000000000000000f0000f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit Load=0x184e and Load-with-argument=0x185a from original C_Tk records, plus Cls-colour=0x0bb8, Paste Bob=0x1cfe and Point=0x0e56. Independent payload/line assembly; no production encoder. The external AmSp file is the independently specified first image bank from image-banks.hex, including its empty second slot."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+    "sources": [
+      "https://amospromanual.dev/05-09-memory-banks.html"
+    ],
+    "symbols": [
+      "InLoad1",
+      "InLoad2",
+      "Bnk.Load",
+      "LB_Sprites",
+      "LB_FIcons"
+    ],
+    "notes": "Load without an argument overwrites Object bank 1. A nonzero optional low-word argument appends image definitions in bank 1 rather than renumbering it. The second original slot is empty, so the appended first image is number 3. Paste ignores hotspots and restores the same planar indices at both positions. These source-derived values are not captured AMOS execution."
+  },
+  "expected": {
+    "values": [
+      [
+        1,
+        2,
+        1,
+        2
+      ]
+    ],
+    "halted": true
+  }
+}

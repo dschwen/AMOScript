@@ -1,0 +1,38 @@
+{
+  "name": "integer-multiplication",
+  "source": "Print 50000*50000\nPrint (-50000)*50000\nPrint 65535*65535\nPrint 65536*32767\n",
+  "programHex": "414d4f532042617369632076312e3030000000500a000476003e0000c350ffe2003e0000c35000000a000476003effff3cb0ffe2003e0000c35000000a000476003e0000ffffffe2003e0000ffff00000a000476003e00010000ffe2003e00007fff0000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Hand-specified instruction bytes independent of the production token table. Print=0x0476, integer=0x003e, *=0xffe2. Source is a readable equivalent, not an AMOS export."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+    "symbols": [
+      "Op_Mult",
+      "milt1",
+      "mlt2",
+      "mlt0",
+      "mltF"
+    ],
+    "notes": "When both operand magnitudes are below 65536, the quick MULU path returns a 32-bit result without overflow checks. Otherwise the slow path checks the unsigned product against 0x7fffffff before restoring sign. These expectations record interpreter source behavior and still need AMOS execution comparison."
+  },
+  "expected": {
+    "values": [
+      [
+        -1794967296
+      ],
+      [
+        1794967296
+      ],
+      [
+        -131071
+      ],
+      [
+        2147418112
+      ]
+    ],
+    "halted": true
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "string-boundaries",
+  "source": "Print Left$(\"\",-1)\nPrint Mid$(\"abc\",4,-1)\nPrint Right$(\"abc\",0)\nPrint Len(String$(\"x\",65535))\nPrint Len(String$(\"x\",65536))\nPrint Len(Space$(65537))\nPrint Len(String$(\"x\",65470)+\"y\")\nPrint Len(\"\"+String$(\"x\",65535))\nPrint Len(String$(\"\",-1))\nPrint Upper$(\"a\"+Chr$(0)+Chr$(255))\n",
+  "programHex": "414d4f532042617369632076312e3030000001300c0004760528007400260000005c003effffffff007c000012000476050e00740026000361626300005c003e00000004005c003effffffff007c00000e000476053600740026000361626300005c003e00000000007c00001000047605da0074056c0074002600017800005c003e0000ffff007c007c00001000047605da0074056c0074002600017800005c003e00010000007c007c00000c00047605da0074055e0074003e00010001007c007c00001400047605da0074056c0074002600017800005c003e0000ffbe007cffc0002600017900007c00001300047605da007400260000ffc0056c0074002600017800005c003e0000ffff007c007c00000f00047605da0074056c007400260000005c003effffffff007c007c00000a000476057c0074002600036100ff00007c0000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit original token offsets for Left$=0x528, Right$=0x536, Mid$=0x50e, String$=0x56c, Space$=0x55e, Len=0x5da, Upper$=0x57c, Print=0x476 and plus=0xffc0. Payloads and line lengths are assembled independently without production tables or helpers. The final raw literal contains 61 00 ff; readable source uses Chr$."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BEqu.s"
+    ],
+    "symbols": [
+      "RFnMid",
+      "FnRight",
+      "FnString",
+      "RString",
+      "Op_Plus",
+      "String_Max",
+      "FnUpper"
+    ],
+    "notes": "RFnMid rejects negative offsets then returns for past-end offsets before checking count. RString stores and loops with word lengths; String$ with empty source replaces its count with zero. Op_Plus checks String_Max=0xffc0 only when both operands are nonempty. Upper$ maps only ASCII lowercase bytes. Logical return values are derived from source; no AMOS heap capacity or allocation failures are modeled, and no target AMOS execution was captured."
+  },
+  "expected": {
+    "values": [
+      [
+        ""
+      ],
+      [
+        ""
+      ],
+      [
+        ""
+      ],
+      [
+        65535
+      ],
+      [
+        0
+      ],
+      [
+        1
+      ],
+      [
+        65471
+      ],
+      [
+        65535
+      ],
+      [
+        0
+      ],
+      [
+        "A\u0000\u00ff"
+      ]
+    ],
+    "halted": true
+  }
+}

@@ -1,2 +1,4 @@
 out.js
 node_modules
+.cache/
+test/artifacts/

@@ -24,25 +24,14 @@ function collect(dir) {
   }
 }
 
-function run() {
+async function run() {
   const start = Date.now();
   let passed = 0, failed = 0;
   for (const { name, fn } of tests) {
     try {
-      const res = fn();
-      if (res && typeof res.then === 'function') {
-        // Simple async support
-        res.then(() => {
-          console.log('✓', name);
-        }).catch((err) => {
-          failed++;
-          console.error('✗', name);
-          console.error(err && err.stack || err);
-        });
-      } else {
-        passed++;
-        console.log('✓', name);
-      }
+      await fn();
+      passed++;
+      console.log('✓', name);
     } catch (err) {
       failed++;
       console.error('✗', name);
@@ -54,6 +43,6 @@ function run() {
   if (failed > 0) process.exitCode = 1;
 }
 
-collect(path.join(__dirname));
-run();
+collect(process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname));
+run().catch(err => { console.error(err); process.exitCode = 1; });
 

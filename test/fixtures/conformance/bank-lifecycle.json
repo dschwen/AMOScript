@@ -1,0 +1,58 @@
+{
+  "name": "bank-lifecycle",
+  "source": "Reserve As Work 5,3\nReserve As Chip Work 6,4\nReserve As Data 7,5\nReserve As Chip Data 8,6\nPrint Length(1),Length(2),Length(5),Length(6),Length(7),Length(8)\nErase Temp\nPrint Length(1),Length(2),Length(5),Length(6),Length(7),Length(8)\nErase 7\nPrint Length(7),Length(8)\nErase All\nPrint Length(1),Length(2),Length(8)\n",
+  "programHex": "414d4f532042617369632076312e3030000001660a0020f2003e00000005005c003e0000000300000a00210a003e00000006005c003e0000000400000a002128003e00000007005c003e0000000500000a002140003e00000008005c003e0000000600002c000476014c0074003e00000001007c005c014c0074003e00000002007c005c014c0074003e00000005007c005c014c0074003e00000006007c005c014c0074003e00000007007c005c014c0074003e00000008007c0000030026c800002c000476014c0074003e00000001007c005c014c0074003e00000002007c005c014c0074003e00000005007c005c014c0074003e00000006007c005c014c0074003e00000007007c005c014c0074003e00000008007c00000600215e003e00000007000010000476014c0074003e00000007007c005c014c0074003e00000008007c0000030026d8000017000476014c0074003e00000001007c005c014c0074003e00000002007c005c014c0074003e00000008007c0000416d42730002416d53700002000100020002c001ffffa0004000600080000000000000000000000000000f0000f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000416d49630001000100020002c001ffffa00040006000800000000f0000f0000f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit original C_Tk offsets: Work=0x20f2, Chip Work=0x210a, Data=0x2128, Chip Data=0x2140, Erase=0x215e, Erase Temp=0x26c8, Erase All=0x26d8 and Length=0x014c. Independent payload/line assembly and the existing independent image-banks.hex trailer; no production token table or encoder is used."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+    "sources": [
+      "https://amospromanual.dev/05-09-memory-banks.html"
+    ],
+    "symbols": [
+      "InResWork",
+      "InResChipWork",
+      "InResData",
+      "InResChipData",
+      "RsBqX",
+      "InErase",
+      "Bnk.EffTemp",
+      "Bnk.EffAll",
+      "FnLength"
+    ],
+    "notes": "Reserve sets bank memory preference and permanent/data bits, with positive byte length and bank number 1..65535. Erase Temp removes banks lacking the data bit, retaining image banks and permanent data. Length returns generic byte count, image slot count including empty slots, or zero for missing banks. Values are source-derived, not captured AMOS execution; physical memory capacity and allocation-failure effects are not modeled."
+  },
+  "expected": {
+    "values": [
+      [
+        2,
+        1,
+        3,
+        4,
+        5,
+        6
+      ],
+      [
+        2,
+        1,
+        0,
+        0,
+        5,
+        6
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "integer-ffp-promotion",
+  "source": "Print 16777217=16777218.0\nPrint -16777217=-16777218.0\nPrint 16777219=16777220.0\nPrint 16777217=16777218\nPrint 16777217-16777218.0\nPrint 16777217+0.0\n",
+  "programHex": "414d4f532042617369632076312e3030000000780a000476003e01000001ffa200468000015900000a000476003efeffffffffa20046800001d900000a000476003e01000003ffa200468000025900000a000476003e01000001ffa2003e0100000200000a000476003e01000001ffca00468000015900000a000476003e01000001ffc00046000000000000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit opcodes and big-endian fields assembled independently of TokenTable and test/helpers/tokens.js: Print=0x0476, integer=0x003e, FFP=0x0046, equality=0xffa2, subtraction=0xffca, addition=0xffc0. FFP 0x80000159 is 16777218; 0x800001d9 is -16777218; 0x80000259 is 16777220. The readable source is a semantic description, not an AMOS export."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+    "symbols": [
+      "Compat",
+      "IntToFl1",
+      "IntToFl2",
+      "Op_Egal",
+      "Op_Moins",
+      "Op_Plus"
+    ],
+    "notes": "Compat promotes an integer operand with SPFlt before mixed integer/float operations and comparisons. The documented FFP format has a normalized 24-bit mantissa. The AROS mathffp SPFlt source rounds the magnitude using the first discarded bit, including ties. These cases exercise that rule without a normalization carry. Expectations remain provisional until captured on the intended AMOS/mathffp version.",
+    "sources": [
+      "https://wiki.amigaos.net/wiki/Math_Libraries",
+      "https://github.com/aros-development-team/AROS/blob/master/workbench/libs/mathffp/spflt.c"
+    ]
+  },
+  "expected": {
+    "values": [
+      [
+        -1
+      ],
+      [
+        -1
+      ],
+      [
+        -1
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        16777218
+      ]
+    ],
+    "halted": true
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "substring-assignment",
+  "source": "S$=\"abcdef\"\nT$=S$\nRight$(S$,4)=\"XY\"\nPrint S$,T$\nMid$(S$,3,2)=S$\nPrint S$\nLeft$(S$,2)=\"Z\"\nMid$(S$,99,-1)=\"!\"\nPrint S$\nMid$(S$,0)=\"1234567\"\nPrint S$\nS$=\"\"\nLeft$(S$,-1)=\"X\"\nPrint S$\nS$=\"a\"+Chr$(0)+\"b\"+Chr$(255)\nMid$(S$,2)=S$\nPrint S$\n",
+  "programHex": "414d4f532042617369632076312e3030000001bc0c000006000001027300ffa20026000661626364656600000b000006000001027400ffa2000600000102730000001100053600740006000001027300005c003e00000004007cffa200260002585900000c0004760006000001027300005c000600000102740000001600050e00740006000001027300005c003e00000003005c003e00000002007cffa20006000001027300000007000476000600000102730000001100052800740006000001027300005c003e00000002007cffa2002600015a0000001500050e00740006000001027300005c003e00000063005c003effffffff007cffa2002600012100000007000476000600000102730000001400051e00740006000001027300005c003e00000000007cffa20026000731323334353637000000070004760006000001027300000009000006000001027300ffa20026000000001100052800740006000001027300005c003effffffff007cffa2002600015800000007000476000600000102730000000b000006000001027300ffa200260004610062ff00001200051e00740006000001027300005c003e00000002007cffa2000600000102730000000700047600060000010273000000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Independent opcode/payload assembly using explicit original C_Tk offsets Left$=0x0528, Right$=0x0536, three-argument Mid$=0x050e and two-argument Mid$=0x051e. Production token table/encoder are not imported. The final literal contains raw bytes 61 00 62 ff; readable source spells those bytes using Chr$."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+      "https://amospromanual.dev/05-02-string-functions.html"
+    ],
+    "symbols": [
+      "InLeft",
+      "InRight",
+      "InMid2",
+      "InMid3",
+      "RInMid",
+      "RInMid2"
+    ],
+    "notes": "RInMid copies the destination before evaluating arguments and replacement. RInMid2 overwrites at most the selected range, remaining destination and source lengths, retaining destination length and untouched suffix. Offsets 0 and 1 select the first byte; past-end offsets return before checking a negative count. InRight selects the suffix start and copies from the beginning of its source. These instruction-derived expectations are not captured AMOS execution."
+  },
+  "expected": {
+    "values": [
+      [
+        "abXYef",
+        "abcdef"
+      ],
+      [
+        "ababef"
+      ],
+      [
+        "Zbabef"
+      ],
+      [
+        "123456"
+      ],
+      [
+        ""
+      ],
+      [
+        "aa\u0000b"
+      ]
+    ],
+    "halted": true
+  }
+}

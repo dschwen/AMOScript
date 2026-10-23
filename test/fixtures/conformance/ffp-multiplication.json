@@ -1,0 +1,43 @@
+{
+  "name": "ffp-multiplication",
+  "source": "Print FFP($80000141)*FFP($c0000041)\nPrint FFP($cccccd3d)*FFP($cccccd3d)\nPrint FFP($80000140)*FFP($fffffe40)\nPrint FFP($8000007f)*FFP($80000041)\nPrint FFP($80000081)*FFP($80000040)\n",
+  "programHex": "414d4f532042617369632076312e3030000000640a000476004680000141ffe20046c000004100000a0004760046cccccd3dffe20046cccccd3d00000a000476004680000140ffe20046fffffe4000000a00047600468000007fffe200468000004100000a000476004680000081ffe20046800000400000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Hand-specified Print=0x0476, FFP literal=0x0046 and arithmetic=0xffe2 opcodes, big-endian literal words and line lengths. Independent of the production token table/encoder. FFP(bits) in source is descriptive notation rather than an implemented AMOS function."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/bayerf42/MotoFFP/blob/main/FFPMUL2.asm",
+    "symbols": [
+      "FFPMUL2",
+      "FFMNOR",
+      "FFMCLN",
+      "FFMOUF"
+    ],
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s"
+    ],
+    "notes": "Expectations follow the preserved Motorola FFPMUL2 routine: exact high product bits, magnitude rounding, normalization carry and exponent guards before normalization. This is the higher-accuracy multiply variant; identifying the multiply implementation in the intended Kickstart mathffp.library remains outstanding. No AMOS/emulator execution has been captured."
+  },
+  "expected": {
+    "values": [
+      [
+        1.500000238418579
+      ],
+      [
+        0.010000000707805157
+      ],
+      [
+        0.5
+      ],
+      [
+        9223371487098962000
+      ],
+      [
+        -2.710505431213761e-20
+      ]
+    ],
+    "halted": true
+  }
+}

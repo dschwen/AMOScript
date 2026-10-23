@@ -29,8 +29,6 @@
   if (typeof window !== 'undefined') {
     window.driverDemoRun = driverDemoRun;
     // expose for browser
-    window.AMOS_DRIVER = window.AMOS_DRIVER || {};
-    window.AMOS_DRIVER.createProgram = createProgram;
   } else {
     module.exports = { driverDemoRun };
   }

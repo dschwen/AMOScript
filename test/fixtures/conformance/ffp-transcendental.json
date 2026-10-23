@@ -1,0 +1,56 @@
+{
+  "name": "ffp-transcendental",
+  "source": "Print Ln(0)\nPrint Ln(1)\nPrint Ln(2)\nPrint Exp(0)\nPrint Exp(1)\nPrint Pi#\nPrint 3^3\nPrint 0^(-1)\n",
+  "programHex": "414d4f532042617369632076312e30300000008a09000476077c0074003e00000000007c000009000476077c0074003e00000001007c000009000476077c0074003e00000002007c00000900047607860074003e00000000007c00000900047607860074003e00000001007c00000400047606d600000a000476003e00000003fff6003e0000000300000a000476003e00000000fff6003effffffff0000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit Print=0x0476, Ln=0x077c, Exp=0x0786, Pi#=0x06d6, power=0xfff6, integer=0x003e, parentheses=0x0074/0x007c and big-endian literal fields. Independent of the production token table/encoder. The negative exponent is encoded as a raw signed integer."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/bayerf42/MotoFFP/blob/main/FFPPWR.asm",
+    "sources": [
+      "https://github.com/bayerf42/MotoFFP/blob/main/FFPLOG.asm",
+      "https://github.com/bayerf42/MotoFFP/blob/main/FFPEXP.asm",
+      "https://github.com/bayerf42/MotoFFP/blob/main/FFPHTHET.asm",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s"
+    ],
+    "symbols": [
+      "FFPPWR",
+      "FFPLOG",
+      "FFPEXP",
+      "FFPTNORM",
+      "Open_MathLibraries"
+    ],
+    "notes": "Results interpret the preserved fixed-point CORDIC log/exp routines and power's log-multiply-exp composition. Ln(0) returns the largest negative finite value; 0^(-1) saturates positively; finite-precision power need not produce an exact integer. Pi uses AMOS Open_MathLibraries' literal 0xc90fd942. The fixture is source analysis, not captured execution of AMOS or a particular Kickstart mathtrans version; library equivalence remains unverified."
+  },
+  "expected": {
+    "values": [
+      [
+        -9223371487098962000
+      ],
+      [
+        0
+      ],
+      [
+        0.6931471824645996
+      ],
+      [
+        1
+      ],
+      [
+        2.7182817459106445
+      ],
+      [
+        3.141592264175415
+      ],
+      [
+        27.0000057220459
+      ],
+      [
+        9223371487098962000
+      ]
+    ],
+    "halted": true
+  }
+}

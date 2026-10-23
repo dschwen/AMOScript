@@ -1,0 +1,57 @@
+{
+  "name": "decimal-input",
+  "source": "Print Val(\"0.1\")\nPrint Val(\"3.141\")\nPrint Val(\"16777217.0\")\nPrint Val(\"-2147483648\")\nPrint Val(\"$80000000\")\nPrint Val(\"1000000e-20\")\nPrint Val(\"1e\")/2\nPrint Val(\"1e+\")/2\nPrint Val(\"1e65536\")\n",
+  "programHex": "414d4f532042617369632076312e3030000000e40a00047605a4007400260003302e3100007c00000b00047605a4007400260005332e31343100007c00000d00047605a400740026000a31363737373231372e30007c00000e00047605a400740026000b2d3231343734383336343800007c00000d00047605a400740026000924383030303030303000007c00000e00047605a400740026000b31303030303030652d323000007c00000d00047605a40074002600023165007cffec003e0000000200000e00047605a400740026000331652b00007cffec003e0000000200000c00047605a40074002600073165363535333600007c0000416d42730000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit big-endian opcodes and payloads: Print=0x0476, Val=0x05a4, parentheses=0x0074/0x007c, string=0x0026 with byte length and even padding, divide=0xffec, integer=0x003e. No production token table/encoder was used."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s",
+    "symbols": [
+      "a2ffp",
+      "L280A8",
+      "L28040",
+      "L2858A",
+      "L28518",
+      "L28116"
+    ],
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BILib.s"
+    ],
+    "notes": "ValRout classifies a decimal point or exponent sign/digits as float; bare 1e remains an integer. declong checks the positive magnitude before applying a sign, so decimal -2147483648 returns zero while hex $80000000 remains valid. a2ffp builds mantissa digits via private FFP multiply/add, applies repeated FFP decimal scaling, and uses a signed 16-bit exponent. The scale for 1000000e-20 underflows before its final multiplication. Expected values are source interpretations, not captured AMOS execution."
+  },
+  "expected": {
+    "values": [
+      [
+        0.10000000149011612
+      ],
+      [
+        3.1409997940063477
+      ],
+      [
+        16777216
+      ],
+      [
+        0
+      ],
+      [
+        -2147483648
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0.5
+      ],
+      [
+        1
+      ]
+    ],
+    "halted": true
+  }
+}

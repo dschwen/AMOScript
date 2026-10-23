@@ -1,13 +1,49 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>AMOScript testbed</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AMOScript</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #17202a; background: #f5f6f8; }
+    button { font: inherit; padding: .5rem 1rem; margin: 0 .5rem 1rem 0; cursor: pointer; }
+    canvas { display: block; width: min(100%, 640px); height: auto; image-rendering: pixelated; border: 2px solid #17202a; background: #000; }
+    canvas:focus { outline: 3px solid #0088ff; outline-offset: 3px; }
+    pre { min-height: 5rem; padding: 1rem; background: #fff; white-space: pre-wrap; }
+  </style>
 </head>
 <body>
-  Open the console to see the script output. <br/>
-  <script src="lib/amos/system.js"></script>
+  <h1>AMOScript</h1>
+  <p>Choose an AMOS program. Focus the screen to send keyboard and mouse input.</p>
+  <button id="run" type="button">Run</button>
+  <button id="graphics" type="button">Graphics</button>
+  <button id="bobs" type="button">Moving Bobs</button>
+  <button id="stop" type="button">Stop</button>
+  <canvas id="screen" width="320" height="200" tabindex="0" aria-label="AMOS program display">Canvas is required to display this program.</canvas>
+  <pre id="output" aria-live="polite"></pre>
   <script src="lib/amos/background.js"></script>
-  <script src="lib/amos/driver.js"></script>
-  <script src="examples/driver-demo.js"></script>
-  <button onclick="driverDemoRun()">Run</button>
+  <script src="lib/amos/browser.js"></script>
+  <script src="examples/compiled-demo.js"></script>
+  <script>const controlFlowFactory = AMOS_MODULE;</script>
+  <script src="examples/compiled-graphics.js"></script>
+  <script>const graphicsFactory = AMOS_MODULE;</script>
+  <script src="examples/compiled-bobs.js"></script>
+  <script>
+    const bobsFactory = AMOS_MODULE;
+    const output = document.getElementById('output');
+    const host = AMOS_BROWSER.createCanvasHost(document.getElementById('screen'));
+    AMOS.init({ write: text => { output.textContent += text; } });
+    function start(factory) {
+      output.textContent = '';
+      const program = AMOS.load(factory);
+      host.attach(program);
+      AMOS.run();
+      host.focus();
+    }
+    document.getElementById('run').addEventListener('click', () => start(controlFlowFactory));
+    document.getElementById('graphics').addEventListener('click', () => start(graphicsFactory));
+    document.getElementById('bobs').addEventListener('click', () => start(bobsFactory));
+    document.getElementById('stop').addEventListener('click', () => AMOS.stop());
+  </script>
 </body>
 </html>

@@ -2,9 +2,18 @@
   "name": "amoscript",
   "version": "0.0.1",
   "description": "Transpile tokenized AMOS basic programs into Javascript",
-  "main": "index.js",
+  "main": "lib/Transpiler.js",
+  "bin": {
+    "amoscript": "bin/amoscript"
+  },
   "scripts": {
-    "test": "node test/run.js"
+    "test": "node test/run.js",
+    "check": "npm run check:generated && npm test",
+    "check:generated": "node tools/build_demo.js --check",
+    "build:demo": "node tools/build_demo.js",
+    "build:examples": "node tools/build_examples.js",
+    "install:browser": "node tools/install_browser.js",
+    "test:browser": "npm run check:generated && node test/browser-smoke.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +29,8 @@
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "binary-search-bounds": "^2.0.4"
+  },
+  "devDependencies": {
+    "playwright": "1.59.1"
   }
 }
