@@ -89,5 +89,5 @@ logical buffers, swaps, immutable snapshots, staged replacement/close, coordinat
 and unsupported forms. Eight independent indexed-pattern GPU/CPU comparisons
 exercise both resolutions, two palettes, fine/coarse offsets and the blank gap.
 The Chromium catalogue includes the standalone scrolling demo with HTML Preview
-links. Full-game compilation now first encounters `Fade` on line 236; see
+links. Full-game compilation now first encounters `Using` on line 285; see
 [Wonderland's milestone](wonderland.md).

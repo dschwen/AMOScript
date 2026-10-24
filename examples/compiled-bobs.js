@@ -1267,6 +1267,7 @@
   const font = options.font || fontFactory();
   const screens = new Map();
   const listeners = new Set();
+  const screenListeners = new Set();
   let current = null;
   let version = 0;
   let drawingHooks = null;
@@ -1327,6 +1328,7 @@
     next.physicalPixels = next.pixels;
     screens.set(id, next);
     current = id;
+    screenListeners.forEach(listener => listener());
     changed(true);
     return next;
   }
@@ -1335,6 +1337,7 @@
     screen(id);
     screens.delete(id);
     if (current === id) current = screens.size ? screens.keys().next().value : null;
+    screenListeners.forEach(listener => listener());
     changed(true);
   }
   function commitWindows() {
@@ -1819,7 +1822,8 @@
     setSpriteWriter(fn) { spriteWriter = fn; changed(); },
     invalidate: changed,
     get current() { return current; }, get version() { return version; },
-    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
+    subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
+    subscribeScreens(listener) { screenListeners.add(listener); return () => screenListeners.delete(listener); }
   };
 };
   const bankReaderFactory = class BankReader {
@@ -2025,6 +2029,50 @@
   const collisionHits = new Uint8Array(256);
   let degrees = false;
   let joystickBinding = null;
+  let fading = null;
+  function publishFade(notify = true) {
+    state.fade = Object.freeze({ active: !!fading, screen: fading ? fading.target.id : null,
+      speed: fading ? fading.speed : 0, nextVbl: fading ? fading.nextVbl : null });
+    if (notify && options.requestPaletteWake) options.requestPaletteWake();
+  }
+  function cancelFade() { fading = null; publishFade(); }
+  function advanceFade(vbl) {
+    if (!fading || vbl < fading.nextVbl) return;
+    const job = fading;
+    if (display.screens.get(job.target.id) !== job.target) { cancelFade(); return; }
+    // At most fifteen component steps and one completion check remain. Clock
+    // catch-up is bounded independently of the number of missed fields.
+    const steps = Math.min(16, Math.floor((vbl - job.nextVbl) / job.speed) + 1);
+    let changed = false;
+    for (let step = 0; step < steps && fading; step++) {
+      let moving = false;
+      for (const entry of job.entries) {
+        if (entry.rgb === 0) continue;
+        const rgb = entry.rgb;
+        entry.rgb = Math.max(0, (rgb >> 8) - 1) * 256 + Math.max(0, ((rgb >> 4) & 15) - 1) * 16 + Math.max(0, (rgb & 15) - 1);
+        job.target.palette[entry.index] = entry.rgb;
+        moving = true; changed = true;
+      }
+      job.nextVbl += job.speed;
+      if (!moving) fading = null;
+    }
+    publishFade();
+    if (changed) display.invalidate();
+  }
+  function fade(speed) {
+    speed = integer(speed);
+    if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
+    if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    const target = display.screen(), vbl = options.vblNow();
+    advanceFade(vbl);
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff })).filter(entry => entry.rgb !== 0);
+    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
+    publishFade();
+  }
+  publishFade(false);
+  (display.subscribeScreens || display.subscribe).call(display, () => {
+    if (fading && display.screens.get(fading.target.id) !== fading.target) cancelFade();
+  });
   function joystickPort(port) {
     if (!Number.isInteger(port) || port < 0 || port > 1) throw new Error('Invalid joystick port');
     return port;
@@ -3196,6 +3244,9 @@
   }
 
   return {
+    fade, advanceFade, cancelFade,
+    nextFadeVbl: () => fading ? fading.nextVbl : null,
+    fadeLocation: () => fading && fading.location,
     display, inputValue, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,
     eraseAll: () => installBanks([], [], true),
     reserveWork: (number, length) => reserveBank(number, length, false, 'fast'),
@@ -3419,6 +3470,7 @@
 
   let lastMaxSteps = 1000;
   let scheduled = null;
+  let paletteWake = null;
   let sleepRemaining = 0;
   const keys = state.input.keys;
   const inputResetListeners = new Set();
@@ -3443,6 +3495,40 @@
     scheduled = null;
     if (timing.clearTimeout && previous.id != null) timing.clearTimeout.call(globalThis, previous.id);
   }
+  function cancelPaletteWake() {
+    if (!paletteWake) return;
+    const task = paletteWake; paletteWake = null;
+    if (timing.clearTimeout && task.id != null) {
+      try { timing.clearTimeout.call(globalThis, task.id); }
+      catch (_) { /* The invalidated ownership token still makes the wake inert. */ }
+    }
+  }
+  function failPalette(error, location) {
+    state.halted = true; state.waiting = null;
+    try { cancelScheduled(); } catch (_) { /* Keep the original asynchronous failure. */ }
+    cancelPaletteWake(); operations.cancelFade();
+    resetInput(); silenceAfterFailure();
+    if (location && !error.message.includes(' at line ')) error.message += ` at line ${location.line}, byte ${location.offset}`;
+    throw error;
+  }
+  function requestPaletteWake() {
+    cancelPaletteWake();
+    if (state.halted || state.stopped) return;
+    const frame = operations.nextFadeVbl();
+    if (frame == null) return;
+    const delay = Math.max(0.001, timerEpoch + frame * 1000 / timing.vblHz - timing.now());
+    const task = { id: null }; paletteWake = task;
+    task.id = timing.setTimeout.call(globalThis, () => {
+      if (paletteWake !== task) return;
+      paletteWake = null;
+      if (state.halted || state.stopped) return;
+      const location = operations.fadeLocation();
+      try {
+        operations.advanceFade(vblCount());
+        if (!paletteWake) requestPaletteWake();
+      } catch (error) { failPalette(error, location); }
+    }, delay);
+  }
 
   function scheduleNext(delayMs) {
     if (scheduled || state.halted || state.stopped) return;
@@ -3463,6 +3549,11 @@
 
     const ipBefore = state.ip;
     let res;
+    if (operations.nextFadeVbl() != null) {
+      const location = operations.fadeLocation();
+      try { operations.advanceFade(vblCount()); }
+      catch (error) { failPalette(error, location); }
+    }
     try {
       res = fn(state) || {};
     } catch (error) {
@@ -3531,6 +3622,7 @@
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
+        cancelPaletteWake(); operations.cancelFade();
         resetInput();
         silenceAfterFailure();
         if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
@@ -3541,11 +3633,12 @@
     }
     try {
       operations.flushBobs();
-      if (state.halted) { resetInput(); operations.audio.silence(); }
+      if (state.halted) { cancelPaletteWake(); operations.cancelFade(); resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
+      cancelPaletteWake(); operations.cancelFade();
       resetInput();
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
@@ -3559,6 +3652,7 @@
     if (state.waiting === 'sleep' && scheduled) sleepRemaining = Math.max(0, scheduled.due - timing.now());
     state.stopped = true;
     cancelScheduled();
+    cancelPaletteWake();
     resetInput();
     operations.audio.silence();
   }
@@ -3566,6 +3660,11 @@
   function resume() {
     if (!state.stopped || state.halted) return;
     state.stopped = false;
+    const location = operations.fadeLocation();
+    try {
+      if (operations.nextFadeVbl() != null) operations.advanceFade(vblCount());
+      requestPaletteWake();
+    } catch (error) { failPalette(error, location); }
     if (state.waiting === 'sleep') scheduleNext(sleepRemaining);
     else if (!state.waiting) scheduleNext(0);
   }
@@ -3601,7 +3700,7 @@
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, Object.assign({}, options, { resetInput }));
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake }));
   return {
     state, tick, stop, resume, sendKey, clearScanCodes, print,
     subscribeInputReset(listener) {

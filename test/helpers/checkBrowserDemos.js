@@ -19,6 +19,18 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'fade') {
+        await page.waitForFunction(() => document.getElementById('fade-controls').dataset.phase === 'ready');
+        await page.click('#fade-fade');
+        await page.waitForFunction(() => document.getElementById('fade-controls').dataset.phase === 'fading');
+        await page.click('#fade-stop');
+        assert.strictEqual(await page.locator('#fade-controls').getAttribute('data-phase'),'stopped');
+        await page.click('#fade-resume');
+        await page.waitForFunction(() => document.getElementById('fade-controls').dataset.phase === 'complete');
+        await page.click('#fade-restart');
+        await page.waitForFunction(() => document.getElementById('fade-controls').dataset.phase === 'ready');
+        await page.click('#fade-stop');
+      }
       if (scenario.id === 'scancodes') {
         await page.click('#scan-input'); await page.keyboard.press('Escape');
         await page.waitForFunction(() => document.getElementById('scan-log').dataset.scan === '69');

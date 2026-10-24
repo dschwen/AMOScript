@@ -1,0 +1,36 @@
+{
+  "name": "fade-black-vbl",
+  "source": "Colour 1,$f31\nFade 2\nWait 3\nPrint Colour(1)\nWait 61\nPrint Colour(1)\n",
+  "programHex": "414d4f532042617369632076312e30300000005c0a000d1c003e00000001005c003e00000f31000006000dfe003e0000000200000600129e003e000000030000090004760d2c0074003e00000001007c00000600129e003e0000003d0000090004760d2c0074003e00000001007c0000",
+  "advanceMs": 1280,
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original words: Colour=0d1c, Fade=0dfe, Wait=129e, Print=0476, Colour query=0d2c. Line lengths and integer payloads assembled without production encoders or tables."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/vbl.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/colours.cpp",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/interp/graphics.cpp"
+    ],
+    "symbols": [
+      "fade",
+      "FadeCpt",
+      "FadeVit",
+      "FadeFlag"
+    ],
+    "notes": "At 50 Hz the first component step occurs at 20 ms, then every 40 ms: f31 becomes e20 then d10 at 60 ms; after 64 fields it is black. The runner advances an explicit bounded fake clock. Source analysis, not an Amiga execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        3344
+      ],
+      [
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

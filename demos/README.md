@@ -9,6 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
+| [Wonderland Fade and VBL palette timing](fade.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/fade.html) |
 | [AMOS Scancode and original Wonderland Escape/title routing](scancodes.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/scancodes.html) |
 | [Computed branches and original Wonderland initialization](computed-branches.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/computed-branches.html) |
 | [Wonderland screen windows and scrolling](screen-windows.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-windows.html) |

@@ -24,6 +24,10 @@ for (const filename of fs.readdirSync(directory).filter(name => name.endsWith('.
       return [name, Buffer.from(hex, 'hex').toString('latin1')];
     })));
     const { logs, program, timers } = execute(Buffer.from(fixture.programHex, 'hex'), 1000, { files });
+    if (fixture.advanceMs != null) {
+      assert.ok(Number.isFinite(fixture.advanceMs) && fixture.advanceMs >= 0 && fixture.advanceMs <= 60000);
+      timers.tick(fixture.advanceMs);
+    }
     assert.deepStrictEqual(logs, fixture.expected.values);
     assert.strictEqual(program.state.halted, fixture.expected.halted);
     assert.strictEqual(timers.pending(), 0);

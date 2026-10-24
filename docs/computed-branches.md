@@ -56,7 +56,7 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Fade `$0dfe` on line 236,
-byte 9450. The bounded inventory reports 15 unrecognized encodings appearing
-36 times. Recognition counts are not a compatibility percentage; see
+Full Wonderland compilation now first encounters Using `$04a6` on line 285,
+byte 10314. The bounded inventory reports 14 unrecognized encodings appearing
+35 times. Recognition counts are not a compatibility percentage; see
 [the milestone](wonderland.md).

@@ -90,6 +90,6 @@ cleanup, diagnostics, mappings and original routing. Chromium also exercises the
 live page using real browser keyboard events. All browser scenarios remain
 standalone repository demos with HTML Preview links.
 
-The full program now first encounters Fade `$0dfe` on line 236, byte 9450.
-Fifteen encodings remain unrecognized, appearing 36 times; see
+The full program now first encounters Using `$04a6` on line 285, byte 10314.
+Fourteen encodings remain unrecognized, appearing 35 times; see
 [Wonderland's milestone](wonderland.md).

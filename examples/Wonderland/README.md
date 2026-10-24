@@ -16,7 +16,9 @@ The [computed-branch fixture](../../demos/computed-branches.html) runs the origi
 enemy dispatch and three unchanged initialization routines, with declared guards
 for the remaining two targets. The [keyboard fixture](../../demos/scancodes.html)
 runs the original Scancode/Escape branch and title routine with synthetic input
-and screen setup, stopping before game/menu/editor loops.
+and screen setup, stopping before game/menu/editor loops. The
+[Fade fixture](../../demos/fade.html) joins the original title and post-death
+Fade/Wait lines with explicit input guards and independently checked RGB frames.
 The original program uses Amiga volume paths; the browser files adapter resolves
 those paths to preloaded asset bytes, preserving the original source filenames.
 

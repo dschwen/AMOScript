@@ -165,6 +165,19 @@ module.exports = async function webglRendererProbe(page, artifacts) {
         }
       }
       windowProgram.stop();
+      const fading = module.exports({ now: () => 0, setTimeout: () => 1, clearTimeout() {} });
+      const fadeDisplay = fading.display;
+      fadeDisplay.setPalette(...Array(32).fill(0)); fadeDisplay.setColour(1, 0xf53); fadeDisplay.clear(1);
+      fading.fade(2);
+      for (const [vbl, steps] of [[1, 1], [3, 2], [15, 8], [29, 15]]) {
+        fading.advanceFade(vbl);
+        const expected = new Uint8Array(640 * 200 * 4);
+        const pixel = [Math.max(0, 15 - steps) * 17, Math.max(0, 5 - steps) * 17, Math.max(0, 3 - steps) * 17, 255];
+        for (let at = 0; at < expected.length; at += 4) expected.set(pixel, at);
+        const failure = verify(fadeDisplay.snapshotDisplay(), `amos-fade-vbl-${vbl}`, expected);
+        if (failure) return { failure };
+      }
+      fading.stop();
       for (const packet of packets) {
         const snapshot = model.deserializeSnapshot(packet.header, from64(packet.chip), from64(packet.tables));
         const failure = verify(snapshot, packet.name, from64(packet.golden)); if (failure) return { failure };

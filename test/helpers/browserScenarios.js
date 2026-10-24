@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'fade', title: 'Wonderland Fade and VBL palette timing', initialFrame: 'Wonderland Fade: 60 ms', description: 'Original title setup and post-death Fade 2 / Wait 64 / Wait Vbl lines, with declared trigger/exit guards. Nine independent RGB comparisons, immutable snapshots, unchanged physical pixels and clock-driven palette updates. Includes live Fade/Stop/Resume/Restart controls.', run: require('./fadeProbe'), check(result, assert) {
+    assert.strictEqual(result.frames,9);assert.strictEqual(result.comparedPixels,737280);
+    assert.strictEqual(result.noAnimationRequired,true);assert.strictEqual(result.sourceWaitFinished,true);
+    assert.strictEqual(result.endpointBlack,true);assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'scancodes', title: 'AMOS scan codes and Wonderland Escape', initialFrame: 'Wonderland Escape to original title', description: 'Inkey$/Scancode consumption, physical key mappings, repeats, joystick passthrough and lifecycle cleanup. Runs the original Wonderland input/Escape branch and title routine in a declared fixture. Includes a live compiled keyboard reader.', run: require('./scancodeProbe'), check(result, assert) {
     assert.deepStrictEqual(result.routes,[{scan:69,route:2},{scan:76,route:1},{scan:77,route:1},{scan:78,route:1},{scan:79,route:1},{scan:32,route:1}]);
     assert.strictEqual(result.keyChecks,9);assert.deepStrictEqual(result.repeatScans,[53,53,53]);assert.strictEqual(result.lifecycleChecks,6);

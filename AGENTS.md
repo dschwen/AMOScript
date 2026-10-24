@@ -49,6 +49,11 @@
   Canvas uses the same slot/row selection. Auto View/View stage screen replacement
   separately from selected logical output. See `docs/title-display.md` for the
   implemented subset and explicit pattern/NTSC/AMSC/timing gates.
+- Fade to black uses one per-program captured palette job and a driver-owned
+  wake on the injected VBL clock, independent of requestAnimationFrame and VM
+  waits. Stop cancels wakes; Resume reconciles elapsed fields; End/failure cancel.
+  Screen lifecycle subscriptions cancel even under Auto View Off. See
+  `docs/fade.md` for the bounded speed/form and timing/capture limits.
 - Screen Display/Screen Offset manage bounded nonoverlapping windows. View commits
   geometry and source offsets; Canvas renders the same physical copper snapshot.
   Full bitmap storage remains authoritative. Setup can span real blank rows,

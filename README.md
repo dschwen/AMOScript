@@ -20,6 +20,8 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [Fade demo](demos/fade.html) executes the original Fade/Wait sequence against
+independent RGB expectations, with live controls; see [the contract](docs/fade.md).
 The [scan-code demo](demos/scancodes.html) adds a live keyboard reader and
 executes the original Escape/title branch; see [input semantics](docs/scancodes.md).
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
