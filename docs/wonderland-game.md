@@ -2,7 +2,8 @@
 
 The [playable demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)
 embeds the unmodified `Wonderland.AMOS` and all seven pinned companion files.
-It runs the existing standalone instruction-function dispatcher and Canvas host.
+It runs the existing standalone instruction-function dispatcher and Canvas 2D host.
+The separate WebGL2 renderer is not connected to this live page.
 No game variables, instruction pointers, source branches or assets are patched.
 
 Focus the canvas. Arrows move and jump; Space/Enter selects in the original menu.
@@ -27,9 +28,10 @@ entry can otherwise reach a negative Rainbow base. Pointer initialization remain
 an editor integration limit; Limit Mouse does not reposition the pointer.
 Pressing L in the original editor therefore reports the explicit synchronous
 `files.select` failure. Prepared file selection and raw writeback remain available
-in their separate demos. IndexedDB persistence is still planned. Web Audio user
-activation is not integrated into this live session; the separate audio demo
-continues to exercise the six original samples.
+in their separate demos. IndexedDB persistence is still planned. Click Enable
+sound to activate Web Audio for the original sample commands.
+Mute stops active voices immediately. The separate audio demo also auditions
+all six samples. See [the sound contract](audio.md#live-game-sound-session).
 
 ## Controlled replay and evidence
 
@@ -65,6 +67,38 @@ slots. A boundary fixture fits exactly 15/15/13 MOVEs across two blank rows and
 the HUD row, with no raster events; removing a blank row still rejects.
 
 This establishes an interactive first-level session and a bounded loss/restart
-path. All-five-level completion, collectibles/enemy behavior, win paths, integrated
-sound and editor round trips, sustained performance, native clock fidelity and
+path. All-five-level completion, collectibles/enemy behavior, win paths, editor
+round trips, sustained performance, native clock fidelity and
 external Amiga reference captures remain milestone work.
+
+## Original game sound
+
+The page creates no live AudioContext until Enable sound is clicked. The optional
+`lib/amos/browserAudio.js` session creates/resumes its owned context inside that
+user action and routes the current program's synchronous events to the existing
+Web Audio host. Before initial activation, and while muted or suspended, new
+effects are dropped rather than queued for later playback. Missing APIs or rejected activation appear
+in the sound status; the game remains usable silently.
+
+Each Restart binds a new program adapter and invalidates the old one. Stop and
+runtime failures silence active voices. Resume continues execution without
+replaying past samples; an interrupted context can be resumed from the user
+control. Rerunning or disposing the demo disconnects owned nodes and closes its
+context. Async activation is invalidated by Mute/disposal, so a late resolution
+cannot re-enable sound.
+
+The keyboard replay produces sample 1 on mask 1 four times, sample 5 on mask 12
+three times and sample 6 on mask 12 once: collectible, death and game-over effects.
+Three offline native Web Audio comparisons use those actual game events and
+independently addressed PCM, Paula periods, gains and stereo routing. Both death
+and game-over play on left and right voices; the collectible command is left-only.
+PCM comparisons tolerate at most 1e-6 sample difference; they are native Web Audio
+control graphs, not Amiga recordings. The existing separate music probe still
+covers all six samples, loops and replacement.
+
+Live Chromium checks click Enable, trigger original gameplay sound, mute, confirm
+voice cleanup, re-enable while stopped without replay, retain activation across
+Restart, and close the context on disposal. Browser-adapter unit tests cover lazy
+creation, pending activation races, failed activation/retry, suspended commands,
+new/old program ownership, missing APIs and idempotent cleanup. Analog fidelity,
+exact interrupt timing and external Amiga audio captures remain open.

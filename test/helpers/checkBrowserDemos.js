@@ -20,15 +20,27 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if (scenario.id === 'wonderland-game') {
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'off');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-context'),'none');
+        await page.click('#game-sound');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
         await page.click('#game-input');await page.keyboard.down('Enter');
         await page.waitForFunction(()=>document.getElementById('game-controls').dataset.line==='204',{},{timeout:30000});await page.keyboard.up('Enter');
         const before=Number(await page.locator('#game-controls').getAttribute('data-x'));
         await page.keyboard.down('ArrowRight');
         await page.waitForFunction(x=>Number(document.getElementById('game-controls').dataset.x)>x,before);await page.keyboard.up('ArrowRight');
+        const played=Number(await page.locator('#game-controls').getAttribute('data-sound-plays'));await page.keyboard.down('ArrowUp');
+        await page.waitForFunction(played=>Number(document.getElementById('game-controls').dataset.soundPlays)>played,played);await page.keyboard.up('ArrowUp');
+        await page.click('#game-sound');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'off');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-voices'),'0');
         await page.click('#game-stop');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'stopped');
+        const mutedPlays=await page.locator('#game-controls').getAttribute('data-sound-plays');await page.click('#game-sound');
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-plays'),mutedPlays);
+
         await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'running');
         await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('game-input').height===256);
-        await page.click('#game-restart');await page.selectOption('#game-keyboard-layout','wasd');await page.keyboard.down('z');
+        await page.click('#game-restart');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-voices'),'0');await page.selectOption('#game-keyboard-layout','wasd');await page.keyboard.down('z');
         await page.waitForFunction(()=>document.getElementById('game-controls').dataset.line==='204',{},{timeout:30000});await page.keyboard.up('z');
         await page.click('#game-restart');await page.selectOption('#game-keyboard-layout','arrows');await page.keyboard.down('ArrowDown');
         await page.waitForFunction(()=>Number(document.getElementById('game-controls').dataset.menuPosition)>0);await page.keyboard.up('ArrowDown');
@@ -38,7 +50,10 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.keyboard.press('l');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.phase==='error');
         assert.match(await page.locator('#game-status').textContent(),/synchronous files.select/);
         await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'error');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-voices'),'0');
         await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'disposed');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-context'),'closed');
       }
       if (scenario.id === 'file-selector') {
         await page.click('#selector-run');

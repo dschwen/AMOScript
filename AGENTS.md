@@ -131,8 +131,10 @@
   Its finite input-only replay spends three lives through natural collisions and
   fades, restarts twice, returns to title and starts a fresh game. No variable/IP
   edits; injected gamepad/CPU-GPU evidence is not an Amiga capture. See
-  `docs/wonderland-game.md`. Editor requester/writeback and sound activation remain
-  unintegrated in that page; surface errors and require Restart.
+  `docs/wonderland-game.md`. The optional `browserAudio.js` session owns gesture
+  activation, mute, context closure and replaceable program bindings. Drop muted
+  effects; never replay queued sounds or let stale bindings stop a new program.
+  Editor requester/writeback remains unintegrated; surface errors and require Restart.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.
 - `examples/` contains Test1–27 and synthetic programs with `.Asc` references.
   ASCII is not an accepted compiler input yet.

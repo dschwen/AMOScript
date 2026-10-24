@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **490 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **496 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -18,13 +18,14 @@ This does not establish all-level completion or native gameplay parity.
 The declared original-menu fixture supports configurable keyboard/gamepad input,
 animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
-audio demos. Integrated sound/editor files and all-level/win coverage remain open.
+audio demos. The live session now connects original sample effects through explicit Web Audio
+Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 ## Feature matrix
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
-| Original Wonderland session | Implemented first-level subset | Complete source/assets, live Canvas keyboard/Gamepad mapping and Stop/Resume/Restart; input-only death/fade/game-over/fresh-game replays and jump/scroll/Escape checks. Native timing/captures, all-level/win paths and integrated audio/editor files remain open. [Contract](wonderland-game.md). |
+| Original Wonderland session | Implemented first-level subset | Complete source/assets, live Canvas keyboard/Gamepad mapping and Stop/Resume/Restart; input-only death/fade/game-over/fresh-game replays and jump/scroll/Escape checks. Original Web Audio sample effects, Enable/Mute and owned context cleanup pass; native timing/captures, all-level/win paths and editor files remain open. [Contract](wonderland-game.md). |
 | Fsel$ / whole-program compilation | Implemented prepared-host subset | Four string overloads, synchronous host choices/cancellation, original retry/Gosub/Return and selected load/save calls. Unmodified Wonderland compiles and enters its own game branch; four physical frames render across two controlled seconds. Native requester UI and async modal expression continuation remain open. [Contract](file-selector.md). |
 | Rnd / Randomize | Implemented source-derived subset | Per-factory word-arithmetic seed transition, integer mask/rejection, cached zero-bound reads, reseeding and optional controlled beam input. Eighteen original enemy streams pass independent vectors. Default seed/beam are zero; native startup/beam timing and captures remain open. [Contract](random.md). |
 | Raw bank files | Implemented checked subset | Bload into existing generic bank/address, exclusive-end Bsave, one live allocation per range, stable identities/addresses and synchronous byte-string files. All five original level writeback/save/load slices pass, preserving the omitted fifth seed. Native arbitrary memory/image-bank ranges remain unsupported; Fsel$ requires prepared synchronous choices. [Contract](raw-files.md). |
@@ -38,7 +39,7 @@ audio demos. Integrated sound/editor files and all-level/win coverage remain ope
 | IFF screen loading / rainbow rows / views | Implemented subset | Current/new-screen opaque Load Iff; blank rainbow tables, Rain read/write and bounded PAL row presentation through shared copper/CPU/GPU snapshots; staged screen replacement with Auto View/View. Pattern strings, active NTSC, laced/AMSC language loads and exact display-list timing remain open. [Contract](title-display.md). |
 | Generic bank byte access | Implemented subset | Start returns per-factory virtual addresses; Peek reads unsigned bytes and Poke stores low bytes in the shared bank payload. Swap/shrink retain surviving addresses; erasure/reload retire them. Image-bank/raw hardware addresses reject. [Contract](bank-memory.md). |
 | Keyboard repeat | Implemented subset | Key Speed uses fixed 50ths; Canvas repeats held keys with native duplicates suppressed and release/blur/Stop/detach/End cleanup. Zero-period and large-word cases remain unsupported. [Contract](key-speed.md). |
-| Music extension / sample audio | Implemented subset | Bounded slot-1 decoding for bank selection, sample play/stop, loop settings and Led On/Off. Original Samples descriptors, four voice masks, Paula-derived rates, optional Web Audio stereo adapter, lifecycle cleanup and offline PCM comparisons. Analog response is approximate; other music commands remain unsupported. [Contract](audio.md). |
+| Music extension / sample audio | Implemented subset | Bounded slot-1 decoding for bank selection, sample play/stop, loop settings and Led On/Off. Original Samples descriptors, four voice masks, Paula-derived rates, optional Web Audio stereo adapter, user-activated live-game sound, context/binding ownership, lifecycle cleanup and offline PCM comparisons. Analog response is approximate; other music commands remain unsupported. [Contract](audio.md). |
 | Startup / host environment | Implemented subset | Leading literal `Set Buffer` is preserved as compile metadata, without AMOS heap capacity enforcement. `Amos Lock`/`Close Editor` update logical host state and call an optional synchronous adapter. [Contract and limits](startup.md). |
 | Timer | Implemented nominal VBL counter | Bare integer read and numeric assignment, signed 32-bit wrap, preserved VBL phase, injected 50/60 Hz clock and independent factories; continues while stopped/waiting. [Source-derived tests and limits](startup.md). |
 | Tokenized source | Implemented core | All 27 existing `.AMOS` fixtures decode and parse. Invalid lengths, truncated payloads, unknown tokens, incomplete syntax and unmatched blocks are errors. |
@@ -73,7 +74,7 @@ audio demos. Integrated sound/editor files and all-level/win coverage remain ope
 | Double buffering / Autoback | Implemented subset | Separate logical/physical buffers, Double Buffer, Screen Swap selected/all, Autoback 0/1/2 with Bob background synchronization and single cursor/output advancement. Chromium verifies hidden drawing until swap. See [buffering contract](buffering.md). Hardware swap scheduling and multi-screen interrupt side effects remain unverified. |
 | Hardware sprites | Implemented subset | Direct 16-pixel, 1–4-plane sprites (third plane ignored, four planes attached) with structured rows/shared Canvas-reference composition, pending/presented updates, palette/priority and coordinate helpers have unit coverage; Chromium verifies manual updates, movement, indexed-pixel separation, instance isolation and cursor restoration. Computed/wide AMOS sprites and DMA contention/timing remain unfinished; bounded raw DMA/reuse/manual registers are implemented. See [display architecture](display-architecture.md). |
 | Amiga reference/WebGL display | CPU/GPU subset implemented | ABI/chip memory, planar/copper/stack paths, static scroll/DPF, EHB/HAM6 and explicit normal/hires/EHB/HAM IFF fields have synthetic goldens. Weave/line-double take explicit history and handle odd heights. Eight-channel/attached sprite reference, bounded DMA/reuse/manual registers and direct AMOS sprite snapshots pass synthetic tests; Canvas/planar/copper EHB/HAM pixels and WebGL2 probe pass locally. AMOS display/copper commands, superhires/HAM8, live fields, sprite contention/computed allocation, GPU host switching and remaining GPU modes remain open; direct nearest/aspect/letterbox presentation and restoration pass six additional canvas checks; WebGL2 resource uploads/readback/loss restoration pass locally (see [contract](webgl-resources.md)); 179 local non-HAM GPU/CPU frames pass, including 100 seeded frames and shader restoration (see [renderer contract](webgl-renderer.md)); full mode/capture gates remain open. See [mode contract](display-modes.md). |
-| Audio | Not implemented | Sample/music decoding and playback remain unfinished. Unsupported platform/extension commands fail explicitly. |
+| Other audio | Open | The bounded sample subset is implemented above. Tracker music, synthesized effects, envelopes, speech and remaining platform/extension commands remain unsupported. |
 | Encrypted/compiled procedures | Explicitly rejected | Rejected from header flags before parsing their bodies. |
 | ASCII input | Not implemented | Planned as a separate frontend sharing the AST/backend. |
 

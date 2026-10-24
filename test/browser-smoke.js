@@ -21,7 +21,7 @@ async function run() {
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
     await runScenario('wonderland-game', page);
     await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
-    console.log('Wonderland game passed: original-source keyboard/gamepad death/fade/restart replays and live controls.');
+    console.log('Wonderland game passed: original keyboard/gamepad replays, eight sample commands, three native PCM/stereo comparisons and live sound controls.');
     await runScenario('file-selector', page);
     console.log('Fsel$ passed: original selector retry/load/save routines; complete unmodified Wonderland runs and renders four first-level frames over two controlled seconds.');
     await runScenario('random', page);

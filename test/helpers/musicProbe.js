@@ -6,13 +6,7 @@ module.exports = async function musicProbe(page) {
   const { binary, token: t, integer: n, word: w, text } = require('./tokens');
   const ext = offset => [w(0x4e), 1, 0, w(offset)];
   const bytes = fs.readFileSync(path.join(__dirname, '../../examples/Wonderland/Wonderland_Samples.Abk'));
-  // Independent file addressing, separate from BankReader and createAudio:
-  // 20-byte AmBk wrapper, word count, relative long offsets, 14-byte records.
-  const samples = Array.from({ length: bytes.readUInt16BE(20) }, (_, index) => {
-    const record = 20 + bytes.readUInt32BE(22 + index * 4), length = bytes.readUInt32BE(record + 10);
-    return { number: index + 1, length, frequency: bytes.readUInt16BE(record + 8),
-      pcm: Array.from({ length }, (_, i) => bytes.readInt8(record + 14 + i) / 128) };
-  });
+  const samples = require('./wonderlandSamples')();
   const programSource = new Transpiler(binary([[t('Load'), text('samples')], [ext(0x1d6)],
     [ext(0x8a), n(5)], [ext(0xb4)], [t('Wait Key')]])).toModule();
   const hostSource = require('../../lib/amos/webAudio').createWebAudioHost.toString();

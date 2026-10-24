@@ -41,7 +41,7 @@ it never adds unsupported commands to the production compiler table.
 | Decoder gap | None: all 142 encodings recognized (initially 44 / 119 missing) |
 | Whole-source compilation | Standalone 1253-instruction factory; no source edits |
 | Whole-program bounded run | Controlled port-1 fire enters game/level 1; release at 100 ms, 100 callbacks reach 2,000 ms / loop count 47; four physical frames render |
-| Live original-game session | Canvas keyboard/Gamepad controls, natural three-life loss/fade/restart replay, original title and fresh game; all-level/win and integrated sound/editor files remain open |
+| Live original-game session | Canvas keyboard/Gamepad controls, natural three-life loss/fade/restart replay, original title and fresh game; original sample sound enabled by user gesture; all-level/win and editor files remain open |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
@@ -55,8 +55,9 @@ writes and the HUD window. The browser selector demo can replay it and show the
 final frame. Five additional WebGL comparisons cover a literal attached fixture
 and those four original-game frames; CPU/GPU agreement is not an Amiga capture.
 Live keyboard/Gamepad input and bounded death/restart paths now pass. All-level
-completion/win paths, collectibles/enemy behavior, editor round trips, integrated
-sound and native timing/reference captures remain acceptance work.
+completion/win paths, collectibles/enemy behavior, editor round trips and native timing/reference captures remain acceptance work.
+The live session now has explicit Web Audio Enable/Mute controls for its original
+sample effects, with three additional native offline PCM/stereo comparisons.
 
 ## Required work, in execution order
 
@@ -103,7 +104,8 @@ sound and native timing/reference captures remain acceptance work.
    collision semantics. Verify movement, jumping, collectibles, enemies and death.
 4. **Complete program paths.** Cover all five levels, score/lives, win/lose/restart,
    background toggle, sample selection/play/stop/loop behavior and browser audio
-   activation. Scancode and [screen-local zones](zones.md) are implemented; a declared
+   activation. The live page now connects original sample effects through explicit
+   Enable/Mute controls, with ownership and native PCM/stereo checks. Scancode and [screen-local zones](zones.md) are implemented; a declared
    original-panel fixture checks every point through the original Zone expression
    with injected hardware coordinates. [Mouse limits/clicks and the opt-in hardware
    Canvas adapter](mouse.md) now run the original editor selection slice with
@@ -177,7 +179,7 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 
-Local verification: `npm run check` passes 490 tests on Node 18.19.1.
+Local verification: `npm run check` passes 496 tests on Node 18.19.1.
 `npm run test:browser` passes the four original image comparisons, all twenty-six
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and

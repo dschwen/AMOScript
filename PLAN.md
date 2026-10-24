@@ -20,8 +20,10 @@ level 1. A new [live original-game demo](docs/wonderland-game.md) supports keybo
 layouts, the browser Gamepad API, Stop/Resume and Restart. Input-only controlled
 replays render three deaths/fades, two life restarts, game over and a fresh game;
 live Chromium checks cover movement, Escape and remapping. Safe blank-row copper
-setup now survives the original death fade. Next cover collectibles/enemy interactions,
-all-five-level/win paths, integrated Web Audio activation and prepared editor
+setup now survives the original death fade. User-activated Web Audio now plays
+the original sample commands, with mute/restart ownership and three native offline
+PCM/stereo comparisons. Next cover collectibles/enemy interactions,
+all-five-level/win paths and prepared editor
 requester/writeback flows. Native timing/reference captures, async modal selection
 and the planned IndexedDB adapter remain open. [Source-derived Rnd/Randomize](docs/random.md) now execute
 original blob/green-jump slices against controlled seed/beam vectors. Native beam
@@ -103,7 +105,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **490 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **496 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

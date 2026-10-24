@@ -94,6 +94,38 @@ voices while the program waits. Disposal is idempotent and disconnects owned
 nodes; it does not close the caller-owned context. Cleanup also works after an
 OfflineAudioContext finishes and closes. Natural source completion releases nodes.
 
+## Live game sound session
+
+The [live Wonderland demo](../demos/wonderland-game.html) now connects its original
+sample commands to Web Audio. Enable sound is an explicit user gesture; Mute
+silences current voices. No live context is constructed during the automatic
+replays. Three additional offline comparisons exercise the original collectible,
+death and game-over commands, including the game's simultaneous left/right mask.
+See [the live-game evidence](wonderland-game.md#original-game-sound).
+
+`lib/amos/browserAudio.js` exports `createBrowserAudioSession(createHost, createContext)`.
+Pass the existing `createWebAudioHost`; `createContext` defaults to constructing
+an AudioContext and is injectable for lifecycle tests. The session owns that
+context, unlike the lower-level host which leaves its caller's context open.
+
+- `bind()` silences/replaces the previous program binding and returns the ordinary
+  synchronous `{command}` adapter for factory option `audio`. Old bindings become
+  inert; muted execution still updates the pure AMOS controller normally.
+- `enable()` creates/resumes the context before its first await, so call it from
+  a user action. It resolves to success/failure and reports errors through status.
+- `mute()` stops voices and invalidates pending activation. Effects received while
+  muted/suspended or before initial activation are dropped; enabling does not replay
+  old samples.
+- `status()` reports activation, context state and owned voice/sample counters.
+- `dispose()` invalidates bindings/activation, disconnects nodes and returns a
+  promise for closing the owned context. Repeated disposal is safe.
+
+The live page keeps AMOS timing independent of sound activation. API absence or
+activation rejection can leave the game silent with a visible sound status.
+Synchronous playback adapter failures retain the ordinary VM failure/cleanup
+contract. Restart preserves the user's enabled/muted choice while replacing the
+program binding. Stop/Resume never replay interrupted AMOS samples.
+
 ## Verification and remaining gates
 
 The [independent-byte fixture](../test/fixtures/conformance/music-samples.json)
@@ -115,5 +147,4 @@ It appears in the [demo index](../demos/index.html) with an
 These are source-derived language and browser-adapter checks, not Amiga audio
 captures. Chip/DMA contention, interrupt latency, hardware analog output,
 envelopes, volume commands, synthesized effects, tracker music, speech and other
-sample-bank forms remain open. Wonderland gameplay still needs the language,
-display and input work recorded in [its milestone plan](wonderland.md).
+sample-bank forms remain open. Remaining Wonderland paths and validation are recorded in [its milestone plan](wonderland.md).

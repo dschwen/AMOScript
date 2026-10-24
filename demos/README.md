@@ -39,7 +39,8 @@ Every current browser scenario is included:
 
 The Wonderland game page embeds the complete original program and provides live
 keyboard/Gamepad controls, Stop/Resume and Restart. The frame selector also shows
-its controlled loss/restart replay. Integrated sound and editor files remain open;
+its controlled loss/restart replay. Enable sound activates original sample effects;
+Mute stops them immediately. Editor file integration remains open;
 see [the live-game contract](../docs/wonderland-game.md).
 
 Each HTML file embeds its runtime, shader factories, compiled programs and fixture

@@ -56,7 +56,9 @@ The [scan-code demo](demos/scancodes.html) adds a live keyboard reader and
 executes the original Escape/title branch; see [input semantics](docs/scancodes.md).
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
-[audio contract](docs/audio.md). The live original-game demo runs its first level and loss/restart paths. Integrated sound, editor file requests and complete gameplay parity remain open.
+[audio contract](docs/audio.md). The live original-game demo now has Enable/Mute
+sound controls for its original sample effects. Editor file requests and complete
+gameplay parity remain open.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
 [native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching

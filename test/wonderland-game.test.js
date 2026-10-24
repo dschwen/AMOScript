@@ -29,3 +29,15 @@ test('Wonderland: original up/right controls jump, scroll and Escape returns to 
     assert.strictEqual(p.state.location.line,66);assert.strictEqual(p.display.canvasFrame().height,256);assert.strictEqual(p.state.halted,false);
   }finally{p.stop();assert.strictEqual(c.pending(),0);}
 });
+
+test('Wonderland: original collectible/death/game-over sample sequence retains exact PCM, masks and Paula-derived rates',()=>{
+  const {create}=compile(source),clock=require('./helpers/steppedTimers').createSteppedTimers(),events=[],samples=require('./helpers/wonderlandSamples')();
+  require('./helpers/wonderlandReplay')(options=>create({...options,audio:{command(event){if(event.type==='play')events.push(event);}}}),clock,files,
+    p=>({set:action=>p.setJoystick(1,action==='fire'?16:action==='left'?4:0),dispose(){}}));
+  assert.deepStrictEqual(events.map(e=>[e.sample.number,e.mask]),[[1,1],[1,1],[1,1],[1,1],[5,12],[5,12],[5,12],[6,12]]);
+  for(const e of events){const sample=samples[e.sample.number-1];
+    assert.deepStrictEqual(Array.from(e.sample.data,v=>((v<<24)>>24)/128),sample.pcm);
+    assert.strictEqual(e.sample.length,sample.length);assert.strictEqual(e.rate,3546895/Math.floor(3546895/sample.frequency));
+    assert.strictEqual(e.volume,56);assert.strictEqual(e.filterEnabled,false);assert.strictEqual(e.loopMask,0);
+  }
+});
