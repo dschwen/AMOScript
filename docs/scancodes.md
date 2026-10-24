@@ -90,6 +90,6 @@ cleanup, diagnostics, mappings and original routing. Chromium also exercises the
 live page using real browser keyboard events. All browser scenarios remain
 standalone repository demos with HTML Preview links.
 
-The full program now first encounters Flash Off `$0D34` on line 361, byte 13748.
-Ten encodings remain unrecognized, appearing 26 times; see
+The full program now first encounters Reserve Zone `$1646` on line 372, byte 13910.
+Nine encodings remain unrecognized, appearing 25 times; see
 [Wonderland's milestone](wonderland.md).

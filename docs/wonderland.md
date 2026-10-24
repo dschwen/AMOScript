@@ -18,8 +18,8 @@ node bin/amoscript examples/Wonderland/Wonderland.AMOS /tmp/wonderland.js
 ```
 
 The first command succeeds and inventories the whole bounded token stream. The
-second currently fails with `Unsupported token 0xd34 at line 361, byte 13748`
-(`Flash Off`). The original first 64 lines compile and execute through Wait Vbl,
+second currently fails with `Unsupported token 0x1646 at line 372, byte 13910`
+(`Reserve Zone`). The original first 64 lines compile and execute through Wait Vbl,
 Load Iff and the original title/menu marker Bob, including both startup branches.
 Canvas, copper and GPU output match an independent source-derived composition. See
 [title display support](title-display.md),
@@ -32,7 +32,7 @@ it never adds unsupported commands to the production compiler table.
 | --- | --- |
 | Source size | 753 physical lines; 30,712 code bytes |
 | Static inventory | 6,011 token occurrences; 142 distinct encodings |
-| Decoder gap | 10 unrecognized encodings, appearing 26 times (initially 44 / 119) |
+| Decoder gap | 9 unrecognized encodings, appearing 25 times (initially 44 / 119) |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
@@ -76,8 +76,10 @@ execution will expose further gaps after the first decoder blockers are removed.
    independent panel pixel checks. [Fade to black](fade.md) now executes the original
    post-death Fade/Wait slice with a declared trigger. [Screen Copy and Logic/Physic](screen-copy.md)
    now publish all five maps through the unchanged original data/paste/copy loops
-   in a declared fixture. Next implement remaining rainbow/flash behavior and the
-   necessary sprite support. The world is 960×288 with a scrolling
+   in a declared fixture. [Flash Off](flash.md) now completes the unchanged original
+   game/editor screen setup; explicit Flash cycles also run on the injected clock.
+   Next implement remaining rainbow behavior and the necessary sprite support.
+   The world is 960×288 with a scrolling
    320×168 game window and a separate 320×32 score window. Preserve logical and
    physical buffers, Autoback, manual Bob clear/draw/swap, image hotspots and
    collision semantics. Verify movement, jumping, collectibles, enemies and death.
@@ -150,11 +152,11 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's current first failure and missing-token inventory.
 
-Local verification: `npm run check` passes 429 tests on Node 18.19.1.
-`npm run test:browser` passes the four original image comparisons, all nineteen
+Local verification: `npm run check` passes 438 tests on Node 18.19.1.
+`npm run test:browser` passes the four original image comparisons, all twenty
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
-167 GPU/CPU frames, including two copy states, four fade states, eight scrolling window patterns, the original
+169 GPU/CPU frames, including two Flash states, two copy states, four fade states, eight scrolling window patterns, the original
 title and PAL rainbow wrap, with six
 presentation checks in Chromium/SwiftShader.
 This work has not added an AMOS execution capture or fresh hosted CI evidence.

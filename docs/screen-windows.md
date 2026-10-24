@@ -76,9 +76,9 @@ follow [`src/lib/screens.cpp`](https://github.com/AOZ-Studio/AMOS-Professional-O
 and [`src/w/mouse.cpp`](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/mouse.cpp).
 These are source-derived expectations, not captured Amiga execution.
 
-The fixture copies original physical lines 351–360 unchanged, with synthetic
-game/background inputs and a Screen 0 / Auto View On / Wait Key suffix. It excludes
-Flash Off and the enclosing Gosub. All four game/editor/background combinations
+The fixture copies original physical lines 351–362 unchanged, with synthetic
+game/background inputs and a Wait Key suffix. It includes the original Flash Off
+and Auto View On, excluding the enclosing Gosub. All four game/editor/background combinations
 execute in Node. The browser checks five window positions against independent
 landscape/panel PNGs; it explicitly restores the original landscape palette after
 the source's black setup. Those fixture boundaries are deliberate and documented,
@@ -89,5 +89,5 @@ logical buffers, swaps, immutable snapshots, staged replacement/close, coordinat
 and unsupported forms. Eight independent indexed-pattern GPU/CPU comparisons
 exercise both resolutions, two palettes, fine/coarse offsets and the blank gap.
 The Chromium catalogue includes the standalone scrolling demo with HTML Preview
-links. Full-game compilation now first encounters `Flash Off` on line 361; see
+links. Full-game compilation now first encounters `Reserve Zone` on line 372; see
 [Wonderland's milestone](wonderland.md).

@@ -12,9 +12,11 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 10 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 9 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Flash Off` on line 361. [Full bitmap Screen Copy and Logic/Physic](docs/screen-copy.md)
+`Reserve Zone` on line 372. [Flash and selected-screen Flash Off](docs/flash.md)
+now share the injected palette clock with Fade, and the original game/editor
+screen setup executes through its own Auto View On. [Full bitmap Screen Copy and Logic/Physic](docs/screen-copy.md)
 now publish all five original level maps in a declared data/paste/copy fixture,
 with an interactive clock-stepped browser demo. Bounded Print Using integer/string fields now
 execute the original level/score statements in a [declared panel fixture](docs/print-using.md),
@@ -54,7 +56,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **429 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **438 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
@@ -76,7 +78,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
   are implemented, as are EHB screens, static scroll/DPF and explicit IFF fields.
   AMOS display/copper commands, superhires and live field timing,
   sprite contention/computed allocation, GPU presentation/switching and remaining
-  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 167
+  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 169
   local GPU/CPU frames; see [renderer contract](docs/webgl-renderer.md).
   WebGL2 resources, exact table readback, dirty uploads and context restoration
   are implemented; see [resource contract](docs/webgl-resources.md). Direct AMOS
@@ -350,7 +352,7 @@ Canvas and the CPU reference, sharing one priority resolver. The opaque Canvas
 RGBA callback has been retired. Finish computed allocation and DMA contention/timing
 before claiming the complete sprite-reference workstream. Canvas assertions alone do not establish
 WebGL2 availability or GPU parity; the separate integer readback probe now proves
-local WebGL2 capability. The native non-HAM GPU renderer now passes 167 local
+local WebGL2 capability. The native non-HAM GPU renderer now passes 169 local
 GPU/CPU frames, including 100 seeded inputs. Presentation/switching, HAM/events
 and unfinished mode/capture gates remain open.
 
@@ -433,7 +435,7 @@ patches. Describe coverage precisely rather than claiming full AMOS support.
 5. Implemented locally: WebGL2 resource storage/readback, owned dirty-row
    comparisons and forced context loss/restoration/disposal (M6 infrastructure).
    Implemented next: GPU decode/resolve for the current non-HAM CPU subset,
-   with 167 GPU/CPU comparisons and restored-shader rerendering.
+   with 169 GPU/CPU comparisons and restored-shader rerendering.
    GPU nearest/aspect/letterbox presentation now passes six canvas/restore checks.
    Next add switching/input integration, live diff, HAM and event support;
    [resource boundaries](docs/webgl-resources.md) remain explicit.

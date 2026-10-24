@@ -51,7 +51,7 @@ module.exports=async function screenCopyProbe(page){
     const previous=document.getElementById('copy-controls');if(previous)previous.remove();
     const controls=document.createElement('section');controls.id='copy-controls';
     const heading=document.createElement('h2');heading.textContent='Step through the original map copy';
-    const help=document.createElement('p');help.textContent='Prepare executes the original level-data and Paste Bob loops into a hidden 960×288 logical bitmap. Publish advances the original Wait Vbl / Screen Copy Logic To Physic / Wait Vbl sequence on an injected clock. The sliders inspect the published bitmap through host-controlled offsets. Flash, rainbows, enemies and gameplay are excluded.';
+    const help=document.createElement('p');help.textContent='Prepare executes the original level-data and Paste Bob loops into a hidden 960×288 logical bitmap. Publish advances the original Wait Vbl / Screen Copy Logic To Physic / Wait Vbl sequence on an injected clock. The sliders inspect the published bitmap through host-controlled offsets. Rainbow activation, enemies and gameplay are excluded.';
     const level=document.createElement('select');level.id='copy-level';level.setAttribute('aria-label','Level');
     for(let i=1;i<=5;i++){const option=document.createElement('option');option.value=i;option.textContent=`Level ${i}`;level.append(option);}
     const surface=document.createElement('canvas');surface.id='copy-output';surface.style.cssText='width:640px;max-width:100%;image-rendering:pixelated';

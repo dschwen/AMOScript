@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'flash', title: 'AMOS Flash and screen-local Flash Off', initialFrame: 'Normal: 20 ms', description: 'Clocked colour cycles, selected-screen cancellation, unchanged physical pixels and immutable snapshots. Normal/EHB/HAM6 Canvas and CPU output use independent RGB expectations. Includes live Stop/Resume/Flash Off controls; Screen Open implicit flashing remains unsupported.', run: require('./flashProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{frames:15,comparedPixels:460800,cancellations:3,gameRunning:false});
+  } },
   { id: 'screen-copy', title: 'Wonderland: publish all five level maps', initialFrame: 'Level 1 published', description: 'Original level-data and Paste Bob loops build five hidden maps, then Screen Copy Logic To Physic publishes their full bitmaps without swapping. Includes a clock-stepped map demo and host scrolling inspection. Gameplay remains excluded.', run: require('./screenCopyProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{levels:5,frames:10,comparedPixels:640000,gameRunning:false});
   } },

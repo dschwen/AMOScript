@@ -1,0 +1,36 @@
+{
+  "name": "flash-cycle-and-selected-screen-off",
+  "source": "Flash 1,\"(f00,1)(0f0,2)\"\nWait 1\nPrint Colour(1)\nWait 1\nPrint Colour(1)\nFlash Off\nWait 3\nPrint Colour(1)\n",
+  "programHex": "414d4f532042617369632076312e30300000008010000d44003e00000001005c0026000e286630302c3129283066302c322900000600129e003e000000010000090004760d2c0074003e00000001007c00000600129e003e000000010000090004760d2c0074003e00000001007c000003000d3400000600129e003e000000030000090004760d2c0074003e00000001007c0000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original Flash=0d44, Flash Off=0d34, Wait=129e, Print=0476 and Colour query=0d2c words; physical-line framing assembled independently of production encoders/tables."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/vbl.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/colours.cpp"
+    ],
+    "symbols": [
+      "flash",
+      "flash_off"
+    ],
+    "notes": "The first step is due at the next VBL; its duration schedules the next colour. Flash Off removes current-screen entries while retaining palette values. Source analysis, not an Amiga execution capture."
+  },
+  "advanceMs": 100,
+  "expected": {
+    "values": [
+      [
+        3840
+      ],
+      [
+        240
+      ],
+      [
+        240
+      ]
+    ],
+    "halted": true
+  }
+}

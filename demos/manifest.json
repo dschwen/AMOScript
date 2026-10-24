@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "flash.html",
+      "title": "AMOS Flash and screen-local Flash Off",
+      "description": "Clocked colour cycles, selected-screen cancellation, unchanged physical pixels and immutable snapshots. Normal/EHB/HAM6 Canvas and CPU output use independent RGB expectations. Includes live Stop/Resume/Flash Off controls; Screen Open implicit flashing remains unsupported.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/flash.html"
+    },
+    {
       "file": "screen-copy.html",
       "title": "Wonderland: publish all five level maps",
       "description": "Original level-data and Paste Bob loops build five hidden maps, then Screen Copy Logic To Physic publishes their full bitmaps without swapping. Includes a clock-stepped map demo and host scrolling inspection. Gameplay remains excluded.",

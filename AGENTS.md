@@ -58,6 +58,10 @@
   waits. Stop cancels wakes; Resume reconciles elapsed fields; End/failure cancel.
   Screen lifecycle subscriptions cancel even under Auto View Off. See
   `docs/fade.md` for the bounded speed/form and timing/capture limits.
+- Explicit Flash cycles and selected-screen Flash Off share that palette wake.
+  Catch-up reduces writes by field, preserving Flash-before-Fade ties and later
+  Flash writes after Fade completes. Jobs follow actual screen identity; see
+  `docs/flash.md`. Implicit Screen Open flashing and wrapped speeds remain open.
 - Screen Display/Screen Offset manage bounded nonoverlapping windows. View commits
   geometry and source offsets; Canvas renders the same physical copper snapshot.
   Full bitmap storage remains authoritative. Setup can span real blank rows,

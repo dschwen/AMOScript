@@ -192,6 +192,16 @@ module.exports = async function webglRendererProbe(page, artifacts) {
         if (failure) return { failure };
       }
       copying.stop();
+      const flashing = module.exports({ now: () => 0, setTimeout: () => 1, clearTimeout() {} });
+      flashing.display.clear(1);flashing.flash(1,'(f00,2)(0f0,3)(00f,1)');
+      for (const [vbl,pixel] of [[1,[255,0,0,255]],[3,[0,255,0,255]]]) {
+        flashing.advancePalette(vbl);
+        const expected = new Uint8Array(640 * 200 * 4);
+        for (let at = 0; at < expected.length; at += 4) expected.set(pixel,at);
+        const failure = verify(flashing.display.snapshotDisplay(),`amos-flash-vbl-${vbl}`,expected);
+        if (failure) return { failure };
+      }
+      flashing.stop();
       for (const packet of packets) {
         const snapshot = model.deserializeSnapshot(packet.header, from64(packet.chip), from64(packet.tables));
         const failure = verify(snapshot, packet.name, from64(packet.golden)); if (failure) return { failure };

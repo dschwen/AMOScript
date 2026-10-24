@@ -136,3 +136,7 @@ The screen-copy fixture uses independent original command/query words. It copies
 logical to physical, changes logical pixels, then copies physical back to logical
 and checks the restored pixel plus the signed selector values. Expectations follow
 the pinned screen handlers; this is source analysis, not an Amiga capture.
+
+The flash-cycle fixture uses independent Flash/Flash Off words and timed Colour
+queries. It checks next-VBL startup, per-entry duration and retained colour after
+cancellation. Expectations are source analysis, separate from an Amiga capture.

@@ -2059,6 +2059,103 @@
   let degrees = false;
   let joystickBinding = null;
   let fading = null;
+  const flashes = [];
+  let paletteWrites = null;
+  function writePalette(target, colour, rgb, vbl, priority, location) {
+    if (!paletteWrites) { target.palette[colour] = rgb; return; }
+    if (!paletteWrites.has(target)) paletteWrites.set(target, new Map());
+    const entries = paletteWrites.get(target), previous = entries.get(colour);
+    if (!previous || vbl > previous.vbl || (vbl === previous.vbl && priority >= previous.priority)) {
+      entries.set(colour, { rgb, vbl, priority, location });
+    }
+  }
+  function paletteError(error, location) {
+    if (location && !error.message.includes(' at line ')) error.message += ` at line ${location.line}, byte ${location.offset}`;
+    throw error;
+  }
+  function publishFlash(notify = true) {
+    state.flashes = Object.freeze(flashes.map(job => Object.freeze({ screen: job.target.id,
+      colour: job.colour, position: job.position, nextVbl: job.nextVbl })));
+    if (notify && options.requestPaletteWake) options.requestPaletteWake();
+  }
+  function parseFlash(pattern) {
+    if (typeof pattern !== 'string') throw new Error('Flash pattern must be a string');
+    if (!pattern) return [];
+    const steps = [], piece = /\( *([0-9a-f]) *([0-9a-f]) *([0-9a-f]), *((?:[0-9] *)+)\)/igy;
+    let at = 0;
+    while (at < pattern.length) {
+      piece.lastIndex = at;
+      const match = piece.exec(pattern);
+      if (!match || steps.length === 16) throw new Error('Unsupported Flash pattern');
+      const speed = Number(match[4].replace(/ /g, ''));
+      if (!Number.isInteger(speed) || speed < 1 || speed > 32767) throw new Error('Unsupported Flash speed (expected 1..32767)');
+      steps.push({ rgb: parseInt(match[1] + match[2] + match[3], 16), speed });
+      at = piece.lastIndex;
+    }
+    return steps;
+  }
+  function flash(colour, pattern) {
+    const target = display.screen();
+    colour = integer(colour);
+    if (colour < 0 || colour > 31) throw new Error('Unsupported Flash colour (expected 0..31)');
+    if (!options.vblNow || !options.requestPaletteWake) throw new Error('Flash requires the runtime VBL clock');
+    advancePalette(options.vblNow());
+    // The original tests global capacity before searching for an existing entry.
+    if (flashes.length === 16) throw new Error('Too many flashing colours');
+    const steps = parseFlash(pattern), previous = flashes.findIndex(job => job.target === target && job.colour === colour);
+    if (previous !== -1) flashes.splice(previous, 1);
+    if (steps.length) flashes.push({ target, colour, steps, cycle: steps.reduce((sum, step) => sum + step.speed, 0),
+      position: 0, nextVbl: options.vblNow() + 1, location: state.location && { ...state.location } });
+    publishFlash();
+  }
+  function flashOff() {
+    const target = display.screen();
+    for (let i = flashes.length - 1; i >= 0; i--) if (flashes[i].target === target) flashes.splice(i, 1);
+    publishFlash();
+  }
+  function advanceFlash(vbl) {
+    let changed = false;
+    for (const job of flashes) {
+      if (vbl < job.nextVbl) continue;
+      try {
+        // Skip whole cycles, then visit at most sixteen entries. Reconciliation
+        // stays bounded after Stop or a delayed host callback.
+        job.nextVbl += Math.floor((vbl - job.nextVbl) / job.cycle) * job.cycle;
+        do {
+          const step = job.steps[job.position];
+          writePalette(job.target, job.colour, step.rgb, job.nextVbl, 0, job.location);
+          job.nextVbl += step.speed;
+          job.position = (job.position + 1) % job.steps.length;
+        } while (job.nextVbl <= vbl);
+        changed = true; if (!paletteWrites) display.invalidate();
+      } catch (error) { paletteError(error, job.location); }
+    }
+    if (changed) publishFlash();
+  }
+  function nextPaletteJob() {
+    return flashes.reduce((earliest, job) => !earliest || job.nextVbl <= earliest.nextVbl ? job : earliest, fading);
+  }
+  function advancePalette(vbl) {
+    // Reduce bounded catch-up by last write time. On the same original field,
+    // Flash precedes Fade; later Flash writes still win after Fade completes.
+    const writes = new Map(); paletteWrites = writes;
+    try {
+      advanceFlash(vbl);
+      const location = fading && fading.location;
+      try { advanceFade(vbl); } catch (error) { paletteError(error, location); }
+    } finally { paletteWrites = null; }
+    for (const [target, entries] of writes) {
+      let location = null;
+      try {
+        for (const [colour, entry] of entries) { target.palette[colour] = entry.rgb; location = entry.location; }
+        display.invalidate();
+      } catch (error) { paletteError(error, location); }
+    }
+  }
+  function cancelPaletteEffects() {
+    flashes.length = 0; publishFlash(false); cancelFade();
+  }
+  publishFlash(false);
   function publishFade(notify = true) {
     state.fade = Object.freeze({ active: !!fading, screen: fading ? fading.target.id : null,
       speed: fading ? fading.speed : 0, nextVbl: fading ? fading.nextVbl : null });
@@ -2079,21 +2176,21 @@
         if (entry.rgb === 0) continue;
         const rgb = entry.rgb;
         entry.rgb = Math.max(0, (rgb >> 8) - 1) * 256 + Math.max(0, ((rgb >> 4) & 15) - 1) * 16 + Math.max(0, (rgb & 15) - 1);
-        job.target.palette[entry.index] = entry.rgb;
+        writePalette(job.target, entry.index, entry.rgb, job.nextVbl, 1, job.location);
         moving = true; changed = true;
       }
       job.nextVbl += job.speed;
       if (!moving) fading = null;
     }
     publishFade();
-    if (changed) display.invalidate();
+    if (changed && !paletteWrites) display.invalidate();
   }
   function fade(speed) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
     const target = display.screen(), vbl = options.vblNow();
-    advanceFade(vbl);
+    advancePalette(vbl);
     const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff })).filter(entry => entry.rgb !== 0);
     fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
     publishFade();
@@ -2101,6 +2198,11 @@
   publishFade(false);
   (display.subscribeScreens || display.subscribe).call(display, () => {
     if (fading && display.screens.get(fading.target.id) !== fading.target) cancelFade();
+    let removed = false;
+    for (let i = flashes.length - 1; i >= 0; i--) if (display.screens.get(flashes[i].target.id) !== flashes[i].target) {
+      flashes.splice(i, 1); removed = true;
+    }
+    if (removed) publishFlash();
   });
   function joystickPort(port) {
     if (!Number.isInteger(port) || port < 0 || port > 1) throw new Error('Invalid joystick port');
@@ -3300,6 +3402,9 @@
   }
 
   return {
+    flash, flashOff, advancePalette, cancelPaletteEffects,
+    nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
+    paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
     fade, advanceFade, cancelFade,
     nextFadeVbl: () => fading ? fading.nextVbl : null,
     fadeLocation: () => fading && fading.location,
@@ -3562,7 +3667,7 @@
   function failPalette(error, location) {
     state.halted = true; state.waiting = null;
     try { cancelScheduled(); } catch (_) { /* Keep the original asynchronous failure. */ }
-    cancelPaletteWake(); operations.cancelFade();
+    cancelPaletteWake(); operations.cancelPaletteEffects();
     resetInput(); silenceAfterFailure();
     if (location && !error.message.includes(' at line ')) error.message += ` at line ${location.line}, byte ${location.offset}`;
     throw error;
@@ -3570,7 +3675,7 @@
   function requestPaletteWake() {
     cancelPaletteWake();
     if (state.halted || state.stopped) return;
-    const frame = operations.nextFadeVbl();
+    const frame = operations.nextPaletteVbl();
     if (frame == null) return;
     const delay = Math.max(0.001, timerEpoch + frame * 1000 / timing.vblHz - timing.now());
     const task = { id: null }; paletteWake = task;
@@ -3578,9 +3683,9 @@
       if (paletteWake !== task) return;
       paletteWake = null;
       if (state.halted || state.stopped) return;
-      const location = operations.fadeLocation();
+      const location = operations.paletteLocation();
       try {
-        operations.advanceFade(vblCount());
+        operations.advancePalette(vblCount());
         if (!paletteWake) requestPaletteWake();
       } catch (error) { failPalette(error, location); }
     }, delay);
@@ -3605,9 +3710,9 @@
 
     const ipBefore = state.ip;
     let res;
-    if (operations.nextFadeVbl() != null) {
-      const location = operations.fadeLocation();
-      try { operations.advanceFade(vblCount()); }
+    if (operations.nextPaletteVbl() != null) {
+      const location = operations.paletteLocation();
+      try { operations.advancePalette(vblCount()); }
       catch (error) { failPalette(error, location); }
     }
     try {
@@ -3678,7 +3783,7 @@
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
-        cancelPaletteWake(); operations.cancelFade();
+        cancelPaletteWake(); operations.cancelPaletteEffects();
         resetInput();
         silenceAfterFailure();
         if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
@@ -3689,12 +3794,12 @@
     }
     try {
       operations.flushBobs();
-      if (state.halted) { cancelPaletteWake(); operations.cancelFade(); resetInput(); operations.audio.silence(); }
+      if (state.halted) { cancelPaletteWake(); operations.cancelPaletteEffects(); resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
-      cancelPaletteWake(); operations.cancelFade();
+      cancelPaletteWake(); operations.cancelPaletteEffects();
       resetInput();
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
@@ -3716,9 +3821,9 @@
   function resume() {
     if (!state.stopped || state.halted) return;
     state.stopped = false;
-    const location = operations.fadeLocation();
+    const location = operations.paletteLocation();
     try {
-      if (operations.nextFadeVbl() != null) operations.advanceFade(vblCount());
+      if (operations.nextPaletteVbl() != null) operations.advancePalette(vblCount());
       requestPaletteWake();
     } catch (error) { failPalette(error, location); }
     if (state.waiting === 'sleep') scheduleNext(sleepRemaining);

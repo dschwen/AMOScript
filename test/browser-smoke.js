@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('flash', page);
+    console.log('Flash passed: fifteen normal/EHB/HAM6 colour-cycle frames, physical-buffer preservation and Flash Off cancellation.');
     await runScenario('screen-copy', page);
     console.log('Screen Copy passed: five original map loops, full bitmap publication, stable buffer identities and Canvas/CPU/indexed palette comparisons.');
     await runScenario('print-using', page);

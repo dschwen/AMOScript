@@ -19,6 +19,17 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'flash') {
+        await page.click('#flash-stop');
+        assert.strictEqual(await page.locator('#flash-controls').getAttribute('data-phase'),'stopped');
+        await page.click('#flash-resume');
+        assert.strictEqual(await page.locator('#flash-controls').getAttribute('data-phase'),'running');
+        await page.click('#flash-off');
+        assert.strictEqual(await page.locator('#flash-controls').getAttribute('data-phase'),'off');
+        await page.click('#flash-restart');
+        assert.strictEqual(await page.locator('#flash-controls').getAttribute('data-phase'),'running');
+        await page.click('#flash-stop');
+      }
       if (scenario.id === 'screen-copy') {
         await page.click('#copy-prepare');
         assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-phase'),'prepared');

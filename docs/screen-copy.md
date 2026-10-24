@@ -49,12 +49,13 @@ Bob backgrounds, immutable snapshots, failure context and unsupported forms.
 An independent-byte conformance fixture checks both copy directions.
 
 The declared Wonderland fixture joins unchanged original title setup (lines 1–64),
-game-screen setup (351–360), palette setup (264–276), panel fields (285/655),
+game-screen setup (351–362), palette setup (264–276), panel fields (285/655),
 level-data loops (309–315) and map-paste/copy loops (287–305). Synthetic game/level
-inputs, View and Wait Key/End guards join those slices. For all five levels it
-checks original enemy/block counts, hidden logical bytes, complete physical
-publication, stable identities and unchanged panel bytes. It excludes Flash Off,
-score awards, enemy initialization, rainbow activation and gameplay.
+inputs, panel selection and Wait Key/End guards join those slices. For all five
+levels it checks original enemy/block counts, hidden logical bytes, complete physical
+publication, stable identities and unchanged panel bytes. It includes Flash Off
+and Auto View On, and excludes score awards, enemy initialization, rainbow
+activation and gameplay.
 
 The shared browser scenario captures ten frames. Canvas and CPU agree; a separate
 palette lookup over the runtime-composed indexed input checks 640,000 displayed
@@ -66,5 +67,5 @@ hidden drawing and published copying against independent uniform RGB expectation
 The [self-contained demo](../demos/screen-copy.html) includes all five levels,
 explicit injected-clock Prepare/Publish controls and host-controlled bitmap
 scroll inspection. It appears with an HTML Preview link in the [gallery](../demos/index.html).
-The full game remains blocked at Flash Off `$0D34`, line 361, byte 13748;
-10 encodings remain unrecognized, appearing 26 times. See [the milestone](wonderland.md).
+The full game remains blocked at Reserve Zone `$1646`, line 372, byte 13910;
+9 encodings remain unrecognized, appearing 25 times. See [the milestone](wonderland.md).

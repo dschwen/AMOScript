@@ -20,6 +20,10 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [Flash demo](demos/flash.html) checks clocked palette cycles and screen-local
+Flash Off with live Stop/Resume controls. Wonderland’s complete screen setup now
+executes through its own Flash Off/Auto View On; [implicit Screen Open flashing remains open](docs/flash.md).
+
 The [map-copy demo](demos/screen-copy.html) paints all five level maps through the
 original data/paste/copy loops in a declared fixture. Step Prepare/Publish to see
 hidden logical drawing become physical output, then inspect the bitmap with the
