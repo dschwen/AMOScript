@@ -42,8 +42,9 @@ WebGL2 integer readback probe verifies capability, not a GPU display backend.
   `Text x,y,string$` uses pixel coordinates with y as the baseline. Printing
   scrolls the pixel buffer when it reaches the bottom text row. `Print` still
   forwards output to the selected `write`/`print` host.
-- `Inkey$`, `Put Key`, `Clear Key`, `X Mouse`, `Y Mouse`, and `Mouse Key` query
-  tokens. Keyboard input is a FIFO queue shared with `Wait Key`.
+- `Inkey$`, `Scancode`, `Put Key`, `Clear Key`, `X Mouse`, `Y Mouse`, and `Mouse Key`
+  query tokens. Keyboard input is a FIFO queue shared with `Wait Key`;
+  [scan metadata](scancodes.md) is latched by successful Inkey$ reads.
 - `Paste Bob`, `Paste Icon`, `Get Sprite/Bob Palette` and `Get Icon Palette`,
   including masked palette variants. `Hrev/Vrev/Rev` select image orientation;
   `Make/No Mask` and `Make/No Icon Mask` control image transparency. See

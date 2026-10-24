@@ -3181,7 +3181,14 @@
   }
 
   function inputValue(name) {
-    if (name === 'Inkey$') return state.input.keys.shift() || '';
+    if (name === 'Inkey$') {
+      if (!state.input.keys.length) return '';
+      const entry = state.input.keys.shift();
+      if (entry === '' || (typeof entry === 'object' && entry.scanCode === 0 && entry.key === '\0')) return '';
+      state.input.scanCode = typeof entry === 'string' ? 0 : entry.scanCode;
+      return typeof entry === 'string' ? entry : entry.key;
+    }
+    if (name === 'Scancode') { const code = state.input.scanCode; state.input.scanCode = 0; return code; }
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;
@@ -3225,7 +3232,10 @@
     makeIconMask: (number = null) => setImageMask(2, true, number),
     noIconMask: (number = null) => setImageMask(2, false, number),
     clearKeys: () => { state.input.keys.length = 0; },
-    putKeys: text => { state.input.keys.push(...text); },
+    putKeys: text => {
+      if (text.includes('\x01')) throw new Error('Encoded Put Key packets are not implemented');
+      state.input.keys.push(...text);
+    },
     integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, readData,
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
@@ -3404,7 +3414,7 @@
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -3412,8 +3422,12 @@
   let sleepRemaining = 0;
   const keys = state.input.keys;
   const inputResetListeners = new Set();
+  function clearScanCodes() {
+    state.input.scanCode = 0;
+    for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
+  }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') state.input.joysticks.fill(0);
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -3556,12 +3570,14 @@
     else if (!state.waiting) scheduleNext(0);
   }
 
-  function sendKey(key) {
+  function sendKey(key, scanCode = null) {
+    if (typeof key !== 'string') throw new Error('Keyboard input must be a string');
+    if (scanCode != null && (!Number.isInteger(scanCode) || scanCode < 0 || scanCode > 127 || key.length !== 1 || key.charCodeAt(0) > 255)) throw new Error('Invalid raw keyboard input');
     if (state.halted) return;
     if (state.waiting === 'key') {
       state.waiting = null;
       if (!state.stopped) scheduleNext(0);
-    } else keys.push(key);
+    } else keys.push(scanCode == null ? key : { key, scanCode });
   }
 
   function print(values, separators = []) {
@@ -3587,7 +3603,7 @@
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput }));
   return {
-    state, tick, stop, resume, sendKey, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);

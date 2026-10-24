@@ -56,7 +56,7 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Scancode `$1262` on line 131,
-byte 4418. The bounded inventory reports 16 unrecognized encodings appearing
-38 times. Recognition counts are not a compatibility percentage; see
+Full Wonderland compilation now first encounters Fade `$0dfe` on line 236,
+byte 9450. The bounded inventory reports 15 unrecognized encodings appearing
+36 times. Recognition counts are not a compatibility percentage; see
 [the milestone](wonderland.md).

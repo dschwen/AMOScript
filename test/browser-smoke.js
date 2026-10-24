@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('scancodes', page);
+    console.log('Scancodes passed: raw key/character pairing, destructive reads, repeats, joystick passthrough, cleanup and original Escape/title branch.');
     await runScenario('computed-branches', page);
     console.log('Computed branches passed: On Gosub/Goto fallthrough/return traces and three original Wonderland enemy initializers.');
     await runScenario('screen-windows', page);

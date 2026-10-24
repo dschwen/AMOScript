@@ -1,0 +1,35 @@
+{
+  "name": "scancode-latch-neutral",
+  "source": "Print Scancode,Scancode\nPut Key \"a\"\nPrint Inkey$,Scancode\n",
+  "programHex": "414d4f532042617369632076312e303000000024060004761262005c126200000600125400260001610000000600047600f2005c12620000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal source words: Scancode=1262, Put Key=1254, Print=0476, Inkey$=00f2. Physical line/string bytes are assembled independently without production helpers."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/keyboard.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/keyboard.cpp"
+    ],
+    "symbols": [
+      "lib_fn_inkey",
+      "lib_fn_scancode",
+      "put_key"
+    ],
+    "notes": "Scancode starts at zero and is cleared by reading; ordinary Put Key characters have scan zero. Raw queued events and saved-code consumption/cleanup are covered separately. Source analysis, not an Amiga execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        0,
+        0
+      ],
+      [
+        "a",
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

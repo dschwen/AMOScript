@@ -34,6 +34,11 @@
   comparisons and Amiga captures. See `docs/audio.md` for the subset and limits.
 - `lib/amos/browser.js` handles Canvas/input; `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
+- Scancode is a destructive last-successful-Inkey latch, not held key state.
+  Optional sendKey character/raw-code records coexist with legacy text entries.
+  Clear Key drains the queue; host clearScanCodes clears metadata while retaining
+  text. Canvas owns physical mapping/repeat/blur cleanup; Key Speed preserves
+  the latch. See `docs/scancodes.md` for source evidence and unsupported forms.
 - Joystick ports 0/1 use per-factory masks and an optional synchronous reader.
   Canvas hosts opt into configurable keyboard/Gamepad API mappings; queries poll
   independently of requestAnimationFrame. Clear owned input on focus/lifecycle

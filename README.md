@@ -20,6 +20,8 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [scan-code demo](demos/scancodes.html) adds a live keyboard reader and
+executes the original Escape/title branch; see [input semantics](docs/scancodes.md).
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
 [audio contract](docs/audio.md). The full game does not compile or run yet.

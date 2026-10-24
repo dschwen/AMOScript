@@ -21,9 +21,9 @@ the browser's existing native repeat behavior is preserved.
 Keyup, blur, modifier shortcuts, detach, program Stop, termination and runtime
 errors cancel controlled repeats. Changing Key Speed resets the held key; its new
 settings apply on the next keydown. Resume requires a new key press rather than
-restarting a released key. Character keys, Enter, Escape and Backspace use the
-existing host translation. Scancodes, composition and AMOS-wide operating-system
-repeat preferences remain separate input work.
+restarting a released key. Common character/control keys now carry physical [scan codes](scancodes.md).
+Controlled repeats preserve that metadata. Composition and AMOS-wide
+operating-system repeat preferences remain separate input work.
 Optional [keyboard-to-joystick mappings](joysticks.md) now handle arrows and fire
 as held state, independently of this text-repeat path.
 

@@ -67,7 +67,7 @@ function createCanvasHost(canvas, options = {}) {
       repeatTask = null;
       if (!program || !held || program.state.halted || program.state.stopped) { releaseKey(); return; }
       const current = held;
-      program.sendKey(current.key);
+      program.sendKey(current.key, current.scanCode);
       if (held === current) repeatAfter(current.config.intervalMs);
     }, ms);
   }
@@ -97,18 +97,30 @@ function createCanvasHost(canvas, options = {}) {
   }
   function keydown(event) {
     if (!program) return;
-    if (event.ctrlKey || event.metaKey || event.altKey) { releaseKey(); resetJoysticks(); return; }
+    if (event.isComposing || event.key === 'Dead' || event.key === 'Process') return;
+    if (event.ctrlKey || event.metaKey || event.altKey) {
+      releaseKey(); resetJoysticks();
+      if (program.clearScanCodes) program.clearScanCodes();
+      return;
+    }
     const joystick = joystickInput.keydown(event.code || (event.key === ' ' ? 'Space' : event.key), !!event.repeat);
     if (joystick.matched && (!focused() || program.state.stopped || program.state.halted)) resetJoysticks();
     if (joystick.matched) { pollJoysticks(); if (joystick.consume) { event.preventDefault(); return; } }
-    const key = event.key.length === 1 ? event.key : { Enter: '\r', Escape: '\x1b', Backspace: '\b' }[event.key];
+    const code = event.code || event.key;
+    const special = { Enter: '\r', NumpadEnter: '\r', Escape: '\x1b', Backspace: '\b', Tab: '\t',
+      ArrowUp: '\x1e', ArrowDown: '\x1f', ArrowRight: '\x1c', ArrowLeft: '\x1d', Delete: '\0', Help: '\0' };
+    let key = null;
+    if (Object.prototype.hasOwnProperty.call(special, code)) key = special[code];
+    else if (/^F(?:[1-9]|10)$/.test(code)) key = '\0';
+    else if (event.key.length === 1 && event.key.charCodeAt(0) <= 255) key = event.key;
     if (key == null) return;
     event.preventDefault();
     const config = program.state.input.keySpeed;
-    if (config && (event.repeat || program.state.halted || program.state.stopped)) return;
-    program.sendKey(key);
+    if (program.state.halted || program.state.stopped || (config && event.repeat)) return;
+    const scanCode = amigaScanCode(code);
+    program.sendKey(key, scanCode == null ? 0 : scanCode);
     if (config) {
-      releaseKey(); held = { code: event.code || event.key, key, config };
+      releaseKey(); held = { code, key, scanCode: scanCode == null ? 0 : scanCode, config };
       repeatAfter(config.delayMs);
     }
   }
@@ -142,7 +154,10 @@ function createCanvasHost(canvas, options = {}) {
     focusSuspended = true;
     releaseKey();
     resetJoysticks();
-    if (program) program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
+    if (program) {
+      if (program.clearScanCodes) program.clearScanCodes();
+      program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
+    }
   }
   function focus() { focusSuspended = false; }
   function visibility() { if (canvas.ownerDocument.hidden) blur(); }
@@ -151,6 +166,7 @@ function createCanvasHost(canvas, options = {}) {
   function detach() {
     releaseKey();
     resetJoysticks();
+    if (program && program.clearScanCodes) program.clearScanCodes();
     if (unsubscribeJoystick) unsubscribeJoystick(); unsubscribeJoystick = null;
     if (unsubscribeInput) unsubscribeInput();
     unsubscribeInput = null;
@@ -257,8 +273,24 @@ function createJoystickInput(configurations) {
     } };
 }
 
-if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost, createJoystickInput };
-else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput };
+const amigaKeyCodes = (() => {
+  const codes = { Numpad0: 0x0f, Numpad1: 0x1d, Numpad2: 0x1e, Numpad3: 0x1f,
+    Numpad4: 0x2d, Numpad5: 0x2e, Numpad6: 0x2f, IntlBackslash: 0x30, NumpadDecimal: 0x3c,
+    Numpad7: 0x3d, Numpad8: 0x3e, Numpad9: 0x3f, Space: 0x40, Backspace: 0x41, Tab: 0x42,
+    NumpadEnter: 0x43, Enter: 0x44, Escape: 0x45, Delete: 0x46, NumpadSubtract: 0x4a,
+    ArrowUp: 0x4c, ArrowDown: 0x4d, ArrowRight: 0x4e, ArrowLeft: 0x4f,
+    NumpadDivide: 0x5c, NumpadMultiply: 0x5d, NumpadAdd: 0x5e, Help: 0x5f };
+  for (const [start, row] of [[0, 'Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Digit6 Digit7 Digit8 Digit9 Digit0 Minus Equal Backslash'],
+    [0x10, 'KeyQ KeyW KeyE KeyR KeyT KeyY KeyU KeyI KeyO KeyP BracketLeft BracketRight'],
+    [0x20, 'KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon Quote'],
+    [0x31, 'KeyZ KeyX KeyC KeyV KeyB KeyN KeyM Comma Period Slash']]) row.split(' ').forEach((code, i) => { codes[code] = start + i; });
+  for (let number = 1; number <= 10; number++) codes[`F${number}`] = 0x4f + number;
+  return Object.freeze(codes);
+})();
+function amigaScanCode(code) { return Object.prototype.hasOwnProperty.call(amigaKeyCodes, code) ? amigaKeyCodes[code] : null; }
+
+if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost, createJoystickInput, amigaScanCode };
+else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaScanCode };
 </script><script>(function installDemo(config) {
   const button = document.getElementById('run-demo'), status = document.getElementById('status');
   const output = document.getElementById('results'), selector = document.getElementById('frames');

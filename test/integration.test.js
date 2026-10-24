@@ -70,6 +70,11 @@ test('integration: generated browser export loads through AMOS and forwards keyb
   timers.runAll();
   assert.strictEqual(output, 'One\nTwo\n');
   assert.strictEqual(context.AMOS.state.halted, true);
+  const raw = context.AMOS.load(context.AMOS_MODULE);
+  context.AMOS.sendKey('\x1b', 69);
+  assert.strictEqual(raw.inputValue('Inkey$'), '\x1b');
+  assert.strictEqual(raw.inputValue('Scancode'), 69);
+  assert.strictEqual(raw.inputValue('Scancode'), 0);
 });
 
 test('integration: checked-in browser demo matches current compiler and page scripts execute', () => {

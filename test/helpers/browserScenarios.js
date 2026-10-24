@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'scancodes', title: 'AMOS scan codes and Wonderland Escape', initialFrame: 'Wonderland Escape to original title', description: 'Inkey$/Scancode consumption, physical key mappings, repeats, joystick passthrough and lifecycle cleanup. Runs the original Wonderland input/Escape branch and title routine in a declared fixture. Includes a live compiled keyboard reader.', run: require('./scancodeProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.routes,[{scan:69,route:2},{scan:76,route:1},{scan:77,route:1},{scan:78,route:1},{scan:79,route:1},{scan:32,route:1}]);
+    assert.strictEqual(result.keyChecks,9);assert.deepStrictEqual(result.repeatScans,[53,53,53]);assert.strictEqual(result.lifecycleChecks,6);
+    assert.strictEqual(result.timersRemaining,0);assert.strictEqual(result.titleExact,true);assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'computed-branches', title: 'Computed branches and Wonderland initialization', initialFrame: 'Original enemy initialization 2', description: 'One-based On Gosub/Goto, out-of-range fallthrough and return traces. Executes Wonderland\'s original dispatch line and three unchanged initializers; the other two targets have explicit End guards. Synthetic inputs and image captions; no enemy gameplay.', run: require('./onBranchProbe'), check(result, assert) {
     assert.deepStrictEqual(result.results.map(item => item.logs), [[[0],[2],[3],[4]],[[-4,99]],[[0,0]],[[-4,99]]]);
     assert.ok(result.results.every(item => item.halted && item.stack === 0));assert.strictEqual(result.gameRunning,false);

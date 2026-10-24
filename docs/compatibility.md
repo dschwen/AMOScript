@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **394 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **402 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -11,7 +11,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob; full-source decoding stops at
-`Scancode` on line 131. A bounded full inventory finds 16 unrecognized encodings.
+`Fade` on line 236. A bounded full inventory finds 15 unrecognized encodings.
 The declared original-menu fixture supports configurable keyboard/gamepad input,
 animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
@@ -53,7 +53,7 @@ audio demos. The game is not running.
 | Data/Read/Restore | Implemented core | Read-time expression evaluation, empty entries, array destinations, fresh procedure cursors, caller cursor restoration. Named Restore targets must directly label a Data statement; other forms fail explicitly. |
 | Sequential file I/O | Implemented subset | Explicit memory/Node host adapters; `Open In/Out`, `Append`, `Close`, `Print #`, `Input #`, `Line Input #`, `Eof/Lof/Pof`. Latin-1 byte strings, channels 1–10, CRLF records, synchronous adapters, commit on Close. Random records, devices, seek assignments and async adapters remain unsupported. |
 | Screens and graphics | Implemented subset | Indexed screens 0–7, 2–64 colours and lowres 4096-colour HAM6 (Hires maximum 16), EHB/HAM pixel conversion, source-derived palette masks, Point/Plot, lines/boxes/bars and text. See [display contract](display.md). Canvas presents one screen; AMOS positioning/offsets/dual commands, live modes and other drawing operations remain. |
-| Input | Implemented subset | Shared FIFO key queue, Inkey$/Put Key/Clear Key/Wait Key, injected mouse state and canvas-local mouse queries. Browser focus, borders and CSS scaling are covered. Hardware coordinate offsets and the full Amiga input API remain unfinished. |
+| Input | Implemented subset | Shared text/raw FIFO, consumed-event Scancode, Inkey$/Put Key/Clear Key/Wait Key, injected mouse state and canvas-local mouse queries. Physical browser codes, repeats, lifecycle metadata cleanup and original Escape/title routing pass. Encoded Put Key, shift/state queries, composition and the full Amiga input API remain open. [Scan contract](scancodes.md). |
 | Asset banks and static images | Implemented subset | Bounded trailer and external AmBs/AmSp/AmIc/AmBk decoding, independent per-instance banks, Load with generic overrides/image appending/group replacement, Paste Bob/Icon, palette transfers, Hrev/Vrev/Rev, image masks and mixed-depth pasting. External bytes use a synchronous files adapter; generated modules embed the decoder. See [bank contract](banks.md). More formats, manipulation and failure/hardware edge fidelity remain unfinished. |
 | Bank lifecycle | Implemented subset | Four Reserve As Work/Data/Chip forms, single/all/temp Erase, integer Length, Bank Swap, generic Bank Shrink and single/group Save through synchronous files. Save includes work banks, preserves source bank order, normalizes live image flips and writes planar bytes. Object-bank changes restore saved Bob backgrounds. Missing-bank Save truncates before error; two-absent Swap is an explicit unsupported-memory error. Physical memory, addresses, oversized/corrupt image-save paths and other manipulation remain unfinished. |
 | Moving Bobs | Implemented subset | Saved-background drawing, movement, priority, hotspots, Set Bob background/plane/minterm options, Limit Bob clipping, hiding/removal, explicit/manual and cooperative automatic updates, per-buffer snapshots, screen cleanup and animated browser fixture. See [Bob contract](bobs.md) for creation/limit quirks derived from source. Hardware VBL timing and blitter edge effects remain unfinished. |

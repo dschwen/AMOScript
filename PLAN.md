@@ -12,9 +12,11 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 16 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 15 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Scancode` on line 131. Named-label On Gosub/Goto now share the existing call
+`Fade` on line 236. Scancode now carries browser physical key metadata through
+Inkey$, with the original Escape/title branch passing a [declared fixture](docs/scancodes.md).
+Named-label On Gosub/Goto now share the existing call
 stack and IP dispatcher; a [declared fixture](docs/computed-branches.md) executes
 the original enemy dispatch and three unchanged initializers.
 A declared fixture now executes the original menu
@@ -46,7 +48,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **394 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **402 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

@@ -19,6 +19,21 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'scancodes') {
+        await page.click('#scan-input'); await page.keyboard.press('Escape');
+        await page.waitForFunction(() => document.getElementById('scan-log').dataset.scan === '69');
+        await page.keyboard.press('ArrowUp');
+        await page.waitForFunction(() => document.getElementById('scan-log').dataset.scan === '76');
+        await page.keyboard.press('a');
+        await page.waitForFunction(() => document.getElementById('scan-log').dataset.scan === '32');
+        await page.click('#scan-stop');
+        assert.strictEqual(await page.locator('#scan-controls').getAttribute('data-status'),'stopped');
+        await page.click('#scan-resume'); await page.keyboard.press('ArrowRight');
+        await page.waitForFunction(() => document.getElementById('scan-log').dataset.scan === '78');
+        await page.click('#scan-clear');
+        assert.strictEqual(await page.locator('#scan-log').getAttribute('data-scan'),'0');
+        await page.click('#scan-stop');
+      }
       if (scenario.id === 'wonderland-menu') {
         await page.waitForFunction(() => document.getElementById('menu-input').height === 256);
         await page.click('#menu-input');await page.keyboard.down('ArrowDown');
