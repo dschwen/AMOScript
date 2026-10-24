@@ -21,11 +21,11 @@ control flow. AMOS commands continue to call shared runtime operations.
 | BankReader/BankWriter | File formats and per-instance decoded assets | Keep format contracts; maintain/invalidate display-visible planar asset allocations |
 | `lib/Transpiler.js` | Standalone factory with embedded CPU runtime | Embed required CPU model/reference helpers; keep WebGL browser resources in the host |
 
-Direct 16-pixel, 1/2-plane AMOS sprites retain pending/presented state and
+Direct 16-pixel, 1–4-plane AMOS sprites retain pending/presented state and
 hardware-coordinate helpers. The manager publishes structured physical rows;
 Canvas and the CPU reference share the same priority resolver. The opaque
 `setCompositor` RGBA callback has been retired. Bounded DMA/reuse/manual-register
-decoding also emits those rows. Computed/attached AMOS allocation and exact
+decoding also emits those rows. Computed/wide AMOS allocation and exact
 DMA/shifter timing remain open; see [sprite contract](sprite-display.md).
 
 The existing indexed renderer is a migration regression oracle for its supported

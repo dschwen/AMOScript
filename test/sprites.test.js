@@ -139,5 +139,5 @@ test('sprites: original bytes, omitted zero coordinates and unsupported allocati
   const image = program.banks.get(1).images[0];
   image.width = 32; image.pixels = new Uint8Array(64);
   program.setSprite(1, 139, 59, 1);
-  assert.throws(() => program.updateSprites(), /Attached or wide hardware Sprites are not implemented/);
+  assert.throws(() => program.updateSprites(), /Wide hardware Sprites are not implemented/);
 });

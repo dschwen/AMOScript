@@ -1,6 +1,6 @@
 # Wonderland browser milestone
 
-Assessment: 2026-10-24. **The original game compiles; playable execution remains blocked by attached sprites.**
+Assessment: 2026-10-24. **The unmodified game compiles and runs/renders its first level for two controlled seconds.**
 Wonderland is the next end-to-end compatibility target. Use its actual code and
 assets to choose the next language/runtime/display work, while retaining the
 existing parser, lowerer, instruction-function dispatcher and headless runtime.
@@ -20,7 +20,9 @@ node bin/amoscript examples/Wonderland/Wonderland.AMOS /tmp/wonderland.js
 The first command succeeds and inventories the whole bounded token stream. The
 second succeeds and emits the unmodified standalone program (1253 instructions).
 A bounded whole-program run selects Game through its own menu, loads level 1,
-and stops at automatic attached-sprite publication at Wait Vbl line 204, byte 8682.
+and executes 100 scheduled callbacks through nominal time 2,000 ms, with loop count
+47 and four successfully rendered physical frames. Attached four-plane image 25
+now publishes on pairs 2/3 and 6/7.
 See [selector and whole-program evidence](file-selector.md). The original first 64 lines compile and execute through Wait Vbl,
 Load Iff and the original title/menu marker Bob, including both startup branches.
 Canvas, copper and GPU output match an independent source-derived composition. See
@@ -36,18 +38,21 @@ it never adds unsupported commands to the production compiler table.
 | Static inventory | 6,011 token occurrences; 142 distinct encodings |
 | Decoder gap | None: all 142 encodings recognized (initially 44 / 119 missing) |
 | Whole-source compilation | Standalone 1253-instruction factory; no source edits |
-| Whole-program runtime gate | Controlled port-1 fire enters game/level 1; four-plane image 25 blocks sprite publication at Wait Vbl line 204 |
+| Whole-program bounded run | Controlled port-1 fire enters game/level 1; release at 100 ms, 100 callbacks reach 2,000 ms / loop count 47; four physical frames render |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
 | Four original ILBMs | All now decode and match independent PNG expectations |
-| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup and three enemy-initializer fixtures and the original Escape/title and post-death Fade/Wait slices and original level/score fields and all five map-paste/copy loops and original editor-panel zones/selections and five level-file round trips and seeded blob/green-jump initializers run; complete game remains blocked |
+| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup and three enemy-initializer fixtures and the original Escape/title and post-death Fade/Wait slices and original level/score fields and all five map-paste/copy loops and original editor-panel zones/selections and five level-file round trips and seeded blob/green-jump initializers run; complete gameplay remains unverified |
 
 These counts describe lexical recognition, not a compatibility percentage. A
 recognized token may still have an unsupported overload or runtime limitation.
-For example, the game uses four-plane hardware sprite images; the existing direct
-AMOS sprite writer currently accepts at most two planes. Compilation now succeeds; complete execution can expose further gaps after
-the current attached-sprite blocker is resolved.
+The bounded original-game run now includes four-plane direct sprites, rainbow
+writes and the HUD window. The browser selector demo can replay it and show the
+final frame. Five additional WebGL comparisons cover a literal attached fixture
+and those four original-game frames; CPU/GPU agreement is not an Amiga capture.
+Longer interactive gameplay, deaths/restarts, editor round trips, sound/presentation
+integration and native timing/reference captures remain acceptance work.
 
 ## Required work, in execution order
 
@@ -71,7 +76,8 @@ the current attached-sprite blocker is resolved.
    and the title's original Bob now run in a [documented subset](title-display.md).
    Joystick up/down/fire and the original menu loop now execute in a declared
    [keyboard/gamepad fixture](joysticks.md), including original animation and
-   background toggle routines. Whole-program integration remains open. Resolve original
+   background toggle routines. Whole-program controlled fire/game dispatch also
+   passes; live interactive integration remains open. Resolve original
    `AMOSPro_Productivity2:Wonderland/...` filenames through a preloaded synchronous
    browser files adapter. Browser fetch/preload happens before execution. Define
    keyboard/gamepad mapping, focus and release behavior. The target is executing
@@ -83,7 +89,8 @@ the current attached-sprite blocker is resolved.
    now publish all five maps through the unchanged original data/paste/copy loops
    in a declared fixture. [Flash Off](flash.md) now completes the unchanged original
    game/editor screen setup; explicit Flash cycles also run on the injected clock.
-   Next implement remaining rainbow behavior and the necessary sprite support.
+   The bounded whole-program run now integrates four-plane attached sprites,
+   rainbow writes and the HUD. Next verify live controls and longer gameplay.
    The world is 960×288 with a scrolling
    320×168 game window and a separate 320×32 score window. Preserve logical and
    physical buffers, Autoback, manual Bob clear/draw/swap, image hotspots and
@@ -117,9 +124,9 @@ compilation. The [asset demo](../demos/wonderland.html) displays that inventory;
 | Gate | Done when | Current state |
 | --- | --- | --- |
 | W0: reproducible assessment | Original bytes pinned; complete token inventory; image/bank checks and browser asset demo | Implemented |
-| W1: whole-program compilation | Unmodified source lowers and emits a standalone factory with implemented command contracts; isolated factories and useful failures tested | Implemented locally; attached-sprite runtime gate remains |
+| W1: whole-program compilation | Unmodified source lowers and emits a standalone factory with implemented command contracts; isolated factories and useful failures tested | Implemented locally; bounded first-level execution/rendering also passes |
 | W2: original title/menu | Browser executes startup and original interactive menu, using original assets | Original menu fixture passes keyboard/gamepad replay; whole-source fire/game dispatch now reaches level 1, full interactive replay open |
-| W3: playable first level | Scrolling world, score panel, controls, Bobs/sprites, collisions and lifecycle work together | Open |
+| W3: playable first level | Scrolling world, score panel, controls, Bobs/sprites, collisions and lifecycle work together | Bounded two-second original run and four rendered frames pass; live controls/longer replay remain open |
 | W4: complete game/editor | Five levels and end states; sound and editor load/save paths exercised | Open |
 | W5: compatibility validation | Deterministic replays, reference comparisons and sustained-play performance recorded | Open |
 
@@ -164,11 +171,11 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 
-Local verification: `npm run check` passes 480 tests on Node 18.19.1.
+Local verification: `npm run check` passes 486 tests on Node 18.19.1.
 `npm run test:browser` passes the four original image comparisons, all twenty-five
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
-169 GPU/CPU frames, including two Flash states, two copy states, four fade states, eight scrolling window patterns, the original
+174 GPU/CPU frames, including four original first-level frames, an independent attached-image fixture, two Flash states, two copy states, four fade states, eight scrolling window patterns, the original
 title and PAL rainbow wrap, with six
 presentation checks in Chromium/SwiftShader.
 This work has not added an AMOS execution capture or fresh hosted CI evidence.

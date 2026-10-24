@@ -22,20 +22,29 @@ module.exports=async function fileSelectorProbe(page){
       const result=run(mode,name,['','wrong.txt',name],bytes);check(result.selected===name&&result.requests.length===3&&!result.visible,'Original selector retry/return or Hide On failed');
       check(result.bytes===(mode==='load'?bytes:bytes.slice(0,7205)),'Original selected file bytes differ');check(JSON.stringify(result.seeds)===JSON.stringify([55,7,45,10,49]),'Selected original file seeds differ');
     }
-    function probeWhole(){
+    function probeWhole(show=false){
       const clock=steps(),files=memory(Object.fromEntries(Object.entries(assets).map(([name,data])=>[prefix+name,atob(data)])));
-      const program=m.exports({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files,print(){}});let failure=null;const trace=[];
+      const program=m.exports({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files,print(){}});const trace=[];
       try{program.tick(100000);trace.push({time:clock.now(),line:program.state.location.line});program.setJoystick(1,16);
-        for(let i=0;i<10&&!program.state.halted;i++){try{check(clock.next(),'Whole program lost its scheduled continuation');trace.push({time:clock.now(),line:program.state.location.line});}catch(error){failure=error.message;break;}}
-        check(failure&&failure.includes('Attached or wide hardware Sprites are not implemented at line 204, byte 8682'),'Whole-program gate changed');
-        check(program.state.variables.int_game===1&&program.state.variables.int_lev===1&&clock.now()===100&&clock.pending()===0,'Whole game dispatch did not reach the measured sprite gate');
-        return{compiled:true,game:1,level:1,time:100,location:program.state.location,failure,trace};
-      }finally{program.stop();}
+        for(let i=0;i<100;i++){
+          check(clock.next(),'Whole program lost its scheduled continuation');if(i===4)program.setJoystick(1,0);
+          if([4,10,30,99].includes(i)){
+            const snapshot=program.display.snapshotDisplay(),rgba=program.display.renderDisplay();
+            check(snapshot.frame.lineSprites.some(value=>value===0x80000001),'Original attached sprites missing');
+            check(rgba.length===640*202*4,'Whole-program frame dimensions changed');
+            trace.push({time:clock.now(),line:program.state.location.line,count:program.state.variables.int_count});
+            if(show){const canvas=document.getElementById('selector-game-frame');canvas.width=640;canvas.height=202;canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(rgba),640,202),0,0);}
+          }
+        }
+        check(!program.state.halted&&program.state.variables.int_game===1&&program.state.variables.int_lev===1&&clock.now()===2000,'Whole game dispatch did not retain its first-level loop');
+        check(program.state.variables.int_count===47,'Whole game loop count changed');
+        return{compiled:true,game:1,level:1,time:2000,frames:4,count:47,running:true,trace};
+      }finally{program.stop();check(clock.pending()===0,'Stopped whole game retained a timer');}
     }
     const gate=probeWhole();
     if(globalThis.AMOS_SELECTOR_DEMO_CLEANUP)globalThis.AMOS_SELECTOR_DEMO_CLEANUP();const previous=document.getElementById('selector-controls');if(previous)previous.remove();
     const controls=document.createElement('section');controls.id='selector-controls';const heading=document.createElement('h2');heading.textContent='Prepare a choice, then run original Fsel$';
-    const help=document.createElement('p');help.textContent='This synchronous adapter consumes prepared choices. Load uses preloaded bytes; Save may choose a new memory-file path. Optional cancellation is followed by the valid choice, so the original extension loop retries. Native modal selection, directory browsing and IndexedDB persistence remain open. The whole-source probe reports the current sprite failure; it does not bypass it.';
+    const help=document.createElement('p');help.textContent='This synchronous adapter consumes prepared choices. Load uses preloaded bytes; Save may choose a new memory-file path. Optional cancellation is followed by the valid choice, so the original extension loop retries. Native modal selection, directory browsing and IndexedDB persistence remain open. The whole-source probe runs the unmodified first-level loop for two seconds and displays its final physical frame. This bounded run does not establish complete gameplay or Amiga parity.';
     const mode=document.createElement('select');mode.id='selector-mode';mode.setAttribute('aria-label','Original file operation');for(const label of ['load','save']){const option=document.createElement('option');option.value=label;option.textContent=label;mode.append(option);}
     const selected=document.createElement('input');selected.id='selector-path';selected.value=prefix+'chosen.lev';selected.setAttribute('aria-label','Prepared full file path');
     const cancel=document.createElement('input');cancel.id='selector-cancel';cancel.type='checkbox';cancel.checked=true;
@@ -49,10 +58,11 @@ module.exports=async function fileSelectorProbe(page){
       try{if(file.size>7206)throw new Error('Selected data exceeds the 7,206-byte destination bank.');const input=new Uint8Array(await file.arrayBuffer());if(!alive||token!==revision)return;data=String.fromCharCode(...input);selected.value=prefix+file.name;controls.dataset.phase='ready';status.textContent=`Preloaded ${input.length} bytes. Choose Load, then run.`;}
       catch(error){if(alive&&token===revision){controls.dataset.phase='error';status.textContent=error.message;}}finally{if(alive&&token===revision)execute.disabled=false;}
     });
-    const full=document.createElement('button');full.id='selector-whole';full.textContent='Probe unmodified game entry';full.addEventListener('click',()=>{const result=probeWhole();controls.dataset.gate=String(result.location.line);status.textContent=JSON.stringify(result,null,2);});
-    const label=document.createElement('label');label.append(cancel,' Cancel once before choosing');controls.append(heading,help,mode,selected,label,upload,execute,full,status);
+    const gameCanvas=document.createElement('canvas');gameCanvas.id='selector-game-frame';gameCanvas.style.maxWidth='100%';gameCanvas.setAttribute('aria-label','Unmodified Wonderland first-level frame');
+    const full=document.createElement('button');full.id='selector-whole';full.textContent='Probe unmodified game entry';full.addEventListener('click',()=>{const result=probeWhole(true);controls.dataset.running=String(result.running);status.textContent=JSON.stringify(result,null,2);});
+    const label=document.createElement('label');label.append(cancel,' Cancel once before choosing');controls.append(heading,help,mode,selected,label,upload,execute,full,gameCanvas,status);
     const results=document.getElementById('results');if(results)results.before(controls);else document.body.append(controls);controls.dataset.phase='ready';status.textContent=JSON.stringify(gate,null,2);
     globalThis.AMOS_SELECTOR_DEMO_CLEANUP=()=>{alive=false;revision++;};
-    return{selectorModes:2,retryCalls:6,wholeCompiled:gate.compiled,gameEntry:true,spriteGate:gate.location.line,gameRunning:false};
+    return{selectorModes:2,retryCalls:6,wholeCompiled:gate.compiled,gameEntry:true,gameFrames:gate.frames,gameRunning:gate.running};
   },{sources,whole,assets,original:Array.from(require('./wonderlandLevelBytes')()),memorySource:require('../../lib/amos/files').createMemoryFiles.toString(),timerSource:require('./fakeTimers').createFakeTimers.toString(),stepSource:require('./steppedTimers').createSteppedTimers.toString()});
 };

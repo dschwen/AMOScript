@@ -80,5 +80,5 @@ These are source-derived/injected checks; no native execution or Amiga capture
 has been added.
 
 The unmodified Wonderland source now compiles completely. Controlled game entry
-reaches the attached-sprite publication gate at Wait Vbl line 204; see
+now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

@@ -5,8 +5,8 @@ embedded banks and volume paths. They pass through the original Wait Vbl, reserv
 and hide a rainbow, load `Title_Screen.Iff`, turn off the cursor, and draw Bob 74
 as the menu marker at `(84,92)`. Both startup benchmark branches produce the same
 title. The original menu loop now also runs in a declared
-[keyboard/gamepad fixture](joysticks.md); complete-source compilation now succeeds; playable gameplay remains blocked by
-attached-sprite publication.
+[keyboard/gamepad fixture](joysticks.md); the complete unmodified source now compiles and runs/renders its first level for
+two controlled seconds. Full interactive gameplay remains unverified.
 
 ## Load Iff
 
@@ -94,7 +94,7 @@ through a scheduled VBL continuation. The
 [Wonderland demo](../demos/wonderland.html) opens on the executed Canvas title.
 The GPU gallery also compares that exact frame with the independent image and
 checks an active rainbow crossing PAL line 256. Including eight
-[screen-window patterns](screen-windows.md), coverage is now 169 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
+[screen-window patterns](screen-windows.md), coverage is now 174 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
 
 Remaining gates include whole-program menu/game integration, nonempty rainbow pattern
 strings, NTSC rainbow timing, AMSC placement, runtime laced loads, full screen

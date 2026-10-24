@@ -84,4 +84,4 @@ inputs and a Wait Key guard. The map-copy fixture likewise uses the complete
 setup before its original five map loops. Neither executes its enclosing
 Gosub/Return or gameplay. These are source-derived fixtures and CPU/GPU checks,
 not Amiga execution captures. The whole source now compiles; controlled game entry reaches the
-attached-sprite gate at the line 204 Wait Vbl boundary. See [the milestone](wonderland.md).
+bounded two-second first-level run with attached sprites. See [the milestone](wonderland.md).

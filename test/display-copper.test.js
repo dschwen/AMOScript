@@ -164,3 +164,23 @@ test('copper builder: mixed lowres/hires stack shares one native sampling grid',
   assert.deepStrictEqual(Array.from(rgba.slice(0, 16)), [...red, ...red, ...black, ...black]);
   assert.deepStrictEqual(Array.from(rgba.slice(100 * 640 * 4, 100 * 640 * 4 + 16)), [...red, ...black, ...red, ...black]);
 });
+
+test('copper builder: blank-row setup reserves rainbow writes without relaxing the pre-fetch budget', () => {
+  const top={width:320,height:98,x:128,y:50,depth:1,rowBytes:40,pointers:[0],palette:Array(32).fill(0)};
+  const bottom={...top,height:100,y:150,pointers:[4000],palette:Array(32).fill(0xfff)};
+  const paletteRows=[148,149,150].map(y=>({y,index:14,rgb:0x123}));
+  const compiled=build([top,bottom],{paletteRows});
+  const words=new DataView(compiled.bytes.buffer);let moves=0,waits=0;
+  for(let at=0;at<compiled.bytes.length-4;at+=4){
+    if(words.getUint16(at,false)&1){if(waits)assert.ok(2+moves*4<0x38);moves=0;waits++;}
+    else moves++;
+  }
+  assert.ok(2+moves*4<0x38);assert.strictEqual(waits,3);
+  const memory=new ChipMemory(524288),list=memory.allocate(compiled.bytes.length);
+  memory.writeBytes(list.address,compiled.bytes);
+  const {snapshot}=interpret(memory.bytes,{...compiled.interpretOptions,address:list.address,initialRegisters:compiled.initialRegisters});
+  assert.strictEqual(snapshot.frame.lineRegs[100*32],4000);
+  assert.deepStrictEqual(pixel(snapshot,0,100),[255,255,255,255]);
+  assert.throws(()=>build([{...top,height:99},bottom],{paletteRows}),/pre-fetch copper budget/);
+  assert.throws(()=>build([top,bottom],{paletteRows:Array.from({length:14},(_,index)=>({y:148,index,rgb:0}))}),/pre-fetch copper budget/);
+});

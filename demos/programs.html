@@ -1247,6 +1247,15 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
     const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
+    const paletteRows = options.paletteRows || [], paletteByLine = new Map();
+    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
+    for (const row of paletteRows) {
+      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
+          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
+          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
+      if (!paletteByLine.has(row.y)) paletteByLine.set(row.y, new Map());
+      paletteByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    }
     let previous = null;
     const emit = (first, second) => { words.push(first, second); };
     const wait = y => emit(((y & 255) << 8) | 1, 0xfffe);
@@ -1299,25 +1308,30 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
           (reg >= R.BPL1PTH && reg < R.BPL1PTH + 32) || previous.setup.get(reg) !== value);
         // Reprogram in the left blanking interval. Never pretend an oversized
         // palette/pointer update fit before DMA; wider scheduling is a later gate.
-        if (2 + changes.length * 4 >= ddfStart) {
+        const rowPalette = paletteByLine.get(y) || new Map();
+        const combined = new Set([...changes.map(([reg]) => reg), ...rowPalette.keys()]).size;
+        if (2 + combined * 4 >= ddfStart) {
           // Spread setup over actual blank rows, always before fetch/capture.
           // DIWSTRT/STOP come first, keeping DMA inactive until the new window.
           const perLine = Math.floor((Math.min(previous.ddfStart, ddfStart) - 3) / 4);
-          const count = Math.ceil(changes.length / perLine), start = y - count + 1;
-          if (perLine < 1 || start < previous.endY) fail('screen setup exceeds pre-fetch copper budget');
-          for (let index = 0; index < count; index++) changesByLine.set(start + index, new Map(changes.slice(index * perLine, (index + 1) * perLine)));
+          const slots = []; let capacity = 0, start = y + 1;
+          while (capacity < changes.length) {
+            start--;
+            const available = perLine - (paletteByLine.get(start) || new Map()).size;
+            if (perLine < 1 || available < 0 || start < previous.endY) fail('screen setup exceeds pre-fetch copper budget');
+            slots.unshift(available); capacity += available;
+          }
+          let index = 0;
+          for (let line = 0; line < slots.length; line++) {
+            changesByLine.set(start + line, new Map(changes.slice(index, index + slots[line]))); index += slots[line];
+          }
         } else changesByLine.set(y, new Map(changes));
       }
       previous = { setup, endY, ddfStart };
     }
-    const paletteRows = options.paletteRows || [];
-    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
-    for (const row of paletteRows) {
-      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
-          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
-          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
-      if (!changesByLine.has(row.y)) changesByLine.set(row.y, new Map());
-      changesByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    for (const [y, palette] of paletteByLine) {
+      if (!changesByLine.has(y)) changesByLine.set(y, new Map());
+      for (const [reg, rgb] of palette) changesByLine.get(y).set(reg, rgb);
     }
     let wrapped = false;
     for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
@@ -2713,12 +2727,13 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
       const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
-      if (image.width !== 16 || image.depth > 2) throw new Error('Attached or wide hardware Sprites are not implemented');
+      if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
+      if (image.depth > 4) throw new Error('Sprite images above four planes are not implemented');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       const word = value => (value << 16) >> 16;
       frames.set(number, { number, image,
         pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
-        width: image.width, height: image.height,
+        width: image.width, height: image.height, depth: image.depth,
         x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
         y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
     }
@@ -2735,23 +2750,37 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   display.setSpriteWriter(frame => {
     // Publish the frozen presentation, never pending logical Sprite commands.
     // AMOS direct coordinates are lowres hardware units in either screen mode.
-    for (const sprite of spriteFrames.values()) {
-      if (sprite.number === 0 && pointerVisible) continue;
+    for (let channel = 0; channel < 8; channel++) {
+      if (channel === 0 && pointerVisible) continue;
+      const sprite = spriteFrames.get(channel);
+      if (!sprite) continue;
+      const attached = sprite.depth >= 4;
+      // HsAd3/HsAdP2 consume an odd starting channel before using the next
+      // even pair. Claimed channels skip their logical records in this pass.
+      if (attached && (channel & 1)) channel++;
+      if (channel >= 8) break;
       const left = (sprite.x - frame.origin.x) * frame.samplesPerLowresPixel;
       for (let line = 0; line < frame.lines; line++) {
         const sourceY = frame.origin.y + line - sprite.y;
         if (sourceY < 0 || sourceY >= sprite.height) continue;
-        const at = line * 32 + sprite.number * 4;
-        let a = 0, b = 0;
+        const at = line * 32 + channel * 4;
+        let a = 0, b = 0, c = 0, d = 0;
         for (let x = 0; x < 16; x++) {
           const value = sprite.pixels[sourceY * 16 + x];
           a |= (value & 1) << (15 - x); b |= ((value >> 1) & 1) << (15 - x);
+          if (attached) { c |= ((value >> 2) & 1) << (15 - x); d |= ((value >> 3) & 1) << (15 - x); }
         }
         frame.lineSprites[at] = left >>> 0;
         frame.lineSprites[at + 1] = a; frame.lineSprites[at + 2] = b;
         frame.lineSprites[at + 3] = 0x80000000;
+        if (attached) {
+          frame.lineSprites[at + 4] = left >>> 0;
+          frame.lineSprites[at + 5] = c; frame.lineSprites[at + 6] = d;
+          frame.lineSprites[at + 7] = 0x80000001;
+        }
         frame.lineRegs[line * 32 + 16] |= 4;
       }
+      if (attached) channel++;
     }
   });
 
@@ -5313,6 +5342,15 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
     const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
+    const paletteRows = options.paletteRows || [], paletteByLine = new Map();
+    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
+    for (const row of paletteRows) {
+      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
+          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
+          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
+      if (!paletteByLine.has(row.y)) paletteByLine.set(row.y, new Map());
+      paletteByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    }
     let previous = null;
     const emit = (first, second) => { words.push(first, second); };
     const wait = y => emit(((y & 255) << 8) | 1, 0xfffe);
@@ -5365,25 +5403,30 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
           (reg >= R.BPL1PTH && reg < R.BPL1PTH + 32) || previous.setup.get(reg) !== value);
         // Reprogram in the left blanking interval. Never pretend an oversized
         // palette/pointer update fit before DMA; wider scheduling is a later gate.
-        if (2 + changes.length * 4 >= ddfStart) {
+        const rowPalette = paletteByLine.get(y) || new Map();
+        const combined = new Set([...changes.map(([reg]) => reg), ...rowPalette.keys()]).size;
+        if (2 + combined * 4 >= ddfStart) {
           // Spread setup over actual blank rows, always before fetch/capture.
           // DIWSTRT/STOP come first, keeping DMA inactive until the new window.
           const perLine = Math.floor((Math.min(previous.ddfStart, ddfStart) - 3) / 4);
-          const count = Math.ceil(changes.length / perLine), start = y - count + 1;
-          if (perLine < 1 || start < previous.endY) fail('screen setup exceeds pre-fetch copper budget');
-          for (let index = 0; index < count; index++) changesByLine.set(start + index, new Map(changes.slice(index * perLine, (index + 1) * perLine)));
+          const slots = []; let capacity = 0, start = y + 1;
+          while (capacity < changes.length) {
+            start--;
+            const available = perLine - (paletteByLine.get(start) || new Map()).size;
+            if (perLine < 1 || available < 0 || start < previous.endY) fail('screen setup exceeds pre-fetch copper budget');
+            slots.unshift(available); capacity += available;
+          }
+          let index = 0;
+          for (let line = 0; line < slots.length; line++) {
+            changesByLine.set(start + line, new Map(changes.slice(index, index + slots[line]))); index += slots[line];
+          }
         } else changesByLine.set(y, new Map(changes));
       }
       previous = { setup, endY, ddfStart };
     }
-    const paletteRows = options.paletteRows || [];
-    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
-    for (const row of paletteRows) {
-      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
-          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
-          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
-      if (!changesByLine.has(row.y)) changesByLine.set(row.y, new Map());
-      changesByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    for (const [y, palette] of paletteByLine) {
+      if (!changesByLine.has(y)) changesByLine.set(y, new Map());
+      for (const [reg, rgb] of palette) changesByLine.get(y).set(reg, rgb);
     }
     let wrapped = false;
     for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
@@ -6779,12 +6822,13 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
       const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
-      if (image.width !== 16 || image.depth > 2) throw new Error('Attached or wide hardware Sprites are not implemented');
+      if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
+      if (image.depth > 4) throw new Error('Sprite images above four planes are not implemented');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       const word = value => (value << 16) >> 16;
       frames.set(number, { number, image,
         pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
-        width: image.width, height: image.height,
+        width: image.width, height: image.height, depth: image.depth,
         x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
         y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
     }
@@ -6801,23 +6845,37 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   display.setSpriteWriter(frame => {
     // Publish the frozen presentation, never pending logical Sprite commands.
     // AMOS direct coordinates are lowres hardware units in either screen mode.
-    for (const sprite of spriteFrames.values()) {
-      if (sprite.number === 0 && pointerVisible) continue;
+    for (let channel = 0; channel < 8; channel++) {
+      if (channel === 0 && pointerVisible) continue;
+      const sprite = spriteFrames.get(channel);
+      if (!sprite) continue;
+      const attached = sprite.depth >= 4;
+      // HsAd3/HsAdP2 consume an odd starting channel before using the next
+      // even pair. Claimed channels skip their logical records in this pass.
+      if (attached && (channel & 1)) channel++;
+      if (channel >= 8) break;
       const left = (sprite.x - frame.origin.x) * frame.samplesPerLowresPixel;
       for (let line = 0; line < frame.lines; line++) {
         const sourceY = frame.origin.y + line - sprite.y;
         if (sourceY < 0 || sourceY >= sprite.height) continue;
-        const at = line * 32 + sprite.number * 4;
-        let a = 0, b = 0;
+        const at = line * 32 + channel * 4;
+        let a = 0, b = 0, c = 0, d = 0;
         for (let x = 0; x < 16; x++) {
           const value = sprite.pixels[sourceY * 16 + x];
           a |= (value & 1) << (15 - x); b |= ((value >> 1) & 1) << (15 - x);
+          if (attached) { c |= ((value >> 2) & 1) << (15 - x); d |= ((value >> 3) & 1) << (15 - x); }
         }
         frame.lineSprites[at] = left >>> 0;
         frame.lineSprites[at + 1] = a; frame.lineSprites[at + 2] = b;
         frame.lineSprites[at + 3] = 0x80000000;
+        if (attached) {
+          frame.lineSprites[at + 4] = left >>> 0;
+          frame.lineSprites[at + 5] = c; frame.lineSprites[at + 6] = d;
+          frame.lineSprites[at + 7] = 0x80000001;
+        }
         frame.lineRegs[line * 32 + 16] |= 4;
       }
+      if (attached) channel++;
     }
   });
 
@@ -9396,6 +9454,15 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
     const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
+    const paletteRows = options.paletteRows || [], paletteByLine = new Map();
+    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
+    for (const row of paletteRows) {
+      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
+          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
+          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
+      if (!paletteByLine.has(row.y)) paletteByLine.set(row.y, new Map());
+      paletteByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    }
     let previous = null;
     const emit = (first, second) => { words.push(first, second); };
     const wait = y => emit(((y & 255) << 8) | 1, 0xfffe);
@@ -9448,25 +9515,30 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
           (reg >= R.BPL1PTH && reg < R.BPL1PTH + 32) || previous.setup.get(reg) !== value);
         // Reprogram in the left blanking interval. Never pretend an oversized
         // palette/pointer update fit before DMA; wider scheduling is a later gate.
-        if (2 + changes.length * 4 >= ddfStart) {
+        const rowPalette = paletteByLine.get(y) || new Map();
+        const combined = new Set([...changes.map(([reg]) => reg), ...rowPalette.keys()]).size;
+        if (2 + combined * 4 >= ddfStart) {
           // Spread setup over actual blank rows, always before fetch/capture.
           // DIWSTRT/STOP come first, keeping DMA inactive until the new window.
           const perLine = Math.floor((Math.min(previous.ddfStart, ddfStart) - 3) / 4);
-          const count = Math.ceil(changes.length / perLine), start = y - count + 1;
-          if (perLine < 1 || start < previous.endY) fail('screen setup exceeds pre-fetch copper budget');
-          for (let index = 0; index < count; index++) changesByLine.set(start + index, new Map(changes.slice(index * perLine, (index + 1) * perLine)));
+          const slots = []; let capacity = 0, start = y + 1;
+          while (capacity < changes.length) {
+            start--;
+            const available = perLine - (paletteByLine.get(start) || new Map()).size;
+            if (perLine < 1 || available < 0 || start < previous.endY) fail('screen setup exceeds pre-fetch copper budget');
+            slots.unshift(available); capacity += available;
+          }
+          let index = 0;
+          for (let line = 0; line < slots.length; line++) {
+            changesByLine.set(start + line, new Map(changes.slice(index, index + slots[line]))); index += slots[line];
+          }
         } else changesByLine.set(y, new Map(changes));
       }
       previous = { setup, endY, ddfStart };
     }
-    const paletteRows = options.paletteRows || [];
-    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
-    for (const row of paletteRows) {
-      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
-          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
-          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
-      if (!changesByLine.has(row.y)) changesByLine.set(row.y, new Map());
-      changesByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    for (const [y, palette] of paletteByLine) {
+      if (!changesByLine.has(y)) changesByLine.set(y, new Map());
+      for (const [reg, rgb] of palette) changesByLine.get(y).set(reg, rgb);
     }
     let wrapped = false;
     for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
@@ -10862,12 +10934,13 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
       const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
-      if (image.width !== 16 || image.depth > 2) throw new Error('Attached or wide hardware Sprites are not implemented');
+      if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
+      if (image.depth > 4) throw new Error('Sprite images above four planes are not implemented');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       const word = value => (value << 16) >> 16;
       frames.set(number, { number, image,
         pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
-        width: image.width, height: image.height,
+        width: image.width, height: image.height, depth: image.depth,
         x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
         y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
     }
@@ -10884,23 +10957,37 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   display.setSpriteWriter(frame => {
     // Publish the frozen presentation, never pending logical Sprite commands.
     // AMOS direct coordinates are lowres hardware units in either screen mode.
-    for (const sprite of spriteFrames.values()) {
-      if (sprite.number === 0 && pointerVisible) continue;
+    for (let channel = 0; channel < 8; channel++) {
+      if (channel === 0 && pointerVisible) continue;
+      const sprite = spriteFrames.get(channel);
+      if (!sprite) continue;
+      const attached = sprite.depth >= 4;
+      // HsAd3/HsAdP2 consume an odd starting channel before using the next
+      // even pair. Claimed channels skip their logical records in this pass.
+      if (attached && (channel & 1)) channel++;
+      if (channel >= 8) break;
       const left = (sprite.x - frame.origin.x) * frame.samplesPerLowresPixel;
       for (let line = 0; line < frame.lines; line++) {
         const sourceY = frame.origin.y + line - sprite.y;
         if (sourceY < 0 || sourceY >= sprite.height) continue;
-        const at = line * 32 + sprite.number * 4;
-        let a = 0, b = 0;
+        const at = line * 32 + channel * 4;
+        let a = 0, b = 0, c = 0, d = 0;
         for (let x = 0; x < 16; x++) {
           const value = sprite.pixels[sourceY * 16 + x];
           a |= (value & 1) << (15 - x); b |= ((value >> 1) & 1) << (15 - x);
+          if (attached) { c |= ((value >> 2) & 1) << (15 - x); d |= ((value >> 3) & 1) << (15 - x); }
         }
         frame.lineSprites[at] = left >>> 0;
         frame.lineSprites[at + 1] = a; frame.lineSprites[at + 2] = b;
         frame.lineSprites[at + 3] = 0x80000000;
+        if (attached) {
+          frame.lineSprites[at + 4] = left >>> 0;
+          frame.lineSprites[at + 5] = c; frame.lineSprites[at + 6] = d;
+          frame.lineSprites[at + 7] = 0x80000001;
+        }
         frame.lineRegs[line * 32 + 16] |= 4;
       }
+      if (attached) channel++;
     }
   });
 

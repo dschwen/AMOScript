@@ -100,5 +100,5 @@ Key guards and checks literal query results. These are source-derived and
 injected/browser checks, not Amiga or physical-device captures.
 
 The unmodified Wonderland source now compiles completely. Controlled game entry
-reaches the attached-sprite publication gate at Wait Vbl line 204; see
+now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

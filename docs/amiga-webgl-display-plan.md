@@ -548,7 +548,7 @@ playfield-only, with indexed drawing authoritative until the later migration.
 
 **Milestone M5**
 - [x] Local synthetic sprite fixtures: all five documented priority settings for each playfield, both PF2PRI settings, transparency combinations and all channel pairs. External captures remain separate.
-- [x] Raw physical attached-pair fixtures render indices 1–15 plus transparent zero; AMOS attached-image allocation remains open.
+- [x] Raw physical attached-pair fixtures render indices 1–15 plus transparent zero; bounded 16-pixel four-plane AMOS direct allocation now publishes the same paired rows; wide/computed allocation remains open.
 - [x] Synthetic signed starts and right-edge clipping, independent of playfield resolution, including native sample grids of two/four. Hardware border/DMA captures remain open.
 
 CPU reference and direct AMOS snapshot publication are implemented; see

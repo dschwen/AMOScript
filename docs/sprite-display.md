@@ -92,9 +92,9 @@ the CPU reference; the opaque `setCompositor` RGBA callback and its duplicate
 priority implementation have been removed. Canvas still converts authoritative
 indexed playfield pixels, preserving the staged planar migration. The direct
 browser-script runtime loads the shared colour/sprite helpers before display.js;
-generated modules embed them. Computed AMOS allocation, attached/wide image forms,
+generated modules embed them. Computed AMOS allocation, wide image forms,
 collision registers, DMA slot contention and mid-line sprite events remain open.
-Raw physical attached tables do not imply those AMOS commands are implemented.
+Bounded four-plane AMOS image publication is described below.
 
 Tests cover all eight channels, word patterns, transparency, all documented
 priority placements against both playfields, PF2PRI permutations, all attached
@@ -106,4 +106,36 @@ Chromium also renders the descriptor/reuse fixture through import-free factories
 and Canvas, saving `test/artifacts/sprite-dma.png`. Standalone
 programs and Chromium compare manual updates/movement/clearing to Canvas.
 These are synthetic/source-derived expectations, not external AMOS captures or
-proof of complete hardware timing. GPU composition remains a separate milestone.
+proof of complete hardware timing. Non-HAM GPU composition shares these physical rows; remaining mode/timing gates stay open.
+
+## Four-plane direct AMOS images
+
+The bridge now accepts 16-pixel images with one through four planes. For three
+planes, the third plane is ignored by the direct hardware path. Four planes
+consume an even/odd pair: planes zero/one go to the even channel and planes
+two/three to the attached odd channel. Zero remains transparent; codes 1–15 select
+palette entries 17–31. Image-mask and image-flip flags retain the existing direct
+hardware behavior.
+
+Allocation scans logical numbers in physical order, independent of command
+insertion order. A four-plane image requested on an odd number consumes a blank
+channel before the next even pair. Thus AMOS 1 uses 2/3 and AMOS 5 uses 6/7;
+AMOS 7 consumes the final blank and has no output. Claimed channels skip their
+logical records for that publication pass. Turning off the owner and updating
+reveals pending neighbours. Manual updates retain frozen positions/image rows,
+and the existing mouse reservation for channel zero is preserved.
+
+These rules follow pinned
+[`src/w/sprites.cpp`, HsAd3/HsAd4 and HsAdP2](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/sprites.cpp).
+They are source analysis, not AMOS execution captures. Widths above 16 pixels,
+depths above four, computed allocation and exact DMA timing remain explicit limits.
+
+The independent literal `test/fixtures/attached-sprite.hex` encodes an AmSp bank
+with one 16 × 2 four-plane image, zero hotspot and zero palette. Plane words are
+`5555/aaaa`, `3333/cccc`, `0f0f/f0f0`, `00ff/ff00`, so its rows contain 0..15 and
+15..0. It uses no production encoder. Tests check exact physical words, palette
+pixels, channel claims, cursor reservation, manual updates and owned snapshots.
+WebGL tests compare its independent pixel expectation and four whole-program
+Wonderland frames against the GPU. The shared Fsel$ demo runs and renders the
+unmodified first-level loop for two controlled seconds. This is bounded execution
+and CPU/GPU parity, not full gameplay or hardware-capture parity.

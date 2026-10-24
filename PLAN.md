@@ -16,9 +16,12 @@ Current assessment: the unmodified 753-line Wonderland source now compiles to
 a standalone 1253-instruction factory, with all 142 encodings recognized (initially
 44 were missing). [Prepared Fsel$ adapters](docs/file-selector.md) execute the
 original selection loop and file calls. Controlled whole-program fire input enters
-level 1 and stops at attached-sprite publication at Wait Vbl line 204. Its active
-requests use image 25 (16 pixels, four planes) on AMOS sprite numbers 1 and 5.
-Prioritize that sprite bridge next; full gameplay and async modal selection remain open. [Source-derived Rnd/Randomize](docs/random.md) now execute
+level 1 and now runs 100 scheduled callbacks (two nominal seconds), rendering four
+physical frames with its original image-25 attached sprites on pairs 2/3 and 6/7.
+The shared demo displays the final frame; this is bounded execution, not complete
+gameplay or native timing parity. Next extend the original-game browser session
+with live keyboard/Gamepad input, longer gameplay/death/restart coverage and
+explicitly measured remaining failures. Async modal selection remains open. [Source-derived Rnd/Randomize](docs/random.md) now execute
 original blob/green-jump slices against controlled seed/beam vectors. Native beam
 timing remains outside this subset. [Raw Bload/Bsave](docs/raw-files.md) now round-trip the
 original five level maps through declared writeback/save/load slices. The exact
@@ -98,7 +101,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **480 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **486 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
@@ -120,7 +123,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
   are implemented, as are EHB screens, static scroll/DPF and explicit IFF fields.
   AMOS display/copper commands, superhires and live field timing,
   sprite contention/computed allocation, GPU presentation/switching and remaining
-  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 169
+  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 174
   local GPU/CPU frames; see [renderer contract](docs/webgl-renderer.md).
   WebGL2 resources, exact table readback, dirty uploads and context restoration
   are implemented; see [resource contract](docs/webgl-resources.md). Direct AMOS
@@ -225,7 +228,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 | Data and strings | Arrays, scoped DATA/READ/RESTORE, substring retrieval/assignment, common string functions | Remaining memory-dependent byte-string/length rules and edge cases |
 | Files | Sequential I/O, structured banks and checked raw Bload/Bsave through explicit memory/Node adapters | IndexedDB persistence, asynchronous modal Fsel$ integration, seek/random-file variants and remaining file operations |
 | Execution | Instruction budget, waits, key queue, timer cancellation, stop/resume, per-instance state | Regression coverage as new asynchronous hosts are added |
-| Browser graphics | Indexed drawing, Bobs/buffers/Autoback, Canvas/input/direct sprites; ABI/chip memory, physical planar export, basic CPU reference, normal ILBM, bounded copper/stack builder and WebGL2 probe | AMOS screen/copper commands, advanced modes, structured hardware sprites, WebGL2 backend, computed/attached sprites, exact timing and hardware coordinates |
+| Browser graphics | Indexed drawing, Bobs/buffers/Autoback, Canvas/input/direct sprites; ABI/chip memory, physical planar export, basic CPU reference, normal ILBM, bounded copper/stack builder and WebGL2 probe | AMOS screen/copper commands, advanced modes, structured hardware sprites, WebGL2 backend, computed/wide sprites, exact timing and hardware coordinates |
 | Audio | Bounded Samples controller and optional Web Audio host, source-derived/offline checks | Remaining music/sample forms, full-game integration, native timing and reference captures |
 | ASCII frontend | No implementation | Lexer/parser producing the shared AST |
 
@@ -385,7 +388,7 @@ animated Bobs example is covered in fake-clock and Chromium tests. See
 [the Bob contract](docs/bobs.md) and [buffering contract](docs/buffering.md).
 Double buffering, Screen Swap and Autoback 0/1/2 now have pixel and browser
 coverage. Bob Col/Col and direct sprites now have unit and Chromium coverage;
-computed/attached sprites, sprite/cross-type collisions, hardware timing and advanced blitter edge
+computed/wide sprites, sprite/cross-type collisions, hardware timing and advanced blitter edge
 effects are still required.
 
 The shared snapshot/reference/WebGL2 workstream above supplies the target display
@@ -394,7 +397,7 @@ Canvas and the CPU reference, sharing one priority resolver. The opaque Canvas
 RGBA callback has been retired. Finish computed allocation and DMA contention/timing
 before claiming the complete sprite-reference workstream. Canvas assertions alone do not establish
 WebGL2 availability or GPU parity; the separate integer readback probe now proves
-local WebGL2 capability. The native non-HAM GPU renderer now passes 169 local
+local WebGL2 capability. The native non-HAM GPU renderer now passes 174 local
 GPU/CPU frames, including 100 seeded inputs. Presentation/switching, HAM/events
 and unfinished mode/capture gates remain open.
 
@@ -477,7 +480,7 @@ patches. Describe coverage precisely rather than claiming full AMOS support.
 5. Implemented locally: WebGL2 resource storage/readback, owned dirty-row
    comparisons and forced context loss/restoration/disposal (M6 infrastructure).
    Implemented next: GPU decode/resolve for the current non-HAM CPU subset,
-   with 169 GPU/CPU comparisons and restored-shader rerendering.
+   with 174 GPU/CPU comparisons and restored-shader rerendering.
    GPU nearest/aspect/letterbox presentation now passes six canvas/restore checks.
    Next add switching/input integration, live diff, HAM and event support;
    [resource boundaries](docs/webgl-resources.md) remain explicit.
@@ -536,7 +539,7 @@ are available; passing synthetic tests does not satisfy it.
   forms, and selected file variants, each
   delivered with binary execution fixtures.
 - Practical graphics: D0–D1 display foundations first, then D2–D6 with the full
-  reference/WebGL proposal gates. Complete computed/attached sprites and
+  reference/WebGL proposal gates. Complete computed/wide sprites and
   sprite/cross-type collisions alongside the shared sprite-line model. Retain
   buffered Bob and external bank round-trip cases; add copper/mode captures.
 - Audio: choose one bank format and playback command set, implement a

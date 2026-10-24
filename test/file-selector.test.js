@@ -53,14 +53,21 @@ test('Fsel$: unchanged Wonderland selector retries cancellation/wrong extensions
   }
 });
 
-test('Wonderland: unmodified whole program compiles standalone and follows its own game branch to the explicit sprite gate',()=>{
+test('Wonderland: unmodified whole program compiles standalone and runs and renders its own first-level loop for two seconds',()=>{
   const source=fs.readFileSync(path.join(__dirname,'../examples/Wonderland/Wonderland.AMOS')),{create}=compile(source);
   const c=require('./helpers/steppedTimers').createSteppedTimers(),reads=[];
   const p=create({now:c.now,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout,files:{read:name=>{reads.push(name);return fs.readFileSync(path.join(__dirname,'../examples/Wonderland',name.split('/').pop()),'latin1');}},print(){}});
   const other=create({now:c.now,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout});other.banks.get(4).data[0]=255;assert.notStrictEqual(p.banks.get(4).data[0],255);other.randomize(12345);assert.strictEqual(p.state.random.seed,0);other.stop();
-  p.tick(100000);assert.strictEqual(p.state.location.line,51);p.setJoystick(1,16);let failure;
-  for(let step=0;step<10&&!p.state.halted;step++){try{assert.ok(c.next());}catch(error){failure=error;break;}}
-  assert.match(failure.message,/Attached or wide hardware Sprites are not implemented at line 204, byte 8682/);
-  assert.strictEqual(p.state.variables.int_game,1);assert.strictEqual(p.state.variables.int_lev,1);assert.strictEqual(c.now(),100);assert.strictEqual(c.pending(),0);
-  assert.deepStrictEqual(reads.map(name=>name.split('/').pop()),['Wonderland_Samples.Abk','Title_Screen.Iff','Landscape.Iff','Score_Panel.Iff']);p.stop();
+  p.tick(100000);assert.strictEqual(p.state.location.line,51);p.setJoystick(1,16);
+  for(let step=0;step<100;step++){
+    assert.ok(c.next());if(step===4)p.setJoystick(1,0);
+    if([4,10,30,99].includes(step)){
+      const snapshot=p.display.snapshotDisplay();assert.strictEqual(snapshot.frame.outputWidth,640);assert.strictEqual(snapshot.frame.lines,202);
+      assert.strictEqual(p.display.renderDisplay().length,640*202*4);
+      assert.ok(snapshot.frame.lineSprites.some(value=>value===0x80000001));
+    }
+  }
+  assert.strictEqual(p.state.halted,false);assert.strictEqual(p.state.variables.int_game,1);assert.strictEqual(p.state.variables.int_lev,1);
+  assert.strictEqual(p.state.variables.int_count,47);assert.strictEqual(c.now(),2000);assert.ok(c.pending()>0);
+  assert.deepStrictEqual(reads.map(name=>name.split('/').pop()),['Wonderland_Samples.Abk','Title_Screen.Iff','Landscape.Iff','Score_Panel.Iff']);p.stop();assert.strictEqual(c.pending(),0);
 });

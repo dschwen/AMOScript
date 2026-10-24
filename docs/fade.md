@@ -87,8 +87,8 @@ replacement, Stop/Resume, stale callbacks and failure context. An independent-by
 conformance case advances its fake clock by an explicit bounded duration.
 Chromium checks nine original-title fade frames without running an animation
 callback and exercises the live controls. Four additional native GPU comparisons
-use independent RGB expectations, bringing local coverage to 169 GPU/CPU frames.
+use independent RGB expectations, bringing local coverage to 174 GPU/CPU frames.
 
 The unmodified Wonderland source now compiles completely. Controlled game entry
-reaches the attached-sprite publication gate at Wait Vbl line 204; see
+now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

@@ -20,7 +20,7 @@ async function run() {
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
     await runScenario('file-selector', page);
-    console.log('Fsel$ passed: original selector retry/load/save routines; complete unmodified Wonderland compiles and reaches its attached/wide sprite gate.');
+    console.log('Fsel$ passed: original selector retry/load/save routines; complete unmodified Wonderland runs and renders four first-level frames over two controlled seconds.');
     await runScenario('random', page);
     console.log('Rnd passed: independent word-arithmetic vectors and eighteen original enemy streams with controlled beam inputs.');
     await runScenario('raw-files', page);

@@ -57,5 +57,5 @@ shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
 The unmodified Wonderland source now compiles completely. Controlled game entry
-reaches the attached-sprite publication gate at Wait Vbl line 204; see
+now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

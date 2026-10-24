@@ -119,7 +119,7 @@ windows through shared snapshots. Full hardware placement/priority, flashing
 colours, cursor animation, HAM raster events and live interlace modes, complete text escape sequences,
 fonts/styles, fill/line patterns, circles/ellipses and full hardware/computed sprites
 remain unfinished. Direct sprites publish physical rows shared by Canvas and the
-CPU reference, which also decodes bounded raw DMA streams. Computed/attached
+CPU reference, which also decodes bounded raw DMA streams. Computed/wide
 AMOS allocation and complete bus/shifter timing remain separate work; see
 [sprite contract](sprite-display.md). Unsupported command tokens and unsupported screen modes fail
 explicitly. Floating-point and numeric text-format compatibility remain separate

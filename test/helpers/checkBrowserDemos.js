@@ -30,7 +30,7 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.selectOption('#selector-mode','load');await page.setInputFiles('#selector-upload',{name:'short.lev',mimeType:'application/octet-stream',buffer:Buffer.from([9])});
         await page.waitForFunction(()=>document.getElementById('selector-controls').dataset.phase==='ready');await page.click('#selector-run');
         assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-bytes'),'1');
-        await page.click('#selector-whole');assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-gate'),'204');
+        await page.click('#selector-whole');assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-running'),'true');
         await page.evaluate(()=>globalThis.AMOS_SELECTOR_DEMO_CLEANUP());
       }
       if (scenario.id === 'random') {

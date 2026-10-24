@@ -9,7 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
-| [Fsel$ and unmodified Wonderland game entry](file-selector.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/file-selector.html) |
+| [Fsel$ and unmodified Wonderland first-level frames](file-selector.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/file-selector.html) |
 | [AMOS Rnd and original enemy initialization](random.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/random.html) |
 | [Wonderland raw level-file save/load](raw-files.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/raw-files.html) |
 | [Wonderland hardware mouse and editor selection](mouse.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mouse.html) |

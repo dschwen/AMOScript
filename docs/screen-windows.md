@@ -89,6 +89,12 @@ logical buffers, swaps, immutable snapshots, staged replacement/close, coordinat
 and unsupported forms. Eight independent indexed-pattern GPU/CPU comparisons
 exercise both resolutions, two palettes, fine/coarse offsets and the blank gap.
 The Chromium catalogue includes the standalone scrolling demo with HTML Preview
-links. The whole source now compiles and game entry reaches the attached-sprite
-publication gate at Wait Vbl line 204; see
+links. The whole source now compiles and game entry runs and renders a bounded first-level loop for two nominal seconds; see
 [Wonderland's milestone](wonderland.md).
+
+When setup spans real blank rows, the copper builder now reserves each row's
+rainbow/palette writes before placing setup chunks. DIW changes still precede
+pointer updates, and the same strict pre-fetch limit applies to every merged
+row. The original game's two-row world/HUD gap now fits its combined palette
+work. Insufficient gaps and palette rows exceeding the budget still reject;
+this is bounded scheduling, not exact DMA/bus timing.

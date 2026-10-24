@@ -83,5 +83,5 @@ the live sandbox, including unsupported-format errors. The gallery includes its
 standalone page and HTML Preview link.
 
 The unmodified Wonderland source now compiles completely. Controlled game entry
-reaches the attached-sprite publication gate at Wait Vbl line 204; see
+now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

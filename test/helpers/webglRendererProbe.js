@@ -71,6 +71,32 @@ module.exports = async function webglRendererProbe(page, artifacts) {
     for (let x = 0; x < 640; x++) golden.set([(rgb >> 8) * 17, ((rgb >> 4) & 15) * 17, (rgb & 15) * 17, 255], (y * 640 + x) * 4);
   }
   addPacket('amos-rainbow-pal-wrap', rainbow.snapshotDisplay(), golden);
+  // Exercise the actual AMOS bridge, with independently specified pixel codes.
+  const attached = require('./attachedSprite');
+  const pairClock=createFakeTimers();
+  const pair = compile(attached.source([...attached.palette, attached.sprite(1), attached.sprite(5,168)])).create({now:pairClock.now,setTimeout:pairClock.setTimeout,clearTimeout:pairClock.clearTimeout});
+  pair.tick(1000);
+  const attachedGolden = new Uint8Array(640*200*4);
+  for(let i=3;i<attachedGolden.length;i+=4)attachedGolden[i]=255;
+  for(const left of [20,80])for(let y=0;y<2;y++)for(let x=0;x<16;x++)for(let sub=0;sub<2;sub++){
+    const value=(y?15-x:x)*17;
+    attachedGolden.set([value,value,value,255],((10+y)*640+left+x*2+sub)*4);
+  }
+  addPacket('amos-attached-odd-pairs',pair.display.snapshotDisplay(),attachedGolden);pair.stop();
+  const gameClock=require('./steppedTimers').createSteppedTimers();
+  const game=compile(fs.readFileSync(path.join(__dirname,'../../examples/Wonderland/Wonderland.AMOS'))).create({
+    now:gameClock.now,setTimeout:gameClock.setTimeout,clearTimeout:gameClock.clearTimeout,print(){},
+    files:{read:name=>fs.readFileSync(path.join(__dirname,'../../examples/Wonderland',name.split('/').pop()),'latin1')}
+  });
+  try{
+    game.tick(100000);game.setJoystick(1,16);
+    for(let i=0;i<100;i++){
+      if(!gameClock.next())throw new Error('Original game lost its continuation');
+      if(i===4)game.setJoystick(1,0);
+      // CPU parity here is not an independent Amiga capture.
+      if([4,10,30,99].includes(i))addPacket(`wonderland-game-${gameClock.now()}ms`,game.display.snapshotDisplay(),game.display.renderDisplay());
+    }
+  }finally{game.stop();}
   const result = await page.evaluate(async ({ sources, images, packets }) => {
     const factory = name => new Function(`return (${sources[name]});`)();
     const model = factory('model')(), colours = factory('colour')(), sprites = factory('sprites')();

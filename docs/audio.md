@@ -4,7 +4,7 @@ Wonderland's five distinct music-extension encodings now decode and execute:
 `Led Off`, `Sam Bank`, `Sam Loop Off`, two-argument `Sam Play`, and masked
 `Sam Stop`. The original first fifteen source lines execute through bank loading
 and sample setup. The extended title fixture now runs 64 lines; the complete
-program now compiles and reaches an attached-sprite runtime gate at line 204. The original menu now runs
+program now compiles and runs/renders a bounded first-level loop for two nominal seconds. The original menu now runs
 with keyboard/gamepad controls in a [declared fixture](joysticks.md).
 
 ## Source and token contracts

@@ -81,6 +81,5 @@ An independent-byte conformance fixture separately checks reserve/set/reset/quer
 forms. These are source-derived expectations and browser comparisons, not an
 Amiga execution capture.
 
-The unmodified whole source now compiles. Controlled game entry reaches the
-attached-sprite publication gate at Wait Vbl line 204; see
+The unmodified whole source now compiles. Controlled game entry runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [whole-program evidence](file-selector.md).

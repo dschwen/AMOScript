@@ -96,5 +96,5 @@ controls, local preload and offline pages are checked in Chromium. This evidence
 is source/asset analysis and injected execution, not an Amiga capture.
 
 The unmodified Wonderland source now compiles completely. Controlled game entry
-reaches the attached-sprite publication gate at Wait Vbl line 204; see
+now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

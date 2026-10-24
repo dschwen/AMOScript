@@ -24,7 +24,7 @@
   metadata and a complete returned path or empty cancellation. Memory files may
   queue prepared choices; browser uploads finish before VM execution. Do not
   replay expressions or return Promises to await a modal picker. See
-  `docs/file-selector.md`, including the unmodified whole-program sprite gate.
+  `docs/file-selector.md`, including the unmodified bounded first-level run.
 - Print Using carries per-item format AST expressions into the existing print IR.
   A shared integer/string formatter validates the format before its value thunk;
   no format state persists across items. Float/decimal/exponent fields remain
@@ -104,7 +104,9 @@
   See `docs/planar-display.md` for the implemented subset and remaining gates.
 - `lib/display/reference/sprites.js` resolves eight physical channels, attached
   pairs and playfield priorities. `snapshotDisplay` publishes direct AMOS sprite
-  rows; `snapshotPlayfield` remains sprite-free. Bounded DMA/reuse/manual registers
+  rows, including bounded four-plane attached pairs (odd numbers consume a blank
+  channel before the next even pair); `snapshotPlayfield` remains sprite-free.
+  Bounded DMA/reuse/manual registers
   live in `lib/display/copper/spriteDma.js`. Contention/timing and computed allocation
   remain open; see `docs/sprite-display.md`. Canvas consumes the same structured
   sprite writer/resolver; do not reintroduce an opaque RGBA compositor callback.

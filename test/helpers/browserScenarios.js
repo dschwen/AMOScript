@@ -228,8 +228,8 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
-  { id: 'file-selector', capturedFrames: false, title: 'Fsel$ and unmodified Wonderland game entry', description: 'Prepared synchronous file choices execute the original retry/Gosub/Return routine and selected load/save calls. The unmodified complete program compiles and follows its own game branch to the explicit attached/wide sprite gate. No native selector GUI or gameplay parity is claimed.', run: require('./fileSelectorProbe'), check(result, assert) {
-    assert.deepStrictEqual(result,{selectorModes:2,retryCalls:6,wholeCompiled:true,gameEntry:true,spriteGate:204,gameRunning:false});
+  { id: 'file-selector', capturedFrames: false, title: 'Fsel$ and unmodified Wonderland game entry', description: 'Prepared synchronous file choices execute the original retry/Gosub/Return routine and selected load/save calls. The unmodified complete program runs and renders four first-level frames over two controlled seconds, including attached sprites and rainbow/HUD scheduling. No native selector GUI or complete gameplay parity is claimed.', run: require('./fileSelectorProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{selectorModes:2,retryCalls:6,wholeCompiled:true,gameEntry:true,gameFrames:4,gameRunning:true});
   } },
   { id: 'random', capturedFrames: false, title: 'AMOS Rnd and original enemy initialization', description: 'Source-derived seeded PRNG vectors and eighteen original blob/green-jump streams with controlled beam input. Includes step/reset/cache controls; gameplay, native startup seeds and real beam timing remain outside this data fixture.', run: require('./randomProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{vectors:5,streams:18,steps:216,gameRunning:false});

@@ -59,16 +59,17 @@ the original busy menu's zero-delay cooperative callbacks forever.
 With declared joystick port-1 fire input, the program's own title/menu dispatch
 enters game 1, level 1. It reads the original Samples, Title, Landscape and Score
 Panel files, initializes the map/enemies, and reaches the first gameplay update.
-At nominal time 100 ms it fails with `Attached or wide hardware Sprites are not
-implemented at line 204, byte 8682`. This is automatic sprite publication at the
-Wait Vbl boundary, **not a Sprite statement at line 204**. The measured active
-requests are AMOS sprite numbers 1 and 5, both image 25, width 16 and depth 4.
-The current AMOS writer rejects depth above two; attached-pair integration is the
-next target. The error is retained rather than bypassed or replaced by a fallback.
+The former bounded two-second first-level run with attached sprites is resolved.
+The measured active requests are AMOS sprites 1 and 5, image 25 (16 pixels,
+four planes); they now publish on physical pairs 2/3 and 6/7. The controlled probe
+releases fire at 100 ms and executes 100 callbacks, reaching 2,000 ms with level 1
+and loop count 47. Four snapshots render, including the rainbow and HUD stack.
+Stop clears the remaining timers. The shared demo can replay this run and show
+the final 640 × 202 physical frame.
 
-This proves compilation and bounded game entry, not playable gameplay, sprite
-parity, native timing or a complete editor. Existing menu/title/display fixtures
-retain their separate evidence. See [the milestone](wonderland.md).
+This proves compilation and bounded first-level execution/rendering, not complete
+playable gameplay, native timing or a complete editor. Existing menu/title/display
+fixtures retain their separate evidence. See [the milestone](wonderland.md).
 
 ## Source and verification
 
@@ -79,9 +80,8 @@ subset, not a reproduction of the native GUI or unsafe buffer cases.
 
 Six execution groups cover all overloads, string DATA/arrays/procedure results,
 once-only expression effects, adapter failures, namespace/queue ownership, the
-unchanged selector/file slices and the unmodified whole-program gate. An
+unchanged selector/file slices and the unmodified whole-program bounded run. An
 independent-byte conformance fixture uses literal original words and declared
 host choices. The shared Chromium scenario checks the original routines, optional
-preload, new save names and the same whole-program sprite failure. It is a data
-inspector with an HTML Preview link in the [gallery](../demos/index.html), not an
-image of a running game. No Amiga GUI or execution capture has been added.
+preload, new save names and four original game frames. It includes a rendered frame and an HTML Preview
+link in the [gallery](../demos/index.html). No Amiga GUI or execution capture has been added.
