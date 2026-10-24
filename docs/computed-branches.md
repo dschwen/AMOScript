@@ -56,7 +56,7 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Screen Copy `$0986` on line 304,
-byte 11664. The bounded inventory reports 13 unrecognized encodings appearing
-32 times. Recognition counts are not a compatibility percentage; see
+Full Wonderland compilation now first encounters Flash Off `$0D34` on line 361,
+byte 13748. The bounded inventory reports 10 unrecognized encodings appearing
+26 times. Recognition counts are not a compatibility percentage; see
 [the milestone](wonderland.md).

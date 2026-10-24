@@ -63,6 +63,10 @@
   Full bitmap storage remains authoritative. Setup can span real blank rows,
   with each chunk completed before fetch. See `docs/screen-windows.md`; general
   placement/priority, wrapped DMA and HAM fine scroll remain open.
+- Two-operand Screen Copy resolves Logic/Physic integer selectors at execution
+  and copies common bitmap planes without swapping identities or invoking
+  Autoback/Bob hooks. Saved Bob backgrounds retain their existing owners. See
+  `docs/screen-copy.md`; rectangle/minterm variants and exact DMA timing remain open.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip
   memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
   `lib/display/reference/render.js` provides basic planar render/explainPixel.

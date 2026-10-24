@@ -9,6 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
+| [Wonderland map copy: five original level loops](screen-copy.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-copy.html) |
 | [Wonderland score fields and Print Using](print-using.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/print-using.html) |
 | [Wonderland Fade and VBL palette timing](fade.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/fade.html) |
 | [AMOS Scancode and original Wonderland Escape/title routing](scancodes.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/scancodes.html) |

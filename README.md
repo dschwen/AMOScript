@@ -20,6 +20,11 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [map-copy demo](demos/screen-copy.html) paints all five level maps through the
+original data/paste/copy loops in a declared fixture. Step Prepare/Publish to see
+hidden logical drawing become physical output, then inspect the bitmap with the
+scroll controls. Gameplay remains blocked; see [the copy contract](docs/screen-copy.md).
+
 The [Print Using demo](demos/print-using.html) renders original level/score
 fields and includes a live compiled integer-field sandbox; see [the contract](docs/print-using.md).
 The [Fade demo](demos/fade.html) executes the original Fade/Wait sequence against

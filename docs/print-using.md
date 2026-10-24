@@ -82,6 +82,6 @@ words and expected field strings. Chromium runs the shared panel evaluator and
 the live sandbox, including unsupported-format errors. The gallery includes its
 standalone page and HTML Preview link.
 
-Full Wonderland compilation now first encounters Screen Copy `$0986` on line 304,
-byte 11664 (`Screen Copy Logic To Physic`). Thirteen encodings remain unrecognized,
-appearing 32 times. See [the milestone](wonderland.md).
+Full Wonderland compilation now first encounters Flash Off `$0D34` on line 361,
+byte 13748 (`Flash Off`). Ten encodings remain unrecognized,
+appearing 26 times. See [the milestone](wonderland.md).

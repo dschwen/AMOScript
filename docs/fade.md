@@ -85,8 +85,8 @@ replacement, Stop/Resume, stale callbacks and failure context. An independent-by
 conformance case advances its fake clock by an explicit bounded duration.
 Chromium checks nine original-title fade frames without running an animation
 callback and exercises the live controls. Four additional native GPU comparisons
-use independent RGB expectations, bringing local coverage to 165 GPU/CPU frames.
+use independent RGB expectations, bringing local coverage to 167 GPU/CPU frames.
 
-The full game now first encounters Screen Copy `$0986` on line 304, byte 11664. The
-inventory has 13 unrecognized encodings appearing 32 times. See
+The full game now first encounters Flash Off `$0D34` on line 361, byte 13748. The
+inventory has 10 unrecognized encodings appearing 26 times. See
 [the milestone](wonderland.md) for the remaining gates.

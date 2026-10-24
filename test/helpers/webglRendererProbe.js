@@ -178,6 +178,20 @@ module.exports = async function webglRendererProbe(page, artifacts) {
         if (failure) return { failure };
       }
       fading.stop();
+      const copying = module.exports({ now: () => 0, setTimeout: () => 1, clearTimeout() {} });
+      const copyDisplay = copying.display;
+      copyDisplay.setPalette(...Array(32).fill(0));copyDisplay.setColour(1,0xf00);copyDisplay.setColour(2,0x0f0);
+      copyDisplay.clear(1);copyDisplay.doubleBuffer();copyDisplay.autoback(0);copyDisplay.clear(2);
+      const logical = copyDisplay.screen().pixels, physical = copyDisplay.screen().physicalPixels;
+      for (const published of [false,true]) {
+        if (published) copyDisplay.copyScreen(copyDisplay.bufferSelector('Logic'),copyDisplay.bufferSelector('Physic'));
+        assert(copyDisplay.screen().pixels === logical && copyDisplay.screen().physicalPixels === physical,'Copy must retain buffer identities');
+        const expected = new Uint8Array(640 * 200 * 4), pixel = published ? [0,255,0,255] : [255,0,0,255];
+        for (let at = 0; at < expected.length; at += 4) expected.set(pixel,at);
+        const failure = verify(copyDisplay.snapshotDisplay(),`amos-screen-copy-${published ? 'published' : 'hidden'}`,expected);
+        if (failure) return { failure };
+      }
+      copying.stop();
       for (const packet of packets) {
         const snapshot = model.deserializeSnapshot(packet.header, from64(packet.chip), from64(packet.tables));
         const failure = verify(snapshot, packet.name, from64(packet.golden)); if (failure) return { failure };

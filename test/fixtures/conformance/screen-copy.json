@@ -1,0 +1,30 @@
+{
+  "name": "screen-copy-tagged-buffers",
+  "source": "Cls 1\nDouble Buffer\nAutoback 0\nCls 2\nScreen Copy Logic To Physic\nCls 3\nScreen Copy Physic To Logic\nPrint Point(0,0),Logic,Physic\n",
+  "programHex": "414d4f532042617369632076312e30300000007006000bb8003e0000000100000300012c000006000e2c003e00000000000006000bb8003e0000000200000600098601c800940e16000006000bb8003e000000030000060009860e16009401c80000110004760e560074003e00000000005c003e00000000007c005c01c8005c0e160000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal catalogue words assembled without the production encoder/table: Cls 0bb8, Double Buffer 012c, Autoback 0e2c, Screen Copy 0986, Logic 01c8, Physic 0e16, To 0094, Point 0e56."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/screens.cpp",
+    "symbols": [
+      "get_screen",
+      "screen_copy",
+      "logic0",
+      "physic0"
+    ],
+    "notes": "Raw logical-to-physical and physical-to-logical copies retain distinct buffers. Bare Logic is BFFFFFFF and Physic is FFFFFFFF. Derived from original source, not an Amiga execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        2,
+        -1073741825,
+        -1
+      ]
+    ],
+    "halted": true
+  }
+}

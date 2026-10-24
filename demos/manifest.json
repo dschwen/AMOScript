@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "screen-copy.html",
+      "title": "Wonderland: publish all five level maps",
+      "description": "Original level-data and Paste Bob loops build five hidden maps, then Screen Copy Logic To Physic publishes their full bitmaps without swapping. Includes a clock-stepped map demo and host scrolling inspection. Gameplay remains excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-copy.html"
+    },
+    {
       "file": "print-using.html",
       "title": "Wonderland score fields and Print Using",
       "description": "Original level/score statements, integer padding/truncation and five panel frames checked against a separate glyph rasterizer over independent image PNGs. Includes a compiled integer-field sandbox. Floats and decimal/exponent masks remain unsupported.",

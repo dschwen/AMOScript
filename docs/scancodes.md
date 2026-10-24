@@ -90,6 +90,6 @@ cleanup, diagnostics, mappings and original routing. Chromium also exercises the
 live page using real browser keyboard events. All browser scenarios remain
 standalone repository demos with HTML Preview links.
 
-The full program now first encounters Screen Copy `$0986` on line 304, byte 11664.
-Thirteen encodings remain unrecognized, appearing 32 times; see
+The full program now first encounters Flash Off `$0D34` on line 361, byte 13748.
+Ten encodings remain unrecognized, appearing 26 times; see
 [Wonderland's milestone](wonderland.md).

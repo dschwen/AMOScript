@@ -93,7 +93,7 @@ through a scheduled VBL continuation. The
 [Wonderland demo](../demos/wonderland.html) opens on the executed Canvas title.
 The GPU gallery also compares that exact frame with the independent image and
 checks an active rainbow crossing PAL line 256. Including eight
-[screen-window patterns](screen-windows.md), coverage is now 165 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
+[screen-window patterns](screen-windows.md), coverage is now 167 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
 
 Remaining gates include whole-program menu/game integration, nonempty rainbow pattern
 strings, NTSC rainbow timing, AMSC placement, runtime laced loads, full screen

@@ -2,7 +2,7 @@
 
 [renderer.js](../lib/display/webgl/renderer.js) implements actual GPU bitplane
 decode and colour/sprite resolve for the current CPU snapshot subset. Chromium
-passes 165 GPU/CPU frame comparisons, including Wonderland's executed original
+passes 167 GPU/CPU frame comparisons, including Wonderland's executed original
 title setup, a PAL-wrap AMOS rainbow, eight independent lowres/hires scrolling
 window patterns with different panel palettes, four independent palette-fade states,
 the baseline planar fixture, 28 independent

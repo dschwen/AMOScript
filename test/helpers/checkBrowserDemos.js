@@ -19,6 +19,22 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'screen-copy') {
+        await page.click('#copy-prepare');
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-phase'),'prepared');
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-buffers-equal'),'false');
+        await page.click('#copy-publish');
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-phase'),'published');
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-buffers-equal'),'true');
+        await page.locator('#copy-x').evaluate(el=>{el.value=640;el.dispatchEvent(new Event('input'));});
+        await page.locator('#copy-y').evaluate(el=>{el.value=120;el.dispatchEvent(new Event('input'));});
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-offset'),'640,120');
+        await page.selectOption('#copy-level','5');await page.click('#copy-reset');
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-phase'),'title');
+        await page.click('#copy-prepare');await page.click('#copy-publish');
+        assert.strictEqual(await page.locator('#copy-controls').getAttribute('data-buffers-equal'),'true');
+        await page.evaluate(()=>globalThis.AMOS_COPY_DEMO_CLEANUP());
+      }
       if (scenario.id === 'print-using') {
         assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'   123');
         await page.fill('#using-format','##');await page.fill('#using-value','12345');await page.click('#using-render');

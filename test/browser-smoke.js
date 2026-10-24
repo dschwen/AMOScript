@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('screen-copy', page);
+    console.log('Screen Copy passed: five original map loops, full bitmap publication, stable buffer identities and Canvas/CPU/indexed palette comparisons.');
     await runScenario('print-using', page);
     console.log('Print Using passed: original level/score statements, five separate panel pixel expectations and compiled integer fields.');
     await runScenario('fade', page);

@@ -68,8 +68,9 @@ execution boundaries as described in [the Bob contract](bobs.md).
 
 Autoback synchronization currently applies to the selected screen. Original
 multi-screen interrupt side effects need further reference execution coverage.
-Screen-copy/scrolling commands, Logic/Physic screen selectors, full hardware sprites,
-and the remaining screen modes are separate unfinished features.
+Bounded [full bitmap copies and Logic/Physic selectors](screen-copy.md) and
+[screen windows/offsets](screen-windows.md) are implemented. Rectangle/minterm
+copies, general scrolling/placement, full hardware sprites and remaining modes stay open.
 
 ## Evidence and checks
 
