@@ -89,6 +89,6 @@ Chromium checks nine original-title fade frames without running an animation
 callback and exercises the live controls. Four additional native GPU comparisons
 use independent RGB expectations, bringing local coverage to 169 GPU/CPU frames.
 
-The full game now first encounters Reserve Zone `$1646` on line 372, byte 13910. The
-inventory has 9 unrecognized encodings appearing 25 times. See
+The full game now first encounters Limit Mouse `$1E6E` on line 378, byte 14142. The
+inventory has 6 unrecognized encodings appearing 18 times. See
 [the milestone](wonderland.md) for the remaining gates.

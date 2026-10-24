@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "zones.html",
+      "title": "Wonderland editor panel zones",
+      "description": "Original five-button zone definitions and the original Zone expression classify all 10,240 panel positions with injected hardware coordinates. Independent panel PNG comparison and a live point/reset inspector; mouse clicks/limits and editor actions remain excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/zones.html"
+    },
+    {
       "file": "flash.html",
       "title": "AMOS Flash and screen-local Flash Off",
       "description": "Clocked colour cycles, selected-screen cancellation, unchanged physical pixels and immutable snapshots. Normal/EHB/HAM6 Canvas and CPU output use independent RGB expectations. Includes live Stop/Resume/Flash Off controls; Screen Open implicit flashing remains unsupported.",

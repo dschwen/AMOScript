@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **438 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **446 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -11,7 +11,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob; full-source decoding stops at
-`Reserve Zone` on line 372. A bounded full inventory finds 9 unrecognized encodings.
+`Limit Mouse` on line 378. A bounded full inventory finds 6 unrecognized encodings.
 The declared original-menu fixture supports configurable keyboard/gamepad input,
 animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
@@ -21,6 +21,7 @@ audio demos. The game is not running.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Screen zones | Implemented bounded subset | Per-screen Reserve/Set/Reset Zone and current/explicit-screen Zone queries, unsigned-word coordinates, inclusive edges and lowest-number overlap priority. Original five-button panel fixture checks all 10,240 points with injected hardware input and independent panel pixels. Hardware mouse queries/limits/clicks, Hzone/Mouse Zone and wrapped count/index aliases remain open. [Contract](zones.md). |
 | Full bitmap Screen Copy / selectors | Implemented bounded subset | Two-operand raw copy, Logic/Physic current/numbered tags, clipping/common planes, preserved identities and Bob background ownership, Autoback bypass. All five original map loops publish in a declared fixture; ten Canvas frames and two native GPU frames pass. Rectangle/minterm copies and exact DMA timing remain open. [Contract](screen-copy.md). |
 | Flash / Flash Off | Implemented bounded subset | Explicit 1–16-step colour cycles, sixteen global entries, selected-screen cancellation, shared VBL wake with Fade and bounded chronological catch-up. Full original game/editor screen setup, fifteen synthetic Canvas/CPU frames and two native GPU frames pass. Implicit Screen Open colour-3 flashing, shifts, wrapped speeds and exact timing remain open. [Contract](flash.md). |
 | Fade to black | Implemented bounded subset | Fade speed 1–32767, captured 32-register components, next-VBL first step, independent palette wake, bounded catch-up and lifecycle cleanup. Original Fade/Wait fixture, nine independent title frames and four GPU states pass. Colour-list/To forms, word-edge timing and Amiga captures remain open. [Contract](fade.md). |

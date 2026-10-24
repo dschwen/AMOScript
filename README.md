@@ -20,6 +20,10 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [zone inspector](demos/zones.html) runs Wonderland’s original editor-panel
+zone definitions and query with injected hardware coordinates. Inspect points and
+reset definitions; editor actions and hardware mouse support remain open.
+
 The [Flash demo](demos/flash.html) checks clocked palette cycles and screen-local
 Flash Off with live Stop/Resume controls. Wonderland’s complete screen setup now
 executes through its own Flash Off/Auto View On; [implicit Screen Open flashing remains open](docs/flash.md).

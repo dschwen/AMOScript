@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('zones', page);
+    console.log('Zones passed: original five-button definitions and Zone expression classify all panel positions; Canvas/CPU pixels match the independent editor panel PNG.');
     await runScenario('flash', page);
     console.log('Flash passed: fifteen normal/EHB/HAM6 colour-cycle frames, physical-buffer preservation and Flash Off cancellation.');
     await runScenario('screen-copy', page);

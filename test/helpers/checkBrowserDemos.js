@@ -19,6 +19,24 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'zones') {
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'1');
+        await page.fill('#zones-x','200');await page.fill('#zones-y','202');await page.click('#zones-query');
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'2');
+        await page.click('#zones-reset-one');
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'0');
+        await page.click('#zones-restart');
+        const panel=await page.locator('#zones-panel').boundingBox();
+        await page.mouse.move(panel.x+18,panel.y+18);
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'1');
+        await page.fill('#zones-x','392');await page.fill('#zones-y','218');await page.click('#zones-query');
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'5');
+        await page.click('#zones-reset-all');
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'0');
+        await page.click('#zones-restart');
+        assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'1');
+        await page.evaluate(()=>globalThis.AMOS_ZONES_DEMO_CLEANUP());
+      }
       if (scenario.id === 'flash') {
         await page.click('#flash-stop');
         assert.strictEqual(await page.locator('#flash-controls').getAttribute('data-phase'),'stopped');

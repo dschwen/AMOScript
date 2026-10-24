@@ -4,7 +4,7 @@ Wonderland's five distinct music-extension encodings now decode and execute:
 `Led Off`, `Sam Bank`, `Sam Loop Off`, two-argument `Sam Play`, and masked
 `Sam Stop`. The original first fifteen source lines execute through bank loading
 and sample setup. The extended title fixture now runs 64 lines; the complete
-program still stops at `Reserve Zone` on line 372. The original menu now runs
+program still stops at `Limit Mouse` on line 378. The original menu now runs
 with keyboard/gamepad controls in a [declared fixture](joysticks.md).
 
 ## Source and token contracts

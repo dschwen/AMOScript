@@ -1,0 +1,44 @@
+{
+  "name": "screen-zones-inclusive-overlap-reset",
+  "source": "Reserve Zone 2\nSet Zone 2,0,0 To 4,4\nSet Zone 1,2,2 To 6,6\nPrint Zone(0,0),Zone(4,4),Zone(0,6,6)\nReset Zone 1\nPrint Zone(4,4)\nReset Zone\nPrint Zone(0,0)\nReserve Zone\nPrint Zone(0,0)\n",
+  "programHex": "414d4f532042617369632076312e30300000011806001646003e00000002000016001668003e00000002005c003e00000000005c003e000000000094003e00000004005c003e00000004000016001668003e00000001005c003e00000002005c003e000000020094003e00000006005c003e0000000600002700047616800074003e00000000005c003e00000000007c005c16800074003e00000004005c003e00000004007c005c168e0074003e00000000005c003e00000006005c003e00000006007c000006001660003e0000000100000d00047616800074003e00000004005c003e00000004007c00000300164e00000d00047616800074003e00000000005c003e00000000007c00000300163200000d00047616800074003e00000000005c003e00000000007c0000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original Reserve Zone 1632/1646, Reset Zone 164e/1660, Set Zone 1668 and Zone 1680/168e words, framed independently of production encoders/tables."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/mouse.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/screens.cpp"
+    ],
+    "symbols": [
+      "zone_at",
+      "w_sy_zones_reserve",
+      "w_sy_zone_reset",
+      "w_sy_zone_set",
+      "lib_fn_zone2",
+      "lib_fn_zone3"
+    ],
+    "notes": "Zones belong to each screen; edges are inclusive and the lowest zone number wins. Reset clears entries while Reserve without a count frees them. Source-derived expectations, not an Amiga execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        2
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

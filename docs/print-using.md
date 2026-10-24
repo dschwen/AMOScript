@@ -82,6 +82,6 @@ words and expected field strings. Chromium runs the shared panel evaluator and
 the live sandbox, including unsupported-format errors. The gallery includes its
 standalone page and HTML Preview link.
 
-Full Wonderland compilation now first encounters Reserve Zone `$1646` on line 372,
-byte 13910 (`Reserve Zone`). Nine encodings remain unrecognized,
-appearing 25 times. See [the milestone](wonderland.md).
+Full Wonderland compilation now first encounters Limit Mouse `$1E6E` on line 378,
+byte 14142 (`Limit Mouse`). Six encodings remain unrecognized,
+appearing 18 times. See [the milestone](wonderland.md).

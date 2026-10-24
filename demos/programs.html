@@ -1658,7 +1658,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode, ham,
+      id, width, height, colours, mode, ham, zones: null,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
@@ -2083,6 +2083,45 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     const offset = word(value - origin);
     return word((horizontal && target.mode === 0x8000 ? offset * 2 : offset) + (horizontal ? target.offsetX : target.offsetY));
   }
+  function reserveZones(count = 0) {
+    whole(count);
+    if (count < 0 || count > 65535) throw new Error('Unsupported zone count (expected 0..65535)');
+    const target = screen();
+    target.zones = count ? new Uint16Array(count * 4) : null;
+  }
+  function zoneIndex(number, target, allowZero = false) {
+    whole(number);
+    if (!target.zones) throw new Error('Zones are not reserved');
+    if (number < (allowZero ? 0 : 1) || number > target.zones.length / 4) throw new Error('Invalid zone number');
+    return (number - 1) * 4;
+  }
+  function resetZone(number = 0) {
+    const target = screen(), at = zoneIndex(number, target, true);
+    if (number === 0) target.zones.fill(0);
+    else target.zones.fill(0, at, at + 4);
+  }
+  function setZone(number, x1, y1, x2, y2) {
+    const target = screen(), at = zoneIndex(number, target);
+    // Original Set Zone stores unsigned words. It does not clip to the bitmap
+    // or normalize reversed endpoints; queries use the same word coordinates.
+    [x1, y1, x2, y2].forEach(whole);
+    x1 &= 65535; y1 &= 65535; x2 &= 65535; y2 &= 65535;
+    if (x1 >= x2 || y1 >= y2) throw new Error('Invalid zone rectangle');
+    target.zones.set([x1, y1, x2, y2], at);
+  }
+  function zone(...args) {
+    screen(); // The original requires a current screen even with an explicit id.
+    let id = args.length === 3 ? whole(args[0]) : current;
+    if (id === -1) id = current;
+    if (id < 0 || id > 7) throw new Error('Unsupported zone screen (expected -1..7)');
+    const target = screen(id), x = whole(args[args.length - 2]) & 65535, y = whole(args[args.length - 1]) & 65535;
+    if (!target.zones) return 0;
+    for (let at = 0; at < target.zones.length; at += 4) {
+      const [x1, y1, x2, y2] = target.zones.subarray(at, at + 4);
+      if ((x2 || y2) && x >= x1 && x <= x2 && y >= y1 && y <= y2) return at / 4 + 1;
+    }
+    return 0;
+  }
   function rgba(id = current) {
     const target = typeof id === 'object' ? id : screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
@@ -2178,6 +2217,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
@@ -5564,7 +5604,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode, ham,
+      id, width, height, colours, mode, ham, zones: null,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
@@ -5989,6 +6029,45 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     const offset = word(value - origin);
     return word((horizontal && target.mode === 0x8000 ? offset * 2 : offset) + (horizontal ? target.offsetX : target.offsetY));
   }
+  function reserveZones(count = 0) {
+    whole(count);
+    if (count < 0 || count > 65535) throw new Error('Unsupported zone count (expected 0..65535)');
+    const target = screen();
+    target.zones = count ? new Uint16Array(count * 4) : null;
+  }
+  function zoneIndex(number, target, allowZero = false) {
+    whole(number);
+    if (!target.zones) throw new Error('Zones are not reserved');
+    if (number < (allowZero ? 0 : 1) || number > target.zones.length / 4) throw new Error('Invalid zone number');
+    return (number - 1) * 4;
+  }
+  function resetZone(number = 0) {
+    const target = screen(), at = zoneIndex(number, target, true);
+    if (number === 0) target.zones.fill(0);
+    else target.zones.fill(0, at, at + 4);
+  }
+  function setZone(number, x1, y1, x2, y2) {
+    const target = screen(), at = zoneIndex(number, target);
+    // Original Set Zone stores unsigned words. It does not clip to the bitmap
+    // or normalize reversed endpoints; queries use the same word coordinates.
+    [x1, y1, x2, y2].forEach(whole);
+    x1 &= 65535; y1 &= 65535; x2 &= 65535; y2 &= 65535;
+    if (x1 >= x2 || y1 >= y2) throw new Error('Invalid zone rectangle');
+    target.zones.set([x1, y1, x2, y2], at);
+  }
+  function zone(...args) {
+    screen(); // The original requires a current screen even with an explicit id.
+    let id = args.length === 3 ? whole(args[0]) : current;
+    if (id === -1) id = current;
+    if (id < 0 || id > 7) throw new Error('Unsupported zone screen (expected -1..7)');
+    const target = screen(id), x = whole(args[args.length - 2]) & 65535, y = whole(args[args.length - 1]) & 65535;
+    if (!target.zones) return 0;
+    for (let at = 0; at < target.zones.length; at += 4) {
+      const [x1, y1, x2, y2] = target.zones.subarray(at, at + 4);
+      if ((x2 || y2) && x >= x1 && x <= x2 && y >= y1 && y <= y2) return at / 4 + 1;
+    }
+    return 0;
+  }
   function rgba(id = current) {
     const target = typeof id === 'object' ? id : screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
@@ -6084,6 +6163,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
@@ -9487,7 +9567,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode, ham,
+      id, width, height, colours, mode, ham, zones: null,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
@@ -9912,6 +9992,45 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     const offset = word(value - origin);
     return word((horizontal && target.mode === 0x8000 ? offset * 2 : offset) + (horizontal ? target.offsetX : target.offsetY));
   }
+  function reserveZones(count = 0) {
+    whole(count);
+    if (count < 0 || count > 65535) throw new Error('Unsupported zone count (expected 0..65535)');
+    const target = screen();
+    target.zones = count ? new Uint16Array(count * 4) : null;
+  }
+  function zoneIndex(number, target, allowZero = false) {
+    whole(number);
+    if (!target.zones) throw new Error('Zones are not reserved');
+    if (number < (allowZero ? 0 : 1) || number > target.zones.length / 4) throw new Error('Invalid zone number');
+    return (number - 1) * 4;
+  }
+  function resetZone(number = 0) {
+    const target = screen(), at = zoneIndex(number, target, true);
+    if (number === 0) target.zones.fill(0);
+    else target.zones.fill(0, at, at + 4);
+  }
+  function setZone(number, x1, y1, x2, y2) {
+    const target = screen(), at = zoneIndex(number, target);
+    // Original Set Zone stores unsigned words. It does not clip to the bitmap
+    // or normalize reversed endpoints; queries use the same word coordinates.
+    [x1, y1, x2, y2].forEach(whole);
+    x1 &= 65535; y1 &= 65535; x2 &= 65535; y2 &= 65535;
+    if (x1 >= x2 || y1 >= y2) throw new Error('Invalid zone rectangle');
+    target.zones.set([x1, y1, x2, y2], at);
+  }
+  function zone(...args) {
+    screen(); // The original requires a current screen even with an explicit id.
+    let id = args.length === 3 ? whole(args[0]) : current;
+    if (id === -1) id = current;
+    if (id < 0 || id > 7) throw new Error('Unsupported zone screen (expected -1..7)');
+    const target = screen(id), x = whole(args[args.length - 2]) & 65535, y = whole(args[args.length - 1]) & 65535;
+    if (!target.zones) return 0;
+    for (let at = 0; at < target.zones.length; at += 4) {
+      const [x1, y1, x2, y2] = target.zones.subarray(at, at + 4);
+      if ((x2 || y2) && x >= x1 && x <= x2 && y >= y1 && y <= y2) return at / 4 + 1;
+    }
+    return 0;
+  }
   function rgba(id = current) {
     const target = typeof id === 'object' ? id : screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
@@ -10007,6 +10126,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,

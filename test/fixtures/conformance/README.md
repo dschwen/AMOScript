@@ -140,3 +140,8 @@ the pinned screen handlers; this is source analysis, not an Amiga capture.
 The flash-cycle fixture uses independent Flash/Flash Off words and timed Colour
 queries. It checks next-VBL startup, per-entry duration and retained colour after
 cancellation. Expectations are source analysis, separate from an Amiga capture.
+
+The screen-zones fixture uses independently assembled original overload words
+for Reserve/Set/Reset Zone and both Zone query forms. It checks inclusive shared
+edges, numeric overlap priority, individual/all reset and reservation release.
+The expected results come from source analysis, not an Amiga execution capture.

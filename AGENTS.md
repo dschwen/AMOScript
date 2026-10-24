@@ -71,6 +71,11 @@
   and copies common bitmap planes without swapping identities or invoking
   Autoback/Bob hooks. Saved Bob backgrounds retain their existing owners. See
   `docs/screen-copy.md`; rectangle/minterm variants and exact DMA timing remain open.
+- Reserve/Set/Reset Zone and Zone queries use per-screen unsigned-word rectangles,
+  inclusive edges and lowest-number overlap priority. They do not draw or change
+  presentation. Keep hardware mouse conversion separate from the existing Canvas
+  pointer contract; the original editor-panel fixture injects hardware coordinates.
+  See `docs/zones.md` for bounds and remaining mouse/zone forms.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip
   memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
   `lib/display/reference/render.js` provides basic planar render/explainPixel.

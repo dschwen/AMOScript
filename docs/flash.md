@@ -83,6 +83,6 @@ including its own Flash Off and Auto View On, with synthetic game/background
 inputs and a Wait Key guard. The map-copy fixture likewise uses the complete
 setup before its original five map loops. Neither executes its enclosing
 Gosub/Return or gameplay. These are source-derived fixtures and CPU/GPU checks,
-not Amiga execution captures. The full source next stops at Reserve Zone `$1646`,
-line 372, byte 13910; nine encodings remain unrecognized, appearing 25 times.
+not Amiga execution captures. The full source next stops at Limit Mouse `$1E6E`,
+line 378, byte 14142; six encodings remain unrecognized, appearing 18 times.
 See [the milestone](wonderland.md).

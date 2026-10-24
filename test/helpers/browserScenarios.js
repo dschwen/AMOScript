@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'zones', title: 'Wonderland editor panel zones', initialFrame: 'Original editor panel', description: 'Original five-button zone definitions and the original Zone expression classify all 10,240 panel positions with injected hardware coordinates. Independent panel PNG comparison and a live point/reset inspector; mouse clicks/limits and editor actions remain excluded.', run: require('./zonesProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{zoneQueries:10240,panelPixels:10240,counts:[6460,900,900,900,756,324],gameRunning:false});
+  } },
   { id: 'flash', title: 'AMOS Flash and screen-local Flash Off', initialFrame: 'Normal: 20 ms', description: 'Clocked colour cycles, selected-screen cancellation, unchanged physical pixels and immutable snapshots. Normal/EHB/HAM6 Canvas and CPU output use independent RGB expectations. Includes live Stop/Resume/Flash Off controls; Screen Open implicit flashing remains unsupported.', run: require('./flashProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{frames:15,comparedPixels:460800,cancellations:3,gameRunning:false});
   } },
