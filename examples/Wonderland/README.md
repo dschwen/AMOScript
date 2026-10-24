@@ -12,6 +12,9 @@ and [the startup/asset demo](../../demos/wonderland.html). An
 with keyboard mapping and Gamepad API options, stopping before game/editor dispatch.
 The [screen-window fixture](../../demos/screen-windows.html) executes original
 game/editor window setup and verifies landscape scrolling and both panels.
+The [computed-branch fixture](../../demos/computed-branches.html) runs the original
+enemy dispatch and three unchanged initialization routines, with declared guards
+for the remaining two targets.
 The original program uses Amiga volume paths; the browser files adapter resolves
 those paths to preloaded asset bytes, preserving the original source filenames.
 

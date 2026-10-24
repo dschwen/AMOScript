@@ -18,6 +18,8 @@ configurable keyboard mappings and the browser Gamepad API; see
 gameplay/editor dispatch; the complete game remains blocked. The
 [screen-window demo](demos/screen-windows.html) executes the original game/editor
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
+The [computed-branch demo](demos/computed-branches.html) now executes the original
+enemy dispatch and three unchanged initialization routines in a declared fixture.
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
 [audio contract](docs/audio.md). The full game does not compile or run yet.

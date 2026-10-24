@@ -1,0 +1,37 @@
+{
+  "name": "computed-label-branches",
+  "source": "On 0 Gosub one,two : Print 0\nOn 2 Gosub one,two : Print 3\nOn 1 Goto done\nPrint 99\nEnd\none: Print 1 : Return\ntwo: Print 2 : Return\ndone: Print 4 : End\n",
+  "programHex": "414d4f532042617369632076312e3030000000e01900031600000002003e0000000002b20018000003006f6e6500005c00180000030074776f0000540476003e0000000000001900031600000002003e0000000202b20018000003006f6e6500005c00180000030074776f0000540476003e0000000300000e00031600000002003e0000000102a8001800000400646f6e65000006000476003e000000630000030003b600000d00000c000003006f6e65000476003e000000010054036000000d00000c0000030074776f000476003e000000020054036000000d00000c00000400646f6e650476003e00000004005403b60000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original token words: On=0316 plus two metadata words, Gosub=02b2, Goto=02a8, Return=0360, End=03b6, Print=0476. Physical lines and label payloads assembled separately without a production encoder/table."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/%2BILib.s",
+    "symbols": [
+      "InOn",
+      "ROn",
+      "OnR",
+      "OnG"
+    ],
+    "notes": "Original interpreter uses one-based selection, falls through for zero/out-of-range selectors, and saves the continuation only for a selected Gosub. This is source analysis, not an AMOS execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        0
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ],
+    "halted": true
+  }
+}

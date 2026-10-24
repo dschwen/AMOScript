@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **386 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **394 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -11,7 +11,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob; full-source decoding stops at
-`On` on line 121. A bounded full inventory finds 17 unrecognized encodings.
+`Scancode` on line 131. A bounded full inventory finds 16 unrecognized encodings.
 The declared original-menu fixture supports configurable keyboard/gamepad input,
 animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
@@ -40,7 +40,7 @@ audio demos. The game is not running.
 | Strings | Implemented subset | Literals, variables, checked concatenation/subtraction, comparisons, string `Min/Max`; `Left$/Right$/Mid$` retrieval and assignment, `Flip$`, `Chr$/Asc`, `Len`, `Instr`, `Space$/String$`, ASCII case conversion, `Str$/Val`. Literals retain embedded zero bytes. Retrieval/assignment follow source validation order; repetition uses word-sized results. Nonempty concatenation enforces String_Max. `Val` retains its dynamic numeric type. AMOS heap limits, extreme raw-memory search offsets and numeric formatting remain unfinished. See [string contract](strings.md). |
 | Print | Implemented core | `write` host preserves separators and newlines; default/`print` host receives values per statement. Text also rasterizes into the current indexed screen with cursor movement and scrolling. Full AMOS number formatting and text control sequences remain unfinished. |
 | Same-line statements and labels | Implemented | Colon-separated statements, labels before statements, duplicate-label diagnostics. |
-| Goto/Gosub/Return/End | Implemented subset | Static named targets, scoped procedure labels, IP return stack; missing targets and invalid returns are errors. Dynamic targets, numbered labels and other variants remain unsupported. |
+| Goto/Gosub/Return/End and On branches | Implemented subset | Static named targets, scoped procedure labels, IP return stack; On Gosub/Goto evaluate one numeric selector and fall through outside the list. Missing targets and invalid returns are errors. Dynamic targets, numbered labels and On Proc remain unsupported. [Computed branches](computed-branches.md). |
 | For/Next | Implemented core | Nested/descending loops, optional variable, captured bound/step expressions, first body execution before `Next` check. |
 | Conditionals | Implemented core | Inline `If/Then/Else`, structured `If/Else If/Else/End If`, nested blocks, true comparisons return -1. |
 | Other loops | Implemented core | `Do/Loop`, `While/Wend`, `Repeat/Until`, multi-level `Exit/Exit If`, integer `Inc/Dec`. Additional loops use synthetic token fixtures. Until's actual 0x025c encoding is tested independently of the token helper. |

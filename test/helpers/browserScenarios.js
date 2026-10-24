@@ -228,6 +228,10 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'computed-branches', title: 'Computed branches and Wonderland initialization', initialFrame: 'Original enemy initialization 2', description: 'One-based On Gosub/Goto, out-of-range fallthrough and return traces. Executes Wonderland\'s original dispatch line and three unchanged initializers; the other two targets have explicit End guards. Synthetic inputs and image captions; no enemy gameplay.', run: require('./onBranchProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.results.map(item => item.logs), [[[0],[2],[3],[4]],[[-4,99]],[[0,0]],[[-4,99]]]);
+    assert.ok(result.results.every(item => item.halted && item.stack === 0));assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'screen-windows', title: 'Wonderland screen windows and scrolling', initialFrame: 'Game window at 37,84', description: 'Original game/editor screen setup, physical-buffer scrolling, independent landscape/panel PNG checks, two blank rows and staged View commits. The complete game is not running.', run: require('./screenWindowProbe'), check(result, assert) {
     assert.strictEqual(result.frames,5); assert.strictEqual(result.comparedPixels,307840);
     assert.strictEqual(result.gapRows,10); assert.deepStrictEqual(result.sizes,[[320,202],[320,202],[320,202],[320,178],[320,178]]);

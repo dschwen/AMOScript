@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "computed-branches.html",
+      "title": "Computed branches and Wonderland initialization",
+      "description": "One-based On Gosub/Goto, out-of-range fallthrough and return traces. Executes Wonderland's original dispatch line and three unchanged initializers; the other two targets have explicit End guards. Synthetic inputs and image captions; no enemy gameplay.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/computed-branches.html"
+    },
+    {
       "file": "screen-windows.html",
       "title": "Wonderland screen windows and scrolling",
       "description": "Original game/editor screen setup, physical-buffer scrolling, independent landscape/panel PNG checks, two blank rows and staged View commits. The complete game is not running.",

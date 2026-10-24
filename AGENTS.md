@@ -8,6 +8,9 @@
 - `lib/Parser.js` builds ASTs without code-emission side effects. Function/display
   signatures live in `FunctionTable.js` and `DisplayTable.js`.
 - `lib/Lowerer.js` handles typing, scopes, labels and control-flow IR.
+  On Gosub/Goto use one numeric selector and scoped named targets, returning the
+  ordinary call/goto controls. Cached On verifier words are decoded within line
+  bounds; targets are rebuilt and all labels validated. See `docs/computed-branches.md`.
   `lib/Transpiler.js` emits standalone program factories.
 - `lib/BankReader.js` decodes supported trailing and external asset banks; generated
   modules embed it for runtime Load through the synchronous files adapter.

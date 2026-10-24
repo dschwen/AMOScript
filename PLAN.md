@@ -12,9 +12,12 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 17 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 16 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`On` on line 121. A declared fixture now executes the original menu
+`Scancode` on line 131. Named-label On Gosub/Goto now share the existing call
+stack and IP dispatcher; a [declared fixture](docs/computed-branches.md) executes
+the original enemy dispatch and three unchanged initializers.
+A declared fixture now executes the original menu
 loop and animation/toggle routines with configurable keyboard and Gamepad API
 input, stopping before game/editor dispatch. See [joysticks](docs/joysticks.md).
 A second declared fixture executes the original game/editor screen setup through
@@ -43,7 +46,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **386 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **394 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
