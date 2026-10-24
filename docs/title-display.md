@@ -4,7 +4,8 @@ Wonderland's exact first 64 physical source lines now execute with the original
 embedded banks and volume paths. They pass through the original Wait Vbl, reserve
 and hide a rainbow, load `Title_Screen.Iff`, turn off the cursor, and draw Bob 74
 as the menu marker at `(84,92)`. Both startup benchmark branches produce the same
-title. This is title setup; the original menu input loop and game are still blocked.
+title. The original menu loop now also runs in a declared
+[keyboard/gamepad fixture](joysticks.md); complete-game compilation is still blocked.
 
 ## Load Iff
 
@@ -94,6 +95,6 @@ The GPU gallery also compares that exact frame with the independent image and
 checks an active rainbow crossing PAL line 256, bringing coverage to 153 native
 GPU/CPU frames. All browser cases remain in the shared demo catalogue.
 
-Remaining gates include interactive menu/joystick input, nonempty rainbow pattern
+Remaining gates include whole-program menu/game integration, nonempty rainbow pattern
 strings, NTSC rainbow timing, AMSC placement, runtime laced loads, full screen
 window/scroll integration and external Amiga captures. See [the milestone](wonderland.md).

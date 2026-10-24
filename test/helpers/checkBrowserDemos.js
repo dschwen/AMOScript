@@ -19,6 +19,28 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'wonderland-menu') {
+        await page.waitForFunction(() => document.getElementById('menu-input').height === 256);
+        await page.click('#menu-input');await page.keyboard.down('ArrowDown');
+        await page.waitForFunction(() => Number(document.getElementById('menu-controls').dataset.position) > 0);
+        await page.keyboard.up('ArrowDown');
+        await page.waitForFunction(() => document.getElementById('menu-controls').dataset.position === '25');
+        await page.keyboard.down('Enter');
+        await page.waitForFunction(() => document.getElementById('menu-controls').dataset.selected === '2');
+        await page.keyboard.up('Enter');
+        await page.click('#menu-restart');await page.selectOption('#menu-keyboard-layout','wasd');
+        await page.waitForFunction(() => document.getElementById('menu-input').height === 256);
+        await page.keyboard.down('z');
+        await page.waitForFunction(() => document.getElementById('menu-controls').dataset.selected === '1');
+        await page.keyboard.up('z');
+        await page.selectOption('#menu-input-mode','gamepad');
+        await page.fill('#menu-gamepad-index','-1');await page.click('#menu-restart');
+        assert.strictEqual(await page.locator('#menu-controls').getAttribute('data-selected'),'1');
+        await page.fill('#menu-gamepad-index','0');await page.click('#menu-restart');
+        await page.waitForFunction(() => document.getElementById('menu-input').height === 256);
+        assert.strictEqual(await page.locator('#menu-controls').getAttribute('data-selected'),'0');
+        await page.click('#menu-stop');
+      }
       if (scenario.id === 'key-repeat') {
         await page.click('#repeat-input'); await page.keyboard.down('a');
         await page.waitForFunction(() => Number(document.getElementById('repeat-log').dataset.count) >= 3);

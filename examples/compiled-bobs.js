@@ -1946,6 +1946,28 @@
   let reversePriority = false;
   const collisionHits = new Uint8Array(256);
   let degrees = false;
+  let joystickBinding = null;
+  function joystickPort(port) {
+    if (!Number.isInteger(port) || port < 0 || port > 1) throw new Error('Invalid joystick port');
+    return port;
+  }
+  function setJoystick(port, mask) {
+    joystickPort(port);
+    if (!Number.isInteger(mask) || mask < 0 || mask > 31) throw new Error('Invalid joystick mask');
+    state.input.joysticks[port] = mask;
+  }
+  function joystickInfo(name, port) {
+    port = joystickPort(integer(port));
+    if (joystickBinding && joystickBinding.reader) {
+      const mask = joystickBinding.reader(port);
+      if (mask != null) setJoystick(port, mask);
+    }
+    const mask = state.input.joysticks[port];
+    if (name === 'Joy') return mask;
+    const bit = { Jup: 1, Jdown: 2, Jleft: 4, Jright: 8, Fire: 16 }[name];
+    if (!bit) throw new Error('Unknown joystick query');
+    return mask & bit ? -1 : 0;
+  }
   state.system = { amosLocked: false, amosFront: true, editorOpen: false };
   function systemCommand(name) {
     if (options.system != null) {
@@ -3138,7 +3160,13 @@
       if (delay < 0 || interval < 0) throw new Error('Invalid Key Speed');
       if (delay > 32767 || interval > 32767 || interval === 0) throw new Error('Unsupported Key Speed range (period must be 1..32767)');
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
-      if (options.resetInput) options.resetInput();
+      if (options.resetInput) options.resetInput('key-speed');
+    },
+    setJoystick, joystickInfo,
+    setJoystickReader(reader) {
+      if (reader != null && typeof reader !== 'function') throw new Error('Joystick reader must be a function');
+      const binding = { reader }; joystickBinding = binding;
+      return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
     audio, loadIff,
     samBank: number => audio.selectBank(integer(number)),
@@ -3298,7 +3326,7 @@
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], mouse: { x: 0, y: 0, buttons: 0 } },
+    input: { keys: [], mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -3306,9 +3334,10 @@
   let sleepRemaining = 0;
   const keys = state.input.keys;
   const inputResetListeners = new Set();
-  function resetInput() {
+  function resetInput(reason = 'lifecycle') {
+    if (reason !== 'key-speed') state.input.joysticks.fill(0);
     for (const listener of Array.from(inputResetListeners)) {
-      try { listener(); } catch (_) { /* cleanup must preserve source failures */ }
+      try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
   }
   function silenceAfterFailure() {

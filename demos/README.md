@@ -9,6 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
+| [Wonderland menu with keyboard mapping and Gamepad API](wonderland-menu.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-menu.html) |
 | [AMOS keyboard repeat and lifecycle cleanup](key-repeat.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/key-repeat.html) |
 | [Wonderland sample playback and Web Audio checks](music.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/music.html) |
 | [Wonderland executed original title, menu Bob and readiness (menu loop/game blocked)](wonderland.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html) |

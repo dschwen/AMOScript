@@ -7,9 +7,11 @@ Original unmodified program and seven companion assets from
 
 The game does not compile/run yet. Its first 64 lines execute as a title-setup
 fixture. See [the assessment](../../docs/wonderland.md)
-and [the startup/asset demo](../../demos/wonderland.html). The original program
-uses Amiga volume paths; the eventual browser files adapter must resolve those
-paths to these bytes, rather than editing the program to use different filenames.
+and [the startup/asset demo](../../demos/wonderland.html). An
+[interactive original-menu fixture](../../demos/wonderland-menu.html) also runs
+with keyboard mapping and Gamepad API options, stopping before game/editor dispatch.
+The original program uses Amiga volume paths; the browser files adapter resolves
+those paths to preloaded asset bytes, preserving the original source filenames.
 
 Audit from the repository root:
 

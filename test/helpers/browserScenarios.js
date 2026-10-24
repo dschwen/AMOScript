@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'wonderland-menu', title: 'Wonderland menu: keyboard and gamepad', initialFrame: 'Original menu (keyboard)', description: 'Original menu routines with animated movement, background toggle and mode selection. Choose keyboard mapping, Gamepad API or both in the live menu below. Stops before unsupported gameplay/editor dispatch.', run: require('./joystickProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.selections,[1,2]);assert.strictEqual(result.backendChecks,12);
+    assert.strictEqual(result.animatedMoves,5);
+    assert.strictEqual(result.polledWithoutAnimation,true);assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'key-repeat', title: 'AMOS keyboard repeat and cleanup', description: 'Source-compiled Key Speed, controlled 200/40 ms repeats, ignored native duplicates and keyup/blur/Stop/detach/End cleanup. Includes a focused live keyboard demo.', run: require('./keyRepeatProbe'), check(result, assert) {
     assert.deepStrictEqual(result.initial, [[0,'a'],[200,'a'],[240,'a']]);
     assert.strictEqual(result.lifecycleChecks, 5); assert.strictEqual(result.timersRemaining, 0); assert.strictEqual(result.ended, true);

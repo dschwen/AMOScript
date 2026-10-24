@@ -22,12 +22,16 @@ Keyup, blur, modifier shortcuts, detach, program Stop, termination and runtime
 errors cancel controlled repeats. Changing Key Speed resets the held key; its new
 settings apply on the next keydown. Resume requires a new key press rather than
 restarting a released key. Character keys, Enter, Escape and Backspace use the
-existing host translation; joystick arrows, scancodes, composition and AMOS-wide
-operating-system repeat preferences remain separate input work.
+existing host translation. Scancodes, composition and AMOS-wide operating-system
+repeat preferences remain separate input work.
+Optional [keyboard-to-joystick mappings](joysticks.md) now handle arrows and fire
+as held state, independently of this text-repeat path.
 
 `program.subscribeInputReset(callback)` returns an unsubscribe function. It is a
 host cleanup notification used by the Canvas adapter for settings/lifecycle
-changes. Reset-listener failures do not replace language failures. The browser
+changes. The callback receives `key-speed` for repeat changes and `lifecycle`
+for Stop/termination/failure; repeat changes preserve held joystick state.
+Reset-listener failures do not replace language failures. The browser
 host accepts injected `setTimeout`/`clearTimeout` alongside its rendering hooks;
 the test scenario injects a finite fake clock, not an animation-frame clock.
 

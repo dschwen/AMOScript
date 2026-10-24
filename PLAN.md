@@ -12,9 +12,12 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 24 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 19 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Jup` on line 66. The exact first 64 lines execute both startup branches through
+`Screen Offset` on line 92. A declared fixture now executes the original menu
+loop and animation/toggle routines with configurable keyboard and Gamepad API
+input, stopping before game/editor dispatch. See [joysticks](docs/joysticks.md).
+The exact first 64 lines execute both startup branches through
 Wait Vbl, Load Iff and the original title/menu marker Bob. Canvas, copper and GPU
 match an independently decoded source-derived title composition. See
 [title display support](docs/title-display.md), [startup support](docs/startup.md),
@@ -37,7 +40,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **373 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **381 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

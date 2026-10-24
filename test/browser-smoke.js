@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('wonderland-menu', page);
+    console.log('Joysticks passed: keyboard remapping, standard/raw gamepad decoding, focus/disconnect/security cleanup and original menu selections/animations.');
     await runScenario('key-repeat', page);
     console.log('Key Speed passed: fixed 50 Hz units, held-key repeats, native duplicate suppression and release/lifecycle cleanup.');
     await runScenario('music', page);

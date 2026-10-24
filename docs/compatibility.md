@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **373 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **381 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -11,7 +11,9 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob; full-source decoding stops at
-`Jup` on line 66. A bounded full inventory finds 24 unrecognized encodings. Four original images,
+`Screen Offset` on line 92. A bounded full inventory finds 19 unrecognized encodings.
+The declared original-menu fixture supports configurable keyboard/gamepad input,
+animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
 audio demos. The game is not running.
 
@@ -19,6 +21,7 @@ audio demos. The game is not running.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Joystick queries / browser mapping | Implemented subset | Joy plus five AMOS boolean queries, independent ports 0/1, optional configurable keyboard and standard/raw Gamepad API mappings, focus/lifecycle/disconnect cleanup. Original menu fixture and injected device tests pass; physical-controller/Amiga captures remain open. [Contract](joysticks.md). |
 | IFF screen loading / rainbow rows / views | Implemented subset | Current/new-screen opaque Load Iff; blank rainbow tables, Rain read/write and bounded PAL row presentation through shared copper/CPU/GPU snapshots; staged screen replacement with Auto View/View. Pattern strings, active NTSC, laced/AMSC language loads and exact display-list timing remain open. [Contract](title-display.md). |
 | Generic bank byte access | Implemented subset | Start returns per-factory virtual addresses; Peek reads unsigned bytes and Poke stores low bytes in the shared bank payload. Swap/shrink retain surviving addresses; erasure/reload retire them. Image-bank/raw hardware addresses reject. [Contract](bank-memory.md). |
 | Keyboard repeat | Implemented subset | Key Speed uses fixed 50ths; Canvas repeats held keys with native duplicates suppressed and release/blur/Stop/detach/End cleanup. Zero-period and large-word cases remain unsupported. [Contract](key-speed.md). |

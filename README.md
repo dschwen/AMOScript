@@ -11,7 +11,11 @@ The next program milestone is **Dithell's Wonderland**: see the
 [readiness assessment and implementation order](docs/wonderland.md) and
 [executed title demo](demos/wonderland.html). Its original first 64 lines
 now load and render the title with its menu marker Bob; see
-[title display support](docs/title-display.md). The menu loop and game remain blocked.
+[title display support](docs/title-display.md). The
+[interactive original menu fixture](demos/wonderland-menu.html) now supports
+configurable keyboard mappings and the browser Gamepad API; see
+[joystick configuration](docs/joysticks.md). Selection stops before unsupported
+gameplay/editor dispatch; the complete game remains blocked.
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
 [audio contract](docs/audio.md). The full game does not compile or run yet.

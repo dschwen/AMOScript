@@ -1,0 +1,17 @@
+{
+  "name": "joystick-queries",
+  "source": "Print Joy(1),Jup(1),Jdown(1),Jleft(1),Jright(1),Fire(1)\n",
+  "programHex": "414d4f532042617369632076312e3030000000582c00047611f80074003e00000001007c005c12020074003e00000001007c005c120c0074003e00000001007c005c12180074003e00000001007c005c12240074003e00000001007c005c12320074003e00000001007c0000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original offsets Joy=11f8, Jup=1202, Jdown=120c, Jleft=1218, Jright=1224, Fire=1232, Print=0476 and independent physical-line/payload bytes. No production name table or encoder."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/keyboard.cpp",
+    "sources": ["https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/system.cpp"],
+    "symbols": ["joy", "joy_bit", "lib_fn_joy", "lib_fn_jup", "lib_fn_fire", "w_sy_joy"],
+    "notes": "Neutral headless input gives zero mask/booleans. Separate raw-offset tests inject masks on both ports and verify pressed results of -1. Browser mapping/native API checks and original menu replay are separate evidence; no physical controller or Amiga execution capture."
+  },
+  "expected": { "values": [[0,0,0,0,0,0]], "halted": true }
+}

@@ -31,6 +31,11 @@
   comparisons and Amiga captures. See `docs/audio.md` for the subset and limits.
 - `lib/amos/browser.js` handles Canvas/input; `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
+- Joystick ports 0/1 use per-factory masks and an optional synchronous reader.
+  Canvas hosts opt into configurable keyboard/Gamepad API mappings; queries poll
+  independently of requestAnimationFrame. Clear owned input on focus/lifecycle
+  changes without conflating Key Speed with held joystick state. See
+  `docs/joysticks.md`; menu fixture/injected device evidence is not a hardware capture.
 - `Load Iff` embeds the bounded ILBM reader for opaque non-laced screen loading.
   Table-based rainbows materialize palette rows through the copper builder;
   Canvas uses the same slot/row selection. Auto View/View stage screen replacement
