@@ -97,6 +97,11 @@ module.exports = async function webglRendererProbe(page, artifacts) {
       if([4,10,30,99].includes(i))addPacket(`wonderland-game-${gameClock.now()}ms`,game.display.snapshotDisplay(),game.display.renderDisplay());
     }
   }finally{game.stop();}
+  require('./wonderlandReplay')(compile(fs.readFileSync(path.join(__dirname,'../../examples/Wonderland/Wonderland.AMOS'))).create,
+    require('./steppedTimers').createSteppedTimers(),
+    {read:name=>fs.readFileSync(path.join(__dirname,'../../examples/Wonderland',name.split('/').pop()),'latin1')},
+    p=>({set:action=>p.setJoystick(1,action==='fire'?16:action==='left'?4:0),dispose(){}}),
+    (name,p)=>{if(name.startsWith('Original fade:')||name==='Original title after game over'||name==='Original fresh game')addPacket(`wonderland-replay-${name}`,p.display.snapshotDisplay(),p.display.renderDisplay());});
   const result = await page.evaluate(async ({ sources, images, packets }) => {
     const factory = name => new Function(`return (${sources[name]});`)();
     const model = factory('model')(), colours = factory('colour')(), sprites = factory('sprites')();

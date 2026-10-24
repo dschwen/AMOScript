@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "wonderland-game.html",
+      "title": "Play unmodified Wonderland",
+      "description": "The complete original game with live Canvas keyboard/Gamepad controls, Stop/Resume and Restart. Input-only keyboard and injected-gamepad replays render three deaths/fades, two life restarts, game over and a fresh game. No Amiga capture, integrated sound or persistent editor files are claimed.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html"
+    },
+    {
       "file": "file-selector.html",
       "title": "Fsel$ and unmodified Wonderland game entry",
       "description": "Prepared synchronous file choices execute the original retry/Gosub/Return routine and selected load/save calls. The unmodified complete program runs and renders four first-level frames over two controlled seconds, including attached sprites and rainbow/HUD scheduling. No native selector GUI or complete gameplay parity is claimed.",

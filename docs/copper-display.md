@@ -34,7 +34,8 @@ and `pixelAspect`. `displayOptions.snapshotStandard` defaults to PAL.
 
 [Screen Display and Screen Offset](screen-windows.md) now integrate bounded
 nonoverlapping windows and pointer/fine-scroll offsets. Large palette/setup
-changes can use actual blank rows, with every chunk complete before fetch.
+changes can use actual blank rows, with every chunk complete before capture on
+blank rows and before fetch on visible rows.
 General placement/priority and user-copper commands remain open.
 [Table-based AMOS rainbows](title-display.md) now schedule bounded per-row palette
 MOVEs through this builder, including restoration and PAL wrap. Canvas uses the
@@ -145,9 +146,11 @@ not duplicate per-line rendering or pointer-advance semantics.
 
 The current builder supports x=128 OCS windows, lowres 1–6 planes, hires 1–4,
 word-padded rows and representable DIW end positions. Each transition must finish
-its changes before DDF start in left blanking; excessive palette/pointer setup
-rejects explicitly. Arbitrary positioning, overlapping screens, larger palette
-transitions with blank-line scheduling, AMOS offsets, ECS/AGA, sprite bus contention,
+its changes before DDF start on visible rows or before snapshot capture on
+genuinely blank rows. DIW setup precedes pointer changes. Excessive palette/pointer
+setup still rejects. [The live-game contract](wonderland-game.md) documents the
+bounded gap-write elimination and independent budget tests. Arbitrary positioning,
+overlapping screens, wider transitions, ECS/AGA, sprite bus contention,
 interlace and user AMOS copper commands remain open. The interpreter records
 supported mode/scroll events but does not claim all mid-line register effects.
 Static scroll, EHB and dual-playfield views are now supported, including early

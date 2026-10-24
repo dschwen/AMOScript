@@ -94,7 +94,10 @@ links. The whole source now compiles and game entry runs and renders a bounded f
 
 When setup spans real blank rows, the copper builder now reserves each row's
 rainbow/palette writes before placing setup chunks. DIW changes still precede
-pointer updates, and the same strict pre-fetch limit applies to every merged
-row. The original game's two-row world/HUD gap now fits its combined palette
+pointer updates. Visible rows retain their strict pre-fetch limit; genuinely
+blank rows finish before snapshot capture instead. The original game's two-row world/HUD gap now fits its combined palette
 work. Insufficient gaps and palette rows exceeding the budget still reject;
-this is bounded scheduling, not exact DMA/bus timing.
+this is bounded scheduling, not exact DMA/bus timing. Nonzero playfield-colour
+gap writes may be omitted only when the next row overwrites the same register;
+border/sprite colours and final restoration writes remain. The original death
+fade now fits the two-row gap. See [the live-game contract](wonderland-game.md).

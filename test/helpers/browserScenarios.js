@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'wonderland-game', title: 'Play unmodified Wonderland', initialFrame: 'Original level 1', description: 'The complete original game with live Canvas keyboard/Gamepad controls, Stop/Resume and Restart. Input-only keyboard and injected-gamepad replays render three deaths/fades, two life restarts, game over and a fresh game. No Amiga capture, integrated sound or persistent editor files are claimed.', run: require('./wonderlandGameProbe'), check(result, assert) {
+    assert.strictEqual(result.inputModes,2);assert.deepStrictEqual(result.deaths,[[2,1,0],[2,1,0]]);
+    assert.deepStrictEqual(result.restarts,[2,2]);assert.deepStrictEqual(result.fades,[3,3]);assert.deepStrictEqual(result.freshLives,[3,3]);
+    assert.strictEqual(result.stopResume,true);assert.ok(result.frames>=20);assert.strictEqual(result.gameRunning,true);
+  } },
   { id: 'file-selector', capturedFrames: false, title: 'Fsel$ and unmodified Wonderland game entry', description: 'Prepared synchronous file choices execute the original retry/Gosub/Return routine and selected load/save calls. The unmodified complete program runs and renders four first-level frames over two controlled seconds, including attached sprites and rainbow/HUD scheduling. No native selector GUI or complete gameplay parity is claimed.', run: require('./fileSelectorProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{selectorModes:2,retryCalls:6,wholeCompiled:true,gameEntry:true,gameFrames:4,gameRunning:true});
   } },

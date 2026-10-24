@@ -8,8 +8,9 @@ Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).
 The unmodified **Dithell's Wonderland** now compiles into a standalone factory.
-Its own game branch now runs and renders level 1 for two controlled seconds;
-try the [selector/game-frame demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/file-selector.html). For the milestone, see the
+[Play the original game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)
+with keyboard or browser Gamepad input. Controlled replays now cover three deaths,
+fades, game over and a fresh game; see the [live-game contract](docs/wonderland-game.md). For the milestone, see the
 [readiness assessment and implementation order](docs/wonderland.md) and
 [executed title demo](demos/wonderland.html). Its original first 64 lines
 now load and render the title with its menu marker Bob; see
@@ -55,7 +56,7 @@ The [scan-code demo](demos/scancodes.html) adds a live keyboard reader and
 executes the original Escape/title branch; see [input semantics](docs/scancodes.md).
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
-[audio contract](docs/audio.md). The unmodified whole source compiles and runs/renders its first level for two controlled seconds, including attached sprites. Longer interactive gameplay remains unverified.
+[audio contract](docs/audio.md). The live original-game demo runs its first level and loss/restart paths. Integrated sound, editor file requests and complete gameplay parity remain open.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
 [native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching

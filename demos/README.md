@@ -9,6 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
+| [Play unmodified Wonderland](wonderland-game.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html) |
 | [Fsel$ and unmodified Wonderland first-level frames](file-selector.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/file-selector.html) |
 | [AMOS Rnd and original enemy initialization](random.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/random.html) |
 | [Wonderland raw level-file save/load](raw-files.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/raw-files.html) |
@@ -35,6 +36,11 @@ Every current browser scenario is included:
 | [Direct sprites and manual updates](sprites.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprites.html) |
 | [Bank operations, buffers and Bob backgrounds](banks.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/banks.html) |
 | [Interactive control flow, graphics, Bobs, input and lifecycle](programs.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/programs.html) |
+
+The Wonderland game page embeds the complete original program and provides live
+keyboard/Gamepad controls, Stop/Resume and Restart. The frame selector also shows
+its controlled loss/restart replay. Integrated sound and editor files remain open;
+see [the live-game contract](../docs/wonderland-game.md).
 
 Each HTML file embeds its runtime, shader factories, compiled programs and fixture
 data. Open it directly from disk or through HTML Preview; no Node process, local

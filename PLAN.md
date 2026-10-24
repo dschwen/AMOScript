@@ -16,12 +16,14 @@ Current assessment: the unmodified 753-line Wonderland source now compiles to
 a standalone 1253-instruction factory, with all 142 encodings recognized (initially
 44 were missing). [Prepared Fsel$ adapters](docs/file-selector.md) execute the
 original selection loop and file calls. Controlled whole-program fire input enters
-level 1 and now runs 100 scheduled callbacks (two nominal seconds), rendering four
-physical frames with its original image-25 attached sprites on pairs 2/3 and 6/7.
-The shared demo displays the final frame; this is bounded execution, not complete
-gameplay or native timing parity. Next extend the original-game browser session
-with live keyboard/Gamepad input, longer gameplay/death/restart coverage and
-explicitly measured remaining failures. Async modal selection remains open. [Source-derived Rnd/Randomize](docs/random.md) now execute
+level 1. A new [live original-game demo](docs/wonderland-game.md) supports keyboard
+layouts, the browser Gamepad API, Stop/Resume and Restart. Input-only controlled
+replays render three deaths/fades, two life restarts, game over and a fresh game;
+live Chromium checks cover movement, Escape and remapping. Safe blank-row copper
+setup now survives the original death fade. Next cover collectibles/enemy interactions,
+all-five-level/win paths, integrated Web Audio activation and prepared editor
+requester/writeback flows. Native timing/reference captures, async modal selection
+and the planned IndexedDB adapter remain open. [Source-derived Rnd/Randomize](docs/random.md) now execute
 original blob/green-jump slices against controlled seed/beam vectors. Native beam
 timing remains outside this subset. [Raw Bload/Bsave](docs/raw-files.md) now round-trip the
 original five level maps through declared writeback/save/load slices. The exact
@@ -101,7 +103,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **486 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **490 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
@@ -123,7 +125,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
   are implemented, as are EHB screens, static scroll/DPF and explicit IFF fields.
   AMOS display/copper commands, superhires and live field timing,
   sprite contention/computed allocation, GPU presentation/switching and remaining
-  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 174
+  GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 179
   local GPU/CPU frames; see [renderer contract](docs/webgl-renderer.md).
   WebGL2 resources, exact table readback, dirty uploads and context restoration
   are implemented; see [resource contract](docs/webgl-resources.md). Direct AMOS
@@ -397,7 +399,7 @@ Canvas and the CPU reference, sharing one priority resolver. The opaque Canvas
 RGBA callback has been retired. Finish computed allocation and DMA contention/timing
 before claiming the complete sprite-reference workstream. Canvas assertions alone do not establish
 WebGL2 availability or GPU parity; the separate integer readback probe now proves
-local WebGL2 capability. The native non-HAM GPU renderer now passes 174 local
+local WebGL2 capability. The native non-HAM GPU renderer now passes 179 local
 GPU/CPU frames, including 100 seeded inputs. Presentation/switching, HAM/events
 and unfinished mode/capture gates remain open.
 
@@ -480,7 +482,7 @@ patches. Describe coverage precisely rather than claiming full AMOS support.
 5. Implemented locally: WebGL2 resource storage/readback, owned dirty-row
    comparisons and forced context loss/restoration/disposal (M6 infrastructure).
    Implemented next: GPU decode/resolve for the current non-HAM CPU subset,
-   with 174 GPU/CPU comparisons and restored-shader rerendering.
+   with 179 GPU/CPU comparisons and restored-shader rerendering.
    GPU nearest/aspect/letterbox presentation now passes six canvas/restore checks.
    Next add switching/input integration, live diff, HAM and event support;
    [resource boundaries](docs/webgl-resources.md) remain explicit.

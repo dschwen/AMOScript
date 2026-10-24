@@ -19,6 +19,27 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'wonderland-game') {
+        await page.click('#game-input');await page.keyboard.down('Enter');
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.line==='204',{},{timeout:30000});await page.keyboard.up('Enter');
+        const before=Number(await page.locator('#game-controls').getAttribute('data-x'));
+        await page.keyboard.down('ArrowRight');
+        await page.waitForFunction(x=>Number(document.getElementById('game-controls').dataset.x)>x,before);await page.keyboard.up('ArrowRight');
+        await page.click('#game-stop');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'stopped');
+        await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'running');
+        await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('game-input').height===256);
+        await page.click('#game-restart');await page.selectOption('#game-keyboard-layout','wasd');await page.keyboard.down('z');
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.line==='204',{},{timeout:30000});await page.keyboard.up('z');
+        await page.click('#game-restart');await page.selectOption('#game-keyboard-layout','arrows');await page.keyboard.down('ArrowDown');
+        await page.waitForFunction(()=>Number(document.getElementById('game-controls').dataset.menuPosition)>0);await page.keyboard.up('ArrowDown');
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.menuPosition==='25');
+        await page.hover('#game-input',{position:{x:100,y:70}});await page.keyboard.down('Enter');
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.game==='2'&&document.getElementById('game-controls').dataset.line==='399');await page.keyboard.up('Enter');
+        await page.keyboard.press('l');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.phase==='error');
+        assert.match(await page.locator('#game-status').textContent(),/synchronous files.select/);
+        await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'error');
+        await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
+      }
       if (scenario.id === 'file-selector') {
         await page.click('#selector-run');
         assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-phase'),'done');

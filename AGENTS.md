@@ -127,6 +127,12 @@
   `docs/webgl-renderer.md`. Its presentation shader uses shared rational layout
   from `presentation/layout.js`. Host switching/input, HAM/events and full mode/capture
   parity remain open. Never count a CPU fallback as GPU execution.
+- The live `wonderland-game` scenario embeds the entire original program/assets.
+  Its finite input-only replay spends three lives through natural collisions and
+  fades, restarts twice, returns to title and starts a fresh game. No variable/IP
+  edits; injected gamepad/CPU-GPU evidence is not an Amiga capture. See
+  `docs/wonderland-game.md`. Editor requester/writeback and sound activation remain
+  unintegrated in that page; surface errors and require Restart.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.
 - `examples/` contains Test1–27 and synthetic programs with `.Asc` references.
   ASCII is not an accepted compiler input yet.

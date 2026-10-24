@@ -170,9 +170,9 @@ test('copper builder: blank-row setup reserves rainbow writes without relaxing t
   const bottom={...top,height:100,y:150,pointers:[4000],palette:Array(32).fill(0xfff)};
   const paletteRows=[148,149,150].map(y=>({y,index:14,rgb:0x123}));
   const compiled=build([top,bottom],{paletteRows});
-  const words=new DataView(compiled.bytes.buffer);let moves=0,waits=0;
+  const words=new DataView(compiled.bytes.buffer);let moves=0,waits=0,deadline=0x38;
   for(let at=0;at<compiled.bytes.length-4;at+=4){
-    if(words.getUint16(at,false)&1){if(waits)assert.ok(2+moves*4<0x38);moves=0;waits++;}
+    if(words.getUint16(at,false)&1){if(waits)assert.ok(2+moves*4<deadline);deadline=(words.getUint16(at,false)>>8)<150?64:0x38;moves=0;waits++;}
     else moves++;
   }
   assert.ok(2+moves*4<0x38);assert.strictEqual(waits,3);
@@ -183,4 +183,37 @@ test('copper builder: blank-row setup reserves rainbow writes without relaxing t
   assert.deepStrictEqual(pixel(snapshot,0,100),[255,255,255,255]);
   assert.throws(()=>build([{...top,height:99},bottom],{paletteRows}),/pre-fetch copper budget/);
   assert.throws(()=>build([top,bottom],{paletteRows:Array.from({length:14},(_,index)=>({y:148,index,rgb:0}))}),/pre-fetch copper budget/);
+});
+
+test('copper builder: fine-scroll death palette fits two genuine blank rows before capture and HUD fetch',()=>{
+  const top={width:320,height:168,x:128,y:48,depth:4,rowBytes:120,pointers:[0,35000,70000,105000],palette:Array(32).fill(0),scroll:255};
+  const bottom={...top,y:218,height:32,rowBytes:40,pointers:[140000,142000,144000,146000],palette:Array.from({length:32},(_,i)=>i<29?0x888:0),scroll:0};
+  const paletteRows=[216,217,218].map((y,i)=>({y,index:14,rgb:[0x123,0x456,0x888][i]}));
+  const compiled=build([top,bottom],{paletteRows,origin:{x:128,y:48},lines:202});
+  const memory=new ChipMemory(524288),list=memory.allocate(compiled.bytes.length);memory.writeBytes(list.address,compiled.bytes);
+  const {snapshot}=interpret(memory.bytes,{...compiled.interpretOptions,address:list.address,initialRegisters:compiled.initialRegisters});
+  assert.strictEqual(snapshot.frame.lineRegs.some((v,i)=>i%32===17&&v),false);
+  for(const y of [168,169,170])assert.deepStrictEqual(pixel(snapshot,0,y),[136,136,136,255]);
+  const words=new DataView(compiled.bytes.buffer);let y=0,moves=0,counts=[];
+  for(let at=0;at<compiled.bytes.length;at+=4){
+    if(words.getUint16(at,false)&1){if(moves)counts.push([y,moves]);y=words.getUint16(at,false)>>8;moves=0;}else moves++;
+  }
+  assert.deepStrictEqual(counts,[[216,15],[217,15],[218,13]]);
+  assert.throws(()=>build([{...top,height:169},bottom],{paletteRows}),/pre-fetch copper budget/);
+});
+
+test('copper builder: gap pruning preserves border and sprite colours and the last playfield restoration',()=>{
+  const top={width:320,height:100,x:128,y:50,depth:1,rowBytes:40,pointers:[4000],palette:Array(32).fill(0)};
+  const bottom={...top,y:152,pointers:[8000]};
+  const paletteRows=[];
+  for(const [y,rgb] of [[150,0xf00],[151,0x0f0],[152,0x00f]])for(const index of [0,16])paletteRows.push({y,index,rgb});
+  paletteRows.push({y:150,index:1,rgb:0xf00},{y:151,index:1,rgb:0x0f0});
+  const compiled=build([top,bottom],{paletteRows,lines:202});
+  const memory=new ChipMemory(524288),list=memory.allocate(compiled.bytes.length);memory.writeBytes(list.address,compiled.bytes);
+  const {snapshot}=interpret(memory.bytes,{...compiled.interpretOptions,address:list.address,initialRegisters:compiled.initialRegisters});
+  for(const [line,rgb] of [[100,[255,0,0,255]],[101,[0,255,0,255]],[102,[0,0,255,255]]]){
+    assert.deepStrictEqual(pixel(snapshot,0,line),rgb);
+    assert.deepStrictEqual(Array.from(snapshot.frame.linePal.slice(line*1024+16*4,line*1024+17*4)),rgb);
+  }
+  assert.deepStrictEqual(Array.from(snapshot.frame.linePal.slice(101*1024+4,101*1024+8)),[0,255,0,255]);
 });
