@@ -13,6 +13,7 @@ for (const filename of fs.readdirSync(directory).filter(name => name.endsWith('.
   test(`conformance (${fixture.evidence.kind}): ${fixture.name}`, () => {
     assert.ok(['source-analysis', 'reference-execution'].includes(fixture.evidence.kind));
     assert.ok(fixture.source && fixture.evidence.url && fixture.evidence.notes);
+    if(fixture.selections)assert.ok(Array.isArray(fixture.selections)&&fixture.selections.length<=128&&fixture.selections.every(value=>typeof value==='string'));
     if (fixture.evidence.kind === 'reference-execution') {
       for (const field of ['implementation', 'version', 'environment', 'command', 'recordedDate']) {
         assert.ok(fixture.evidence[field], `Missing reference execution ${field}`);
@@ -22,7 +23,7 @@ for (const filename of fs.readdirSync(directory).filter(name => name.endsWith('.
     const files = fixture.files && createMemoryFiles(Object.fromEntries(Object.entries(fixture.files).map(([name, hex]) => {
       assert.match(hex, /^(?:[0-9a-f]{2})*$/i);
       return [name, Buffer.from(hex, 'hex').toString('latin1')];
-    })));
+    })),fixture.selections || []);
     const { logs, program, timers } = execute(Buffer.from(fixture.programHex, 'hex'), 1000, { files });
     if (fixture.mouseEvents) {
       assert.ok(Array.isArray(fixture.mouseEvents) && fixture.mouseEvents.length <= 128);

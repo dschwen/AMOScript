@@ -20,6 +20,11 @@
   ranges. Bload preserves payload/address identity; Bsave excludes its end address
   and validates/snapshots before truncating the destination. Wonderland's original
   7,205-byte save omits seed 5; preserve that source behavior. See `docs/raw-files.md`.
+- Fsel$ uses one synchronous `files.select` call with frozen path/default/title
+  metadata and a complete returned path or empty cancellation. Memory files may
+  queue prepared choices; browser uploads finish before VM execution. Do not
+  replay expressions or return Promises to await a modal picker. See
+  `docs/file-selector.md`, including the unmodified whole-program sprite gate.
 - Print Using carries per-item format AST expressions into the existing print IR.
   A shared integer/string formatter validates the format before its value thunk;
   no format state persists across items. Float/decimal/exponent fields remain

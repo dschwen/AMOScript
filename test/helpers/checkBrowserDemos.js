@@ -19,6 +19,20 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'file-selector') {
+        await page.click('#selector-run');
+        assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-phase'),'done');
+        assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-requests'),'2');
+        assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-bytes'),'7206');
+        await page.selectOption('#selector-mode','save');await page.fill('#selector-path','new:output.LEV');await page.click('#selector-run');
+        assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-selected'),'new:output.LEV');
+        assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-bytes'),'7205');
+        await page.selectOption('#selector-mode','load');await page.setInputFiles('#selector-upload',{name:'short.lev',mimeType:'application/octet-stream',buffer:Buffer.from([9])});
+        await page.waitForFunction(()=>document.getElementById('selector-controls').dataset.phase==='ready');await page.click('#selector-run');
+        assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-bytes'),'1');
+        await page.click('#selector-whole');assert.strictEqual(await page.locator('#selector-controls').getAttribute('data-gate'),'204');
+        await page.evaluate(()=>globalThis.AMOS_SELECTOR_DEMO_CLEANUP());
+      }
       if (scenario.id === 'random') {
         await page.click('#rnd-next');
         assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-xs'),'0');

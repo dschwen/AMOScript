@@ -160,3 +160,7 @@ The random-sequence fixture uses independently encoded Rnd/Randomize words and
 source-derived literal sequences. It checks negative-bound deterministic draws,
 zero-bound caching and a reseed that retains the previous result. It contains no
 beam capture or native execution evidence.
+
+The file-selector fixture independently encodes one/three-argument Fsel$ words
+and supplies declared cancellation/selection choices. Its output is source-derived
+host-adapter evidence, not native requester execution or an Amiga capture.

@@ -89,5 +89,6 @@ logical buffers, swaps, immutable snapshots, staged replacement/close, coordinat
 and unsupported forms. Eight independent indexed-pattern GPU/CPU comparisons
 exercise both resolutions, two palettes, fine/coarse offsets and the blank gap.
 The Chromium catalogue includes the standalone scrolling demo with HTML Preview
-links. Full-game compilation now first encounters `Fsel$` on line 709; see
+links. The whole source now compiles and game entry reaches the attached-sprite
+publication gate at Wait Vbl line 204; see
 [Wonderland's milestone](wonderland.md).

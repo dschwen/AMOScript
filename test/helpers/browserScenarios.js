@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'file-selector', capturedFrames: false, title: 'Fsel$ and unmodified Wonderland game entry', description: 'Prepared synchronous file choices execute the original retry/Gosub/Return routine and selected load/save calls. The unmodified complete program compiles and follows its own game branch to the explicit attached/wide sprite gate. No native selector GUI or gameplay parity is claimed.', run: require('./fileSelectorProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{selectorModes:2,retryCalls:6,wholeCompiled:true,gameEntry:true,spriteGate:204,gameRunning:false});
+  } },
   { id: 'random', capturedFrames: false, title: 'AMOS Rnd and original enemy initialization', description: 'Source-derived seeded PRNG vectors and eighteen original blob/green-jump streams with controlled beam input. Includes step/reset/cache controls; gameplay, native startup seeds and real beam timing remain outside this data fixture.', run: require('./randomProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{vectors:5,streams:18,steps:216,gameRunning:false});
   } },
@@ -292,7 +295,7 @@ const scenarios = [
       { name: 'Score_Panel.Iff', width: 640, height: 256, exact: true },
       { name: 'Editor_Panel.Iff', width: 640, height: 256, exact: true }
     ]);
-    assert.ok(result.unrecognizedEncodings <= 24);
+    assert.strictEqual(result.unrecognizedEncodings,0);assert.strictEqual(result.compiler.ok,true);
     assert.strictEqual(result.startup.physicalLines, 64);
     assert.deepStrictEqual(result.startup.runs, [1, 0].map(speedFlag => ({ speedFlag, halted: true, variableBufferBytes: 10240,
       titleExact: true, waitedVbl: true, timersRemaining: 0,

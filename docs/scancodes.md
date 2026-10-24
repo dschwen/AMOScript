@@ -90,6 +90,6 @@ cleanup, diagnostics, mappings and original routing. Chromium also exercises the
 live page using real browser keyboard events. All browser scenarios remain
 standalone repository demos with HTML Preview links.
 
-The full program now first encounters Fsel$ `$196C` on line 709, byte 29596.
-One encoding remains unrecognized, appearing once; see
-[Wonderland's milestone](wonderland.md).
+The unmodified Wonderland source now compiles completely. Controlled game entry
+reaches the attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

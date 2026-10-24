@@ -99,6 +99,6 @@ independent-byte conformance fixture injects five mouse states at explicit Wait
 Key guards and checks literal query results. These are source-derived and
 injected/browser checks, not Amiga or physical-device captures.
 
-Full Wonderland decoding now first stops at Fsel$ `$196C`, line 709, byte 29596.
-One encoding remains unrecognized, appearing once. Complete gameplay/editor
-compatibility remains open; see [the milestone](wonderland.md).
+The unmodified Wonderland source now compiles completely. Controlled game entry
+reaches the attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

@@ -113,7 +113,8 @@ pins original offsets and source links to the original joystick handlers.
 
 Evidence is source analysis, injected input and Chromium's native API availability
 path. A physical controller and real Amiga execution have not been captured.
-The unmodified complete game still fails at Fsel$ on line 709. See
+The unmodified complete source now compiles and its own fire/game branch reaches
+the attached-sprite gate at Wait Vbl line 204. See
 [the milestone](wonderland.md). The
 [HTML Preview menu](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-menu.html)
 is linked from the shared [demo index](../demos/index.html).

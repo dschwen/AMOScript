@@ -79,8 +79,6 @@ Playwright and has an HTML Preview link in the [gallery](../demos/index.html).
 These are source-derived/injected checks; no native execution or Amiga capture
 has been added.
 
-Full Wonderland decoding next stops at Fsel$ `$196C`, line 709, byte 29596.
-It is the sole remaining unrecognized encoding (one occurrence). Complete parsing,
-lowering, sprite support and gameplay/editor integration still require their
-own checks; lexical recognition is not a compatibility percentage. See
-[the milestone](wonderland.md).
+The unmodified Wonderland source now compiles completely. Controlled game entry
+reaches the attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

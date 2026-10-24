@@ -89,6 +89,6 @@ Chromium checks nine original-title fade frames without running an animation
 callback and exercises the live controls. Four additional native GPU comparisons
 use independent RGB expectations, bringing local coverage to 169 GPU/CPU frames.
 
-The full game now first encounters Fsel$ `$196C` on line 709, byte 29596. The
-inventory has 1 unrecognized encoding appearing once. See
-[the milestone](wonderland.md) for the remaining gates.
+The unmodified Wonderland source now compiles completely. Controlled game entry
+reaches the attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

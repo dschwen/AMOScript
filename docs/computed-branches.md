@@ -56,7 +56,6 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Fsel$ `$196C` on line 709,
-byte 29596. The bounded inventory reports 1 unrecognized encoding appearing
-once. Recognition counts are not a compatibility percentage; see
-[the milestone](wonderland.md).
+The unmodified Wonderland source now compiles completely. Controlled game entry
+reaches the attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

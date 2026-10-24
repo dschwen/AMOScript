@@ -5,7 +5,8 @@ embedded banks and volume paths. They pass through the original Wait Vbl, reserv
 and hide a rainbow, load `Title_Screen.Iff`, turn off the cursor, and draw Bob 74
 as the menu marker at `(84,92)`. Both startup benchmark branches produce the same
 title. The original menu loop now also runs in a declared
-[keyboard/gamepad fixture](joysticks.md); complete-game compilation is still blocked.
+[keyboard/gamepad fixture](joysticks.md); complete-source compilation now succeeds; playable gameplay remains blocked by
+attached-sprite publication.
 
 ## Load Iff
 

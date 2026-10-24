@@ -26,8 +26,8 @@ test('Wonderland: pinned original program/assets retain their upstream bytes', (
 test('Wonderland: bounded full-source inventory includes extension calls and embedded banks', () => {
   const report = auditProgram(read('Wonderland.AMOS'));
   assert.deepStrictEqual([report.physicalLines, report.tokenOccurrences, report.distinctEncodings], [753, 6011, 142]);
-  // Recognition may improve as the milestone progresses; it is not semantic coverage.
-  assert.ok(report.unrecognizedEncodings <= 44);
+  // Complete lexical/compiler coverage is distinct from gameplay compatibility.
+  assert.strictEqual(report.unrecognizedEncodings,0);assert.strictEqual(report.compiler.ok,true);
   const sample = report.tokens.find(token => token.code === '004e:1:00ee');
   assert.strictEqual(sample.name, 'sam play'); assert.strictEqual(sample.count, 2);
   assert.deepStrictEqual(sample.locations.map(location => location.line), [170, 703]);

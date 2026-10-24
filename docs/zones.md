@@ -81,5 +81,6 @@ An independent-byte conformance fixture separately checks reserve/set/reset/quer
 forms. These are source-derived expectations and browser comparisons, not an
 Amiga execution capture.
 
-The full program now first stops at Fsel$ `$196C`, line 709, byte 29596.
-One encoding remains unrecognized, appearing once. See [the milestone](wonderland.md).
+The unmodified whole source now compiles. Controlled game entry reaches the
+attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [whole-program evidence](file-selector.md).

@@ -95,5 +95,6 @@ specifies input/output bytes without production encoders or writers. Browser
 controls, local preload and offline pages are checked in Chromium. This evidence
 is source/asset analysis and injected execution, not an Amiga capture.
 
-Full Wonderland decoding next stops at Fsel$ `$196C`, line 709, byte 29596.
-One encoding remains unrecognized, appearing once; see [the milestone](wonderland.md).
+The unmodified Wonderland source now compiles completely. Controlled game entry
+reaches the attached-sprite publication gate at Wait Vbl line 204; see
+[the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

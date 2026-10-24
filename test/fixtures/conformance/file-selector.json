@@ -1,0 +1,35 @@
+{
+  "name": "file-selector-host-result-and-cancel",
+  "source": "Print Fsel$(\"*.lev\")\nPrint Fsel$(\"*.lev\",\"default\",\"Title\")\n",
+  "programHex": "414d4f532042617369632076312e3030000000460b00047619540074002600052a2e6c657600007c000018000476196c0074002600052a2e6c657600005c0026000764656661756c7400005c002600055469746c6500007c0000",
+  "files": {},
+  "selections": [
+    "",
+    "disk:CHOSEN.LEV"
+  ],
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original Fsel$ one/three-argument words 1954/196c and independently framed string/Print words; no production encoder/token lookup."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/fsel.cpp",
+    "symbols": [
+      "lib_fn_file_selector1",
+      "lib_fn_file_selector3",
+      "lib_fn_file_selector4"
+    ],
+    "notes": "Omitted arguments default to empty strings; a cancelled native selector returns an empty string and selection returns a filename. Results here are declared host choices, not native GUI execution or Amiga captures."
+  },
+  "expected": {
+    "values": [
+      [
+        ""
+      ],
+      [
+        "disk:CHOSEN.LEV"
+      ]
+    ],
+    "halted": true
+  }
+}
