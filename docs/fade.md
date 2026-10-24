@@ -89,6 +89,6 @@ Chromium checks nine original-title fade frames without running an animation
 callback and exercises the live controls. Four additional native GPU comparisons
 use independent RGB expectations, bringing local coverage to 169 GPU/CPU frames.
 
-The full game now first encounters Rnd `$0686` on line 560, byte 21156. The
-inventory has 2 unrecognized encodings appearing 14 times. See
+The full game now first encounters Fsel$ `$196C` on line 709, byte 29596. The
+inventory has 1 unrecognized encoding appearing once. See
 [the milestone](wonderland.md) for the remaining gates.

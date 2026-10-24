@@ -19,6 +19,21 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'random') {
+        await page.click('#rnd-next');
+        assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-xs'),'0');
+        assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-ys'),'-13');
+        const seed=await page.locator('#rnd-controls').getAttribute('data-seed');await page.click('#rnd-repeat');
+        assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-cached'),'7');
+        assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-seed'),seed);
+        await page.selectOption('#rnd-kind','green-right');await page.click('#rnd-reset');await page.click('#rnd-next');
+        const expected=require('../fixtures/random-vectors.json').enemies.find(item=>item.kind==='green-right'&&item.seed===12345&&item.beam===0).rows[0];
+        assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-xs'),String(expected[0]));
+        assert.strictEqual(await page.locator('#rnd-controls').getAttribute('data-ys'),String(expected[1]));
+        await page.fill('#rnd-beam','65536');await page.click('#rnd-reset');
+        assert.match(await page.locator('#rnd-status').textContent(),/beam word 0–65535/);
+        await page.evaluate(()=>globalThis.AMOS_RANDOM_DEMO_CLEANUP());
+      }
       if (scenario.id === 'raw-files') {
         await page.selectOption('#raw-level','5');await page.click('#raw-restart');await page.fill('#raw-tile','17');await page.click('#raw-apply');
         assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-cell'),'17');

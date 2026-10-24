@@ -1,0 +1,35 @@
+{
+  "name": "random-sequence-cache-and-reseed",
+  "source": "Randomize 12345\nPrint Rnd(-6),Rnd(-10),Rnd(0)\nRandomize 0\nPrint Rnd(0),Rnd(-6),Rnd(-10)\n",
+  "programHex": "414d4f532042617369632076312e30300000007406000690003e0000303900001700047606860074003efffffffa007c005c06860074003efffffff6007c005c06860074003e00000000007c000006000690003e0000000000001700047606860074003e00000000007c005c06860074003efffffffa007c005c06860074003efffffff6007c0000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original Rnd=0686 and Randomize=0690, with independently framed Print/literal/expression words; no production encoder or token lookup."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/system.cpp",
+    "symbols": [
+      "mulu32",
+      "next_random",
+      "lib_fn_rnd",
+      "lib_in_randomize"
+    ],
+    "notes": "Independent arbitrary-precision word arithmetic gives these bounded negative-input sequences without beam mixing. Zero repeats the previous result; Randomize changes only the seed. Source analysis, not native execution or an Amiga capture."
+  },
+  "expected": {
+    "values": [
+      [
+        3,
+        7,
+        7
+      ],
+      [
+        7,
+        0,
+        6
+      ]
+    ],
+    "halted": true
+  }
+}

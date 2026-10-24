@@ -29,6 +29,11 @@
 - `lib/amos/operations.js` implements language operations; `display.js` models
   indexed screens; `font.js` supplies glyphs; `files.js` provides synchronous
   memory/Node file adapters. Host-specific APIs belong in adapters.
+- Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
+  multiplication, masked rejection and zero-bound repeat. Positive bounds accept
+  an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/
+  beam choices, not native startup/timing claims. See `docs/random.md` for the
+  rejection bound, independent vectors and original enemy fixtures.
 - `lib/amos/bankMemory.js` maps generic-bank payloads to checked per-factory
   virtual addresses for Start/Peek/Poke. These are separate from display chip
   addresses. Preserve addresses across swap/shrink; retire them on replacement

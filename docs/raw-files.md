@@ -73,6 +73,11 @@ chosen local file before reload. This is a file/data inspector, not a game displ
 or implementation of `Fsel$`. Each browser scenario is linked through HTML
 Preview in the [gallery](../demos/index.html).
 
+IndexedDB-backed persistence is [planned](../PLAN.md#browser-persistent-files-planned).
+The current demo Map is volatile; its download control is the current explicit
+way to retain a file outside the page. Future persistence must distinguish cached
+writes from committed durable transactions.
+
 ## Source and validation
 
 Pinned [`src/lib/files.cpp`](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/files.cpp)
@@ -90,5 +95,5 @@ specifies input/output bytes without production encoders or writers. Browser
 controls, local preload and offline pages are checked in Chromium. This evidence
 is source/asset analysis and injected execution, not an Amiga capture.
 
-Full Wonderland decoding next stops at Rnd `$0686`, line 560, byte 21156.
-Two encodings remain unrecognized, appearing 14 times; see [the milestone](wonderland.md).
+Full Wonderland decoding next stops at Fsel$ `$196C`, line 709, byte 29596.
+One encoding remains unrecognized, appearing once; see [the milestone](wonderland.md).

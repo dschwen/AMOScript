@@ -56,7 +56,7 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Rnd `$0686` on line 560,
-byte 21156. The bounded inventory reports 2 unrecognized encodings appearing
-14 times. Recognition counts are not a compatibility percentage; see
+Full Wonderland compilation now first encounters Fsel$ `$196C` on line 709,
+byte 29596. The bounded inventory reports 1 unrecognized encoding appearing
+once. Recognition counts are not a compatibility percentage; see
 [the milestone](wonderland.md).

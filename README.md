@@ -20,6 +20,9 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [Rnd inspector](demos/random.html) steps original enemy initializers with
+controlled seeds and beam words. IndexedDB persistence is [planned](PLAN.md#browser-persistent-files-planned); current browser file storage remains volatile.
+
 The [raw level-file demo](demos/raw-files.html) edits cells and executes the
 original five-map writeback/save/load slices. Inspect the exact 7,205-byte save,
 reload behavior and omitted fifth seed, or download/preload raw files.

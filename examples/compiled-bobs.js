@@ -2112,6 +2112,40 @@
   let reversePriority = false;
   const collisionHits = new Uint8Array(256);
   let degrees = false;
+  if (options.readRandomBeam != null && typeof options.readRandomBeam !== 'function') throw new Error('readRandomBeam must be a synchronous function');
+  let randomSeed = 0, previousRandom = 0;
+  function publishRandom() { state.random = Object.freeze({ seed: randomSeed, last: previousRandom }); }
+  function randomize(seed) { randomSeed = integer(seed) >>> 0; publishRandom(); }
+  function rnd(bound) {
+    bound = integer(bound);
+    if (bound === 0) return previousRandom;
+    const maximum = Math.abs(bound);
+    let mask = 0xffffff, carry = 0;
+    for (let bit = 0; bit < 24; bit++) {
+      carry = mask & 1; mask >>>= 1;
+      if (mask < maximum) break;
+    }
+    mask = (mask << 1) | carry;
+    const swap = value => ((value << 16) | (value >>> 16)) >>> 0;
+    try {
+      // The original Mulu32 swaps whole cross products, retaining their high
+      // halves in the low word. Math.imul(seed, constant) is not equivalent.
+      for (let attempt = 0; attempt < 4096; attempt++) {
+        const low = randomSeed & 65535, high = randomSeed >>> 16;
+        randomSeed = (low * 0xe62d + swap(high * 0xe62d) + swap(low * 0xbb40) + 1) >>> 0;
+        let value = randomSeed >>> 8;
+        if (bound > 0 && options.readRandomBeam) {
+          const beam = options.readRandomBeam();
+          if (!Number.isInteger(beam) || beam < 0 || beam > 65535) throw new Error('Random beam reader must return a 16-bit word synchronously');
+          value = (value & 0xffff0000) | ((value + beam) & 65535);
+        }
+        value &= mask;
+        if (value <= maximum) { previousRandom = value; return value; }
+      }
+      throw new Error('Rnd rejection budget exhausted');
+    } finally { publishRandom(); }
+  }
+  publishRandom();
   let joystickBinding = null;
   let fading = null;
   const flashes = [];
@@ -3501,6 +3535,7 @@
   }
 
   return {
+    rnd, randomize,
     bload, bsave,
     limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,

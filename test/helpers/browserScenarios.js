@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'random', capturedFrames: false, title: 'AMOS Rnd and original enemy initialization', description: 'Source-derived seeded PRNG vectors and eighteen original blob/green-jump streams with controlled beam input. Includes step/reset/cache controls; gameplay, native startup seeds and real beam timing remain outside this data fixture.', run: require('./randomProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{vectors:5,streams:18,steps:216,gameRunning:false});
+  } },
   { id: 'raw-files', capturedFrames: false, title: 'Wonderland raw level-file save/load', description: 'Original map writeback, Bsave, Bload and seed-refresh statements round-trip all five maps through an in-memory files adapter. Exact exclusive-end bytes, stable addresses and retained fifth seed are checked. Includes cell editing, raw download and optional local preload; file selection and gameplay are excluded.', run: require('./rawFilesProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{levels:5,savedBytes:7205,comparedBytes:72050,omittedFifthSeed:true,gameRunning:false});
   } },

@@ -12,9 +12,11 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 2 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 1 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Rnd` on line 560. [Raw Bload/Bsave](docs/raw-files.md) now round-trip the
+`Fsel$` on line 709. [Source-derived Rnd/Randomize](docs/random.md) now execute
+original blob/green-jump slices against controlled seed/beam vectors. Native beam
+timing remains outside this subset. [Raw Bload/Bsave](docs/raw-files.md) now round-trip the
 original five level maps through declared writeback/save/load slices. The exact
 7,205-byte save excludes the fifth seed, as in the source. [Mouse limits, polling clicks and opt-in hardware Canvas input](docs/mouse.md)
 now run the original editor selection slice with browser input, preserving the
@@ -48,6 +50,36 @@ The 75-image bank and level-data bank decode; all four original ILBMs now match
 independently decoded PNGs in CPU and browser asset tests. This is asset readiness,
 not a running game or an Amiga reference capture.
 
+## Browser persistent files (planned)
+
+Add an opt-in IndexedDB-backed browser files adapter after the raw-file subset.
+Current demos use volatile memory Maps; no persistent browser storage exists yet.
+
+- Keep `files.read`/`files.write` synchronous for generated programs. Open/upgrade
+  IndexedDB and preload the selected file namespace into an owned memory cache
+  before starting/resuming a program; local uploads also finish before execution.
+- Synchronous writes update that cache and enqueue versioned IndexedDB commits.
+  Expose pending/durable/failed status and an asynchronous host `flush()` boundary.
+  Bsave returning means the cache accepted bytes; claim persistence only after the
+  transaction commits. Never block or advance AMOS time through requestAnimationFrame.
+- Preserve byte strings exactly, including empty/NUL/high-byte files, existing
+  filename/path semantics and the original 7,205-byte Wonderland save. Store file
+  bytes and revision metadata in a versioned database; define upgrade/migration,
+  deletion, namespace and multi-tab conflict behavior before shipping.
+- Keep dirty bytes available for retry/export after quota, permission or transaction
+  failures. Explicitly report unavailable persistence; offer volatile operation as
+  a visible choice. Program switching/Stop/disposal must expose pending commits
+  and provide a host flush policy, without silently losing uncommitted writes.
+- Add shared browser scenarios/demos for reload/new-adapter persistence, independent
+  namespaces, upgrades, conflicting tabs, failed commits/retry and exact raw-byte
+  round trips. Test durable completion separately from cache reads. Document
+  origin scoping: HTML Preview, hosted pages and local files may have separate or
+  unavailable storage; do not imply files persist across those origins.
+
+Acceptance: a saved Wonderland level survives closing and reopening the adapter
+on the same supported origin after a successful flush, while VM file operations
+retain their synchronous contract and all failure/pending states are observable.
+
 ## Objective and scope
 
 Transpile tokenized AMOS `.AMOS` programs into self-contained JavaScript
@@ -62,7 +94,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **464 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **473 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
@@ -187,10 +219,10 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 | Compiler | Separate AST parser and lowerer, typed symbols, control-flow IR, source locations, standalone code generation | Remaining statement/function variants, consistent numeric lowering, legacy-code cleanup |
 | Core language | Assignments, expressions, conditions, loops, labels, Gosub/Return, procedures and results | Float fidelity, additional operators/functions, procedure variants, broader reference verification |
 | Data and strings | Arrays, scoped DATA/READ/RESTORE, substring retrieval/assignment, common string functions | Remaining memory-dependent byte-string/length rules and edge cases |
-| Files | Sequential I/O through explicit memory/Node adapters | Seek/random-file variants, other documented file operations |
+| Files | Sequential I/O, structured banks and checked raw Bload/Bsave through explicit memory/Node adapters | IndexedDB persistence, Fsel$ browser selection, seek/random-file variants and remaining file operations |
 | Execution | Instruction budget, waits, key queue, timer cancellation, stop/resume, per-instance state | Regression coverage as new asynchronous hosts are added |
 | Browser graphics | Indexed drawing, Bobs/buffers/Autoback, Canvas/input/direct sprites; ABI/chip memory, physical planar export, basic CPU reference, normal ILBM, bounded copper/stack builder and WebGL2 probe | AMOS screen/copper commands, advanced modes, structured hardware sprites, WebGL2 backend, computed/attached sprites, exact timing and hardware coordinates |
-| Audio | No implementation | Sample/music assets, playback hosts, timing/lifecycle contracts |
+| Audio | Bounded Samples controller and optional Web Audio host, source-derived/offline checks | Remaining music/sample forms, full-game integration, native timing and reference captures |
 | ASCII frontend | No implementation | Lexer/parser producing the shared AST |
 
 See [the compatibility matrix](docs/compatibility.md) for precise limitations

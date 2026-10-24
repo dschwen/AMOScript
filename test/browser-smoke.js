@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('random', page);
+    console.log('Rnd passed: independent word-arithmetic vectors and eighteen original enemy streams with controlled beam inputs.');
     await runScenario('raw-files', page);
     console.log('Raw files passed: five original map writeback/save/load loops, exact exclusive-end bytes and retained fifth seed.');
     await runScenario('mouse', page);

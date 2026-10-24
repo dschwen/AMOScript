@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "random.html",
+      "title": "AMOS Rnd and original enemy initialization",
+      "description": "Source-derived seeded PRNG vectors and eighteen original blob/green-jump streams with controlled beam input. Includes step/reset/cache controls; gameplay, native startup seeds and real beam timing remain outside this data fixture.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/random.html"
+    },
+    {
       "file": "raw-files.html",
       "title": "Wonderland raw level-file save/load",
       "description": "Original map writeback, Bsave, Bload and seed-refresh statements round-trip all five maps through an in-memory files adapter. Exact exclusive-end bytes, stable addresses and retained fifth seed are checked. Includes cell editing, raw download and optional local preload; file selection and gameplay are excluded.",

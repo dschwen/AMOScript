@@ -83,6 +83,6 @@ including its own Flash Off and Auto View On, with synthetic game/background
 inputs and a Wait Key guard. The map-copy fixture likewise uses the complete
 setup before its original five map loops. Neither executes its enclosing
 Gosub/Return or gameplay. These are source-derived fixtures and CPU/GPU checks,
-not Amiga execution captures. The full source next stops at Rnd `$0686`,
-line 560, byte 21156; two encodings remain unrecognized, appearing 14 times.
+not Amiga execution captures. The full source next stops at Fsel$ `$196C`,
+line 709, byte 29596; one encoding remains unrecognized, appearing once.
 See [the milestone](wonderland.md).

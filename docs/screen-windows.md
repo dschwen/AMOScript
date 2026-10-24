@@ -89,5 +89,5 @@ logical buffers, swaps, immutable snapshots, staged replacement/close, coordinat
 and unsupported forms. Eight independent indexed-pattern GPU/CPU comparisons
 exercise both resolutions, two palettes, fine/coarse offsets and the blank gap.
 The Chromium catalogue includes the standalone scrolling demo with HTML Preview
-links. Full-game compilation now first encounters `Rnd` on line 560; see
+links. Full-game compilation now first encounters `Fsel$` on line 709; see
 [Wonderland's milestone](wonderland.md).

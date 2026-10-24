@@ -67,5 +67,5 @@ hidden drawing and published copying against independent uniform RGB expectation
 The [self-contained demo](../demos/screen-copy.html) includes all five levels,
 explicit injected-clock Prepare/Publish controls and host-controlled bitmap
 scroll inspection. It appears with an HTML Preview link in the [gallery](../demos/index.html).
-The full game remains blocked at Rnd `$0686`, line 560, byte 21156;
-2 encodings remain unrecognized, appearing 14 times. See [the milestone](wonderland.md).
+The full game remains blocked at Fsel$ `$196C`, line 709, byte 29596;
+1 encoding remains unrecognized, appearing once. See [the milestone](wonderland.md).

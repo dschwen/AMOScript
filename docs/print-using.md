@@ -82,6 +82,6 @@ words and expected field strings. Chromium runs the shared panel evaluator and
 the live sandbox, including unsupported-format errors. The gallery includes its
 standalone page and HTML Preview link.
 
-Full Wonderland compilation now first encounters Rnd `$0686` on line 560,
-byte 21156 (`Rnd`). Two encodings remain unrecognized,
-appearing 14 times. See [the milestone](wonderland.md).
+Full Wonderland compilation now first encounters Fsel$ `$196C` on line 709,
+byte 29596 (`Fsel$`). One encoding remains unrecognized,
+appearing once. See [the milestone](wonderland.md).
