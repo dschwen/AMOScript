@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "mouse.html",
+      "title": "Wonderland hardware mouse and editor selection",
+      "description": "Opt-in hardware-coordinate Canvas input, original mouse limits and polling-based Mouse Click. Original editor selection statements, scaled/bordered input and lifecycle cleanup pass; editor actions remain excluded. Includes a live button-selection harness.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mouse.html"
+    },
+    {
       "file": "zones.html",
       "title": "Wonderland editor panel zones",
       "description": "Original five-button zone definitions and the original Zone expression classify all 10,240 panel positions with injected hardware coordinates. Independent panel PNG comparison and a live point/reset inspector; mouse clicks/limits and editor actions remain excluded.",

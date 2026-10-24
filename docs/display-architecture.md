@@ -202,8 +202,9 @@ execution, while detach/dispose own host resource destruction.
 Map pointer positions through the content rectangle, letterboxing, integer/aspect
 scale, native raster and screen/hardware transforms. Preserve the existing local
 setMouse injection contract during the bridge. AMOS hardware mouse query semantics
-need a separate explicit migration/test gate before multi-screen hardware mode;
-backend switching alone must never change query results. Restore the previous
+now have a separate opt-in Canvas mode with committed-raster mapping and
+original editor-selection tests; see [mouse input](mouse.md). Default local units
+remain unchanged, and backend switching alone must never change query results. Restore the previous
 cursor when detaching, preserving Hide On/Show On behavior.
 
 WebGL2 setup follows the [Khronos specification](https://registry.khronos.org/webgl/specs/latest/2.0/):

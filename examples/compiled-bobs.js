@@ -1273,7 +1273,7 @@
   let drawingHooks = null;
   let spriteWriter = null;
   let planarBridge = null;
-  let autoView = true, presented = null;
+  let autoView = true, presented = null, presentedHardware = null;
   let presentedWindows = null;
   const rainbows = new Map();
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
@@ -1341,6 +1341,8 @@
     changed(true);
   }
   function commitWindows() {
+    presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
+      width: presented.width, height: presented.height, mode: presented.mode } : null;
     const targets = Array.from(screens.values()).filter(target => target.windowed);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
@@ -1859,6 +1861,19 @@
     for (let i = 0; i < width * height; i++) pixels.set(source.subarray(i * scale * 4, i * scale * 4 + 4), i * 4);
     return { width, height, rgba: pixels };
   }
+  function pointerHardwarePosition(x, y, width, height) {
+    if (presentedWindows) {
+      const left = Math.min(...presentedWindows.map(window => window.x));
+      const top = Math.min(...presentedWindows.map(window => window.y));
+      const right = Math.max(...presentedWindows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
+      const bottom = Math.max(...presentedWindows.map(window => window.y + window.height));
+      return [left + Math.floor(x * (right - left) / width), top + Math.floor(y * (bottom - top) / height)];
+    }
+    const target = presentedHardware;
+    if (!target) throw new Error('No physical display for hardware mouse coordinates');
+    return [target.x + Math.floor(x * target.width / width / (target.mode === 0x8000 ? 2 : 1)),
+      target.y + Math.floor(y * target.height / height)];
+  }
   function pointerPosition(x, y, width, height) {
     const target = presentedWindows ? screen() : presented || screen();
     if (!presentedWindows) return [Math.max(0, Math.min(target.width - 1, Math.floor(x * target.width / width))),
@@ -1872,7 +1887,7 @@
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -3426,6 +3441,24 @@
     throw new Error(`Unsupported file information ${name}`);
   }
 
+  function limitMouse(x1, y1, x2, y2) {
+    display.screen();
+    x1 = integer(x1) & 65535; y1 = integer(y1) & 65535;
+    x2 = Math.min(458, integer(x2) & 65535); y2 = Math.min(312, integer(y2) & 65535);
+    if (x1 & 32768) x1 = 0;
+    if (y1 & 32768) y1 = 0;
+    if (x1 > x2) [x1, x2] = [x2, x1];
+    if (y1 > y2) [y1, y2] = [y2, y1];
+    // Like the source, defining limits does not immediately reposition the mouse.
+    state.input.mouseLimits = Object.freeze({ x1, y1, x2, y2 });
+  }
+  function limitMouseScreen(id = null) {
+    display.screen();
+    if (id != null) { id = integer(id); if (id < 0 || id > 7) throw new Error('Unsupported mouse screen (expected 0..7)'); }
+    const target = id == null ? display.screen() : display.screen(id);
+    limitMouse(target.hardwareX, target.hardwareY,
+      display.coordinate('X Hard', target.id, target.width - 1), display.coordinate('Y Hard', target.id, target.height - 1));
+  }
   function inputValue(name) {
     if (name === 'Inkey$') {
       if (!state.input.keys.length) return '';
@@ -3438,10 +3471,16 @@
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;
+    if (name === 'Mouse Click') {
+      const now = state.input.mouse.buttons, clicked = now & ~state.input.mouseClick;
+      state.input.mouseClick = now;
+      return clicked;
+    }
     throw new Error(`Unsupported input query ${name}`);
   }
 
   return {
+    limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
@@ -3666,7 +3705,7 @@
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -3680,10 +3719,14 @@
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
+  }
+  function clearMouseButtons() {
+    state.input.mouse.buttons = 0;
+    state.input.mouseClick = 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -3903,7 +3946,7 @@
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
@@ -3915,6 +3958,8 @@
     },
     setMouse(x, y, buttons = state.input.mouse.buttons) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(buttons) || buttons < 0 || buttons > 7) throw new Error('Invalid mouse state');
+      const limits = state.input.mouseLimits;
+      if (limits) { x = Math.max(limits.x1, Math.min(limits.x2, x)); y = Math.max(limits.y1, Math.min(limits.y2, y)); }
       state.input.mouse = { x, y, buttons };
     },
     ...operations

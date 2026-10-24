@@ -12,9 +12,11 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 6 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 4 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Limit Mouse` on line 378. [Screen-local zones](docs/zones.md) now execute the
+`Bload` on line 428. [Mouse limits, polling clicks and opt-in hardware Canvas input](docs/mouse.md)
+now run the original editor selection slice with browser input, preserving the
+existing local-coordinate mode. [Screen-local zones](docs/zones.md) now execute the
 original five editor-panel definitions and Zone expression against every panel
 position with declared hardware input injection. [Flash and selected-screen Flash Off](docs/flash.md)
 now share the injected palette clock with Fade, and the original game/editor
@@ -58,7 +60,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **446 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **455 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

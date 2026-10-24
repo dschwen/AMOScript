@@ -56,7 +56,7 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Limit Mouse `$1E6E` on line 378,
-byte 14142. The bounded inventory reports 6 unrecognized encodings appearing
-18 times. Recognition counts are not a compatibility percentage; see
+Full Wonderland compilation now first encounters Bload `$180C` on line 428,
+byte 16270. The bounded inventory reports 4 unrecognized encodings appearing
+16 times. Recognition counts are not a compatibility percentage; see
 [the milestone](wonderland.md).

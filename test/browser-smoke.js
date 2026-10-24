@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('mouse', page);
+    console.log('Mouse passed: hardware-coordinate opt-in, original limits/click/zone selections, polling semantics and lifecycle cleanup.');
     await runScenario('zones', page);
     console.log('Zones passed: original five-button definitions and Zone expression classify all panel positions; Canvas/CPU pixels match the independent editor panel PNG.');
     await runScenario('flash', page);

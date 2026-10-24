@@ -82,6 +82,6 @@ words and expected field strings. Chromium runs the shared panel evaluator and
 the live sandbox, including unsupported-format errors. The gallery includes its
 standalone page and HTML Preview link.
 
-Full Wonderland compilation now first encounters Limit Mouse `$1E6E` on line 378,
-byte 14142 (`Limit Mouse`). Six encodings remain unrecognized,
-appearing 18 times. See [the milestone](wonderland.md).
+Full Wonderland compilation now first encounters Bload `$180C` on line 428,
+byte 16270 (`Bload`). Four encodings remain unrecognized,
+appearing 16 times. See [the milestone](wonderland.md).

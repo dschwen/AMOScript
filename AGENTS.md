@@ -76,6 +76,12 @@
   presentation. Keep hardware mouse conversion separate from the existing Canvas
   pointer contract; the original editor-panel fixture injects hardware coordinates.
   See `docs/zones.md` for bounds and remaining mouse/zone forms.
+- Limit Mouse captures per-program hardware bounds; Mouse Click compares held
+  buttons with the previous query rather than queuing events. Canvas preserves
+  default local coordinates and opts into committed raster hardware coordinates
+  with `mouseCoordinates: 'hardware'`. Focus/lifecycle cleanup clears buttons and
+  click history, preserving limits and position; Key Speed leaves them alone.
+  See `docs/mouse.md` for the bounded migration gate and source evidence.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip
   memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
   `lib/display/reference/render.js` provides basic planar render/explainPixel.

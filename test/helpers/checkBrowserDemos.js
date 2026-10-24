@@ -19,6 +19,22 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'mouse') {
+        await page.locator('#mouse-panel').scrollIntoViewIfNeeded();
+        const panel=await page.locator('#mouse-panel').boundingBox();
+        await page.mouse.move(panel.x+18,panel.y+310);await page.mouse.down();
+        await page.waitForFunction(()=>document.getElementById('mouse-controls').dataset.action==='l');
+        await page.mouse.up();
+        await page.waitForFunction(()=>document.getElementById('mouse-controls').dataset.buttons==='0');
+        await page.click('#mouse-stop');
+        assert.strictEqual(await page.locator('#mouse-controls').getAttribute('data-phase'),'stopped');
+        await page.click('#mouse-resume');
+        assert.strictEqual(await page.locator('#mouse-controls').getAttribute('data-phase'),'running');
+        await page.click('#mouse-restart');
+        assert.strictEqual(await page.locator('#mouse-controls').getAttribute('data-action'),'none');
+        await page.click('#mouse-stop');
+        await page.evaluate(()=>globalThis.AMOS_MOUSE_DEMO_CLEANUP());
+      }
       if (scenario.id === 'zones') {
         assert.strictEqual(await page.locator('#zones-controls').getAttribute('data-zone'),'1');
         await page.fill('#zones-x','200');await page.fill('#zones-y','202');await page.click('#zones-query');

@@ -145,3 +145,8 @@ The screen-zones fixture uses independently assembled original overload words
 for Reserve/Set/Reset Zone and both Zone query forms. It checks inclusive shared
 edges, numeric overlap priority, individual/all reset and reservation release.
 The expected results come from source analysis, not an Amiga execution capture.
+
+The mouse-input fixture independently encodes Limit Mouse and button/position
+queries. Five host injections at Wait Key guards check clamping and query-to-query
+Mouse Click history, including repeated reads. These are source-derived expected
+results with declared injected input, not a physical-device or Amiga capture.

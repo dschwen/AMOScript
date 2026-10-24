@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'mouse', title: 'Wonderland hardware mouse and editor selection', initialFrame: 'Original editor selection fixture', description: 'Opt-in hardware-coordinate Canvas input, original mouse limits and polling-based Mouse Click. Original editor selection statements, scaled/bordered input and lifecycle cleanup pass; editor actions remain excluded. Includes a live button-selection harness.', run: require('./mouseProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{selections:5,lifecycleChecks:5,coordinateModes:2,gameRunning:false});
+  } },
   { id: 'zones', title: 'Wonderland editor panel zones', initialFrame: 'Original editor panel', description: 'Original five-button zone definitions and the original Zone expression classify all 10,240 panel positions with injected hardware coordinates. Independent panel PNG comparison and a live point/reset inspector; mouse clicks/limits and editor actions remain excluded.', run: require('./zonesProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{zoneQueries:10240,panelPixels:10240,counts:[6460,900,900,900,756,324],gameRunning:false});
   } },

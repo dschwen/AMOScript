@@ -43,8 +43,9 @@ physical-buffer contract and do not include zone definitions.
 ## Mouse boundary and Wonderland fixture
 
 This feature preserves the existing Canvas input contract: its pointer coordinates
-are local to the selected screen. Hardware-coordinate mouse queries, Mouse Click,
-Limit Mouse, Hzone and Mouse Zone remain unsupported. Do not treat a Zone query
+are local to the selected screen. [Mouse limits/clicks and an explicit hardware
+Canvas mode](mouse.md) are now implemented separately; Hzone and Mouse Zone
+remain unsupported. Do not treat a Zone query
 as an implicit conversion between browser-local and Amiga hardware coordinates.
 
 The declared fixture joins unchanged Wonderland screen setup (lines 351–362),
@@ -61,7 +62,8 @@ hit. Canvas and CPU panel pixels match the independent original-panel PNG;
 queries leave bitmap bytes, presentation version and old snapshots unchanged.
 A cropped view of actual Canvas output provides a live point inspector and
 Reset/Restore controls. Pointer movement in this inspector explicitly injects
-panel-relative hardware coordinates; it is not general hardware-mouse support.
+panel-relative hardware coordinates. The separate [mouse demo](mouse.md) exercises
+the hardware Canvas adapter and original selection statements.
 All browser assertions and demo inputs share the same scenario, linked through
 HTML Preview in the [gallery](../demos/index.html).
 
@@ -79,5 +81,5 @@ An independent-byte conformance fixture separately checks reserve/set/reset/quer
 forms. These are source-derived expectations and browser comparisons, not an
 Amiga execution capture.
 
-The full program now first stops at Limit Mouse `$1E6E`, line 378, byte 14142.
-Six encodings remain unrecognized, appearing 18 times. See [the milestone](wonderland.md).
+The full program now first stops at Bload `$180C`, line 428, byte 16270.
+Four encodings remain unrecognized, appearing 16 times. See [the milestone](wonderland.md).

@@ -24,6 +24,16 @@ for (const filename of fs.readdirSync(directory).filter(name => name.endsWith('.
       return [name, Buffer.from(hex, 'hex').toString('latin1')];
     })));
     const { logs, program, timers } = execute(Buffer.from(fixture.programHex, 'hex'), 1000, { files });
+    if (fixture.mouseEvents) {
+      assert.ok(Array.isArray(fixture.mouseEvents) && fixture.mouseEvents.length <= 128);
+      for (const event of fixture.mouseEvents) {
+        assert.ok(Number.isInteger(event.x) && Number.isInteger(event.y));
+        assert.ok(Number.isInteger(event.buttons) && event.buttons >= 0 && event.buttons <= 7);
+        assert.strictEqual(program.state.waiting, 'key');
+        program.setMouse(event.x, event.y, event.buttons);
+        program.sendKey('fixture'); timers.tick(0);
+      }
+    }
     if (fixture.advanceMs != null) {
       assert.ok(Number.isFinite(fixture.advanceMs) && fixture.advanceMs >= 0 && fixture.advanceMs <= 60000);
       timers.tick(fixture.advanceMs);

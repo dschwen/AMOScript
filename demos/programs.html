@@ -55,6 +55,8 @@
 'use strict';
 
 function createCanvasHost(canvas, options = {}) {
+  const mouseCoordinates = options.mouseCoordinates == null ? 'screen' : options.mouseCoordinates;
+  if (mouseCoordinates !== 'screen' && mouseCoordinates !== 'hardware') throw new Error('Invalid mouse coordinate mode');
   if (options.getGamepads != null && typeof options.getGamepads !== 'function') throw new Error('getGamepads must be a function');
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Canvas 2D rendering is not available');
@@ -179,7 +181,7 @@ function createCanvasHost(canvas, options = {}) {
     if (joystickInput.keyup(event.code || (event.key === ' ' ? 'Space' : event.key))) pollJoysticks();
   }
   function pointer(event) {
-    if (!program) return;
+    if (!program || (mouseCoordinates === 'hardware' && (focusSuspended || program.state.stopped || program.state.halted))) return;
     const screen = program.display.presentedScreen ? program.display.presentedScreen() : program.display.current == null ? null : program.display.screen();
     if (!screen) return;
     const bounds = canvas.getBoundingClientRect();
@@ -190,7 +192,8 @@ function createCanvasHost(canvas, options = {}) {
     const height = canvas.clientHeight ? canvas.clientHeight * scaleY : bounds.height;
     const left = bounds.left + (canvas.clientLeft || 0) * scaleX;
     const top = bounds.top + (canvas.clientTop || 0) * scaleY;
-    const [x, y] = program.display.pointerPosition ? program.display.pointerPosition(event.clientX - left, event.clientY - top, width, height) : [
+    const position = mouseCoordinates === 'hardware' ? program.display.pointerHardwarePosition : program.display.pointerPosition;
+    const [x, y] = position ? position.call(program.display, event.clientX - left, event.clientY - top, width, height) : [
       Math.max(0, Math.min(screen.width - 1, Math.floor((event.clientX - left) * screen.width / width))),
       Math.max(0, Math.min(screen.height - 1, Math.floor((event.clientY - top) * screen.height / height)))];
     program.setMouse(x, y, event.buttons & 7);
@@ -206,7 +209,8 @@ function createCanvasHost(canvas, options = {}) {
     resetJoysticks();
     if (program) {
       if (program.clearScanCodes) program.clearScanCodes();
-      program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
+      if (program.clearMouseButtons) program.clearMouseButtons();
+      else program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
     }
   }
   function focus() { focusSuspended = false; }
@@ -217,6 +221,7 @@ function createCanvasHost(canvas, options = {}) {
     releaseKey();
     resetJoysticks();
     if (program && program.clearScanCodes) program.clearScanCodes();
+    if (program && program.clearMouseButtons) program.clearMouseButtons();
     if (unsubscribeJoystick) unsubscribeJoystick(); unsubscribeJoystick = null;
     if (unsubscribeInput) unsubscribeInput();
     unsubscribeInput = null;
@@ -237,6 +242,7 @@ function createCanvasHost(canvas, options = {}) {
   }
   function attach(next) {
     detach();
+    if (mouseCoordinates === 'hardware' && typeof next.display.pointerHardwarePosition !== 'function') throw new Error('Hardware mouse coordinates are unavailable');
     program = next;
     if (program.subscribeInputReset) unsubscribeInput = program.subscribeInputReset(reason => {
       releaseKey(); if (reason !== 'key-speed') resetJoysticks();
@@ -1617,7 +1623,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   let drawingHooks = null;
   let spriteWriter = null;
   let planarBridge = null;
-  let autoView = true, presented = null;
+  let autoView = true, presented = null, presentedHardware = null;
   let presentedWindows = null;
   const rainbows = new Map();
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
@@ -1685,6 +1691,8 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     changed(true);
   }
   function commitWindows() {
+    presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
+      width: presented.width, height: presented.height, mode: presented.mode } : null;
     const targets = Array.from(screens.values()).filter(target => target.windowed);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
@@ -2203,6 +2211,19 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     for (let i = 0; i < width * height; i++) pixels.set(source.subarray(i * scale * 4, i * scale * 4 + 4), i * 4);
     return { width, height, rgba: pixels };
   }
+  function pointerHardwarePosition(x, y, width, height) {
+    if (presentedWindows) {
+      const left = Math.min(...presentedWindows.map(window => window.x));
+      const top = Math.min(...presentedWindows.map(window => window.y));
+      const right = Math.max(...presentedWindows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
+      const bottom = Math.max(...presentedWindows.map(window => window.y + window.height));
+      return [left + Math.floor(x * (right - left) / width), top + Math.floor(y * (bottom - top) / height)];
+    }
+    const target = presentedHardware;
+    if (!target) throw new Error('No physical display for hardware mouse coordinates');
+    return [target.x + Math.floor(x * target.width / width / (target.mode === 0x8000 ? 2 : 1)),
+      target.y + Math.floor(y * target.height / height)];
+  }
   function pointerPosition(x, y, width, height) {
     const target = presentedWindows ? screen() : presented || screen();
     if (!presentedWindows) return [Math.max(0, Math.min(target.width - 1, Math.floor(x * target.width / width))),
@@ -2216,7 +2237,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -3770,6 +3791,24 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     throw new Error(`Unsupported file information ${name}`);
   }
 
+  function limitMouse(x1, y1, x2, y2) {
+    display.screen();
+    x1 = integer(x1) & 65535; y1 = integer(y1) & 65535;
+    x2 = Math.min(458, integer(x2) & 65535); y2 = Math.min(312, integer(y2) & 65535);
+    if (x1 & 32768) x1 = 0;
+    if (y1 & 32768) y1 = 0;
+    if (x1 > x2) [x1, x2] = [x2, x1];
+    if (y1 > y2) [y1, y2] = [y2, y1];
+    // Like the source, defining limits does not immediately reposition the mouse.
+    state.input.mouseLimits = Object.freeze({ x1, y1, x2, y2 });
+  }
+  function limitMouseScreen(id = null) {
+    display.screen();
+    if (id != null) { id = integer(id); if (id < 0 || id > 7) throw new Error('Unsupported mouse screen (expected 0..7)'); }
+    const target = id == null ? display.screen() : display.screen(id);
+    limitMouse(target.hardwareX, target.hardwareY,
+      display.coordinate('X Hard', target.id, target.width - 1), display.coordinate('Y Hard', target.id, target.height - 1));
+  }
   function inputValue(name) {
     if (name === 'Inkey$') {
       if (!state.input.keys.length) return '';
@@ -3782,10 +3821,16 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;
+    if (name === 'Mouse Click') {
+      const now = state.input.mouse.buttons, clicked = now & ~state.input.mouseClick;
+      state.input.mouseClick = now;
+      return clicked;
+    }
     throw new Error(`Unsupported input query ${name}`);
   }
 
   return {
+    limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
@@ -4010,7 +4055,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -4024,10 +4069,14 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
+  }
+  function clearMouseButtons() {
+    state.input.mouse.buttons = 0;
+    state.input.mouseClick = 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -4247,7 +4296,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
@@ -4259,6 +4308,8 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     },
     setMouse(x, y, buttons = state.input.mouse.buttons) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(buttons) || buttons < 0 || buttons > 7) throw new Error('Invalid mouse state');
+      const limits = state.input.mouseLimits;
+      if (limits) { x = Math.max(limits.x1, Math.min(limits.x2, x)); y = Math.max(limits.y1, Math.min(limits.y2, y)); }
       state.input.mouse = { x, y, buttons };
     },
     ...operations
@@ -5563,7 +5614,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   let drawingHooks = null;
   let spriteWriter = null;
   let planarBridge = null;
-  let autoView = true, presented = null;
+  let autoView = true, presented = null, presentedHardware = null;
   let presentedWindows = null;
   const rainbows = new Map();
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
@@ -5631,6 +5682,8 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     changed(true);
   }
   function commitWindows() {
+    presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
+      width: presented.width, height: presented.height, mode: presented.mode } : null;
     const targets = Array.from(screens.values()).filter(target => target.windowed);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
@@ -6149,6 +6202,19 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     for (let i = 0; i < width * height; i++) pixels.set(source.subarray(i * scale * 4, i * scale * 4 + 4), i * 4);
     return { width, height, rgba: pixels };
   }
+  function pointerHardwarePosition(x, y, width, height) {
+    if (presentedWindows) {
+      const left = Math.min(...presentedWindows.map(window => window.x));
+      const top = Math.min(...presentedWindows.map(window => window.y));
+      const right = Math.max(...presentedWindows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
+      const bottom = Math.max(...presentedWindows.map(window => window.y + window.height));
+      return [left + Math.floor(x * (right - left) / width), top + Math.floor(y * (bottom - top) / height)];
+    }
+    const target = presentedHardware;
+    if (!target) throw new Error('No physical display for hardware mouse coordinates');
+    return [target.x + Math.floor(x * target.width / width / (target.mode === 0x8000 ? 2 : 1)),
+      target.y + Math.floor(y * target.height / height)];
+  }
   function pointerPosition(x, y, width, height) {
     const target = presentedWindows ? screen() : presented || screen();
     if (!presentedWindows) return [Math.max(0, Math.min(target.width - 1, Math.floor(x * target.width / width))),
@@ -6162,7 +6228,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -7716,6 +7782,24 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     throw new Error(`Unsupported file information ${name}`);
   }
 
+  function limitMouse(x1, y1, x2, y2) {
+    display.screen();
+    x1 = integer(x1) & 65535; y1 = integer(y1) & 65535;
+    x2 = Math.min(458, integer(x2) & 65535); y2 = Math.min(312, integer(y2) & 65535);
+    if (x1 & 32768) x1 = 0;
+    if (y1 & 32768) y1 = 0;
+    if (x1 > x2) [x1, x2] = [x2, x1];
+    if (y1 > y2) [y1, y2] = [y2, y1];
+    // Like the source, defining limits does not immediately reposition the mouse.
+    state.input.mouseLimits = Object.freeze({ x1, y1, x2, y2 });
+  }
+  function limitMouseScreen(id = null) {
+    display.screen();
+    if (id != null) { id = integer(id); if (id < 0 || id > 7) throw new Error('Unsupported mouse screen (expected 0..7)'); }
+    const target = id == null ? display.screen() : display.screen(id);
+    limitMouse(target.hardwareX, target.hardwareY,
+      display.coordinate('X Hard', target.id, target.width - 1), display.coordinate('Y Hard', target.id, target.height - 1));
+  }
   function inputValue(name) {
     if (name === 'Inkey$') {
       if (!state.input.keys.length) return '';
@@ -7728,10 +7812,16 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;
+    if (name === 'Mouse Click') {
+      const now = state.input.mouse.buttons, clicked = now & ~state.input.mouseClick;
+      state.input.mouseClick = now;
+      return clicked;
+    }
     throw new Error(`Unsupported input query ${name}`);
   }
 
   return {
+    limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
@@ -7956,7 +8046,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -7970,10 +8060,14 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
+  }
+  function clearMouseButtons() {
+    state.input.mouse.buttons = 0;
+    state.input.mouseClick = 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -8193,7 +8287,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
@@ -8205,6 +8299,8 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     },
     setMouse(x, y, buttons = state.input.mouse.buttons) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(buttons) || buttons < 0 || buttons > 7) throw new Error('Invalid mouse state');
+      const limits = state.input.mouseLimits;
+      if (limits) { x = Math.max(limits.x1, Math.min(limits.x2, x)); y = Math.max(limits.y1, Math.min(limits.y2, y)); }
       state.input.mouse = { x, y, buttons };
     },
     ...operations
@@ -9526,7 +9622,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   let drawingHooks = null;
   let spriteWriter = null;
   let planarBridge = null;
-  let autoView = true, presented = null;
+  let autoView = true, presented = null, presentedHardware = null;
   let presentedWindows = null;
   const rainbows = new Map();
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
@@ -9594,6 +9690,8 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     changed(true);
   }
   function commitWindows() {
+    presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
+      width: presented.width, height: presented.height, mode: presented.mode } : null;
     const targets = Array.from(screens.values()).filter(target => target.windowed);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
@@ -10112,6 +10210,19 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     for (let i = 0; i < width * height; i++) pixels.set(source.subarray(i * scale * 4, i * scale * 4 + 4), i * 4);
     return { width, height, rgba: pixels };
   }
+  function pointerHardwarePosition(x, y, width, height) {
+    if (presentedWindows) {
+      const left = Math.min(...presentedWindows.map(window => window.x));
+      const top = Math.min(...presentedWindows.map(window => window.y));
+      const right = Math.max(...presentedWindows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
+      const bottom = Math.max(...presentedWindows.map(window => window.y + window.height));
+      return [left + Math.floor(x * (right - left) / width), top + Math.floor(y * (bottom - top) / height)];
+    }
+    const target = presentedHardware;
+    if (!target) throw new Error('No physical display for hardware mouse coordinates');
+    return [target.x + Math.floor(x * target.width / width / (target.mode === 0x8000 ? 2 : 1)),
+      target.y + Math.floor(y * target.height / height)];
+  }
   function pointerPosition(x, y, width, height) {
     const target = presentedWindows ? screen() : presented || screen();
     if (!presentedWindows) return [Math.max(0, Math.min(target.width - 1, Math.floor(x * target.width / width))),
@@ -10125,7 +10236,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition,
+    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -11679,6 +11790,24 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     throw new Error(`Unsupported file information ${name}`);
   }
 
+  function limitMouse(x1, y1, x2, y2) {
+    display.screen();
+    x1 = integer(x1) & 65535; y1 = integer(y1) & 65535;
+    x2 = Math.min(458, integer(x2) & 65535); y2 = Math.min(312, integer(y2) & 65535);
+    if (x1 & 32768) x1 = 0;
+    if (y1 & 32768) y1 = 0;
+    if (x1 > x2) [x1, x2] = [x2, x1];
+    if (y1 > y2) [y1, y2] = [y2, y1];
+    // Like the source, defining limits does not immediately reposition the mouse.
+    state.input.mouseLimits = Object.freeze({ x1, y1, x2, y2 });
+  }
+  function limitMouseScreen(id = null) {
+    display.screen();
+    if (id != null) { id = integer(id); if (id < 0 || id > 7) throw new Error('Unsupported mouse screen (expected 0..7)'); }
+    const target = id == null ? display.screen() : display.screen(id);
+    limitMouse(target.hardwareX, target.hardwareY,
+      display.coordinate('X Hard', target.id, target.width - 1), display.coordinate('Y Hard', target.id, target.height - 1));
+  }
   function inputValue(name) {
     if (name === 'Inkey$') {
       if (!state.input.keys.length) return '';
@@ -11691,10 +11820,16 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;
+    if (name === 'Mouse Click') {
+      const now = state.input.mouse.buttons, clicked = now & ~state.input.mouseClick;
+      state.input.mouseClick = now;
+      return clicked;
+    }
     throw new Error(`Unsupported input query ${name}`);
   }
 
   return {
+    limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
@@ -11919,7 +12054,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -11933,10 +12068,14 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
+  }
+  function clearMouseButtons() {
+    state.input.mouse.buttons = 0;
+    state.input.mouseClick = 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -12156,7 +12295,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
@@ -12168,6 +12307,8 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     },
     setMouse(x, y, buttons = state.input.mouse.buttons) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(buttons) || buttons < 0 || buttons > 7) throw new Error('Invalid mouse state');
+      const limits = state.input.mouseLimits;
+      if (limits) { x = Math.max(limits.x1, Math.min(limits.x2, x)); y = Math.max(limits.y1, Math.min(limits.y2, y)); }
       state.input.mouse = { x, y, buttons };
     },
     ...operations

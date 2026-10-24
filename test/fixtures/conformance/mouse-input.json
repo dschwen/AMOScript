@@ -1,0 +1,89 @@
+{
+  "name": "mouse-limits-and-query-edge-replay",
+  "source": "Limit Mouse 128,48 To 448,220\nWait Key\nPrint X Mouse,Y Mouse,Mouse Key,Mouse Click,Mouse Click\nWait Key\nPrint X Mouse,Y Mouse,Mouse Key,Mouse Click,Mouse Click\nWait Key\nPrint X Mouse,Y Mouse,Mouse Key,Mouse Click,Mouse Click\nWait Key\nPrint X Mouse,Y Mouse,Mouse Key,Mouse Click,Mouse Click\nWait Key\nPrint X Mouse,Y Mouse,Mouse Key,Mouse Click,Mouse Click\n",
+  "programHex": "414d4f532042617369632076312e3030000000ba12001e6e003e00000080005c003e000000300094003e000001c0005c003e000000dc00000300129000000c0004761e16005c1e24005c1e32005c1e42005c1e4200000300129000000c0004761e16005c1e24005c1e32005c1e42005c1e4200000300129000000c0004761e16005c1e24005c1e32005c1e42005c1e4200000300129000000c0004761e16005c1e24005c1e32005c1e42005c1e4200000300129000000c0004761e16005c1e24005c1e32005c1e42005c1e420000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal Limit Mouse=1e6e, Wait Key=1290, Print=0476 and mouse query words 1e16/1e24/1e32/1e42, framed independently of production encoders/tables."
+  },
+  "mouseEvents": [
+    {
+      "x": 0,
+      "y": 0,
+      "buttons": 3
+    },
+    {
+      "x": 200,
+      "y": 100,
+      "buttons": 3
+    },
+    {
+      "x": 200,
+      "y": 100,
+      "buttons": 0
+    },
+    {
+      "x": 200,
+      "y": 100,
+      "buttons": 2
+    },
+    {
+      "x": 999,
+      "y": 999,
+      "buttons": 7
+    }
+  ],
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/mouse.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/sprites.cpp"
+    ],
+    "symbols": [
+      "w_sy_mouse_limit",
+      "w_sy_mouse_click",
+      "w_sy_mouse_key"
+    ],
+    "notes": "Host-injected positions clamp at inclusive limits; Mouse Click returns current buttons absent at the previous query, then updates that query history. The five injections occur at synthetic Wait Key guards. Source analysis, not an Amiga capture."
+  },
+  "expected": {
+    "values": [
+      [
+        128,
+        48,
+        3,
+        3,
+        0
+      ],
+      [
+        200,
+        100,
+        3,
+        0,
+        0
+      ],
+      [
+        200,
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        200,
+        100,
+        2,
+        2,
+        0
+      ],
+      [
+        448,
+        220,
+        7,
+        5,
+        0
+      ]
+    ],
+    "halted": true
+  }
+}
