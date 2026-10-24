@@ -29,5 +29,12 @@
       "height": 256,
       "sha256": "9037d31fb3238b50d788183316922b7a4aa6d8d3a459db47346c52bfd4b3782c"
     }
-  ]
+  ],
+  "titleSetup": {
+    "file": "title-setup.png",
+    "width": 640,
+    "height": 256,
+    "sha256": "b387668576f87948a10de5d3590d14b0a83074f0b77e362ddf23073a7dd87e49",
+    "evidence": "Original title pixels plus independently decoded opaque Bob 74 at (84,92); source-derived composition, not an Amiga capture."
+  }
 }

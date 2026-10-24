@@ -24,7 +24,7 @@ async function run() {
     await runScenario('music', page);
     console.log('Web Audio passed: six original sample PCM/stereo/rate comparisons, loops, voice replacement, Stop and disposal.');
     const wonderland = await runScenario('wonderland', page);
-    console.log('Wonderland startup: original first 48 lines execute both speed-test branches, read embedded level seeds and initialize image masks.');
+    console.log('Wonderland title: original first 64 lines execute through Wait Vbl, Load Iff and the menu Bob; Canvas and copper match independent composition in both startup branches.');
     console.log(`Wonderland: ${wonderland.images.length} original images match independent PNGs; ${wonderland.unrecognizedEncodings} encodings still unrecognized; gameRunning=${wonderland.gameRunning}`);
     const gpu = await runScenario('webgl-integers', page);
     const artifacts = path.join(__dirname, 'artifacts');

@@ -78,8 +78,9 @@ function installDemo(config) {
       frames.forEach((frame, i) => { const option = document.createElement('option'); option.value = i; option.textContent = frame.name; selector.append(option); });
       selector.hidden = frames.length === 0;
       if (frames.length) {
+        const preferred = frames.findIndex(frame => frame.name === config.initialFrame);
         const copper = frames.findIndex(frame => frame.name === 'copper-stack-dma');
-        selector.value = copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
+        selector.value = preferred >= 0 ? preferred : copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
       }
       button.disabled = false;
     }

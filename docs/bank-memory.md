@@ -53,7 +53,7 @@ contract above; it does not claim to reproduce numeric Amiga addresses.
 Tests cover typed scalars, arrays, DATA and procedure results, signed-byte storage,
 swapping, shrinking, replacement, group reloads, erasure, saving and audio reads.
 Generated modules run without `require` in a sandbox. The shared
-[Wonderland demo](../demos/wonderland.html) executes the original first 48 lines
+[Wonderland demo](../demos/wonderland.html) executes the original first 64 lines
 with its original embedded image and level banks, checking seeds
 `55,7,45,10,49`, image masks, sample setup and both startup timing branches.
 These expectations remain source/asset analysis, not Amiga execution captures.

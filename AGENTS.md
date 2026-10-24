@@ -31,6 +31,11 @@
   comparisons and Amiga captures. See `docs/audio.md` for the subset and limits.
 - `lib/amos/browser.js` handles Canvas/input; `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
+- `Load Iff` embeds the bounded ILBM reader for opaque non-laced screen loading.
+  Table-based rainbows materialize palette rows through the copper builder;
+  Canvas uses the same slot/row selection. Auto View/View stage screen replacement
+  separately from selected logical output. See `docs/title-display.md` for the
+  implemented subset and explicit pattern/NTSC/AMSC/timing gates.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip
   memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
   `lib/display/reference/render.js` provides basic planar render/explainPixel.

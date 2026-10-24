@@ -5,7 +5,7 @@ Original unmodified program and seven companion assets from
 `manifest.json` pins the revision, byte lengths and SHA-256 hashes.
 `UPSTREAM-LICENSE` preserves the upstream MIT license.
 
-The game does not compile/run yet. Its first 48 lines execute as a startup
+The game does not compile/run yet. Its first 64 lines execute as a title-setup
 fixture. See [the assessment](../../docs/wonderland.md)
 and [the startup/asset demo](../../demos/wonderland.html). The original program
 uses Amiga volume paths; the eventual browser files adapter must resolve those

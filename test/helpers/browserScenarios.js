@@ -237,7 +237,7 @@ const scenarios = [
     assert.ok(result.samples.every(sample => sample.maxDifference <= 1e-6));
     assert.strictEqual(result.loopChecks, 2); assert.strictEqual(result.lifecycleChecks, 5);
   } },
-  { id: 'wonderland', title: 'Wonderland milestone: startup and assets', description: 'Original 48-line startup, embedded level-seed reads, image masks, sample setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
+  { id: 'wonderland', title: 'Wonderland milestone: original title screen', initialFrame: 'Original title and menu marker (Canvas, fast startup)', description: 'Original 64-line title setup executes through Wait Vbl, image loading and its menu marker Bob. Both startup branches match an independent source-derived image. The menu loop and game are not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
     assert.strictEqual(result.gameRunning, false); assert.strictEqual(result.physicalLines, 753);
     assert.deepStrictEqual(result.images, [
       { name: 'Title_Screen.Iff', width: 640, height: 256, exact: true },
@@ -245,10 +245,11 @@ const scenarios = [
       { name: 'Score_Panel.Iff', width: 640, height: 256, exact: true },
       { name: 'Editor_Panel.Iff', width: 640, height: 256, exact: true }
     ]);
-    assert.ok(result.unrecognizedEncodings <= 31);
-    assert.strictEqual(result.startup.physicalLines, 48);
+    assert.ok(result.unrecognizedEncodings <= 24);
+    assert.strictEqual(result.startup.physicalLines, 64);
     assert.deepStrictEqual(result.startup.runs, [1, 0].map(speedFlag => ({ speedFlag, halted: true, variableBufferBytes: 10240,
-      commands: ['Amos Lock', 'Close Editor'], reads: ['AMOSPro_Productivity2:Wonderland/Wonderland_Samples.Abk'],
+      titleExact: true, waitedVbl: true, timersRemaining: 0,
+      commands: ['Amos Lock', 'Close Editor'], reads: ['AMOSPro_Productivity2:Wonderland/Wonderland_Samples.Abk', 'AMOSPro_Productivity2:Wonderland/Title_Screen.Iff'],
       audio: { bank: 5, loopMask: 0, filterEnabled: false }, sampleCount: 6,
       keySpeed: { delay: 10, interval: 2, delayMs: 200, intervalMs: 40 }, levelSeeds: [55,7,45,10,49],
       imageCount: 75, firstMasks: [true,false,true,true,false,true,true,false], finalMask: false })));

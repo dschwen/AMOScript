@@ -18,6 +18,7 @@ module.exports = async function checkBrowserDemos(browser) {
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
+      if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if (scenario.id === 'key-repeat') {
         await page.click('#repeat-input'); await page.keyboard.down('a');
         await page.waitForFunction(() => Number(document.getElementById('repeat-log').dataset.count) >= 3);

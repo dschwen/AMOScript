@@ -27,7 +27,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
     const checkSource = scenario.check.toString().replace(/^check\(/, 'function check(');
     const pngReference = scenario.id === 'webgl-integers'
       ? `data:image/png;base64,${encodePng(2, 2, Uint8Array.from([131,124,2,255,251,4,3,255,17,238,0,255,67,188,1,255])).toString('base64')}` : null;
-    const config = `{evaluate:(${captured[0].source}),argument:${json(captured[0].argument)},check:(${checkSource}),pngReference:${json(pngReference)}}`;
+    const config = `{evaluate:(${captured[0].source}),argument:${json(captured[0].argument)},check:(${checkSource}),pngReference:${json(pngReference)},initialFrame:${json(scenario.initialFrame || null)}}`;
     outputs.set(`${scenario.id}.html`, page(scenario.title,
       `<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a></nav>\n<h1>${escape(scenario.title)}</h1><p>${escape(scenario.description)}</p><p>Run the same scenario and assertions as the browser test suite. Select a captured frame to inspect it.</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><div id="stage"></div><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>\n` +
       script(browserSource) + script(`(${installDemo.toString()})(${config});`)));

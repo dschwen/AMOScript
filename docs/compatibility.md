@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **366 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **373 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,10 +9,9 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
-Its original first 48 lines now execute both startup benchmark branches,
-sample-bank load/setup, embedded level-seed reads and image-mask setup;
-full-source decoding stops at `Set Rainbow` on line 52.
-A bounded full inventory finds 31 unrecognized encodings. Four original images,
+Its original first 64 lines now execute both startup branches through Wait Vbl,
+Load Iff and the original title/menu marker Bob; full-source decoding stops at
+`Jup` on line 66. A bounded full inventory finds 24 unrecognized encodings. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
 audio demos. The game is not running.
 
@@ -20,6 +19,7 @@ audio demos. The game is not running.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| IFF screen loading / rainbow rows / views | Implemented subset | Current/new-screen opaque Load Iff; blank rainbow tables, Rain read/write and bounded PAL row presentation through shared copper/CPU/GPU snapshots; staged screen replacement with Auto View/View. Pattern strings, active NTSC, laced/AMSC language loads and exact display-list timing remain open. [Contract](title-display.md). |
 | Generic bank byte access | Implemented subset | Start returns per-factory virtual addresses; Peek reads unsigned bytes and Poke stores low bytes in the shared bank payload. Swap/shrink retain surviving addresses; erasure/reload retire them. Image-bank/raw hardware addresses reject. [Contract](bank-memory.md). |
 | Keyboard repeat | Implemented subset | Key Speed uses fixed 50ths; Canvas repeats held keys with native duplicates suppressed and release/blur/Stop/detach/End cleanup. Zero-period and large-word cases remain unsupported. [Contract](key-speed.md). |
 | Music extension / sample audio | Implemented subset | Bounded slot-1 decoding for bank selection, sample play/stop, loop settings and Led On/Off. Original Samples descriptors, four voice masks, Paula-derived rates, optional Web Audio stereo adapter, lifecycle cleanup and offline PCM comparisons. Analog response is approximate; other music commands remain unsupported. [Contract](audio.md). |
@@ -56,7 +56,7 @@ audio demos. The game is not running.
 | Bob collisions | Implemented subset | Bob Col, inclusive first To last range, Col status and repeatable negative searches, cached image masks, current coordinates and screen ownership. Independent-byte fixture and Chromium verify results. See [collision contract](collisions.md). Sprite/cross-type/hardware collision APIs and further hardware edge cases remain unfinished. |
 | Double buffering / Autoback | Implemented subset | Separate logical/physical buffers, Double Buffer, Screen Swap selected/all, Autoback 0/1/2 with Bob background synchronization and single cursor/output advancement. Chromium verifies hidden drawing until swap. See [buffering contract](buffering.md). Hardware swap scheduling and multi-screen interrupt side effects remain unverified. |
 | Hardware sprites | Implemented subset | Direct 16-pixel, 1/2-plane sprites with structured rows/shared Canvas-reference composition, pending/presented updates, palette/priority and coordinate helpers have unit coverage; Chromium verifies manual updates, movement, indexed-pixel separation, instance isolation and cursor restoration. Computed/attached AMOS sprites, DMA contention/timing and channel allocation remain unfinished; bounded raw DMA/reuse/manual registers are implemented. See [display architecture](display-architecture.md). |
-| Amiga reference/WebGL display | CPU/GPU subset implemented | ABI/chip memory, planar/copper/stack paths, static scroll/DPF, EHB/HAM6 and explicit normal/hires/EHB/HAM IFF fields have synthetic goldens. Weave/line-double take explicit history and handle odd heights. Eight-channel/attached sprite reference, bounded DMA/reuse/manual registers and direct AMOS sprite snapshots pass synthetic tests; Canvas/planar/copper EHB/HAM pixels and WebGL2 probe pass locally. AMOS display/copper commands, superhires/HAM8, live fields, sprite contention/computed allocation, GPU host switching and remaining GPU modes remain open; direct nearest/aspect/letterbox presentation and restoration pass six additional canvas checks; WebGL2 resource uploads/readback/loss restoration pass locally (see [contract](webgl-resources.md)); 151 local non-HAM GPU/CPU frames pass, including 100 seeded frames and shader restoration (see [renderer contract](webgl-renderer.md)); full mode/capture gates remain open. See [mode contract](display-modes.md). |
+| Amiga reference/WebGL display | CPU/GPU subset implemented | ABI/chip memory, planar/copper/stack paths, static scroll/DPF, EHB/HAM6 and explicit normal/hires/EHB/HAM IFF fields have synthetic goldens. Weave/line-double take explicit history and handle odd heights. Eight-channel/attached sprite reference, bounded DMA/reuse/manual registers and direct AMOS sprite snapshots pass synthetic tests; Canvas/planar/copper EHB/HAM pixels and WebGL2 probe pass locally. AMOS display/copper commands, superhires/HAM8, live fields, sprite contention/computed allocation, GPU host switching and remaining GPU modes remain open; direct nearest/aspect/letterbox presentation and restoration pass six additional canvas checks; WebGL2 resource uploads/readback/loss restoration pass locally (see [contract](webgl-resources.md)); 153 local non-HAM GPU/CPU frames pass, including 100 seeded frames and shader restoration (see [renderer contract](webgl-renderer.md)); full mode/capture gates remain open. See [mode contract](display-modes.md). |
 | Audio | Not implemented | Sample/music decoding and playback remain unfinished. Unsupported platform/extension commands fail explicitly. |
 | Encrypted/compiled procedures | Explicitly rejected | Rejected from header flags before parsing their bodies. |
 | ASCII input | Not implemented | Planned as a separate frontend sharing the AST/backend. |

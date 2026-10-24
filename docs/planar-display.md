@@ -131,8 +131,10 @@ and active palette-changing/cycling extensions reject. Up to 256 inactive CRNG
 records are retained as frozen metadata; size, reserved word, flag bits, range
 ordering and placement before BODY are checked. This enables the original
 Wonderland assets without implementing animated cycling. Unknown nonsemantic chunks
-are skipped with bounds checks. There is no AMOS Load Iff command wired to this
-utility yet, and existing bank Load behavior is unchanged.
+are skipped with bounds checks. Palette presence/count, CAMG presence and AMSC
+presence are retained as image metadata. The AMOS
+[Load Iff command](title-display.md) now uses this utility for opaque non-laced
+images; AMSC placement rejects explicitly. Existing bank Load behavior is unchanged.
 
 Inputs are bounded to 16 MiB, dimensions to 2048×2048, and decoded plane storage
 to configured chip capacity. ByteRun1 packets may not cross plane-row boundaries;

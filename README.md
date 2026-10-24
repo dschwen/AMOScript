@@ -9,9 +9,10 @@ Every browser test is available in the [demo gallery](demos/index.html), with
 See [demo instructions and coverage](demos/README.md).
 The next program milestone is **Dithell's Wonderland**: see the
 [readiness assessment and implementation order](docs/wonderland.md) and
-[startup and asset demo](demos/wonderland.html). Its original first 48 lines
-execute both benchmark branches, load/setup samples, read level seeds and initialize
-image masks. The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
+[executed title demo](demos/wonderland.html). Its original first 64 lines
+now load and render the title with its menu marker Bob; see
+[title display support](docs/title-display.md). The menu loop and game remain blocked.
+The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
 [audio contract](docs/audio.md). The full game does not compile or run yet.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU

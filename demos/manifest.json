@@ -15,8 +15,8 @@
     },
     {
       "file": "wonderland.html",
-      "title": "Wonderland milestone: startup and assets",
-      "description": "Original 48-line startup, embedded level-seed reads, image masks, sample setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.",
+      "title": "Wonderland milestone: original title screen",
+      "description": "Original 64-line title setup executes through Wait Vbl, image loading and its menu marker Bob. Both startup branches match an independent source-derived image. The menu loop and game are not running yet.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html"
     },
     {

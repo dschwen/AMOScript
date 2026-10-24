@@ -48,6 +48,28 @@ module.exports = async function webglRendererProbe(page, artifacts) {
     return { name: fixture.manifest.name, header: wire.header, chip: Buffer.from(wire.chip).toString('base64'),
       tables: Buffer.from(wire.tables).toString('base64'), golden: Buffer.from(fixture.golden.rgba).toString('base64') };
   });
+  function addPacket(name, snapshot, golden) {
+    const wire = model.serializeSnapshot(snapshot);
+    packets.push({ name, header: wire.header, chip: Buffer.from(wire.chip).toString('base64'),
+      tables: Buffer.from(wire.tables).toString('base64'), golden: Buffer.from(golden).toString('base64') });
+  }
+  const { compile } = require('./program'), { createFakeTimers } = require('./fakeTimers');
+  const { create } = compile(require('./wonderlandStartup')(64, true)), timers = createFakeTimers();
+  const title = create({ now: timers.now, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout,
+    displayOptions: { snapshotChipBytes: 524288 }, files: { read: name => fs.readFileSync(path.join(__dirname, '../../examples/Wonderland', name.split('/').pop())).toString('latin1') } });
+  title.tick(100000); timers.tick(20);
+  addPacket('wonderland-original-title', title.display.snapshotDisplay(), decodePng(fs.readFileSync(path.join(__dirname, '../fixtures/wonderland/title-setup.png'))).rgba);
+  const rainbow = require('../../lib/amos/display')({ snapshotChipBytes: 524288 });
+  rainbow.open(0, 320, 256, 16, 0); rainbow.clear(14); rainbow.setColour(14, 0x135);
+  rainbow.setRainbow(1, 14, 16, '', '', '');
+  for (let y = 0; y < 16; y++) rainbow.setRain(1, y, y * 0x111);
+  rainbow.rainbow(1, 3, 250, 10);
+  const golden = new Uint8Array(640 * 256 * 4);
+  for (let y = 0; y < 256; y++) {
+    const rgb = y >= 200 && y < 210 ? (3 + y - 200) * 0x111 : 0x135;
+    for (let x = 0; x < 640; x++) golden.set([(rgb >> 8) * 17, ((rgb >> 4) & 15) * 17, (rgb & 15) * 17, 255], (y * 640 + x) * 4);
+  }
+  addPacket('amos-rainbow-pal-wrap', rainbow.snapshotDisplay(), golden);
   const result = await page.evaluate(async ({ sources, images, packets }) => {
     const factory = name => new Function(`return (${sources[name]});`)();
     const model = factory('model')(), colours = factory('colour')(), sprites = factory('sprites')();

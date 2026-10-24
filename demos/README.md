@@ -11,7 +11,7 @@ Every current browser scenario is included:
 | --- | --- |
 | [AMOS keyboard repeat and lifecycle cleanup](key-repeat.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/key-repeat.html) |
 | [Wonderland sample playback and Web Audio checks](music.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/music.html) |
-| [Wonderland original startup benchmark, assets and readiness (game not running)](wonderland.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html) |
+| [Wonderland executed original title, menu Bob and readiness (menu loop/game blocked)](wonderland.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html) |
 | [Integer GPU readback and PNG decode](webgl-integers.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-integers.html) |
 | [GPU uploads, dirty rows and context lifecycle](webgl-resources.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-resources.html) |
 | [GPU/CPU image, mode, sprite, scaling and seeded-frame gallery](webgl-renderer.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html) |

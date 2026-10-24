@@ -32,9 +32,11 @@ sampling grid is shared, so lowres pixels occupy two samples and hires one.
 Geometry can override `standard`, `origin`, `outputWidth`, `lines`, `videoRate`
 and `pixelAspect`. `displayOptions.snapshotStandard` defaults to PAL.
 
-This is a host display API, not new AMOS syntax. `Screen Display`, `Screen Offset`,
-rainbow and user-copper commands still need token/source verification and full
-parser/lowerer/runtime semantics. The Canvas host still uses `rgba()`.
+`Screen Display`, `Screen Offset` and user-copper commands still need integration.
+[Table-based AMOS rainbows](title-display.md) now schedule bounded per-row palette
+MOVEs through this builder, including restoration and PAL wrap. Canvas uses the
+same rainbow table selection. Auto View stages screen replacement; the default
+snapshot and Canvas follow the presented screen. Exact VBL list timing remains open.
 
 `snapshotPlayfield`/`renderPlayfield` remain the full-bitmap migration/debug path
 from [the planar contract](planar-display.md), including virtual/odd/small screen

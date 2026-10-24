@@ -455,6 +455,133 @@
   }
   return frame;
 };
+  const ilbmReaderFactory = (function createIlbmReader(ChipMemory, snapshotModel, staticFrame) {
+  return function readIlbm(bytes, options = {}) {
+    const fail = (message, offset = 0) => { throw new Error(`ILBM at byte ${offset}: ${message}`); };
+    if (!ArrayBuffer.isView(bytes) || Object.prototype.toString.call(bytes) !== '[object Uint8Array]' ||
+        bytes.length < 12 || bytes.length > 16 * 1024 * 1024) fail('invalid input size/type');
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const tag = offset => String.fromCharCode(...bytes.subarray(offset, offset + 4));
+    if (tag(0) !== 'FORM' || tag(8) !== 'ILBM') fail('expected FORM ILBM');
+    const end = view.getUint32(4, false) + 8;
+    if (end !== bytes.length) fail('invalid FORM bounds', 4);
+    const chunks = {}, cycles = [];
+    for (let position = 12; position < end;) {
+      if (position + 8 > end) fail('truncated chunk header', position);
+      const type = tag(position), size = view.getUint32(position + 4, false), start = position + 8;
+      const next = start + size + (size & 1);
+      if (next > end) fail('truncated chunk/padding', position);
+      if (['DEST', 'PCHG', 'SHAM', 'CTBL', 'CCRT', 'DRNG'].includes(type)) fail(`unsupported ${type} semantics`, position);
+      if (type === 'CRNG') {
+        if (cycles.length >= 256) fail('too many CRNG records', position);
+        if (chunks.BODY) fail('properties must precede BODY', position);
+        if (size !== 8) fail('invalid CRNG size', position);
+        const rate = view.getUint16(start + 2, false), flags = view.getUint16(start + 4, false), low = bytes[start + 6], high = bytes[start + 7];
+        if (view.getUint16(start, false) || (flags & ~3) || low > high) fail('invalid CRNG metadata', position);
+        if (flags & 1) fail('unsupported active CRNG semantics', position);
+        cycles.push(Object.freeze({ rate, flags, low, high }));
+      }
+      if (['BMHD', 'CMAP', 'CAMG', 'BODY', 'AMSC'].includes(type)) {
+        if (chunks[type]) fail(`duplicate ${type}`, position);
+        if (chunks.BODY) fail('properties must precede BODY', position);
+        if (type === 'BODY' && !chunks.BMHD) fail('BODY precedes BMHD', position);
+        chunks[type] = { start, size };
+      }
+      position = next;
+    }
+    if (!chunks.BMHD || !chunks.BODY) fail('missing BMHD/BODY');
+    if (chunks.BMHD.size !== 20) fail('invalid BMHD size', chunks.BMHD.start);
+    const at = chunks.BMHD.start, width = view.getUint16(at, false), height = view.getUint16(at + 2, false);
+    const depth = bytes[at + 8], masking = bytes[at + 9], compression = bytes[at + 10];
+    if (width < 1 || width > 2048 || height < 1 || height > 2048 || depth < 1 || depth > 6) fail('unsupported dimensions/depth', at);
+    if (![0, 1, 2].includes(masking)) fail('unsupported masking', at + 9);
+    if (![0, 1].includes(compression)) fail('unsupported compression', at + 10);
+    const transparentColour = view.getUint16(at + 12, false);
+    if (masking === 2 && transparentColour >= (1 << depth)) fail('invalid transparent colour', at + 12);
+    let mode = 0, displayMode = 0, monitor = null;
+    if (chunks.CAMG) {
+      if (chunks.CAMG.size !== 4) fail('invalid CAMG size', chunks.CAMG.start);
+      mode = view.getUint32(chunks.CAMG.start, false);
+      const monitorId = mode >>> 16;
+      if (monitorId && (![1, 2].includes(monitorId) || !(mode & 0x1000))) fail('unsupported CAMG monitor ID', chunks.CAMG.start);
+      if (!monitorId && (mode & 0x1000)) fail('unsupported CAMG extended mode without monitor ID', chunks.CAMG.start);
+      monitor = monitorId === 1 ? 'NTSC' : monitorId === 2 ? 'PAL' : null;
+      // SPRITES describes a ViewPort flag, not ILBM pixel planes. The extended
+      // marker belongs to a recognized PAL/NTSC ModeID, not BPLCON0.
+      displayMode = (mode & 65535) & ~(0x4000 | (monitorId ? 0x1000 : 0));
+      if (displayMode & ~0x8884) fail('unsupported CAMG mode (AGA/other extended modes remain planned)', chunks.CAMG.start);
+    }
+    const ham = !!(displayMode & 0x800), ehb = !!(displayMode & 0x80);
+    if (ham && (ehb || (mode & 0x8000) || ![5, 6].includes(depth))) fail('invalid/unsupported HAM mode and plane count', at);
+    if (!ham && ((depth === 6) !== ehb || (ehb && (mode & 0x8000)))) fail('invalid/unsupported EHB mode and plane count', at);
+    if ((mode & 0x8000) && depth > 4) fail('hires supports at most four planes', at);
+    const colours = 1 << depth;
+    const baseColours = ham ? 16 : Math.min(32, colours);
+    const palette = Array.from({ length: 32 }, (_, index) => index < baseColours ? Math.round(index * 15 / (baseColours - 1)) * 0x111 : 0);
+    if (chunks.CMAP) {
+      const { start, size } = chunks.CMAP;
+      if (size % 3 || size > 768) fail('invalid CMAP size', start);
+      for (let i = 0; i < Math.min(32, size / 3); i++) {
+        palette[i] = ((bytes[start + i * 3] >> 4) << 8) | ((bytes[start + i * 3 + 1] >> 4) << 4) | (bytes[start + i * 3 + 2] >> 4);
+      }
+    }
+    const rowBytes = Math.ceil(width / 16) * 2, planeBytes = rowBytes * height;
+    const memory = new ChipMemory(options.chipBytes);
+    if (planeBytes * depth > memory.bytes.length) fail('image exceeds chip capacity', at);
+    const allocation = memory.allocate(planeBytes * depth);
+    const planar = new Uint8Array(allocation.length);
+    const mask = masking === 1 ? new Uint8Array(planeBytes) : null;
+    let position = chunks.BODY.start;
+    const bodyEnd = position + chunks.BODY.size;
+    function row() {
+      if (compression === 0) {
+        if (position + rowBytes > bodyEnd) fail('truncated uncompressed row', position);
+        const result = bytes.subarray(position, position + rowBytes); position += rowBytes; return result;
+      }
+      const result = new Uint8Array(rowBytes);
+      let written = 0;
+      while (written < rowBytes) {
+        if (position >= bodyEnd) fail('truncated ByteRun1 row', position);
+        const code = bytes[position++];
+        if (code === 128) continue;
+        const count = code < 128 ? code + 1 : 257 - code;
+        if (count > rowBytes - written) fail('ByteRun1 run crosses row boundary', position - 1);
+        if (code < 128) {
+          if (position + count > bodyEnd) fail('truncated ByteRun1 literal', position);
+          result.set(bytes.subarray(position, position + count), written); position += count;
+        } else {
+          if (position >= bodyEnd) fail('truncated ByteRun1 repeat', position);
+          result.fill(bytes[position++], written, written + count);
+        }
+        written += count;
+      }
+      return result;
+    }
+    for (let y = 0; y < height; y++) {
+      for (let plane = 0; plane < depth; plane++) planar.set(row(), plane * planeBytes + y * rowBytes);
+      if (mask) mask.set(row(), y * rowBytes);
+    }
+    if (compression === 1) while (position < bodyEnd && bytes[position] === 128) position++;
+    if (position !== bodyEnd) fail('trailing BODY data', position);
+    memory.writeBytes(allocation.address, planar);
+    const samples = mode & 0x8000 ? 1 : 2;
+    const field = mode & 4 ? (options.field == null ? 0 : options.field) : null;
+    if ((field != null && field !== 0 && field !== 1) || (!(mode & 4) && options.field != null)) fail('invalid field selection', at);
+    const fieldLines = field == null ? height : Math.ceil((height - field) / 2);
+    const xAspect = bytes[at + 14], yAspect = bytes[at + 15];
+    const frame = staticFrame({ width, height: fieldLines, outputHeight: height, interlaceField: field, depth,
+      rowBytes: rowBytes * (field == null ? 1 : 2), palette,
+      pointers: Array.from({ length: depth }, (_, plane) => allocation.address + plane * planeBytes + (field || 0) * rowBytes),
+      hires: !!(mode & 0x8000), ham, origin: options.origin, videoRate: options.videoRate || (monitor ? { numerator: monitor === 'PAL' ? 50 : 60, denominator: 1 } : undefined),
+      pixelAspect: xAspect && yAspect ? { numerator: xAspect, denominator: yAspect * samples } : undefined });
+    return { snapshot: snapshotModel.createSnapshot({ chip: memory.bytes, frame }), mask,
+      image: Object.freeze({ width, height, depth, rowBytes, mode, displayMode, monitor, cycles: Object.freeze(cycles), masking, compression, transparentColour,
+        hasPalette: !!chunks.CMAP, paletteSize: chunks.CMAP ? chunks.CMAP.size / 3 : 0,
+        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC,
+        x: view.getInt16(at + 4, false), y: view.getInt16(at + 6, false), xAspect, yAspect,
+        pageWidth: view.getInt16(at + 16, false), pageHeight: view.getInt16(at + 18, false) }) };
+  };
+})(chipMemoryClass, frameStateModel, staticFrameFactory);
   const planarBridgeFactory = function createPhysicalBridge(display, options, ChipMemory, snapshotModel, staticFrame, copperBuilder, copperInterpreter) {
   const memory = new ChipMemory(options.snapshotChipBytes);
   const records = new Map();
@@ -462,7 +589,7 @@
   let copperAllocation = null;
   function prune() {
     for (const [target, buffers] of records) {
-      const active = display.screens.get(target.id) === target;
+      const active = display.screens.get(target.id) === target || (display.isPresented && display.isPresented(target));
       for (const [buffer, record] of buffers) {
         if (active && (buffer === target.pixels || buffer === target.physicalPixels)) continue;
         memory.free(record.allocation); buffers.delete(buffer);
@@ -517,6 +644,7 @@
       outputWidth: Math.max(...views.map(view => view.width * (view.hires ? 1 : 2))),
       lines: Math.max(...views.map(view => view.y + view.height)) - top,
       standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
+      paletteRows: display.paletteRows ? display.paletteRows(views) : [],
       pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
     if (copperAllocation) { memory.free(copperAllocation); copperAllocation = null; }
     copperAllocation = memory.allocate(compiled.bytes.length);
@@ -756,7 +884,7 @@
     if (options.standard && !['PAL', 'NTSC'].includes(options.standard)) fail('unsupported video standard');
     if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
-    const initialRegisters = new Uint16Array(256), words = [];
+    const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
     let previous = null;
     const emit = (first, second) => { words.push(first, second); };
     const wait = y => emit(((y & 255) << 8) | 1, 0xfffe);
@@ -808,10 +936,27 @@
         // Reprogram in the left blanking interval. Never pretend an oversized
         // palette/pointer update fit before DMA; wider scheduling is a later gate.
         if (2 + changes.length * 4 >= ddfStart) fail('screen setup exceeds pre-fetch copper budget');
-        wait(y);
-        for (const [reg, value] of changes) emit(reg, value);
+        changesByLine.set(y, new Map(changes));
       }
       previous = { setup, endY };
+    }
+    const paletteRows = options.paletteRows || [];
+    if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
+    for (const row of paletteRows) {
+      if (!Number.isInteger(row.y) || row.y < 0 || row.y >= (options.standard === 'NTSC' ? 262 : 312) ||
+          !Number.isInteger(row.index) || row.index < 0 || row.index > 31 ||
+          !Number.isInteger(row.rgb) || row.rgb < 0 || row.rgb > 0xfff) fail('invalid palette row');
+      if (!changesByLine.has(row.y)) changesByLine.set(row.y, new Map());
+      changesByLine.get(row.y).set(R.COLOR00 + row.index * 2, row.rgb);
+    }
+    let wrapped = false;
+    for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
+      const view = views.slice().reverse().find(view => view.y <= y) || views[0];
+      const fetchStart = (view.hires ? 0x3c : 0x38) - (view.scroll ? 8 : 0);
+      if (2 + changes.size * 4 >= fetchStart) fail('screen/palette setup exceeds pre-fetch copper budget');
+      if (y >= 256 && !wrapped) { emit(0xffdf, 0xfffe); wrapped = true; }
+      wait(y);
+      for (const [reg, value] of changes) emit(reg, value);
     }
     const spritePointers = options.spritePointers;
     if (spritePointers != null) {
@@ -1107,11 +1252,17 @@
   let drawingHooks = null;
   let spriteWriter = null;
   let planarBridge = null;
+  let autoView = true, presented = null;
+  const rainbows = new Map();
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
 
-  function changed() {
+  function changed(viewChange = false) {
     version++;
     if (planarBridge) planarBridge.prune();
+    if (viewChange) {
+      if (!autoView) return;
+      presented = screens.get(current) || null;
+    }
     listeners.forEach(listener => listener(version));
   }
   function whole(value) {
@@ -1147,21 +1298,66 @@
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
       inkBackground: 0, inkBorder: 0, x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
-      columns: Math.floor(width / 8), rows: Math.floor(height / 8)
+      columns: Math.floor(width / 8), rows: Math.floor(height / 8), cursorVisible: true
     };
     next.pixels.fill(paper);
     next.physicalPixels = next.pixels;
     screens.set(id, next);
     current = id;
-    changed();
+    changed(true);
     return next;
   }
-  function select(id) { screen(id); current = id; changed(); }
+  function select(id) { screen(id); current = id; changed(true); }
   function close(id) {
     screen(id);
     screens.delete(id);
     if (current === id) current = screens.size ? screens.keys().next().value : null;
+    changed(true);
+  }
+  function view() { presented = screens.get(current) || null; changed(); }
+  function setAutoView(enabled) { autoView = enabled; if (enabled) view(); }
+  function setRainbow(number, colour, length, red, green, blue, start = 0) {
+    [number, colour, length, start].forEach(whole);
+    if (number < 0 || number > 3 || colour < 0 || (colour & 31) > 15 || length < 16 || length >= 32700) throw new Error('Invalid Set Rainbow arguments');
+    if ([red, green, blue].some(pattern => pattern !== '')) throw new Error('Rainbow pattern strings are not implemented');
+    const colours = new Uint16Array(length); colours.fill(start & 0xfff);
+    rainbows.set(number, { colour: colour & 31, colours, base: 0, y: 28, height: 0 }); changed();
+  }
+  function rainbow(number, base = null, y = null, height = null) {
+    const table = rainbows.get(whole(number));
+    if (!table) throw new Error('Rainbow is not defined');
+    [base, y, height].filter(value => value != null).forEach(whole);
+    if ((base != null && base < 0) || (y != null && (y < 0 || y > 311)) ||
+        (height != null && (height < 0 || height > 312))) throw new Error('Unsupported Rainbow placement');
+    if ((height == null ? table.height : height) && options.snapshotStandard === 'NTSC') throw new Error('NTSC rainbow presentation is not implemented');
+    if (base != null && base < table.colours.length) table.base = base;
+    if (y != null) table.y = Math.max(28, y);
+    if (height != null) table.height = height;
     changed();
+  }
+  function rainColour(number, line) {
+    const table = rainbows.get(whole(number));
+    if (!table || !Number.isInteger(line) || line < 0 || line >= table.colours.length) throw new Error('Rain index out of bounds');
+    return table.colours[line];
+  }
+  function setRain(number, line, rgb) { rainColour(number, line); rainbows.get(number).colours[line] = whole(rgb) & 0xfff; changed(); }
+  function activeRainbow(y) {
+    for (let number = 0; number < 4; number++) {
+      const table = rainbows.get(number);
+      if (table && y >= table.y && y < table.y + table.height) return table;
+    }
+    return null;
+  }
+  function paletteRows(views) {
+    const rows = []; let previous = null;
+    const ordered = views.slice().sort((a, b) => a.y - b.y);
+    for (let y = 0; y < 312; y++) {
+      const view = ordered.slice().reverse().find(view => view.y <= y) || ordered[0], table = activeRainbow(y);
+      if (previous && (!table || previous.colour !== table.colour)) rows.push({ y, index: previous.colour, rgb: view.palette[previous.colour] || 0 });
+      if (table) rows.push({ y, index: table.colour, rgb: table.colours[(table.base + y - table.y) % table.colours.length] });
+      previous = table;
+    }
+    return rows;
   }
   function doubleBuffer() {
     const target = screen();
@@ -1456,7 +1652,7 @@
     return word(horizontal && target.mode === 0x8000 ? offset * 2 : offset);
   }
   function rgba(id = current) {
-    const target = screen(id);
+    const target = typeof id === 'object' ? id : screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
     let spriteFrame = null, spriteRows = null;
     const samples = target.mode === 0x8000 ? 1 : 2;
@@ -1473,21 +1669,26 @@
       spriteWriter(spriteFrame);
       for (let y = 0; y < target.height; y++) spriteRows[y] = spriteModel.validate(spriteFrame, y) ? 1 : 0;
     }
+    const colourAt = (index, y) => {
+      const table = activeRainbow(target.hardwareY + y);
+      return table && table.colour === index ? table.colours[(table.base + target.hardwareY + y - table.y) % table.colours.length] : target.palette[index];
+    };
     let previous = target.palette[0];
     for (let i = 0; i < target.physicalPixels.length; i++) {
       const index = target.physicalPixels[i];
-      let rgb = target.palette[target.colours === 64 ? index & 31 : index];
+      const line = Math.floor(i / target.width);
+      let rgb = colourAt(target.colours === 64 ? index & 31 : index, line);
       if (target.ham) {
         if (!colorModel) throw new Error('HAM colour helpers are not loaded');
         if (index > 63) throw new Error('Invalid HAM pixel code');
-        if (i % target.width === 0) previous = target.palette[0];
-        rgb = colorModel.hamWord(index, previous, target.palette[index & 15]);
+        if (i % target.width === 0) previous = colourAt(0, line);
+        rgb = colorModel.hamWord(index, previous, colourAt(index & 15, line));
         previous = rgb;
       } else if (target.colours === 64 && (index & 32)) rgb = (rgb >> 1) & 0x777;
       const y = Math.floor(i / target.width);
       if (spriteFrame && spriteRows[y]) {
         const sprite = spriteModel.sample(spriteFrame, y, (i % target.width) * samples, index);
-        if (sprite && sprite.visible) rgb = target.palette[sprite.paletteIndex];
+        if (sprite && sprite.visible) rgb = colourAt(sprite.paletteIndex, line);
       }
       result[i * 4] = ((rgb >> 8) & 15) * 17;
       result[i * 4 + 1] = ((rgb >> 4) & 15) * 17;
@@ -1499,7 +1700,8 @@
   function getPlanarBridge() {
     if (!planarBridge) {
       if (!planarBridgeFactory || !chipMemoryClass || !frameStateModel || !staticFrameFactory) throw new Error('Planar snapshot helpers are not loaded');
-      planarBridge = planarBridgeFactory({ screens, writeSprites: frame => { if (spriteWriter) spriteWriter(frame); } }, options, chipMemoryClass, frameStateModel, staticFrameFactory, copperBuilder, copperInterpreter);
+      planarBridge = planarBridgeFactory({ screens, paletteRows, isPresented: target => presented === target,
+        writeSprites: frame => { if (spriteWriter) spriteWriter(frame); } }, options, chipMemoryClass, frameStateModel, staticFrameFactory, copperBuilder, copperInterpreter);
     }
     return planarBridge;
   }
@@ -1509,12 +1711,12 @@
     const snapshot = snapshotPlayfield(id);
     return referenceRenderer.render(snapshot.chip, snapshot.frame);
   }
-  function snapshotDisplay(ids = current, geometry = {}) {
+  function snapshotDisplay(ids = null, geometry = {}) {
     if (!copperBuilder || !copperInterpreter) throw new Error('Copper helpers are not loaded');
-    const targets = (Array.isArray(ids) ? ids : [ids]).map(id => screen(id));
+    const targets = ids == null ? (presented ? [presented] : []) : (Array.isArray(ids) ? ids : [ids]).map(id => screen(id));
     return getPlanarBridge().snapshotDisplay(targets, geometry);
   }
-  function renderDisplay(ids = current, geometry = {}) {
+  function renderDisplay(ids = null, geometry = {}) {
     if (!referenceRenderer) throw new Error('Planar reference renderer is not loaded');
     const snapshot = snapshotDisplay(ids, geometry);
     return referenceRenderer.render(snapshot.chip, snapshot.frame);
@@ -1522,6 +1724,11 @@
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, setColour, setPalette,
+    rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
+    autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
+    presentedScreen: () => presented,
+    get autoView() { return autoView; },
+    cursOff() { screen().cursorVisible = false; },
     ink, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
@@ -2038,6 +2245,42 @@
       return next;
     });
     installBanks(loaded, [], decoded.grouped);
+  }
+
+  function loadIff(filename, destination = null) {
+    if (!options.files || typeof options.files.read !== 'function') throw new Error('Load Iff requires a files host adapter');
+    if (typeof ilbmReaderFactory !== 'function') throw new Error('Load Iff requires the ILBM runtime');
+    const contents = options.files.read(filename);
+    if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return IFF bytes synchronously');
+    const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
+    const mode = image.hasMode ? image.displayMode :
+      ((image.pageWidth >= 640 && image.depth <= 4 ? 0x8000 : 0) | (image.pageHeight >= 400 ? 4 : 0));
+    if (image.masking || (mode & 4) || image.hasAmosScreen) throw new Error('Load Iff masks, interlace and AMSC placement are not implemented');
+    let target;
+    if (destination != null) {
+      destination = integer(destination);
+      target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
+        mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
+    } else target = display.screen();
+    if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
+    clearBobs(target);
+    const mask = (1 << image.depth) - 1;
+    for (let y = 0; y < Math.min(image.height, target.height); y++) for (let x = 0; x < image.width; x++) {
+      let index = 0;
+      for (let plane = 0; plane < image.depth; plane++) {
+        const address = snapshot.frame.lineRegs[plane] + y * image.rowBytes + (x >> 3);
+        if (snapshot.chip[address] & (128 >> (x & 7))) index |= 1 << plane;
+      }
+      const at = y * target.width + x;
+      target.pixels[at] = (target.pixels[at] & ~mask) | index;
+    }
+    if (image.hasPalette) for (let index = 0; index < Math.min(32, image.paletteSize); index++) {
+      const at = index * 4;
+      target.palette[index] = ((snapshot.frame.linePal[at] >> 4) << 8) |
+        ((snapshot.frame.linePal[at + 1] >> 4) << 4) | (snapshot.frame.linePal[at + 2] >> 4);
+    }
+    target.cursorVisible = false;
+    imageBobsChanged(); display.invalidate();
   }
 
   function installBanks(loaded, removed = [], clear = false) {
@@ -2897,7 +3140,7 @@
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
       if (options.resetInput) options.resetInput();
     },
-    audio,
+    audio, loadIff,
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),

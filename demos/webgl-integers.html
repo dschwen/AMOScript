@@ -36,12 +36,12 @@ function createCanvasHost(canvas, options = {}) {
     if (!program) return;
     const display = program.display;
     if (canvas.style && program.mouseVisible) canvas.style.cursor = program.mouseVisible() ? previousCursor || '' : 'none';
-    if (display.current == null) { canvas.width = 0; canvas.height = 0; return; }
-    const screen = display.screen();
+    const screen = display.presentedScreen ? display.presentedScreen() : display.current == null ? null : display.screen();
+    if (!screen) { canvas.width = 0; canvas.height = 0; return; }
     if (canvas.width !== screen.width) canvas.width = screen.width;
     if (canvas.height !== screen.height) canvas.height = screen.height;
     const frame = context.createImageData(screen.width, screen.height);
-    frame.data.set(display.rgba());
+    frame.data.set(display.rgba(screen));
     context.putImageData(frame, 0, 0);
   }
   function schedule() {
@@ -70,8 +70,9 @@ function createCanvasHost(canvas, options = {}) {
   }
   function keyup(event) { if (held && held.code === (event.code || event.key)) releaseKey(); }
   function pointer(event) {
-    if (!program || program.display.current == null) return;
-    const screen = program.display.screen();
+    if (!program) return;
+    const screen = program.display.presentedScreen ? program.display.presentedScreen() : program.display.current == null ? null : program.display.screen();
+    if (!screen) return;
     const bounds = canvas.getBoundingClientRect();
     if (!bounds.width || !bounds.height) return;
     const scaleX = canvas.offsetWidth ? bounds.width / canvas.offsetWidth : 1;
@@ -197,8 +198,9 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
       frames.forEach((frame, i) => { const option = document.createElement('option'); option.value = i; option.textContent = frame.name; selector.append(option); });
       selector.hidden = frames.length === 0;
       if (frames.length) {
+        const preferred = frames.findIndex(frame => frame.name === config.initialFrame);
         const copper = frames.findIndex(frame => frame.name === 'copper-stack-dma');
-        selector.value = copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
+        selector.value = preferred >= 0 ? preferred : copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
       }
       button.disabled = false;
     }
@@ -293,4 +295,4 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   }),argument:undefined,check:(function check(result, assert) {
     assert.match(result.version, /^WebGL 2/); assert.ok(result.maxTextureSize >= 2048);
     assert.deepStrictEqual(result.pixels, [131,124,2,255,251,4,3,255,17,238,0,255,67,188,1,255]);
-  }),pngReference:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVR4nGNormH6/5uF+T+D4DuG/857GP8DAEXhB/9VE99/AAAAAElFTkSuQmCC"});</script></body></html>
+  }),pngReference:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAG0lEQVR4nGNormH6/5uF+T+D4DuG/857GP8DAEXhB/9VE99/AAAAAElFTkSuQmCC",initialFrame:null});</script></body></html>
