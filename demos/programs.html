@@ -2908,6 +2908,27 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     hotSpot(number, x === 0 ? 0 : x === 1 ? Math.floor(image.width / 2) : image.width, y === 0 ? 0 : y === 1 ? Math.floor(image.height / 2) : image.height);
   }
 
+  function bload(filename, destination) {
+    const address = bankMemory.address(integer(destination));
+    if (!options.files || typeof options.files.read !== 'function') throw new Error('Bload requires a files host adapter');
+    const contents = options.files.read(filename);
+    if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return raw bytes synchronously');
+    bankMemory.checkRange(address, contents.length);
+    bankMemory.write(address, Uint8Array.from(contents, char => char.charCodeAt(0)));
+  }
+  function bsave(filename, start, end) {
+    const address = bankMemory.address(integer(start)), stop = integer(end) >>> 0;
+    if (stop <= address) throw new Error('Invalid Bsave range (end must follow start)');
+    const bytes = bankMemory.read(address, stop - address);
+    if (!options.files || typeof options.files.write !== 'function') throw new Error('Bsave requires a files host adapter');
+    let contents = '';
+    for (let at = 0; at < bytes.length; at += 8192) contents += String.fromCharCode(...bytes.subarray(at, at + 8192));
+    const write = text => {
+      const result = options.files.write(filename, text);
+      if (result && typeof result.then === 'function') throw new Error('Files host must write raw bytes synchronously');
+    };
+    write(''); write(contents);
+  }
   function loadBanks(filename, destination = null) {
     if (destination != null) destination = integer(destination);
     if (destination != null && destination >= 65536) throw new Error('Invalid bank number');
@@ -3830,6 +3851,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   }
 
   return {
+    bload, bsave,
     limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
@@ -3998,20 +4020,29 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     }
     return allocation.base;
   }
-  function resolve(address) {
+  function resolve(address, length = 1) {
     if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid bank memory range');
     prune();
     for (const [bank, allocation] of allocations) {
-      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+      if (address >= allocation.base && address <= allocation.base + allocation.capacity) {
         const offset = address - allocation.base;
         if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
-        if (offset >= bank.data.length) break;
+        if (offset > bank.data.length || length > bank.data.length - offset) break;
         return { bank, offset };
       }
     }
     throw new Error('Bank memory address out of bounds or retired');
   }
   return { start,
+    address(value) {
+      // Original bank_or_address treats operands below 1024 as bank numbers.
+      const address = value < 1024 ? start(value) : value;
+      resolve(address, 0); return address;
+    },
+    checkRange(address, length) { resolve(address, length); },
+    read(address, length) { const { bank, offset } = resolve(address, length); return bank.data.slice(offset, offset + length); },
+    write(address, bytes) { const { bank, offset } = resolve(address, bytes.length); bank.data.set(bytes, offset); },
     peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
     poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
     release(bank) { allocations.delete(bank); } };
@@ -6899,6 +6930,27 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     hotSpot(number, x === 0 ? 0 : x === 1 ? Math.floor(image.width / 2) : image.width, y === 0 ? 0 : y === 1 ? Math.floor(image.height / 2) : image.height);
   }
 
+  function bload(filename, destination) {
+    const address = bankMemory.address(integer(destination));
+    if (!options.files || typeof options.files.read !== 'function') throw new Error('Bload requires a files host adapter');
+    const contents = options.files.read(filename);
+    if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return raw bytes synchronously');
+    bankMemory.checkRange(address, contents.length);
+    bankMemory.write(address, Uint8Array.from(contents, char => char.charCodeAt(0)));
+  }
+  function bsave(filename, start, end) {
+    const address = bankMemory.address(integer(start)), stop = integer(end) >>> 0;
+    if (stop <= address) throw new Error('Invalid Bsave range (end must follow start)');
+    const bytes = bankMemory.read(address, stop - address);
+    if (!options.files || typeof options.files.write !== 'function') throw new Error('Bsave requires a files host adapter');
+    let contents = '';
+    for (let at = 0; at < bytes.length; at += 8192) contents += String.fromCharCode(...bytes.subarray(at, at + 8192));
+    const write = text => {
+      const result = options.files.write(filename, text);
+      if (result && typeof result.then === 'function') throw new Error('Files host must write raw bytes synchronously');
+    };
+    write(''); write(contents);
+  }
   function loadBanks(filename, destination = null) {
     if (destination != null) destination = integer(destination);
     if (destination != null && destination >= 65536) throw new Error('Invalid bank number');
@@ -7821,6 +7873,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   }
 
   return {
+    bload, bsave,
     limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
@@ -7989,20 +8042,29 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     }
     return allocation.base;
   }
-  function resolve(address) {
+  function resolve(address, length = 1) {
     if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid bank memory range');
     prune();
     for (const [bank, allocation] of allocations) {
-      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+      if (address >= allocation.base && address <= allocation.base + allocation.capacity) {
         const offset = address - allocation.base;
         if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
-        if (offset >= bank.data.length) break;
+        if (offset > bank.data.length || length > bank.data.length - offset) break;
         return { bank, offset };
       }
     }
     throw new Error('Bank memory address out of bounds or retired');
   }
   return { start,
+    address(value) {
+      // Original bank_or_address treats operands below 1024 as bank numbers.
+      const address = value < 1024 ? start(value) : value;
+      resolve(address, 0); return address;
+    },
+    checkRange(address, length) { resolve(address, length); },
+    read(address, length) { const { bank, offset } = resolve(address, length); return bank.data.slice(offset, offset + length); },
+    write(address, bytes) { const { bank, offset } = resolve(address, bytes.length); bank.data.set(bytes, offset); },
     peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
     poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
     release(bank) { allocations.delete(bank); } };
@@ -10907,6 +10969,27 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     hotSpot(number, x === 0 ? 0 : x === 1 ? Math.floor(image.width / 2) : image.width, y === 0 ? 0 : y === 1 ? Math.floor(image.height / 2) : image.height);
   }
 
+  function bload(filename, destination) {
+    const address = bankMemory.address(integer(destination));
+    if (!options.files || typeof options.files.read !== 'function') throw new Error('Bload requires a files host adapter');
+    const contents = options.files.read(filename);
+    if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return raw bytes synchronously');
+    bankMemory.checkRange(address, contents.length);
+    bankMemory.write(address, Uint8Array.from(contents, char => char.charCodeAt(0)));
+  }
+  function bsave(filename, start, end) {
+    const address = bankMemory.address(integer(start)), stop = integer(end) >>> 0;
+    if (stop <= address) throw new Error('Invalid Bsave range (end must follow start)');
+    const bytes = bankMemory.read(address, stop - address);
+    if (!options.files || typeof options.files.write !== 'function') throw new Error('Bsave requires a files host adapter');
+    let contents = '';
+    for (let at = 0; at < bytes.length; at += 8192) contents += String.fromCharCode(...bytes.subarray(at, at + 8192));
+    const write = text => {
+      const result = options.files.write(filename, text);
+      if (result && typeof result.then === 'function') throw new Error('Files host must write raw bytes synchronously');
+    };
+    write(''); write(contents);
+  }
   function loadBanks(filename, destination = null) {
     if (destination != null) destination = integer(destination);
     if (destination != null && destination >= 65536) throw new Error('Invalid bank number');
@@ -11829,6 +11912,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   }
 
   return {
+    bload, bsave,
     limitMouse, limitMouseScreen,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
@@ -11997,20 +12081,29 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
     }
     return allocation.base;
   }
-  function resolve(address) {
+  function resolve(address, length = 1) {
     if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid bank memory range');
     prune();
     for (const [bank, allocation] of allocations) {
-      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+      if (address >= allocation.base && address <= allocation.base + allocation.capacity) {
         const offset = address - allocation.base;
         if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
-        if (offset >= bank.data.length) break;
+        if (offset > bank.data.length || length > bank.data.length - offset) break;
         return { bank, offset };
       }
     }
     throw new Error('Bank memory address out of bounds or retired');
   }
   return { start,
+    address(value) {
+      // Original bank_or_address treats operands below 1024 as bank numbers.
+      const address = value < 1024 ? start(value) : value;
+      resolve(address, 0); return address;
+    },
+    checkRange(address, length) { resolve(address, length); },
+    read(address, length) { const { bank, offset } = resolve(address, length); return bank.data.slice(offset, offset + length); },
+    write(address, bytes) { const { bank, offset } = resolve(address, bytes.length); bank.data.set(bytes, offset); },
     peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
     poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
     release(bank) { allocations.delete(bank); } };

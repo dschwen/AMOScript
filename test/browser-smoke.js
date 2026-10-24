@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('raw-files', page);
+    console.log('Raw files passed: five original map writeback/save/load loops, exact exclusive-end bytes and retained fifth seed.');
     await runScenario('mouse', page);
     console.log('Mouse passed: hardware-coordinate opt-in, original limits/click/zone selections, polling semantics and lifecycle cleanup.');
     await runScenario('zones', page);

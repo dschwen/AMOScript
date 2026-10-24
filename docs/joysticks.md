@@ -113,7 +113,7 @@ pins original offsets and source links to the original joystick handlers.
 
 Evidence is source analysis, injected input and Chromium's native API availability
 path. A physical controller and real Amiga execution have not been captured.
-The unmodified complete game still fails at Bload on line 428. See
+The unmodified complete game still fails at Rnd on line 560. See
 [the milestone](wonderland.md). The
 [HTML Preview menu](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-menu.html)
 is linked from the shared [demo index](../demos/index.html).

@@ -99,6 +99,6 @@ independent-byte conformance fixture injects five mouse states at explicit Wait
 Key guards and checks literal query results. These are source-derived and
 injected/browser checks, not Amiga or physical-device captures.
 
-Full Wonderland decoding now first stops at Bload `$180C`, line 428, byte 16270.
-Four encodings remain unrecognized, appearing 16 times. Complete gameplay/editor
+Full Wonderland decoding now first stops at Rnd `$0686`, line 560, byte 21156.
+Two encodings remain unrecognized, appearing 14 times. Complete gameplay/editor
 compatibility remains open; see [the milestone](wonderland.md).

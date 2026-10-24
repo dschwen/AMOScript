@@ -20,6 +20,10 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [raw level-file demo](demos/raw-files.html) edits cells and executes the
+original five-map writeback/save/load slices. Inspect the exact 7,205-byte save,
+reload behavior and omitted fifth seed, or download/preload raw files.
+
 The [mouse demo](demos/mouse.html) uses opt-in hardware Canvas coordinates and
 Wonderland’s original limits/click/zone statements to report button selections.
 Editor actions remain excluded; the default local-coordinate mode is preserved.

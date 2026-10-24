@@ -81,5 +81,5 @@ An independent-byte conformance fixture separately checks reserve/set/reset/quer
 forms. These are source-derived expectations and browser comparisons, not an
 Amiga execution capture.
 
-The full program now first stops at Bload `$180C`, line 428, byte 16270.
-Four encodings remain unrecognized, appearing 16 times. See [the milestone](wonderland.md).
+The full program now first stops at Rnd `$0686`, line 560, byte 21156.
+Two encodings remain unrecognized, appearing 14 times. See [the milestone](wonderland.md).

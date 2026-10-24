@@ -19,6 +19,21 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'raw-files') {
+        await page.selectOption('#raw-level','5');await page.click('#raw-restart');await page.fill('#raw-tile','17');await page.click('#raw-apply');
+        assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-cell'),'17');
+        await page.click('#raw-save');assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-file-bytes'),'7205');
+        assert.match(await page.locator('#raw-download').getAttribute('href'),/^blob:/);
+        await page.click('#raw-damage');await page.click('#raw-reload');
+        assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-phase'),'loaded');
+        assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-cell'),'17');
+        assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-tail'),'100');
+        await page.selectOption('#raw-level','1');await page.click('#raw-restart');await page.click('#raw-save');
+        await page.setInputFiles('#raw-upload',{name:'short.lev',mimeType:'application/octet-stream',buffer:Buffer.from([9])});
+        await page.waitForFunction(()=>document.getElementById('raw-controls').dataset.fileBytes==='1');await page.click('#raw-reload');
+        assert.strictEqual(await page.locator('#raw-controls').getAttribute('data-cell'),'9');
+        await page.evaluate(()=>globalThis.AMOS_RAW_DEMO_CLEANUP());
+      }
       if (scenario.id === 'mouse') {
         await page.locator('#mouse-panel').scrollIntoViewIfNeeded();
         const panel=await page.locator('#mouse-panel').boundingBox();
@@ -160,6 +175,7 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#stage canvas').getAttribute('height'), '880');
         await page.selectOption('#frames', { label: 'copper-stack-dma' });
       }
+      else if (scenario.capturedFrames === false) assert.strictEqual(status.frames,0,`${scenario.id} exposes data controls without rendering claims`);
       else if (scenario.id !== 'webgl-resources') assert.ok(status.frames > 0, `${scenario.id} has visual output`);
       assert.deepStrictEqual(errors, [], `${scenario.id} page errors`);
       assert.deepStrictEqual(network, [], `${scenario.id} must run without external requests`);

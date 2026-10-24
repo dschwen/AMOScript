@@ -18,8 +18,8 @@ node bin/amoscript examples/Wonderland/Wonderland.AMOS /tmp/wonderland.js
 ```
 
 The first command succeeds and inventories the whole bounded token stream. The
-second currently fails with `Unsupported token 0x180c at line 428, byte 16270`
-(`Bload`). The original first 64 lines compile and execute through Wait Vbl,
+second currently fails with `Unsupported token 0x686 at line 560, byte 21156`
+(`Rnd`). The original first 64 lines compile and execute through Wait Vbl,
 Load Iff and the original title/menu marker Bob, including both startup branches.
 Canvas, copper and GPU output match an independent source-derived composition. See
 [title display support](title-display.md),
@@ -32,12 +32,12 @@ it never adds unsupported commands to the production compiler table.
 | --- | --- |
 | Source size | 753 physical lines; 30,712 code bytes |
 | Static inventory | 6,011 token occurrences; 142 distinct encodings |
-| Decoder gap | 4 unrecognized encodings, appearing 16 times (initially 44 / 119) |
+| Decoder gap | 2 unrecognized encodings, appearing 14 times (initially 44 / 119) |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
 | Four original ILBMs | All now decode and match independent PNG expectations |
-| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup and three enemy-initializer fixtures and the original Escape/title and post-death Fade/Wait slices and original level/score fields and all five map-paste/copy loops and original editor-panel zones/selections run; complete game remains blocked |
+| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup and three enemy-initializer fixtures and the original Escape/title and post-death Fade/Wait slices and original level/score fields and all five map-paste/copy loops and original editor-panel zones/selections and five level-file round trips run; complete game remains blocked |
 
 These counts describe lexical recognition, not a compatibility percentage. A
 recognized token may still have an unsupported overload or runtime limitation.
@@ -89,9 +89,10 @@ execution will expose further gaps after the first decoder blockers are removed.
    original-panel fixture checks every point through the original Zone expression
    with injected hardware coordinates. [Mouse limits/clicks and the opt-in hardware
    Canvas adapter](mouse.md) now run the original editor selection slice with
-   browser input. The editor still needs
-   `Bload`/`Bsave`, and a browser file-selector adapter for `Fsel$`. Verify a saved
-   level can be reloaded. Do not silently strip editor or audio calls to claim the
+   browser input. [Bload/Bsave](raw-files.md) now round-trip the original level-file
+   statements for all five maps, preserving the source’s 7,205-byte exclusive-end
+   save and omitted fifth seed. The editor still needs a browser file-selector
+   adapter for `Fsel$`, integrated editing and a complete saved-level replay. Do not silently strip editor or audio calls to claim the
    unmodified program is supported.
 5. **Compatibility evidence.** Add deterministic input replays with fake clocks
    and finite budgets, covering both startup speed-test branches. Compare menu,
@@ -156,8 +157,8 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's current first failure and missing-token inventory.
 
-Local verification: `npm run check` passes 455 tests on Node 18.19.1.
-`npm run test:browser` passes the four original image comparisons, all twenty-two
+Local verification: `npm run check` passes 464 tests on Node 18.19.1.
+`npm run test:browser` passes the four original image comparisons, all twenty-three
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
 169 GPU/CPU frames, including two Flash states, two copy states, four fade states, eight scrolling window patterns, the original

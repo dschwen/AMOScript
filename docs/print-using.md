@@ -82,6 +82,6 @@ words and expected field strings. Chromium runs the shared panel evaluator and
 the live sandbox, including unsupported-format errors. The gallery includes its
 standalone page and HTML Preview link.
 
-Full Wonderland compilation now first encounters Bload `$180C` on line 428,
-byte 16270 (`Bload`). Four encodings remain unrecognized,
-appearing 16 times. See [the milestone](wonderland.md).
+Full Wonderland compilation now first encounters Rnd `$0686` on line 560,
+byte 21156 (`Rnd`). Two encodings remain unrecognized,
+appearing 14 times. See [the milestone](wonderland.md).

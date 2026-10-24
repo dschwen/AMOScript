@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'raw-files', capturedFrames: false, title: 'Wonderland raw level-file save/load', description: 'Original map writeback, Bsave, Bload and seed-refresh statements round-trip all five maps through an in-memory files adapter. Exact exclusive-end bytes, stable addresses and retained fifth seed are checked. Includes cell editing, raw download and optional local preload; file selection and gameplay are excluded.', run: require('./rawFilesProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{levels:5,savedBytes:7205,comparedBytes:72050,omittedFifthSeed:true,gameRunning:false});
+  } },
   { id: 'mouse', title: 'Wonderland hardware mouse and editor selection', initialFrame: 'Original editor selection fixture', description: 'Opt-in hardware-coordinate Canvas input, original mouse limits and polling-based Mouse Click. Original editor selection statements, scaled/bordered input and lifecycle cleanup pass; editor actions remain excluded. Includes a live button-selection harness.', run: require('./mouseProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{selections:5,lifecycleChecks:5,coordinateModes:2,gameRunning:false});
   } },

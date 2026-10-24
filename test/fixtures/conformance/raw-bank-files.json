@@ -1,0 +1,36 @@
+{
+  "name": "raw-bank-file-load-exclusive-save",
+  "source": "Reserve As Work 4,4\nBload \"in\",4\nBsave \"out\",Start(4) To Start(4)+3\nPrint Peek(Start(4)+3)\n",
+  "programHex": "414d4f532042617369632076312e30300000007a0a0020f2003e00000004005c003e0000000400000a00180c00260002696e005c003e0000000400001900181a002600036f757400005c01400074003e00000004007c009401400074003e00000004007cffc0003e0000000300001000047621e6007401400074003e00000004007cffc0003e00000003007c0000",
+  "files": {
+    "in": "0080ff7e"
+  },
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal Bload=180c, Bsave=181a, Reserve As Work=20f2, Start=0140, Peek=21e6 and existing expression words, independently framed without the production encoder/table."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/files.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/banks.cpp"
+    ],
+    "symbols": [
+      "lib_in_bload",
+      "lib_in_bsave",
+      "bank_or_address"
+    ],
+    "notes": "Bload transfers a raw whole file into an existing bank/address; Bsave writes end-start bytes, excluding the end address. Source-derived expected bytes, not an Amiga capture."
+  },
+  "expected": {
+    "values": [
+      [
+        126
+      ]
+    ],
+    "halted": true,
+    "files": {
+      "out": "0080ff"
+    }
+  }
+}

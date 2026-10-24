@@ -42,6 +42,11 @@ addresses into bitplane/DMA pointers. Zero-length generic payloads may have a
 Start address but no byte can be accessed. No Doke/Deek/Leek, arbitrary memory
 allocation, physical allocation timing or Amiga bus-fault behavior is implied.
 
+Raw [Bload/Bsave](raw-files.md) also use this allocation map. Complete ranges
+must fit one live payload, with Bsave excluding its end address. Bload retains
+bank and byte-array identity; empty loads may use an owned one-past-end boundary.
+Peek/Poke still require an actual byte.
+
 ## Evidence and verification
 
 The [independent-byte fixture](../test/fixtures/conformance/bank-byte-access.json)

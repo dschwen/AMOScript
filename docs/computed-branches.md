@@ -56,7 +56,7 @@ continuation. Standalone factories execute without require. Chromium runs the sa
 shared demo evaluator and assertions, and the repository gallery exposes every
 captured frame through its HTML Preview links.
 
-Full Wonderland compilation now first encounters Bload `$180C` on line 428,
-byte 16270. The bounded inventory reports 4 unrecognized encodings appearing
-16 times. Recognition counts are not a compatibility percentage; see
+Full Wonderland compilation now first encounters Rnd `$0686` on line 560,
+byte 21156. The bounded inventory reports 2 unrecognized encodings appearing
+14 times. Recognition counts are not a compatibility percentage; see
 [the milestone](wonderland.md).

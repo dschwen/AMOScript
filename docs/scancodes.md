@@ -90,6 +90,6 @@ cleanup, diagnostics, mappings and original routing. Chromium also exercises the
 live page using real browser keyboard events. All browser scenarios remain
 standalone repository demos with HTML Preview links.
 
-The full program now first encounters Bload `$180C` on line 428, byte 16270.
-Four encodings remain unrecognized, appearing 16 times; see
+The full program now first encounters Rnd `$0686` on line 560, byte 21156.
+Two encodings remain unrecognized, appearing 14 times; see
 [Wonderland's milestone](wonderland.md).

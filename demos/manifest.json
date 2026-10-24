@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "raw-files.html",
+      "title": "Wonderland raw level-file save/load",
+      "description": "Original map writeback, Bsave, Bload and seed-refresh statements round-trip all five maps through an in-memory files adapter. Exact exclusive-end bytes, stable addresses and retained fifth seed are checked. Includes cell editing, raw download and optional local preload; file selection and gameplay are excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/raw-files.html"
+    },
+    {
       "file": "mouse.html",
       "title": "Wonderland hardware mouse and editor selection",
       "description": "Opt-in hardware-coordinate Canvas input, original mouse limits and polling-based Mouse Click. Original editor selection statements, scaled/bordered input and lifecycle cleanup pass; editor actions remain excluded. Includes a live button-selection harness.",

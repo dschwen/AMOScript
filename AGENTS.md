@@ -16,6 +16,10 @@
   modules embed it for runtime Load through the synchronous files adapter.
 - `lib/BankWriter.js` encodes supported ABK/ABS files and is also embedded for
   runtime Save. Serialization coverage includes independent expected bytes.
+- Bload/Bsave transfer raw synchronous byte strings through checked generic-bank
+  ranges. Bload preserves payload/address identity; Bsave excludes its end address
+  and validates/snapshots before truncating the destination. Wonderland's original
+  7,205-byte save omits seed 5; preserve that source behavior. See `docs/raw-files.md`.
 - Print Using carries per-item format AST expressions into the existing print IR.
   A shared integer/string formatter validates the format before its value thunk;
   no format state persists across items. Float/decimal/exponent fields remain

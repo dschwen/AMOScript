@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **455 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **464 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -11,7 +11,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob; full-source decoding stops at
-`Bload` on line 428. A bounded full inventory finds 4 unrecognized encodings.
+`Rnd` on line 560. A bounded full inventory finds 2 unrecognized encodings.
 The declared original-menu fixture supports configurable keyboard/gamepad input,
 animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
@@ -21,6 +21,7 @@ audio demos. The game is not running.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Raw bank files | Implemented checked subset | Bload into existing generic bank/address, exclusive-end Bsave, one live allocation per range, stable identities/addresses and synchronous byte-string files. All five original level writeback/save/load slices pass, preserving the omitted fifth seed. Native arbitrary memory, image banks and Fsel$ remain unsupported. [Contract](raw-files.md). |
 | Mouse limits / clicks / hardware adapter | Implemented bounded subset | All three Limit Mouse forms, query-to-query Mouse Click, captured per-program bounds and lifecycle cleanup. Canvas explicitly opts into committed hardware raster coordinates; default local mapping is preserved. Original editor selection slice and scaled/bordered browser replay pass. X/Y assignment, pointer locking, letterboxing, Hzone/Mouse Zone and GPU host switching remain open. [Contract](mouse.md). |
 | Screen zones | Implemented bounded subset | Per-screen Reserve/Set/Reset Zone and current/explicit-screen Zone queries, unsigned-word coordinates, inclusive edges and lowest-number overlap priority. Original five-button panel fixture checks all 10,240 points with injected hardware input and independent panel pixels. Hardware input requires the explicit Canvas mode; Hzone/Mouse Zone and wrapped count/index aliases remain open. [Contract](zones.md). |
 | Full bitmap Screen Copy / selectors | Implemented bounded subset | Two-operand raw copy, Logic/Physic current/numbered tags, clipping/common planes, preserved identities and Bob background ownership, Autoback bypass. All five original map loops publish in a declared fixture; ten Canvas frames and two native GPU frames pass. Rectangle/minterm copies and exact DMA timing remain open. [Contract](screen-copy.md). |
