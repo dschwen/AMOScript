@@ -19,6 +19,8 @@ runs the original Scancode/Escape branch and title routine with synthetic input
 and screen setup, stopping before game/menu/editor loops. The
 [Fade fixture](../../demos/fade.html) joins the original title and post-death
 Fade/Wait lines with explicit input guards and independently checked RGB frames.
+The [Print Using fixture](../../demos/print-using.html) copies original level/score
+statements and compares panel fields with a separate glyph rasterizer.
 The original program uses Amiga volume paths; the browser files adapter resolves
 those paths to preloaded asset bytes, preserving the original source filenames.
 

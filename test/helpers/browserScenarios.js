@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'print-using', title: 'Wonderland score fields and Print Using', initialFrame: 'Wonderland level 5, score 12345', description: 'Original level/score statements, integer padding/truncation and five panel frames checked against a separate glyph rasterizer over independent image PNGs. Includes a compiled integer-field sandbox. Floats and decimal/exponent masks remain unsupported.', run: require('./printUsingProbe'), check(result, assert) {
+    assert.strictEqual(result.frames,5);assert.strictEqual(result.comparedPixels,51200);
+    assert.deepStrictEqual(result.outputs,[['1','     0'],['5',' 12345'],['2','234567'],['1','    42'],['3','483648']]);
+    assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'fade', title: 'Wonderland Fade and VBL palette timing', initialFrame: 'Wonderland Fade: 60 ms', description: 'Original title setup and post-death Fade 2 / Wait 64 / Wait Vbl lines, with declared trigger/exit guards. Nine independent RGB comparisons, immutable snapshots, unchanged physical pixels and clock-driven palette updates. Includes live Fade/Stop/Resume/Restart controls.', run: require('./fadeProbe'), check(result, assert) {
     assert.strictEqual(result.frames,9);assert.strictEqual(result.comparedPixels,737280);
     assert.strictEqual(result.noAnimationRequired,true);assert.strictEqual(result.sourceWaitFinished,true);

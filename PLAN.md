@@ -12,9 +12,11 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 14 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 13 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Using` on line 285. Nonblocking Fade to black now uses the injected VBL clock,
+`Screen Copy` on line 304. Bounded Print Using integer/string fields now
+execute the original level/score statements in a [declared panel fixture](docs/print-using.md),
+with separate expected glyph rasterization. Nonblocking Fade to black now uses the injected VBL clock,
 with a [declared original Fade/Wait fixture](docs/fade.md), lifecycle cleanup and
 independent RGB/CPU/GPU checks. Scancode now carries browser physical key metadata through
 Inkey$, with the original Escape/title branch passing a [declared fixture](docs/scancodes.md).
@@ -50,7 +52,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **411 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **420 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

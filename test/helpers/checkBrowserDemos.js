@@ -19,6 +19,16 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if (scenario.id === 'print-using') {
+        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'   123');
+        await page.fill('#using-format','##');await page.fill('#using-value','12345');await page.click('#using-render');
+        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'45');
+        await page.fill('#using-format','+##');await page.fill('#using-value','-7');await page.click('#using-render');
+        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'- 7');
+        await page.fill('#using-format','###.##');await page.click('#using-render');
+        assert.match(await page.locator('#using-status').textContent(),/Decimal\/exponent/);
+        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'- 7');
+      }
       if (scenario.id === 'fade') {
         await page.waitForFunction(() => document.getElementById('fade-controls').dataset.phase === 'ready');
         await page.click('#fade-fade');

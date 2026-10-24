@@ -1,0 +1,43 @@
+{
+  "name": "print-using-integer-string-fields",
+  "source": "Print Using \"######\";123\nPrint Using \"#\";123\nPrint Using \"+##\";-7\nPrint Using \"~~~\";\"A\"\nPrint Using \"##\";0\n",
+  "programHex": "414d4f532042617369632076312e3030000000760d00047604a6002600062323232323230064003e0000007b00000b00047604a60026000123000064003e0000007b00000c00047604a6002600032b2323000064003efffffff900000c00047604a6002600037e7e7e00006400260001410000000b00047604a60026000223230064003e000000000000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Literal original Print=0476, Using=04a6, semicolon=0064, string=0026 and integer=003e words; lengths and physical-line bytes assembled without production encoders or token tables."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/interp/print.cpp",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/convert.cpp"
+    ],
+    "symbols": [
+      "using_number",
+      "using_string",
+      "next_piece",
+      "long_to_dec"
+    ],
+    "notes": "Integer digits are consumed backwards with blank padding and overflow truncation; explicit sign slots use the leading sign/space. String tildes consume characters and pad with blanks. Source analysis, not an Amiga execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        "   123"
+      ],
+      [
+        "3"
+      ],
+      [
+        "- 7"
+      ],
+      [
+        "A  "
+      ],
+      [
+        " 0"
+      ]
+    ],
+    "halted": true
+  }
+}

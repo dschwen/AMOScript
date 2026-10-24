@@ -278,6 +278,8 @@ normalizes those host-derived values on entry.
 NaN reaching those helpers raises a source-located invalid-value error.
 Remaining floating operations need
 their own result rounding and range rules, alongside transcendental behavior,
-exact number formatting and double-precision support.
+exact floating number formatting and double-precision support. Bounded
+[Print Using integer fields](print-using.md) now avoid host decimal conversion
+and preserve signed 32-bit digits, padding and overflow truncation.
 Float-to-integer conversion uses the preserved FFPFPI truncation/saturation
 contract; comparison against the selected AMOS/Kickstart version remains open.

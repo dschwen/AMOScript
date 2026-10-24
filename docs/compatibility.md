@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **411 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **420 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -11,7 +11,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 The next end-to-end target is [Wonderland in the browser](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob; full-source decoding stops at
-`Using` on line 285. A bounded full inventory finds 14 unrecognized encodings.
+`Screen Copy` on line 304. A bounded full inventory finds 13 unrecognized encodings.
 The declared original-menu fixture supports configurable keyboard/gamepad input,
 animated movement, background toggling and both selections. Four original images,
 embedded banks and six samples are checked, with standalone startup/asset and
@@ -39,7 +39,7 @@ audio demos. The game is not running.
 | Floating point | Partial | Literal FFP values decode correctly. Integer promotion, arithmetic, loops and decimal input use explicit FFP rules. Ln/Exp/power and Sin/Cos/Tan use source-derived CORDIC; Pi# uses AMOS's stored constant. Base-10 Log still uses JavaScript. Target-library verification, multiply-variant selection and double-precision support remain unfinished. See [numeric contract](numbers.md). |
 | Functions | Implemented subset | `Pi#`, `Sin/Cos/Tan` with per-program Degree/Radian modes, `Min/Max` for numbers or strings, `Log/Ln/Exp`, type-preserving `Abs/Int`, integer-valued `Sgn`. Inverse/hyperbolic trigonometry and additional functions remain unsupported. |
 | Strings | Implemented subset | Literals, variables, checked concatenation/subtraction, comparisons, string `Min/Max`; `Left$/Right$/Mid$` retrieval and assignment, `Flip$`, `Chr$/Asc`, `Len`, `Instr`, `Space$/String$`, ASCII case conversion, `Str$/Val`. Literals retain embedded zero bytes. Retrieval/assignment follow source validation order; repetition uses word-sized results. Nonempty concatenation enforces String_Max. `Val` retains its dynamic numeric type. AMOS heap limits, extreme raw-memory search offsets and numeric formatting remain unfinished. See [string contract](strings.md). |
-| Print | Implemented core | `write` host preserves separators and newlines; default/`print` host receives values per statement. Text also rasterizes into the current indexed screen with cursor movement and scrolling. Full AMOS number formatting and text control sequences remain unfinished. |
+| Print / Print Using | Implemented bounded subset | `write` preserves separators/newlines; the print host receives values per statement. Using formats one integer/string item with source-derived padding/truncation/signs or tilde slots, sharing screen/file output. Text rasterizes into indexed buffers. Floats, decimal/exponent masks, long-string chunking, full number formatting/streaming and text controls remain open. [Contract](print-using.md). |
 | Same-line statements and labels | Implemented | Colon-separated statements, labels before statements, duplicate-label diagnostics. |
 | Goto/Gosub/Return/End and On branches | Implemented subset | Static named targets, scoped procedure labels, IP return stack; On Gosub/Goto evaluate one numeric selector and fall through outside the list. Missing targets and invalid returns are errors. Dynamic targets, numbered labels and On Proc remain unsupported. [Computed branches](computed-branches.md). |
 | For/Next | Implemented core | Nested/descending loops, optional variable, captured bound/step expressions, first body execution before `Next` check. |

@@ -20,6 +20,8 @@ gameplay/editor dispatch; the complete game remains blocked. The
 screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [computed-branch demo](demos/computed-branches.html) now executes the original
 enemy dispatch and three unchanged initialization routines in a declared fixture.
+The [Print Using demo](demos/print-using.html) renders original level/score
+fields and includes a live compiled integer-field sandbox; see [the contract](docs/print-using.md).
 The [Fade demo](demos/fade.html) executes the original Fade/Wait sequence against
 independent RGB expectations, with live controls; see [the contract](docs/fade.md).
 The [scan-code demo](demos/scancodes.html) adds a live keyboard reader and

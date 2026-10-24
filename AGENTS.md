@@ -16,6 +16,10 @@
   modules embed it for runtime Load through the synchronous files adapter.
 - `lib/BankWriter.js` encodes supported ABK/ABS files and is also embedded for
   runtime Save. Serialization coverage includes independent expected bytes.
+- Print Using carries per-item format AST expressions into the existing print IR.
+  A shared integer/string formatter validates the format before its value thunk;
+  no format state persists across items. Float/decimal/exponent fields remain
+  unsupported. See `docs/print-using.md` for bounds and source evidence.
 - `lib/amos/driver.js` executes an instruction-function table using `state.ip`,
   call/procedure stacks, cooperative budgets and waits. It is not a switch emitter.
 - `lib/amos/operations.js` implements language operations; `display.js` models

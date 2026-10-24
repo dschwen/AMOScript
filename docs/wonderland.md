@@ -18,8 +18,8 @@ node bin/amoscript examples/Wonderland/Wonderland.AMOS /tmp/wonderland.js
 ```
 
 The first command succeeds and inventories the whole bounded token stream. The
-second currently fails with `Unsupported token 0x4a6 at line 285, byte 10314`
-(`Using`). The original first 64 lines compile and execute through Wait Vbl,
+second currently fails with `Unsupported token 0x986 at line 304, byte 11664`
+(`Screen Copy Logic To Physic`). The original first 64 lines compile and execute through Wait Vbl,
 Load Iff and the original title/menu marker Bob, including both startup branches.
 Canvas, copper and GPU output match an independent source-derived composition. See
 [title display support](title-display.md),
@@ -32,12 +32,12 @@ it never adds unsupported commands to the production compiler table.
 | --- | --- |
 | Source size | 753 physical lines; 30,712 code bytes |
 | Static inventory | 6,011 token occurrences; 142 distinct encodings |
-| Decoder gap | 14 unrecognized encodings, appearing 35 times (initially 44 / 119) |
+| Decoder gap | 13 unrecognized encodings, appearing 32 times (initially 44 / 119) |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
 | Four original ILBMs | All now decode and match independent PNG expectations |
-| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup and three enemy-initializer fixtures and the original Escape/title and post-death Fade/Wait slices run; complete game remains blocked |
+| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup and three enemy-initializer fixtures and the original Escape/title and post-death Fade/Wait slices and original level/score fields run; complete game remains blocked |
 
 These counts describe lexical recognition, not a compatibility percentage. A
 recognized token may still have an unsupported overload or runtime limitation.
@@ -51,7 +51,8 @@ execution will expose further gaps after the first decoder blockers are removed.
    `Amos Lock`/`Close Editor` and assignable/readable VBL `Timer` are implemented
    in a [documented subset](startup.md). `Key Speed` and bounded generic-bank
    `Peek`/`Poke`/`Start` are also implemented. Next add verified offsets and semantics
-   for `Rnd` and `Print Using`. Scancode and the original Escape/title branch
+   for `Rnd` and the remaining numeric functions. Bounded Print Using now
+   renders the original level/score fields in a [declared fixture](print-using.md). Scancode and the original Escape/title branch
    now pass a [documented fixture](scancodes.md). Named-label On Gosub/Goto now
    execute the original dispatch and three unchanged initializers in a
    [declared fixture](computed-branches.md). All music-extension
@@ -148,8 +149,8 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's current first failure and missing-token inventory.
 
-Local verification: `npm run check` passes 411 tests on Node 18.19.1.
-`npm run test:browser` passes the four original image comparisons, all seventeen
+Local verification: `npm run check` passes 420 tests on Node 18.19.1.
+`npm run test:browser` passes the four original image comparisons, all eighteen
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
 165 GPU/CPU frames, including four fade states, eight scrolling window patterns, the original

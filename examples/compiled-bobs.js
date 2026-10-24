@@ -3159,6 +3159,33 @@
     }
   }
 
+  function formatUsing(format, read, sourceType) {
+    if (typeof format !== 'string' || /[^\x00-\xff]/.test(format)) throw new Error('Print Using requires a byte-string format');
+    if (format.length >= 120) throw new Error('Print Using format must be shorter than 120 bytes');
+    format = format.split('\0')[0];
+    const operand = read(), type = sourceType === 'dynamic' ? operand.numericType : sourceType, item = value(operand);
+    if (type === 'string') {
+      if (item.length > 121) throw new Error('Long-string Print Using is not implemented');
+      const chars = item.split('\0')[0]; let index = 0;
+      return format.replace(/~/g, () => index < chars.length ? chars[index++] : ' ');
+    }
+    if (type !== 'integer') throw new Error('Floating-point Print Using is not implemented');
+    if (!Number.isInteger(item) || item < -2147483648 || item > 2147483647) throw new Error('Invalid Print Using integer');
+    if (/[.;^]/.test(format)) throw new Error('Decimal/exponent Print Using formats are not implemented');
+    // LongToAsc's positive prefix is a space; UsingC consumes digits backwards
+    // and copies that prefix only for an explicit sign field. Overflow truncates.
+    const number = (item < 0 ? '-' : ' ') + String(Math.abs(item));
+    let index = number.length;
+    const result = Array.from(format);
+    for (let at = format.length - 1; at >= 0; at--) {
+      const c = format[at];
+      if (c === '#') result[at] = index > 0 ? (/^[0-9]$/.test(number[--index]) ? number[index] : ' ') : ' ';
+      else if (c === '-') result[at] = number[0];
+      else if (c === '+') result[at] = item < 0 ? '-' : '+';
+    }
+    return result.join('');
+  }
+
   const channels = new Map();
   function fileChannel(number, mode = null) {
     if (!Number.isInteger(number) || number < 1 || number > 10) throw new Error('Invalid file channel');
@@ -3318,7 +3345,7 @@
     ledOff: () => audio.filter(false),
     amosLock: () => systemCommand('Amos Lock'),
     closeEditor: () => systemCommand('Close Editor'),
-    stringFunction, replaceSubstring, fileOpen, fileClose, filePrint, fileRead, fileInfo,
+    stringFunction, replaceSubstring, formatUsing, fileOpen, fileClose, filePrint, fileRead, fileInfo,
     min: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, false),
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
