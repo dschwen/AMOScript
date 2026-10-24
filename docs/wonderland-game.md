@@ -72,6 +72,16 @@ path. All-five-level completion, collectibles/enemy behavior, win paths, editor
 round trips, sustained performance, native clock fidelity and
 external Amiga reference captures remain milestone work.
 
+## Fullscreen
+
+Fullscreen fits the game inside the available viewport for both renderers, with
+controls and game/audio status kept visible. It preserves the canvas bitmap and
+pointer mapping. Switching renderers and Restart retain fullscreen because the
+container survives canvas replacement. Escape first leaves fullscreen; press it
+again outside fullscreen to return to the game's title. Browser/frame permission
+failures are reported separately from game errors. See [the shared fullscreen
+contract](fullscreen.md).
+
 ## Original game sound
 
 The page creates no live AudioContext until Enable sound is clicked. The optional

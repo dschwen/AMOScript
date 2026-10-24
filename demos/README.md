@@ -39,7 +39,10 @@ Every current browser scenario is included:
 
 The Wonderland game page embeds the complete original program and provides live
 keyboard/Gamepad controls, Stop/Resume and Restart. WebGL2 is the default; the
-Renderer selector switches to Canvas 2D and back without restarting the game. The frame selector also shows
+Renderer selector switches to Canvas 2D and back without restarting the game.
+Fullscreen keeps controls visible and preserves aspect on both renderers; Escape
+exits fullscreen. The main examples and captured-frame viewers have the same
+control. See [fullscreen behavior and limits](../docs/fullscreen.md). The frame selector also shows
 its controlled loss/restart replay. Enable sound activates original sample effects;
 Mute stops them immediately. Editor file integration remains open;
 see [the live-game contract](../docs/wonderland-game.md).

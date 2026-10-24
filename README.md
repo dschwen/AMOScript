@@ -10,7 +10,8 @@ See [demo instructions and coverage](demos/README.md).
 The unmodified **Dithell's Wonderland** now compiles into a standalone factory.
 [Play the original game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)
 with default WebGL2 presentation, selectable Canvas 2D, and keyboard or browser
-Gamepad input. Controlled replays now cover three deaths,
+Gamepad input. The Fullscreen button works with either renderer; Escape exits
+fullscreen. Controlled replays now cover three deaths,
 fades, game over and a fresh game; see the [live-game contract](docs/wonderland-game.md). For the milestone, see the
 [readiness assessment and implementation order](docs/wonderland.md) and
 [executed title demo](demos/wonderland.html). Its original first 64 lines

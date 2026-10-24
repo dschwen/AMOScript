@@ -57,6 +57,11 @@
   `clear()` forgets removed-screen presentation across restoration.
   `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
+- `lib/amos/fullscreen.js` owns browser fullscreen for a stable container. Fit CSS
+  around the canvas without resizing its bitmap/GPU buffers; margins stay outside
+  the pointer rectangle. Preserve the container across renderer switches/Restart.
+  Escape exits fullscreen before reaching AMOS, and disposal exits only its own
+  container, including late requests. See `docs/fullscreen.md`.
 - Scancode is a destructive last-successful-Inkey latch, not held key state.
   Optional sendKey character/raw-code records coexist with legacy text entries.
   Clear Key drains the queue; host clearScanCodes clears metadata while retaining

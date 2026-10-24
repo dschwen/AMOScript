@@ -57,7 +57,8 @@ and those four original-game frames; CPU/GPU agreement is not an Amiga capture.
 Live keyboard/Gamepad input and bounded death/restart paths now pass. All-level
 completion/win paths, collectibles/enemy behavior, editor round trips and native
 timing/reference captures remain acceptance work.
-The live session now defaults to WebGL2, with state-preserving Canvas switching
+The live session now defaults to WebGL2, with fullscreen controls for both
+renderers, state-preserving Canvas switching
 and eleven full-game GPU/CPU comparisons. It has explicit Web Audio Enable/Mute
 controls for its original
 sample effects, with three additional native offline PCM/stereo comparisons.
@@ -182,7 +183,7 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 
-Local verification: `npm run check` passes 498 tests on Node 18.19.1.
+Local verification: `npm run check` passes 502 tests on Node 18.19.1.
 `npm run test:browser` passes the four original image comparisons, all twenty-six
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and

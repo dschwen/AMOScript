@@ -90,6 +90,8 @@ async function run() {
     fs.writeFileSync(path.join(artifacts, 'ham.png'), Buffer.from(hamResult.png.split(',')[1], 'base64'));
     await runScenario('sprites', page, artifacts);
     await runScenario('banks', page, artifacts);
+    await page.click('#fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='screen-view');
+    await page.keyboard.press('Escape');await page.waitForFunction(()=>document.fullscreenElement===null);
     await page.click('#run');
     assert.strictEqual(await page.locator('#output').textContent(), 'Start\nOne\nTwo\nThree\nEnd\n');
     await page.click('#graphics');

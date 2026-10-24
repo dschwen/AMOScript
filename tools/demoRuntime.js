@@ -7,6 +7,8 @@ function installDemo(config) {
   const output = document.getElementById('results'), selector = document.getElementById('frames');
   const stage = document.getElementById('stage');
   const zoom = document.getElementById('zoom');
+  const fullscreenButton=document.getElementById('frame-fullscreen');
+  const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(document.getElementById('frame-view'),{button:fullscreenButton,statusElement:document.getElementById('frame-fullscreen-status'),surface:stage});
   const equal = (a, b) => {
     if (Object.is(a, b)) return true;
     if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
@@ -23,6 +25,7 @@ function installDemo(config) {
   function show() {
     stage.replaceChildren();
     const frame = frames[Number(selector.value)]; if (!frame) return;
+    fullscreenButton.hidden=false;
     if (frame.png) {
       const image = new Image(); image.alt = frame.name;
       image.onload = () => { image.style.width = `${image.naturalWidth * Number(zoom.value)}px`; };
@@ -38,7 +41,7 @@ function installDemo(config) {
   zoom.addEventListener('change', show);
   button.addEventListener('click', async () => {
     button.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
-    frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
+    fullscreenButton.hidden=true;frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
     const previousObserver = globalThis.AMOS_DEMO_OBSERVE;
     const originalPut = CanvasRenderingContext2D.prototype.putImageData;
     let previousPng = null;

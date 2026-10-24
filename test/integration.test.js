@@ -80,9 +80,10 @@ test('integration: generated browser export loads through AMOS and forwards keyb
 test('integration: checked-in browser demo matches current compiler and page scripts execute', () => {
   const generated = new Transpiler(example(21)).toModule() + '\n';
   assert.strictEqual(fs.readFileSync(path.join(root, 'examples/compiled-demo.js'), 'utf8'), generated, 'Run npm run build:demo after changing codegen/runtime');
-  const elements = Object.fromEntries(['run', 'graphics', 'bobs', 'stop', 'output', 'screen'].map(id => [id, { textContent: '', handlers: {}, addEventListener(event, fn) { this.handlers[event] = fn; }, removeEventListener(event) { delete this.handlers[event]; }, focus() {} }]));
+  const elements = Object.fromEntries(['run', 'graphics', 'bobs', 'stop', 'output', 'screen', 'screen-view', 'screen-surface', 'fullscreen', 'fullscreen-status'].map(id => [id, { textContent: '', handlers: {}, addEventListener(event, fn) { this.handlers[event] = fn; }, removeEventListener(event) { delete this.handlers[event]; }, focus() {} }]));
   elements.screen.getContext = () => ({ createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }), putImageData() {} });
-  const document = { getElementById: id => elements[id], addEventListener() {} };
+  const document = { getElementById: id => elements[id], addEventListener() {}, removeEventListener() {} };
+  for(const element of Object.values(elements)){element.ownerDocument=document;element.setAttribute=()=>{};}
   const context = vm.createContext({ document, setTimeout, clearTimeout });
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   for (const match of html.matchAll(/<script(?: src="([^"]+)")?>([\s\S]*?)<\/script>/g)) {

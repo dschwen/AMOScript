@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-24. The current local baseline has **498 passing tests**, plus a
+Updated 2026-10-24. The current local baseline has **502 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -60,7 +60,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Procedures | Implemented subset | Skipped top-level definitions, parameters, fresh local frames, recursion, named `Global/Shared` declarations, and `End Proc[result]` with typed `Param` slots. Wildcard declarations and additional procedure control commands remain unsupported. |
 | Waits | Implemented | `Wait`, `Wait Vbl`, `Wait Key`; fake timer/input tests cover suspension and resumption. |
 | Node packaging / CLI | Implemented | Self-contained generated modules, package entry and binary, exit codes, stdout/stderr separation, exclusive output creation. |
-| Browser | Implemented core | Generated factory, facade, selectable Canvas/WebGL2 presentation and shared focused keyboard/pointer host. Real Chromium checks Canvas colours, keyboard resumption, pointer mapping, program switching and Stop. Screenshot inspected. |
+| Browser | Implemented core | Generated factory, facade, selectable Canvas/WebGL2 presentation, shared focused keyboard/pointer host and stable-container fullscreen controls. Native fullscreen entry/exit, pointer mapping, resize, renderer replacement and Escape priority pass. Real Chromium checks Canvas colours, keyboard resumption, pointer mapping, program switching and Stop. Screenshot inspected. |
 | Scheduler | Implemented core | Step budget, self-jumps, one pending continuation, stale-callback guards, stop/resume and remaining sleep duration. |
 | Arrays | Implemented core | Typed multidimensional arrays with inclusive bounds, scalar/array namespaces, local and shared arrays, default elements and bounds errors. Sparse storage; dimension bounds 0–65535, total size must be a safe integer. Re-dimensioning an existing array is rejected. |
 | Data/Read/Restore | Implemented core | Read-time expression evaluation, empty entries, array destinations, fresh procedure cursors, caller cursor restoration. Named Restore targets must directly label a Data statement; other forms fail explicitly. |

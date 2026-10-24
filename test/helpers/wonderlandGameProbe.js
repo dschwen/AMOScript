@@ -75,7 +75,7 @@ module.exports=async function wonderlandGameProbe(page){
     const previous=document.getElementById('game-controls');if(previous)previous.remove();
     const controls=document.createElement('section');controls.id='game-controls';
     const heading=document.createElement('h2');heading.textContent="Play Dithell's Wonderland";
-    const help=document.createElement('p');help.textContent='Focus the canvas, then use arrows to move and jump, Space/Enter to select, and Escape to return to the title. Choose WASD + Z or a standard browser gamepad below. WebGL2 is the default renderer; Canvas 2D is an explicit alternative. Switching preserves the running game and sound. The complete original source and all seven companion files are embedded. Click Enable sound to hear the original sample effects; Mute stops them immediately. The integrated editor file requester/writeback remains open. Runtime/display errors stop the session and appear here.';
+    const help=document.createElement('p');help.textContent='Focus the canvas, then use arrows to move and jump, Space/Enter to select, and Escape to return to the title. Choose WASD + Z or a standard browser gamepad below. WebGL2 is the default renderer; Canvas 2D is an explicit alternative. Switching preserves the running game and sound. Fullscreen fits the display without stretching; Escape leaves fullscreen before it reaches the game. The complete original source and all seven companion files are embedded. Click Enable sound to hear the original sample effects; Mute stops them immediately. The integrated editor file requester/writeback remains open. Runtime/display errors stop the session and appear here.';
     const mode=document.createElement('select');mode.id='game-input-mode';
     for(const value of ['keyboard','gamepad','both']){const option=document.createElement('option');option.value=value;option.textContent=value;mode.append(option);}
     const layout=document.createElement('select');layout.id='game-keyboard-layout';
@@ -84,6 +84,11 @@ module.exports=async function wonderlandGameProbe(page){
     let canvas=makeCanvas();
     const backend=document.createElement('select');backend.id='game-renderer';backend.setAttribute('aria-label','Display renderer');
     for(const [value,text] of [['webgl','WebGL2'],['canvas','Canvas 2D']]){const option=document.createElement('option');option.value=value;option.textContent=text;backend.append(option);}
+    const viewport=document.createElement('section');viewport.id='game-viewport';
+    const toolbar=document.createElement('div');toolbar.className='amos-fullscreen-toolbar';
+    const surfaceSlot=document.createElement('div');surfaceSlot.id='game-surface';surfaceSlot.append(canvas);
+    const fullscreenButton=document.createElement('button');fullscreenButton.id='game-fullscreen';
+    const fullscreenStatus=document.createElement('span');fullscreenStatus.id='game-fullscreen-status';fullscreenStatus.setAttribute('role','status');
     const status=document.createElement('p');status.id='game-status';status.setAttribute('aria-live','polite');
     const sound=createAudioSession(createAudioHost),soundButton=document.createElement('button'),soundStatus=document.createElement('p');
     soundButton.id='game-sound';soundStatus.id='game-sound-status';soundStatus.setAttribute('aria-live','polite');
@@ -93,7 +98,7 @@ module.exports=async function wonderlandGameProbe(page){
       if(!live)return;const v=live.state.variables;
       controls.dataset.phase=errorMessage?'error':live.state.halted?'halted':live.state.stopped?'stopped':'running';
       controls.dataset.line=String(live.state.location&&live.state.location.line);controls.dataset.game=String(v.int_game);controls.dataset.level=String(v.int_lev);controls.dataset.menuPosition=String(v.int_p);
-      controls.dataset.lives=String(v.int_li);controls.dataset.x=String(v.int_x);controls.dataset.y=String(v.int_y);controls.dataset.count=String(v.int_count);
+      controls.dataset.lives=String(v.int_li);controls.dataset.x=String(v.int_x);controls.dataset.y=String(v.int_y);controls.dataset.count=String(v.int_count);controls.dataset.mouseX=String(live.state.input.mouse.x);controls.dataset.mouseY=String(live.state.input.mouse.y);
       const gpuStats=gpu?gpu.stats:null;controls.dataset.backend=!host?'unavailable':gpu?'webgl':'canvas';controls.dataset.gpuState=gpu?gpu.state:'none';controls.dataset.gpuFrames=String(gpuStats?gpuStats.gpuFrames:0);controls.dataset.displayLines=String(gpuStats&&gpuStats.lastResult?gpuStats.lastResult.lines:canvas.height);
       const audio=sound.status();controls.dataset.sound=audio.state;controls.dataset.soundContext=audio.contextState||'none';controls.dataset.soundPlays=String(audio.plays);controls.dataset.soundVoices=String(audio.voices.length);controls.dataset.soundSample=String(audio.lastSample);
       soundButton.textContent=['on','starting'].includes(audio.state)?'Mute sound':'Enable sound';
@@ -120,14 +125,15 @@ module.exports=async function wonderlandGameProbe(page){
       installHost();live.tick(2000);update();
     }
     const label=(text,input)=>{const label=document.createElement('label');label.append(`${text} `,input);return label;};
-    controls.append(heading,help,label('Renderer',backend),label('Input',mode),label('Keyboard',layout));
+    controls.append(heading,help);toolbar.append(label('Renderer',backend),label('Input',mode),label('Keyboard',layout));
     for(const action of ['restart','stop','resume']){const button=document.createElement('button');button.id=`game-${action}`;button.textContent=action;
-      button.addEventListener('click',()=>{try{if(action==='restart')start();else if(action==='stop')live.stop();else if(!errorMessage){if(sound.status().requested)sound.enable().then(()=>{if(!disposed)update();});live.resume();}host.focus();update();}catch(error){fail(error);}});controls.append(button);}
+      button.addEventListener('click',()=>{try{if(action==='restart')start();else if(action==='stop')live.stop();else if(!errorMessage){if(sound.status().requested)sound.enable().then(()=>{if(!disposed)update();});live.resume();}host.focus();update();}catch(error){fail(error);}});toolbar.append(button);}
     backend.addEventListener('change',()=>{try{installHost();host.focus();update();}catch(error){fail(error);}});
     for(const input of [mode,layout])input.addEventListener('change',()=>{try{host.configureJoysticks(configuration());host.focus();update();}catch(error){fail(error);}});
     soundButton.addEventListener('click',()=>{if(['on','starting'].includes(sound.status().state)){sound.mute();update();}else{sound.enable().then(()=>{if(!disposed)update();});update();}host.focus();});
-    controls.append(soundButton,soundStatus,canvas,status);const results=document.getElementById('results');if(results)results.before(controls);else document.body.append(controls);
-    const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=sound.dispose();update();return closing.then(()=>update());};
+    toolbar.append(soundButton,fullscreenButton,fullscreenStatus);const messages=document.createElement('div');messages.className='amos-fullscreen-messages';messages.append(soundStatus,status);viewport.append(toolbar,surfaceSlot,messages);controls.append(viewport);const results=document.getElementById('results');if(results)results.before(controls);else document.body.append(controls);
+    const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullscreenButton,statusElement:fullscreenStatus,surface:surfaceSlot,getContent:()=>canvas,onChange(){if(host&&!disposed){canvas.dispatchEvent(new Event('blur'));host.focus();}}});
+    const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
     try{start();}catch(error){fail(error);}
     return {inputModes:2,deaths:replays.map(r=>r.deaths),restarts:replays.map(r=>r.restarts),fades:replays.map(r=>r.fades),freshLives:replays.map(r=>r.freshLives),stopResume:replays.every(r=>r.stopResume),frames,audioCommands:audioEvents.length,audioComparisons,gpuFrames,gpuUnavailable,gpuDeaths:gpuReplay?gpuReplay.deaths:null,gameRunning:true};
   },{source,assets,timerSource:require('./steppedTimers').createSteppedTimers.toString(),replaySource:require('./wonderlandReplay').toString(),audioHostSource:require('../../lib/amos/webAudio').createWebAudioHost.toString(),audioSessionSource:require('../../lib/amos/browserAudio').createBrowserAudioSession.toString(),samples:require('./wonderlandSamples')(),gpuSources:require('./webglHostSources')()});

@@ -20,6 +20,10 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if (scenario.id === 'wonderland-game') {
+        await page.click('#frame-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='frame-view');
+        await page.click('#frame-fullscreen');await page.waitForFunction(()=>document.fullscreenElement===null);
+        await page.click('#game-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='game-viewport');
+
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'webgl');
         assert.ok(Number(await page.locator('#game-controls').getAttribute('data-gpu-frames'))>0);
         assert.strictEqual(await page.locator('#game-input').evaluate(canvas=>canvas.getContext('2d')),null);
@@ -31,6 +35,8 @@ module.exports = async function checkBrowserDemos(browser) {
         const before=Number(await page.locator('#game-controls').getAttribute('data-x'));
         await page.keyboard.down('ArrowRight');
         await page.waitForFunction(x=>Number(document.getElementById('game-controls').dataset.x)>x,before);await page.keyboard.up('ArrowRight');
+        const pointer=await page.locator('#game-input').evaluate(canvas=>{const r=canvas.getBoundingClientRect();return{x:r.left+canvas.clientLeft+canvas.clientWidth/4,y:r.top+canvas.clientTop+canvas.clientHeight/4};});
+        await page.mouse.move(pointer.x,pointer.y);await page.waitForFunction(()=>document.getElementById('game-controls').dataset.mouseX==='208'&&document.getElementById('game-controls').dataset.mouseY==='98');
         const played=Number(await page.locator('#game-controls').getAttribute('data-sound-plays'));await page.keyboard.down('ArrowUp');
         await page.waitForFunction(played=>Number(document.getElementById('game-controls').dataset.soundPlays)>played,played);await page.keyboard.up('ArrowUp');
         await page.click('#game-sound');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'off');
@@ -42,9 +48,18 @@ module.exports = async function checkBrowserDemos(browser) {
 
         const pausedCount=await page.locator('#game-controls').getAttribute('data-count');
         await page.selectOption('#game-renderer','canvas');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'canvas');
+        assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'game-viewport');
+        assert.strictEqual(await page.locator('#game-input').evaluate(canvas=>!!canvas.getContext('2d')),true);
+        await page.click('#game-fullscreen');await page.waitForFunction(()=>document.fullscreenElement===null);
+        await page.click('#game-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='game-viewport');
+        const fullscreenSession=await page.context().newCDPSession(page);
+        await fullscreenSession.send('Emulation.setDeviceMetricsOverride',{width:1100,height:800,deviceScaleFactor:1,mobile:false});
+        await page.waitForFunction(()=>{const image=document.getElementById('game-input').getBoundingClientRect(),slot=document.getElementById('game-surface').getBoundingClientRect();return image.width<=slot.width+1&&image.height<=slot.height+1&&Math.abs((image.width-4)/(image.height-4)-320/202)<0.02;});
+        await fullscreenSession.send('Emulation.clearDeviceMetricsOverride');await fullscreenSession.detach();
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-count'),pausedCount);
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'stopped');
         await page.selectOption('#game-renderer','webgl');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'webgl');
+        assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'game-viewport');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-count'),pausedCount);
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'on');
         await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'running');
@@ -60,8 +75,14 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'webgl');
         await page.click('#game-resume');
 
+        const beforeExit=Number(await page.locator('#game-controls').getAttribute('data-count'));
+        await page.keyboard.press('Escape');await page.waitForFunction(()=>document.fullscreenElement===null);
+        await page.waitForFunction(count=>Number(document.getElementById('game-controls').dataset.count)>count,beforeExit);
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-display-lines'),'202');
         await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.displayLines==='256');
+        await page.click('#game-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='game-viewport');
         await page.click('#game-restart');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
+        assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'game-viewport');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-voices'),'0');await page.selectOption('#game-keyboard-layout','wasd');await page.keyboard.down('z');
         await page.waitForFunction(()=>document.getElementById('game-controls').dataset.line==='204',{},{timeout:30000});await page.keyboard.up('z');
         await page.click('#game-restart');await page.selectOption('#game-keyboard-layout','arrows');await page.keyboard.down('ArrowDown');
@@ -73,7 +94,10 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.match(await page.locator('#game-status').textContent(),/synchronous files.select/);
         await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'error');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-voices'),'0');
+        assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'game-viewport');
+        assert.strictEqual(await page.locator('#game-status').isVisible(),true);
         await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
+        assert.strictEqual(await page.evaluate(()=>document.fullscreenElement),null);
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'disposed');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-context'),'closed');
       }

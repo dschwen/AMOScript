@@ -19,7 +19,9 @@ original selection loop and file calls. Controlled whole-program fire input ente
 level 1. A new [live original-game demo](docs/wonderland-game.md) supports keyboard
 layouts, the browser Gamepad API, Stop/Resume and Restart. WebGL2 is now its
 default renderer, with explicit Canvas switching that preserves the VM/audio
-session, eleven whole-game GPU/CPU frames and live context-loss/restoration checks. Input-only controlled
+session, eleven whole-game GPU/CPU frames and live context-loss/restoration checks.
+Fullscreen now fits both renderers without changing their buffers, and survives
+renderer replacement/Restart; native controls, Escape and pointer mapping pass. Input-only controlled
 replays render three deaths/fades, two life restarts, game over and a fresh game;
 live Chromium checks cover movement, Escape and remapping. Safe blank-row copper
 setup now survives the original death fade. User-activated Web Audio now plays
@@ -107,7 +109,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **498 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **502 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

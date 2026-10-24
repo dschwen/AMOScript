@@ -16,14 +16,19 @@
   <h1>AMOScript</h1>
   <p data-demo-index><a href="demos/index.html">All browser-test demos</a> · <a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Open gallery with HTML Preview</a></p>
   <p>Choose an AMOS program. Focus the screen to send keyboard and mouse input.</p>
+  <section id="screen-view"><div class="amos-fullscreen-toolbar">
   <button id="run" type="button">Run</button>
   <button id="graphics" type="button">Graphics</button>
   <button id="bobs" type="button">Moving Bobs</button>
   <button id="stop" type="button">Stop</button>
+  <button id="fullscreen" type="button">Fullscreen</button><span id="fullscreen-status" role="status"></span>
+  </div><div id="screen-surface">
   <canvas id="screen" width="320" height="200" tabindex="0" aria-label="AMOS program display">Canvas is required to display this program.</canvas>
+  </div></section>
   <pre id="output" aria-live="polite"></pre>
   <script src="lib/amos/background.js"></script>
   <script src="lib/amos/browser.js"></script>
+  <script src="lib/amos/fullscreen.js"></script>
   <script src="examples/compiled-demo.js"></script>
   <script>const controlFlowFactory = AMOS_MODULE;</script>
   <script src="examples/compiled-graphics.js"></script>
@@ -33,6 +38,7 @@
     const bobsFactory = AMOS_MODULE;
     const output = document.getElementById('output');
     const host = AMOS_BROWSER.createCanvasHost(document.getElementById('screen'));
+    const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(document.getElementById('screen-view'), {button:document.getElementById('fullscreen'),statusElement:document.getElementById('fullscreen-status'),surface:document.getElementById('screen-surface'),onChange(){document.getElementById('screen').dispatchEvent(new Event('blur'));host.focus();}});
     AMOS.init({ write: text => { output.textContent += text; } });
     function start(factory) {
       output.textContent = '';

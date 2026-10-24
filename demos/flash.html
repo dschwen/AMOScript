@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMOS Flash and screen-local Flash Off · AMOScript</title><style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:2rem auto;padding:0 1rem;color:#17202a;background:#f5f6f8}a{color:#07569c}button,select{font:inherit;padding:.5rem;margin:.4rem .5rem .6rem 0}button{cursor:pointer}pre{padding:1rem;background:white;white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}#stage{overflow:auto;max-height:65vh}canvas,img{image-rendering:pixelated;max-width:100%;border:1px solid #b8c5cf}#stage img{min-width:128px}article{padding:1rem;background:white;margin:1rem 0;border:1px solid #dae2e8}#status{display:block;margin:1rem 0}body[data-status=failed] #status{color:#a00020}body[data-status=passed] #status{color:#126238}</style></head><body><nav><a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a></nav>
-<h1>AMOS Flash and screen-local Flash Off</h1><p>Clocked colour cycles, selected-screen cancellation, unchanged physical pixels and immutable snapshots. Normal/EHB/HAM6 Canvas and CPU output use independent RGB expectations. Includes live Stop/Resume/Flash Off controls; Screen Open implicit flashing remains unsupported.</p><p>Run the same scenario and assertions as the browser test suite. Select a captured frame to inspect it.</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><div id="stage"></div><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>
+<h1>AMOS Flash and screen-local Flash Off</h1><p>Clocked colour cycles, selected-screen cancellation, unchanged physical pixels and immutable snapshots. Normal/EHB/HAM6 Canvas and CPU output use independent RGB expectations. Includes live Stop/Resume/Flash Off controls; Screen Open implicit flashing remains unsupported.</p><p>Run the same scenario and assertions as the browser test suite. Select a captured frame to inspect it.</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><section id="frame-view"><div class="amos-fullscreen-toolbar"><button id="frame-fullscreen" hidden>Fullscreen</button><span id="frame-fullscreen-status" role="status"></span></div><div id="stage"></div></section><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>
 <script>/* jshint esversion: 6 */
 'use strict';
 
@@ -309,11 +309,83 @@ function amigaScanCode(code) { return Object.prototype.hasOwnProperty.call(amiga
 
 if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost, createJoystickInput, amigaScanCode };
 else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaScanCode };
+</script><script>/* jshint esversion: 6 */
+'use strict';
+
+// Own fullscreen for a stable container, independently of rendering and VM time.
+function createFullscreenHost(container, options = {}) {
+  const doc=container.ownerDocument, win=doc.defaultView, button=options.button;
+  const surface=options.surface||container;
+  const content=options.getContent||(()=>surface.querySelector('canvas,img'));
+  const supported=typeof container.requestFullscreen==='function'&&typeof doc.exitFullscreen==='function'&&doc.fullscreenEnabled!==false;
+  let disposed=false,pending=false,error=null,current=null,saved=null,transition=null,closing=null;
+  const active=()=>doc.fullscreenElement===container;
+  if(!supported){
+    if(button){button.textContent='Fullscreen';button.disabled=true;button.setAttribute('aria-pressed','false');}
+    if(options.statusElement)options.statusElement.textContent='Fullscreen is unavailable in this browser or frame.';
+    return {toggle:()=>Promise.resolve(false),refresh(){},dispose(){disposed=true;return Promise.resolve();},status:()=>({active:false,supported:false,pending:false,error:null,disposed})};
+  }
+
+  const style=doc.createElement('style');
+  style.textContent='.amos-fullscreen:fullscreen{display:flex;flex-direction:column;align-items:stretch;box-sizing:border-box;width:100%;height:100%;max-width:none;max-height:none;padding:12px;gap:8px;overflow:hidden;background:#000;color:#fff}.amos-fullscreen:fullscreen>.amos-fullscreen-toolbar{flex:none;display:flex;align-items:center;flex-wrap:wrap;gap:4px}.amos-fullscreen:fullscreen>.amos-fullscreen-messages{flex:none;font-size:14px}.amos-fullscreen-messages>p{margin:4px 0}.amos-fullscreen:fullscreen>.amos-fullscreen-surface{flex:1;min-width:0;min-height:0;width:100%;max-height:none!important;overflow:hidden!important;display:flex;align-items:center;justify-content:center}.amos-fullscreen:fullscreen>.amos-fullscreen-surface>canvas,.amos-fullscreen:fullscreen>.amos-fullscreen-surface>img{flex:none;min-width:0!important;max-width:none!important;max-height:none!important;image-rendering:pixelated}';
+  doc.head.appendChild(style);container.classList.add('amos-fullscreen');surface.classList.add('amos-fullscreen-surface');
+  function restore(){if(current&&saved){current.style.width=saved.width;current.style.height=saved.height;}current=null;saved=null;}
+  function refresh(){
+    const next=content();
+    if(!active()||disposed||next!==current)restore();
+    if(active()&&!disposed&&next){
+      if(!current){current=next;saved={width:next.style.width,height:next.style.height};}
+      const width=next.naturalWidth||next.width,height=next.naturalHeight||next.height;
+      const borderX=Math.max(0,next.offsetWidth-next.clientWidth),borderY=Math.max(0,next.offsetHeight-next.clientHeight);
+      const scale=Math.min((surface.clientWidth-borderX)/width,(surface.clientHeight-borderY)/height);
+      if(width>0&&height>0&&scale>0){const w=`${Math.max(1,Math.floor(width*scale))}px`,h=`${Math.max(1,Math.floor(height*scale))}px`;if(next.style.width!==w)next.style.width=w;if(next.style.height!==h)next.style.height=h;}
+    }
+    if(button){button.textContent=active()?'Exit fullscreen':'Fullscreen';button.setAttribute('aria-pressed',String(active()));button.disabled=!supported||pending||disposed;}
+    if(options.statusElement)options.statusElement.textContent=error?`Fullscreen unavailable: ${error}`:!supported?'Fullscreen is unavailable in this browser or frame.':'';
+  }
+  function toggle(){
+    if(disposed||pending||!supported)return Promise.resolve(false);
+    pending=true;error=null;refresh();
+    let operation;
+    try{operation=active()?doc.exitFullscreen():container.requestFullscreen();}
+    catch(failure){error=failure.message;pending=false;refresh();return Promise.resolve(false);}
+    transition=Promise.resolve(operation).then(async()=>{
+      if(disposed&&active())await doc.exitFullscreen();
+      return !disposed;
+    }).catch(failure=>{error=failure.message;return false;}).finally(()=>{pending=false;refresh();});
+    return transition;
+  }
+  let previousActive=active();
+  function changed(){refresh();const entered=active();if(entered!==previousActive){previousActive=entered;if(!disposed&&options.onChange)options.onChange(entered);}}
+  function escape(event){if(active()&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();toggle();}}
+  if(button)button.addEventListener('click',toggle);
+  doc.addEventListener('fullscreenchange',changed);doc.addEventListener('keydown',escape,true);
+  if(win)win.addEventListener('resize',refresh);surface.addEventListener('load',refresh,true);
+  const resize=win&&win.ResizeObserver?new win.ResizeObserver(refresh):null;if(resize)resize.observe(surface);
+  const mutation=win&&win.MutationObserver?new win.MutationObserver(refresh):null;
+  if(mutation)mutation.observe(surface,{childList:true,subtree:true,attributes:true,attributeFilter:['width','height','src','style']});
+  refresh();
+  function dispose(){
+    if(disposed)return closing||Promise.resolve();disposed=true;
+    if(button)button.removeEventListener('click',toggle);
+    doc.removeEventListener('fullscreenchange',changed);doc.removeEventListener('keydown',escape,true);
+    if(win)win.removeEventListener('resize',refresh);surface.removeEventListener('load',refresh,true);if(resize)resize.disconnect();if(mutation)mutation.disconnect();
+    restore();style.remove();container.classList.remove('amos-fullscreen');surface.classList.remove('amos-fullscreen-surface');
+    let exit;try{exit=active()?doc.exitFullscreen():null;}catch(failure){error=failure.message;}
+    closing=Promise.allSettled([transition,exit]).then(()=>{refresh();});return closing;
+  }
+  return {toggle,refresh,dispose,status:()=>({active:active(),supported,pending,error,disposed})};
+}
+
+if(typeof module==='object'&&module.exports)module.exports={createFullscreenHost};
+else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
 </script><script>(function installDemo(config) {
   const button = document.getElementById('run-demo'), status = document.getElementById('status');
   const output = document.getElementById('results'), selector = document.getElementById('frames');
   const stage = document.getElementById('stage');
   const zoom = document.getElementById('zoom');
+  const fullscreenButton=document.getElementById('frame-fullscreen');
+  const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(document.getElementById('frame-view'),{button:fullscreenButton,statusElement:document.getElementById('frame-fullscreen-status'),surface:stage});
   const equal = (a, b) => {
     if (Object.is(a, b)) return true;
     if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
@@ -330,6 +402,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   function show() {
     stage.replaceChildren();
     const frame = frames[Number(selector.value)]; if (!frame) return;
+    fullscreenButton.hidden=false;
     if (frame.png) {
       const image = new Image(); image.alt = frame.name;
       image.onload = () => { image.style.width = `${image.naturalWidth * Number(zoom.value)}px`; };
@@ -345,7 +418,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, amigaSca
   zoom.addEventListener('change', show);
   button.addEventListener('click', async () => {
     button.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
-    frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
+    fullscreenButton.hidden=true;frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
     const previousObserver = globalThis.AMOS_DEMO_OBSERVE;
     const originalPut = CanvasRenderingContext2D.prototype.putImageData;
     let previousPng = null;

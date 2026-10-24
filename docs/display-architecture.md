@@ -204,6 +204,9 @@ when the VM is stopped. No automatic CPU fallback is counted as GPU execution.
 Creation/mode errors are visible; users can explicitly choose Canvas and Restart.
 `clear()` forgets removed-screen presentation so restoration does not repaint stale
 output. Detach cancels rAF/input subscriptions; the caller disposes renderer state.
+The shared [fullscreen controller](fullscreen.md) fits CSS around the full canvas
+without changing its bitmap or GPU viewport; its black margins remain outside the
+input rectangle. This works in both live backends and survives canvas replacement.
 See [the live-game contract](wonderland-game.md#live-webgl2-presentation).
 
 Map pointer positions through the content rectangle, letterboxing, integer/aspect
