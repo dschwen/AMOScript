@@ -1,0 +1,20 @@
+{
+  "name": "bank-byte-access",
+  "source": "Reserve As Work 4,4\nPoke Start(4),511\nPrint Peek(Start(4))\nKey Speed 10,2\n",
+  "programHex": "414d4f532042617369632076312e30300000005a0a0020f2003e00000004005c003e0000000400000d0021ca01400074003e00000004007c005c003e000001ff00000c00047621e6007401400074003e00000004007c007c00000a0011c6003e0000000a005c003e000000020000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit original offsets Reserve As Work=20f2, Start=0140, Poke=21ca, Peek=21e6 and Key Speed=11c6, with independent decimal payloads and physical line lengths. No production encoder or name table."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/ccfefa080fa5ee725947284155bf835631c0ae6c/%2BLib.s",
+    "sources": [
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/bf6a179efce79a23d80a75d306ea8d5657f70193/%2BW.s",
+      "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/banks.cpp"
+    ],
+    "symbols": ["FnStart", "InPoke", "FnPeek", "InKeySpeed", "TKSpeed", "CalRep", "Bnk.Schrink"],
+    "notes": "Source-derived expectations: Peek zero-extends a byte, Poke stores the low byte, Key Speed converts 50ths to input-device time. AMOScript uses bounded virtual bank addresses rather than original machine addresses. No captured AMOS execution."
+  },
+  "expected": { "values": [[255]], "halted": true }
+}

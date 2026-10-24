@@ -165,8 +165,9 @@ Bank Shrink applies to generic byte banks, retaining prefix bytes and metadata.
 The new length must be positive and no greater than the old one; equal size is
 allowed. Validation rejects nonpositive lengths first, then missing banks,
 image-bank types, and growth. The bank object remains the same, while its byte
-storage is reduced. The runtime does not model raw pointers, FreeMem/AllocAbs or
-Amiga scheduler locking around physical relocation.
+storage is reduced. [Portable Start/Peek/Poke addresses](bank-memory.md) now retain
+the surviving prefix address and reject removed tail accesses. The runtime does
+not model native machine pointers, FreeMem/AllocAbs or Amiga scheduler locking.
 
 These rules follow [InBankSwap and Bnk.Schrink](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s)
 and the [memory-bank manual](https://amospromanual.dev/05-09-memory-banks.html).

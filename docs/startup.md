@@ -3,8 +3,9 @@
 The initial executable Wonderland slice covered the original first nine physical
 lines, including its 20,001-iteration speed test and both resulting `a3000` values,
 running unchanged in standalone JavaScript. That nine-line regression remains;
-the shared browser demo now executes the first fifteen lines through original
-sample-bank loading and setup. See [audio support](audio.md). These startup
+the shared browser demo now executes the first 48 lines through original
+sample-bank loading, embedded level-seed reads and image-mask setup. See
+[audio support](audio.md), [bank memory](bank-memory.md) and [keyboard repeat](key-speed.md). These startup
 fixtures are not shortened playable versions of the game.
 
 ## Set Buffer
@@ -80,6 +81,6 @@ These expectations are source analysis, not AMOS execution captures.
 Tests execute generated modules without `require`, checking VBL boundaries,
 assignment phase, signed wrap, factory isolation, Stop, 50/60 Hz, typed values,
 invalid forms and adapter failures. The
-[Wonderland demo](../demos/wonderland.html) executes the exact fifteen-line original
+[Wonderland demo](../demos/wonderland.html) executes the exact 48-line original
 prefix under two fake-clock schedules and displays both benchmark outcomes,
 alongside the four independently checked image assets and remaining blockers.

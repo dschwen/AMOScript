@@ -1722,6 +1722,7 @@
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
+  const bankMemory = bankMemoryFactory(banks);
   const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
   state.audio = audio.state;
   let bankOrder = Array.from(banks.keys()).reverse();
@@ -2042,10 +2043,11 @@
   function installBanks(loaded, removed = [], clear = false) {
     const objectsChanged = (clear && banks.has(1)) || removed.includes(1) || loaded.some(bank => bank.number === 1);
     if (objectsChanged) clearBobs(null, true);
-    if (clear) { banks.clear(); bankOrder = []; }
-    for (const number of removed) banks.delete(number);
+    if (clear) { for (const bank of banks.values()) bankMemory.release(bank); banks.clear(); bankOrder = []; }
+    for (const number of removed) { bankMemory.release(banks.get(number)); banks.delete(number); }
     bankOrder = bankOrder.filter(number => !removed.includes(number));
     for (const bank of loaded) {
+      bankMemory.release(banks.get(bank.number));
       banks.set(bank.number, bank);
       bankOrder = [bank.number, ...bankOrder.filter(number => number !== bank.number)];
     }
@@ -2885,6 +2887,16 @@
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
     radian: () => { degrees = false; },
+    bankStart: number => bankMemory.start(integer(number)),
+    peek: address => bankMemory.peek(integer(address)),
+    poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    keySpeed(delay, interval) {
+      delay = integer(delay); interval = integer(interval);
+      if (delay < 0 || interval < 0) throw new Error('Invalid Key Speed');
+      if (delay > 32767 || interval > 32767 || interval === 0) throw new Error('Unsupported Key Speed range (period must be 1..32767)');
+      state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
+      if (options.resetInput) options.resetInput();
+    },
     audio,
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
@@ -2966,6 +2978,44 @@
   return { state, sample, selectBank, loop, filter, play, stop,
     silence() { if (activeMask) stop(15); } };
 };
+  const bankMemoryFactory = function createBankMemory(banks) {
+  const allocations = new Map();
+  let next = 65536;
+  function prune() {
+    for (const bank of allocations.keys()) if (banks.get(bank.number) !== bank) allocations.delete(bank);
+  }
+  function start(number) {
+    prune();
+    const bank = banks.get(number);
+    if (!bank) throw new Error('Bank not reserved');
+    if (bank.type !== 'data') throw new Error('Start of image banks is not implemented');
+    let allocation = allocations.get(bank);
+    if (!allocation) {
+      const base = Math.ceil(next / 16) * 16, capacity = bank.data.length;
+      if (!Number.isSafeInteger(capacity) || capacity < 0 || base > 0x7fffffff || base + capacity > 0x80000000) throw new Error('Bank address space exhausted');
+      allocation = { base, capacity };
+      allocations.set(bank, allocation); next = base + Math.max(1, capacity) + 16;
+    }
+    return allocation.base;
+  }
+  function resolve(address) {
+    if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    prune();
+    for (const [bank, allocation] of allocations) {
+      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+        const offset = address - allocation.base;
+        if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
+        if (offset >= bank.data.length) break;
+        return { bank, offset };
+      }
+    }
+    throw new Error('Bank memory address out of bounds or retired');
+  }
+  return { start,
+    peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
+    poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
+    release(bank) { allocations.delete(bank); } };
+};
   const createProgram = function createProgram(cases, options = {}) {
   const timing = {
     setTimeout: options.setTimeout || (typeof setTimeout !== 'undefined' ? setTimeout : null),
@@ -3012,6 +3062,12 @@
   let scheduled = null;
   let sleepRemaining = 0;
   const keys = state.input.keys;
+  const inputResetListeners = new Set();
+  function resetInput() {
+    for (const listener of Array.from(inputResetListeners)) {
+      try { listener(); } catch (_) { /* cleanup must preserve source failures */ }
+    }
+  }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
     try { operations.audio.silence(); } catch (_) { /* best-effort cleanup */ }
@@ -3111,6 +3167,7 @@
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
+        resetInput();
         silenceAfterFailure();
         if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
         throw error;
@@ -3120,11 +3177,12 @@
     }
     try {
       operations.flushBobs();
-      if (state.halted) operations.audio.silence();
+      if (state.halted) { resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
+      resetInput();
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       throw error;
@@ -3137,6 +3195,7 @@
     if (state.waiting === 'sleep' && scheduled) sleepRemaining = Math.max(0, scheduled.due - timing.now());
     state.stopped = true;
     cancelScheduled();
+    resetInput();
     operations.audio.silence();
   }
 
@@ -3176,9 +3235,13 @@
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, options);
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput }));
   return {
     state, tick, stop, resume, sendKey, print,
+    subscribeInputReset(listener) {
+      if (typeof listener !== 'function') throw new Error('Input listener must be a function');
+      inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
+    },
     timer: () => (timerBase + (vblCount() - timerWrittenAt) % 4294967296) | 0,
     setTimer(value) {
       const number = operations.integer(value), count = vblCount();

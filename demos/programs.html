@@ -59,10 +59,28 @@ function createCanvasHost(canvas, options = {}) {
   if (!context) throw new Error('Canvas 2D rendering is not available');
   const request = options.requestAnimationFrame || (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : callback => setTimeout(callback, 0));
   const cancel = options.cancelAnimationFrame || (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout);
+  const delay = options.setTimeout || setTimeout, clearDelay = options.clearTimeout || clearTimeout;
   let program = null;
   let unsubscribe = null;
   let pending = null;
   let previousCursor = null;
+  let unsubscribeInput = null, held = null, repeatTask = null;
+
+  function releaseKey() {
+    held = null;
+    if (repeatTask) { const previous = repeatTask; repeatTask = null; clearDelay(previous.id); }
+  }
+  function repeatAfter(ms) {
+    const task = { id: null }; repeatTask = task;
+    task.id = delay(() => {
+      if (repeatTask !== task) return;
+      repeatTask = null;
+      if (!program || !held || program.state.halted || program.state.stopped) { releaseKey(); return; }
+      const current = held;
+      program.sendKey(current.key);
+      if (held === current) repeatAfter(current.config.intervalMs);
+    }, ms);
+  }
 
   function render() {
     if (!program) return;
@@ -87,12 +105,20 @@ function createCanvasHost(canvas, options = {}) {
     });
   }
   function keydown(event) {
-    if (!program || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (!program) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) { releaseKey(); return; }
     const key = event.key.length === 1 ? event.key : { Enter: '\r', Escape: '\x1b', Backspace: '\b' }[event.key];
     if (key == null) return;
     event.preventDefault();
+    const config = program.state.input.keySpeed;
+    if (config && (event.repeat || program.state.halted || program.state.stopped)) return;
     program.sendKey(key);
+    if (config) {
+      releaseKey(); held = { code: event.code || event.key, key, config };
+      repeatAfter(config.delayMs);
+    }
   }
+  function keyup(event) { if (held && held.code === (event.code || event.key)) releaseKey(); }
   function pointer(event) {
     if (!program || program.display.current == null) return;
     const screen = program.display.screen();
@@ -114,11 +140,15 @@ function createCanvasHost(canvas, options = {}) {
     pointer(event);
   }
   function blur() {
+    releaseKey();
     if (program) program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
   }
-  const events = { keydown, pointermove: pointer, pointerdown, pointerup: pointer, blur };
+  const events = { keydown, keyup, pointermove: pointer, pointerdown, pointerup: pointer, blur };
 
   function detach() {
+    releaseKey();
+    if (unsubscribeInput) unsubscribeInput();
+    unsubscribeInput = null;
     if (unsubscribe) unsubscribe();
     unsubscribe = null;
     if (pending) { cancel(pending.id); pending = null; }
@@ -130,6 +160,7 @@ function createCanvasHost(canvas, options = {}) {
   function attach(next) {
     detach();
     program = next;
+    if (program.subscribeInputReset) unsubscribeInput = program.subscribeInputReset(releaseKey);
     if (canvas.style) previousCursor = canvas.style.cursor;
     unsubscribe = program.display.subscribe(schedule);
     for (const [name, listener] of Object.entries(events)) canvas.addEventListener(name, listener);
@@ -1865,6 +1896,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
+  const bankMemory = bankMemoryFactory(banks);
   const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
   state.audio = audio.state;
   let bankOrder = Array.from(banks.keys()).reverse();
@@ -2185,10 +2217,11 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   function installBanks(loaded, removed = [], clear = false) {
     const objectsChanged = (clear && banks.has(1)) || removed.includes(1) || loaded.some(bank => bank.number === 1);
     if (objectsChanged) clearBobs(null, true);
-    if (clear) { banks.clear(); bankOrder = []; }
-    for (const number of removed) banks.delete(number);
+    if (clear) { for (const bank of banks.values()) bankMemory.release(bank); banks.clear(); bankOrder = []; }
+    for (const number of removed) { bankMemory.release(banks.get(number)); banks.delete(number); }
     bankOrder = bankOrder.filter(number => !removed.includes(number));
     for (const bank of loaded) {
+      bankMemory.release(banks.get(bank.number));
       banks.set(bank.number, bank);
       bankOrder = [bank.number, ...bankOrder.filter(number => number !== bank.number)];
     }
@@ -3028,6 +3061,16 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
     radian: () => { degrees = false; },
+    bankStart: number => bankMemory.start(integer(number)),
+    peek: address => bankMemory.peek(integer(address)),
+    poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    keySpeed(delay, interval) {
+      delay = integer(delay); interval = integer(interval);
+      if (delay < 0 || interval < 0) throw new Error('Invalid Key Speed');
+      if (delay > 32767 || interval > 32767 || interval === 0) throw new Error('Unsupported Key Speed range (period must be 1..32767)');
+      state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
+      if (options.resetInput) options.resetInput();
+    },
     audio,
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
@@ -3109,6 +3152,44 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   return { state, sample, selectBank, loop, filter, play, stop,
     silence() { if (activeMask) stop(15); } };
 };
+  const bankMemoryFactory = function createBankMemory(banks) {
+  const allocations = new Map();
+  let next = 65536;
+  function prune() {
+    for (const bank of allocations.keys()) if (banks.get(bank.number) !== bank) allocations.delete(bank);
+  }
+  function start(number) {
+    prune();
+    const bank = banks.get(number);
+    if (!bank) throw new Error('Bank not reserved');
+    if (bank.type !== 'data') throw new Error('Start of image banks is not implemented');
+    let allocation = allocations.get(bank);
+    if (!allocation) {
+      const base = Math.ceil(next / 16) * 16, capacity = bank.data.length;
+      if (!Number.isSafeInteger(capacity) || capacity < 0 || base > 0x7fffffff || base + capacity > 0x80000000) throw new Error('Bank address space exhausted');
+      allocation = { base, capacity };
+      allocations.set(bank, allocation); next = base + Math.max(1, capacity) + 16;
+    }
+    return allocation.base;
+  }
+  function resolve(address) {
+    if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    prune();
+    for (const [bank, allocation] of allocations) {
+      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+        const offset = address - allocation.base;
+        if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
+        if (offset >= bank.data.length) break;
+        return { bank, offset };
+      }
+    }
+    throw new Error('Bank memory address out of bounds or retired');
+  }
+  return { start,
+    peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
+    poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
+    release(bank) { allocations.delete(bank); } };
+};
   const createProgram = function createProgram(cases, options = {}) {
   const timing = {
     setTimeout: options.setTimeout || (typeof setTimeout !== 'undefined' ? setTimeout : null),
@@ -3155,6 +3236,12 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   let scheduled = null;
   let sleepRemaining = 0;
   const keys = state.input.keys;
+  const inputResetListeners = new Set();
+  function resetInput() {
+    for (const listener of Array.from(inputResetListeners)) {
+      try { listener(); } catch (_) { /* cleanup must preserve source failures */ }
+    }
+  }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
     try { operations.audio.silence(); } catch (_) { /* best-effort cleanup */ }
@@ -3254,6 +3341,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
+        resetInput();
         silenceAfterFailure();
         if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
         throw error;
@@ -3263,11 +3351,12 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     }
     try {
       operations.flushBobs();
-      if (state.halted) operations.audio.silence();
+      if (state.halted) { resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
+      resetInput();
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       throw error;
@@ -3280,6 +3369,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     if (state.waiting === 'sleep' && scheduled) sleepRemaining = Math.max(0, scheduled.due - timing.now());
     state.stopped = true;
     cancelScheduled();
+    resetInput();
     operations.audio.silence();
   }
 
@@ -3319,9 +3409,13 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, options);
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput }));
   return {
     state, tick, stop, resume, sendKey, print,
+    subscribeInputReset(listener) {
+      if (typeof listener !== 'function') throw new Error('Input listener must be a function');
+      inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
+    },
     timer: () => (timerBase + (vblCount() - timerWrittenAt) % 4294967296) | 0,
     setTimer(value) {
       const number = operations.integer(value), count = vblCount();
@@ -5082,6 +5176,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
+  const bankMemory = bankMemoryFactory(banks);
   const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
   state.audio = audio.state;
   let bankOrder = Array.from(banks.keys()).reverse();
@@ -5402,10 +5497,11 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   function installBanks(loaded, removed = [], clear = false) {
     const objectsChanged = (clear && banks.has(1)) || removed.includes(1) || loaded.some(bank => bank.number === 1);
     if (objectsChanged) clearBobs(null, true);
-    if (clear) { banks.clear(); bankOrder = []; }
-    for (const number of removed) banks.delete(number);
+    if (clear) { for (const bank of banks.values()) bankMemory.release(bank); banks.clear(); bankOrder = []; }
+    for (const number of removed) { bankMemory.release(banks.get(number)); banks.delete(number); }
     bankOrder = bankOrder.filter(number => !removed.includes(number));
     for (const bank of loaded) {
+      bankMemory.release(banks.get(bank.number));
       banks.set(bank.number, bank);
       bankOrder = [bank.number, ...bankOrder.filter(number => number !== bank.number)];
     }
@@ -6245,6 +6341,16 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
     radian: () => { degrees = false; },
+    bankStart: number => bankMemory.start(integer(number)),
+    peek: address => bankMemory.peek(integer(address)),
+    poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    keySpeed(delay, interval) {
+      delay = integer(delay); interval = integer(interval);
+      if (delay < 0 || interval < 0) throw new Error('Invalid Key Speed');
+      if (delay > 32767 || interval > 32767 || interval === 0) throw new Error('Unsupported Key Speed range (period must be 1..32767)');
+      state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
+      if (options.resetInput) options.resetInput();
+    },
     audio,
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
@@ -6326,6 +6432,44 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   return { state, sample, selectBank, loop, filter, play, stop,
     silence() { if (activeMask) stop(15); } };
 };
+  const bankMemoryFactory = function createBankMemory(banks) {
+  const allocations = new Map();
+  let next = 65536;
+  function prune() {
+    for (const bank of allocations.keys()) if (banks.get(bank.number) !== bank) allocations.delete(bank);
+  }
+  function start(number) {
+    prune();
+    const bank = banks.get(number);
+    if (!bank) throw new Error('Bank not reserved');
+    if (bank.type !== 'data') throw new Error('Start of image banks is not implemented');
+    let allocation = allocations.get(bank);
+    if (!allocation) {
+      const base = Math.ceil(next / 16) * 16, capacity = bank.data.length;
+      if (!Number.isSafeInteger(capacity) || capacity < 0 || base > 0x7fffffff || base + capacity > 0x80000000) throw new Error('Bank address space exhausted');
+      allocation = { base, capacity };
+      allocations.set(bank, allocation); next = base + Math.max(1, capacity) + 16;
+    }
+    return allocation.base;
+  }
+  function resolve(address) {
+    if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    prune();
+    for (const [bank, allocation] of allocations) {
+      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+        const offset = address - allocation.base;
+        if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
+        if (offset >= bank.data.length) break;
+        return { bank, offset };
+      }
+    }
+    throw new Error('Bank memory address out of bounds or retired');
+  }
+  return { start,
+    peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
+    poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
+    release(bank) { allocations.delete(bank); } };
+};
   const createProgram = function createProgram(cases, options = {}) {
   const timing = {
     setTimeout: options.setTimeout || (typeof setTimeout !== 'undefined' ? setTimeout : null),
@@ -6372,6 +6516,12 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   let scheduled = null;
   let sleepRemaining = 0;
   const keys = state.input.keys;
+  const inputResetListeners = new Set();
+  function resetInput() {
+    for (const listener of Array.from(inputResetListeners)) {
+      try { listener(); } catch (_) { /* cleanup must preserve source failures */ }
+    }
+  }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
     try { operations.audio.silence(); } catch (_) { /* best-effort cleanup */ }
@@ -6471,6 +6621,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
+        resetInput();
         silenceAfterFailure();
         if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
         throw error;
@@ -6480,11 +6631,12 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     }
     try {
       operations.flushBobs();
-      if (state.halted) operations.audio.silence();
+      if (state.halted) { resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
+      resetInput();
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       throw error;
@@ -6497,6 +6649,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     if (state.waiting === 'sleep' && scheduled) sleepRemaining = Math.max(0, scheduled.due - timing.now());
     state.stopped = true;
     cancelScheduled();
+    resetInput();
     operations.audio.silence();
   }
 
@@ -6536,9 +6689,13 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, options);
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput }));
   return {
     state, tick, stop, resume, sendKey, print,
+    subscribeInputReset(listener) {
+      if (typeof listener !== 'function') throw new Error('Input listener must be a function');
+      inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
+    },
     timer: () => (timerBase + (vblCount() - timerWrittenAt) % 4294967296) | 0,
     setTimer(value) {
       const number = operations.integer(value), count = vblCount();
@@ -8316,6 +8473,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
+  const bankMemory = bankMemoryFactory(banks);
   const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
   state.audio = audio.state;
   let bankOrder = Array.from(banks.keys()).reverse();
@@ -8636,10 +8794,11 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   function installBanks(loaded, removed = [], clear = false) {
     const objectsChanged = (clear && banks.has(1)) || removed.includes(1) || loaded.some(bank => bank.number === 1);
     if (objectsChanged) clearBobs(null, true);
-    if (clear) { banks.clear(); bankOrder = []; }
-    for (const number of removed) banks.delete(number);
+    if (clear) { for (const bank of banks.values()) bankMemory.release(bank); banks.clear(); bankOrder = []; }
+    for (const number of removed) { bankMemory.release(banks.get(number)); banks.delete(number); }
     bankOrder = bankOrder.filter(number => !removed.includes(number));
     for (const bank of loaded) {
+      bankMemory.release(banks.get(bank.number));
       banks.set(bank.number, bank);
       bankOrder = [bank.number, ...bankOrder.filter(number => number !== bank.number)];
     }
@@ -9479,6 +9638,16 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
     radian: () => { degrees = false; },
+    bankStart: number => bankMemory.start(integer(number)),
+    peek: address => bankMemory.peek(integer(address)),
+    poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    keySpeed(delay, interval) {
+      delay = integer(delay); interval = integer(interval);
+      if (delay < 0 || interval < 0) throw new Error('Invalid Key Speed');
+      if (delay > 32767 || interval > 32767 || interval === 0) throw new Error('Unsupported Key Speed range (period must be 1..32767)');
+      state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
+      if (options.resetInput) options.resetInput();
+    },
     audio,
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
@@ -9560,6 +9729,44 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   return { state, sample, selectBank, loop, filter, play, stop,
     silence() { if (activeMask) stop(15); } };
 };
+  const bankMemoryFactory = function createBankMemory(banks) {
+  const allocations = new Map();
+  let next = 65536;
+  function prune() {
+    for (const bank of allocations.keys()) if (banks.get(bank.number) !== bank) allocations.delete(bank);
+  }
+  function start(number) {
+    prune();
+    const bank = banks.get(number);
+    if (!bank) throw new Error('Bank not reserved');
+    if (bank.type !== 'data') throw new Error('Start of image banks is not implemented');
+    let allocation = allocations.get(bank);
+    if (!allocation) {
+      const base = Math.ceil(next / 16) * 16, capacity = bank.data.length;
+      if (!Number.isSafeInteger(capacity) || capacity < 0 || base > 0x7fffffff || base + capacity > 0x80000000) throw new Error('Bank address space exhausted');
+      allocation = { base, capacity };
+      allocations.set(bank, allocation); next = base + Math.max(1, capacity) + 16;
+    }
+    return allocation.base;
+  }
+  function resolve(address) {
+    if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
+    prune();
+    for (const [bank, allocation] of allocations) {
+      if (address >= allocation.base && address < allocation.base + allocation.capacity) {
+        const offset = address - allocation.base;
+        if (bank.data.length > allocation.capacity) throw new Error('Bank memory grew outside its allocation');
+        if (offset >= bank.data.length) break;
+        return { bank, offset };
+      }
+    }
+    throw new Error('Bank memory address out of bounds or retired');
+  }
+  return { start,
+    peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
+    poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
+    release(bank) { allocations.delete(bank); } };
+};
   const createProgram = function createProgram(cases, options = {}) {
   const timing = {
     setTimeout: options.setTimeout || (typeof setTimeout !== 'undefined' ? setTimeout : null),
@@ -9606,6 +9813,12 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
   let scheduled = null;
   let sleepRemaining = 0;
   const keys = state.input.keys;
+  const inputResetListeners = new Set();
+  function resetInput() {
+    for (const listener of Array.from(inputResetListeners)) {
+      try { listener(); } catch (_) { /* cleanup must preserve source failures */ }
+    }
+  }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
     try { operations.audio.silence(); } catch (_) { /* best-effort cleanup */ }
@@ -9705,6 +9918,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
+        resetInput();
         silenceAfterFailure();
         if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
         throw error;
@@ -9714,11 +9928,12 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     }
     try {
       operations.flushBobs();
-      if (state.halted) operations.audio.silence();
+      if (state.halted) { resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
+      resetInput();
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       throw error;
@@ -9731,6 +9946,7 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     if (state.waiting === 'sleep' && scheduled) sleepRemaining = Math.max(0, scheduled.due - timing.now());
     state.stopped = true;
     cancelScheduled();
+    resetInput();
     operations.audio.silence();
   }
 
@@ -9770,9 +9986,13 @@ else globalThis.AMOS_BROWSER = { createCanvasHost };
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, options);
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput }));
   return {
     state, tick, stop, resume, sendKey, print,
+    subscribeInputReset(listener) {
+      if (typeof listener !== 'function') throw new Error('Input listener must be a function');
+      inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
+    },
     timer: () => (timerBase + (vblCount() - timerWrittenAt) % 4294967296) | 0,
     setTimer(value) {
       const number = operations.integer(value), count = vblCount();

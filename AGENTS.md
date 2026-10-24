@@ -18,6 +18,11 @@
 - `lib/amos/operations.js` implements language operations; `display.js` models
   indexed screens; `font.js` supplies glyphs; `files.js` provides synchronous
   memory/Node file adapters. Host-specific APIs belong in adapters.
+- `lib/amos/bankMemory.js` maps generic-bank payloads to checked per-factory
+  virtual addresses for Start/Peek/Poke. These are separate from display chip
+  addresses. Preserve addresses across swap/shrink; retire them on replacement
+  or erasure. See `docs/bank-memory.md`. Canvas Key Speed repeats use fixed
+  50ths and input-reset subscriptions for lifecycle cleanup; see `docs/key-speed.md`.
 - `lib/ExtensionTable.js` records implemented extension slots/offsets; slot-1
   Music sample commands use `lib/amos/audio.js` for bounded Samples records and
   voice commands. `webAudio.js` is the optional browser adapter. Generated

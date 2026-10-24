@@ -1,6 +1,6 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-23.
+Assessment updated: 2026-10-24.
 
 ## Current priority: Wonderland in the browser
 
@@ -12,11 +12,12 @@ compatibility additions or GPU modes. Keep the JavaScript dispatcher, CPU
 runtime and shared immutable display snapshots; integrate the required display
 commands through the existing design. The broader milestones below remain open.
 
-Current assessment: 753 physical lines, 142 distinct token encodings, 35 not
+Current assessment: 753 physical lines, 142 distinct token encodings, 31 not
 recognized by the compiler decoder (initially 44). Compilation now stops at
-`Key Speed` on line 16. The exact first fifteen lines execute both
-startup speed-test branches, load the original sample bank and configure sound;
-see [startup support](docs/startup.md) and [sample playback](docs/audio.md).
+`Set Rainbow` on line 52. The exact first 48 lines execute both
+startup speed-test branches, load/configure sound, read the embedded level seeds
+and initialize image masks. See [startup support](docs/startup.md),
+[bank memory](docs/bank-memory.md), [keyboard repeat](docs/key-speed.md) and [sample playback](docs/audio.md).
 The 75-image bank and level-data bank decode; all four original ILBMs now match
 independently decoded PNGs in CPU and browser asset tests. This is asset readiness,
 not a running game or an Amiga reference capture.
@@ -35,7 +36,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **356 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **366 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

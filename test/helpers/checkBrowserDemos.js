@@ -18,6 +18,13 @@ module.exports = async function checkBrowserDemos(browser) {
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
+      if (scenario.id === 'key-repeat') {
+        await page.click('#repeat-input'); await page.keyboard.down('a');
+        await page.waitForFunction(() => Number(document.getElementById('repeat-log').dataset.count) >= 3);
+        await page.keyboard.up('a'); await page.click('#repeat-stop');
+        assert.strictEqual(await page.locator('#repeat-controls').getAttribute('data-status'), 'stopped');
+        await page.click('#repeat-detach');
+      }
       if (scenario.id === 'music') {
         for (let number = 1; number <= 6; number++) {
           await page.click(`#audio-sample-${number}`);

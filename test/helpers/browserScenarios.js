@@ -228,12 +228,16 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'key-repeat', title: 'AMOS keyboard repeat and cleanup', description: 'Source-compiled Key Speed, controlled 200/40 ms repeats, ignored native duplicates and keyup/blur/Stop/detach/End cleanup. Includes a focused live keyboard demo.', run: require('./keyRepeatProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.initial, [[0,'a'],[200,'a'],[240,'a']]);
+    assert.strictEqual(result.lifecycleChecks, 5); assert.strictEqual(result.timersRemaining, 0); assert.strictEqual(result.ended, true);
+  } },
   { id: 'music', title: 'Wonderland samples and Web Audio', description: 'Six original PCM samples, independent offline stereo/rate comparisons, loops, replacement and Stop/disposal checks. Explicit buttons audition each sample.', run: require('./musicProbe'), check(result, assert) {
     assert.deepStrictEqual(result.samples.map(sample => [sample.number, sample.channel, sample.nonzero]), [[1,0,true],[2,1,true],[3,1,true],[4,0,true],[5,0,true],[6,1,true]]);
     assert.ok(result.samples.every(sample => sample.maxDifference <= 1e-6));
     assert.strictEqual(result.loopChecks, 2); assert.strictEqual(result.lifecycleChecks, 5);
   } },
-  { id: 'wonderland', title: 'Wonderland milestone: startup and assets', description: 'Original fifteen-line startup, sample-bank load/setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
+  { id: 'wonderland', title: 'Wonderland milestone: startup and assets', description: 'Original 48-line startup, embedded level-seed reads, image masks, sample setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.', run: require('./wonderlandProbe'), check(result, assert) {
     assert.strictEqual(result.gameRunning, false); assert.strictEqual(result.physicalLines, 753);
     assert.deepStrictEqual(result.images, [
       { name: 'Title_Screen.Iff', width: 640, height: 256, exact: true },
@@ -241,11 +245,13 @@ const scenarios = [
       { name: 'Score_Panel.Iff', width: 640, height: 256, exact: true },
       { name: 'Editor_Panel.Iff', width: 640, height: 256, exact: true }
     ]);
-    assert.ok(result.unrecognizedEncodings <= 35);
-    assert.strictEqual(result.startup.physicalLines, 15);
+    assert.ok(result.unrecognizedEncodings <= 31);
+    assert.strictEqual(result.startup.physicalLines, 48);
     assert.deepStrictEqual(result.startup.runs, [1, 0].map(speedFlag => ({ speedFlag, halted: true, variableBufferBytes: 10240,
       commands: ['Amos Lock', 'Close Editor'], reads: ['AMOSPro_Productivity2:Wonderland/Wonderland_Samples.Abk'],
-      audio: { bank: 5, loopMask: 0, filterEnabled: false }, sampleCount: 6 })));
+      audio: { bank: 5, loopMask: 0, filterEnabled: false }, sampleCount: 6,
+      keySpeed: { delay: 10, interval: 2, delayMs: 200, intervalMs: 40 }, levelSeeds: [55,7,45,10,49],
+      imageCount: 75, firstMasks: [true,false,true,true,false,true,true,false], finalMask: false })));
   } },
   { id: 'webgl-integers', title: 'WebGL2 integer readback', description: 'Exact chip bytes, unsigned addressing, integer framebuffer and PNG decoding.', run: require('./webglProbe'), check(result, assert) {
     assert.match(result.version, /^WebGL 2/); assert.ok(result.maxTextureSize >= 2048);

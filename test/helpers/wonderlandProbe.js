@@ -7,7 +7,7 @@ module.exports = async function wonderlandProbe(page) {
   const directory = path.join(__dirname, '../../examples/Wonderland');
   const goldenDirectory = path.join(__dirname, '../fixtures/wonderland');
   const report = auditProgram(fs.readFileSync(path.join(directory, 'Wonderland.AMOS')));
-  const startup = new (require('../../lib/Transpiler'))(require('./wonderlandStartup')(15)).toModule();
+  const startup = new (require('../../lib/Transpiler'))(require('./wonderlandStartup')(48, true)).toModule();
   const sampleBank = fs.readFileSync(path.join(directory, 'Wonderland_Samples.Abk')).toString('base64');
   const { createFrameStateModel } = require('../../lib/display/model/frameState');
   const { createIlbmReader } = require('../../lib/display/model/ilbm');
@@ -40,7 +40,11 @@ module.exports = async function wonderlandProbe(page) {
       program.tick(100000);
       return { speedFlag: program.state.variables.int_a3000, halted: program.state.halted,
         variableBufferBytes: program.compilation.variableBufferBytes, commands, reads,
-        audio: { ...program.state.audio }, sampleCount: program.banks.get(5).data[1] };
+        audio: { ...program.state.audio }, sampleCount: program.banks.get(5).data[1], keySpeed: { ...program.state.input.keySpeed },
+        levelSeeds: [1,2,3,4,5].map(i => program.arrayGet(program.state.variables.array_int_rbowseed, [i])),
+        imageCount: program.banks.get(1).images.length,
+        firstMasks: program.banks.get(1).images.slice(0, 8).map(image => image.masked),
+        finalMask: program.banks.get(1).images[74].masked };
     });
     const { read, reference } = new Function(source)(), images = [];
     for (const asset of assets) {
@@ -57,7 +61,7 @@ module.exports = async function wonderlandProbe(page) {
       if (globalThis.AMOS_DEMO_OBSERVE) globalThis.AMOS_DEMO_OBSERVE({ name: asset.name, width: image.width, height: image.height, rgba });
       images.push({ name: asset.name, width: image.width, height: image.height, exact: true });
     }
-    return { milestone: 'startup, sample-bank setup and original asset preview', gameRunning: false, startup: { physicalLines: 15, runs },
+    return { milestone: 'startup, level seeds, image masks and original asset preview', gameRunning: false, startup: { physicalLines: 48, runs },
       evidence: 'Original assets / independent PNG decoding; no Amiga execution capture.', images, ...readiness };
   }, { source, assets, startup, sampleBank, readiness: { compiler: report.compiler, physicalLines: report.physicalLines,
     unrecognizedEncodings: report.unrecognizedEncodings,

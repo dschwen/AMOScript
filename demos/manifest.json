@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "key-repeat.html",
+      "title": "AMOS keyboard repeat and cleanup",
+      "description": "Source-compiled Key Speed, controlled 200/40 ms repeats, ignored native duplicates and keyup/blur/Stop/detach/End cleanup. Includes a focused live keyboard demo.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/key-repeat.html"
+    },
+    {
       "file": "music.html",
       "title": "Wonderland samples and Web Audio",
       "description": "Six original PCM samples, independent offline stereo/rate comparisons, loops, replacement and Stop/disposal checks. Explicit buttons audition each sample.",
@@ -10,7 +16,7 @@
     {
       "file": "wonderland.html",
       "title": "Wonderland milestone: startup and assets",
-      "description": "Original fifteen-line startup, sample-bank load/setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.",
+      "description": "Original 48-line startup, embedded level-seed reads, image masks, sample setup, both timing branches and four original screens checked against independent PNGs. The game is not running yet.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html"
     },
     {
