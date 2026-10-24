@@ -20,6 +20,9 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if (scenario.id === 'wonderland-game') {
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'webgl');
+        assert.ok(Number(await page.locator('#game-controls').getAttribute('data-gpu-frames'))>0);
+        assert.strictEqual(await page.locator('#game-input').evaluate(canvas=>canvas.getContext('2d')),null);
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'off');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-context'),'none');
         await page.click('#game-sound');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
@@ -37,8 +40,27 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-plays'),mutedPlays);
 
+        const pausedCount=await page.locator('#game-controls').getAttribute('data-count');
+        await page.selectOption('#game-renderer','canvas');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'canvas');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-count'),pausedCount);
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'stopped');
+        await page.selectOption('#game-renderer','webgl');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'webgl');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-count'),pausedCount);
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound'),'on');
         await page.click('#game-resume');assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'running');
-        await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('game-input').height===256);
+        const beforeLoss=Number(await page.locator('#game-controls').getAttribute('data-count'));
+        await page.locator('#game-input').evaluate(canvas=>{globalThis.AMOS_TEST_GPU_LOSS=canvas.getContext('webgl2').getExtension('WEBGL_lose_context');globalThis.AMOS_TEST_GPU_LOSS.loseContext();});
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.gpuState==='lost');
+        await page.waitForFunction(count=>Number(document.getElementById('game-controls').dataset.count)>count,beforeLoss);
+        await page.click('#game-stop');const stoppedCount=await page.locator('#game-controls').getAttribute('data-count');
+        await page.evaluate(()=>globalThis.AMOS_TEST_GPU_LOSS.restoreContext());
+        await page.waitForFunction(()=>document.getElementById('game-controls').dataset.gpuState==='ready');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-count'),stoppedCount);
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-phase'),'stopped');
+        assert.strictEqual(await page.locator('#game-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#game-resume');
+
+        await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.displayLines==='256');
         await page.click('#game-restart');await page.waitForFunction(()=>document.getElementById('game-controls').dataset.sound==='on');
         assert.strictEqual(await page.locator('#game-controls').getAttribute('data-sound-voices'),'0');await page.selectOption('#game-keyboard-layout','wasd');await page.keyboard.down('z');
         await page.waitForFunction(()=>document.getElementById('game-controls').dataset.line==='204',{},{timeout:30000});await page.keyboard.up('z');

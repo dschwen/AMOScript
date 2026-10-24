@@ -184,20 +184,27 @@ transitional CPU fallback does not satisfy it.
 
 ## Browser host and failure lifecycle
 
-Keep `createCanvasHost(canvas)` as the existing 2D entry. Plan a separate
-`createDisplayHost(container, { renderer: 'auto' | 'reference' | 'webgl2' })` which
-owns presentation surfaces and a stable focus/input element. This is a proposed
-API, not a currently accepted option.
+`createCanvasHost(canvas)` retains its existing 2D behavior. Its optional
+`{renderer}` accepts the WebGL2 renderer's `render`, `present` and `clear` methods;
+that branch consumes physical snapshots without requesting a 2D context or CPU
+pixels. The caller owns/disposes the injected renderer. The live Wonderland page
+now defaults to this GPU branch and offers explicit Canvas switching. The wider
+container/auto-selection host remains future work.
 
-Use separate 2D and WebGL canvases for switching/fallback: an HTML canvas's context
-mode cannot be changed from WebGL to 2D by a later getContext call. See the
-[canvas context rules](https://html.spec.whatwg.org/multipage/canvas.html#dom-canvas-getcontext).
-Creation failure selects CPU; context loss switches to CPU without restarting the
-program. Restore textures, programs, FBOs and field history from CPU-owned state,
-then resume GPU presentation only after a complete upload. Keep input and timers
-running according to VM state throughout. Detach cancels rAF/listeners and releases
-GPU resources; replacing programs releases their allocations/history. Stop pauses
-execution, while detach/dispose own host resource destruction.
+Switching uses a new canvas because an existing canvas cannot change context
+mode. The page retains the same VM and audio binding, detaches old input listeners,
+clears held input, and disposes old GPU resources. It fits the whole snapshot at
+its rational aspect so the established pointer mapping applies; arbitrary resize
+and letterbox input routing remain open.
+
+Context loss keeps the GPU backend marked unavailable while the VM/input/field
+clock continues. Owned snapshots arriving during loss provide the latest restore
+source. Rebuilding textures, programs and FBOs redraws/presents that snapshot even
+when the VM is stopped. No automatic CPU fallback is counted as GPU execution.
+Creation/mode errors are visible; users can explicitly choose Canvas and Restart.
+`clear()` forgets removed-screen presentation so restoration does not repaint stale
+output. Detach cancels rAF/input subscriptions; the caller disposes renderer state.
+See [the live-game contract](wonderland-game.md#live-webgl2-presentation).
 
 Map pointer positions through the content rectangle, letterboxing, integer/aspect
 scale, native raster and screen/hardware transforms. Preserve the existing local

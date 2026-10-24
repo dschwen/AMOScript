@@ -58,8 +58,10 @@ function createCanvasHost(canvas, options = {}) {
   const mouseCoordinates = options.mouseCoordinates == null ? 'screen' : options.mouseCoordinates;
   if (mouseCoordinates !== 'screen' && mouseCoordinates !== 'hardware') throw new Error('Invalid mouse coordinate mode');
   if (options.getGamepads != null && typeof options.getGamepads !== 'function') throw new Error('getGamepads must be a function');
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('Canvas 2D rendering is not available');
+  const renderer = options.renderer || null;
+  if (renderer && ['render','present','clear'].some(name => typeof renderer[name] !== 'function')) throw new Error('Invalid display renderer');
+  const context = renderer ? null : canvas.getContext('2d');
+  if (!renderer && !context) throw new Error('Canvas 2D rendering is not available');
   const request = options.requestAnimationFrame || (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : callback => setTimeout(callback, 0));
   const cancel = options.cancelAnimationFrame || (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout);
   const delay = options.setTimeout || setTimeout, clearDelay = options.clearTimeout || clearTimeout;
@@ -129,7 +131,17 @@ function createCanvasHost(canvas, options = {}) {
     const display = program.display;
     if (canvas.style && program.mouseVisible) canvas.style.cursor = program.mouseVisible() ? previousCursor || '' : 'none';
     const screen = display.presentedScreen ? display.presentedScreen() : display.current == null ? null : display.screen();
-    if (!screen) { canvas.width = 0; canvas.height = 0; return; }
+    if (!screen) { if (renderer) renderer.clear(); canvas.width = 0; canvas.height = 0; return; }
+    if (renderer) {
+      const snapshot = display.snapshotDisplay(), frame = snapshot.frame;
+      renderer.render(snapshot);
+      // Exact rational cells preserve the snapshot's pixel aspect without
+      // letterboxing, so the existing pointer contract covers the full canvas.
+      let divisor = frame.pixelAspect.numerator, remainder = frame.pixelAspect.denominator;
+      while (remainder) { const next = divisor % remainder; divisor = remainder; remainder = next; }
+      return renderer.present({ width: frame.outputWidth * (frame.pixelAspect.numerator / divisor),
+        height: Math.max(1, frame.lines * (frame.pixelAspect.denominator / divisor)) });
+    }
     const output = display.canvasFrame ? display.canvasFrame() : { width: screen.width, height: screen.height, rgba: display.rgba(screen) };
     if (canvas.width !== output.width) canvas.width = output.width;
     if (canvas.height !== output.height) canvas.height = output.height;

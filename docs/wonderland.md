@@ -41,7 +41,7 @@ it never adds unsupported commands to the production compiler table.
 | Decoder gap | None: all 142 encodings recognized (initially 44 / 119 missing) |
 | Whole-source compilation | Standalone 1253-instruction factory; no source edits |
 | Whole-program bounded run | Controlled port-1 fire enters game/level 1; release at 100 ms, 100 callbacks reach 2,000 ms / loop count 47; four physical frames render |
-| Live original-game session | Canvas keyboard/Gamepad controls, natural three-life loss/fade/restart replay, original title and fresh game; original sample sound enabled by user gesture; all-level/win and editor files remain open |
+| Live original-game session | Default WebGL2, explicit Canvas switching, keyboard/Gamepad controls, natural three-life loss/fade/restart replay, original title and fresh game; original sample sound enabled by user gesture; all-level/win and editor files remain open |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
@@ -55,8 +55,11 @@ writes and the HUD window. The browser selector demo can replay it and show the
 final frame. Five additional WebGL comparisons cover a literal attached fixture
 and those four original-game frames; CPU/GPU agreement is not an Amiga capture.
 Live keyboard/Gamepad input and bounded death/restart paths now pass. All-level
-completion/win paths, collectibles/enemy behavior, editor round trips and native timing/reference captures remain acceptance work.
-The live session now has explicit Web Audio Enable/Mute controls for its original
+completion/win paths, collectibles/enemy behavior, editor round trips and native
+timing/reference captures remain acceptance work.
+The live session now defaults to WebGL2, with state-preserving Canvas switching
+and eleven full-game GPU/CPU comparisons. It has explicit Web Audio Enable/Mute
+controls for its original
 sample effects, with three additional native offline PCM/stereo comparisons.
 
 ## Required work, in execution order
@@ -179,11 +182,11 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 
-Local verification: `npm run check` passes 496 tests on Node 18.19.1.
+Local verification: `npm run check` passes 498 tests on Node 18.19.1.
 `npm run test:browser` passes the four original image comparisons, all twenty-six
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
-179 GPU/CPU frames, including three death-fade entries, game-over/fresh-game frames, four original first-level frames, an independent attached-image fixture, two Flash states, two copy states, four fade states, eight scrolling window patterns, the original
+179 renderer GPU/CPU frames plus eleven live-host GPU/CPU frames, including three death-fade entries, game-over/fresh-game frames, four original first-level frames, an independent attached-image fixture, two Flash states, two copy states, four fade states, eight scrolling window patterns, the original
 title and PAL rainbow wrap, with six
 presentation checks in Chromium/SwiftShader.
 This work has not added an AMOS execution capture or fresh hosted CI evidence.

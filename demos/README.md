@@ -38,7 +38,8 @@ Every current browser scenario is included:
 | [Interactive control flow, graphics, Bobs, input and lifecycle](programs.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/programs.html) |
 
 The Wonderland game page embeds the complete original program and provides live
-keyboard/Gamepad controls, Stop/Resume and Restart. The frame selector also shows
+keyboard/Gamepad controls, Stop/Resume and Restart. WebGL2 is the default; the
+Renderer selector switches to Canvas 2D and back without restarting the game. The frame selector also shows
 its controlled loss/restart replay. Enable sound activates original sample effects;
 Mute stops them immediately. Editor file integration remains open;
 see [the live-game contract](../docs/wonderland-game.md).

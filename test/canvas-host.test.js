@@ -70,3 +70,27 @@ test('canvas: pointer mapping excludes borders and accounts for CSS scaling', ()
   assert.deepStrictEqual(JSON.parse(JSON.stringify(program.state.input.mouse)), { x: 160, y: 100, buttons: 0 });
   host.detach();
 });
+
+test('canvas host: injected renderer consumes owned physical snapshots without creating a 2D context or CPU pixels',()=>{
+  const target=canvas(),timers=createFakeTimers(),calls=[];
+  target.getContext=()=>{throw new Error('Unexpected Canvas fallback');};
+  const program=compile(example(1)).create({now:timers.now,setTimeout:timers.setTimeout,clearTimeout:timers.clearTimeout,displayOptions:{snapshotPixelAspect:{numerator:2,denominator:4}},print(){}});
+  program.display.canvasFrame=program.display.rgba=()=>{throw new Error('Unexpected CPU rendering');};
+  const renderer={render:snapshot=>calls.push(snapshot),present:layout=>{target.width=layout.width;target.height=layout.height;},clear(){calls.push('clear');},dispose(){throw new Error('Caller owns renderer');}};
+  const host=createCanvasHost(target,{renderer,requestAnimationFrame:fn=>timers.setTimeout(fn,16),cancelAnimationFrame:timers.clearTimeout});
+  host.attach(program);assert.strictEqual(target.width,640);assert.strictEqual(target.height,400);
+  program.display.plot(0,0,1);timers.tick(16);assert.strictEqual(calls.length,2);
+  assert.notStrictEqual(calls[0].frame.lineRegs,calls[1].frame.lineRegs);
+  target.events.get('pointermove')({clientX:330,clientY:220,buttons:0});
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(program.state.input.mouse)),{x:160,y:100,buttons:0});
+  program.display.close(0);host.render();assert.strictEqual(calls[calls.length-1],'clear');assert.strictEqual(target.width,0);
+  host.detach();assert.strictEqual(timers.pending(),0);program.stop();
+});
+
+test('canvas host: invalid or failing renderers reject explicitly without selecting the CPU path',()=>{
+  assert.throws(()=>createCanvasHost(canvas(),{renderer:{render(){}}}),/Invalid display renderer/);
+  const program=compile(example(1)).create({setTimeout:()=>1,clearTimeout(){},now:()=>0,print(){}});
+  const target=canvas();target.getContext=()=>{throw new Error('Unexpected fallback');};
+  const host=createCanvasHost(target,{renderer:{render(){throw new Error('Unsupported GPU mode');},present(){},clear(){}}});
+  assert.throws(()=>host.attach(program),/Unsupported GPU mode/);host.detach();program.stop();
+});

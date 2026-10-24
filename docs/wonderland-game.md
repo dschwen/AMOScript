@@ -2,8 +2,9 @@
 
 The [playable demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)
 embeds the unmodified `Wonderland.AMOS` and all seven pinned companion files.
-It runs the existing standalone instruction-function dispatcher and Canvas 2D host.
-The separate WebGL2 renderer is not connected to this live page.
+It runs the existing standalone instruction-function dispatcher with WebGL2
+presentation by default. The Renderer selector explicitly switches to Canvas 2D
+and back while retaining the current program, timers and sound session.
 No game variables, instruction pointers, source branches or assets are patched.
 
 Focus the canvas. Arrows move and jump; Space/Enter selects in the original menu.
@@ -102,3 +103,46 @@ Restart, and close the context on disposal. Browser-adapter unit tests cover laz
 creation, pending activation races, failed activation/retry, suspended commands,
 new/old program ownership, missing APIs and idempotent cleanup. Analog fidelity,
 exact interrupt timing and external Amiga audio captures remain open.
+
+
+## Live WebGL2 presentation
+
+The shared input host accepts `createCanvasHost(canvas, {renderer: gpu})`, where
+`gpu` is the existing WebGL2 renderer. That path takes `snapshotDisplay()` through
+the actual decode/resolve shaders and the presentation shader. It does not call
+`canvasFrame`, `rgba`, Canvas 2D, `putImageData`, or GPU readback. Indexed playfield
+storage and CPU planar packing remain the established snapshot bridge; this does
+not make planar storage authoritative or move the AMOS VM onto the GPU.
+
+The host sizes its drawing buffer from reduced rational pixel-aspect cells. For
+Wonderland, 640 native samples by 202 rows present as 640 × 404 pixels, covering
+the entire canvas. Existing local/hardware pointer mapping therefore continues
+to cover the full image without letterboxing. Arbitrary viewport/letterbox input
+routing remains outside this bounded host integration.
+
+Switching creates a new canvas because context modes cannot change on the same
+canvas. It detaches old input subscriptions and releases old GPU resources while
+retaining the same program and audio binding. Held input is cleared; press keys
+again after switching. The host itself does not dispose an injected renderer;
+its caller owns that resource. Restart creates a new program and renderer, and
+demo cleanup disposes GPU objects and releases the owned context.
+
+Context loss reports WebGL as unavailable and continues the VM/input/field clock.
+Snapshots received during loss replace the owned restoration source. Restoration
+rebuilds resources and shader passes and redraws/presents the latest snapshot,
+even while the VM is stopped. It never silently selects Canvas. Unsupported GPU
+modes/errors stop the live session visibly. If WebGL2 creation is unavailable,
+select Canvas 2D and Restart; the automatic result reports the skipped GPU probe
+explicitly instead of counting CPU execution as GPU coverage.
+
+The controlled full-program GPU replay compares eleven GPU readbacks with CPU
+output over level entry, all three deaths/fades, two life restarts, game over and
+a fresh game. CPU presentation is replaced by a throwing function during that
+GPU replay, and the canvas refuses a 2D context. These checks supplement the
+separate 179 renderer comparisons. Live Chromium checks cover WebGL default,
+explicit switching while stopped without resetting the game, sound activation,
+VM progress during context loss and restoration while stopped. The renderer's
+`clear()` forgets a removed screen and prevents restoration from repainting it.
+These are local Chromium/SwiftShader and CPU/GPU parity checks, not Amiga captures
+or sustained GPU performance measurements. HAM/events and remaining mode gates
+remain explicit renderer limits.

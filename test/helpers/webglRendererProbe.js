@@ -334,6 +334,12 @@ module.exports = async function webglRendererProbe(page, artifacts) {
         wanted.set(expected.subarray((sy * snapshot.frame.outputWidth + sx) * 4, (sy * snapshot.frame.outputWidth + sx + 1) * 4), at);
       }
       assert(same(shown, wanted), 'restored canvas presents latest owned GPU pixels'); presentationChecks++;
+      gpu.clear();
+      assert(gpu.stats.lastResult===null&&gpu.stats.lastPresentation===null,'clear forgets the presentation');
+      assert(readCanvas().every((v,i)=>v===(i%4===3?255:0)),'clear blanks the GPU canvas');
+      const framesBeforeClear=gpu.stats.gpuFrames,lostEmpty=event('webglcontextlost');extension.loseContext();await lostEmpty;
+      gpu.clear();const restoredEmpty=event('webglcontextrestored');extension.restoreContext();await restoredEmpty;
+      assert(gpu.state==='ready'&&gpu.stats.gpuFrames===framesBeforeClear&&gpu.stats.lastResult===null,'restore does not repaint a removed screen');
       return { checked, imageCount, namedCount, randomCount, presentationChecks, drawCalls: gpu.stats.drawCalls, restored: true, reducerVerified: true, sample };
     } finally {
       const gl = gpu.resources.context; gpu.dispose();

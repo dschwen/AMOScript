@@ -571,8 +571,9 @@ computed allocation remain open.
 - [x] Forced WEBGL_lose_context cycle recreates textures/programs/framebuffers and uploads the latest owned snapshot without reload. Disposal checks resource deletion.
 
 Resource infrastructure and the direct GPU nearest/aspect presentation pass
-are implemented. Runtime backend switching/input integration and live diff remain
-open. Native non-HAM decode/resolve now has its own local parity evidence below;
+are implemented. Bounded live backend switching/input integration is implemented
+for Wonderland; general viewport routing and live diff remain open. Native non-HAM
+decode/resolve now has its own local parity evidence below;
 this milestone does not claim host fallback or complete mode support.
 
 ### Phase 7: GPU parity, non-HAM modes
@@ -701,3 +702,14 @@ P0 ─► P1 ─► P2 ─► P3 ─► P4 ─► P5 ─┐
 
 - P6 (WebGL infrastructure) can start in parallel once P2 fixes the FrameState format.
 - P11 begins with a static physical-buffer bridge at P1, moves to the shared copper builder at P2–P3, and completes planar drawing/storage migration after parity. The GPU renderer consumes the same snapshots throughout. See D0–D6 in the integrated architecture.
+
+
+### Current bounded live integration
+
+The Wonderland page now defaults to the GPU renderer through the shared input
+host, with explicit state-preserving Canvas switching. Eleven whole-game host
+frames match CPU output, in addition to the renderer corpus. Context loss leaves
+the VM clock running; restoration presents the latest owned field while stopped.
+No CPU fallback is reported as GPU execution. The full container/auto-backend,
+arbitrary viewport/letterbox input, live field, HAM/event and capture gates in
+this plan remain open. See [the implemented contract](wonderland-game.md#live-webgl2-presentation).

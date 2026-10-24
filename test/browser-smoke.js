@@ -19,9 +19,9 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
-    await runScenario('wonderland-game', page);
+    const liveGpu=await runScenario('wonderland-game', page);assert.strictEqual(liveGpu.gpuFrames,11);
     await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
-    console.log('Wonderland game passed: original keyboard/gamepad replays, eight sample commands, three native PCM/stereo comparisons and live sound controls.');
+    console.log('Wonderland game passed: original keyboard/gamepad replays, eight sample commands, three native PCM/stereo comparisons, eleven live-host GPU/CPU frames, renderer switching and live sound controls.');
     await runScenario('file-selector', page);
     console.log('Fsel$ passed: original selector retry/load/save routines; complete unmodified Wonderland runs and renders four first-level frames over two controlled seconds.');
     await runScenario('random', page);

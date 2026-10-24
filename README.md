@@ -9,7 +9,8 @@ Every browser test is available in the [demo gallery](demos/index.html), with
 See [demo instructions and coverage](demos/README.md).
 The unmodified **Dithell's Wonderland** now compiles into a standalone factory.
 [Play the original game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)
-with keyboard or browser Gamepad input. Controlled replays now cover three deaths,
+with default WebGL2 presentation, selectable Canvas 2D, and keyboard or browser
+Gamepad input. Controlled replays now cover three deaths,
 fades, game over and a fresh game; see the [live-game contract](docs/wonderland-game.md). For the milestone, see the
 [readiness assessment and implementation order](docs/wonderland.md) and
 [executed title demo](demos/wonderland.html). Its original first 64 lines
@@ -61,7 +62,7 @@ sound controls for its original sample effects. Editor file requests and complet
 gameplay parity remain open.
 The integrated [Amiga display design](docs/display-architecture.md) has CPU
 planar/copper exports, EHB and [HAM6](docs/ham-display.md), plus a
-[native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; application host switching
+[native non-HAM GPU renderer](docs/webgl-renderer.md). Direct GPU nearest/aspect presentation is implemented; general viewport/input resizing
 and remaining modes are still planned.
 
 ## Compile and run

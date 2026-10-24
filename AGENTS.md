@@ -50,7 +50,12 @@
   modules embed the pure controller; headless execution needs no AudioContext.
   Keep source-derived expectations distinct from native Web Audio control-graph
   comparisons and Amiga captures. See `docs/audio.md` for the subset and limits.
-- `lib/amos/browser.js` handles Canvas/input; `background.js` exposes AMOS.
+- `lib/amos/browser.js` handles shared Canvas/input; optional `{renderer}` routes
+  snapshots to WebGL render/present/clear without CPU pixels. The caller owns GPU
+  disposal. The live demo defaults to GPU and switches canvases without replacing
+  the VM/audio binding; full-frame rational sizing preserves pointer mapping.
+  `clear()` forgets removed-screen presentation across restoration.
+  `background.js` exposes AMOS.
   Generated modules embed scheduler, operations, display and font, without imports.
 - Scancode is a destructive last-successful-Inkey latch, not held key state.
   Optional sendKey character/raw-code records coexist with legacy text entries.
@@ -125,8 +130,8 @@
   uploads, debug readback and context restoration/disposal. `webgl/renderer.js`
   runs non-HAM decode/resolve/sprite shader passes on shared snapshots; see
   `docs/webgl-renderer.md`. Its presentation shader uses shared rational layout
-  from `presentation/layout.js`. Host switching/input, HAM/events and full mode/capture
-  parity remain open. Never count a CPU fallback as GPU execution.
+  from `presentation/layout.js`. Bounded live host switching/input is implemented; arbitrary viewport/letterbox
+  input routing, HAM/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
 - The live `wonderland-game` scenario embeds the entire original program/assets.
   Its finite input-only replay spends three lives through natural collisions and
   fades, restarts twice, returns to title and starts a fresh game. No variable/IP

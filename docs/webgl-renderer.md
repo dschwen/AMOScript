@@ -49,8 +49,8 @@ framebuffer. Empty fields clear the canvas without inventing rows or draws.
 This presents one current field; full interlace weaving remains separate. The
 last requested viewport/options survive context loss, and restoration rerenders
 and presents the latest owned frame before notifying the host. Calls never run
-VM instructions or advance language time. The current application still uses its
-Canvas host; backend switching/input integration remains open.
+VM instructions or advance language time. The live Wonderland application now
+uses this renderer through the shared input host, with explicit Canvas switching.
 
 ## Shader passes
 
@@ -124,7 +124,12 @@ fixture in `test/fixtures/display/gpu-regressions/`, with CPU-reference expectat
 explicitly labelled synthetic. A deliberate readback perturbation verifies this
 reduction/replay path without inventing a real GPU failure.
 
-Browser backend switching/live diff, HAM, mid-line
-events, full interlace presentation, remaining ECS modes and target-device timing
+Live Wonderland now uses this renderer through the shared input host and offers
+explicit Canvas switching. Eleven additional full-program host frames match the
+CPU reference; context loss keeps the VM running, and restoration works while
+stopped. Clearing a removed screen forgets its presentation before restoration.
+See [the host contract](wonderland-game.md#live-webgl2-presentation).
+
+General viewport/letterbox input routing, live diff, HAM, mid-line events, full interlace presentation, remaining ECS modes and target-device timing
 budgets remain open. The full M7 gate still includes modes/captures that earlier
 milestones have not supplied; current-subset parity does not close those gates.
