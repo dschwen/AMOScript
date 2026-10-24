@@ -11,6 +11,7 @@ const model = require('../../lib/display/model/frameState');
 module.exports = async function webglRendererProbe(page, artifacts) {
   const directory = path.join(__dirname, '../fixtures/display');
   const sources = {
+    windowProgram: new (require('../../lib/Transpiler'))(require('./tokens').binary([[require('./tokens').token('Wait Key')]])).toModule(),
     model: model.createFrameStateModel.toString(), memory: require('../../lib/display/model/ChipMemory').toString(),
     frame: require('../../lib/display/model/staticFrame').toString(),
     colour: require('../../lib/display/model/color').createColorModel.toString(),
@@ -135,6 +136,35 @@ module.exports = async function webglRendererProbe(page, artifacts) {
       checked++; return null;
     }
     try {
+      // Language bridge snapshots, independently expected from indexed patterns.
+      // Two palette banks force setup across the real two-row blank gap.
+      const module = { exports: {} }; new Function('module', sources.windowProgram)(module);
+      const windowProgram = module.exports(), display = windowProgram.display;
+      for (const hires of [false, true]) {
+        display.open(0, hires ? 960 : 640, 288, 16, hires ? 0x8000 : 0);
+        display.setPalette(...Array.from({ length: 16 }, (_, i) => i * 0x111));
+        const world = display.screen();
+        for (let i = 0; i < world.pixels.length; i++) world.pixels[i] = ((i % world.width) + Math.floor(i / world.width)) % 16;
+        display.screenDisplay(0, 128, 48, 320, 168);
+        display.open(1, hires ? 640 : 320, 256, 16, hires ? 0x8000 : 0);
+        display.setPalette(...Array.from({ length: 16 }, (_, i) => i << 8));
+        const panel = display.screen();
+        for (let i = 0; i < panel.pixels.length; i++) panel.pixels[i] = ((i % panel.width) + Math.floor(i / panel.width) * 3) % 16;
+        display.screenDisplay(1, 128, 218, 320, 32); display.select(0);
+        for (const offset of hires ? [2, 14, 16, 38] : [1, 15, 16, 37]) {
+          display.screenOffset(0, offset, 84);
+          const expected = new Uint8Array(640 * 202 * 4);
+          for (let y = 0; y < 202; y++) for (let x = 0; x < 640; x++) {
+            const sourceX = hires ? x : x >> 1;
+            const value = y < 168 ? (sourceX + offset + y + 84) % 16 : y >= 170 ? (sourceX + (y - 170) * 3) % 16 : 0;
+            const colour = value * 17;
+            expected.set([colour, y < 168 ? colour : 0, y < 168 ? colour : 0, 255], (y * 640 + x) * 4);
+          }
+          const failure = verify(display.snapshotDisplay(), `amos-${hires ? 'hires' : 'lowres'}-window-${offset}`, expected);
+          if (failure) return { failure };
+        }
+      }
+      windowProgram.stop();
       for (const packet of packets) {
         const snapshot = model.deserializeSnapshot(packet.header, from64(packet.chip), from64(packet.tables));
         const failure = verify(snapshot, packet.name, from64(packet.golden)); if (failure) return { failure };

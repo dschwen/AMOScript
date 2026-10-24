@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "screen-windows.html",
+      "title": "Wonderland screen windows and scrolling",
+      "description": "Original game/editor screen setup, physical-buffer scrolling, independent landscape/panel PNG checks, two blank rows and staged View commits. The complete game is not running.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-windows.html"
+    },
+    {
       "file": "wonderland-menu.html",
       "title": "Wonderland menu: keyboard and gamepad",
       "description": "Original menu routines with animated movement, background toggle and mode selection. Choose keyboard mapping, Gamepad API or both in the live menu below. Stops before unsupported gameplay/editor dispatch.",

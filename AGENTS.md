@@ -41,6 +41,11 @@
   Canvas uses the same slot/row selection. Auto View/View stage screen replacement
   separately from selected logical output. See `docs/title-display.md` for the
   implemented subset and explicit pattern/NTSC/AMSC/timing gates.
+- Screen Display/Screen Offset manage bounded nonoverlapping windows. View commits
+  geometry and source offsets; Canvas renders the same physical copper snapshot.
+  Full bitmap storage remains authoritative. Setup can span real blank rows,
+  with each chunk completed before fetch. See `docs/screen-windows.md`; general
+  placement/priority, wrapped DMA and HAM fine scroll remain open.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip
   memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
   `lib/display/reference/render.js` provides basic planar render/explainPixel.

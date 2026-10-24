@@ -15,7 +15,9 @@ now load and render the title with its menu marker Bob; see
 [interactive original menu fixture](demos/wonderland-menu.html) now supports
 configurable keyboard mappings and the browser Gamepad API; see
 [joystick configuration](docs/joysticks.md). Selection stops before unsupported
-gameplay/editor dispatch; the complete game remains blocked.
+gameplay/editor dispatch; the complete game remains blocked. The
+[screen-window demo](demos/screen-windows.html) executes the original game/editor
+screen setup and verifies scrolling and panel pixels; see [the contract](docs/screen-windows.md).
 The [keyboard demo](demos/key-repeat.html) exposes held-key repeat;
 the [audio demo](demos/music.html) plays the six original samples. See the
 [audio contract](docs/audio.md). The full game does not compile or run yet.

@@ -32,11 +32,14 @@ sampling grid is shared, so lowres pixels occupy two samples and hires one.
 Geometry can override `standard`, `origin`, `outputWidth`, `lines`, `videoRate`
 and `pixelAspect`. `displayOptions.snapshotStandard` defaults to PAL.
 
-`Screen Display`, `Screen Offset` and user-copper commands still need integration.
+[Screen Display and Screen Offset](screen-windows.md) now integrate bounded
+nonoverlapping windows and pointer/fine-scroll offsets. Large palette/setup
+changes can use actual blank rows, with every chunk complete before fetch.
+General placement/priority and user-copper commands remain open.
 [Table-based AMOS rainbows](title-display.md) now schedule bounded per-row palette
 MOVEs through this builder, including restoration and PAL wrap. Canvas uses the
 same rainbow table selection. Auto View stages screen replacement; the default
-snapshot and Canvas follow the presented screen. Exact VBL list timing remains open.
+snapshot and Canvas follow committed screen/window descriptors. Exact VBL list timing remains open.
 
 `snapshotPlayfield`/`renderPlayfield` remain the full-bitmap migration/debug path
 from [the planar contract](planar-display.md), including virtual/odd/small screen

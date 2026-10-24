@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'screen-windows', title: 'Wonderland screen windows and scrolling', initialFrame: 'Game window at 37,84', description: 'Original game/editor screen setup, physical-buffer scrolling, independent landscape/panel PNG checks, two blank rows and staged View commits. The complete game is not running.', run: require('./screenWindowProbe'), check(result, assert) {
+    assert.strictEqual(result.frames,5); assert.strictEqual(result.comparedPixels,307840);
+    assert.strictEqual(result.gapRows,10); assert.deepStrictEqual(result.sizes,[[320,202],[320,202],[320,202],[320,178],[320,178]]);
+    assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'wonderland-menu', title: 'Wonderland menu: keyboard and gamepad', initialFrame: 'Original menu (keyboard)', description: 'Original menu routines with animated movement, background toggle and mode selection. Choose keyboard mapping, Gamepad API or both in the live menu below. Stops before unsupported gameplay/editor dispatch.', run: require('./joystickProbe'), check(result, assert) {
     assert.deepStrictEqual(result.selections,[1,2]);assert.strictEqual(result.backendChecks,12);
     assert.strictEqual(result.animatedMoves,5);

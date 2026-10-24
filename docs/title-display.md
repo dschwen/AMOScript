@@ -92,8 +92,8 @@ Node and Chromium compare every pixel after executing the real 64-line prefix
 through a scheduled VBL continuation. The
 [Wonderland demo](../demos/wonderland.html) opens on the executed Canvas title.
 The GPU gallery also compares that exact frame with the independent image and
-checks an active rainbow crossing PAL line 256, bringing coverage to 153 native
-GPU/CPU frames. All browser cases remain in the shared demo catalogue.
+checks an active rainbow crossing PAL line 256. Including eight
+[screen-window patterns](screen-windows.md), coverage is now 161 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
 
 Remaining gates include whole-program menu/game integration, nonempty rainbow pattern
 strings, NTSC rainbow timing, AMSC placement, runtime laced loads, full screen

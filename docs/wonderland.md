@@ -18,8 +18,8 @@ node bin/amoscript examples/Wonderland/Wonderland.AMOS /tmp/wonderland.js
 ```
 
 The first command succeeds and inventories the whole bounded token stream. The
-second currently fails with `Unsupported token 0xa36 at line 92, byte 3056`
-(`Screen Offset`). The original first 64 lines compile and execute through Wait Vbl,
+second currently fails with `Unsupported token 0x316 at line 121, byte 3968`
+(`On ... Gosub`). The original first 64 lines compile and execute through Wait Vbl,
 Load Iff and the original title/menu marker Bob, including both startup branches.
 Canvas, copper and GPU output match an independent source-derived composition. See
 [title display support](title-display.md),
@@ -32,12 +32,12 @@ it never adds unsupported commands to the production compiler table.
 | --- | --- |
 | Source size | 753 physical lines; 30,712 code bytes |
 | Static inventory | 6,011 token occurrences; 142 distinct encodings |
-| Decoder gap | 19 unrecognized encodings, appearing 47 times (initially 44 / 119) |
+| Decoder gap | 17 unrecognized encodings, appearing 40 times (initially 44 / 119) |
 | Embedded image bank 1 | 75 images, four planes |
 | Embedded level bank 4 | 7,206 bytes, including five level maps and rainbow seeds |
 | External samples | Six PCM records decode and play through the optional Web Audio adapter |
 | Four original ILBMs | All now decode and match independent PNG expectations |
-| Original-program execution | 64-line title setup plus a declared original-menu fixture run; complete game remains blocked |
+| Original-program execution | 64-line title setup plus declared original-menu and game/editor screen-setup fixtures run; complete game remains blocked |
 
 These counts describe lexical recognition, not a compatibility percentage. A
 recognized token may still have an unsupported overload or runtime limitation.
@@ -67,8 +67,9 @@ execution will expose further gaps after the first decoder blockers are removed.
    browser files adapter. Browser fetch/preload happens before execution. Define
    keyboard/gamepad mapping, focus and release behavior. The target is executing
    the original menu loop and entering the game/editor through its own branches.
-3. **Playing one level.** Implement `Screen Display`, `Screen Offset`,
-   `Screen Copy Logic To Physic`, `Logic`/`Physic`, rainbows/`Rain`, fade/flash
+3. **Playing one level.** `Screen Display` and `Screen Offset` now run in a
+   [bounded original screen-setup fixture](screen-windows.md), with scrolling and
+   independent panel pixel checks. Next implement `Screen Copy Logic To Physic`, `Logic`/`Physic`, rainbows/`Rain`, fade/flash
    behavior and the necessary sprite support. The world is 960×288 with a scrolling
    320×168 game window and a separate 320×32 score window. Preserve logical and
    physical buffers, Autoback, manual Bob clear/draw/swap, image hotspots and
@@ -142,10 +143,11 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's current first failure and missing-token inventory.
 
-Local verification: `npm run check` passes 381 tests on Node 18.19.1.
-`npm run test:browser` passes the four original image comparisons, all thirteen
+Local verification: `npm run check` passes 386 tests on Node 18.19.1.
+`npm run test:browser` passes the four original image comparisons, all fourteen
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
-153 GPU/CPU frames, including the original title and PAL rainbow wrap, with six
+161 GPU/CPU frames, including eight scrolling window patterns, the original
+title and PAL rainbow wrap, with six
 presentation checks in Chromium/SwiftShader.
 This work has not added an AMOS execution capture or fresh hosted CI evidence.

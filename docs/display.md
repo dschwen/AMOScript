@@ -112,8 +112,9 @@ The pixel data and attribution are preserved in `lib/amos/font.js`. This is not
 the Amiga Topaz typeface; unsupported characters use a question-mark glyph.
 Initial palette entries beyond the conventional basic colours are approximate.
 
-The current display selects one screen for presentation. Amiga hardware mouse
-offsets, copper/display composition, screen scrolling/display offsets, flashing
+Programs without window commands select one screen for presentation. Explicit
+[screen windows and scrolling](screen-windows.md) now compose nonoverlapping
+windows through shared snapshots. Full hardware placement/priority, flashing
 colours, cursor animation, HAM raster events and live interlace modes, complete text escape sequences,
 fonts/styles, fill/line patterns, circles/ellipses and full hardware/computed sprites
 remain unfinished. Direct sprites publish physical rows shared by Canvas and the
@@ -124,6 +125,6 @@ explicitly. Floating-point and numeric text-format compatibility remain separate
 work items in PLAN.md.
 
 The CPU reference also decodes static scroll/dual-playfield state and explicit
-ILBM fields, with pure weave/line-double composition. Those image/model APIs do
-not yet provide AMOS Screen Offset/Dual Playfield/Laced commands or live field
-scheduling. See [the mode contract](display-modes.md).
+ILBM fields, with pure weave/line-double composition. Those image/model APIs
+provide bounded AMOS Screen Offset/Screen Display; Dual Playfield/Laced commands and live field
+scheduling remain open. See [the mode contract](display-modes.md).

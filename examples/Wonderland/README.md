@@ -10,6 +10,8 @@ fixture. See [the assessment](../../docs/wonderland.md)
 and [the startup/asset demo](../../demos/wonderland.html). An
 [interactive original-menu fixture](../../demos/wonderland-menu.html) also runs
 with keyboard mapping and Gamepad API options, stopping before game/editor dispatch.
+The [screen-window fixture](../../demos/screen-windows.html) executes original
+game/editor window setup and verifies landscape scrolling and both panels.
 The original program uses Amiga volume paths; the browser files adapter resolves
 those paths to preloaded asset bytes, preserving the original source filenames.
 

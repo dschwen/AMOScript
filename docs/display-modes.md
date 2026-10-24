@@ -27,8 +27,10 @@ mid-line scroll timing still need capture/word-level validation.
 The copper builder accepts a per-view scroll byte. Nonzero scrolling starts DMA
 eight clocks earlier, providing one extra lowres word or two extra hires words.
 The caller's raw plane storage must include that prefix; modulos account for the
-actual fetched size and row stride. Ordinary indexed screens do not yet expose
-AMOS Screen Offset, so their default scroll remains zero.
+actual fetched size and row stride. [AMOS Screen Offset](screen-windows.md) now
+adjusts physical plane pointers and scroll delay through the same builder. Its
+hires path requests a four-clock advance, preserving the source's even-pixel
+precision; the default raw-model advance remains eight clocks.
 
 These definitions follow the Commodore
 [playfield register summary](https://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0092.html),
