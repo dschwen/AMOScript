@@ -4,6 +4,10 @@ AMOScript transpiles tokenized AMOS `.AMOS` programs into self-contained
 JavaScript modules for Node and browsers. The core language is implemented;
 full AMOS/Amiga compatibility is still in progress. See
 [compatibility and remaining work](docs/compatibility.md) and [the plan](PLAN.md).
+The current target is **Roller II** from the supplied `RII/` directory. Its
+[readiness assessment](docs/roller2.md) and [MOD inspector demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2.html)
+record the initial gaps and implemented original load statements. Full-game
+compilation and tracker playback are still in progress.
 Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).

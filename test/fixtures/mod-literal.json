@@ -1,0 +1,13 @@
+{
+  "evidence": "Independent literal four-channel MOD bytes; no production encoder or Amiga execution.",
+  "byteLength": 2116,
+  "patches": [
+    [0, "6c69746572616c"],
+    [20, "766f696365"],
+    [42, "00040f2000010003"],
+    [950, "017f"],
+    [1080, "4d2e4b2e"],
+    [1084, "01ac1c200358100700000a0a00000e0100000f0700000d00"],
+    [2108, "807f00ff0102fe40"]
+  ]
+}

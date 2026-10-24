@@ -1,0 +1,2 @@
+# Preserve supplied asset bytes, including CRLF text covered by the manifest.
+* -text

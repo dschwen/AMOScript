@@ -19,6 +19,7 @@ module.exports = async function checkBrowserDemos(browser) {
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
+      if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
       if (scenario.id === 'wonderland-game') {
         await page.click('#frame-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='frame-view');
         await page.click('#frame-fullscreen');await page.waitForFunction(()=>document.fullscreenElement===null);

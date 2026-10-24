@@ -44,6 +44,12 @@
   addresses. Preserve addresses across swap/shrink; retire them on replacement
   or erasure. See `docs/bank-memory.md`. Canvas Key Speed repeats use fixed
   50ths and input-reset subscriptions for lifecycle cleanup; see `docs/key-speed.md`.
+- `lib/amos/mod.js` decodes owned four-channel M.K. files without playback.
+  Track Load uses raw synchronous bytes in a chip `Tracker ` bank plus 32 zero
+  workspace bytes; loop flags are per factory. Track Play/Stop remain unsupported.
+  Roller II is the current target; see `docs/roller2.md` and `docs/mod-tracker.md`.
+  Its end tunes are AMOS Music banks, not MODs. Never count a pattern inspector
+  or loop flag as tracker playback.
 - `lib/ExtensionTable.js` records implemented extension slots/offsets; slot-1
   Music sample commands use `lib/amos/audio.js` for bounded Samples records and
   voice commands. `webAudio.js` is the optional browser adapter. Generated

@@ -19,6 +19,7 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('roller2',page);console.log('Roller2 passed: original asset loads, twelve MOD patterns and ten instruments; playback remains unimplemented.');
     const liveGpu=await runScenario('wonderland-game', page);assert.strictEqual(liveGpu.gpuFrames,11);
     await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
     console.log('Wonderland game passed: original keyboard/gamepad replays, eight sample commands, three native PCM/stereo comparisons, eleven live-host GPU/CPU frames, renderer switching and live sound controls.');

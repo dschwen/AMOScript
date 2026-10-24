@@ -1,7 +1,8 @@
 # Wonderland browser milestone
 
 Assessment: 2026-10-24. **The unmodified game now has a live keyboard/Gamepad browser demo and controlled death/restart coverage.**
-Wonderland is the next end-to-end compatibility target. Use its actual code and
+Wonderland is retained as an end-to-end regression target while [Roller II](roller2.md)
+is the current implementation priority. Use its actual code and
 assets to choose the next language/runtime/display work, while retaining the
 existing parser, lowerer, instruction-function dispatcher and headless runtime.
 
@@ -183,8 +184,8 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 
-Local verification: `npm run check` passes 502 tests on Node 18.19.1.
-`npm run test:browser` passes the four original image comparisons, all twenty-six
+Local verification: `npm run check` passes 510 tests on Node 18.19.1.
+`npm run test:browser` passes the four original image comparisons, all twenty-seven
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and
 179 renderer GPU/CPU frames plus eleven live-host GPU/CPU frames, including three death-fade entries, game-over/fresh-game frames, four original first-level frames, an independent attached-image fixture, two Flash states, two copy states, four fade states, eight scrolling window patterns, the original
