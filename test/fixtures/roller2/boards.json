@@ -1,0 +1,125 @@
+{
+  "evidence": "Independent raw AmIc/AmBk extraction and source-derived GAMEDISP composition, including entry copies, original masks and EHB. Palette restoration is a declared preview harness; no native/gameplay capture.",
+  "levels": [
+    {
+      "level": "1",
+      "countedTiles": 5,
+      "sourceSha256": "4c9b4873c72d1f6d01f0ddc6479079309cf741eba90a892cdd6f0b2240d6e41f",
+      "indicesSha256": "84c6769a532794374eda8565a80f2c15dd4ed829220d3f30b679d790d19cd717",
+      "rgbaSha256": "7643caca85768a1c574d3bf8b3399b12ec5b6f988200f8b2118dc4bc74e1071a",
+      "png": "board-1.png"
+    },
+    {
+      "level": "2",
+      "countedTiles": 3,
+      "sourceSha256": "8b2a9802b7b70164aa004b535821378914a750c9ceb39dc4c703f48e83e8b212",
+      "indicesSha256": "8a7e0a43aadca80aee7caf86638f6a769b7e08d22afff27f910df78572af8ec0",
+      "rgbaSha256": "0d20910b8fc84cb0b085a6e70324cc2f0ff243f4e5d5523477006ddc9af97235",
+      "png": "board-2.png"
+    },
+    {
+      "level": "3",
+      "countedTiles": 5,
+      "sourceSha256": "8db993a0a261010ebbbde76067fdfcd87e5cdc6b43dd04b57f606048e9ece2ad",
+      "indicesSha256": "7bded4d315355798e3da352e7f7968af12f45b70a67f3a35027f9dcf5da2217c",
+      "rgbaSha256": "cb039e23e69e75bd4a95f43f92b3bfa1e477f60f9e5695ddd0ac67ab0384534c",
+      "png": "board-3.png"
+    },
+    {
+      "level": "4",
+      "countedTiles": 5,
+      "sourceSha256": "2a0cb3e5564244848b1b7fff13ea48040d293b0330bb40b370adcbd5a2ef6f16",
+      "indicesSha256": "69840ef517e08733060bb42efcfa97394e82eb47ab71fb4b1bca008aaef72f95",
+      "rgbaSha256": "2a8e070c90d8c39780c4942d2f10bb07fbc237c6661490748a8d059647f660ac",
+      "png": "board-4.png"
+    },
+    {
+      "level": "5",
+      "countedTiles": 6,
+      "sourceSha256": "06954aa3b43891a50a135761bdf2a218f901bfcded48a15bdd848d7d24c1becd",
+      "indicesSha256": "60a296fa2702b1af911c2aeb9f9013102acda5f29709de4fd3ab992e01dd714b",
+      "rgbaSha256": "9d751f0b3582d6baf5d6957f465a99608ccd12bc9ad433dde4fd8c8578938a4c",
+      "png": "board-5.png"
+    },
+    {
+      "level": "6",
+      "countedTiles": 0,
+      "sourceSha256": "ef6e131fcb25f437b44d79913c0750ca5a2cb789d79e181be031c664a4f65e83",
+      "indicesSha256": "42b0f365d2117a65a1ade1a6a8648c44dd3d1db7ffbe482daeb66b76b3566277",
+      "rgbaSha256": "4f17990b6fcee72dbbc7b8176a0b441ff5b9601216c458064f35b3539158fa6d",
+      "png": "board-6.png"
+    },
+    {
+      "level": "7",
+      "countedTiles": 5,
+      "sourceSha256": "a48a1ccbffda0dfb109abd16cbf86ec3f540ea2129eeb0677320fdcea75cd595",
+      "indicesSha256": "42c029ac880132c48e0bb9805b64a6931a4aa3016e0029f78e820a30f471a4f7",
+      "rgbaSha256": "8362ec13ddaebdca2211f703f151d690147af655e2a8fcdac199b45c66d0794c",
+      "png": "board-7.png"
+    },
+    {
+      "level": "8",
+      "countedTiles": 0,
+      "sourceSha256": "6bf0ced4f2c01d3872f2d8004ad035894291e20782004dc2a62c047d7f0dfa17",
+      "indicesSha256": "79442f938b1ec552fa699dcf0e060a7c7a1ceec781b5d095817de49e4be6f3d8",
+      "rgbaSha256": "aa9ef8d288fd4bb59a74577ed091cd21021346ca65edfc59b33676b06cd91aa9",
+      "png": "board-8.png"
+    },
+    {
+      "level": "9",
+      "countedTiles": 6,
+      "sourceSha256": "cf3da2137526437c0398eeb8bb50698728a016a7d1682a27ee47531c8da1d252",
+      "indicesSha256": "b9c9ae717d38dae8fe528afc082b486a8c972b42472a66f70e5230337b061c46",
+      "rgbaSha256": "1256f115ae5203f640f1c8dd5bcb59c8d37cb59b9ba0b802bddcf19888aae6d0",
+      "png": "board-9.png"
+    },
+    {
+      "level": "10",
+      "countedTiles": 25,
+      "sourceSha256": "897e3c2d4b09db3d6174058a60c44de958a5cbb827cc654ac47028bf5bb66b8d",
+      "indicesSha256": "54c442ee8b11005947dff8c0a0c66c3d97fade8f037a751b6b0e234ec0998b3b",
+      "rgbaSha256": "71c0046f740fce839ea95cb6a95b44762499fc60f00d52931d75e9bc3ad688a0",
+      "png": "board-10.png"
+    },
+    {
+      "level": "11",
+      "countedTiles": 23,
+      "sourceSha256": "f31e795e13435cf761625be50f236aac9e8b2c731001afa463ce4d545a9a7156",
+      "indicesSha256": "e1a9d0758896d92732c87e2f9d09dbc23451a90a6eb70d48659506ca0e6f8eb5",
+      "rgbaSha256": "6692dd85c270853ca24ee468bb81074548db081d9fa0f1d484087ba9a4985046",
+      "png": "board-11.png"
+    },
+    {
+      "level": "16",
+      "countedTiles": 3,
+      "sourceSha256": "e29c69650342ca3b48010b12aedad5cbde29e4ed382ffc0cf0c1aaebfe0d0a8c",
+      "indicesSha256": "c14fd13cf85beaec6ed5d0324a5600e2e752d5c97d6c3afc976e80487fcf295c",
+      "rgbaSha256": "c177e12834a94c2ad37e2a9458db983ac48b44b7685e14a874d59e707aea3a1f",
+      "png": "board-16.png"
+    },
+    {
+      "level": "17",
+      "countedTiles": 3,
+      "sourceSha256": "e29c69650342ca3b48010b12aedad5cbde29e4ed382ffc0cf0c1aaebfe0d0a8c",
+      "indicesSha256": "c14fd13cf85beaec6ed5d0324a5600e2e752d5c97d6c3afc976e80487fcf295c",
+      "rgbaSha256": "c177e12834a94c2ad37e2a9458db983ac48b44b7685e14a874d59e707aea3a1f",
+      "png": "board-17.png"
+    },
+    {
+      "level": "20",
+      "countedTiles": 1,
+      "sourceSha256": "f0f47b189bbf86ee2d85c34b49accd2aa276a696d1e6290e8a0445251df2e54f",
+      "indicesSha256": "c415b6b5ac65c81a89663a8b04aac60b5b4695b7389223cd5993b9a774ab4477",
+      "rgbaSha256": "1a408d370177d801565ac0d28e864f45e8a092f73509b46631f4898a4182e00e",
+      "png": "board-20.png"
+    },
+    {
+      "level": "100",
+      "countedTiles": 0,
+      "sourceSha256": "907960307e8f6c563dc93be31b04da1c76e20ac785925e05e44117e3c6509c63",
+      "indicesSha256": "fb179e1bfd4289746b3233166e6f10aa357bce5b5b937fa8f2410d25432592bd",
+      "rgbaSha256": "bc91def8ba96cfb201a751429baa99c59c719609105ad0e86b0e9cc795e2edca",
+      "png": "board-100.png"
+    }
+  ]
+}

@@ -20,6 +20,16 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-boards'){
+        assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-backend'),'webgl');
+        assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-count'),'5');
+        await page.click('#roller2-board-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-board-viewport');
+        await page.selectOption('#roller2-board-level','10');assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-count'),'25');
+        assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'roller2-board-viewport');
+        await page.click('#roller2-board-load');assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-phase'),'ready');
+        await page.selectOption('#roller2-board-level','100');assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-count'),'0');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_BOARD_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-icons'){
         assert.strictEqual(await page.locator('#roller2-icon-controls').getAttribute('data-backend'),'webgl');
         await page.click('#roller2-icon-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-icon-viewport');

@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const boards=await runScenario('roller2-boards',page);assert.strictEqual(boards.gpuFrames,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_BOARD_CLEANUP());
+    console.log('Roller2 boards passed: fifteen original GAMEDISP maps, independent pixels/counts, declared palette preview and two WebGL frames.');
     const icons=await runScenario('roller2-icons',page);assert.strictEqual(icons.gpuFrames,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_ICON_CLEANUP());
     console.log('Roller2 icons passed: original inclusive ICCOPY, unchanged masks, independent PNGs and two WebGL frames.');
     await runScenario('roller2-levels',page);await page.evaluate(()=>globalThis.AMOS_ROLLER2_LEVEL_CLEANUP());

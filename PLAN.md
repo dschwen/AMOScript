@@ -47,7 +47,11 @@ guard follows those copies; an independent PNG/WebGL inspector covers them.
 Bare Cline now refreshes whole text rows through the existing buffer/Bob drawing
 path. Original game entry now runs through 600: game screens, rainbow/status
 setup and level 1 loading. Independent portable-font/rainbow pixels match Canvas
-and GPU. Next cover Screen To Front/overlapping windows, GAMEDISP/ready prompt,
+and GPU. Original GAMEDISP now renders all fifteen supplied maps in an isolated
+board inspector, matching independent indexed/RGBA goldens and source counts;
+its palette restoration is a declared preview harness. Sixteen Canvas checks and
+two more GPU frames pass. The connected guard remains after 600. Next cover
+Screen To Front/overlapping windows and join GAMEDISP/ready prompt,
 Copy/Fill and later gates. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
@@ -161,7 +165,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **588 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **592 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

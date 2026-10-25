@@ -56,6 +56,13 @@ Get Palette copies bounded screen palettes without selecting the source.
 See [Roller II's first-image contract](roller2-title.md) for clone selection,
 owner-retirement gates and the original FLOAD evidence.
 
+Roller II's next connected gate is its overlapping foreground prompt at 601–602.
+Screen To Front priority/commit semantics and palette-switch setup budgets must
+be verified before enabling it. The separate [board inspector](roller2-boards.md)
+now validates GAMEDISP across all supplied maps without bypassing this display
+gate. Occlusion must retain physical buffers/offsets and feed the same immutable
+snapshot to CPU and GPU; an RGBA crop/compositor fallback does not satisfy it.
+
 The bridge packs each full physical bitmap with its original plane stride. A
 coarse x/y offset adjusts bitplane pointers; the remainder sets shared BPLCON1
 delay and an earlier data-fetch start. Modulos retain the full bitmap row stride.

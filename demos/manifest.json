@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-boards.html",
+      "title": "Roller II original board rendering",
+      "description": "Unchanged GAMEDISP across all fifteen supplied maps, with original icon copies, retained masks and source tile counts. Independent board PNGs, sixteen Canvas checks and two WebGL frames. Live level selector/fullscreen preview; palette restoration is a declared harness and the full prompt/gameplay path remains excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-boards.html"
+    },
+    {
       "file": "roller2-icons.html",
       "title": "Roller II raw icon memory and ICCOPY",
       "description": "Original game-entry icon copies through checked planar aliases, including rounded padding and unchanged masks. Independent before/after pixels and two WebGL frames; live Copy/Reset/fullscreen inspector. Game screen and level setup remain excluded.",

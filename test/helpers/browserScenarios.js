@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-boards', title: 'Roller II original board rendering', initialFrame: 'Canvas: original level 1 board', description: 'Unchanged GAMEDISP across all fifteen supplied maps, with original icon copies, retained masks and source tile counts. Independent board PNGs, sixteen Canvas checks and two WebGL frames. Live level selector/fullscreen preview; palette restoration is a declared harness and the full prompt/gameplay path remains excluded.', run: require('./roller2BoardProbe'), check(result, assert) {
+    assert.strictEqual(result.levels,15);assert.strictEqual(result.frames,16);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:2);assert.strictEqual(result.gameRunning,false);assert.strictEqual(result.isolatedBoard,true);
+  } },
   { id: 'roller2-icons', title: 'Roller II raw icon memory and ICCOPY', initialFrame: 'Canvas: after original ICCOPY', description: 'Original game-entry icon copies through checked planar aliases, including rounded padding and unchanged masks. Independent before/after pixels and two WebGL frames; live Copy/Reset/fullscreen inspector. Game screen and level setup remain excluded.', run: require('./roller2IconProbe'), check(result, assert) {
     assert.strictEqual(result.frames,2);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:2);assert.strictEqual(result.copiedIcons,2);assert.strictEqual(result.bytesPerCopy,193);assert.strictEqual(result.masksRegenerated,false);assert.strictEqual(result.gameRunning,false);
   } },

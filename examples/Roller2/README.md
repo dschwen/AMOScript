@@ -45,3 +45,7 @@ The [icon-copy inspector](../../demos/roller2-icons.html) shows original ICCOPY
 through bounded raw icon views. Connected menu game selection now reaches these
 original entry calls, then continues through original screen/rainbow/status setup and level 1 loading,
 with a guard before board drawing.
+
+The [board inspector](../../demos/roller2-boards.html) runs unchanged GAMEDISP
+across all fifteen supplied maps. A declared palette-restoration harness permits
+inspection; the foreground prompt and actual gameplay path remain excluded.

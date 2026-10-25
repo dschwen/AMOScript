@@ -67,6 +67,10 @@
   guard; board rendering and gameplay remain open. Its WebGL/fullscreen host reuses browserAudio
   for gesture activation, mute, Restart bindings and owned-context closure.
   See `docs/roller2-menu.md`; selected routines/gameplay remain open.
+  Isolated GAMEDISP now checks all fifteen maps against independent raw-asset
+  board pixels/counts. Its palette restoration is a declared preview harness.
+  Foreground Screen To Front/overlap/palette timing stays gated; do not join
+  the game path by bypassing copper budgets. See `docs/roller2-boards.md`.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/

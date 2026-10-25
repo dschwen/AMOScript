@@ -27,6 +27,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; icon addressing now runs original ICCOPY before its entry guard. [Demo](../demos/roller2-levels.html) |
 | Original game-entry icon copies | Original 565–570 and ICCOPY 240–246 execute after menu game selection. Bounded live icon table/planar views preserve the inclusive allocation-tail byte and old masks. Independent PNGs and two additional GPU frames. [Contract](icon-memory.md) |
 | Game screens and first level load | Original 571–600 creates hidden/game screens, initializes rainbow/status rows, loads level 1 and refreshes text through Cline. Independent portable-font/rainbow panel pixels match Canvas/GPU. Guard precedes overlapping-window presentation, board drawing and gameplay. [Contract](cline.md) |
+| Isolated board routine | Unchanged GAMEDISP renders all fifteen supplied maps; independent indices/pixels/counts pass. Sixteen Canvas frames and two additional GPU frames; declared palette restoration, no foreground/gameplay integration. [Contract](roller2-boards.md) |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
@@ -83,7 +84,7 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    fifteen files. First game entry now calls original ICCOPY through raw Start(2) icon
    aliases. The guard now follows original setup and level 1 loading through 600.
    Cline refreshes status rows. Next add Screen To Front/overlapping windows,
-   GAMEDISP/ready prompt, Copy/Fill,
+   join the independently verified GAMEDISP with the ready prompt, Copy/Fill,
    Add/Swap forms,
    Get Icon, Scin and Key State as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
@@ -102,7 +103,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 588 tests, 34 offline browser scenario pages,
-179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu and two icon-copy GPU/CPU comparisons, plus existing
+Local baseline for this slice: 592 tests, 35 offline browser scenario pages,
+179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu, two icon-copy and two board GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.
