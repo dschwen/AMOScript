@@ -2519,6 +2519,7 @@
     // Original FDZ supplies all 32 registers. Preserve omitted/negative entries
     // and reject float bit-pattern quirks rather than silently coercing them.
     const palette = colours.map(entry => {
+      if (entry == null) return null;
       const type = entry.type === 'dynamic' ? entry.value && entry.value.numericType : entry.type;
       if (type !== 'integer') throw new Error('Explicit Fade colours require integer values');
       const rgb = integer(entry.value); return rgb < 0 ? null : rgb & 0xfff;

@@ -1,0 +1,93 @@
+{
+  "evidence": "Independent raw assets, source KCWEG/Poke/score/count rules and zero-seed/beam random oracle; captured steady palettes on declared portable clock/font, not an Amiga capture.",
+  "transition": {
+    "time": 5920,
+    "score": 10,
+    "printedScore": 0,
+    "colour": 2,
+    "remaining": 5,
+    "png": "colour-transition.png",
+    "rgbaSha256": "e90b8c1281eb1af7532b43a1a840f8e917561c700c0a315537df062aa93a55c8",
+    "indicesSha256": "dab9d0b3e75f315dbd65471688187a69ee1b85eca5511c2231d3893b3bd07a49"
+  },
+  "frames": [
+    {
+      "time": 6600,
+      "bx": 8,
+      "by": 9,
+      "score": 10,
+      "remaining": 4,
+      "colour": 2,
+      "countdown": 33,
+      "fillIcon": 1,
+      "payloadSha256": "19c54c1dd8a76f2a9010866fff67d1866f78fa908cd797a73497eb2181c38e37",
+      "png": "colour-1.png",
+      "rgbaSha256": "40b8c3a5218127596101845b03005262203d74f036fcbf9f7b6520896f18e060",
+      "indicesSha256": "1c5764264d7b099476b3f8007fa127af9d96ee01bfe7952f2ac07ce7abad3518"
+    },
+    {
+      "time": 8000,
+      "bx": 9,
+      "by": 9,
+      "score": 20,
+      "remaining": 3,
+      "colour": 3,
+      "countdown": 32,
+      "fillIcon": 1,
+      "payloadSha256": "7603bbdfb4a3fccccd6a5ffe5f50acfbb6c7f3f24412ca4d8b4b984c1c920837",
+      "png": "colour-2.png",
+      "rgbaSha256": "2f04f101b54521c2264583b90f0eb28354cf7589fa2cf3e9d2b05fd0d1856e64",
+      "indicesSha256": "c2bccc2f7d175a0f9a182d6240b64480b7ae063ba02cc44cb6ad1ef9611d8048"
+    },
+    {
+      "time": 9400,
+      "bx": 10,
+      "by": 9,
+      "score": 30,
+      "remaining": 2,
+      "colour": 4,
+      "countdown": 30,
+      "fillIcon": 1,
+      "payloadSha256": "d13076e3d7835a995602965d3f453de4068924dd85bf7c182e369f9f2aa49db2",
+      "png": "colour-3.png",
+      "rgbaSha256": "d42bd1231ca7c858b6cd98022e50b138c5bfd99e9fa080670a705c88a5e3fc0b",
+      "indicesSha256": "59952cf6c42f7a02c13aed7ea49ab6bccf701c332330c79b952593d0a7e295c0"
+    },
+    {
+      "time": 10800,
+      "bx": 11,
+      "by": 9,
+      "score": 40,
+      "remaining": 1,
+      "colour": 5,
+      "countdown": 29,
+      "fillIcon": 2,
+      "payloadSha256": "f704a58bec78d33dacb9b88661777051e904bec608cf3255e14eaacb46788f7a",
+      "png": "colour-4.png",
+      "rgbaSha256": "7c1e9bb1dbd1e581d373784fde31085c8bc1bd58cf318efb4ad1638195ce44fe",
+      "indicesSha256": "68a286ee4570ccb919b138f2742f86a79c9796f7b0f3b9e3ffad3ee71c017831"
+    },
+    {
+      "time": 12200,
+      "bx": 12,
+      "by": 9,
+      "score": 50,
+      "remaining": 0,
+      "colour": 1,
+      "countdown": 29,
+      "fillIcon": 1,
+      "payloadSha256": "60a72d4549bd04476198940c1a0cdcf22c976ca1d30e44c526a549301f2830f2",
+      "png": "colour-5.png",
+      "rgbaSha256": "b55452913d1e5902c78bfba71978654fd6b79506f3563c674321ce3044683fdc",
+      "indicesSha256": "c484a87501ac63989123d8d873338fd068510bf2ff77770965f153589f1e10a4"
+    }
+  ],
+  "guard": "level-bonus",
+  "changedOffsets": [
+    189,
+    190,
+    191,
+    192,
+    193
+  ]
+}

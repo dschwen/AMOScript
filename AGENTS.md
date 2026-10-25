@@ -80,7 +80,12 @@
   toggles/countdown and Escape title return; movement/pause/game-over targets
   are guards. Main ASCII string Goto/Gosub and integer Add now run original BEWEG, floor,
   stop and Lasttest movement in a separate fixture. Other SASINIT labels are
-  explicit handler guards; the first level stops before KCWEG effects.
+  explicit handler guards in that fixture. A separate colour fixture now runs
+  KCWEG/HCWEG, BCL and GAMED through all five first-level colour collections.
+  Sparse Fade omissions preserve register positions and skip jobs for those
+  entries; malformed values reject before replacing the job. The colour fixture
+  stops at a declared ZAEHLHOCH bonus guard with its ordinary Gosub frame.
+  See `docs/roller2-colours.md`; bonus scoring/next-level loading remain open.
   Prepared original stop/collapse maps are declared adapter fixtures, not native
   level progression. See `docs/roller2-movement.md`, `docs/add.md` and
   `docs/string-branches.md`. Numeric/procedure/non-ASCII string branches remain open.

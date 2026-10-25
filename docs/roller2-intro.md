@@ -45,9 +45,11 @@ called by this fixture; persistence remains separate work.
 
 ## Explicit Fade palette lists
 
-`Fade speed,colour,...` now accepts one through 32 integer colour expressions.
-Nonnegative values use their low twelve bits; negative values and omitted tail
-entries leave those registers out of the captured job. Every supplied expression
+`Fade speed,colour,...` now accepts one through 32 colour fields. Leading,
+interior and trailing omissions retain their register positions; an all-omitted
+list replaces/cancels the current fade without changing colours. Nonnegative
+integer values use their low twelve bits; negative and omitted entries leave
+those registers out of the captured job. Every supplied expression
 evaluates once, left to right, before dispatch; no values are replayed on later
 fields. DATA/scalar/array/procedure integers and dynamic Val integer results use
 the same rules. Static floats/strings reject at compilation; dynamic float Val

@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-colours', title: 'Roller II original colour collections', initialFrame: 'Canvas: keyboard colour 5 collected', description: 'Original KCWEG/BCL/GAMED collect all five first-level colour tiles, update exact map bytes, score and remaining count, and fade only the ball palette. Fourteen independent Canvas images and seven WebGL comparisons across keyboard/Gamepad input; bonus scoring/level loading remains guarded.', run: page=>require('./roller2MovementProbe')(page,{colours:true}), check(result, assert) {
+    assert.strictEqual(result.inputModes,2);assert.strictEqual(result.collections,10);assert.strictEqual(result.frames,14);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:7);assert.strictEqual(result.guard,'level-bonus');assert.strictEqual(result.mapUnchanged,false);assert.strictEqual(result.fullGame,false);
+  } },
   { id: 'roller2-movement', title: 'Roller II original floor movement', initialFrame: 'Canvas: keyboard colour-tile guard', description: 'Original string-based SAS$ dispatch, wall checks and floor sliding on level 1. Keyboard and browser Gamepad paths verify 48 field positions, twelve independent Canvas frames and six WebGL comparisons; the colour handler remains guarded. Live fullscreen/Stop/Resume/Restart preview.', run: require('./roller2MovementProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,2);assert.strictEqual(result.positions,48);assert.strictEqual(result.frames,12);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:6);assert.strictEqual(result.guard,'tile:kcweg');assert.strictEqual(result.mapUnchanged,true);assert.strictEqual(result.movement,true);assert.strictEqual(result.fullGame,false);
   } },

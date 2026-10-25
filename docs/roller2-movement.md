@@ -68,3 +68,8 @@ linked through HTML Preview from the gallery.
 Next implement KCWEG/BCL and its actual colour/score/tile-writeback dependencies,
 then extend original trajectories through collectible interactions. The stopped
 colour-handler guard is not a completed game.
+
+The separate [colour fixture](roller2-colours.md) now replaces KCWEG/HCWEG
+guards with original handlers, BCL and GAMED, reaching the level-bonus guard
+after all five first-level colour tiles. This floor inspector retains its
+original colour-handler boundary.

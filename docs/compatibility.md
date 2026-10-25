@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-25. The current local baseline has **625 passing tests**, plus a
+Updated 2026-10-25. The current local baseline has **633 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -37,6 +37,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
 | MOD / tracker | Implemented bounded playback | Owned M.K. decoder, Track Load/Loop/Play/Stop and C/A/E/F/D effects. Driver-owned VBL wakes share sample voices, cancel on End/failure/bank retirement, and pause without elapsed-note replay. Original music fixture matches 1,997 notes and twelve native Web Audio comparisons. Held sample phase after pause, wider effects, exact DMA contention, live bank editing and AMOS Music-bank playback remain open. [Contract](mod-tracker.md). |
+| Roller II colour collection | Implemented bounded original handlers | KCWEG/HCWEG, sparse BCL and GAMED run through five first-level colour collections: score 50, NOI 0 and exact tile-byte/RNG/pixel expectations. Fourteen Canvas frames and seven GPU comparisons; bonus scoring/level loading remain guarded. [Contract](roller2-colours.md). |
 | Roller II first floor movement | Implemented bounded original handlers | BEWEG/THE_MOVING, PHALT/stop and Lasttest execute via original SAS$ string dispatch. Keyboard/Gamepad verify 48 field positions, twelve independent Canvas frames and six GPU comparisons; colour/other tile handlers remain guarded. [Contract](roller2-movement.md). |
 | Roller II original input loop | Implemented guarded original path | JOAB 619–639, countdown, effects/music toggles, held Help query and original Escape title return. Four guarded direction paths, twenty-four Canvas checks and six more GPU frames; movement and pause/game-over handlers remain gated. [Contract](roller2-input.md). |
 | Roller II connected ready prompt | Implemented guarded original path | Original startup/menu, entry through 617, GAMEDISP, blinking prompt, ball palette/sprite, initial fade and status border. Eighteen independent Canvas frames, three input exits and six GPU frames. Guard precedes movement; [ball contract](roller2-ball.md). [Contract](screen-priority.md). |

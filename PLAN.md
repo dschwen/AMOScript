@@ -63,8 +63,11 @@ game-over destinations are guarded. Twenty-four Canvas checks and six additional
 GPU frames pass. Main ASCII string Goto/Gosub and integer Add now run original BEWEG, floor,
 stop and Lasttest handlers. The first level slides through three cells to a
 guarded colour tile. Independent 24-step/PNG expectations, prepared original
-stop/collapse maps and six more GPU comparisons pass. Next integrate KCWEG/BCL,
-score/colour/tile effects, then Copy/Fill and other reached handlers. Sprite-bank raw
+stop/collapse maps and six more GPU comparisons pass. Original KCWEG/HCWEG, sparse BCL fades and GAMED now run in a separate colour
+fixture. All five first-level colour tiles clear with exact score/count/map/RNG
+expectations, fourteen independent Canvas images and seven more GPU comparisons.
+The next guard precedes ZAEHLHOCH bonus scoring/level loading. Next implement that
+original bonus/next-level path, then Copy/Fill and other reached handlers. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
