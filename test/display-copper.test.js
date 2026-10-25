@@ -217,3 +217,16 @@ test('copper builder: gap pruning preserves border and sprite colours and the la
   }
   assert.deepStrictEqual(Array.from(snapshot.frame.linePal.slice(101*1024+4,101*1024+8)),[0,255,0,255]);
 });
+
+test('copper: DMA-off event pruning retains colours if sprite DMA starts later on the same row',()=>{
+  const words=[0x0041,0xfffe,R.COLOR00+32,0x0f00,0x0061,0xfffe,R.DMACON,0x8220,...end];
+  const {snapshot}=run(words,{outputWidth:640},(chip,initial)=>{initial[R.DMACON/2]=0x280;});
+  assert.strictEqual(snapshot.frame.lineRegs[17],2);
+  assert.strictEqual(snapshot.frame.lineEvents[1],R.COLOR00+32);
+  const blank=run([0x0041,0xfffe,R.COLOR00+32,0x0f00,...end],{outputWidth:640},(chip,initial)=>{initial[R.DMACON/2]=0x280;}).snapshot;
+  assert.strictEqual(blank.frame.lineRegs[17],0);
+  const manual=run([R.SPR0POS,0x0080,R.SPR0DATA,0x8000,0x0041,0xfffe,R.COLOR00+32,0xf00,...end],{outputWidth:640},(chip,initial)=>{initial[R.DMACON/2]=0x280;}).snapshot;
+  assert.ok(manual.frame.lineSprites[3]&0x80000000);
+  assert.strictEqual(manual.frame.lineRegs[17],1);
+  assert.strictEqual(manual.frame.lineEvents[1],R.COLOR00+32);
+});

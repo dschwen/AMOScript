@@ -1,0 +1,44 @@
+/* jshint esversion: 6 */
+'use strict';
+module.exports=async function roller2ReadyProbe(page){
+  const fs=require('fs'),path=require('path'),directory=path.join(__dirname,'../../examples/Roller2');
+  const assets=Object.fromEntries(['music/Roller_II_Samples.Abk','music/mod.Roller_II_mus','iffp/terminator el','iffp/roller titel','Highscores','iffp/icons.abk','iffp/sprites.abk','levl/1'].map(name=>[`rii:${name.toLowerCase()}`,fs.readFileSync(path.join(directory,name)).toString('base64')]));
+  return page.evaluate(async({source,assets,prompt,panel,timerSource,gpuSources})=>{
+    const compiled={exports:{}};new Function('module',source)(compiled);const makeClock=new Function(`return (${timerSource});`)();
+    const factory=name=>new Function(`return (${gpuSources[name]});`)(),model=factory('model')(),sprites=factory('sprites')();
+    const createGpu=factory('renderer')(model,sprites,factory('resources')(model),factory('shaders'),factory('layout'));
+    const check=(value,message)=>{if(!value)throw Error(message);};
+    const files={isDirectory:name=>name==='RII:',exists:name=>Object.prototype.hasOwnProperty.call(assets,name.toLowerCase()),read:name=>atob(assets[name.toLowerCase()]),write(){throw Error('Unexpected write');}};
+    const release=gpu=>{if(!gpu)return;const gl=gpu.resources.context;gpu.dispose();const ext=gl.getExtension('WEBGL_lose_context');if(ext&&!gl.isContextLost())ext.loseContext();};
+    async function golden(bytes){const image=new Image();image.src=`data:image/png;base64,${bytes}`;await image.decode();const c=document.createElement('canvas');c.width=320;c.height=250;c.getContext('2d').drawImage(image,0,0);return c.getContext('2d').getImageData(0,0,320,250).data;}
+    const popup=await golden(prompt),hidden=await golden(panel);
+    function make(){const clock=makeClock(4),program=compiled.exports({files,print(){},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout});program.tick(1000);clock.tick(1000);program.sendKey('a');clock.tick(1840);program.setMouse(158,182,1);clock.tick(1300);program.setMouse(158,182,0);return{program,clock};}
+    let frames=0,gpuFrames=0,gpuUnavailable=null;
+    for(const mode of ['mouse','keyboard','gamepad']){
+      const run=make(),canvas=document.createElement('canvas');canvas.tabIndex=0;document.body.append(canvas);let pad=null,gpu=null,gpuHost=null;
+      const host=AMOS_BROWSER.createCanvasHost(canvas,{mouseCoordinates:'hardware',hasFocus:()=>true,requestAnimationFrame:()=>1,cancelAnimationFrame(){},getGamepads:()=>[pad],joysticks:[{port:1,keyboard:true,gamepad:true}]});host.attach(run.program);
+      if(mode==='mouse')try{gpu=createGpu(document.createElement('canvas'));gpuHost=AMOS_BROWSER.createCanvasHost(gpu.resources.context.canvas,{renderer:gpu,requestAnimationFrame:()=>1,cancelAnimationFrame(){}});gpuHost.attach(run.program);}catch(e){gpuUnavailable=e.message;}
+      function capture(name,expected){host.render();const rgba=canvas.getContext('2d').getImageData(0,0,320,250).data;check(rgba.every((value,index)=>value===expected[index]),`${mode} ${name}: independent pixels differ`);frames++;
+        if(globalThis.AMOS_DEMO_OBSERVE)globalThis.AMOS_DEMO_OBSERVE({name:`Canvas: ${mode} ${name}`,width:320,height:250,rgba});
+        if(gpuHost){const old=run.program.display.canvasFrame;run.program.display.canvasFrame=()=>{throw Error('GPU used CPU presentation');};try{gpuHost.render();}finally{run.program.display.canvasFrame=old;}const actual=gpu.readPixels(),cpu=run.program.display.renderDisplay();check(gpu.stats.lastResult.backend==='gpu'&&actual.length===cpu.length&&actual.every((value,index)=>value===cpu[index]),'Ready GPU differs');gpuFrames++;if(globalThis.AMOS_DEMO_OBSERVE)globalThis.AMOS_DEMO_OBSERVE({name:`WebGL: ${name}`,width:640,height:250,rgba:actual});}}
+      try{run.clock.tick(20);capture('ready prompt',popup);run.clock.tick(420);check(run.program.state.variables.int_noi===5,'Original board count differs');capture('prompt hidden',hidden);run.clock.tick(120);capture('prompt blinking',popup);
+        if(mode==='mouse'){const r=canvas.getBoundingClientRect();canvas.dispatchEvent(new PointerEvent('pointermove',{clientX:r.left+r.width/2,clientY:r.top+r.height/2,button:0,buttons:1,bubbles:true}));}
+        if(mode==='keyboard')canvas.dispatchEvent(new KeyboardEvent('keydown',{code:'Space',key:' ',bubbles:true}));
+        if(mode==='gamepad')pad={index:0,connected:true,mapping:'standard',axes:[0,0,0,0],buttons:Array.from({length:17},(_,index)=>({pressed:index===0,value:index===0?1:0}))};
+        run.clock.tick(300);check(run.program.state.waiting==='key'&&run.program.state.variables.string_selection==='game',`${mode}: ready input missed original branch`);check(run.program.state.variables.int_tm===35&&run.program.state.variables.int_bx===5,'Original level metadata differs');
+      }finally{host.detach();if(gpuHost)gpuHost.detach();run.program.stop();release(gpu);canvas.remove();}
+    }
+    if(globalThis.AMOS_ROLLER2_READY_CLEANUP)await globalThis.AMOS_ROLLER2_READY_CLEANUP();const old=document.getElementById('roller2-ready-controls');if(old)old.remove();
+    const controls=document.createElement('section');controls.id='roller2-ready-controls';
+    const help=document.createElement('p');help.textContent='Connected original startup/menu and game entry through line 608. The harness selects Game and releases the mouse; the original GAMEDISP and blinking ready loop then run. Click or press Space/Enter (or Gamepad fire) to read the starting level metadata. A guard stops before ball colour/sprite/gameplay setup. MOD timing continues silently in this preview; the menu demo provides sound controls.';
+    const viewport=document.createElement('section'),toolbar=document.createElement('div'),slot=document.createElement('div'),status=document.createElement('p');toolbar.className='amos-fullscreen-toolbar';viewport.id='roller2-ready-viewport';
+    let surface=document.createElement('canvas');surface.tabIndex=0;surface.id='roller2-ready-input';slot.append(surface);const restart=document.createElement('button'),pause=document.createElement('button'),full=document.createElement('button'),fullStatus=document.createElement('span');restart.id='roller2-ready-restart';pause.id='roller2-ready-pause';full.id='roller2-ready-fullscreen';restart.textContent='Restart ready prompt';pause.textContent='Stop';toolbar.append(restart,pause,full,fullStatus);viewport.append(toolbar,slot,status);controls.append(help,viewport);document.body.append(controls);
+    let gpu=null;try{gpu=createGpu(surface);}catch(_){const next=surface.cloneNode();surface.replaceWith(next);surface=next;}
+    let live,adapter,timer,paused=false,error='';
+    function update(){const v=live.program.state.variables;controls.dataset.phase=error?'error':v.string_selection==='game'?'guarded':paused?'stopped':'ready';controls.dataset.backend=gpu?'webgl':'canvas';controls.dataset.count=String(v.int_noi);status.textContent=error||(v.string_selection==='game'?`Guard after original 608: start (${v.int_bx}, ${v.int_by}), colour ${v.int_bc}, time ${v.int_tm}; gameplay pending`:`Original ready prompt / board loading; ${gpu?'WebGL2':'Canvas 2D (WebGL unavailable)'}; click or fire to continue`);pause.textContent=paused?'Resume':'Stop';fullscreen.refresh();}
+    function start(){if(timer)clearInterval(timer);if(adapter)adapter.detach();if(live)live.program.stop();if(gpu)gpu.clear();live=make();paused=false;error='';adapter=AMOS_BROWSER.createCanvasHost(surface,{renderer:gpu,mouseCoordinates:'hardware',joysticks:[{port:1,keyboard:true,gamepad:true}]});adapter.attach(live.program);timer=setInterval(()=>{if(paused)return;try{live.clock.tick(4);update();}catch(e){error=e.message;live.program.stop();clearInterval(timer);update();}},4);update();surface.focus();}
+    const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:full,statusElement:fullStatus,surface:slot,getContent:()=>surface});restart.addEventListener('click',start);pause.addEventListener('click',()=>{paused=!paused;if(paused)live.program.stop();else live.program.resume();update();});start();
+    globalThis.AMOS_ROLLER2_READY_CLEANUP=()=>{clearInterval(timer);adapter.detach();live.program.stop();release(gpu);return fullscreen.dispose();};
+    return{inputModes:3,frames,gpuFrames,gpuUnavailable,connectedStartup:true,guardAfter:608,gameRunning:false};
+  },{source:new(require('../../lib/Transpiler'))(require('./roller2ConnectedMenu')({ready:true})).toModule(),assets,prompt:fs.readFileSync(path.join(__dirname,'../fixtures/roller2/ready-prompt.png')).toString('base64'),panel:fs.readFileSync(path.join(__dirname,'../fixtures/roller2/game-load-panel.png')).toString('base64'),timerSource:require('./fakeTimers').createFakeTimers.toString(),gpuSources:require('./webglHostSources')()});
+};

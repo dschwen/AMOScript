@@ -3,7 +3,8 @@
 The [board inspector](../demos/roller2-boards.html) executes unchanged GAMEDISP
 72–86, FDZ 57–62, ICCOPY 240–246 and entry calls 570. A declared Load/screen/call
 harness supplies one original level and captures the procedure result. The
-connected game path still stops after 600; it has not been joined to this fixture.
+earlier menu fixture still stops after 600; the separate connected ready fixture
+now runs through 608 without this inspector’s palette restoration.
 
 GAMEDISP first fills the 20×12 cells with `colourByte*3`, then pastes their icon
 numbers in original x-major loop order. Original entry copies update icons 18/29
@@ -43,15 +44,12 @@ injected clock (700 ms through drawing, then four ms through palette restoration
 not wall-clock/native busy-loop timing. Every browser check is runnable from the
 repository demo and linked through HTML Preview from the gallery.
 
-## Foreground integration remains gated
+## Connected foreground integration
 
-Original 601–602 uses Screen To Front and shows a 32-row window over the main
-screen. Its palette differs from the underlying screen. The existing copper
-builder rejects overlap and enforces pre-fetch setup budgets; this slice keeps
-those gates. No CPU crop/compositor fallback is counted as GPU support.
-
-The next integration must verify native priority/commit behavior, retain physical
-bitmap ownership and offsets when resolving occluded rows, and prove palette/
-pointer setup timing. CPU and GPU must continue to consume the same immutable
-physical snapshot. Independent prompt pixels and a connected input-only replay
-are required before moving the actual game guard beyond that display boundary.
+The separate [connected ready fixture](screen-priority.md) now runs original
+GAMEDISP and the foreground prompt through 608, keeping the original black
+palette and guarding before ball/sprite/gameplay setup. It resolves bounded
+priority slices through real DMA-disabled setup rows and the shared immutable
+copper snapshot, with independent prompt pixels and three GPU comparisons.
+This coloured inspector retains its declared palette restoration and all-map
+scope. Wider overlays, active sprites and exact native timing remain open.

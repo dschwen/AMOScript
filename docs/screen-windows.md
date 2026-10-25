@@ -56,12 +56,11 @@ Get Palette copies bounded screen palettes without selecting the source.
 See [Roller II's first-image contract](roller2-title.md) for clone selection,
 owner-retirement gates and the original FLOAD evidence.
 
-Roller II's next connected gate is its overlapping foreground prompt at 601–602.
-Screen To Front priority/commit semantics and palette-switch setup budgets must
-be verified before enabling it. The separate [board inspector](roller2-boards.md)
-now validates GAMEDISP across all supplied maps without bypassing this display
-gate. Occlusion must retain physical buffers/offsets and feed the same immutable
-snapshot to CPU and GPU; an RGBA crop/compositor fallback does not satisfy it.
+Roller II's foreground prompt at 601–602 now uses bounded priority slices and
+DMA-disabled setup rows; see [the priority contract](screen-priority.md).
+The separate [board inspector](roller2-boards.md) validates GAMEDISP across all
+supplied maps. Occlusion retains physical buffers/offsets and feeds the same
+immutable snapshot to CPU and GPU.
 
 The bridge packs each full physical bitmap with its original plane stride. A
 coarse x/y offset adjusts bitplane pointers; the remainder sets shared BPLCON1
@@ -114,3 +113,8 @@ this is bounded scheduling, not exact DMA/bus timing. Nonzero playfield-colour
 gap writes may be omitted only when the next row overwrites the same register;
 border/sprite colours and final restoration writes remain. The original death
 fade now fits the two-row gap. See [the live-game contract](wonderland-game.md).
+
+Explicit Screen To Front now opts into bounded equal-width lowres priority slices
+with shared background colour and real DMA-disabled setup rows. Roller II’s
+connected board/ready prompt runs through 608; wider overlays and native timing
+remain open. See [priority and ready-prompt contract](screen-priority.md).

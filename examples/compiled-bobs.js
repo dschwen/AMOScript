@@ -645,7 +645,7 @@
   }
   function snapshotDisplay(targets, geometry, windows = null) {
     if (!targets.length) throw new Error('Display snapshot needs at least one screen');
-    const views = targets.map((target, index) => {
+    let views = targets.map((target, index) => {
       const view = prepare(target), window = windows ? windows[index] : target.windowed ? {
         x: target.hardwareX, y: target.hardwareY, width: target.windowWidth, height: target.windowHeight,
         offsetX: target.offsetX, offsetY: target.offsetY } : null;
@@ -657,7 +657,37 @@
       return { ...view, width: window.width, height: window.height, x: window.x, y: window.y,
         pointers: view.pointers.map(pointer => pointer + offsetY * view.rowBytes + (offsetX >> 4) * 2),
         scroll: delay | (delay << 4), fetchAdvance: view.hires ? 4 : 8 };
-    }), top = Math.min(...views.map(view => view.y));
+    });
+    if (windows && windows.some(window => window.priority)) {
+      // Native MkD/MkA chooses one screen for each horizontal slice. A switch
+      // starts with DMA disabled on a setup row, never a software overlay.
+      if (views.some(view => view.hires || view.ham || view.scroll || view.x !== 128 || view.width !== views[0].width || view.palette[0] !== views[0].palette[0])) {
+        throw new Error('Screen priority requires equal-width lowres windows, aligned offsets and a shared background colour');
+      }
+      const boundaries = [...new Set(views.flatMap(view => [view.y, view.y + view.height]))].sort((a, b) => a - b);
+      const slices = [];
+      for (let i = 0; i < boundaries.length - 1; i++) {
+        const y = boundaries[i], end = boundaries[i + 1];
+        const owner = views.find(view => view.y <= y && view.y + view.height > y);
+        if (!owner) continue;
+        const last = slices[slices.length - 1];
+        if (last && last.owner === owner && last.end === y) last.end = end;
+        else slices.push({ owner, y, end });
+      }
+      views = slices.map((slice, index) => {
+        const previous = slices[index - 1], next = slices[index + 1];
+        // A foreground start blanks its preceding row; resuming a lower
+        // screen blanks its first row (native start/end cut boundaries).
+        const resume = previous && previous.end === slice.y && slice.owner.y < slice.y;
+        const y = slice.y + (resume ? 1 : 0);
+        const end = slice.end - (next && next.y === slice.end && next.owner.y === next.y ? 1 : 0);
+        if (end <= y) throw new Error('Screen priority slice is too short for setup');
+        return { ...slice.owner, y, height: end - y,
+          pointers: slice.owner.pointers.map(pointer => pointer + (y - slice.owner.y) * slice.owner.rowBytes),
+          blankSetup: index > 0 };
+      });
+    }
+    const top = Math.min(...views.map(view => view.y));
     const compiled = copperBuilder(views, { origin: { x: 128, y: top },
       outputWidth: Math.max(...views.map(view => view.width * (view.hires ? 1 : 2))),
       lines: Math.max(...views.map(view => view.y + view.height)) - top,
@@ -670,6 +700,9 @@
     const result = copperInterpreter(memory.bytes, { ...compiled.interpretOptions, initialRegisters: compiled.initialRegisters,
       address: copperAllocation.address, revision: ++revision }).snapshot;
     if (display.writeSprites) display.writeSprites(result.frame);
+    if (views.some(view => view.blankSetup) && result.frame.lineSprites.some((value, index) => index % 4 === 3 && (value & 0x80000000))) {
+      throw new Error('Sprites across screen priority setup rows are not implemented');
+    }
     return snapshotModel.createSnapshot(result);
   }
   return { snapshot, snapshotDisplay, prune };
@@ -903,6 +936,7 @@
     if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
     const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
+    const dmaSetupRows = new Set();
     const paletteRows = options.paletteRows || [], paletteByLine = new Map();
     if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
     for (const row of paletteRows) {
@@ -977,7 +1011,13 @@
         // Reprogram in the left blanking interval. Never pretend an oversized
         // palette/pointer update fit before DMA or blank-row snapshot capture.
         const combined = new Set([...changes.map(([reg]) => reg), ...rowPalette.keys()]).size;
-        if (2 + combined * 4 >= ddfStart) {
+        if (view.blankSetup) {
+          const line = y - 1;
+          if (line < previous.endY || changesByLine.has(line) || palette[0] !== previous.setup.get(R.COLOR00)) fail('unsafe priority setup row');
+          changesByLine.set(line, new Map([[R.DMACON, 0x100], ...changes]));
+          changesByLine.set(y, new Map([[R.DMACON, 0x8300]]));
+          dmaSetupRows.add(line);
+        } else if (2 + combined * 4 >= ddfStart) {
           // Spread setup over actual blank rows, always before fetch/capture.
           // DIWSTRT/STOP come first, keeping DMA inactive until the new window.
           const slots = []; let capacity = 0, start = y + 1;
@@ -1005,7 +1045,10 @@
     for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
       const view = views.slice().reverse().find(view => view.y <= y) || views[0];
       const fetchStart = (view.hires ? 0x3c : 0x38) - (view.scroll ? (view.fetchAdvance == null ? 8 : view.fetchAdvance) : 0);
-      if (2 + changes.size * 4 >= (blankRow(y) ? captureStart : fetchStart)) fail('screen/palette setup exceeds pre-fetch copper budget');
+      // DMA-disabled setup may use a whole blank row. All other writes retain
+      // the existing capture/fetch deadline, including re-enabling next row.
+      const deadline = dmaSetupRows.has(y) ? 227 : blankRow(y) ? captureStart : fetchStart;
+      if (2 + changes.size * 4 >= deadline) fail('screen/palette setup exceeds pre-fetch copper budget');
       if (y >= 256 && !wrapped) { emit(0xffdf, 0xfffe); wrapped = true; }
       wait(y);
       for (const [reg, value] of changes) emit(reg, value);
@@ -1146,6 +1189,8 @@
       lineSprites: new Uint32Array(lines * 32), lineEvents: new Uint32Array(lines * maxEvents * 4),
       eventOffsets: new Uint32Array(lines + 1), overflowEvents: new Uint32Array(0) };
     const events = Array.from({ length: lines }, () => []);
+    const hiddenEvents = Array.from({ length: lines }, () => new Set());
+    const spriteDmaRows = new Uint8Array(lines);
     let totalEvents = 0, fetched = null, captured = false, halted = false;
     const get = reg => registers[reg / 2];
     const set = (reg, value) => { registers[reg / 2] = value; };
@@ -1199,6 +1244,8 @@
       }
     }
     function tick() {
+      const outputLine = line - origin.y;
+      if (outputLine >= 0 && outputLine < lines && (get(R.DMACON) & 0x220) === 0x220) spriteDmaRows[outputLine] = 1;
       spriteDma.tick(line, horizontal);
       if (!fetched && horizontal === dataFetchPosition(get(R.BPLCON0), get(R.DDFSTRT)) && verticalWindow() && dma()) {
         const control = get(R.BPLCON0), count = (control >> 12) & 7;
@@ -1243,6 +1290,11 @@
       if (outputLine < 0 || outputLine >= lines || x >= width) return;
       const mode = [R.BPLCON0, R.BPLCON1, R.BPLCON2].includes(reg);
       if (x < 0 && !(mode && fetched)) return;
+      // These may be invisible on a DMA-disabled setup row. Defer removal
+      // until the whole row proves no later fetch or sprite DMA occurred.
+      const noDma = !fetched && !dma() && (get(R.DMACON) & 0x220) !== 0x220;
+      if (noDma && ((reg > R.COLOR00 && reg <= R.COLOR00 + 62) || mode ||
+          [R.DIWSTRT, R.DIWSTOP, R.DDFSTRT, R.DDFSTOP].includes(reg))) hiddenEvents[outputLine].add(events[outputLine].length);
       if (++totalEvents > maxTotalEvents) fail('event storage limit exceeded');
       events[outputLine].push(x >>> 0, reg, value, 0);
     }
@@ -1283,7 +1335,11 @@
     }
     const overflow = [];
     for (let y = 0; y < lines; y++) {
-      const words = events[y], count = words.length / 4;
+      const sprites = spriteDmaRows[y] || frame.lineSprites.subarray(y * 32, (y + 1) * 32).some((value, index) => index % 4 === 3 && (value & 0x80000000)) ||
+        events[y].some((value, index) => index % 4 === 1 && value >= R.SPR0POS && value < R.SPR0POS + 64);
+      const words = !(frame.lineRegs[y * 32 + 16] & 2) && !sprites ?
+        events[y].filter((_, index) => !hiddenEvents[y].has(index & ~3)) : events[y];
+      const count = words.length / 4;
       frame.lineRegs[y * 32 + 17] = count;
       frame.lineEvents.set(words.slice(0, maxEvents * 4), y * maxEvents * 4);
       frame.eventOffsets[y] = overflow.length / 4;
@@ -1307,6 +1363,7 @@
   let planarBridge = null;
   let autoView = true, presented = null, presentedHardware = null;
   let presentedWindows = null;
+  let priorityOrder = [], priorityEnabled = false;
   const rainbows = new Map();
   const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
 
@@ -1337,6 +1394,7 @@
     return whole(value) & 31;
   }
   function visibleScreen() {
+    if (priorityEnabled) return priorityOrder.map(id => screens.get(id)).find(target => target && !target.hidden) || null;
     const selected = screens.get(current);
     return selected && !selected.hidden ? selected : Array.from(screens.values()).find(target => !target.hidden) || null;
   }
@@ -1367,6 +1425,7 @@
     next.pixels.fill(paper);
     next.physicalPixels = next.pixels;
     screens.set(id, next);
+    priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
     current = id;
     screenListeners.forEach(listener => listener());
     changed(true);
@@ -1376,6 +1435,7 @@
   function close(id) {
     checkClones(screen(id));
     screens.delete(id);
+    priorityOrder = priorityOrder.filter(other => other !== id);
     if (current === id) { const next = Array.from(screens.values()).find(target => !target.cloneOwner); current = next ? next.id : null; }
     screenListeners.forEach(listener => listener());
     changed(true);
@@ -1383,9 +1443,17 @@
   function commitWindows() {
     presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
       width: presented.width, height: presented.height, mode: presented.mode } : null;
-    const targets = Array.from(screens.values()).filter(target => target.windowed && !target.hidden);
+    const targets = priorityEnabled ? priorityOrder.map(id => screens.get(id)).filter(target => target && !target.hidden) :
+      Array.from(screens.values()).filter(target => target.windowed && !target.hidden);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
-      width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
+      width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY,
+      priority: priorityEnabled })) : null;
+  }
+  function screenToFront(id = current) {
+    screen(whole(id));
+    priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
+    priorityEnabled = true;
+    changed(true);
   }
   function view() { presented = visibleScreen(); commitWindows(); changed(); }
   function hideScreen(id = current) { screen(whole(id)).hidden = true; changed(true); }
@@ -1398,7 +1466,9 @@
     // Static bitmap aliases, with independent display state/palette. A clone is
     // not selectable; drawing continues on the original owner.
     const target = { ...owner, id, cloneOwner: owner, palette: owner.palette.slice(), zones: null };
-    screens.set(id, target); screenListeners.forEach(listener => listener()); changed(true); return target;
+    screens.set(id, target);
+    priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
+    screenListeners.forEach(listener => listener()); changed(true); return target;
   }
   function setAutoView(enabled) { autoView = enabled; if (enabled) view(); }
   function screenDisplay(id, x = null, y = null, width = null, height = null) {
@@ -1975,7 +2045,7 @@
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),

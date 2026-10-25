@@ -69,8 +69,12 @@
   See `docs/roller2-menu.md`; selected routines/gameplay remain open.
   Isolated GAMEDISP now checks all fifteen maps against independent raw-asset
   board pixels/counts. Its palette restoration is a declared preview harness.
-  Foreground Screen To Front/overlap/palette timing stays gated; do not join
-  the game path by bypassing copper budgets. See `docs/roller2-boards.md`.
+  A separate connected ready fixture runs original GAMEDISP and 601–608 through
+  bounded Screen To Front slices and real DMA-disabled setup rows. No RGBA overlay
+  or relaxed visible-row budget; equal-width lowres/shared COLOR00, no active
+  sprites. Original input exits read level metadata before the guard. Exact native
+  timing and gameplay remain open. See `docs/roller2-boards.md` and
+  `docs/screen-priority.md`.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/

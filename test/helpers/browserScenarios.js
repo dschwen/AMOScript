@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-ready', title: 'Roller II connected ready prompt', initialFrame: 'Canvas: mouse ready prompt', description: 'Connected original startup/menu, game setup, GAMEDISP and blinking foreground ready prompt through line 608. Independent popup/panel pixels, nine Canvas checks and three WebGL frames. Mouse, keyboard and Gamepad fire reach the guard before ball/sprite/gameplay setup; live fullscreen preview.', run: require('./roller2ReadyProbe'), check(result, assert) {
+    assert.strictEqual(result.inputModes,3);assert.strictEqual(result.frames,9);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:3);assert.strictEqual(result.guardAfter,608);assert.strictEqual(result.connectedStartup,true);assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'roller2-boards', title: 'Roller II original board rendering', initialFrame: 'Canvas: original level 1 board', description: 'Unchanged GAMEDISP across all fifteen supplied maps, with original icon copies, retained masks and source tile counts. Independent board PNGs, sixteen Canvas checks and two WebGL frames. Live level selector/fullscreen preview; palette restoration is a declared harness and the full prompt/gameplay path remains excluded.', run: require('./roller2BoardProbe'), check(result, assert) {
     assert.strictEqual(result.levels,15);assert.strictEqual(result.frames,16);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:2);assert.strictEqual(result.gameRunning,false);assert.strictEqual(result.isolatedBoard,true);
   } },
@@ -257,7 +260,7 @@ const scenarios = [
     assert.deepStrictEqual(result,{fields:9631,orders:22,rows:1376,notes:1997,nativeComparisons:12,instruments:10,nonzero:true,vmPlayback:true});
   } },
   { id:'roller2', capturedFrames:false, title:'Roller II target and MOD inspector', description:'Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original module, instruments and effects. The separate music demo runs compiled Track Play; whole-game compilation remains open.', run:require('./roller2Probe'), check(result,assert){
-    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:18,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
+    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:17,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
   } },
   { id: 'wonderland-game', title: 'Play unmodified Wonderland', initialFrame: 'Original level 1', description: 'The complete original game with default WebGL2 presentation, selectable Canvas 2D, fullscreen, keyboard/Gamepad controls, Stop/Resume and Restart. Input-only keyboard and injected-gamepad replays render three deaths/fades, two life restarts, game over and a fresh game. Enable/Mute controls route original sample commands through Web Audio; three native offline PCM/stereo comparisons cover the replay. No Amiga capture or persistent editor files are claimed.', run: require('./wonderlandGameProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,2);assert.deepStrictEqual(result.deaths,[[2,1,0],[2,1,0]]);

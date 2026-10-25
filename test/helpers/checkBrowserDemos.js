@@ -20,6 +20,15 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-ready'){
+        assert.strictEqual(await page.locator('#roller2-ready-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#roller2-ready-pause');await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='stopped');
+        await page.click('#roller2-ready-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-ready-viewport');
+        await page.click('#roller2-ready-restart');assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'roller2-ready-viewport');
+        await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.count==='5');await page.keyboard.down('Space');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='guarded');}finally{await page.keyboard.up('Space');}
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_READY_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-boards'){
         assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-backend'),'webgl');
         assert.strictEqual(await page.locator('#roller2-board-controls').getAttribute('data-count'),'5');

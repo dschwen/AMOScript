@@ -24,6 +24,8 @@ through original Deek/Doke statements. [Inspect the original raw icon copies](ht
 now executed at game entry. Game selection now creates original game screens/rainbow/status rows and loads
 level 1, then guards before board drawing. Full-game compilation and gameplay
 remain in progress.
+[Run the connected Roller II ready prompt](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-ready.html)
+
 [Inspect original board rendering for every supplied map](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-boards.html)
 in a WebGL/fullscreen preview. This isolated harness restores the palette;
 foreground prompt integration and gameplay remain open.

@@ -6,7 +6,7 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 18 remain unrecognized (43 at
+The main source has 1,199 lines and 194 encodings; 17 remain unrecognized (43 at
 initial assessment), and whole compilation stops at Boom on line 161.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
@@ -50,8 +50,11 @@ setup and level 1 loading. Independent portable-font/rainbow pixels match Canvas
 and GPU. Original GAMEDISP now renders all fifteen supplied maps in an isolated
 board inspector, matching independent indexed/RGBA goldens and source counts;
 its palette restoration is a declared preview harness. Sixteen Canvas checks and
-two more GPU frames pass. The connected guard remains after 600. Next cover
-Screen To Front/overlapping windows and join GAMEDISP/ready prompt,
+two more GPU frames pass. A new connected ready fixture now runs original GAMEDISP and game entry through
+608, including bounded Screen To Front slices and the blinking prompt. Mouse,
+keyboard and Gamepad exits read original start/time metadata; nine Canvas and
+three more GPU frames pass. Its guard precedes ball/sprite setup; the menu fixture
+retains its post-600 guard. Next integrate ball palettes, six-plane sprite mapping,
 Copy/Fill and later gates. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
