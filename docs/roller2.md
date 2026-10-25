@@ -36,7 +36,9 @@ case-insensitive `RII:` mapping; native relative-directory semantics remain open
 1. **Music loading and playback.** The [MOD reader and Track Load/loop foundation](mod-tracker.md)
    are implemented, along with a pure field-stepped player for C/A/E/F/D and
    phase-preserving Web Audio loop/volume/rate support. The complete tune traverses
-   1,376 rows in 9,631 fields; the direct browser player has native audio checks.
+   1,376 rows in 9,631 fields; all 1,997 note triggers and all ten instruments now
+   have independent note/PCM checks, including full initial fetches before silent
+   repeats. The direct browser player passes eleven native audio comparisons.
    Next integrate Track Play/Stop with driver-owned ticks and bank mutation.
    Share the four hardware voice identities with Sam Play and cover
    mute/Stop/Resume/failure/replacement using the existing Web Audio session.

@@ -87,11 +87,16 @@ test('tracker: unsupported effects reject before dispatch and async hosts fail w
 });
 
 test('tracker: original Roller II tune traverses 22 orders and preserves native restart 120', () => {
-  const m = readMod(fs.readFileSync(require('path').join(__dirname,'../examples/Roller2/music/mod.Roller_II_mus'))), events = [];
+  const bytes = fs.readFileSync(require('path').join(__dirname,'../examples/Roller2/music/mod.Roller_II_mus'));
+  const m = readMod(bytes), events = [], audit = require('./helpers/roller2NoteAudit')(bytes);
   const p = createTracker(m,{host:{command:e=>events.push(e)}});
   let count = 0; while(p.state.playing && count++ < 12000) p.tick();
   assert.strictEqual(p.state.playing,false); assert.strictEqual(count,9631); // 6 + (1376 - 1) * 7 fields.
-  assert.ok(events.filter(e=>e.type==='play').length>1000); assert.strictEqual(events.at(-1).type,'stop');
+  assert.strictEqual(audit.notes.length,1997); assert.strictEqual(audit.rows,1376);
+  assert.deepStrictEqual(audit.byChannel,[1108,226,80,583]);
+  assert.deepStrictEqual(audit.bySample,[82,430,595,82,5,585,165,2,42,9]);
+  assert.deepStrictEqual(events.filter(e=>e.type==='play').map(e=>[e.field,Math.log2(e.mask),e.sample.number,e.period,e.volume]),audit.notes);
+  assert.strictEqual(events.at(-1).type,'stop');
   const loop = createTracker(m,{loop:true}); fields(loop,count); assert.strictEqual(loop.state.order,120); assert.strictEqual(loop.state.row,0);
   fields(loop,7*64*8); assert.strictEqual(loop.state.order,0);
 });

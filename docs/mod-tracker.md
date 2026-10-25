@@ -86,7 +86,21 @@ not Amiga recordings.
 [Play the original tune](../demos/tracker.html) directly with Play/Stop controls.
 The shared browser scenario traverses the whole song without audio, then compares
 a partial sample loop and mid-play volume/rate change against an independent
-native OfflineAudioContext graph. It verifies PCM equality and stereo isolation.
+native OfflineAudioContext graph. It also compares every original instrument's
+PCM, stereo route and repeat against native graphs made from independently read
+raw sample headers/bytes. All ten instruments must produce nonzero output.
+An independent raw-cell audit checks all 1,997 triggers (channel counts
+1,108 / 226 / 80 / 583), including field, instrument, period and volume.
+
+The initial adapter incorrectly used Web Audio's loop end for both the initial
+fetch and repeat. Six instruments (1, 2, 5, 6, 7, 10), covering 1,276 triggers,
+have a zero-offset one-word silent repeat. That made them loop over silence
+before their sample bodies could sound. The adapter now appends the repeat PCM
+after the full initial fetch when necessary, then loops only that appended
+region. A single source preserves phase through rate/volume updates. Eleven
+native graph comparisons cover all ten original instruments plus a non-silent
+short repeat and voice updates. These verify portable Web Audio behavior, not
+Amiga audio capture parity.
 The audible demo starts only on a click, uses a monotonic 50 Hz host timer
 independent of animation frames, and closes voices/context on Stop or rerun.
 Long timer stalls stop playback and ask for restart. It offers one song traversal,
@@ -107,6 +121,6 @@ finetunes and writes a zero long at each sample start in mutable bank storage.
 Model those source rules explicitly; the reader above preserves original file
 bytes. The current target's F07/D00/E01 forms fit that subset. Tick/first-row,
 volume-slide and sample-loop behavior now have bounded source-derived traces
-and a native Web Audio control-graph comparison. VM lifecycle, hardware DMA/filter
+and eleven native Web Audio control-graph comparisons. VM lifecycle, hardware DMA/filter
 response and whole-game music integration remain gates. Actual AMOS/Amiga
 audio captures remain a later validation gate.

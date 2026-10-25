@@ -53,6 +53,9 @@
   `lib/amos/tracker.js` provides direct field-stepped C/A/E/F/D playback with
   owned PCM preprocessing and raw restart semantics. The playable tracker demo
   is separate from VM Track Play/Stop and shared Sam voice lifecycle integration.
+  Web Audio explicit repeat bounds apply after the full initial sample fetch;
+  short/silent repeat regions must not truncate it. The tracker demo verifies
+  all 1,997 original triggers and all ten instrument waveforms independently.
 - `lib/ExtensionTable.js` records implemented extension slots/offsets; slot-1
   Music sample commands use `lib/amos/audio.js` for bounded Samples records and
   voice commands. `webAudio.js` is the optional browser adapter. Generated
