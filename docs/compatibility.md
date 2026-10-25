@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-25. The current local baseline has **582 passing tests**, plus a
+Updated 2026-10-25. The current local baseline has **588 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,7 +9,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 19 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 18 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
 compilation stops at Boom. Original WTIN/FDZ now run in a declared fixture that
@@ -37,7 +37,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
 | MOD / tracker | Implemented bounded playback | Owned M.K. decoder, Track Load/Loop/Play/Stop and C/A/E/F/D effects. Driver-owned VBL wakes share sample voices, cancel on End/failure/bank retirement, and pause without elapsed-note replay. Original music fixture matches 1,997 notes and twelve native Web Audio comparisons. Held sample phase after pause, wider effects, exact DMA contention, live bank editing and AMOS Music-bank playback remain open. [Contract](mod-tracker.md). |
-| Roller II connected guarded menu | Implemented bounded original prefix | Original executable startup/intro/initialization/setup/menu through 316 runs with continuing tracker playback; destinations report guarded outcomes. Ten browser cases, nine selections and three independent/GPU frames; live WebGL/fullscreen and optional MOD music. Game selection first runs original ICCOPY through 570, then guards; screen/level setup, other selected routines and gameplay remain open. [Contract](roller2-menu.md). |
+| Roller II connected guarded menu | Implemented bounded original prefix | Original executable startup/intro/initialization/setup/menu through 316 runs with continuing tracker playback; destinations report guarded outcomes. Ten browser cases, nine selections and three independent/GPU frames; live WebGL/fullscreen and optional MOD music. Game selection runs original setup through 600, creating screens/rainbow/status rows and loading level 1; the guard precedes board drawing. Other selected routines and gameplay remain open. [Contract](roller2-menu.md). |
 | Roller II intro / title image | Implemented bounded original slices | Original startup, WTIN/FDZ/FLOAD and integer Fade lists. Original arrays/highscores, tile-handler tables and work/icon/sprite banks run before a declared handoff skips setup 281–286 and loads the full tall EHB title behind a bounded PAL window. Three input modes, thirteen new independent image states and eleven GPU frames pass; live fullscreen preview. Menu/game initialization and gameplay remain open. [Intro contract](roller2-intro.md). |
 | Dir$ / Exist | Implemented bounded subset | Per-program verified directory prefixes, strict synchronous metadata queries, common transfer/channel path routing, memory/Node metadata and explicit RII case mapping. Parent/assign/lock semantics and persistent browser storage remain open. [Contract](directories.md). |
 | Original Wonderland session | Implemented first-level subset | Complete source/assets, default WebGL2/explicit Canvas switching and live keyboard/Gamepad mapping and Stop/Resume/Restart; input-only death/fade/game-over/fresh-game replays and jump/scroll/Escape checks. Original Web Audio sample effects, Enable/Mute and owned context cleanup pass; native timing/captures, all-level/win paths and editor files remain open. [Contract](wonderland-game.md). |
@@ -66,6 +66,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Floating point | Partial | Literal FFP values decode correctly. Integer promotion, arithmetic, loops and decimal input use explicit FFP rules. Ln/Exp/power and Sin/Cos/Tan use source-derived CORDIC; Pi# uses AMOS's stored constant. Base-10 Log still uses JavaScript. Target-library verification, multiply-variant selection and double-precision support remain unfinished. See [numeric contract](numbers.md). |
 | Functions | Implemented subset | `Pi#`, `Sin/Cos/Tan` with per-program Degree/Radian modes, `Min/Max` for numbers or strings, `Log/Ln/Exp`, type-preserving `Abs/Int`, integer-valued `Sgn`. Inverse/hyperbolic trigonometry and additional functions remain unsupported. |
 | Strings | Implemented subset | Literals, variables, checked concatenation/subtraction, comparisons, string `Min/Max`; `Left$/Right$/Mid$` retrieval and assignment, `Flip$`, `Chr$/Asc`, `Len`, `Instr`, `Space$/String$`, ASCII case conversion, `Str$/Val`. Literals retain embedded zero bytes. Retrieval/assignment follow source validation order; repetition uses word-sized results. Nonempty concatenation enforces String_Max. `Val` retains its dynamic numeric type. AMOS heap limits, extreme raw-memory search offsets and numeric formatting remain unfinished. See [string contract](strings.md). |
+| Cline | Implemented bare form | Clears the current full 8×8 text row in paper colour without moving the cursor. Existing Autoback/Bob hooks apply. Original game-load rows match independent portable-font/rainbow pixels. Counted form and general text controls/windows remain open. [Contract](cline.md). |
 | Print / Print Using | Implemented bounded subset | `write` preserves separators/newlines; the print host receives values per statement. Using formats one integer/string item with source-derived padding/truncation/signs or tilde slots, sharing screen/file output. Text rasterizes into indexed buffers. Floats, decimal/exponent masks, long-string chunking, full number formatting/streaming and text controls remain open. [Contract](print-using.md). |
 | Same-line statements and labels | Implemented | Colon-separated statements, labels before statements, duplicate-label diagnostics. |
 | Goto/Gosub/Return/End and On branches | Implemented subset | Static named targets, scoped procedure labels, IP return stack; On Gosub/Goto evaluate one numeric selector and fall through outside the list. Missing targets and invalid returns are errors. Dynamic targets, numbered labels and On Proc remain unsupported. [Computed branches](computed-branches.md). |

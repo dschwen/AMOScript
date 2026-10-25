@@ -15,8 +15,8 @@
     },
     {
       "file": "roller2-menu.html",
-      "title": "Roller II original intro to guarded menu",
-      "description": "Original startup, intro, initialization, mask/filter/screen setup and menu now execute in order, with continuing MOD music. Ten mouse/keyboard/Gamepad cases reach nine guarded selections. Live WebGL/fullscreen and optional music controls; the selected game/editor/scores/help routines remain excluded.",
+      "title": "Roller II intro, menu and first level load",
+      "description": "Original startup, menu and game entry now create game screens, initialize the rainbow, load level 1 and refresh status text. Ten input cases, nine guarded selections and three independent/GPU frames. WebGL/fullscreen and optional MOD music; board drawing, gameplay and editor/scores/help routines remain excluded.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html"
     },
     {

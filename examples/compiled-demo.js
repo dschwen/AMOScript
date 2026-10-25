@@ -1764,6 +1764,13 @@
     target.pixels.fill(target.paper, (target.rows - 1) * 8 * target.width);
     target.y = target.rows - 1;
   }
+  function clearLine() {
+    const target = screen();
+    if (!target.columns || !target.rows) throw new Error('Screen is too small for text');
+    const first = target.y * 8, end = Math.min(first + 8, target.height);
+    for (let y = first; y < end; y++) target.pixels.fill(target.paper, y * target.width, y * target.width + target.columns * 8);
+    changed();
+  }
   function write(text) {
     const target = screen();
     if (!target.columns || !target.rows) throw new Error('Screen is too small for text');
@@ -1980,7 +1987,7 @@
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => drawing(draw, args),
     drawTo: (...args) => drawing(drawTo, args), box: (...args) => drawing(box, args),
-    bar: (...args) => drawing(bar, args), write: (...args) => drawing(write, args),
+    bar: (...args) => drawing(bar, args), write: (...args) => drawing(write, args), clearLine: () => drawing(clearLine, []),
     text: (...args) => drawing(text, args), centre: (...args) => drawing(centre, args),
     pasteGraphic: (...args) => drawing(paste, args),
     setDrawingHooks(hooks) { drawingHooks = hooks; },

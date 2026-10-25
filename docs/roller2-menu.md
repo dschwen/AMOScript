@@ -1,14 +1,14 @@
-# Roller II original intro to guarded menu
+# Roller II intro, menu and first level load
 
 The [menu demo](../demos/roller2-menu.html) now runs the original executable
 startup-to-menu sequence through line 316. `roller2ConnectedMenu` retains raw
-lines 1–71, WTIN 163–165, SASINIT 205–239 and setup/menu 275–316. Omitted intervening
+lines 1–71, WTIN 163–165, SASINIT/ICCOPY 205–246 and setup/menu 275–316. Omitted intervening
 code consists of unused procedure definitions/comments. There is no synthetic
 title load, jump across executable setup, or host variable/IP edit.
 
 Destination guards record `game`, `editor`, `scores` or `help`
-and wait. Game selection now first runs original entry 565–570 (both ICCOPY
-calls); its guard follows those copies. Screen/level setup after 570 and the
+and wait. Game selection now runs original entry/setup through 600: ICCOPY, game screens,
+rainbow/status rows and level 1 loading. The guard precedes board drawing;
 editor/scores/help routines remain excluded. This is not a running game. The complete source still fails
 decoding at Boom in an omitted procedure; selected routines, gameplay and their
 later dependencies remain open. The earlier isolated menu helper remains in
@@ -71,7 +71,7 @@ and the bank-reload lifecycle probe. Source and assets are unchanged.
 
 The shared browser evaluator now traverses the complete connected prefix in each
 of ten bounded cases. Nine select guards. Independent PNGs check the first logo,
-main title and black output after original FDZ. Three snapshots run on the same
+main title and first-level load panel. Three snapshots run on the same
 actual WebGL host across screen replacement and match CPU output; disabling the
 CPU presentation path guards against a fallback. These replace the earlier two
 isolated-menu GPU checks, rather than adding three to that earlier count.
@@ -83,8 +83,8 @@ self-contained demo's HTML Preview link in the gallery.
 
 The controlled clock has a four-millisecond minimum host callback delay and finite
 budgets, preventing busy polling from starving VBL wakes. Input leaves WTIN at
-1000 ms; the menu is checked at 2840 ms (tracker field 142), and selections after
-another 640 ms, including original FDZ where applicable. These are injected clocks,
+1000 ms; the menu is checked at 2840 ms (tracker field 142), and non-game selections after
+another 640 ms. Game setup/loading is checked after 1300 ms (field 207). These are injected clocks,
 not exact native busy-loop timing, physical-controller evidence, Amiga captures
 or target-GPU performance. See [Mouse Zone](zones.md), [mouse assignment](mouse.md)
 and [tracker limits](mod-tracker.md).
@@ -93,3 +93,6 @@ The [raw icon bridge and inspector](icon-memory.md) provide independent before/
 after pixels for ICCOPY. Connected menu replays verify its copied pixels and
 unchanged masks on every game selection; existing title GPU frame counts remain
 three, with two additional GPU frames in the separate icon inspector.
+
+See [Cline and game-load bounds](cline.md) for the current guard after line 600
+and independent portable-font/rainbow panel evidence.

@@ -3,8 +3,8 @@
 `Start` now exposes a bounded virtual layout for icon banks. Generic data-bank
 behavior is retained; sprite-bank addressing still rejects. The connected Roller II
 menu now executes original game-entry lines 565–570, including both original
-ICCOPY calls, before its game guard. Screen/level initialization after line 570
-and gameplay remain open. No host variable/IP changes are used in that replay.
+ICCOPY calls, before continuing through original setup and first-level loading at 600.
+The guard now precedes board drawing; gameplay remains open. No host variable/IP changes are used in that replay.
 
 ## Layout and ownership
 

@@ -53,7 +53,8 @@ module.exports = async function checkBrowserDemos(browser) {
         const point=await page.locator('#roller2-menu-input').evaluate(canvas=>{const r=canvas.getBoundingClientRect(),sx=r.width/canvas.offsetWidth,sy=r.height/canvas.offsetHeight;return{x:r.left+(canvas.clientLeft+canvas.clientWidth*30/320)*sx,y:r.top+(canvas.clientTop+canvas.clientHeight*140/268)*sy};});
         await page.mouse.move(point.x,point.y);await page.mouse.down();
         try{await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.action==='game');}finally{await page.mouse.up();}
-        assert.strictEqual(await page.locator('#roller2-menu-controls').getAttribute('data-game-entry'),'icons-copied');
+        assert.strictEqual(await page.locator('#roller2-menu-controls').getAttribute('data-game-entry'),'level-loaded');
+        assert.strictEqual(await page.locator('#roller2-menu-controls').getAttribute('data-level'),'1');
         await page.click('#roller2-menu-restart');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='intro-input');
         assert.strictEqual(await page.locator('#roller2-menu-controls').getAttribute('data-sound'),'on');
         await page.keyboard.press('a');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='menu');

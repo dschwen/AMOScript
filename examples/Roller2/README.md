@@ -43,4 +43,5 @@ the original game/editor loops and file persistence remain excluded.
 
 The [icon-copy inspector](../../demos/roller2-icons.html) shows original ICCOPY
 through bounded raw icon views. Connected menu game selection now reaches these
-original entry calls, then guards before game screen/level setup.
+original entry calls, then continues through original screen/rainbow/status setup and level 1 loading,
+with a guard before board drawing.

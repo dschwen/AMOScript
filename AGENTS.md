@@ -62,8 +62,9 @@
   The connected menu fixture retains original executable startup through 316,
   including Make Icon Mask, Led Off, screen retirement and continuing MOD music.
   Only unused procedures/comments are omitted; destination guards stop before
-  game screen/level setup and editor/scores/help routines. Game selection now
-  runs original ICCOPY entry through 570 before its guard. Its WebGL/fullscreen host reuses browserAudio
+  board drawing and editor/scores/help routines. Game selection now
+  runs original game entry through setup/first-level loading at 600 before its
+  guard; board rendering and gameplay remain open. Its WebGL/fullscreen host reuses browserAudio
   for gesture activation, mute, Restart bindings and owned-context closure.
   See `docs/roller2-menu.md`; selected routines/gameplay remain open.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
@@ -291,3 +292,8 @@ make planar storage authoritative only after parity. CPU and GPU consume the sam
 immutable snapshot. Keep AMOS timing independent of requestAnimationFrame and
 preserve logical/physical buffers, Autoback, Bob snapshots and input contracts.
 Distinguish CPU/GPU parity, source-derived fixtures and external Amiga captures.
+
+Bare Cline clears the full current 8x8 text row in paper colour without moving
+the cursor. Use existing drawing/Autoback/Bob hooks; counted Cline and general
+text controls/windows remain gated. See docs/cline.md for the independent
+portable-font/rainbow expectations and original game-load scope.

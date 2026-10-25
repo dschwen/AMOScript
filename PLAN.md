@@ -6,7 +6,7 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 19 remain unrecognized (43 at
+The main source has 1,199 lines and 194 encodings; 18 remain unrecognized (43 at
 initial assessment), and whole compilation stops at Boom on line 161.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
@@ -44,7 +44,11 @@ range checks. Original level metadata/time statements pass across all fifteen
 pinned files in a new demo. Bounded icon table/planar aliases now run original ICCOPY at game entry through
 570, including its inclusive padding byte and unchanged masks. The connected menu
 guard follows those copies; an independent PNG/WebGL inspector covers them.
-Next cover game screen/level setup, Copy/Fill and later gates. Sprite-bank raw
+Bare Cline now refreshes whole text rows through the existing buffer/Bob drawing
+path. Original game entry now runs through 600: game screens, rainbow/status
+setup and level 1 loading. Independent portable-font/rainbow pixels match Canvas
+and GPU. Next cover Screen To Front/overlapping windows, GAMEDISP/ready prompt,
+Copy/Fill and later gates. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
@@ -157,7 +161,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **582 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **588 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.
