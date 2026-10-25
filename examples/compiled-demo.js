@@ -3931,6 +3931,16 @@
       state.input.keys.push(...text);
     },
     integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, readData,
+    addInteger(current, delta, low = null, high = null) {
+      const result = (current + delta) | 0;
+      return low == null ? result : result < low ? high : result > high ? low : result;
+    },
+    stringBranchTarget(name, labels) {
+      if (typeof name !== 'string' || !name.length || name.length >= 32 || /[^\x00-\x7f]/.test(name)) throw new Error('Unsupported string label name');
+      const key = name.replace(/[A-Z]/g, c => String.fromCharCode(c.charCodeAt(0) + 32));
+      if (!Object.prototype.hasOwnProperty.call(labels, key)) throw new Error(`Undefined string label ${name}`);
+      return labels[key];
+    },
     value, numberFunction, float, floatAdd, floatMultiply, floatDivide, naturalLog, floatExp, floatPower, floatTrig, val, numericUnary, numericBinary,
     degree: () => { degrees = true; },
     radian: () => { degrees = false; },
@@ -4677,6 +4687,7 @@
 };
   return function create(opts = {}){
     const cases = [];
+    const stringLabels = Object.freeze(Object.fromEntries([["hop2",2],["hop1",6],["sub1",8]]));
     const dataTables = Object.create(null);
     dataTables["@main"] = [];
     cases[0] = function(state){ state.location = {"line":2,"offset":54}; program.print(["Start"], []); return {}; };

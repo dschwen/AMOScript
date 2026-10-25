@@ -62,5 +62,6 @@ now runs and renders a bounded first-level loop for two nominal seconds; see
 
 Standalone uncached integer identifiers after Goto/Gosub now normalize to the
 same named-target AST and scoped validation as label-reference tokens. This
-bounded native verifier form enables Roller II’s original input loop; expression
-targets remain unsupported. See [input source forms](roller2-input.md).
+bounded native verifier form enables Roller II’s original input loop. Ordinary
+main-program [string branches](string-branches.md) are now supported separately;
+On lists, numeric targets and wider string-branch scopes remain gated. See [input source forms](roller2-input.md).

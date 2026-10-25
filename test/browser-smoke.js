@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const movement=await runScenario('roller2-movement',page);assert.strictEqual(movement.gpuFrames,6);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());
+    console.log('Roller2 movement passed: original string dispatch/wall voice cycle, 48 keyboard/Gamepad field positions, independent pixels and six WebGL frames.');
     const input=await runScenario('roller2-input',page);assert.strictEqual(input.gpuFrames,6);await page.evaluate(()=>globalThis.AMOS_ROLLER2_READY_CLEANUP());
     console.log('Roller2 input passed: unchanged idle loop, held Help and consumed joystick raw keys, four guarded directions and six WebGL frames.');
     const ready=await runScenario('roller2-ready',page);assert.strictEqual(ready.gpuFrames,6);await page.evaluate(()=>globalThis.AMOS_ROLLER2_READY_CLEANUP());

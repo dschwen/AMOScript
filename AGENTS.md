@@ -78,9 +78,15 @@
   Earlier menu/ready unit guards remain bounded; movement still stops before
   JOAB in the ball fixture. A separate input fixture includes original 619–639,
   toggles/countdown and Escape title return; movement/pause/game-over targets
-  are guards. Native string Goto and cyclic Add still gate movement.
-  See `docs/roller2-input.md`. Exact native timing and gameplay remain open. See `docs/roller2-ball.md`. See `docs/roller2-boards.md` and
-  `docs/screen-priority.md`.
+  are guards. Main ASCII string Goto/Gosub and integer Add now run original BEWEG, floor,
+  stop and Lasttest movement in a separate fixture. Other SASINIT labels are
+  explicit handler guards; the first level stops before KCWEG effects.
+  Prepared original stop/collapse maps are declared adapter fixtures, not native
+  level progression. See `docs/roller2-movement.md`, `docs/add.md` and
+  `docs/string-branches.md`. Numeric/procedure/non-ASCII string branches remain open.
+  Earlier fixture bounds are in `docs/roller2-input.md`, `docs/roller2-ball.md`,
+  `docs/roller2-boards.md` and `docs/screen-priority.md`. Exact native timing and
+  full gameplay remain open.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/

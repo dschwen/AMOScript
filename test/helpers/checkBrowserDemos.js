@@ -20,6 +20,19 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-movement'){
+        assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#roller2-movement-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-movement-viewport');
+        await page.focus('#roller2-movement-input');await page.keyboard.down('ArrowRight');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-movement-controls').dataset.phase==='sliding');}finally{await page.keyboard.up('ArrowRight');}
+        await page.click('#roller2-movement-pause');const x=await page.locator('#roller2-movement-controls').getAttribute('data-x');await page.waitForTimeout(80);
+        assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-x'),x);
+        assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-phase'),'stopped');await page.click('#roller2-movement-pause');
+        await page.waitForFunction(()=>document.getElementById('roller2-movement-controls').dataset.phase==='guarded');assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-cell'),'8,9');
+        await page.click('#roller2-movement-restart');assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'roller2-movement-viewport');
+        assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-cell'),'5,9');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-input'){
         assert.strictEqual(await page.locator('#roller2-ready-controls').getAttribute('data-backend'),'webgl');
         await page.click('#roller2-ready-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-ready-viewport');

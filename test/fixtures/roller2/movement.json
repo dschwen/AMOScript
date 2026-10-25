@@ -1,0 +1,206 @@
+{
+  "evidence": "Independent raw map and original floor-handler step=2/Wait Vbl trajectory; portable palette/font composition, not native timing/capture.",
+  "trajectory": [
+    {
+      "field": 1,
+      "bx": 5,
+      "by": 9,
+      "x": 210,
+      "y": 194
+    },
+    {
+      "field": 2,
+      "bx": 5,
+      "by": 9,
+      "x": 212,
+      "y": 194
+    },
+    {
+      "field": 3,
+      "bx": 5,
+      "by": 9,
+      "x": 214,
+      "y": 194
+    },
+    {
+      "field": 4,
+      "bx": 5,
+      "by": 9,
+      "x": 216,
+      "y": 194
+    },
+    {
+      "field": 5,
+      "bx": 5,
+      "by": 9,
+      "x": 218,
+      "y": 194
+    },
+    {
+      "field": 6,
+      "bx": 5,
+      "by": 9,
+      "x": 220,
+      "y": 194
+    },
+    {
+      "field": 7,
+      "bx": 5,
+      "by": 9,
+      "x": 222,
+      "y": 194
+    },
+    {
+      "field": 8,
+      "bx": 5,
+      "by": 9,
+      "x": 224,
+      "y": 194
+    },
+    {
+      "field": 9,
+      "bx": 6,
+      "by": 9,
+      "x": 226,
+      "y": 194
+    },
+    {
+      "field": 10,
+      "bx": 6,
+      "by": 9,
+      "x": 228,
+      "y": 194
+    },
+    {
+      "field": 11,
+      "bx": 6,
+      "by": 9,
+      "x": 230,
+      "y": 194
+    },
+    {
+      "field": 12,
+      "bx": 6,
+      "by": 9,
+      "x": 232,
+      "y": 194
+    },
+    {
+      "field": 13,
+      "bx": 6,
+      "by": 9,
+      "x": 234,
+      "y": 194
+    },
+    {
+      "field": 14,
+      "bx": 6,
+      "by": 9,
+      "x": 236,
+      "y": 194
+    },
+    {
+      "field": 15,
+      "bx": 6,
+      "by": 9,
+      "x": 238,
+      "y": 194
+    },
+    {
+      "field": 16,
+      "bx": 6,
+      "by": 9,
+      "x": 240,
+      "y": 194
+    },
+    {
+      "field": 17,
+      "bx": 7,
+      "by": 9,
+      "x": 242,
+      "y": 194
+    },
+    {
+      "field": 18,
+      "bx": 7,
+      "by": 9,
+      "x": 244,
+      "y": 194
+    },
+    {
+      "field": 19,
+      "bx": 7,
+      "by": 9,
+      "x": 246,
+      "y": 194
+    },
+    {
+      "field": 20,
+      "bx": 7,
+      "by": 9,
+      "x": 248,
+      "y": 194
+    },
+    {
+      "field": 21,
+      "bx": 7,
+      "by": 9,
+      "x": 250,
+      "y": 194
+    },
+    {
+      "field": 22,
+      "bx": 7,
+      "by": 9,
+      "x": 252,
+      "y": 194
+    },
+    {
+      "field": 23,
+      "bx": 7,
+      "by": 9,
+      "x": 254,
+      "y": 194
+    },
+    {
+      "field": 24,
+      "bx": 7,
+      "by": 9,
+      "x": 256,
+      "y": 194
+    }
+  ],
+  "frames": [
+    {
+      "field": 2,
+      "png": "movement-2.png",
+      "hardwareX": 212,
+      "rgbaSha256": "277cbe0c9370ea1020b217cf923c346e79bdf9d5d5b780aaffdb74f234036582"
+    },
+    {
+      "field": 8,
+      "png": "movement-8.png",
+      "hardwareX": 224,
+      "rgbaSha256": "86da7191cfb88af2bd7341fdc8e4d3897a12526e50034f5035c7a6cfb44f40e1"
+    },
+    {
+      "field": 16,
+      "png": "movement-16.png",
+      "hardwareX": 240,
+      "rgbaSha256": "9286a6ca1eafa92f0fb89f216f74c94ca606fd01e949dcc3a313d6f2b76a1f63"
+    },
+    {
+      "field": 25,
+      "png": "movement-guard.png",
+      "hardwareX": 256,
+      "rgbaSha256": "0f5b86ed7945a2b08124e249495f371c9f8bce7087ebfbc6ee4e2899d1b31633"
+    }
+  ],
+  "guard": {
+    "bx": 8,
+    "by": 9,
+    "hd": 3,
+    "hc": 2,
+    "handler": "KCWEG"
+  }
+}

@@ -7,6 +7,6 @@ test('branches: uncached integer identifiers resolve named Goto/Gosub targets wi
     [id('start',0xc),t('Gosub'),id('sub')],[t('Print'),text('end')],[t('End')]]));
   assert.deepStrictEqual(logs,[['sub'],['end']]);
   assert.throws(()=>compile(binary([[t('Goto'),id('missing')]])),/Unresolved label missing.*line 1/);
-  assert.throws(()=>compile(binary([[t('Goto'),id('target',6,2)]])),/expression targets are not implemented/);
-  assert.throws(()=>compile(binary([[t('Goto'),id('target'),t('('),n(1),t(')')]])),/Expected end of statement/);
+  assert.throws(()=>execute(binary([[t('Goto'),id('target',6,2)]])),/Unsupported string label name/);
+  assert.throws(()=>compile(binary([[t('Goto'),id('target'),t('('),n(1),t(')')]])),/numeric targets are not implemented/);
 });

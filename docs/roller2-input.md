@@ -31,8 +31,9 @@ These lines contain integer identifier tokens after some named Goto instructions
 rather than preverified label-reference tokens. Pinned native `src/verif/tables.cpp`
 label_or_expression converts such a standalone identifier into a label; the parser
 now builds the same named-target AST. Ordinary scoped label resolution still
-validates every destination. String/number/array expression branches remain gated;
-there is no variable-value lookup for an uncached named label.
+validates every static destination. Numeric expression branches remain gated; main
+ASCII string expressions now have [bounded lookup support](string-branches.md).
+A standalone uncached named label does not read a variable value.
 
 Original deadline checks also use slot-1 Sam Play base offset `0x00de` with an
 unverified parameter-count cache of zero and two arguments. Native
@@ -65,8 +66,9 @@ retains fullscreen, Stop/Resume and Restart. Escape first exits fullscreen; a
 later Escape reaches AMOS. The gallery links it through HTML Preview, and every
 shared browser check remains runnable offline.
 
-Next implement string-based `Goto SAS$(HD)` at 646 and the cyclic Add needed by
-645/Lasttest, then original floor/stop tile handlers and movement animation. Keep
+A separate [movement fixture](roller2-movement.md) now runs `Goto SAS$(HD)`,
+cyclic Add and original floor/stop/Lasttest handlers, stopping before colour effects.
+Next extend those actual handler dependencies. Keep
 all reached labels checked and add independent trajectory/tile expectations;
 do not replace source dispatch with a synthetic floor handler. Full compilation
-still stops at Boom, with sixteen token encodings unrecognized.
+still stops at Boom, with fourteen token encodings unrecognized.

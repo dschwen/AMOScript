@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-movement.html",
+      "title": "Roller II original floor movement",
+      "description": "Original string-based SAS$ dispatch, wall checks and floor sliding on level 1. Keyboard and browser Gamepad paths verify 48 field positions, twelve independent Canvas frames and six WebGL comparisons; the colour handler remains guarded. Live fullscreen/Stop/Resume/Restart preview.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-movement.html"
+    },
+    {
       "file": "roller2-input.html",
       "title": "Roller II original game input loop",
       "description": "Connected original setup and JOAB through 639: real countdown, physical Key State, keyboard/Gamepad directions, effects/music keys and Escape menu return. Twenty-four independent Canvas checks and six WebGL frames; movement, pause and game-over handlers are guarded.",

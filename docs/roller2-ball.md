@@ -74,3 +74,7 @@ Do not infer gameplay from the initialized Timer or visible stationary ball.
 The separate [input fixture](roller2-input.md) now continues through JOAB 639,
 with countdown/toggles and guarded movement dispatch; this ball fixture retains
 its post-617 guard.
+
+The separate [movement fixture](roller2-movement.md) now continues through the
+original floor/stop/Lasttest path to a colour-handler guard. This initializer
+retains its post-617 guard.
