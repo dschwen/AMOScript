@@ -3,8 +3,8 @@
   "scenarios": [
     {
       "file": "roller2-menu.html",
-      "title": "Roller II guarded title-menu selection",
-      "description": "Original LIMM, menu zones/input branches and FDZ after a synthetic title load. Mouse, keyboard and injected Gamepad API selections reach declared guards. Live WebGL/fullscreen preview; startup/setup and the selected game/editor/scores/help routines remain excluded.",
+      "title": "Roller II original intro to guarded menu",
+      "description": "Original startup, intro, initialization, mask/filter/screen setup and menu now execute in order, with continuing MOD music. Ten mouse/keyboard/Gamepad cases reach nine guarded selections. Live WebGL/fullscreen and optional music controls; the selected game/editor/scores/help routines remain excluded.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html"
     },
     {

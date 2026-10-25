@@ -1,16 +1,42 @@
-# Roller II guarded title-menu selection
+# Roller II original intro to guarded menu
 
-The [menu demo](../demos/roller2-menu.html) runs unchanged original LIMM (call
-288 and definition 69–71), zone declarations and the input/branch loop (293–316),
-and FDZ (57–62). A synthetic `Load Iff "title",0` supplies the pinned main-title
-image. Synthetic destination labels record `game`, `editor`, `scores` or `help`
-and wait instead of entering those original routines. There are no host
-variable/IP edits. This is a bounded menu selection fixture, not a running game.
+The [menu demo](../demos/roller2-menu.html) now runs the original executable
+startup-to-menu sequence through line 316. `roller2ConnectedMenu` retains raw
+lines 1–71, WTIN 163–165, SASINIT 205–239 and setup/menu 275–316. Omitted intervening
+code consists of unused procedure definitions/comments. There is no synthetic
+title load, jump across executable setup, or host variable/IP edit.
 
-Startup, initialization, FLOAD fade-in, setup 281–286 and music are excluded.
-The separate [intro demo](roller2-intro.md) covers the intro and initialization;
-these two fixtures have not yet been joined into complete source control flow.
-Game/editor/help/highscore rendering, file operations and gameplay remain open.
+Synthetic destination labels still record `game`, `editor`, `scores` or `help`
+and wait instead of entering those original routines. This is a connected intro
+and menu selection fixture, not a running game. The complete source still fails
+decoding at Boom in an omitted procedure; selected routines, gameplay and their
+later dependencies remain open. The earlier isolated menu helper remains in
+headless tests, and the earlier [intro demo](roller2-intro.md) retains its declared
+handoff for focused rendering/input regression coverage.
+
+## Original setup and music
+
+The initial FLOAD fades the logo in; original WTIN accepts input, FDZ fades out,
+and the original array/highscore/SASINIT/bank setup runs. Setup 281–286 now also
+executes: Led Off, Make Icon Mask, Screen Close 0 and the second Led Off. It uses
+existing runtime semantics. All 113 nonempty icon records receive masks; null
+slots remain null. The first screen is retired before the main FLOAD creates the
+320×512 EHB title and its bounded window. The temporary palette clone is closed
+before the original LIMM and menu zones/input loop begin.
+
+The chip Tracker bank and playback continue across both FLOADs, setup and menu.
+The normal path does not reload/restart the music. Original Highend 291–292 also
+reloads and starts the MOD if that bank is absent. One explicit headless lifecycle
+probe erases the bank during the intro to verify this fallback; this mutation is
+not part of the normal browser replay.
+
+The optional Enable/Mute music button uses the existing browser audio session.
+Construction and VM binding create no AudioContext; activation requires its user
+gesture. Muted notes are dropped. Stop silences voices and freezes tracker fields;
+Resume continues without restoring held sample phase. Restart preserves the audio
+session preference and replaces its program binding, silencing old voices. Disposal
+closes the owned context. These controls reuse the established tracker/Web Audio
+subset; they add no new claim of Amiga analog or MOD-effect fidelity.
 
 ## Original input and branches
 
@@ -28,33 +54,36 @@ and branches on held mouse/fire input. It retains its original precedence:
 - Game/editor selection executes the original `FDZ[2]` before its guard.
 
 The live preview defaults to WebGL2 with a labelled Canvas fallback and a stable
-fullscreen container. Keyboard arrows and Space/Enter map to joystick port 1;
-the Gamepad API is polled by the original queries. Pointer events use the existing
-hardware-coordinate adapter. Joystick assignments change the runtime mouse,
-without warping the browser cursor. The status reports the current coordinates,
-zone and guarded outcome. Restart creates a fresh menu fixture; Stop/Resume and
-fullscreen preserve the existing host contracts. The preview is silent.
+fullscreen container. A key/fire leaves the intro logo. At the menu, keyboard
+arrows and Space/Enter map to joystick port 1; Gamepad API queries poll independently
+of rendering. Pointer events use the hardware-coordinate adapter. Joystick mouse
+assignments do not warp the browser cursor. Restart begins the original intro
+again; Stop/Resume preserve the host's existing input/fullscreen contracts.
 
 ## Evidence and limits
 
-Headless tests classify all 85,760 positions of the 320×268 title window against
-independently transcribed original rectangles. They exercise inclusive zone
-edges, unchanged bitmap storage, target guards, keyboard shortcuts, blank clicks,
-direct fire and moved-fire precedence. No percentage of game compatibility is
-inferred from this slice.
+The isolated headless menu test still classifies all 85,760 title positions
+against independently transcribed rectangles. Four additional connected-flow
+groups cover the ordered asset reads, mask/filter/screen setup, tracker continuity,
+all four target guards, two-button highscore bypass, factory ownership, Stop/Resume
+and the bank-reload lifecycle probe. Source and assets are unchanged.
 
-The shared browser evaluator runs ten bounded cases: four pointer regions,
-three keyboard paths, direct and moved gamepad fire, and a blank click. Nine
-cases select guards. Its independent PNG oracle checks the original title and
-black output after original FDZ; two snapshots also run on actual WebGL and
-match CPU output. CPU fallback never counts as GPU execution. Chromium gallery
-checks additionally use a real held pointer and H key, a controlled Help event,
-Stop/Resume, Restart and fullscreen cleanup. Every browser case runs from the
-self-contained demo linked through HTML Preview in the gallery.
+The shared browser evaluator now traverses the complete connected prefix in each
+of ten bounded cases. Nine select guards. Independent PNGs check the first logo,
+main title and black output after original FDZ. Three snapshots run on the same
+actual WebGL host across screen replacement and match CPU output; disabling the
+CPU presentation path guards against a fallback. These replace the earlier two
+isolated-menu GPU checks, rather than adding three to that earlier count.
 
-The replay uses a fake clock with a four-millisecond minimum host callback delay
-and finite execution budgets. Busy polling cannot starve the injected VBL clock.
-It checks outcomes after 640 ms, including the original 30-field FDZ wait where
-applicable. These are injected timing checks, not native busy-loop timing,
-physical gamepad evidence, Amiga audio/display captures or target-GPU performance.
-See [Mouse Zone semantics](zones.md) and [mouse assignment](mouse.md).
+Chromium gallery checks additionally exercise real pointer/H-key input, a
+controlled Help event, music activation/mute, silent Stop, restart bindings,
+fullscreen and owned-context closure. Every browser case is available from the
+self-contained demo's HTML Preview link in the gallery.
+
+The controlled clock has a four-millisecond minimum host callback delay and finite
+budgets, preventing busy polling from starving VBL wakes. Input leaves WTIN at
+1000 ms; the menu is checked at 2840 ms (tracker field 142), and selections after
+another 640 ms, including original FDZ where applicable. These are injected clocks,
+not exact native busy-loop timing, physical-controller evidence, Amiga captures
+or target-GPU performance. See [Mouse Zone](zones.md), [mouse assignment](mouse.md)
+and [tracker limits](mod-tracker.md).

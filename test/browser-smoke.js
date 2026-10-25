@@ -19,9 +19,9 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
-    const rollerMenu=await runScenario('roller2-menu',page);assert.strictEqual(rollerMenu.gpuFrames,2);
+    const rollerMenu=await runScenario('roller2-menu',page);assert.strictEqual(rollerMenu.gpuFrames,3);
     await page.evaluate(()=>globalThis.AMOS_ROLLER2_MENU_CLEANUP());
-    console.log('Roller2 menu passed: nine guarded pointer/keyboard/Gamepad selections, blank clicks, independent pixels and two WebGL frames.');
+    console.log('Roller2 menu passed: connected original startup/intro/setup, continuing tracker, nine guarded selections and three independent/WebGL frames.');
     const rollerIntro=await runScenario('roller2-intro',page);assert.strictEqual(rollerIntro.gpuFrames,11);
     await page.evaluate(()=>globalThis.AMOS_ROLLER2_INTRO_CLEANUP());
     console.log('Roller2 intro passed: original WTIN/FDZ, three input modes, independent EHB pixels and eleven WebGL frames.');

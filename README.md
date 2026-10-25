@@ -16,10 +16,10 @@ through the unchanged FLOAD procedure, with WebGL presentation and fullscreen.
 [Advance the original intro to the main title image](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html)
 with keyboard, mouse or gamepad input. Original highscore/table initialization
 and work/icon/sprite bank loads now run; the declared title handoff still omits
-setup 281–286. [Try guarded menu selection](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html)
-through original pointer/keyboard/Gamepad branches. That separate fixture skips
-startup/setup and stops before selected routines. Full-game compilation remains
-in progress.
+setup 281–286. [Run the original intro through menu selection](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html)
+with optional MOD music and WebGL/fullscreen. Original startup and setup now
+lead into pointer/keyboard/Gamepad menu branches; destination guards stop before
+selected routines. Full-game compilation remains in progress.
 Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).

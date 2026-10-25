@@ -13,8 +13,9 @@ FLOAD call 287 and a synthetic Wait Key/End guard. It omits unused procedure
 definitions and setup 281–286 (Led Off, Make Icon Mask and Screen Close), so this
 handoff is still not the complete source control flow. The original zones/menu
 and gameplay are not executed; clicking Start on the displayed main title does not start a game. The live preview is silent while
-logical tracker commands continue. A separate [guarded menu fixture](roller2-menu.md)
-now exercises selection without entering the selected routines. It defaults to WebGL, labels Canvas if WebGL
+logical tracker commands continue. The [connected menu fixture](roller2-menu.md)
+now runs original setup and menu after the intro, with optional MOD music, while
+retaining destination guards. This focused intro fixture keeps its earlier handoff. It defaults to WebGL, labels Canvas if WebGL
 is unavailable, and supports fullscreen, Stop/Resume and Restart.
 
 ## Original initialization

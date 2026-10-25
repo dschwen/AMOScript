@@ -33,11 +33,12 @@ cover loaded/missing/bypassed scores and every handler/connection slot.
 X/Y Mouse assignment now follows native doubled-word clamps after explicit Limit
 Mouse; original LIMM and joystick movement 299–303 run in a separate bounded
 fixture, with fourteen keyboard/Gamepad browser steps. Mouse Zone now queries
-the selected live hardware window with hires/scroll conversion. A separate
-guarded menu fixture runs original zones/input branches and FDZ after a synthetic
-title load: ten browser cases, nine selections, two independent/GPU frames.
-Next join the original startup/setup path, cover setup 281–286, and implement
-the selected routines, alongside the remaining decoder gate at Boom. Game-over/win
+the selected live hardware window with hires/scroll conversion. The connected
+menu fixture now runs the original executable prefix through 316, including both
+FLOADs, setup 281–286 and continuing MOD playback: ten browser cases, nine guarded
+selections and three independent/GPU frames. The live demo offers music activation/
+mute and restart-safe bindings. Next implement the selected routines and their
+dependencies, alongside the remaining decoder gate at Boom. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
@@ -148,7 +149,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **566 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **570 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

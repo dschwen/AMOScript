@@ -59,6 +59,12 @@
   between browser and headless assertions. Tall 320-pixel lowres IFFs preserve bitmap rows behind
   bounded PAL/NTSC default windows. See `docs/roller2-intro.md`; the menu/game
   and exact native busy-loop timing are not covered by that fixture.
+  The connected menu fixture retains original executable startup through 316,
+  including Make Icon Mask, Led Off, screen retirement and continuing MOD music.
+  Only unused procedures/comments are omitted; destination guards stop before
+  game/editor/scores/help routines. Its WebGL/fullscreen host reuses browserAudio
+  for gesture activation, mute, Restart bindings and owned-context closure.
+  See `docs/roller2-menu.md`; selected routines/gameplay remain open.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/
@@ -146,6 +152,10 @@
   default local coordinates and opts into committed raster hardware coordinates
   with `mouseCoordinates: 'hardware'`. Focus/lifecycle cleanup clears buttons and
   click history, preserving limits and position; Key Speed leaves them alone.
+  X/Y Mouse assignment requires explicit Limit Mouse bounds and uses doubled
+  unsigned-word clamps with EntNul as no-op; keep it separate from host injection.
+  Mouse Zone queries the current screen's live window and source offsets,
+  including before View, without scanning priorities or consuming clicks.
   See `docs/mouse.md` for the bounded migration gate and source evidence.
 - `lib/display/model/` contains the versioned snapshot codec, revisioned chip
   memory, static physical-screen bridge and bounded normal ILBM/ByteRun1 loader.
