@@ -20,6 +20,21 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-intro'){
+        await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='waiting-input');
+        assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#roller2-intro-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-intro-viewport');
+        await page.click('#roller2-intro-stop');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='stopped');
+        await page.click('#roller2-intro-resume');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='waiting-input');
+        await page.hover('#roller2-intro-input');await page.mouse.down();
+        try { await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='fading'); }
+        finally { await page.mouse.up(); }
+        await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='title-ready');
+        assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-bitmap-height'),'512');
+        await page.click('#roller2-intro-restart');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='waiting-input');
+        await page.keyboard.press('Space');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='title-ready');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_INTRO_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-title'){
         await page.waitForFunction(()=>document.getElementById('roller2-title-controls').dataset.phase==='ready');
         assert.strictEqual(await page.locator('#roller2-title-controls').getAttribute('data-backend'),'webgl');

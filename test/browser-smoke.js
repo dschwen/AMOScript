@@ -19,6 +19,9 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const rollerIntro=await runScenario('roller2-intro',page);assert.strictEqual(rollerIntro.gpuFrames,11);
+    await page.evaluate(()=>globalThis.AMOS_ROLLER2_INTRO_CLEANUP());
+    console.log('Roller2 intro passed: original WTIN/FDZ, three input modes, independent EHB pixels and eleven WebGL frames.');
     const rollerTitle=await runScenario('roller2-title',page);assert.strictEqual(rollerTitle.gpuFrames,7);
     await page.waitForFunction(()=>document.getElementById('roller2-title-controls').dataset.phase==='ready');
     await page.evaluate(()=>globalThis.AMOS_ROLLER2_TITLE_CLEANUP());

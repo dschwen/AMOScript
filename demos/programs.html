@@ -1874,6 +1874,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       throw new Error('Load Iff AMSC placement is not implemented for these fields');
     }
   }
+  function defaultIffWindow(id) {
+    const target = screen(id);
+    if (target.mode !== 0 || target.width !== 320 || target.height <= 256) throw new Error('Unsupported tall IFF window');
+    // Existing portable default Y=50, native DefWY2=DefWY-8, and native
+    // nonlaced PAL/NTSC exclusive end rows 310/260.
+    const y = 42, end = options.snapshotStandard === 'NTSC' ? 260 : 310;
+    screenDisplay(id, 128, y, 320, Math.min(target.height, end - y));
+  }
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
     if (number < 0 || number > 3 || colour < 0 || (colour & 31) > 15 || length < 16 || length >= 32700) throw new Error('Invalid Set Rainbow arguments');
@@ -2388,7 +2396,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -2838,21 +2846,35 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     publishFade();
     if (changed && !paletteWrites) display.invalidate();
   }
-  function fade(speed, source = null) {
+  function beginFade(speed, destination) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    const target = display.screen(), vbl = options.vblNow();
+    advancePalette(vbl);
+    const palette = typeof destination === 'function' ? destination() : destination;
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: palette[index] == null ? null : palette[index] & 0xfff })).filter(entry => entry.to != null && entry.rgb !== entry.to);
+    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
+    publishFade();
+  }
+  function fade(speed, source = null) {
     if (source != null) {
       source = integer(source);
       if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
       display.screen(source);
     }
-    const target = display.screen(), vbl = options.vblNow();
-    advancePalette(vbl);
-    const destination = source == null ? Array(32).fill(0) : display.screen(source).palette.slice();
-    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: destination[index] & 0xfff })).filter(entry => entry.rgb !== entry.to);
-    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
-    publishFade();
+    beginFade(speed, () => source == null ? Array(32).fill(0) : display.screen(source).palette.slice());
+  }
+  function fadeColours(speed, colours) {
+    if (!Array.isArray(colours) || !colours.length || colours.length > 32) throw new Error('Unsupported Fade colour count');
+    // Original FDZ supplies all 32 registers. Preserve omitted/negative entries
+    // and reject float bit-pattern quirks rather than silently coercing them.
+    const palette = colours.map(entry => {
+      const type = entry.type === 'dynamic' ? entry.value && entry.value.numericType : entry.type;
+      if (type !== 'integer') throw new Error('Explicit Fade colours require integer values');
+      const rgb = integer(entry.value); return rgb < 0 ? null : rgb & 0xfff;
+    });
+    beginFade(speed, palette);
   }
   publishFade(false);
   (display.subscribeScreens || display.subscribe).call(display, () => {
@@ -3287,12 +3309,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
     const placement = destination != null ? image.amosScreen : null;
     if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
+    const tall = destination != null && !placement && image.height > 256 && image.width === 320 && !(mode & 0x8000);
     let target;
     if (destination != null) {
       destination = integer(destination);
       target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
         mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
       if (placement) display.screenDisplay(destination, placement.x, placement.y, placement.width, placement.height);
+      else if (tall) display.defaultIffWindow(destination);
     } else target = display.screen();
     if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
     clearBobs(target);
@@ -4195,7 +4219,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
-    fade, advanceFade, cancelFade,
+    fade, fadeColours, advanceFade, cancelFade,
     nextFadeVbl: () => fading ? fading.nextVbl : null,
     fadeLocation: () => fading && fading.location,
     display, inputValue, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,
@@ -6350,6 +6374,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       throw new Error('Load Iff AMSC placement is not implemented for these fields');
     }
   }
+  function defaultIffWindow(id) {
+    const target = screen(id);
+    if (target.mode !== 0 || target.width !== 320 || target.height <= 256) throw new Error('Unsupported tall IFF window');
+    // Existing portable default Y=50, native DefWY2=DefWY-8, and native
+    // nonlaced PAL/NTSC exclusive end rows 310/260.
+    const y = 42, end = options.snapshotStandard === 'NTSC' ? 260 : 310;
+    screenDisplay(id, 128, y, 320, Math.min(target.height, end - y));
+  }
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
     if (number < 0 || number > 3 || colour < 0 || (colour & 31) > 15 || length < 16 || length >= 32700) throw new Error('Invalid Set Rainbow arguments');
@@ -6864,7 +6896,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -7314,21 +7346,35 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     publishFade();
     if (changed && !paletteWrites) display.invalidate();
   }
-  function fade(speed, source = null) {
+  function beginFade(speed, destination) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    const target = display.screen(), vbl = options.vblNow();
+    advancePalette(vbl);
+    const palette = typeof destination === 'function' ? destination() : destination;
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: palette[index] == null ? null : palette[index] & 0xfff })).filter(entry => entry.to != null && entry.rgb !== entry.to);
+    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
+    publishFade();
+  }
+  function fade(speed, source = null) {
     if (source != null) {
       source = integer(source);
       if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
       display.screen(source);
     }
-    const target = display.screen(), vbl = options.vblNow();
-    advancePalette(vbl);
-    const destination = source == null ? Array(32).fill(0) : display.screen(source).palette.slice();
-    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: destination[index] & 0xfff })).filter(entry => entry.rgb !== entry.to);
-    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
-    publishFade();
+    beginFade(speed, () => source == null ? Array(32).fill(0) : display.screen(source).palette.slice());
+  }
+  function fadeColours(speed, colours) {
+    if (!Array.isArray(colours) || !colours.length || colours.length > 32) throw new Error('Unsupported Fade colour count');
+    // Original FDZ supplies all 32 registers. Preserve omitted/negative entries
+    // and reject float bit-pattern quirks rather than silently coercing them.
+    const palette = colours.map(entry => {
+      const type = entry.type === 'dynamic' ? entry.value && entry.value.numericType : entry.type;
+      if (type !== 'integer') throw new Error('Explicit Fade colours require integer values');
+      const rgb = integer(entry.value); return rgb < 0 ? null : rgb & 0xfff;
+    });
+    beginFade(speed, palette);
   }
   publishFade(false);
   (display.subscribeScreens || display.subscribe).call(display, () => {
@@ -7763,12 +7809,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
     const placement = destination != null ? image.amosScreen : null;
     if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
+    const tall = destination != null && !placement && image.height > 256 && image.width === 320 && !(mode & 0x8000);
     let target;
     if (destination != null) {
       destination = integer(destination);
       target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
         mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
       if (placement) display.screenDisplay(destination, placement.x, placement.y, placement.width, placement.height);
+      else if (tall) display.defaultIffWindow(destination);
     } else target = display.screen();
     if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
     clearBobs(target);
@@ -8671,7 +8719,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
-    fade, advanceFade, cancelFade,
+    fade, fadeColours, advanceFade, cancelFade,
     nextFadeVbl: () => fading ? fading.nextVbl : null,
     fadeLocation: () => fading && fading.location,
     display, inputValue, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,
@@ -10843,6 +10891,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       throw new Error('Load Iff AMSC placement is not implemented for these fields');
     }
   }
+  function defaultIffWindow(id) {
+    const target = screen(id);
+    if (target.mode !== 0 || target.width !== 320 || target.height <= 256) throw new Error('Unsupported tall IFF window');
+    // Existing portable default Y=50, native DefWY2=DefWY-8, and native
+    // nonlaced PAL/NTSC exclusive end rows 310/260.
+    const y = 42, end = options.snapshotStandard === 'NTSC' ? 260 : 310;
+    screenDisplay(id, 128, y, 320, Math.min(target.height, end - y));
+  }
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
     if (number < 0 || number > 3 || colour < 0 || (colour & 31) > 15 || length < 16 || length >= 32700) throw new Error('Invalid Set Rainbow arguments');
@@ -11357,7 +11413,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -11807,21 +11863,35 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     publishFade();
     if (changed && !paletteWrites) display.invalidate();
   }
-  function fade(speed, source = null) {
+  function beginFade(speed, destination) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    const target = display.screen(), vbl = options.vblNow();
+    advancePalette(vbl);
+    const palette = typeof destination === 'function' ? destination() : destination;
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: palette[index] == null ? null : palette[index] & 0xfff })).filter(entry => entry.to != null && entry.rgb !== entry.to);
+    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
+    publishFade();
+  }
+  function fade(speed, source = null) {
     if (source != null) {
       source = integer(source);
       if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
       display.screen(source);
     }
-    const target = display.screen(), vbl = options.vblNow();
-    advancePalette(vbl);
-    const destination = source == null ? Array(32).fill(0) : display.screen(source).palette.slice();
-    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: destination[index] & 0xfff })).filter(entry => entry.rgb !== entry.to);
-    fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
-    publishFade();
+    beginFade(speed, () => source == null ? Array(32).fill(0) : display.screen(source).palette.slice());
+  }
+  function fadeColours(speed, colours) {
+    if (!Array.isArray(colours) || !colours.length || colours.length > 32) throw new Error('Unsupported Fade colour count');
+    // Original FDZ supplies all 32 registers. Preserve omitted/negative entries
+    // and reject float bit-pattern quirks rather than silently coercing them.
+    const palette = colours.map(entry => {
+      const type = entry.type === 'dynamic' ? entry.value && entry.value.numericType : entry.type;
+      if (type !== 'integer') throw new Error('Explicit Fade colours require integer values');
+      const rgb = integer(entry.value); return rgb < 0 ? null : rgb & 0xfff;
+    });
+    beginFade(speed, palette);
   }
   publishFade(false);
   (display.subscribeScreens || display.subscribe).call(display, () => {
@@ -12256,12 +12326,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
     const placement = destination != null ? image.amosScreen : null;
     if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
+    const tall = destination != null && !placement && image.height > 256 && image.width === 320 && !(mode & 0x8000);
     let target;
     if (destination != null) {
       destination = integer(destination);
       target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
         mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
       if (placement) display.screenDisplay(destination, placement.x, placement.y, placement.width, placement.height);
+      else if (tall) display.defaultIffWindow(destination);
     } else target = display.screen();
     if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
     clearBobs(target);
@@ -13164,7 +13236,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
-    fade, advanceFade, cancelFade,
+    fade, fadeColours, advanceFade, cancelFade,
     nextFadeVbl: () => fading ? fading.nextVbl : null,
     fadeLocation: () => fading && fading.location,
     display, inputValue, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,

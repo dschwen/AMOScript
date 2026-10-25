@@ -79,8 +79,9 @@ separate gates; bitmap decoding alone is not placement support.
 and moves each differing RGB nibble one step toward its goal at the existing
 field interval. Source closure or palette changes do not retarget that goal.
 It shares fade-to-black lifecycle, Flash ordering, identity checks and bounded
-catch-up. Sprite-bank destinations, masks, explicit colour lists, wrapped speeds
-and native hardware timing remain open. FDZ's explicit colour lists still reject.
+catch-up. Sprite-bank destinations, masks, wrapped speeds and native hardware
+timing remain open. Explicit integer lists now run original FDZ in the separate
+[intro/main-title fixture](roller2-intro.md); float bit-pattern forms remain gated.
 
 ## Evidence
 

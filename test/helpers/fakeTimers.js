@@ -1,13 +1,13 @@
 'use strict';
 
-function createFakeTimers() {
+function createFakeTimers(minimumDelay = 0) {
   let now = 0;
   let idSeq = 1;
   const tasks = new Map();
 
   function schedule(fn, delay = 0) {
     const id = idSeq++;
-    const time = now + Math.max(0, Number(delay) || 0);
+    const time = now + Math.max(minimumDelay, Number(delay) || 0);
     tasks.set(id, { id, time, fn });
     return id;
   }

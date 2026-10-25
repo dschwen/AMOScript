@@ -13,7 +13,9 @@ The [unchanged first 17 startup lines](https://htmlpreview.github.io/?https://gi
 now execute through directory setup, music and pointer hiding.
 [See the original first image fade in](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-title.html)
 through the unchanged FLOAD procedure, with WebGL presentation and fullscreen.
-The main title/menu and full-game compilation are still in progress.
+[Advance the original intro to the main title image](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html)
+with keyboard, mouse or gamepad input. The declared title handoff skips game
+initialization; menu actions and full-game compilation are still in progress.
 Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).

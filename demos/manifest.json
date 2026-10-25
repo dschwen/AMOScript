@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-intro.html",
+      "title": "Roller II intro and main-title image",
+      "description": "Original intro/input wait/FDZ/FLOAD, followed by a declared handoff to the original tall EHB title load. Keyboard, pointer and injected Gamepad API input pass independent pixel checks. Live WebGL/fullscreen preview; game initialization and menu logic remain excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html"
+    },
+    {
       "file": "roller2-title.html",
       "title": "Roller II first image and original FLOAD",
       "description": "Unchanged startup through the first FLOAD, original procedure, AMSC placement, hidden palette clone and Fade To. Independent Python image pixels verify seven Canvas/copper states and seven WebGL comparisons. Live fullscreen preview precedes WTIN, the main title and gameplay.",

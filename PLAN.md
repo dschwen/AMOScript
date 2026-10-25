@@ -23,8 +23,13 @@ pointer visibility are also supported. The unchanged first FLOAD call and origin
 procedure now load/fade the “EL SOFTICUS presents” image through a static palette
 clone and bounded AMSC placement. Seven independently checked image states match
 Canvas/copper and actual WebGL, with a live fullscreen preview. Pop Proc and
-Fade To screen are implemented. Next cover WTIN, FDZ's explicit colour lists,
-the main tall EHB title/window and remaining startup/game forms. Game-over/win
+Fade To screen are implemented. Original WTIN/FDZ now run through keyboard,
+mouse or Gamepad input, and explicit integer Fade palettes are implemented.
+A declared handoff loads the original tall EHB title with all 512 bitmap rows
+retained behind a bounded 268-row PAL window. Thirteen independent pixel states
+and eleven more GPU comparisons pass; initialization/menu/gameplay remain excluded.
+Next cover original game initialization and title-menu logic, alongside the
+remaining decoder gate at Boom. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
@@ -135,7 +140,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **548 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **554 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

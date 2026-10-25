@@ -27,4 +27,6 @@ The [startup demo](../../demos/roller2-startup.html) runs the unchanged first 17
 physical lines with a synthetic Wait Key guard before the first image request.
 The [first-image demo](../../demos/roller2-title.html) also executes original
 line 18 and FLOAD (63–68), then stops before WTIN. It shows the first logo through
-AMSC placement and palette fading; the main title/menu is still separate work.
+AMSC placement and palette fading. The [intro transition demo](../../demos/roller2-intro.html)
+continues through original WTIN/FDZ input and fade-out, then uses a declared
+handoff to load the main title image. Initialization, the menu and gameplay remain open.
