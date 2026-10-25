@@ -44,7 +44,7 @@ short/unrepresentable slices, sprite/palette transitions, wrapped DMA and native
 capture parity remain open and reject explicitly. SnapshotPlayfield still exports
 the complete physical bitmap without priority cropping.
 
-The [ready demo](../demos/roller2-ready.html) extends the connected startup/menu
+The ready-only unit fixture extends the connected startup/menu
 fixture with unchanged GAMEDISP 72–86, MWAIT 153–155 and game entry 565–608.
 The harness selects Game then releases the input; original 601–607 handles the
 foreground icon, board rendering, blinking and mouse/Fire(1) exit. Original 608
@@ -58,13 +58,13 @@ The board's original black palette remains black; no preview palette restoration
 is injected in the connected fixture. The isolated coloured board inspector has
 its own documented palette harness. Source-derived PNGs are not Amiga captures.
 Unit checks also compare original board indices with the independent map hash,
-verify source metadata, independent factories and Stop/Resume. Chromium checks
-three original input exits, nine Canvas frames and three actual WebGL frames with
+verify source metadata, independent factories and Stop/Resume. The extended [ready/ball demo](roller2-ball.md) now checks
+three original input exits, eighteen Canvas frames and six actual WebGL frames with
 CPU presentation disabled. The live demo provides keyboard/Gamepad/mouse input,
 Stop/Resume, Restart and fullscreen. It advances an injected VBL clock from host
 timers, independently of requestAnimationFrame; MOD timing runs without a browser
 audio adapter in this demo. The menu demo retains its optional sound controls.
 
-Next integrate BALLFARBEN and source six-plane sprites' low-four-plane hardware
-behavior, then the initial fade/status border and first movement loop. Full game
-compilation still stops at Boom; this fixture does not establish gameplay.
+The live demo now also runs BALLFARBEN, six-plane sprites’ low-four-plane hardware
+behavior and initial fade/status border through 617. See [initial ball](roller2-ball.md).
+The movement loop remains the next gate. Whole compilation still stops at Boom.

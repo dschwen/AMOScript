@@ -3,8 +3,8 @@
   "scenarios": [
     {
       "file": "roller2-ready.html",
-      "title": "Roller II connected ready prompt",
-      "description": "Connected original startup/menu, game setup, GAMEDISP and blinking foreground ready prompt through line 608. Independent popup/panel pixels, nine Canvas checks and three WebGL frames. Mouse, keyboard and Gamepad fire reach the guard before ball/sprite/gameplay setup; live fullscreen preview.",
+      "title": "Roller II ready prompt and initial ball",
+      "description": "Connected original startup/menu, game setup, GAMEDISP and blinking foreground ready prompt through line 617. Original ball palette, six-plane sprite, fade and status border; independent pixels, eighteen Canvas checks and six WebGL frames. Mouse, keyboard and Gamepad fire reach the guard before movement; live fullscreen preview.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-ready.html"
     },
     {

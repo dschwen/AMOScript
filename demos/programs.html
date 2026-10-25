@@ -3044,7 +3044,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
       if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
-      if (image.depth > 4) throw new Error('Sprite images above four planes are not implemented');
+      // HsAd3/HsAd4 consumes the first four planes for attached hardware
+      // sprites even when the original image contains five or six planes.
+      if (image.depth < 1 || image.depth > 6) throw new Error('Unsupported Sprite image depth');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       const word = value => (value << 16) >> 16;
       frames.set(number, { number, image,
@@ -7733,7 +7735,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
       if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
-      if (image.depth > 4) throw new Error('Sprite images above four planes are not implemented');
+      // HsAd3/HsAd4 consumes the first four planes for attached hardware
+      // sprites even when the original image contains five or six planes.
+      if (image.depth < 1 || image.depth > 6) throw new Error('Unsupported Sprite image depth');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       const word = value => (value << 16) >> 16;
       frames.set(number, { number, image,
@@ -12439,7 +12443,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
       if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
-      if (image.depth > 4) throw new Error('Sprite images above four planes are not implemented');
+      // HsAd3/HsAd4 consumes the first four planes for attached hardware
+      // sprites even when the original image contains five or six planes.
+      if (image.depth < 1 || image.depth > 6) throw new Error('Unsupported Sprite image depth');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       const word = value => (value << 16) >> 16;
       frames.set(number, { number, image,

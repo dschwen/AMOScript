@@ -63,6 +63,18 @@ test('attached sprites: three-plane images publish low two planes, unsupported d
   const p=execute(source([...palette,[t('Sprite Update Off')],sprite(1)])).program;
   const image=p.banks.get(1).images[0];image.depth=3;p.updateSprites();
   const old=p.display.snapshotDisplay();assert.strictEqual(old.frame.lineSprites[10*32+7],0x80000000);assert.strictEqual(old.frame.lineSprites[10*32+11],0);
-  image.depth=5;assert.throws(()=>p.updateSprites(),/above four planes/);
+  image.depth=7;assert.throws(()=>p.updateSprites(),/Unsupported Sprite image depth/);
   assert.deepStrictEqual(Array.from(p.display.snapshotDisplay().frame.lineSprites),Array.from(old.frame.lineSprites));
+});
+
+test('attached sprites: independent five/six-plane banks preserve raw pixels but publish only the low four planes',()=>{
+  const {binary}=require('./helpers/program'),reference=execute(source([...palette,sprite(1)])).program.display.snapshotDisplay();
+  for(const depth of [5,6]){
+    const literal=Buffer.from(`416d5370000100010002000${depth}000000005555aaaa3333cccc0f0ff0f000ffff00ffffffff${depth===6?'aaaa5555':''}${'0000'.repeat(32)}`,'hex');
+    const p=execute(Buffer.concat([binary([...palette,sprite(1)]),Buffer.from('416d42730001','hex'),literal])).program;
+    assert.ok(p.banks.get(1).images[0].pixels.every(value=>value>=16));
+    const frame=p.display.snapshotDisplay();assert.deepStrictEqual(Array.from(frame.frame.lineSprites),Array.from(reference.frame.lineSprites));
+    assert.deepStrictEqual(Array.from(p.display.renderDisplay()),Array.from(render(reference.chip,reference.frame)));
+    assert.strictEqual(p.banks.get(1).images[0].depth,depth);
+  }
 });

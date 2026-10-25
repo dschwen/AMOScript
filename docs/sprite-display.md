@@ -108,10 +108,10 @@ programs and Chromium compare manual updates/movement/clearing to Canvas.
 These are synthetic/source-derived expectations, not external AMOS captures or
 proof of complete hardware timing. Non-HAM GPU composition shares these physical rows; remaining mode/timing gates stay open.
 
-## Four-plane direct AMOS images
+## Attached direct AMOS images
 
-The bridge now accepts 16-pixel images with one through four planes. For three
-planes, the third plane is ignored by the direct hardware path. Four planes
+The bridge now accepts 16-pixel images with one through six planes. For three
+planes, the third plane is ignored by the direct hardware path. Four or more planes
 consume an even/odd pair: planes zero/one go to the even channel and planes
 two/three to the attached odd channel. Zero remains transparent; codes 1–15 select
 palette entries 17–31. Image-mask and image-flip flags retain the existing direct
@@ -128,7 +128,7 @@ and the existing mouse reservation for channel zero is preserved.
 These rules follow pinned
 [`src/w/sprites.cpp`, HsAd3/HsAd4 and HsAdP2](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/w/sprites.cpp).
 They are source analysis, not AMOS execution captures. Widths above 16 pixels,
-depths above four, computed allocation and exact DMA timing remain explicit limits.
+depths above six, computed allocation and exact DMA timing remain explicit limits.
 
 The independent literal `test/fixtures/attached-sprite.hex` encodes an AmSp bank
 with one 16 × 2 four-plane image, zero hotspot and zero palette. Plane words are
@@ -139,3 +139,8 @@ WebGL tests compare its independent pixel expectation and four whole-program
 Wonderland frames against the GPU. The shared Fsel$ demo runs and renders the
 unmodified first-level loop for two controlled seconds. This is bounded execution
 and CPU/GPU parity, not full gameplay or hardware-capture parity.
+
+Five/six-plane bank images now use the same first four hardware planes, keeping
+all indexed bits in the original bank. Independent literal banks verify high-bit
+transparency and identical physical words; the connected original Roller II
+ball/fade/border fixture adds six GPU frames. See [initial ball](roller2-ball.md).

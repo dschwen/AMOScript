@@ -53,9 +53,11 @@ its palette restoration is a declared preview harness. Sixteen Canvas checks and
 two more GPU frames pass. A new connected ready fixture now runs original GAMEDISP and game entry through
 608, including bounded Screen To Front slices and the blinking prompt. Mouse,
 keyboard and Gamepad exits read original start/time metadata; nine Canvas and
-three more GPU frames pass. Its guard precedes ball/sprite setup; the menu fixture
-retains its post-600 guard. Next integrate ball palettes, six-plane sprite mapping,
-Copy/Fill and later gates. Sprite-bank raw
+three more GPU frames pass. The live ready demo now extends through 617: original ball palette, six-plane
+sprite using its low four planes, initial fade, status border and timer setup.
+Three independent new PNGs and six total ready/ball GPU frames pass; the guard
+precedes JOAB movement. Earlier unit fixtures retain their declared guards.
+Next integrate original input/movement, Key State, Copy/Fill and reached tile handlers. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the

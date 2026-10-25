@@ -1,0 +1,133 @@
+{
+  "evidence": "Independent raw assets and original 609\u2013617 palette/sprite/fade/border semantics; portable font and hardware origin, no native capture.",
+  "sourceDepth": 6,
+  "hardware": [
+    208,
+    194
+  ],
+  "local": [
+    80,
+    144
+  ],
+  "spriteWords": [
+    [
+      672,
+      2016,
+      0,
+      0
+    ],
+    [
+      5208,
+      8184,
+      0,
+      0
+    ],
+    [
+      44,
+      16380,
+      0,
+      0
+    ],
+    [
+      16406,
+      32766,
+      0,
+      0
+    ],
+    [
+      10,
+      32766,
+      1024,
+      1024
+    ],
+    [
+      32791,
+      65535,
+      3584,
+      2560
+    ],
+    [
+      11,
+      65535,
+      1024,
+      1024
+    ],
+    [
+      32791,
+      65535,
+      0,
+      0
+    ],
+    [
+      41007,
+      65535,
+      0,
+      0
+    ],
+    [
+      20567,
+      65535,
+      0,
+      0
+    ],
+    [
+      43695,
+      65535,
+      0,
+      0
+    ],
+    [
+      21854,
+      32766,
+      0,
+      0
+    ],
+    [
+      31422,
+      32766,
+      0,
+      0
+    ],
+    [
+      16380,
+      16380,
+      0,
+      0
+    ],
+    [
+      8184,
+      8184,
+      0,
+      0
+    ],
+    [
+      2016,
+      2016,
+      0,
+      0
+    ]
+  ],
+  "frames": [
+    {
+      "png": "ball-fade-2.png",
+      "step": 2,
+      "border": false,
+      "rgbaSha256": "241967cc064d6c9c6e40d8baeeef609cc4e2bc641666700cf63bc746338056ee",
+      "indicesSha256": "4d8d6c314f7edfc077b822051eaa13476b0182703ac802d3701c5c2d05b40f94"
+    },
+    {
+      "png": "ball-fade-7.png",
+      "step": 7,
+      "border": false,
+      "rgbaSha256": "28f3ce961a4319f705353509c86fe48cd8aaf6637f4ddb76c59cb01abf3d1adb",
+      "indicesSha256": "4d8d6c314f7edfc077b822051eaa13476b0182703ac802d3701c5c2d05b40f94"
+    },
+    {
+      "png": "ball-start.png",
+      "step": 15,
+      "border": true,
+      "rgbaSha256": "85b8cd1d19126540ec47a72b23b3f3aee328362886f74196ce76707e3ed29668",
+      "indicesSha256": "0943bb57fc426dc2eecb98f04b3f579add9dac56a07b2798ea92e92cbbb65e69"
+    }
+  ]
+}

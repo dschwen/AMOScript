@@ -72,8 +72,11 @@
   A separate connected ready fixture runs original GAMEDISP and 601–608 through
   bounded Screen To Front slices and real DMA-disabled setup rows. No RGBA overlay
   or relaxed visible-row budget; equal-width lowres/shared COLOR00, no active
-  sprites. Original input exits read level metadata before the guard. Exact native
-  timing and gameplay remain open. See `docs/roller2-boards.md` and
+  sprites. Original input exits read level metadata before the ready-only guard.
+  The live fixture now runs through 617: BALLFARBEN, low-four-plane direct sprite
+  output from the six-plane bank, initial fade, BDRAW border and timer setup.
+  Earlier menu/ready unit guards remain bounded; movement still stops before
+  JOAB. Exact native timing and gameplay remain open. See `docs/roller2-ball.md`. See `docs/roller2-boards.md` and
   `docs/screen-priority.md`.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
@@ -181,7 +184,7 @@
   See `docs/planar-display.md` for the implemented subset and remaining gates.
 - `lib/display/reference/sprites.js` resolves eight physical channels, attached
   pairs and playfield priorities. `snapshotDisplay` publishes direct AMOS sprite
-  rows, including bounded four-plane attached pairs (odd numbers consume a blank
+  rows, including low-four-plane attached pairs from 4–6-plane images (odd numbers consume a blank
   channel before the next even pair); `snapshotPlayfield` remains sprite-free.
   Bounded DMA/reuse/manual registers
   live in `lib/display/copper/spriteDma.js`. Contention/timing and computed allocation

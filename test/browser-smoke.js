@@ -19,8 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
-    const ready=await runScenario('roller2-ready',page);assert.strictEqual(ready.gpuFrames,3);await page.evaluate(()=>globalThis.AMOS_ROLLER2_READY_CLEANUP());
-    console.log('Roller2 ready passed: original connected board/prompt loop, independent pixels, mouse/keyboard/gamepad input and three WebGL frames.');
+    const ready=await runScenario('roller2-ready',page);assert.strictEqual(ready.gpuFrames,6);await page.evaluate(()=>globalThis.AMOS_ROLLER2_READY_CLEANUP());
+    console.log('Roller2 ready passed: original connected board/prompt loop, independent pixels, mouse/keyboard/gamepad input, original ball/fade/border setup and six WebGL frames.');
     const boards=await runScenario('roller2-boards',page);assert.strictEqual(boards.gpuFrames,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_BOARD_CLEANUP());
     console.log('Roller2 boards passed: fifteen original GAMEDISP maps, independent pixels/counts, declared palette preview and two WebGL frames.');
     const icons=await runScenario('roller2-icons',page);assert.strictEqual(icons.gpuFrames,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_ICON_CLEANUP());
