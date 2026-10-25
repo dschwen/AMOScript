@@ -57,8 +57,8 @@
     },
     {
       "file": "mouse.html",
-      "title": "Wonderland hardware mouse and editor selection",
-      "description": "Opt-in hardware-coordinate Canvas input, original mouse limits and polling-based Mouse Click. Original editor selection statements, scaled/bordered input and lifecycle cleanup pass; editor actions remain excluded. Includes a live button-selection harness.",
+      "title": "AMOS hardware mouse and original game input",
+      "description": "Hardware-coordinate input, original mouse limits, polling-based Mouse Click and X/Y Mouse assignment. Original Wonderland editor selection and fourteen Roller II joystick mouse steps pass through keyboard and injected Gamepad API input. Includes a live editor button-selection harness; game actions remain excluded.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mouse.html"
     },
     {

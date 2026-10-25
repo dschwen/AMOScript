@@ -2,7 +2,9 @@
 
 Implemented forms are `Limit Mouse`, `Limit Mouse screen`, `Limit Mouse x1,y1 To
 x2,y2`, and the integer query `Mouse Click`. They share the headless runtime and
-existing argument conversion. No browser is needed for injected mouse input.
+existing argument conversion. `X Mouse=expression` and `Y Mouse=expression` now
+set one axis after an explicit Limit Mouse establishes bounds. No browser is
+needed for injected mouse input.
 
 ## Limits and query semantics
 
@@ -39,6 +41,44 @@ retains its earlier pointer forwarding behavior, including after completion. Res
 button state: a subsequent pointer event supplies it. Direct headless injection
 remains an explicit host operation.
 
+## X/Y Mouse assignment
+
+Statement context accepts `X Mouse=expression` and `Y Mouse=expression` while
+expression context keeps the existing integer queries. The expression evaluates
+once and uses the shared numeric-to-integer conversion, including truncation of
+float and boxed Val results. Static strings reject at compilation. The native
+`EntNul` value −2147483648 leaves the axis unchanged.
+
+The assignment doubles the value into an unsigned sixteen-bit word, clamps it
+first to the doubled lower bound and then to the doubled upper bound, and halves
+it again. With x bounds 128–447, −1 assigns 447, 32768 assigns 128, and 65536
+assigns 128. This is deliberately different from unrestricted host injection.
+Only the selected axis changes: held buttons, Mouse Click query history, the
+other axis, limits, bitmap pixels and presentation remain untouched.
+
+Assignments require an explicit Limit Mouse command; native startup/configuration
+bound discovery is not emulated. A missing bound fails with source context,
+except the no-op EntNul case. The runtime does not warp the browser cursor or
+manufacture a pointer event. A later real pointer event supplies a new position
+through the existing adapter, subject to its limits. Stop/blur cleanup preserves
+the assigned position while clearing held input as before.
+
+The shared [mouse demo](../demos/mouse.html) also runs original Roller II LIMM
+(call 288 and definition 69–71) and movement statements 299–303. A synthetic title
+load and Repeat/Wait Key gate permit bounded individual steps, without zones,
+selection branches, other menu setup or gameplay. Four directions, opposing
+inputs and both limit corners give fourteen keyboard/injected-Gamepad steps in
+Chromium. Each original direction changes the matching axis by two; active Joy
+waits for VBL. The title bitmap is preserved. The captured title frame is a Canvas
+input check, not additional GPU execution or an Amiga capture. The demo still
+provides the existing live Wonderland button-selection harness.
+
+These assignment rules were checked in `src/lib/sprites.cpp` and
+`src/w/mouse.cpp` at pinned revision
+`7f32e0abe1b6b415c9502b598cd3e4cb131018f8`. Four new headless groups cover independent
+word vectors, numeric types/DATA/arrays/procedure results, single expression
+evaluation, errors, factory/lifecycle isolation and the original Roller II slice.
+
 ## Explicit coordinate migration
 
 The existing default `createCanvasHost(canvas)` and `mouseCoordinates: 'screen'`
@@ -65,8 +105,8 @@ the hardware mapping helper fail explicitly.
 implicit local/hardware conversion. With limits active, injection clamps in the
 same units as the mouse queries. Use the hardware Canvas mode for programs whose
 Limit Mouse and X/Y Mouse expressions use hardware coordinates. These changes do
-not implement pointer locking, browser letterboxing, relative movement, X/Y Mouse
-assignment, Hzone/Mouse Zone, or GPU host switching. Legacy unbounded headless
+not implement pointer locking, browser letterboxing, relative movement,
+Hzone/Mouse Zone, or GPU host switching. Legacy unbounded headless
 injection and all existing local-coordinate demos retain their previous units.
 
 ## Wonderland and evidence

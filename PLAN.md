@@ -30,7 +30,10 @@ retained behind a bounded 268-row PAL window. Thirteen independent pixel states
 and eleven more GPU comparisons pass. Original highscore/array setup, SASINIT
 and work/icon/sprite bank loads now execute before the title. Independent checks
 cover loaded/missing/bypassed scores and every handler/connection slot.
-Next cover setup 281–286 and title-menu logic, alongside the
+X/Y Mouse assignment now follows native doubled-word clamps after explicit Limit
+Mouse; original LIMM and joystick movement 299–303 run in a separate bounded
+fixture, with fourteen keyboard/Gamepad browser steps. Mouse Zone and menu
+selection remain open. Next cover setup 281–286 and title-menu logic, alongside the
 remaining decoder gate at Boom. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
@@ -142,7 +145,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **557 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **561 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

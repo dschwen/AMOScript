@@ -18,7 +18,7 @@ Every current browser scenario is included:
 | [Fsel$ and unmodified Wonderland first-level frames](file-selector.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/file-selector.html) |
 | [AMOS Rnd and original enemy initialization](random.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/random.html) |
 | [Wonderland raw level-file save/load](raw-files.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/raw-files.html) |
-| [Wonderland hardware mouse and editor selection](mouse.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mouse.html) |
+| [AMOS hardware mouse and original game input](mouse.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mouse.html) |
 | [Wonderland editor panel zones](zones.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/zones.html) |
 | [AMOS Flash and screen-local Flash Off](flash.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/flash.html) |
 | [Wonderland map copy: five original level loops](screen-copy.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-copy.html) |

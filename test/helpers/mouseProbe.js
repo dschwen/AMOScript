@@ -6,7 +6,9 @@ module.exports=async function mouseProbe(page){
   const source=new Transpiler(require('./wonderlandMouse')()).toModule();
   const {binary,token:t}=require('./tokens');const idleSource=new Transpiler(binary([[t('Wait Key')]])).toModule();
   const panel=fs.readFileSync(path.join(__dirname,'../../examples/Wonderland/Editor_Panel.Iff')).toString('base64');
-  return page.evaluate(({source,idleSource,panel,timerSource})=>{
+  const rollerSource=new Transpiler(require('./roller2MenuMouse')()).toModule();
+  const rollerTitle=fs.readFileSync(path.join(__dirname,'../../examples/Roller2/iffp/roller titel')).toString('base64');
+  return page.evaluate(({source,idleSource,panel,timerSource,rollerSource,rollerTitle})=>{
     const module={exports:{}};new Function('module',source)(module);const create=module.exports;
     const idle={exports:{}};new Function('module',idleSource)(idle);const makeClock=new Function(`return (${timerSource});`)();
     const check=(condition,message)=>{if(!condition)throw new Error(message);};
@@ -65,10 +67,33 @@ module.exports=async function mouseProbe(page){
       }finally{adapter.detach();program.stop();surface.remove();}
     }
     check((()=>{try{AMOS_BROWSER.createCanvasHost(document.createElement('canvas'),{mouseCoordinates:'invalid'});return false;}catch(_){return true;}})(),'Invalid coordinate option accepted');
+    const roller={exports:{}};new Function('module',rollerSource)(roller);let rollerMouseSteps=0;
+    const directions=[['ArrowLeft'],['ArrowRight'],['ArrowUp'],['ArrowDown'],['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'],['ArrowLeft','ArrowUp'],['ArrowRight','ArrowDown']];
+    const positions=[[198,100],[200,100],[200,98],[200,100],[200,100],[128,42],[447,312]];
+    for(const mode of ['keyboard','gamepad']){
+      const clock=makeClock(),program=roller.exports({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:()=>atob(rollerTitle)}});
+      const canvas=document.createElement('canvas');canvas.tabIndex=0;document.body.append(canvas);let pad=null;
+      const adapter=AMOS_BROWSER.createCanvasHost(canvas,{mouseCoordinates:'hardware',hasFocus:()=>true,requestAnimationFrame:()=>1,cancelAnimationFrame(){},getGamepads:()=>[pad],
+        joysticks:[{port:1,keyboard:mode==='keyboard',gamepad:mode==='gamepad'}]});
+      try{
+        adapter.attach(program);program.tick(1000);program.setMouse(200,100);const before=program.display.screen().physicalPixels.slice();
+        for(let index=0;index<directions.length;index++){
+          const keys=directions[index];if(index===5)program.setMouse(128,42);if(index===6)program.setMouse(447,312);
+          if(mode==='keyboard')for(const key of keys)canvas.dispatchEvent(new KeyboardEvent('keydown',{key,code:key,bubbles:true,cancelable:true}));
+          else pad={connected:true,mapping:'standard',axes:[0,0],buttons:Array.from({length:16},(_,i)=>({pressed:keys.includes({12:'ArrowUp',13:'ArrowDown',14:'ArrowLeft',15:'ArrowRight'}[i])}))};
+          program.sendKey('step');clock.tick(20);
+          check(program.state.waiting==='key',`Roller II ${mode} movement escaped its guard`);
+          check(program.inputValue('X Mouse')===positions[index][0]&&program.inputValue('Y Mouse')===positions[index][1],`Roller II ${mode} mouse step ${index} differs`);rollerMouseSteps++;
+          if(mode==='keyboard')for(const key of keys)canvas.dispatchEvent(new KeyboardEvent('keyup',{key,code:key,bubbles:true}));else pad=null;
+        }
+        check(program.state.variables.int_movj===-1&&program.display.screen().physicalPixels.every((v,i)=>v===before[i]),'Roller II movement changed its title bitmap');
+        adapter.render();if(mode==='gamepad'&&globalThis.AMOS_DEMO_OBSERVE)globalThis.AMOS_DEMO_OBSERVE({name:'Roller II original joystick mouse movement',width:320,height:268,rgba:canvas.getContext('2d').getImageData(0,0,320,268).data});
+      }finally{adapter.detach();program.stop();canvas.remove();}
+    }
     if(globalThis.AMOS_MOUSE_DEMO_CLEANUP)globalThis.AMOS_MOUSE_DEMO_CLEANUP();const previous=document.getElementById('mouse-controls');if(previous)previous.remove();
     const controls=document.createElement('section');controls.id='mouse-controls';
     const title=document.createElement('h2');title.textContent='Original editor button selection';
-    const help=document.createElement('p');help.textContent='Click and hold a panel button briefly. A synthetic 50 Hz polling harness steps the unchanged original Mouse Click / Zone / selection statements. Hardware-coordinate Canvas input uses the original Limit Mouse rectangle. Selected actions are reported; files, clearing, exiting and the rest of the editor are not executed.';
+    const help=document.createElement('p');help.textContent='The replay also checks fourteen original Roller II joystick mouse steps using keyboard and injected Gamepad API input, including limits. Its zones/menu actions remain excluded. Below, click and hold a Wonderland panel button briefly. A synthetic 50 Hz polling harness steps the unchanged original Mouse Click / Zone / selection statements. Selected actions are reported; files, clearing, exiting and the rest of the editor are not executed.';
     const surface=document.createElement('canvas');surface.id='mouse-panel';surface.style.cssText='width:640px;max-width:100%;image-rendering:pixelated';
     surface.addEventListener('contextmenu',event=>event.preventDefault());
     const status=document.createElement('pre');status.id='mouse-status';let live=null,last='none';
@@ -82,6 +107,6 @@ module.exports=async function mouseProbe(page){
     const interval=setInterval(()=>{if(live.program.state.stopped)return;const result=live.poll();controls.dataset.zone=String(result.zone);
       if(result.click){last=result.key||(result.scan===69?'escape':'none');controls.dataset.action=last;}report();},20);
     globalThis.AMOS_MOUSE_DEMO_CLEANUP=()=>{clearInterval(interval);live.dispose();};
-    return{selections,lifecycleChecks,coordinateModes:2,gameRunning:false};
-  },{source,idleSource,panel,timerSource:require('./fakeTimers').createFakeTimers.toString()});
+    return{selections,lifecycleChecks,coordinateModes:2,rollerMouseSteps,gameRunning:false};
+  },{source,idleSource,panel,rollerSource,rollerTitle,timerSource:require('./fakeTimers').createFakeTimers.toString()});
 };

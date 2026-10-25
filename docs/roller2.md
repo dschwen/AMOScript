@@ -22,6 +22,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
 | Original first FLOAD | Unchanged lines 1–18 plus original procedure 63–68 load/fade the first logo; declared Wait Key/End guards stop before WTIN and gameplay |
 | Original intro transition / declared main-title handoff | Unchanged lines 1–20 and WTIN/FDZ/FLOAD now handle input and fade-out. The fixture includes original array/highscore setup 32–56, SASINIT 205–239 and bank loads 275–279, skips remaining setup 281–286, then executes original title load 287; the menu/game remains excluded |
+| Original joystick mouse movement | Original LIMM and lines 299–303 execute in a separate synthetic title-load/step fixture; X/Y Mouse assignment clamps doubled words to explicit bounds. Fourteen keyboard/Gamepad steps pass in the mouse demo; this is not integrated menu selection |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
@@ -63,7 +64,9 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    loads now run, with independent table/score assertions in the same browser demo.
    Next integrate setup 281–286 and the menu.
 3. **Screen/asset setup.** Screen Hide/Show/Clone and Get Palette support the first
-   image. Screen To Front, Rainbow Del and remaining drawing/text forms still need
+   image. Original LIMM and joystick X/Y Mouse movement now run in a bounded
+   [mouse demo fixture](../demos/mouse.html). Mouse Zone, selection branches,
+   Screen To Front, Rainbow Del and remaining drawing/text forms still need
    integration. Double-buffered clone/owner retirement forms remain gated. The tall
    EHB title now retains its full bitmap behind a bounded managed window. Direct
    six-plane sprite images need the original low-four-plane
@@ -86,7 +89,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 557 tests, 31 offline browser scenario pages,
+Local baseline for this slice: 561 tests, 31 offline browser scenario pages,
 179 renderer, eleven Wonderland live-game, seven Roller II first-image and eleven Roller II intro GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.
