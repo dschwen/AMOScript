@@ -1,0 +1,24 @@
+{
+  "name": "bank-word-long-access",
+  "source": "Reserve As Work 4,9\nDoke Start(4)+1,43981\nLoke Start(4)+3,-2147483647\nPrint Deek(Start(4)+1),Leek(Start(4)+3),Peek(Start(4))\n",
+  "programHex": "414d4f532042617369632076312e3030000000b00a0020f2003e00000004005c003e0000000900001100015a01400074003e00000004007cffc0003e00000001005c003e0000abcd0000110021d801400074003e00000004007cffc0003e00000003005c003e8000000100002c00047621f2007401400074003e00000004007cffc0003e00000001007c005c21fe007401400074003e00000004007cffc0003e00000003007c005c21e6007401400074003e00000004007cffc0003e00000000007c0000",
+  "encoding": {
+    "kind": "independent-bytes",
+    "notes": "Explicit original token offsets and big-endian integer/line records, assembled independently with Python struct; no production token table or encoder."
+  },
+  "evidence": {
+    "kind": "source-analysis",
+    "url": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/memory.cpp",
+    "notes": "lib_in_doke/loke and lib_fn_deek/leek preserve big-endian values at odd addresses. Deek zero-extends a word; Leek returns the integer long bit pattern. Checked virtual bank ranges are AMOScript ownership bounds, not machine-address or bus timing emulation. No AMOS execution capture."
+  },
+  "expected": {
+    "values": [
+      [
+        43981,
+        -2147483647,
+        0
+      ]
+    ],
+    "halted": true
+  }
+}

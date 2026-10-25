@@ -1,4 +1,4 @@
-# Bank byte addresses
+# Checked bank memory addresses
 
 The original `Start` (`$0140`), `Peek` (`$21e6`) and `Poke` (`$21ca`) forms now
 work on generic data/work bank payloads. This lets Wonderland's startup read its
@@ -39,8 +39,8 @@ Only generic bank payloads are addressable. `Start` for sprite/icon banks reject
 image headers, raw Amiga RAM, ROM and hardware registers are outside this subset.
 The allocator is separate from display chip memory and does not turn these
 addresses into bitplane/DMA pointers. Zero-length generic payloads may have a
-Start address but no byte can be accessed. No Doke/Deek/Leek, arbitrary memory
-allocation, physical allocation timing or Amiga bus-fault behavior is implied.
+Start address but no byte can be accessed. Arbitrary memory allocation, physical
+allocation timing and Amiga bus-fault behavior remain outside this subset.
 
 Raw [Bload/Bsave](raw-files.md) also use this allocation map. Complete ranges
 must fit one live payload, with Bsave excluding its end address. Bload retains
@@ -62,3 +62,53 @@ Generated modules run without `require` in a sandbox. The shared
 with its original embedded image and level banks, checking seeds
 `55,7,45,10,49`, image masks, sample setup and both startup timing branches.
 These expectations remain source/asset analysis, not Amiga execution captures.
+
+## Word and long access
+
+`Doke` (`$015a`), `Loke` (`$21d8`), `Deek` (`$21f2`) and `Leek` (`$21fe`) now use
+the same checked generic-bank intervals. Reads and writes are big endian, at
+both even and odd addresses. Deek zero-extends two bytes to 0–65535; Leek returns
+the signed 32-bit AMOS integer bit pattern. Doke stores the low sixteen bits and
+Loke all thirty-two bits after shared integer conversion. Addresses are virtual
+addresses, not implicit bank numbers. Static/boxed numeric values, arrays, DATA
+and procedure results keep the existing conversion rules.
+
+Each operation checks its entire two/four-byte range in one live payload.
+Cross-boundary, shrunken-tail and retired addresses reject. Writes validate the
+whole range and invoke the shared mutation guard once before changing any byte;
+failed writes cannot leave a partial update. Active Tracker banks remain readable
+but reject word/long writes just as they reject Poke/Bload. Save and future sample
+reads see the same owned bytes; no shadow representation is introduced.
+
+The final byte values follow pinned `src/lib/memory.cpp` at
+`7f32e0abe1b6b415c9502b598cd3e4cb131018f8`. Its odd-address path explicitly works
+byte by byte. This portable subset does not reproduce bus-access order, hardware
+register side effects, interrupts, alignment faults or arbitrary machine RAM.
+The independent [token-byte fixture](../test/fixtures/conformance/bank-word-long-access.json)
+uses explicit opcodes and line/literal bytes, without the production encoder.
+
+## Roller II level metadata
+
+The [level demo](../demos/roller2-levels.html) executes original game line 608 to
+read BX, BY, BC and `Deek(Start(10)+486)`, then original editor line 474 to write
+`Doke Start(10)+486,TM` and wait for VBL. Synthetic Load/Input# and Wait Key guards
+prepare one level and the replacement time. No game/editor loop, icon addressing,
+rendering or persistent write is claimed; the original game guard remains.
+
+All fifteen supplied level files have a 20-byte AmBk header and 490-byte Work
+payload. They are not fifteen consecutive playable levels: names are 1–11, 16,
+17, 20 and 100. Independent Python extraction in `tools/reference/roller2_levels.py`
+pins their hashes and literal ball/time metadata in
+`test/fixtures/roller2/level-metadata.json`. It imports no AMOScript reader.
+
+Browser and headless checks load every original file, compare its metadata,
+write time 43981, and verify that only bytes 486/487 become AB/CD. Bank identity
+and address remain unchanged. The runnable browser preview can select a level,
+change its in-memory time, and reload the original bytes. Persistence and the
+original editor's complete Save path remain open. These are source/asset-derived
+and browser checks, not native execution captures.
+
+Game entry first calls ICCOPY, whose Start(2)/Leek layout needs raw image-bank
+addressing. Start on image banks still rejects explicitly. These generic-bank
+word/long commands prepare later level work without claiming that ICCOPY or the
+first playable screen has run. Copy/Fill and other game-entry gates remain open.

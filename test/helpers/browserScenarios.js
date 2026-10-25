@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-levels', title: 'Roller II level metadata and word memory', capturedFrames: false, description: 'Original metadata reads and Doke time writes across all fifteen pinned level files, checked against independent headers. Live level/time memory preview; no file persistence, game/editor loop or rendering.', run: require('./roller2LevelProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{levels:15,metadataReads:15,timeWrites:15,persistent:false,gameRunning:false});
+  } },
   { id: 'roller2-menu', title: 'Roller II original intro to guarded menu', initialFrame: 'Canvas: original menu title', description: 'Original startup, intro, initialization, mask/filter/screen setup and menu now execute in order, with continuing MOD music. Ten mouse/keyboard/Gamepad cases reach nine guarded selections. Live WebGL/fullscreen and optional music controls; the selected game/editor/scores/help routines remain excluded.', run: require('./roller2MenuProbe'), check(result, assert) {
     assert.strictEqual(result.cases,10);assert.strictEqual(result.selections,9);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:3);assert.strictEqual(result.guardedTargets,true);assert.strictEqual(result.gameRunning,false);assert.strictEqual(result.connectedStartup,true);
   } },
@@ -248,7 +251,7 @@ const scenarios = [
     assert.deepStrictEqual(result,{fields:9631,orders:22,rows:1376,notes:1997,nativeComparisons:12,instruments:10,nonzero:true,vmPlayback:true});
   } },
   { id:'roller2', capturedFrames:false, title:'Roller II target and MOD inspector', description:'Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original module, instruments and effects. The separate music demo runs compiled Track Play; whole-game compilation remains open.', run:require('./roller2Probe'), check(result,assert){
-    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:22,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
+    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:19,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
   } },
   { id: 'wonderland-game', title: 'Play unmodified Wonderland', initialFrame: 'Original level 1', description: 'The complete original game with default WebGL2 presentation, selectable Canvas 2D, fullscreen, keyboard/Gamepad controls, Stop/Resume and Restart. Input-only keyboard and injected-gamepad replays render three deaths/fades, two life restarts, game over and a fresh game. Enable/Mute controls route original sample commands through Web Audio; three native offline PCM/stereo comparisons cover the replay. No Amiga capture or persistent editor files are claimed.', run: require('./wonderlandGameProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,2);assert.deepStrictEqual(result.deaths,[[2,1,0],[2,1,0]]);

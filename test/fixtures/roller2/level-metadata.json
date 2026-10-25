@@ -1,0 +1,125 @@
+{
+  "evidence": "Independent Python struct/byte extraction from pinned 20-byte AmBk headers plus original payload offsets 482/483/484/486; no AMOScript bank reader. Source/asset-derived, not an Amiga capture.",
+  "levels": [
+    {
+      "level": "1",
+      "sha256": "4c9b4873c72d1f6d01f0ddc6479079309cf741eba90a892cdd6f0b2240d6e41f",
+      "x": 5,
+      "y": 9,
+      "colour": 1,
+      "time": 35
+    },
+    {
+      "level": "2",
+      "sha256": "8b2a9802b7b70164aa004b535821378914a750c9ceb39dc4c703f48e83e8b212",
+      "x": 8,
+      "y": 1,
+      "colour": 1,
+      "time": 30
+    },
+    {
+      "level": "3",
+      "sha256": "8db993a0a261010ebbbde76067fdfcd87e5cdc6b43dd04b57f606048e9ece2ad",
+      "x": 10,
+      "y": 9,
+      "colour": 1,
+      "time": 10
+    },
+    {
+      "level": "4",
+      "sha256": "2a0cb3e5564244848b1b7fff13ea48040d293b0330bb40b370adcbd5a2ef6f16",
+      "x": 12,
+      "y": 4,
+      "colour": 1,
+      "time": 35
+    },
+    {
+      "level": "5",
+      "sha256": "06954aa3b43891a50a135761bdf2a218f901bfcded48a15bdd848d7d24c1becd",
+      "x": 16,
+      "y": 6,
+      "colour": 1,
+      "time": 65
+    },
+    {
+      "level": "6",
+      "sha256": "ef6e131fcb25f437b44d79913c0750ca5a2cb789d79e181be031c664a4f65e83",
+      "x": 16,
+      "y": 6,
+      "colour": 1,
+      "time": 100
+    },
+    {
+      "level": "7",
+      "sha256": "a48a1ccbffda0dfb109abd16cbf86ec3f540ea2129eeb0677320fdcea75cd595",
+      "x": 2,
+      "y": 6,
+      "colour": 1,
+      "time": 300
+    },
+    {
+      "level": "8",
+      "sha256": "6bf0ced4f2c01d3872f2d8004ad035894291e20782004dc2a62c047d7f0dfa17",
+      "x": 6,
+      "y": 4,
+      "colour": 2,
+      "time": 25
+    },
+    {
+      "level": "9",
+      "sha256": "cf3da2137526437c0398eeb8bb50698728a016a7d1682a27ee47531c8da1d252",
+      "x": 6,
+      "y": 7,
+      "colour": 1,
+      "time": 30
+    },
+    {
+      "level": "10",
+      "sha256": "897e3c2d4b09db3d6174058a60c44de958a5cbb827cc654ac47028bf5bb66b8d",
+      "x": 4,
+      "y": 7,
+      "colour": 1,
+      "time": 15
+    },
+    {
+      "level": "11",
+      "sha256": "f31e795e13435cf761625be50f236aac9e8b2c731001afa463ce4d545a9a7156",
+      "x": 4,
+      "y": 7,
+      "colour": 1,
+      "time": 20
+    },
+    {
+      "level": "16",
+      "sha256": "e29c69650342ca3b48010b12aedad5cbde29e4ed382ffc0cf0c1aaebfe0d0a8c",
+      "x": 6,
+      "y": 6,
+      "colour": 1,
+      "time": 300
+    },
+    {
+      "level": "17",
+      "sha256": "e29c69650342ca3b48010b12aedad5cbde29e4ed382ffc0cf0c1aaebfe0d0a8c",
+      "x": 6,
+      "y": 6,
+      "colour": 1,
+      "time": 300
+    },
+    {
+      "level": "20",
+      "sha256": "f0f47b189bbf86ee2d85c34b49accd2aa276a696d1e6290e8a0445251df2e54f",
+      "x": 6,
+      "y": 9,
+      "colour": 1,
+      "time": 300
+    },
+    {
+      "level": "100",
+      "sha256": "907960307e8f6c563dc93be31b04da1c76e20ac785925e05e44117e3c6509c63",
+      "x": 0,
+      "y": 0,
+      "colour": 1,
+      "time": 300
+    }
+  ]
+}

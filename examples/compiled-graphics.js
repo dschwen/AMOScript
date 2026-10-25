@@ -3858,6 +3858,10 @@
     bankStart: number => bankMemory.start(integer(number)),
     peek: address => bankMemory.peek(integer(address)),
     poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    deek: address => bankMemory.deek(integer(address)),
+    leek: address => bankMemory.leek(integer(address)),
+    doke: (address, value) => bankMemory.doke(integer(address), integer(value)),
+    loke: (address, value) => bankMemory.loke(integer(address), integer(value)),
     keySpeed(delay, interval) {
       delay = integer(delay); interval = integer(interval);
       if (delay < 0 || interval < 0) throw new Error('Invalid Key Speed');
@@ -4143,7 +4147,22 @@
     }
     throw new Error('Bank memory address out of bounds or retired');
   }
+  function readNumber(address, length) {
+    const { bank, offset } = resolve(address, length);
+    let value = 0;
+    for (let index = 0; index < length; index++) value = (value << 8) | bank.data[offset + index];
+    return value;
+  }
+  function writeNumber(address, value, length) {
+    const { bank, offset } = resolve(address, length);
+    if (options.beforeWrite) options.beforeWrite(bank);
+    for (let index = 0; index < length; index++) bank.data[offset + index] = (value >>> ((length - index - 1) * 8)) & 255;
+  }
   return { start,
+    deek: address => readNumber(address, 2),
+    leek: address => readNumber(address, 4),
+    doke: (address, value) => writeNumber(address, value, 2),
+    loke: (address, value) => writeNumber(address, value, 4),
     address(value) {
       // Original bank_or_address treats operands below 1024 as bank numbers.
       const address = value < 1024 ? start(value) : value;

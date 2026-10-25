@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-levels.html",
+      "title": "Roller II level metadata and word memory",
+      "description": "Original metadata reads and Doke time writes across all fifteen pinned level files, checked against independent headers. Live level/time memory preview; no file persistence, game/editor loop or rendering.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-levels.html"
+    },
+    {
       "file": "roller2-menu.html",
       "title": "Roller II original intro to guarded menu",
       "description": "Original startup, intro, initialization, mask/filter/screen setup and menu now execute in order, with continuing MOD music. Ten mouse/keyboard/Gamepad cases reach nine guarded selections. Live WebGL/fullscreen and optional music controls; the selected game/editor/scores/help routines remain excluded.",

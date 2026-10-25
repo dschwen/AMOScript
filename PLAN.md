@@ -6,7 +6,7 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 22 remain unrecognized (43 at
+The main source has 1,199 lines and 194 encodings; 19 remain unrecognized (43 at
 initial assessment), and whole compilation stops at Boom on line 161.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
@@ -38,7 +38,12 @@ menu fixture now runs the original executable prefix through 316, including both
 FLOADs, setup 281–286 and continuing MOD playback: ten browser cases, nine guarded
 selections and three independent/GPU frames. The live demo offers music activation/
 mute and restart-safe bindings. Next implement the selected routines and their
-dependencies, alongside the remaining decoder gate at Boom. Game-over/win
+dependencies, alongside the remaining decoder gate at Boom. Checked big-endian
+Doke/Deek/Loke/Leek now support generic banks, including odd addresses and atomic
+range checks. Original level metadata/time statements pass across all fifteen
+pinned files in a new demo. First game entry still stops at ICCOPY’s raw icon-bank
+addressing requirement; Start(image bank), Copy/Fill and later gates remain open.
+Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
@@ -149,7 +154,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **570 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **577 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

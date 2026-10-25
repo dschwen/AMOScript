@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-25. The current local baseline has **570 passing tests**, plus a
+Updated 2026-10-25. The current local baseline has **577 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,7 +9,7 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 22 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 19 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
 compilation stops at Boom. Original WTIN/FDZ now run in a declared fixture that
@@ -52,7 +52,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Screen windows / scrolling | Implemented bounded subset | Screen Display/Screen Offset, staged nonoverlapping windows, physical-buffer coarse/fine scrolling and shared Canvas/CPU/GPU snapshots. Original game/editor setup fixture and independent landscape/panel pixels pass; general placement/priority, wrapped DMA, HAM fine scrolling and exact timing remain open. [Contract](screen-windows.md). |
 | Joystick queries / browser mapping | Implemented subset | Joy plus five AMOS boolean queries, independent ports 0/1, optional configurable keyboard and standard/raw Gamepad API mappings, focus/lifecycle/disconnect cleanup. Original menu fixture and injected device tests pass; physical-controller/Amiga captures remain open. [Contract](joysticks.md). |
 | IFF screen loading / rainbow rows / views | Implemented subset | Current/new-screen opaque Load Iff and bounded lowres full-bitmap AMSC placement; blank rainbow tables, Rain read/write and bounded PAL row presentation through shared copper/CPU/GPU snapshots; staged screen replacement/visibility with Auto View/View. Pattern strings, active NTSC, laced/remaining AMSC forms and exact display-list timing remain open. [Contract](title-display.md). |
-| Generic bank byte access | Implemented subset | Start returns per-factory virtual addresses; Peek reads unsigned bytes and Poke stores low bytes in the shared bank payload. Swap/shrink retain surviving addresses; erasure/reload retire them. Image-bank/raw hardware addresses reject. [Contract](bank-memory.md). |
+| Generic bank byte/word/long access | Implemented bounded subset | Start returns per-factory addresses; Peek/Poke, big-endian Deek/Doke and Leek/Loke share owned payloads. Odd addresses work; complete ranges validate before writes, including active-Tracker protection. Swap/shrink retain surviving addresses; reload/erasure retire them. All fifteen Roller II headers and original time writes pass. Image-bank/raw hardware addresses still reject. [Contract](bank-memory.md). |
 | Keyboard repeat | Implemented subset | Key Speed uses fixed 50ths; Canvas repeats held keys with native duplicates suppressed and release/blur/Stop/detach/End cleanup. Zero-period and large-word cases remain unsupported. [Contract](key-speed.md). |
 | Music extension / sample audio | Implemented subset | Bounded slot-1 decoding for bank selection, sample play/stop, loop settings and Led On/Off. Original Samples descriptors, four voice masks, Paula-derived rates, optional Web Audio stereo adapter, user-activated live-game sound, context/binding ownership, lifecycle cleanup and offline PCM comparisons. Analog response is approximate; other music commands remain unsupported. [Contract](audio.md). |
 | Startup / host environment | Implemented subset | Leading literal `Set Buffer` is preserved as compile metadata, without AMOS heap capacity enforcement. `Amos Lock`/`Close Editor` update logical host state and call an optional synchronous adapter. [Contract and limits](startup.md). |

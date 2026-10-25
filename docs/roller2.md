@@ -15,7 +15,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 22 after tracker/startup, FLOAD screen/procedure commands and Mouse Zone |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 19 after tracker/startup, screen/menu commands and word/long memory access |
 | Whole-source compiler gate | Unsupported extension `1:$0074` Boom at line 161, byte 7,850; recognition alone still does not prove parser/runtime support for later forms |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
@@ -24,6 +24,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Original intro transition / declared main-title handoff | Unchanged lines 1–20 and WTIN/FDZ/FLOAD now handle input and fade-out. The fixture includes original array/highscore setup 32–56, SASINIT 205–239 and bank loads 275–279, skips remaining setup 281–286, then executes original title load 287; the menu/game remains excluded |
 | Original joystick mouse movement | Original LIMM and lines 299–303 execute in a separate synthetic title-load/step fixture; X/Y Mouse assignment clamps doubled words to explicit bounds. Fourteen keyboard/Gamepad steps pass in the mouse demo; this is not integrated menu selection |
 | Connected intro and guarded menu | Original executable sequence through 316 now runs, including setup 281–286, original FLOADs, continuing tracker and menu. Destination guards replace game/editor/scores/help routines. Ten connected browser cases select nine outcomes; three independent/GPU states and optional music controls. [Contract](roller2-menu.md) |
+| Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; game entry still requires raw ICCOPY image-bank addressing. [Demo](../demos/roller2-levels.html) |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
@@ -75,7 +76,11 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    EHB title now retains its full bitmap behind a bounded managed window. Direct
    six-plane sprite images need the original low-four-plane
    hardware behavior; the current AMOS bridge rejects depths above four.
-4. **First playable level.** Add Add/Swap forms, checked Doke/Deek/Leek/Copy/Fill,
+4. **First playable level.** Checked generic-bank Doke/Deek/Leek/Loke are now
+   implemented, with original level metadata/time statements checked across all
+   fifteen files. First game entry calls ICCOPY, which needs raw Start(2) image-bank
+   addressing; this remains explicitly rejected. Next add that bridge, Copy/Fill,
+   Add/Swap forms,
    Get Icon, Scin and Key State as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
    against the unchanged source and level data. Wider general forms remain gates.
@@ -93,7 +98,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 570 tests, 32 offline browser scenario pages,
+Local baseline for this slice: 577 tests, 33 offline browser scenario pages,
 179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

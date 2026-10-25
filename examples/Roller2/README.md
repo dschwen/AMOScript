@@ -36,3 +36,7 @@ The [connected menu demo](../../demos/roller2-menu.html) now joins original star
 intro, initialization, setup and menu with continuing MOD playback. Optional sound
 controls and WebGL/fullscreen share the live host. Explicit destination guards
 stop before selected game/editor/scores/help routines.
+
+The [level metadata demo](../../demos/roller2-levels.html) executes original time
+reads/writes across all fifteen pinned level files. Edits affect memory only;
+the original game/editor loops and file persistence remain excluded.

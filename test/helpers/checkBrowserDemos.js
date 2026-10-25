@@ -20,6 +20,16 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-levels'){
+        assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-time'),'35');
+        await page.selectOption('#roller2-level-select','7');assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-time'),'300');
+        await page.fill('#roller2-level-time','513');await page.click('#roller2-level-apply');
+        assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-time'),'513');assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-phase'),'edited');
+        await page.click('#roller2-level-load');assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-time'),'300');
+        await page.fill('#roller2-level-time','1.5');await page.click('#roller2-level-apply');assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-phase'),'error');
+        await page.click('#roller2-level-load');assert.strictEqual(await page.locator('#roller2-level-controls').getAttribute('data-phase'),'loaded');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_LEVEL_CLEANUP());
+      }
       if(scenario.id==='roller2-menu'){
         await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='intro-input');
         assert.strictEqual(await page.locator('#roller2-menu-controls').getAttribute('data-backend'),'webgl');

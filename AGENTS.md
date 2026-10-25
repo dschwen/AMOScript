@@ -72,7 +72,10 @@
   rejection bound, independent vectors and original enemy fixtures.
 - `lib/amos/bankMemory.js` maps generic-bank payloads to checked per-factory
   virtual addresses for Start/Peek/Poke. These are separate from display chip
-  addresses. Preserve addresses across swap/shrink; retire them on replacement
+  addresses. Doke/Deek and Loke/Leek use checked complete two/four-byte ranges,
+  big endian and odd addresses; writes preflight and share the active-Tracker
+  guard. Deek zero-extends; Leek returns signed integer bits. Start(image bank)
+  stays unsupported, including Roller II ICCOPY. Preserve addresses across swap/shrink; retire them on replacement
   or erasure. See `docs/bank-memory.md`. Canvas Key Speed repeats use fixed
   50ths and input-reset subscriptions for lifecycle cleanup; see `docs/key-speed.md`.
 - `lib/amos/mod.js` decodes owned four-channel M.K. files without playback.

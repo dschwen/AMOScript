@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('roller2-levels',page);await page.evaluate(()=>globalThis.AMOS_ROLLER2_LEVEL_CLEANUP());
+    console.log('Roller2 level metadata passed: fifteen original headers, checked word/long reads and original Doke edits without persistence.');
     const rollerMenu=await runScenario('roller2-menu',page);assert.strictEqual(rollerMenu.gpuFrames,3);
     await page.evaluate(()=>globalThis.AMOS_ROLLER2_MENU_CLEANUP());
     console.log('Roller2 menu passed: connected original startup/intro/setup, continuing tracker, nine guarded selections and three independent/WebGL frames.');
