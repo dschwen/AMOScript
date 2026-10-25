@@ -15,21 +15,24 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 39 after Track Load/Loop On/Play/Stop |
-| Whole-source compiler gate | Unsupported `$2b9e` Set Stack at line 2, byte 34; the full decoder checks all source, so later forms also need support |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 30 after tracker and startup/path/boolean/pointer commands |
+| Whole-source compiler gate | Unsupported `$033c` Pop Proc at line 47, byte 1,920; the full decoder checks all source, so later forms also need support |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
+| Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
 | Sprites/icons | Four sprites; 117 icons; includes six-plane assets |
-| Images | All five supplied primary IFFs decode already; title is 320×512, six-plane EHB; the others are 320×256, five planes |
-| Browser evidence | [Original-load/MOD inspector](../demos/roller2.html) and [compiled original music statements](../demos/tracker.html), with HTML Preview links from the gallery; no gameplay yet |
+| Images | All five supplied primary IFFs decode in the pure reader; runtime Load Iff rejects the first `terminator el` image's AMSC chunk. `over` and the win image also carry AMSC. The main title is 320×512, six-plane EHB |
+| Browser evidence | [Original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [compiled music statements](../demos/tracker.html), with HTML Preview links from the gallery; no title rendering/gameplay yet |
 
-The independent original statement fixture preserves its bytes, but excludes
+The independent load-only statement fixture preserves its bytes, but excludes
 Dir$, TRUE, Track Play, startup controls, procedures and gameplay. It is not a
 modified full game advertised as compatibility. File lookup is a prepared,
-case-insensitive `RII:` mapping; native relative-directory semantics remain open.
+case-insensitive `RII:` mapping. The separate original startup prefix now executes
+Dir$/TRUE/Track Play through Hide. Per-program directory prefixes and synchronous
+Exist metadata queries are implemented; parent/assign/lock semantics remain open.
 
 ## Work in execution order
 
@@ -44,11 +47,12 @@ case-insensitive `RII:` mapping; native relative-directory semantics remain open
    pause freezes the sequencer but does not restore held sample phase. Bank
    replacement/erasure/shrink, active-write rejection and failures are covered.
    Wider effects, exact DMA/sample interrupt contention and captures remain open.
-2. **Startup and the first title.** Implement Set Stack and Break Off with explicit
-   portable semantics; boolean TRUE/FALSE and Not; Dir$ and Exist; Hide/Show
-   overloads; Pop Proc and the original `FLOAD`/wait/fade routines. Do not register
-   names without parser/lowerer/runtime behavior. The first actual image request
-   is `terminator el`.
+2. **Startup and the first title.** Set Stack metadata, Break Off host flag,
+   TRUE/FALSE/Not, Dir$/Exist and nested Hide/Show now execute with explicit
+   portable contracts. The unchanged first 17 physical lines pass with a synthetic
+   Wait Key guard. Next implement Pop Proc and the original FLOAD/wait/fade
+   routines. The first image request is `terminator el`, whose AMSC placement is
+   still rejected by runtime Load Iff; do not confuse pure decoding with execution.
 3. **Screen/asset setup.** Screen Hide/Show/Clone, Get Palette, Screen To Front,
    Rainbow Del and supported drawing/text forms need integration. The tall EHB
    title requires a bounded presentation window, not an unrepresentable 512-line
@@ -72,7 +76,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 527 tests, 28 offline browser scenario pages,
+Local baseline for this slice: 540 tests, 29 offline browser scenario pages,
 the existing 179 renderer plus eleven live-game GPU/CPU comparisons, and existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

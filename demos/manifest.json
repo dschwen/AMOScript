@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-startup.html",
+      "title": "Roller II original startup",
+      "description": "Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original sample/tracker loads and Hide. Step/reset controls inspect the silent field clock; native Canvas checks cover nested Hide/Show. The captured default screen precedes FLOAD; title rendering and gameplay remain open.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html"
+    },
+    {
       "file": "tracker.html",
       "title": "Play Roller II MOD music",
       "description": "Original bounded load/Led Off/Track Play statements run in a compiled VM, with independent field wakes, Pause/Resume and Stop. All 1,997 notes and ten instrument waveforms pass source-derived/native Web Audio checks. Full-game integration remains open.",

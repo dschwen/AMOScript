@@ -20,6 +20,11 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-startup'){
+        await page.click('#roller2-startup-step');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'12');
+        await page.click('#roller2-startup-reset');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'0');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_STARTUP_CLEANUP());
+      }
       if(scenario.id==='tracker'){
         await page.click('#tracker-play');await page.waitForFunction(()=>Number(document.getElementById('tracker-status').dataset.field)>=6);
         await page.click('#tracker-pause');await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='paused');

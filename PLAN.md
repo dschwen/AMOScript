@@ -6,8 +6,8 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 39 remain unrecognized (43 at
-initial assessment), and whole compilation stops at Set Stack on line 2.
+The main source has 1,199 lines and 194 encodings; 30 remain unrecognized (43 at
+initial assessment), and whole compilation stops at Pop Proc on line 47.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -16,8 +16,12 @@ plays the original tune with C/A/E/F/D effects. Compiled Track Play/Stop now use
 driver-owned field wakes and shared sample voices; the browser player runs bounded
 original music statements, with all 1,997 note triggers and twelve native audio
 comparisons. Host pause freezes the sequencer and silences held samples; Resume
-continues at the next field without replaying elapsed notes. Next implement
-startup/path/screen forms and an original first-level replay. Game-over/win
+continues at the next field without replaying elapsed notes. The unchanged first
+17 startup lines now run through directive metadata, Break Off, Dir$, True,
+music and Hide, with a declared Wait Key guard. Not/False/Exist and nested
+pointer visibility are also supported. Next implement Pop Proc, FLOAD screen
+visibility/palette forms and the first image's AMSC placement contract, then
+title/level replays. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
@@ -128,7 +132,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **527 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **540 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

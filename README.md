@@ -9,7 +9,9 @@ The current target is **Roller II** from the supplied `RII/` directory. Its
 record the initial gaps and implemented original load statements.
 [Play Roller II's MOD tune](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tracker.html)
 through compiled original Track Play statements, with Pause/Resume and Stop.
-Full-game compilation is still in progress.
+The [unchanged first 17 startup lines](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html)
+now execute through directory setup, music and pointer hiding. Title rendering
+and full-game compilation are still in progress.
 Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).

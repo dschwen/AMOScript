@@ -34,6 +34,15 @@
 - `lib/amos/operations.js` implements language operations; `display.js` models
   indexed screens; `font.js` supplies glyphs; `files.js` provides synchronous
   memory/Node file adapters. Host-specific APIs belong in adapters.
+  Dir$ owns a per-program verified prefix; Exist uses strict synchronous boolean
+  metadata, never file reads. Route all transfers through one prefix and retain
+  resolved write/channel names across host callbacks. Case/volume mapping stays
+  in adapters; parent/assign/lock forms remain open. See `docs/directories.md`.
+  Set Stack is frozen compilation metadata, not native stack allocation; Break
+  Off records a host flag/hook without disabling host Stop. True/False/Not use
+  integer AMOS values; Hide/Show have signed-word nesting and On resets. The
+  unchanged first 17 Roller II lines stop at a synthetic Wait Key, before FLOAD
+  and AMSC title placement. See `docs/startup.md` and `docs/roller2.md`.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/

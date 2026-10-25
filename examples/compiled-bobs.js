@@ -2188,6 +2188,11 @@
   let spritesDirty = false;
   let automaticSprites = true;
   let pointerVisible = true;
+  let pointerCount = 0;
+  function setPointerCount(count) {
+    pointerCount = (count << 16) >> 16;
+    pointerVisible = pointerCount >= 0; display.invalidate();
+  }
   let drawnBobs = [];
   let bobsDirty = false;
   let automaticBobs = true;
@@ -2398,6 +2403,7 @@
     return mask & bit ? -1 : 0;
   }
   state.system = { amosLocked: false, amosFront: true, editorOpen: false };
+  state.breakEnabled = true;
   function systemCommand(name) {
     if (options.system != null) {
       if (typeof options.system.command !== 'function') throw new Error('System host requires a synchronous command method');
@@ -2406,6 +2412,7 @@
     }
     if (name === 'Amos Lock') { state.system.amosLocked = true; state.system.amosFront = true; }
     if (name === 'Close Editor') state.system.editorOpen = false;
+    if (name === 'Break Off') state.breakEnabled = false;
   }
 
   function spriteNumber(number) {
@@ -2690,6 +2697,35 @@
     hotSpot(number, x === 0 ? 0 : x === 1 ? Math.floor(image.width / 2) : image.width, y === 0 ? 0 : y === 1 ? Math.floor(image.height / 2) : image.height);
   }
 
+  let directory = '';
+  function checkDirectoryPath(path) {
+    if (!path || path.includes('\0') || path.startsWith('/') || path.startsWith(':') ||
+        /(^|[:/])\.{1,2}(\/|$)|\/\//.test(path) || (path.match(/:/g) || []).length > 1) throw new Error('Unsupported directory path');
+  }
+  function resolveFileName(name) {
+    if (typeof name !== 'string') throw new Error('Filename must be a string');
+    if (!directory) return name;
+    checkDirectoryPath(name);
+    return name.includes(':') ? name : directory + name;
+  }
+  function setDirectory(name) {
+    if (typeof name !== 'string') throw new Error('Dir$ requires a string');
+    checkDirectoryPath(name);
+    const path = resolveFileName(name), target = /[:/]$/.test(path) ? path : `${path}/`;
+    if (!options.files || typeof options.files.isDirectory !== 'function') throw new Error('Dir$ requires a synchronous files.isDirectory adapter');
+    const exists = options.files.isDirectory(target);
+    if (typeof exists !== 'boolean') throw new Error('Files isDirectory must return a boolean synchronously');
+    if (!exists) throw new Error(`Directory not found: ${target}`);
+    directory = target;
+  }
+  function fileExists(name) {
+    if (typeof name !== 'string') throw new Error('Exist requires a string');
+    if (!name) return 0;
+    if (!options.files || typeof options.files.exists !== 'function') throw new Error('Exist requires a synchronous files.exists adapter');
+    const exists = options.files.exists(resolveFileName(name));
+    if (typeof exists !== 'boolean') throw new Error('Files exists must return a boolean synchronously');
+    return exists ? -1 : 0;
+  }
   function fileSelector(path, defaultName = '', title1 = '', title2 = '') {
     const valid = value => typeof value === 'string' && value.length <= 255 && !/[^\x01-\xff]/.test(value);
     if (![path, defaultName, title1, title2].every(valid)) throw new Error('Fsel$ requires NUL-free byte strings of at most 255 bytes');
@@ -2701,7 +2737,7 @@
   function bload(filename, destination) {
     const address = bankMemory.address(integer(destination));
     if (!options.files || typeof options.files.read !== 'function') throw new Error('Bload requires a files host adapter');
-    const contents = options.files.read(filename);
+    const contents = options.files.read(resolveFileName(filename));
     if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return raw bytes synchronously');
     bankMemory.checkRange(address, contents.length);
     bankMemory.write(address, Uint8Array.from(contents, char => char.charCodeAt(0)));
@@ -2711,10 +2747,11 @@
     if (stop <= address) throw new Error('Invalid Bsave range (end must follow start)');
     const bytes = bankMemory.read(address, stop - address);
     if (!options.files || typeof options.files.write !== 'function') throw new Error('Bsave requires a files host adapter');
+    const path = resolveFileName(filename);
     let contents = '';
     for (let at = 0; at < bytes.length; at += 8192) contents += String.fromCharCode(...bytes.subarray(at, at + 8192));
     const write = text => {
-      const result = options.files.write(filename, text);
+      const result = options.files.write(path, text);
       if (result && typeof result.then === 'function') throw new Error('Files host must write raw bytes synchronously');
     };
     write(''); write(contents);
@@ -2724,7 +2761,7 @@
     if (destination != null && destination >= 65536) throw new Error('Invalid bank number');
     if (!options.files || typeof options.files.read !== 'function') throw new Error('Bank loading requires a files host adapter');
     if (typeof bankReaderFactory !== 'function') throw new Error('Bank loading requires the BankReader runtime');
-    const contents = options.files.read(filename);
+    const contents = options.files.read(resolveFileName(filename));
     if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return a bank byte string synchronously');
     const decoded = bankReaderFactory.readFile(Uint8Array.from(contents, char => char.charCodeAt(0)));
     const loaded = decoded.banks.map(bank => {
@@ -2746,7 +2783,7 @@
     number = integer(number);
     if (number < 1 || number >= 65536) throw new Error('Invalid Track Load bank number');
     if (!options.files || typeof options.files.read !== 'function') throw new Error('Track Load requires a files host adapter');
-    const contents = options.files.read(filename);
+    const contents = options.files.read(resolveFileName(filename));
     if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return tracker bytes synchronously');
     if (contents.length > 16 * 1024 * 1024) throw new Error('Tracker file exceeds 16 MiB');
     const data = new Uint8Array(contents.length + 32);
@@ -2760,7 +2797,7 @@
   function loadIff(filename, destination = null) {
     if (!options.files || typeof options.files.read !== 'function') throw new Error('Load Iff requires a files host adapter');
     if (typeof ilbmReaderFactory !== 'function') throw new Error('Load Iff requires the ILBM runtime');
-    const contents = options.files.read(filename);
+    const contents = options.files.read(resolveFileName(filename));
     if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return IFF bytes synchronously');
     const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
     const mode = image.hasMode ? image.displayMode :
@@ -2872,8 +2909,9 @@
   function saveBanks(filename, number = null) {
     if (!options.files || typeof options.files.write !== 'function') throw new Error('Bank saving requires a files host adapter');
     if (typeof bankWriterFactory !== 'function') throw new Error('Bank saving requires the BankWriter runtime');
+    const path = resolveFileName(filename);
     const write = contents => {
-      const result = options.files.write(filename, contents);
+      const result = options.files.write(path, contents);
       if (result && typeof result.then === 'function') throw new Error('Files host must write bank bytes synchronously');
     };
     if (number != null) number = integer(number);
@@ -3565,6 +3603,7 @@
     if (!Number.isInteger(number) || number < 1 || number > 10) throw new Error('Invalid file channel');
     if (channels.has(number)) throw new Error('File channel is already open');
     if (!options.files || typeof options.files.read !== 'function' || typeof options.files.write !== 'function') throw new Error('File I/O requires a files host adapter');
+    name = resolveFileName(name);
     let contents = '';
     if (mode !== 'Open Out') {
       try { contents = options.files.read(name); }
@@ -3660,6 +3699,7 @@
   }
 
   return {
+    setDirectory, currentDirectory: () => directory, fileExists,
     trackPlay, trackStop, advanceTracker, pauseTracker, resumeTracker,
     nextTrackerVbl: () => trackerNext,
     trackerLocation: () => trackerLocation,
@@ -3682,8 +3722,10 @@
     sprites, setSprite, spriteInfo, spriteOff, updateSprites, spritePriority,
     spriteUpdateOn: () => { automaticSprites = true; },
     spriteUpdateOff: () => { automaticSprites = false; },
-    hideOn: () => { pointerVisible = false; display.invalidate(); },
-    showOn: () => { pointerVisible = true; display.invalidate(); },
+    hide: () => setPointerCount(pointerCount - 1),
+    show: () => setPointerCount(pointerCount + 1),
+    hideOn: () => setPointerCount(-1),
+    showOn: () => setPointerCount(0),
     mouseVisible: () => pointerVisible,
     bobs, setBob, configureBob, bobInfo, bobOff, updateBobs, flushBobs, doubleBuffer,
     bobCollision, collisionInfo,
@@ -3745,6 +3787,7 @@
     ledOn: () => audio.filter(true),
     ledOff: () => audio.filter(false),
     amosLock: () => systemCommand('Amos Lock'),
+    breakOff: () => systemCommand('Break Off'),
     closeEditor: () => systemCommand('Close Editor'),
     stringFunction, replaceSubstring, formatUsing, fileOpen, fileClose, filePrint, fileRead, fileInfo,
     min: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, false),
@@ -4410,7 +4453,7 @@
     cases[38] = function(state){ state.location = {"line":35,"offset":774}; program.updateBobs(); return {}; };
     cases[39] = function(state){ state.location = {"line":36,"offset":780}; return { halt: true }; };
     const program = createProgram(cases, Object.assign({}, opts, { banks: [{"number":1,"type":"sprites","images":[{"width":16,"height":16,"depth":4,"hotspotX":8,"hotspotY":8,"pixels":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,2,2,5,5,2,2,5,3,0,0,0,0,0,0,3,5,2,2,5,5,2,2,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,2,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,3,3,3,3,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,5,5,5,5,5,5,5,5,3,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"palette":[0,291,4095,3968,143,712,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}] }));
-    program.compilation = Object.freeze({ variableBufferBytes: null });
+    program.compilation = Object.freeze({ variableBufferBytes: null, stackEntries: null });
     program.state.data = { entries: dataTables["@main"], index: 0 };
     program.state.variables = Object.create(null);
     Object.defineProperty(program.state.variables, "int_hitstart", { enumerable: true, get: () => int_hitstart });

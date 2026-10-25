@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-25. The current local baseline has **527 passing tests**, plus a
+Updated 2026-10-25. The current local baseline has **540 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,9 +9,10 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 39 still unrecognized. Original sample/Track Load/Led Off/Track Play
-statements execute in a bounded standalone browser VM; whole compilation remains
-open. Wonderland remains a
+encodings, 30 still unrecognized. Its unchanged first 17 startup lines now execute
+in a bounded standalone browser VM, including original paths, music and Hide.
+Whole compilation stops at Pop Proc; runtime AMSC title placement is also open.
+Wonderland remains a
 [working regression target](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
 Load Iff and the original title/menu marker Bob. The unmodified complete source
@@ -30,6 +31,8 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
 | MOD / tracker | Implemented bounded playback | Owned M.K. decoder, Track Load/Loop/Play/Stop and C/A/E/F/D effects. Driver-owned VBL wakes share sample voices, cancel on End/failure/bank retirement, and pause without elapsed-note replay. Original music fixture matches 1,997 notes and twelve native Web Audio comparisons. Held sample phase after pause, wider effects, exact DMA contention, live bank editing and AMOS Music-bank playback remain open. [Contract](mod-tracker.md). |
+| Roller II startup | Implemented bounded prefix | Unchanged lines 1–17 with synthetic Wait Key; Set Stack metadata, Break Off flag/hook, True/False/Not and nested Hide/Show. Native stack allocation, Control-C interrupts, Pop Proc/FLOAD/title rendering remain open. [Startup contract](startup.md). |
+| Dir$ / Exist | Implemented bounded subset | Per-program verified directory prefixes, strict synchronous metadata queries, common transfer/channel path routing, memory/Node metadata and explicit RII case mapping. Parent/assign/lock semantics and persistent browser storage remain open. [Contract](directories.md). |
 | Original Wonderland session | Implemented first-level subset | Complete source/assets, default WebGL2/explicit Canvas switching and live keyboard/Gamepad mapping and Stop/Resume/Restart; input-only death/fade/game-over/fresh-game replays and jump/scroll/Escape checks. Original Web Audio sample effects, Enable/Mute and owned context cleanup pass; native timing/captures, all-level/win paths and editor files remain open. [Contract](wonderland-game.md). |
 | Fsel$ / whole-program compilation | Implemented prepared-host subset | Four string overloads, synchronous host choices/cancellation, original retry/Gosub/Return and selected load/save calls. Unmodified Wonderland compiles and enters its own game branch; four physical frames render across two controlled seconds. Native requester UI and async modal expression continuation remain open. [Contract](file-selector.md). |
 | Rnd / Randomize | Implemented source-derived subset | Per-factory word-arithmetic seed transition, integer mask/rejection, cached zero-bound reads, reseeding and optional controlled beam input. Eighteen original enemy streams pass independent vectors. Default seed/beam are zero; native startup/beam timing and captures remain open. [Contract](random.md). |

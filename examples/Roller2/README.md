@@ -23,3 +23,5 @@ See [the milestone](../../docs/roller2.md) and
 [music demo](../../demos/tracker.html) now plays the main MOD through bounded
 compiled original statements. Full-game compilation and the separate AMOS Music
 bank end tunes remain open.
+The [startup demo](../../demos/roller2-startup.html) runs the unchanged first 17
+physical lines with a synthetic Wait Key guard before the first image request.
