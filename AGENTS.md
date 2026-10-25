@@ -62,7 +62,8 @@
   The connected menu fixture retains original executable startup through 316,
   including Make Icon Mask, Led Off, screen retirement and continuing MOD music.
   Only unused procedures/comments are omitted; destination guards stop before
-  game/editor/scores/help routines. Its WebGL/fullscreen host reuses browserAudio
+  game screen/level setup and editor/scores/help routines. Game selection now
+  runs original ICCOPY entry through 570 before its guard. Its WebGL/fullscreen host reuses browserAudio
   for gesture activation, mute, Restart bindings and owned-context closure.
   See `docs/roller2-menu.md`; selected routines/gameplay remain open.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
@@ -74,8 +75,11 @@
   virtual addresses for Start/Peek/Poke. These are separate from display chip
   addresses. Doke/Deek and Loke/Leek use checked complete two/four-byte ranges,
   big endian and odd addresses; writes preflight and share the active-Tracker
-  guard. Deek zero-extends; Leek returns signed integer bits. Start(image bank)
-  stays unsupported, including Roller II ICCOPY. Preserve addresses across swap/shrink; retire them on replacement
+  guard. Deek zero-extends; Leek returns signed integer bits. Bounded raw icon
+  count/pointer/header/planar views now support ICCOPY; sprite banks and raw icon
+  metadata/mask-pointer access remain gated. Raw planar writes update canonical
+  indexed pixels and preserve old masks. Rounded padding is separate, owned and
+  zero-initialized as a portable default. See `docs/icon-memory.md`. Preserve addresses across swap/shrink; retire them on replacement
   or erasure. See `docs/bank-memory.md`. Canvas Key Speed repeats use fixed
   50ths and input-reset subscriptions for lifecycle cleanup; see `docs/key-speed.md`.
 - `lib/amos/mod.js` decodes owned four-channel M.K. files without playback.

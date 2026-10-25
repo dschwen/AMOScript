@@ -35,8 +35,10 @@ exhaustion throws rather than wrapping or aliasing another allocation.
   Missing banks, foreign/unmapped addresses and retired/out-of-bounds bytes fail
   with the executing instruction's source location.
 
-Only generic bank payloads are addressable. `Start` for sprite/icon banks rejects;
-image headers, raw Amiga RAM, ROM and hardware registers are outside this subset.
+Generic bank payloads and bounded icon-bank table/record views are addressable.
+[Raw icon memory](icon-memory.md) now supports original ICCOPY, preserving indexed
+pixels and separate masks. Sprite banks, metadata writes, raw Amiga RAM, ROM and
+hardware registers remain outside this subset.
 The allocator is separate from display chip memory and does not turn these
 addresses into bitplane/DMA pointers. Zero-length generic payloads may have a
 Start address but no byte can be accessed. Arbitrary memory allocation, physical
@@ -108,7 +110,6 @@ change its in-memory time, and reload the original bytes. Persistence and the
 original editor's complete Save path remain open. These are source/asset-derived
 and browser checks, not native execution captures.
 
-Game entry first calls ICCOPY, whose Start(2)/Leek layout needs raw image-bank
-addressing. Start on image banks still rejects explicitly. These generic-bank
-word/long commands prepare later level work without claiming that ICCOPY or the
-first playable screen has run. Copy/Fill and other game-entry gates remain open.
+Game entry now runs original ICCOPY through bounded Start(2)/Leek icon views;
+see [its contract](icon-memory.md). Generic-bank word/long commands also prepare
+later level work. Screen/level setup, Copy/Fill and other gameplay gates remain open.

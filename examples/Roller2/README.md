@@ -35,8 +35,12 @@ image-bank loading now run; setup 281–286, the menu and gameplay remain open.
 The [connected menu demo](../../demos/roller2-menu.html) now joins original startup,
 intro, initialization, setup and menu with continuing MOD playback. Optional sound
 controls and WebGL/fullscreen share the live host. Explicit destination guards
-stop before selected game/editor/scores/help routines.
+stop before game screen/level setup and editor/scores/help routines.
 
 The [level metadata demo](../../demos/roller2-levels.html) executes original time
 reads/writes across all fifteen pinned level files. Edits affect memory only;
 the original game/editor loops and file persistence remain excluded.
+
+The [icon-copy inspector](../../demos/roller2-icons.html) shows original ICCOPY
+through bounded raw icon views. Connected menu game selection now reaches these
+original entry calls, then guards before game screen/level setup.

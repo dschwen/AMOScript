@@ -18,10 +18,11 @@ with keyboard, mouse or gamepad input. Original highscore/table initialization
 and work/icon/sprite bank loads now run; the declared title handoff still omits
 setup 281–286. [Run the original intro through menu selection](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html)
 with optional MOD music and WebGL/fullscreen. Original startup and setup now
-lead into pointer/keyboard/Gamepad menu branches; destination guards stop before
-selected routines. [Inspect and edit original level metadata in memory](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-levels.html)
-through original Deek/Doke statements. Game entry still needs raw icon-bank
-addressing; full-game compilation remains in progress.
+lead into pointer/keyboard/Gamepad menu branches; guards stop before game screen/
+level setup and editor/scores/help routines. [Inspect and edit original level metadata in memory](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-levels.html)
+through original Deek/Doke statements. [Inspect the original raw icon copies](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-icons.html)
+now executed at game entry. The guard follows those copies; game screen/level
+setup and full-game compilation remain in progress.
 Every browser test is available in the [demo gallery](demos/index.html), with
 [HTML Preview links](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
 See [demo instructions and coverage](demos/README.md).

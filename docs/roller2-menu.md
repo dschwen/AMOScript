@@ -6,9 +6,10 @@ lines 1–71, WTIN 163–165, SASINIT 205–239 and setup/menu 275–316. Omitte
 code consists of unused procedure definitions/comments. There is no synthetic
 title load, jump across executable setup, or host variable/IP edit.
 
-Synthetic destination labels still record `game`, `editor`, `scores` or `help`
-and wait instead of entering those original routines. This is a connected intro
-and menu selection fixture, not a running game. The complete source still fails
+Destination guards record `game`, `editor`, `scores` or `help`
+and wait. Game selection now first runs original entry 565–570 (both ICCOPY
+calls); its guard follows those copies. Screen/level setup after 570 and the
+editor/scores/help routines remain excluded. This is not a running game. The complete source still fails
 decoding at Boom in an omitted procedure; selected routines, gameplay and their
 later dependencies remain open. The earlier isolated menu helper remains in
 headless tests, and the earlier [intro demo](roller2-intro.md) retains its declared
@@ -87,3 +88,8 @@ another 640 ms, including original FDZ where applicable. These are injected cloc
 not exact native busy-loop timing, physical-controller evidence, Amiga captures
 or target-GPU performance. See [Mouse Zone](zones.md), [mouse assignment](mouse.md)
 and [tracker limits](mod-tracker.md).
+
+The [raw icon bridge and inspector](icon-memory.md) provide independent before/
+after pixels for ICCOPY. Connected menu replays verify its copied pixels and
+unchanged masks on every game selection; existing title GPU frame counts remain
+three, with two additional GPU frames in the separate icon inspector.

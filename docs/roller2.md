@@ -24,7 +24,8 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Original intro transition / declared main-title handoff | Unchanged lines 1–20 and WTIN/FDZ/FLOAD now handle input and fade-out. The fixture includes original array/highscore setup 32–56, SASINIT 205–239 and bank loads 275–279, skips remaining setup 281–286, then executes original title load 287; the menu/game remains excluded |
 | Original joystick mouse movement | Original LIMM and lines 299–303 execute in a separate synthetic title-load/step fixture; X/Y Mouse assignment clamps doubled words to explicit bounds. Fourteen keyboard/Gamepad steps pass in the mouse demo; this is not integrated menu selection |
 | Connected intro and guarded menu | Original executable sequence through 316 now runs, including setup 281–286, original FLOADs, continuing tracker and menu. Destination guards replace game/editor/scores/help routines. Ten connected browser cases select nine outcomes; three independent/GPU states and optional music controls. [Contract](roller2-menu.md) |
-| Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; game entry still requires raw ICCOPY image-bank addressing. [Demo](../demos/roller2-levels.html) |
+| Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; icon addressing now runs original ICCOPY before its entry guard. [Demo](../demos/roller2-levels.html) |
+| Original game-entry icon copies | Original 565–570 and ICCOPY 240–246 now execute after menu game selection. Bounded live icon table/planar views preserve the inclusive allocation-tail byte and old masks. Independent PNGs and two additional GPU frames; game screen/level setup remains excluded. [Contract](icon-memory.md) |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
@@ -78,8 +79,8 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    hardware behavior; the current AMOS bridge rejects depths above four.
 4. **First playable level.** Checked generic-bank Doke/Deek/Leek/Loke are now
    implemented, with original level metadata/time statements checked across all
-   fifteen files. First game entry calls ICCOPY, which needs raw Start(2) image-bank
-   addressing; this remains explicitly rejected. Next add that bridge, Copy/Fill,
+   fifteen files. First game entry now calls original ICCOPY through raw Start(2) icon
+   aliases. The guard follows line 570. Next add game screen/level setup, Copy/Fill,
    Add/Swap forms,
    Get Icon, Scin and Key State as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
@@ -98,7 +99,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 577 tests, 33 offline browser scenario pages,
-179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu GPU/CPU comparisons, plus existing
+Local baseline for this slice: 582 tests, 34 offline browser scenario pages,
+179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu and two icon-copy GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

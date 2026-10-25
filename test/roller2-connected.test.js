@@ -27,7 +27,9 @@ test('Roller2 connected: original input selects all four guarded destinations af
   for(const [x,y,action]of [[30,140,'game'],[290,140,'editor'],[150,140,'scores'],[270,46,'help']]){
     const {p,clock}=boot();p.setMouse(128+x,42+y,1);clock.tick(640);
     assert.strictEqual(p.state.variables.string_selection,action);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.state.tracker.position.field,174);
-    if(action==='game'||action==='editor')assert.ok(p.display.screen().palette.every(rgb=>rgb===0));checkMasks(p);p.stop();assert.strictEqual(clock.pending(),0);
+    if(action==='game'||action==='editor')assert.ok(p.display.screen().palette.every(rgb=>rgb===0));
+    if(action==='game')for(const [a,b]of [[76,18],[74,29]])assert.deepStrictEqual(p.banks.get(2).images[b-1].pixels,p.banks.get(2).images[a-1].pixels);
+    else checkMasks(p);p.stop();assert.strictEqual(clock.pending(),0);
   }
 });
 

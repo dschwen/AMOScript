@@ -228,11 +228,14 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-icons', title: 'Roller II raw icon memory and ICCOPY', initialFrame: 'Canvas: after original ICCOPY', description: 'Original game-entry icon copies through checked planar aliases, including rounded padding and unchanged masks. Independent before/after pixels and two WebGL frames; live Copy/Reset/fullscreen inspector. Game screen and level setup remain excluded.', run: require('./roller2IconProbe'), check(result, assert) {
+    assert.strictEqual(result.frames,2);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:2);assert.strictEqual(result.copiedIcons,2);assert.strictEqual(result.bytesPerCopy,193);assert.strictEqual(result.masksRegenerated,false);assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'roller2-levels', title: 'Roller II level metadata and word memory', capturedFrames: false, description: 'Original metadata reads and Doke time writes across all fifteen pinned level files, checked against independent headers. Live level/time memory preview; no file persistence, game/editor loop or rendering.', run: require('./roller2LevelProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{levels:15,metadataReads:15,timeWrites:15,persistent:false,gameRunning:false});
   } },
   { id: 'roller2-menu', title: 'Roller II original intro to guarded menu', initialFrame: 'Canvas: original menu title', description: 'Original startup, intro, initialization, mask/filter/screen setup and menu now execute in order, with continuing MOD music. Ten mouse/keyboard/Gamepad cases reach nine guarded selections. Live WebGL/fullscreen and optional music controls; the selected game/editor/scores/help routines remain excluded.', run: require('./roller2MenuProbe'), check(result, assert) {
-    assert.strictEqual(result.cases,10);assert.strictEqual(result.selections,9);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:3);assert.strictEqual(result.guardedTargets,true);assert.strictEqual(result.gameRunning,false);assert.strictEqual(result.connectedStartup,true);
+    assert.strictEqual(result.cases,10);assert.strictEqual(result.selections,9);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:3);assert.strictEqual(result.guardedTargets,true);assert.strictEqual(result.gameRunning,false);assert.strictEqual(result.connectedStartup,true);assert.strictEqual(result.gameEntryCopies,8);
   } },
   { id: 'roller2-intro', title: 'Roller II intro, initialization and main-title image', initialFrame: 'Canvas: main title (keyboard, 2840 ms)', description: 'Original intro/input wait/FDZ/FLOAD, highscore and tile-handler initialization, work/icon/sprite banks, then a declared handoff to the tall EHB title load. Keyboard, pointer and injected Gamepad API input pass independent checks. Live WebGL/fullscreen preview; setup 281–286 and menu logic remain excluded.', run: require('./roller2IntroProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,3);assert.strictEqual(result.frames,13);

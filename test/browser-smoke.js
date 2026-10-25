@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const icons=await runScenario('roller2-icons',page);assert.strictEqual(icons.gpuFrames,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_ICON_CLEANUP());
+    console.log('Roller2 icons passed: original inclusive ICCOPY, unchanged masks, independent PNGs and two WebGL frames.');
     await runScenario('roller2-levels',page);await page.evaluate(()=>globalThis.AMOS_ROLLER2_LEVEL_CLEANUP());
     console.log('Roller2 level metadata passed: fifteen original headers, checked word/long reads and original Doke edits without persistence.');
     const rollerMenu=await runScenario('roller2-menu',page);assert.strictEqual(rollerMenu.gpuFrames,3);

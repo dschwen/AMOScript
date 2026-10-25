@@ -41,8 +41,11 @@ mute and restart-safe bindings. Next implement the selected routines and their
 dependencies, alongside the remaining decoder gate at Boom. Checked big-endian
 Doke/Deek/Loke/Leek now support generic banks, including odd addresses and atomic
 range checks. Original level metadata/time statements pass across all fifteen
-pinned files in a new demo. First game entry still stops at ICCOPY’s raw icon-bank
-addressing requirement; Start(image bank), Copy/Fill and later gates remain open.
+pinned files in a new demo. Bounded icon table/planar aliases now run original ICCOPY at game entry through
+570, including its inclusive padding byte and unchanged masks. The connected menu
+guard follows those copies; an independent PNG/WebGL inspector covers them.
+Next cover game screen/level setup, Copy/Fill and later gates. Sprite-bank raw
+addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
@@ -154,7 +157,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **577 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **582 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

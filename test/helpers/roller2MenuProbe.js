@@ -20,7 +20,7 @@ module.exports = async function roller2MenuProbe(page) {
     const firstGolden=oracle.getContext('2d').getImageData(0,0,320,256).data;
     const cases=[['pointer-game',30,140,'game'],['pointer-editor',290,140,'editor'],['pointer-scores',150,140,'scores'],['pointer-help',270,46,'help'],
       ['keyboard-h',0,0,'scores'],['keyboard-help',0,0,'help'],['keyboard-fire',0,0,'game'],['gamepad-fire',0,0,'game'],['gamepad-moved-fire',28,140,'game'],['blank',80,80,'']];
-    let selections=0,gpuFrames=0,gpuUnavailable=null;
+    let selections=0,gpuFrames=0,gpuUnavailable=null,gameEntryCopies=0;
     for(const [mode,x,y,action] of cases){
       const clock=makeClock(4),program=compiled.exports({files,now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout});
       const canvas=document.createElement('canvas');canvas.tabIndex=0;canvas.style.border='0';document.body.append(canvas);let pad=null,gpu=null,gpuHost=null;
@@ -47,6 +47,7 @@ module.exports = async function roller2MenuProbe(page) {
         check(program.banks.get(2).images.every(image=>!image||(image.masked&&image.mask&&image.mask.every((bit,index)=>bit===(image.pixels[index]===0?0:1)))),'Original Make Icon Mask setup did not run');
         check(!program.state.audio.filterEnabled&&program.banks.get(22)===tracker&&program.state.tracker.position.field===142,'Original setup or tracker continuity differs');
         if(mode==='pointer-game')capture('original menu title',false);
+        const oldMasks=[17,28].map(index=>program.banks.get(2).images[index].mask.slice());
         if(mode.startsWith('pointer-')||mode==='blank')pointer(1);
         else if(mode.startsWith('keyboard-')){const [key,code]=mode==='keyboard-h'?['h','KeyH']:mode==='keyboard-help'?['Help','Help']:[' ','Space'];canvas.dispatchEvent(new KeyboardEvent('keydown',{key,code,bubbles:true,cancelable:true}));}
         else{
@@ -56,6 +57,7 @@ module.exports = async function roller2MenuProbe(page) {
         clock.tick(640);check(program.state.variables.string_selection===action,`${mode}: wrong target guard`);
         check(program.state.waiting===(action?'key':null),`${mode}: wrong wait state`);
         if(action)selections++;
+        if(action==='game')for(const [index,a,b]of [[0,76,18],[1,74,29]]){const bank=program.banks.get(2);check(bank.images[b-1].pixels.every((v,i)=>v===bank.images[a-1].pixels[i]),'Original game-entry ICCOPY did not run');check(bank.images[b-1].mask.every((v,i)=>v===oldMasks[index][i]),'Raw game-entry copy regenerated a mask');gameEntryCopies++;}
         if(mode==='gamepad-moved-fire')check(program.state.variables.int_movj===-1&&program.state.variables.int_mz===1,'Moved fire skipped original zone branch');
         if(mode==='pointer-game')capture('game target guard after original FDZ',true);
       }finally{host.detach();if(gpuHost)gpuHost.detach();program.stop();release(gpu);canvas.remove();}
@@ -63,7 +65,7 @@ module.exports = async function roller2MenuProbe(page) {
     if(globalThis.AMOS_ROLLER2_MENU_CLEANUP)await globalThis.AMOS_ROLLER2_MENU_CLEANUP();
     const previous=document.getElementById('roller2-menu-controls');if(previous)previous.remove();
     const controls=document.createElement('section');controls.id='roller2-menu-controls';
-    const help=document.createElement('p');help.textContent='Original startup, intro, initialization, setup and menu now run in order. Press a key or fire to leave the logo. At the title, click a menu region/help symbol, press H for scores, or use arrows/Space or gamepad directions/fire. Destinations report guarded selections; game, editor, scores and help routines remain excluded. Enable music to hear the original MOD; Restart begins at the intro.';
+    const help=document.createElement('p');help.textContent='Original startup, intro, initialization, setup and menu run in order. Press a key or fire to leave the logo. At the title, click a region/help symbol, press H for scores, or use arrows/Space or gamepad directions/fire. Game selection now runs original ICCOPY calls before its guard; game screen/level setup and editor/scores/help routines remain excluded. Enable music to hear the original MOD; Restart begins at the intro.';
     const viewport=document.createElement('section');viewport.id='roller2-menu-viewport';const toolbar=document.createElement('div');toolbar.className='amos-fullscreen-toolbar';
     const slot=document.createElement('div'),status=document.createElement('pre'),fullButton=document.createElement('button'),fullStatus=document.createElement('span');fullButton.id='roller2-menu-fullscreen';
     let surface=document.createElement('canvas'),gpu=null;surface.id='roller2-menu-input';surface.tabIndex=0;surface.setAttribute('aria-label','Roller II guarded title menu');slot.append(surface);
@@ -77,6 +79,7 @@ module.exports = async function roller2MenuProbe(page) {
         target.height===512?(target.zones&&!live.state.fade.active?'menu':'title-loading'):'loading';
       controls.dataset.phase=error?'error':live.state.halted?'ended':live.state.stopped?'stopped':action?'selected':phase;
       controls.dataset.action=action;controls.dataset.backend=gpu?'webgl':'canvas';controls.dataset.zone=String(target?live.inputValue('Mouse Zone'):0);
+      controls.dataset.gameEntry=action==='game'?'icons-copied':'not-entered';
       const audio=sound.status();controls.dataset.sound=audio.state;controls.dataset.soundContext=audio.contextState||'none';controls.dataset.soundPlays=String(audio.plays);controls.dataset.soundVoices=String(audio.voices.length);
       controls.dataset.trackerField=String(live.state.tracker.position?live.state.tracker.position.field:0);soundButton.textContent=['on','starting'].includes(audio.state)?'Mute music':'Enable music';
       status.textContent=error||JSON.stringify({phase:controls.dataset.phase,selectedTarget:action||'none',zone:Number(controls.dataset.zone),hardwareMouse:live.state.input.mouse,backend:gpu?'WebGL2':'Canvas 2D (WebGL unavailable)',music:audio.state,musicError:audio.error,trackerField:Number(controls.dataset.trackerField),gameRunning:false},null,2);fullscreen.refresh();}
@@ -89,7 +92,7 @@ module.exports = async function roller2MenuProbe(page) {
     soundButton.addEventListener('click',()=>{if(['on','starting'].includes(sound.status().state))sound.mute();else sound.enable().then(()=>{if(!disposed)update();});adapter.focus();update();});
     const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullButton,statusElement:fullStatus,surface:slot,getContent:()=>surface});start();const monitor=setInterval(update,50);
     globalThis.AMOS_ROLLER2_MENU_CLEANUP=()=>{disposed=true;revision++;clearInterval(monitor);adapter.detach();live.stop();release(gpu);const closing=Promise.all([fullscreen.dispose(),sound.dispose()]);update();return closing.then(()=>update());};
-    return{cases:cases.length,selections,gpuFrames,gpuUnavailable,gameRunning:false,guardedTargets:true,connectedStartup:true};
+    return{cases:cases.length,selections,gpuFrames,gpuUnavailable,gameRunning:false,guardedTargets:true,connectedStartup:true,gameEntryCopies};
   },{source:new(require('../../lib/Transpiler'))(require('./roller2ConnectedMenu')()).toModule(),assets,
     png:fs.readFileSync(path.join(__dirname,'../fixtures/roller2/roller-title.png')).toString('base64'),firstPNG:fs.readFileSync(path.join(__dirname,'../fixtures/roller2/terminator-el.png')).toString('base64'),
     timerSource:require('./fakeTimers').createFakeTimers.toString(),gpuSources:require('./webglHostSources')(),initializationSource:require('./checkRoller2Initialization').toString(),initializationExpected:require('../fixtures/roller2/initialization.json'),

@@ -9,6 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
+| [Roller II raw icon memory and ICCOPY](roller2-icons.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-icons.html) |
 | [Roller II level metadata and word memory](roller2-levels.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-levels.html) |
 | [Roller II original intro to guarded menu](roller2-menu.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html) |
 | [Roller II intro, initialization and main-title image](roller2-intro.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html) |
