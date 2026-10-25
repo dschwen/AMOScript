@@ -53,8 +53,10 @@
   See `docs/roller2-title.md`; wider clone/AMSC/fade forms remain gated.
   Explicit Fade lists accept up to 32 integer/boxed-integer goals, skipping
   negative/omitted entries; native float bit-pattern forms reject. Original
-  WTIN/FDZ run in a declared intro fixture that skips game initialization before
-  main-title load 287. Tall 320-pixel lowres IFFs preserve bitmap rows behind
+  WTIN/FDZ run in a declared intro fixture with original array/highscore setup,
+  SASINIT and work/icon/sprite bank loads before main-title load 287. Setup
+  281–286 remains omitted; independently transcribed tables/scores are shared
+  between browser and headless assertions. Tall 320-pixel lowres IFFs preserve bitmap rows behind
   bounded PAL/NTSC default windows. See `docs/roller2-intro.md`; the menu/game
   and exact native busy-loop timing are not covered by that fixture.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word

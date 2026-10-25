@@ -29,4 +29,5 @@ The [first-image demo](../../demos/roller2-title.html) also executes original
 line 18 and FLOAD (63–68), then stops before WTIN. It shows the first logo through
 AMSC placement and palette fading. The [intro transition demo](../../demos/roller2-intro.html)
 continues through original WTIN/FDZ input and fade-out, then uses a declared
-handoff to load the main title image. Initialization, the menu and gameplay remain open.
+handoff to load the main title image. Original scores/arrays, SASINIT and work/
+image-bank loading now run; setup 281–286, the menu and gameplay remain open.

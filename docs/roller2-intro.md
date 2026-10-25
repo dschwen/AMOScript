@@ -1,4 +1,4 @@
-# Roller II intro and main-title image
+# Roller II intro, initialization and main-title image
 
 The [intro demo](../demos/roller2-intro.html) now runs unchanged original lines
 1–20, including the first FLOAD, WTIN and FDZ, with their original definitions
@@ -7,13 +7,39 @@ the ordinary cooperative VM budget. A key, mouse-button edge or gamepad fire
 leaves that loop; FDZ then fades the logo out and Show On restores the pointer.
 Keyboard input is consumed by the original Inkey$, not a harness variable/IP edit.
 
-A declared fixture then executes the unchanged main-title FLOAD call from line
-287, skipping initialization 21–286, and stops at a synthetic Wait Key/End guard.
-This handoff is not the complete source control flow. The original zones/menu,
-highscore initialization and gameplay are not executed; clicking Start on the
-displayed main title does not start a game. The live preview is silent while
+The fixture now continues through unchanged array/highscore setup (32–56),
+SASINIT (205–239), and work/icon/sprite bank setup (275–279), before main-title
+FLOAD call 287 and a synthetic Wait Key/End guard. It omits unused procedure
+definitions and setup 281–286 (Led Off, Make Icon Mask and Screen Close), so this
+handoff is still not the complete source control flow. The original zones/menu
+and gameplay are not executed; clicking Start on the displayed main title does not start a game. The live preview is silent while
 logical tracker commands continue. It defaults to WebGL, labels Canvas if WebGL
 is unavailable, and supports fullscreen, Stop/Resume and Restart.
+
+## Original initialization
+
+The original Dim/Global statements allocate six arrays. SCORELOAD reads ten
+name/integer-score pairs from the pinned `RII:Highscores` file through ordinary
+synchronous channels and shared global arrays. If Exist returns false, Pop Proc
+preserves the defaults; holding both mouse buttons at original line 44 bypasses
+the procedure altogether. The case-insensitive RII mapping belongs to the demo
+adapter. No source paths or score values are patched into the VM.
+
+SASINIT initializes 50 handler strings and 16 connection flags across 55 slots,
+including the original empty slots. Reserve As Work allocates 490 zero bytes in
+bank 10; original Load statements install icon and sprite banks 2 and 1. Loading
+these banks does not demonstrate icon-mask setup, hardware sprite presentation,
+tile dispatch or gameplay. Each factory owns its arrays and mutable bank data.
+
+`test/fixtures/roller2/initialization.json` independently transcribes constants
+from the source and pinned Highscores file. A shared validator checks every
+highscore/table slot, dimensions and work-bank bytes in headless tests and all
+three browser input replays. The gallery also checks a controlled pointer with
+both buttons held through the bypass, preserving default scores. Truncated score input halts with source context
+before game-bank allocation. The live demo displays the resulting scores and
+setup summary below the preview; Restart clears it until initialization runs
+again. SCORE SAVE is retained as an unchanged procedure definition but is not
+called by this fixture; persistence remains separate work.
 
 ## Explicit Fade palette lists
 

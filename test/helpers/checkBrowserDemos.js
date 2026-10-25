@@ -31,8 +31,19 @@ module.exports = async function checkBrowserDemos(browser) {
         finally { await page.mouse.up(); }
         await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='title-ready');
         assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-bitmap-height'),'512');
+        assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-initialized'),'true');
+        assert.match(await page.locator('#roller2-intro-initialization').textContent(),/daninsani/);
         await page.click('#roller2-intro-restart');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='waiting-input');
+        assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-initialized'),'false');
         await page.keyboard.press('Space');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='title-ready');
+        assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-scores'),'loaded');
+        await page.click('#roller2-intro-restart');await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='waiting-input');
+        await page.locator('#roller2-intro-input').evaluate(canvas=>{
+          const r=canvas.getBoundingClientRect();canvas.dispatchEvent(new PointerEvent('pointermove',{clientX:r.left+10,clientY:r.top+10,buttons:3,bubbles:true}));
+        });
+        await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='title-ready');
+        assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-scores'),'defaults');
+        assert.doesNotMatch(await page.locator('#roller2-intro-initialization').textContent(),/daninsani/);
         await page.evaluate(()=>globalThis.AMOS_ROLLER2_INTRO_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
       }
       if(scenario.id==='roller2-title'){

@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-25. The current local baseline has **554 passing tests**, plus a
+Updated 2026-10-25. The current local baseline has **557 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -13,8 +13,8 @@ encodings, 23 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
 compilation stops at Boom. Original WTIN/FDZ now run in a declared fixture that
-hands off to the original main-title image load while excluding initialization
-21–286. The title menu and gameplay remain open.
+runs original array/highscore setup, SASINIT and work/icon/sprite bank loads,
+then hands off to the main-title image while omitting remaining setup 281–286. The title menu and gameplay remain open.
 Wonderland remains a
 [working regression target](wonderland.md).
 Its original first 64 lines now execute both startup branches through Wait Vbl,
@@ -34,7 +34,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
 | MOD / tracker | Implemented bounded playback | Owned M.K. decoder, Track Load/Loop/Play/Stop and C/A/E/F/D effects. Driver-owned VBL wakes share sample voices, cancel on End/failure/bank retirement, and pause without elapsed-note replay. Original music fixture matches 1,997 notes and twelve native Web Audio comparisons. Held sample phase after pause, wider effects, exact DMA contention, live bank editing and AMOS Music-bank playback remain open. [Contract](mod-tracker.md). |
-| Roller II intro / title image | Implemented bounded original slices | Original startup, WTIN/FDZ/FLOAD and integer Fade lists. A declared handoff skips initialization and loads the full tall EHB title behind a bounded PAL window. Three input modes, thirteen new independent image states and eleven GPU frames pass; live fullscreen preview. Menu/game initialization and gameplay remain open. [Intro contract](roller2-intro.md). |
+| Roller II intro / title image | Implemented bounded original slices | Original startup, WTIN/FDZ/FLOAD and integer Fade lists. Original arrays/highscores, tile-handler tables and work/icon/sprite banks run before a declared handoff skips setup 281–286 and loads the full tall EHB title behind a bounded PAL window. Three input modes, thirteen new independent image states and eleven GPU frames pass; live fullscreen preview. Menu/game initialization and gameplay remain open. [Intro contract](roller2-intro.md). |
 | Dir$ / Exist | Implemented bounded subset | Per-program verified directory prefixes, strict synchronous metadata queries, common transfer/channel path routing, memory/Node metadata and explicit RII case mapping. Parent/assign/lock semantics and persistent browser storage remain open. [Contract](directories.md). |
 | Original Wonderland session | Implemented first-level subset | Complete source/assets, default WebGL2/explicit Canvas switching and live keyboard/Gamepad mapping and Stop/Resume/Restart; input-only death/fade/game-over/fresh-game replays and jump/scroll/Escape checks. Original Web Audio sample effects, Enable/Mute and owned context cleanup pass; native timing/captures, all-level/win paths and editor files remain open. [Contract](wonderland-game.md). |
 | Fsel$ / whole-program compilation | Implemented prepared-host subset | Four string overloads, synchronous host choices/cancellation, original retry/Gosub/Return and selected load/save calls. Unmodified Wonderland compiles and enters its own game branch; four physical frames render across two controlled seconds. Native requester UI and async modal expression continuation remain open. [Contract](file-selector.md). |

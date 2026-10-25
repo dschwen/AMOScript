@@ -2,11 +2,12 @@
 'use strict';
 module.exports = async function roller2IntroProbe(page) {
   const fs = require('fs'), path = require('path'), directory = path.join(__dirname, '../../examples/Roller2');
-  const assets = Object.fromEntries(['music/Roller_II_Samples.Abk', 'music/mod.Roller_II_mus', 'iffp/terminator el', 'iffp/roller titel'].map(name => [`rii:${name.toLowerCase()}`, fs.readFileSync(path.join(directory, name)).toString('base64')]));
-  return page.evaluate(async ({ source, assets, timerSource, firstPNG, titlePNG, titleIndices, gpuSources }) => {
+  const assets = Object.fromEntries(['music/Roller_II_Samples.Abk', 'music/mod.Roller_II_mus', 'iffp/terminator el', 'iffp/roller titel', 'Highscores', 'iffp/icons.abk', 'iffp/sprites.abk'].map(name => [`rii:${name.toLowerCase()}`, fs.readFileSync(path.join(directory, name)).toString('base64')]));
+  return page.evaluate(async ({ source, assets, timerSource, firstPNG, titlePNG, titleIndices, gpuSources, initializationSource, initializationExpected }) => {
     const module = { exports: {} }; new Function('module', source)(module);
-    const createClock = new Function(`return (${timerSource});`)();
-    const files = { isDirectory: name => name === 'RII:', read(name) {
+    const createClock = new Function(`return (${timerSource});`)(), checkInitialization = new Function(`return (${initializationSource});`)();
+    const files = { isDirectory: name => name === 'RII:', exists: name => Object.prototype.hasOwnProperty.call(assets, name.toLowerCase()),
+      write() { throw new Error('Unexpected intro file write'); }, read(name) {
       const bytes = assets[name.toLowerCase()]; if (!bytes) throw new Error(`Asset not preloaded: ${name}`); return atob(bytes);
     } };
     const check = (value, message) => { if (!value) throw new Error(message); };
@@ -75,6 +76,7 @@ module.exports = async function roller2IntroProbe(page) {
           clock.tick(time - clock.now()); capture(`main title (${input}, ${time} ms)`, time < 1940 ? 0 : Math.min(15, Math.floor((time - 1940) / 60) + 1), true);
         } else { clock.tick(2840 - clock.now()); capture(`main title (${input})`, 15, true); }
         check(program.state.waiting === 'key' && !program.state.fade.active && program.mouseVisible(), 'Original intro/title handoff failed to finish');
+        checkInitialization(program, initializationExpected);
         check(program.display.screen().physicalPixels.every((v, i) => v === indices[i]), 'Tall source bitmap changed');
         if (input === 'keyboard') { program.display.screenOffset(0, 0, 240); capture('lower title bitmap viewport', 15, true, 240); }
       } finally { host.detach(); if (gpuHost) gpuHost.detach(); program.stop(); releaseGpu(gpu); canvas.remove(); }
@@ -83,28 +85,34 @@ module.exports = async function roller2IntroProbe(page) {
     if (globalThis.AMOS_ROLLER2_INTRO_CLEANUP) await globalThis.AMOS_ROLLER2_INTRO_CLEANUP();
     const old = document.getElementById('roller2-intro-controls'); if (old) old.remove();
     const controls = document.createElement('section'); controls.id = 'roller2-intro-controls';
-    const help = document.createElement('p'); help.textContent = 'Original intro lines 1–20 and WTIN/FDZ/FLOAD run unchanged. Press a key, click the image or use gamepad fire to leave the intro. A declared harness then runs original main-title load 287, skipping game initialization 21–286. The menu/game is not running. This preview is silent; tracker commands continue.';
+    const help = document.createElement('p'); help.textContent = 'Original intro and WTIN/FDZ/FLOAD run unchanged. Press a key, hold a mouse button on the image or use gamepad fire to leave the intro. Original highscore/array setup, SASINIT and work/icon/sprite bank loads now run before main-title load 287. The harness omits setup 281–286 and unused procedures; the menu/game is not running. This preview is silent; tracker commands continue.';
     const viewport = document.createElement('section'); viewport.id = 'roller2-intro-viewport';
     const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar'; const slot = document.createElement('div');
     function makeSurface() { const c = document.createElement('canvas'); c.id = 'roller2-intro-input'; c.tabIndex = 0; c.setAttribute('aria-label', 'Original Roller II intro; key, click or gamepad fire advances'); return c; }
     let surface = makeSurface(), gpu = null; slot.append(surface);
-    const status = document.createElement('p'), fullButton = document.createElement('button'), fullStatus = document.createElement('span');
-    fullButton.id = 'roller2-intro-fullscreen'; toolbar.append(fullButton, fullStatus); viewport.append(toolbar, slot, status); controls.append(help, viewport); document.body.append(controls);
+    const status = document.createElement('p'), setup = document.createElement('pre'), fullButton = document.createElement('button'), fullStatus = document.createElement('span');
+    setup.id = 'roller2-intro-initialization';
+    fullButton.id = 'roller2-intro-fullscreen'; toolbar.append(fullButton, fullStatus); viewport.append(toolbar, slot, status); controls.append(help, viewport, setup); document.body.append(controls);
     try { gpu = createGpu(surface); } catch (_) {
       const gl = surface.getContext('webgl2'), ext = gl && gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext();
       surface = makeSurface(); slot.replaceChildren(surface);
     }
-    let live = null, adapter = null, error = '', disposed = false;
+    let live = null, adapter = null, error = '', disposed = false, scoresLoaded = false;
     function update() {
       if (!live) return;
       controls.dataset.phase = error ? 'error' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : live.state.waiting === 'key' ? 'title-ready' : live.state.fade.active ? 'fading' : live.display.screen().height === 512 ? 'title-loading' : live.state.waiting === 'sleep' ? 'loading' : 'waiting-input';
       controls.dataset.backend = gpu ? 'webgl' : 'canvas'; controls.dataset.bitmapHeight = String(live.display.screen().height); controls.dataset.gpuFrames = String(gpu ? gpu.stats.gpuFrames : 0);
+      const initialized = [10, 2, 1].every(number => live.banks.has(number)); controls.dataset.initialized = String(initialized);
+      controls.dataset.scores = initialized ? scoresLoaded ? 'loaded' : 'defaults' : 'pending';
+      if (initialized) setup.textContent = JSON.stringify(checkInitialization(live, initializationExpected, scoresLoaded), null, 2);
+      else setup.textContent = 'Waiting for original initialization after the intro.';
       status.textContent = error || `${controls.dataset.phase}; ${gpu ? 'WebGL2' : 'Canvas 2D (WebGL unavailable)'}; main menu/game excluded`; fullscreen.refresh();
     }
     function fail(failure) { error = failure.message; if (live) live.stop(); update(); }
     function start() {
-      if (adapter) adapter.detach(); if (live) live.stop(); if (gpu) gpu.clear(); error = '';
-      live = module.exports({ files, now: () => performance.now(), clearTimeout, setTimeout(fn, delay) {
+      if (adapter) adapter.detach(); if (live) live.stop(); if (gpu) gpu.clear(); error = ''; scoresLoaded = false;
+      const liveFiles = { ...files, read(name) { const bytes = files.read(name); if (name.toLowerCase() === 'rii:highscores') scoresLoaded = true; return bytes; } };
+      live = module.exports({ files: liveFiles, now: () => performance.now(), clearTimeout, setTimeout(fn, delay) {
         return setTimeout(() => { if (!disposed) { try { fn(); } catch (failure) { fail(failure); } } }, delay);
       } });
       adapter = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, joysticks: [{ port: 1, keyboard: false, gamepad: true }] });
@@ -117,8 +125,9 @@ module.exports = async function roller2IntroProbe(page) {
     const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: fullButton, statusElement: fullStatus, surface: slot, getContent: () => surface });
     start(); const monitor = setInterval(update, 50);
     globalThis.AMOS_ROLLER2_INTRO_CLEANUP = () => { disposed = true; clearInterval(monitor); adapter.detach(); live.stop(); releaseGpu(gpu); return fullscreen.dispose(); };
-    return { inputModes: 3, frames, gpuFrames, gpuUnavailable, fullBitmap: [320, 512], viewport: [320, 268], declaredMainTitleHandoff: true, gameRunning: false };
+    return { inputModes: 3, frames, gpuFrames, gpuUnavailable, fullBitmap: [320, 512], viewport: [320, 268], initialized: true, declaredMainTitleHandoff: true, gameRunning: false };
   }, { source: new(require('../../lib/Transpiler'))(require('./roller2Intro')()).toModule(), assets, timerSource: require('./fakeTimers').createFakeTimers.toString(),
     firstPNG: fs.readFileSync(path.join(__dirname, '../fixtures/roller2/terminator-el.png')).toString('base64'), titlePNG: fs.readFileSync(path.join(__dirname, '../fixtures/roller2/roller-title.png')).toString('base64'),
-    titleIndices: fs.readFileSync(path.join(__dirname, '../fixtures/roller2/roller-title.indices')).toString('base64'), gpuSources: require('./webglHostSources')() });
+    titleIndices: fs.readFileSync(path.join(__dirname, '../fixtures/roller2/roller-title.indices')).toString('base64'), gpuSources: require('./webglHostSources')(),
+    initializationSource: require('./checkRoller2Initialization').toString(), initializationExpected: require('../fixtures/roller2/initialization.json') });
 };

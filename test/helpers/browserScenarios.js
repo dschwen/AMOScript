@@ -228,10 +228,10 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
-  { id: 'roller2-intro', title: 'Roller II intro and main-title image', initialFrame: 'Canvas: main title (keyboard, 2840 ms)', description: 'Original intro/input wait/FDZ/FLOAD, followed by a declared handoff to the original tall EHB title load. Keyboard, pointer and injected Gamepad API input pass independent pixel checks. Live WebGL/fullscreen preview; game initialization and menu logic remain excluded.', run: require('./roller2IntroProbe'), check(result, assert) {
+  { id: 'roller2-intro', title: 'Roller II intro, initialization and main-title image', initialFrame: 'Canvas: main title (keyboard, 2840 ms)', description: 'Original intro/input wait/FDZ/FLOAD, highscore and tile-handler initialization, work/icon/sprite banks, then a declared handoff to the tall EHB title load. Keyboard, pointer and injected Gamepad API input pass independent checks. Live WebGL/fullscreen preview; setup 281–286 and menu logic remain excluded.', run: require('./roller2IntroProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,3);assert.strictEqual(result.frames,13);
     if(result.gpuUnavailable){assert.strictEqual(result.gpuFrames,0);assert.strictEqual(typeof result.gpuUnavailable,'string');}else assert.strictEqual(result.gpuFrames,11);
-    assert.deepStrictEqual(result.fullBitmap,[320,512]);assert.deepStrictEqual(result.viewport,[320,268]);assert.strictEqual(result.declaredMainTitleHandoff,true);assert.strictEqual(result.gameRunning,false);
+    assert.deepStrictEqual(result.fullBitmap,[320,512]);assert.deepStrictEqual(result.viewport,[320,268]);assert.strictEqual(result.initialized,true);assert.strictEqual(result.declaredMainTitleHandoff,true);assert.strictEqual(result.gameRunning,false);
   } },
   { id: 'roller2-title', title: 'Roller II first image and original FLOAD', initialFrame: 'Canvas: first image (940 ms)', description: 'Unchanged startup through the first FLOAD, original procedure, AMSC placement, hidden palette clone and Fade To. Independent Python image pixels verify seven Canvas/copper states and seven WebGL comparisons. Live fullscreen preview precedes WTIN, the main title and gameplay.', run: require('./roller2TitleProbe'), check(result, assert) {
     assert.strictEqual(result.originalPrefix,18);assert.deepStrictEqual(result.originalProcedure,[63,68]);assert.strictEqual(result.frames,7);

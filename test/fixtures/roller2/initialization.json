@@ -1,0 +1,17 @@
+{
+  "evidence": "Source-derived constants from original lines 32–43 and SASINIT 205–239; loaded scores independently transcribed from the pinned Highscores byte file. No Amiga capture.",
+  "defaultNames": ["program", "von", "daniel", "schwen", "gfx", "auch", "von", "daniel", "schwen", "..."],
+  "defaultScores": [1000, 900, 800, 700, 600, 500, 400, 300, 200, 0],
+  "loadedNames": ["daninsani", "dienstag", "program", "von", "daniel", "schwen", "gfx", "auch", "versager", "von"],
+  "loadedScores": [4406, 4226, 1000, 900, 800, 700, 600, 500, 439, 400],
+  "handlers": {
+    "1": "THE_MOVING", "2": "THE_MOVING", "3": "KCWEG", "4": "KCWEG", "5": "KCWEG", "6": "KCWEG", "7": "KCWEG", "8": "KMWEG",
+    "9": "HCWEG", "10": "HCWEG", "11": "HCWEG", "12": "HCWEG", "13": "HCWEG", "14": "HMWEG", "15": "_ONLY", "16": "GAME_OVER",
+    "17": "FAERBER", "18": "THE_MOVING", "19": "GSPHALTJOAB", "20": "NEULEVEXIT", "21": "SCHLUE", "22": "HOLE", "23": "PAY", "24": "TIMEBONUS",
+    "25": "MAUKAP", "26": "GSSLOWPHALTBEWEG", "27": "PAYTIME", "28": "BOONCE", "29": "THE_MOVING", "30": "NEULEVEXIT2", "31": "ROUNDTURN",
+    "32": "UNOFAERBER", "34": "N34", "35": "PFEIL", "36": "PFEIL", "37": "PFEIL", "38": "PFEIL", "39": "DISKETTE", "40": "BONUS",
+    "41": "REDOLEV", "42": "TURN_IT", "43": "FASTBALL", "44": "FASTLANE", "45": "SLOWBALL", "47": "RAMME", "48": "KSWITCH", "49": "HSWITCH",
+    "50": "THE_MOVING", "51": "AUTO", "52": "WANDSTOP"
+  },
+  "connected": [3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 15, 17, 21, 22, 32, 39]
+}

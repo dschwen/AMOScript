@@ -27,8 +27,10 @@ Fade To screen are implemented. Original WTIN/FDZ now run through keyboard,
 mouse or Gamepad input, and explicit integer Fade palettes are implemented.
 A declared handoff loads the original tall EHB title with all 512 bitmap rows
 retained behind a bounded 268-row PAL window. Thirteen independent pixel states
-and eleven more GPU comparisons pass; initialization/menu/gameplay remain excluded.
-Next cover original game initialization and title-menu logic, alongside the
+and eleven more GPU comparisons pass. Original highscore/array setup, SASINIT
+and work/icon/sprite bank loads now execute before the title. Independent checks
+cover loaded/missing/bypassed scores and every handler/connection slot.
+Next cover setup 281–286 and title-menu logic, alongside the
 remaining decoder gate at Boom. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
@@ -140,7 +142,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **554 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **557 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

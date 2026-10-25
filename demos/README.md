@@ -9,7 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
-| [Roller II intro and main-title image](roller2-intro.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html) |
+| [Roller II intro, initialization and main-title image](roller2-intro.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html) |
 | [Roller II first image and original FLOAD](roller2-title.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-title.html) |
 | [Roller II original startup](roller2-startup.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html) |
 | [Play Roller II MOD music](tracker.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tracker.html) |

@@ -8,12 +8,13 @@ const raw = fs.readFileSync(path.join(directory, 'iffp/roller titel'));
 const golden = decodePng(fs.readFileSync(path.join(__dirname, 'fixtures/roller2/roller-title.png')));
 const indices = fs.readFileSync(path.join(__dirname, 'fixtures/roller2/roller-title.indices'));
 const evidence = require('./fixtures/roller2/roller-title.json');
-const files = { isDirectory: n => n === 'RII:', read(n) {
+const files = { isDirectory: n => n === 'RII:', exists: n => names.some(name => name.toLowerCase() === n.replace(/^rii:/i, '').toLowerCase()),
+  write() { throw new Error('Unexpected intro file write'); }, read(n) {
   const name = names.find(name => name.toLowerCase() === n.replace(/^rii:/i, '').toLowerCase());
   if (!name) throw new Error(`Unexpected file: ${n}`); return fs.readFileSync(path.join(directory, name), 'latin1');
 } };
-function start() {
-  const clock = require('./helpers/fakeTimers').createFakeTimers(4), p = compile(require('./helpers/roller2Intro')()).create({ files,
+function start(hostFiles = files) {
+  const clock = require('./helpers/fakeTimers').createFakeTimers(4), p = compile(require('./helpers/roller2Intro')()).create({ files: hostFiles,
     now: clock.now, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout }); p.tick(1000); return { p, clock };
 }
 
@@ -89,4 +90,37 @@ test('tall Load Iff: NTSC uses its own field end while ordinary 256-row images r
     const old = execute(binary([[t('Load Iff Screen'), text('image'), t(','), n(0)]]), 100, { files: { read: () => bytes } }).program;
     assert.deepStrictEqual([old.display.screen().width,old.display.screen().height,old.display.screen().hardwareY,old.display.screen().windowed],[width,height,50,false]); old.stop();
   }
+});
+
+test('Roller2 initialization: original global arrays, persisted scores, SASINIT and work/image banks match independent constants', () => {
+  const expected = require('./fixtures/roller2/initialization.json'), check = require('./helpers/checkRoller2Initialization');
+  const runs = [start(), start()];
+  try {
+    for (const { p, clock } of runs) { clock.tick(1000); p.sendKey(' '); clock.tick(1840); check(p, expected); }
+    const first = runs[0].p, second = runs[1].p;
+    first.arraySet(first.state.variables.array_string_hi, [1], 'changed'); first.banks.get(10).data[0] = 255;
+    check(second, expected);
+    assert.notStrictEqual(first.banks.get(1).images.find(Boolean).pixels, second.banks.get(1).images.find(Boolean).pixels);
+  } finally { for (const { p } of runs) p.stop(); }
+});
+
+test('Roller2 initialization: missing highscore file and original two-button bypass retain defaults without reading scores', () => {
+  const expected = require('./fixtures/roller2/initialization.json'), check = require('./helpers/checkRoller2Initialization');
+  for (const bypass of [false, true]) {
+    let queries = 0;
+    const { p, clock } = start({ ...files, exists(name) { queries++; assert.strictEqual(name, 'RII:Highscores'); return false; },
+      read(name) { assert.notStrictEqual(name, 'RII:Highscores'); return files.read(name); } });
+    try {
+      clock.tick(1000); if (bypass) p.setMouse(0, 0, 3); else p.sendKey(' '); clock.tick(1840);
+      assert.strictEqual(p.state.waiting, 'key'); check(p, expected, false); assert.strictEqual(queries, bypass ? 0 : 1);
+    } finally { p.stop(); }
+  }
+});
+
+test('Roller2 initialization: truncated scores halt with source context before reserving game banks', () => {
+  const { p, clock } = start({ ...files, read(name) { return name === 'RII:Highscores' ? 'incomplete\r\n' : files.read(name); } });
+  clock.tick(1000); p.sendKey(' ');
+  assert.throws(() => clock.tick(1840), /End of file.*line \d+, byte/);
+  assert.strictEqual(p.state.halted, true); assert.strictEqual(clock.pending(), 0);
+  assert.strictEqual(p.banks.has(10), false); assert.strictEqual(p.banks.has(2), false); p.stop();
 });

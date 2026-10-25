@@ -21,13 +21,13 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
 | Original first FLOAD | Unchanged lines 1–18 plus original procedure 63–68 load/fade the first logo; declared Wait Key/End guards stop before WTIN and gameplay |
-| Original intro transition / declared main-title handoff | Unchanged lines 1–20 and WTIN/FDZ/FLOAD now handle input and fade-out. A declared fixture skips initialization 21–286 and executes original title load 287; the menu/game remains excluded |
+| Original intro transition / declared main-title handoff | Unchanged lines 1–20 and WTIN/FDZ/FLOAD now handle input and fade-out. The fixture includes original array/highscore setup 32–56, SASINIT 205–239 and bank loads 275–279, skips remaining setup 281–286, then executes original title load 287; the menu/game remains excluded |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
 | Sprites/icons | Four sprites; 117 icons; includes six-plane assets |
 | Images | All five primary IFFs decode. Bounded AMSC displays the first logo at (128,42). The 320×512 six-plane EHB main title now displays through a bounded PAL window, preserving lower bitmap rows. Wider modes/placement remain gated |
-| Browser evidence | [First image/FLOAD](../demos/roller2-title.html), [original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [music](../demos/tracker.html), with HTML Preview links; no main title/menu or gameplay yet |
+| Browser evidence | [Intro, initialization and main-title image](../demos/roller2-intro.html), [first image/FLOAD](../demos/roller2-title.html), [original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [music](../demos/tracker.html), with HTML Preview links; no title-menu actions or gameplay yet |
 
 The independent load-only statement fixture preserves its bytes, but excludes
 Dir$, TRUE, Track Play, startup controls, procedures and gameplay. It is not a
@@ -59,7 +59,9 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    WTIN/FDZ now execute unchanged, including 32-entry explicit integer Fade lists.
    A [declared handoff to original main-title load 287](roller2-intro.md) shows the
    EHB title after the intro, with thirteen independent states and eleven GPU
-   comparisons. Next integrate the intervening initialization and menu.
+   comparisons. Original highscore/array setup, SASINIT and work/icon/sprite bank
+   loads now run, with independent table/score assertions in the same browser demo.
+   Next integrate setup 281–286 and the menu.
 3. **Screen/asset setup.** Screen Hide/Show/Clone and Get Palette support the first
    image. Screen To Front, Rainbow Del and remaining drawing/text forms still need
    integration. Double-buffered clone/owner retirement forms remain gated. The tall
@@ -84,7 +86,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 554 tests, 31 offline browser scenario pages,
+Local baseline for this slice: 557 tests, 31 offline browser scenario pages,
 179 renderer, eleven Wonderland live-game, seven Roller II first-image and eleven Roller II intro GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.
