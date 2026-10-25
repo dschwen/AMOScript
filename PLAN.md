@@ -1,6 +1,6 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-24.
+Assessment updated: 2026-10-25.
 
 ## Current priority: Roller II
 
@@ -11,8 +11,10 @@ initial assessment), and whole compilation stops at Set Stack on line 2.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
-run standalone and in the browser inspector; song playback is still unsupported.
-Prioritize Track Play/Stop, a field-clock sequencer and the target MOD effects,
+run standalone and in the browser inspector. A pure field-stepped controller now
+plays the original tune in a separate browser demo, with C/A/E/F/D effects and
+native Web Audio loop/voice checks. Prioritize VM Track Play/Stop integration,
+driver-owned clock wakes and shared sample-voice lifecycle,
 then startup/path/screen forms and an original first-level replay. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
@@ -124,7 +126,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **510 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **517 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

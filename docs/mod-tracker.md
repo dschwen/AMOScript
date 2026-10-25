@@ -52,12 +52,50 @@ original data, typed command arguments, bank replacement and instance isolation.
 The browser demo executes the original sample-load line and leading Track Load
 statement, with an explicit End before the unimplemented remainder.
 
-## Next: the AMOS player, not just a modern MOD library
+## Field-driven player subset
 
-Use a pure four-voice controller with a driver-owned field-clock wake, independent
-of requestAnimationFrame. Extend the existing audio host with sample loops,
-per-voice volume and period updates; starting a new sample every tick would
-incorrectly restart its phase. Coordinate tracker and Sam Play ownership of the
+`lib/amos/tracker.js` now provides a pure, manually field-stepped controller for
+decoded modules. It emits existing four-voice audio commands, with partial sample
+loops and phase-preserving volume/rate updates supported by `webAudio.js`.
+The supported effects are empty `000`, C volume, A volume slide, E filter,
+F speed and D pattern break. Other effects reject with pattern/row/channel
+context before any audio dispatch. This is intentionally bounded to the target's
+effect inventory; arpeggio, portamento, vibrato and position jump remain open.
+
+The first row executes on field six. Later rows use the current speed; A slides
+run on intervening fields, with the upper nibble taking precedence and volume
+clamped to 0–64. Instrument-only rows reset volume without restarting the sample;
+notes without instruments reuse the selected instrument. E uses the parameter's
+low bit (one disables the filter), F clamps to 1–31, and D ignores its row operand.
+Finetune is ignored. The controller applies the native zero-long sample-start
+writes to owned concatenated PCM, including spill through short/empty records.
+Original decoded PCM and bank bytes remain unchanged in this direct-player API.
+On a repeat offset, the initial fetch ends at the repeat end. One-word repeats
+play the zeroed silent word. Sample DMA activation/reload within a field is an
+approximation, not cycle-accurate Paula behavior.
+
+The source's raw restart byte is preserved. Roller II stores 120, so looping
+visits order slots 120–127 (all pattern zero), then wraps to zero. It does not
+immediately restart at zero as many modern players would. Restart bytes above
+127 fail when reached. Loop Off stops after 22 orders / 1,376 rows / 9,631 fields:
+six initial fields plus 1,375 intervals at speed seven. Literal-cell tests cover
+first-row delay, slides, speed clamps, filter, break, instrument reuse, PCM
+ownership, stop/failure and instance isolation. These are source-derived traces,
+not Amiga recordings.
+
+[Play the original tune](../demos/tracker.html) directly with Play/Stop controls.
+The shared browser scenario traverses the whole song without audio, then compares
+a partial sample loop and mid-play volume/rate change against an independent
+native OfflineAudioContext graph. It verifies PCM equality and stereo isolation.
+The audible demo starts only on a click, uses a monotonic 50 Hz host timer
+independent of animation frames, and closes voices/context on Stop or rerun.
+Long timer stalls stop playback and ask for restart. It offers one song traversal,
+without a loop toggle. No whole-game execution or VM timing is claimed.
+
+## Next: VM integration
+
+Connect the pure controller to a driver-owned field-clock wake, independent
+of requestAnimationFrame. Coordinate tracker and Sam Play ownership of the
 same four voices. Track Stop, Stop/Resume, failure, bank replacement and factory
 isolation must cancel/reconcile work predictably.
 
@@ -68,6 +106,7 @@ ignores its optional pattern argument, starts with speed six, zeroes sample
 finetunes and writes a zero long at each sample start in mutable bank storage.
 Model those source rules explicitly; the reader above preserves original file
 bytes. The current target's F07/D00/E01 forms fit that subset. Tick/first-row,
-volume-slide, sample-loop and filter behavior need independent expected traces
-and native Web Audio comparisons before playback is claimed. Actual AMOS/Amiga
+volume-slide and sample-loop behavior now have bounded source-derived traces
+and a native Web Audio control-graph comparison. VM lifecycle, hardware DMA/filter
+response and whole-game music integration remain gates. Actual AMOS/Amiga
 audio captures remain a later validation gate.

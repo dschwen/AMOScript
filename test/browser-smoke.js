@@ -19,7 +19,12 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
-    await runScenario('roller2',page);console.log('Roller2 passed: original asset loads, twelve MOD patterns and ten instruments; playback remains unimplemented.');
+    await runScenario('tracker',page);console.log('Roller2 tracker passed: full-song field trace and native Web Audio loop/voice comparison.');
+    await page.click('#tracker-play');await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='playing');
+    await page.waitForTimeout(160);await page.click('#tracker-stop');
+    await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='off');
+    await page.evaluate(()=>globalThis.AMOS_TRACKER_DEMO_CLEANUP());
+    await runScenario('roller2',page);console.log('Roller2 passed: original asset loads, twelve MOD patterns and ten instruments; VM playback remains unimplemented.');
     const liveGpu=await runScenario('wonderland-game', page);assert.strictEqual(liveGpu.gpuFrames,11);
     await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
     console.log('Wonderland game passed: original keyboard/gamepad replays, eight sample commands, three native PCM/stereo comparisons, eleven live-host GPU/CPU frames, renderer switching and live sound controls.');

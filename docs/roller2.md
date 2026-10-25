@@ -24,7 +24,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
 | Sprites/icons | Four sprites; 117 icons; includes six-plane assets |
 | Images | All five supplied primary IFFs decode already; title is 320×512, six-plane EHB; the others are 320×256, five planes |
-| Browser evidence | [Original-load/MOD inspector](../demos/roller2.html), with runnable HTML Preview link from the gallery; no gameplay or song playback |
+| Browser evidence | [Original-load/MOD inspector](../demos/roller2.html) and [direct song player](../demos/tracker.html), with HTML Preview links from the gallery; no gameplay or VM Track Play yet |
 
 The independent original statement fixture preserves its bytes, but excludes
 Dir$, TRUE, Track Play, startup controls, procedures and gameplay. It is not a
@@ -34,9 +34,11 @@ case-insensitive `RII:` mapping; native relative-directory semantics remain open
 ## Work in execution order
 
 1. **Music loading and playback.** The [MOD reader and Track Load/loop foundation](mod-tracker.md)
-   are implemented. Next add source-derived Track Play/Stop with field-clock ticks,
-   held sample phases, loops, volume/period changes, and the target's C/A/E0/F/D
-   effects. Share the four hardware voice identities with Sam Play and cover
+   are implemented, along with a pure field-stepped player for C/A/E/F/D and
+   phase-preserving Web Audio loop/volume/rate support. The complete tune traverses
+   1,376 rows in 9,631 fields; the direct browser player has native audio checks.
+   Next integrate Track Play/Stop with driver-owned ticks and bank mutation.
+   Share the four hardware voice identities with Sam Play and cover
    mute/Stop/Resume/failure/replacement using the existing Web Audio session.
 2. **Startup and the first title.** Implement Set Stack and Break Off with explicit
    portable semantics; boolean TRUE/FALSE and Not; Dir$ and Exist; Hide/Show
@@ -66,7 +68,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 510 tests, 27 offline browser scenario pages,
+Local baseline for this slice: 517 tests, 28 offline browser scenario pages,
 the existing 179 renderer plus eleven live-game GPU/CPU comparisons, and existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

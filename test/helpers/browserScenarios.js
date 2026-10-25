@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id:'tracker', capturedFrames:false, title:'Play Roller II MOD music', description:'Audition the original tune through a field-driven AMOS tracker controller. Independent tick traces and a native Web Audio loop/volume/rate comparison cover the bounded player; VM Track Play and full-game integration remain open.', run:require('./trackerProbe'), check(result,assert){
+    assert.deepStrictEqual(result,{fields:9631,orders:22,rows:1376,nativeComparisons:1,nonzero:true,vmPlayback:false});
+  } },
   { id:'roller2', capturedFrames:false, title:'Roller II target and MOD inspector', description:'Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original four-channel module, instruments and pattern effects. Whole-game compilation and tracker playback remain open.', run:require('./roller2Probe'), check(result,assert){
     assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:41,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
   } },

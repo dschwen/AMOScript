@@ -184,7 +184,7 @@ and appears in the [demo index](../demos/index.html). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 
-Local verification: `npm run check` passes 510 tests on Node 18.19.1.
+Local verification: `npm run check` passes 517 tests on Node 18.19.1.
 `npm run test:browser` passes the four original image comparisons, all twenty-seven
 standalone scenario pages offline, including Web Audio and controlled/live keyboard
 repeat, original-menu keyboard/gamepad replay and live keyboard UI, existing Canvas/input/lifecycle checks and

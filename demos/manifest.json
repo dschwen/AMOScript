@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "tracker.html",
+      "title": "Play Roller II MOD music",
+      "description": "Audition the original tune through a field-driven AMOS tracker controller. Independent tick traces and a native Web Audio loop/volume/rate comparison cover the bounded player; VM Track Play and full-game integration remain open.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tracker.html"
+    },
+    {
       "file": "roller2.html",
       "title": "Roller II target and MOD inspector",
       "description": "Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original four-channel module, instruments and pattern effects. Whole-game compilation and tracker playback remain open.",

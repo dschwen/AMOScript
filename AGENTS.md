@@ -50,6 +50,9 @@
   Roller II is the current target; see `docs/roller2.md` and `docs/mod-tracker.md`.
   Its end tunes are AMOS Music banks, not MODs. Never count a pattern inspector
   or loop flag as tracker playback.
+  `lib/amos/tracker.js` provides direct field-stepped C/A/E/F/D playback with
+  owned PCM preprocessing and raw restart semantics. The playable tracker demo
+  is separate from VM Track Play/Stop and shared Sam voice lifecycle integration.
 - `lib/ExtensionTable.js` records implemented extension slots/offsets; slot-1
   Music sample commands use `lib/amos/audio.js` for bounded Samples records and
   voice commands. `webAudio.js` is the optional browser adapter. Generated
