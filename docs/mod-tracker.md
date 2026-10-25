@@ -22,13 +22,17 @@ and `D00` (one). Zero-effect/zero-parameter cells are omitted from those counts.
 
 ## Implemented AMOS commands
 
-Music extension slot 1 registers only these new implemented offsets:
+Music extension slot 1 registers these implemented tracker offsets:
 
 | Offset | Form | Portable behavior |
 | --- | --- | --- |
 | `$026e` | Track Loop On | Per-program loop configuration enabled |
 | `$0282` | Track Loop Off | Per-program loop configuration disabled |
 | `$02ba` | Track Load filename,bank | Raw synchronous file bytes into a chip data bank named `Tracker `, followed by 32 zero workspace bytes; selects the destination bank |
+| `$0296` | Track Play | Play the last Track Load destination |
+| `$02a8` | Track Play bank | Play a named chip Tracker bank |
+| `$02b0` | Track Play bank,pattern | Evaluate numeric arguments; the original player ignores the pattern argument |
+| `$025e` | Track Stop | Stop an active tracker and all four shared voices; inactive tracker is a no-op |
 
 `Track Load` accepts bank numbers 1–65535 and files up to 16 MiB through the
 existing synchronous byte-string adapter. It deliberately does not parse the
@@ -39,8 +43,12 @@ selection/allocation-failure behavior is not emulated. Successful replacement
 retires old virtual addresses through the established bank installer.
 
 Generated modules embed these operations without imports, and each factory owns
-its tracker selection/loop state. Track Play and Track Stop remain unsupported
-extension encodings; loop configuration is not silently presented as playback.
+its tracker selection, loop and playback state. The bounded Track Play form takes
+banks 1–65535 with the exact MOD-plus-32-workspace layout above; raw addresses and
+other layouts reject. Track Play validates the module and supported effects
+before replacing playback or mutating bytes. It then writes the original zero
+longs at sample starts and clears sample finetunes in the mutable bank itself.
+Explicit Track Play does not change the default bank selected by Track Load.
 AMOS Music-bank `Music`/`Mvolume`/`Music Off` commands remain separate work.
 
 Offsets and normal bank/loop behavior follow the pinned original
@@ -49,7 +57,7 @@ and [`src/ext/music.cpp`](https://github.com/AOZ-Studio/AMOS-Professional-Offici
 The literal sparse MOD fixture is independent of any production encoder. Unit
 tests cover malformed headers/payloads, ownership, unused order slots, exact
 original data, typed command arguments, bank replacement and instance isolation.
-The browser demo executes the original sample-load line and leading Track Load
+The load-inspector demo executes the original sample-load line and leading Track Load
 statement, with an explicit End before the unimplemented remainder.
 
 ## Field-driven player subset
@@ -99,19 +107,51 @@ before their sample bodies could sound. The adapter now appends the repeat PCM
 after the full initial fetch when necessary, then loops only that appended
 region. A single source preserves phase through rate/volume updates. Eleven
 native graph comparisons cover all ten original instruments plus a non-silent
-short repeat and voice updates. These verify portable Web Audio behavior, not
+short repeat and voice updates. A twelfth comparison verifies that the compiled
+original Track Play statement reaches Web Audio with the opening note's PCM,
+period, volume and stereo route. Both pure-controller and generated-VM traces
+match all 1,997 notes. These verify portable Web Audio behavior, not
 Amiga audio capture parity.
-The audible demo starts only on a click, uses a monotonic 50 Hz host timer
-independent of animation frames, and closes voices/context on Stop or rerun.
-Long timer stalls stop playback and ask for restart. It offers one song traversal,
-without a loop toggle. No whole-game execution or VM timing is claimed.
+The audible demo starts only on a click and runs a standalone compiled VM with
+the bounded original load statements, Led Off (bytes 56–62) and Track Play 22
+(394–406). A synthetic Wait Key keeps it alive. TRUE, Track Loop On and other
+startup/gameplay statements remain outside this fixture. The demo offers one
+song traversal, Pause/Resume and Stop; cleanup closes its voices and context.
 
-## Next: VM integration
+## Driver clock, lifecycle and shared voices
 
-Connect the pure controller to a driver-owned field-clock wake, independent
-of requestAnimationFrame. Coordinate tracker and Sam Play ownership of the
-same four voices. Track Stop, Stop/Resume, failure, bank replacement and factory
-isolation must cancel/reconcile work predictably.
+The driver owns a separate wake for each next global VBL, independent of
+requestAnimationFrame, VM instruction budgets, Wait/Wait Key, Timer assignments
+and sleepScale. PAL/NTSC tests cover the field phase and separate audio-clock
+choice. Natural song end leaves the waiting VM alive. End/failure cancel music,
+palette and VM wakes and silence voices; asynchronous errors retain the starting
+Track Play location. Ownership tokens make late callbacks inert even without
+clearTimeout. Catch-up is limited to 250 fields per advance; larger stalls halt
+with source context. Smaller timer stalls can still jitter/batch host audio
+commands: sample-accurate scheduling and hardware captures remain open.
+
+Host Stop cancels wakes, freezes the sequencer and silences audio. Resume rebases
+the next field on the current global clock without replaying elapsed notes.
+Held sample phase is not restored: sound resumes on subsequent note triggers.
+This is an explicit host pause policy, separate from native Track Stop.
+
+Sam Play and the tracker route through the same audio controller and four voice
+identities. Samples replace the selected current voices; tracker nonzero held
+periods and volume slides write those voices on later fields, and subsequent
+notes replace their PCM again. Sam Stop leaves the sequencer running. Sam loop
+configuration affects sample-owned voices and future samples, preserving tracker
+repeat regions. LED/filter state is shared across both sources. Exact sample
+interrupt/DMA contention, zero-period hardware writes and phase restoration
+after host pause remain outside this portable subset.
+
+Playing bank identity survives Swap. Replacement, erasure or actual shrink stops
+the tracker before invalidating storage. The controller decodes an owned snapshot;
+live pattern/PCM editing is not supported, so Poke/Bload into an active Tracker
+bank reject before writing. Track Stop first to edit and replay. Direct external
+mutation of the exposed banks map/data is outside the runtime command contract.
+Per-factory tests verify independent players, PCM, defaults and timers.
+
+## Remaining player gates
 
 The original player differs from modern ProTracker defaults: F commands clamp
 to speed 1–31 rather than selecting BPM, D commands break to the next pattern
@@ -121,6 +161,6 @@ finetunes and writes a zero long at each sample start in mutable bank storage.
 Model those source rules explicitly; the reader above preserves original file
 bytes. The current target's F07/D00/E01 forms fit that subset. Tick/first-row,
 volume-slide and sample-loop behavior now have bounded source-derived traces
-and eleven native Web Audio control-graph comparisons. VM lifecycle, hardware DMA/filter
-response and whole-game music integration remain gates. Actual AMOS/Amiga
+and twelve native Web Audio control-graph comparisons. Hardware DMA/filter
+response, wider effects and whole-game music integration remain gates. Actual AMOS/Amiga
 audio captures remain a later validation gate.

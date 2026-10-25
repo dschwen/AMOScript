@@ -2121,10 +2121,66 @@
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
-  const bankMemory = bankMemoryFactory(banks);
+  let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
+  const bankMemory = bankMemoryFactory(banks, { beforeWrite(bank) {
+    if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
+  } });
   const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
   state.audio = audio.state;
-  state.tracker = { bank: null, loop: false };
+  state.tracker = { bank: null, loop: false, playing: false, paused: false, position: null };
+  function trackStop() {
+    const previous = tracker;
+    tracker = null; trackerBank = null; trackerNext = null;
+    state.tracker.playing = false; state.tracker.paused = false;
+    try { if (previous) previous.stop(); }
+    finally { if (options.requestTrackerWake) options.requestTrackerWake(); }
+  }
+  function trackPlay(number = state.tracker.bank, pattern = null) {
+    // Native Track Play evaluates but ignores its optional pattern argument.
+    if (pattern != null) integer(pattern);
+    number = integer(number);
+    if (number < 1 || number >= 65536) throw new Error('Invalid Track Play bank number');
+    const bank = banks.get(number);
+    if (!bank || bank.type !== 'data' || bank.memory !== 'chip' || bank.name !== 'Tracker ') throw new Error('Tracker bank not found');
+    if (!options.vblNow || !options.requestTrackerWake) throw new Error('Track Play requires the runtime VBL clock');
+    if (state.halted) throw new Error('Cannot start tracker in a halted program');
+    // This bounded bank form is Track Load's exact MOD plus 32 workspace bytes.
+    const module = modReaderFactory(bank.data.subarray(0, -32));
+    const next = trackerFactory(module, { standard: options.audioStandard, loop: state.tracker.loop,
+      filterEnabled: audio.state.filterEnabled, host: { command(event) {
+        if (event.type === 'filter') audio.filter(event.enabled);
+        else audio.command(event.type === 'play' ? { ...event, filterEnabled: audio.state.filterEnabled } : event);
+      } } });
+    // Validate before mutating banks or silencing the current song.
+    const now = options.vblNow();
+    trackStop(); audio.stop();
+    for (const sample of module.samples) {
+      bank.data.fill(0, sample.offset, sample.offset + 4);
+      bank.data[44 + (sample.number - 1) * 30] = 0;
+    }
+    tracker = next; trackerBank = bank; trackerNext = now + 1;
+    trackerLocation = state.location && { ...state.location };
+    state.tracker.position = next.state; state.tracker.playing = true;
+    state.tracker.paused = state.stopped;
+    options.requestTrackerWake();
+  }
+  function advanceTracker(vbl) {
+    if (!tracker || state.tracker.paused) return;
+    if (vbl - trackerNext >= 250) throw new Error('Tracker field catch-up exceeds 250 fields');
+    while (tracker && trackerNext <= vbl) {
+      trackerNext++;
+      tracker.state.loop = state.tracker.loop;
+      tracker.state.filterEnabled = audio.state.filterEnabled;
+      tracker.tick();
+      if (!tracker.state.playing) { tracker = null; trackerBank = null; trackerNext = null; state.tracker.playing = false; }
+    }
+  }
+  function pauseTracker() { if (tracker) state.tracker.paused = true; }
+  function resumeTracker() {
+    if (tracker && state.tracker.paused) {
+      trackerNext = options.vblNow() + 1; state.tracker.paused = false;
+    }
+  }
   let bankOrder = Array.from(banks.keys()).reverse();
   const bobs = new Map();
   const sprites = new Map();
@@ -2738,6 +2794,7 @@
   }
 
   function installBanks(loaded, removed = [], clear = false) {
+    if (trackerBank && (clear || removed.includes(trackerBank.number) || loaded.some(bank => bank.number === trackerBank.number))) trackStop();
     const objectsChanged = (clear && banks.has(1)) || removed.includes(1) || loaded.some(bank => bank.number === 1);
     if (objectsChanged) clearBobs(null, true);
     if (clear) { for (const bank of banks.values()) bankMemory.release(bank); banks.clear(); bankOrder = []; }
@@ -2806,7 +2863,10 @@
     if (!bank) throw new Error('Bank not reserved');
     if (bank.images) throw new Error('Cannot shrink an image bank');
     if (length > bank.data.length) throw new Error('Invalid bank length');
-    if (length !== bank.data.length) bank.data = bank.data.slice(0, length);
+    if (length !== bank.data.length) {
+      if (bank === trackerBank) trackStop();
+      bank.data = bank.data.slice(0, length);
+    }
   }
 
   function saveBanks(filename, number = null) {
@@ -3600,6 +3660,9 @@
   }
 
   return {
+    trackPlay, trackStop, advanceTracker, pauseTracker, resumeTracker,
+    nextTrackerVbl: () => trackerNext,
+    trackerLocation: () => trackerLocation,
     fileSelector,
     rnd, randomize,
     bload, bsave,
@@ -3694,11 +3757,21 @@
   const clock = standard === 'PAL' ? 3546895 : 3579545;
   const state = { bank: 5, loopMask: 0, filterEnabled: true };
   let activeMask = 0;
+  let trackerMask = 0;
   function notify(event) {
     if (options.host == null) return;
     if (typeof options.host.command !== 'function') throw new Error('Audio host requires a synchronous command method');
     const result = options.host.command(event);
     if (result && typeof result.then === 'function') throw new Error('Audio host commands must complete synchronously');
+  }
+  function command(event, origin = 'tracker') {
+    if (event.type === 'play') {
+      const mask = event.mask & 15;
+      activeMask |= mask;
+      trackerMask = (trackerMask & ~mask) | (origin === 'tracker' ? mask : 0);
+    }
+    try { notify(event); }
+    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); } }
   }
   function sample(number) {
     const bank = banks.get(state.bank);
@@ -3729,7 +3802,8 @@
   }
   function loop(enabled, mask = 15) {
     mask &= 15;
-    notify({ type: 'loop', mask, enabled });
+    // Sam loops configure the sample interrupt stream, not tracker DMA loops.
+    notify({ type: 'loop', mask: mask & ~trackerMask, enabled });
     state.loopMask = enabled ? state.loopMask | mask : state.loopMask & ~mask;
   }
   function filter(enabled) {
@@ -3742,18 +3816,161 @@
     const period = Math.max(124, Math.floor(clock / frequency));
     if (!Number.isFinite(frequency) || !Number.isInteger(period) || period > 65535) throw new Error('Unsupported sample frequency');
     // Mark before dispatch so a partially failing host is silenced by the driver.
-    activeMask |= mask & 15;
-    notify({ type: 'play', mask: mask & 15, sample: selected, period, rate: clock / period,
-      volume: 56, loopMask: state.loopMask, filterEnabled: state.filterEnabled });
+    command({ type: 'play', mask: mask & 15, sample: selected, period, rate: clock / period,
+      volume: 56, loopMask: state.loopMask, filterEnabled: state.filterEnabled }, 'sample');
   }
   function stop(mask = 15) {
     mask &= 15;
-    try { notify({ type: 'stop', mask }); } finally { activeMask &= ~mask; }
+    command({ type: 'stop', mask });
   }
-  return { state, sample, selectBank, loop, filter, play, stop,
+  return { state, sample, selectBank, loop, filter, play, stop, command,
     silence() { if (activeMask) stop(15); } };
 };
-  const bankMemoryFactory = function createBankMemory(banks) {
+  const modReaderFactory = function readMod(bytes) {
+  const fail=message=>{throw new Error(`MOD: ${message}`);};
+  if(!ArrayBuffer.isView(bytes)||Object.prototype.toString.call(bytes)!=='[object Uint8Array]')fail('expected byte storage');
+  if(bytes.length>16*1024*1024)fail('file exceeds 16 MiB');
+  const bounds=(at,length)=>{if(at<0||length<0||at>bytes.length-length)fail(`truncated data at byte ${at} (need ${length})`);};
+  const word=at=>{bounds(at,2);return bytes[at]*256+bytes[at+1];};
+  const text=(at,length)=>{bounds(at,length);return String.fromCharCode(...bytes.subarray(at,at+length)).split('\0')[0];};
+  bounds(0,1084);
+  const signature=text(1080,4);if(signature!=='M.K.')fail(`unsupported signature ${JSON.stringify(signature)} (expected four-channel M.K.)`);
+  const songLength=bytes[950],restart=bytes[951];if(songLength<1||songLength>128)fail('song length must be 1..128');
+  const orderTable=Uint8Array.from(bytes.subarray(952,1080));if(orderTable.some(value=>value>127))fail('pattern number exceeds 127');
+  // AMOS Track Play addresses sample storage using all 128 order slots.
+  const patternCount=Math.max(...orderTable)+1,sampleStart=1084+patternCount*1024;
+  bounds(1084,patternCount*1024);
+  let end=sampleStart;const descriptors=[];
+  for(let index=0;index<31;index++){
+    const at=20+index*30,length=word(at+22)*2,finetune=bytes[at+24],volume=bytes[at+25];
+    const loopStart=word(at+26)*2,loopLength=word(at+28)*2;
+    if(finetune>15)fail(`invalid finetune for sample ${index+1}`);
+    if(volume>64)fail(`invalid volume for sample ${index+1}`);
+    if(loopStart>length||(loopLength>2&&loopStart+loopLength>length))fail(`loop exceeds sample ${index+1}`);
+    bounds(end,length);
+    descriptors.push({number:index+1,name:text(at,22),length,finetune:finetune<8?finetune:finetune-16,volume,loopStart,loopLength,looping:loopLength>2,offset:end});
+    end+=length;
+  }
+  if(end!==bytes.length)fail(`unexpected trailing data at byte ${end}`);
+  const patterns=[];
+  for(let pattern=0;pattern<patternCount;pattern++){
+    const cells=[];
+    for(let cell=0;cell<256;cell++){
+      const at=1084+pattern*1024+cell*4,instrument=(bytes[at]&240)|(bytes[at+2]>>4);
+      if(instrument>31)fail(`invalid sample ${instrument} in pattern ${pattern}, row ${cell>>2}, channel ${cell&3}`);
+      cells.push({sample:instrument,period:((bytes[at]&15)<<8)|bytes[at+1],effect:bytes[at+2]&15,parameter:bytes[at+3]});
+    }
+    patterns.push(cells);
+  }
+  const samples=descriptors.map(sample=>({...sample,pcm:Int8Array.from(bytes.subarray(sample.offset,sample.offset+sample.length),value=>(value<<24)>>24)}));
+  return {title:text(0,20),signature,channels:4,songLength,restart,orderTable,orders:orderTable.slice(0,songLength),patternCount,sampleStart,samples,patterns};
+};
+  const trackerFactory = function createTracker(module, options = {}) {
+  const clock = options.standard === 'NTSC' ? 3579545 : 3546895;
+  if (options.standard != null && !['PAL', 'NTSC'].includes(options.standard)) throw new Error('Unsupported audio standard');
+  // Reject unsupported effects before starting any audio, including unused
+  // patterns. 000 is empty; 0xy arpeggio is deliberately not implemented yet.
+  for (let p = 0; p < module.patterns.length; p++) for (let i = 0; i < 256; i++) {
+    const c = module.patterns[p][i];
+    if (!([10, 12, 13, 14, 15].includes(c.effect) || c.effect === 0 && c.parameter === 0)) {
+      throw new Error(`Tracker: unsupported effect ${c.effect.toString(16)} at pattern ${p}, row ${i >> 2}, channel ${i & 3}`);
+    }
+  }
+  // Native Track Play writes a zero long at EVERY sample address, including
+  // empty/short records. Preserve spill into following samples in owned storage.
+  const pcm = new Uint8Array(module.samples.reduce((sum, s) => sum + s.length, 0) + 32);
+  let at = 0;
+  for (const s of module.samples) { pcm.set(s.pcm, at); at += s.length; }
+  at = 0;
+  for (const s of module.samples) { pcm.fill(0, at, at + 4); at += s.length; }
+  at = 0;
+  const samples = module.samples.map(s => {
+    const sample = { number: s.number, length: s.length, data: pcm.slice(at, at + s.length) };
+    at += s.length; return sample;
+  });
+  const voices = Array.from({ length: 4 }, () => ({ sample: 0, period: 0, volume: 0, effect: 0, parameter: 0 }));
+  const state = { playing: true, field: 0, counter: 0, speed: 6, order: 0, row: 0,
+    loop: !!options.loop, filterEnabled: options.filterEnabled !== false, voices };
+  function emit(event) {
+    if (!options.host) return;
+    const result = options.host.command({ ...event, field: state.field });
+    if (result && typeof result.then === 'function') throw new Error('Tracker audio commands must complete synchronously');
+  }
+  function stop() {
+    if (!state.playing) return;
+    state.playing = false; emit({ type: 'stop', mask: 15 });
+  }
+  function tick() {
+    if (!state.playing) return;
+    state.field++;
+    try {
+      if (++state.counter < state.speed) {
+        for (let v = 0; v < 4; v++) {
+          const voice = voices[v];
+          const event = { type: 'voice', mask: 1 << v };
+          if (voice.period) event.rate = clock / voice.period;
+          if (voice.effect === 10) {
+            const up = voice.parameter >> 4;
+            voice.volume = Math.max(0, Math.min(64, voice.volume + (up || -(voice.parameter & 15))));
+            event.volume = voice.volume;
+          }
+          if (event.rate != null || event.volume != null) emit(event);
+        }
+        return;
+      }
+      state.counter = 0;
+      const pattern = module.orderTable[state.order], cells = module.patterns[pattern];
+      let patternBreak = false;
+      for (let v = 0; v < 4; v++) {
+        const cell = cells[state.row * 4 + v], voice = voices[v], mask = 1 << v;
+        if (cell.sample) {
+          voice.sample = cell.sample; voice.volume = module.samples[cell.sample - 1].volume;
+          emit({ type: 'voice', mask, volume: voice.volume });
+        }
+        voice.effect = cell.effect; voice.parameter = cell.parameter;
+        if (cell.period) voice.period = cell.period;
+        if (cell.effect === 12) {
+          voice.volume = Math.min(64, cell.parameter); emit({ type: 'voice', mask, volume: voice.volume });
+        }
+        if (cell.effect === 14) {
+          state.filterEnabled = !(cell.parameter & 1); emit({ type: 'filter', enabled: state.filterEnabled });
+        }
+        if (cell.effect === 15) state.speed = Math.max(1, Math.min(31, cell.parameter));
+        if (cell.effect === 13) patternBreak = true;
+        if (cell.period) {
+          const descriptor = module.samples[voice.sample - 1], sample = samples[voice.sample - 1];
+          if (!sample || !sample.length) emit({ type: 'stop', mask });
+          else {
+            // With a repeat offset AMOS fetches only through the repeat end on
+            // the first pass. A one-word repeat is the zeroed silent word.
+            const end = descriptor.loopStart ? descriptor.loopStart + descriptor.loopLength : sample.length;
+            emit({ type: 'play', mask, sample: { ...sample, length: end, data: sample.data.slice(0, end) },
+              period: voice.period, rate: clock / voice.period, volume: voice.volume,
+              loopMask: descriptor.loopLength ? mask : 0,
+              ...(descriptor.loopLength ? { loopStart: descriptor.loopStart, loopEnd: descriptor.loopStart + descriptor.loopLength } : {}),
+              filterEnabled: state.filterEnabled });
+          }
+        }
+      }
+      if (++state.row === 64 || patternBreak) {
+        state.row = 0; state.order = (state.order + 1) & 127;
+        if (state.order === module.songLength) {
+          if (!state.loop) stop();
+          // Preserve the native raw restart byte, rather than modern players'
+          // usual restart-to-zero normalization. Bound unsafe restart bytes.
+          else if (module.restart > 127) throw new Error('Tracker: restart exceeds order table');
+          else state.order = module.restart;
+        }
+      }
+    } catch (error) {
+      try { stop(); } catch (_) { /* preserve the original failure */ }
+      error.message += ` at tracker field ${state.field}, order ${state.order}, row ${state.row}`;
+      throw error;
+    }
+  }
+  return { state, tick, stop };
+};
+  const bankMemoryFactory = function createBankMemory(banks, options = {}) {
   const allocations = new Map();
   let next = 65536;
   function prune() {
@@ -3795,9 +4012,17 @@
     },
     checkRange(address, length) { resolve(address, length); },
     read(address, length) { const { bank, offset } = resolve(address, length); return bank.data.slice(offset, offset + length); },
-    write(address, bytes) { const { bank, offset } = resolve(address, bytes.length); bank.data.set(bytes, offset); },
+    write(address, bytes) {
+      const { bank, offset } = resolve(address, bytes.length);
+      if (bytes.length && options.beforeWrite) options.beforeWrite(bank);
+      bank.data.set(bytes, offset);
+    },
     peek(address) { const { bank, offset } = resolve(address); return bank.data[offset]; },
-    poke(address, value) { const { bank, offset } = resolve(address); bank.data[offset] = value & 255; },
+    poke(address, value) {
+      const { bank, offset } = resolve(address);
+      if (options.beforeWrite) options.beforeWrite(bank);
+      bank.data[offset] = value & 255;
+    },
     release(bank) { allocations.delete(bank); } };
 };
   const createProgram = function createProgram(cases, options = {}) {
@@ -3845,6 +4070,7 @@
   let lastMaxSteps = 1000;
   let scheduled = null;
   let paletteWake = null;
+  let trackerWake = null;
   let sleepRemaining = 0;
   const keys = state.input.keys;
   const inputResetListeners = new Set();
@@ -3864,6 +4090,8 @@
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
+    cancelTrackerWake();
+    try { operations.trackStop(); } catch (_) { /* best-effort cleanup */ }
     try { operations.audio.silence(); } catch (_) { /* best-effort cleanup */ }
   }
 
@@ -3907,6 +4135,29 @@
       } catch (error) { failPalette(error, location); }
     }, delay);
   }
+  function cancelTrackerWake() {
+    if (!trackerWake) return;
+    const task = trackerWake; trackerWake = null;
+    if (timing.clearTimeout && task.id != null) {
+      try { timing.clearTimeout.call(globalThis, task.id); }
+      catch (_) { /* invalidated ownership makes late callbacks inert */ }
+    }
+  }
+  function requestTrackerWake() {
+    cancelTrackerWake();
+    if (state.halted || state.stopped) return;
+    const field = operations.nextTrackerVbl();
+    if (field == null) return;
+    const task = { id: null }; trackerWake = task;
+    task.id = timing.setTimeout.call(globalThis, () => {
+      if (trackerWake !== task) return;
+      trackerWake = null;
+      if (state.halted || state.stopped) return;
+      const location = operations.trackerLocation();
+      try { operations.advanceTracker(vblCount()); requestTrackerWake(); }
+      catch (error) { failPalette(error, location); }
+    }, Math.max(0.001, timerEpoch + field * 1000 / timing.vblHz - timing.now()));
+  }
 
   function scheduleNext(delayMs) {
     if (scheduled || state.halted || state.stopped) return;
@@ -3927,6 +4178,11 @@
 
     const ipBefore = state.ip;
     let res;
+    if (operations.nextTrackerVbl() != null) {
+      const location = operations.trackerLocation();
+      try { operations.advanceTracker(vblCount()); }
+      catch (error) { failPalette(error, location); }
+    }
     if (operations.nextPaletteVbl() != null) {
       const location = operations.paletteLocation();
       try { operations.advancePalette(vblCount()); }
@@ -4011,7 +4267,7 @@
     }
     try {
       operations.flushBobs();
-      if (state.halted) { cancelPaletteWake(); operations.cancelPaletteEffects(); resetInput(); operations.audio.silence(); }
+      if (state.halted) { cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); resetInput(); operations.audio.silence(); }
     } catch (error) {
       state.halted = true;
       state.waiting = null;
@@ -4031,6 +4287,7 @@
     state.stopped = true;
     cancelScheduled();
     cancelPaletteWake();
+    cancelTrackerWake(); operations.pauseTracker();
     resetInput();
     operations.audio.silence();
   }
@@ -4043,6 +4300,8 @@
       if (operations.nextPaletteVbl() != null) operations.advancePalette(vblCount());
       requestPaletteWake();
     } catch (error) { failPalette(error, location); }
+    try { operations.resumeTracker(); requestTrackerWake(); }
+    catch (error) { failPalette(error, operations.trackerLocation()); }
     if (state.waiting === 'sleep') scheduleNext(sleepRemaining);
     else if (!state.waiting) scheduleNext(0);
   }
@@ -4078,7 +4337,7 @@
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake }));
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
   return {
     state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
     subscribeInputReset(listener) {

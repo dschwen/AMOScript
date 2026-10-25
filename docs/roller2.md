@@ -15,7 +15,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 41 after Track Load/Loop On |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 39 after Track Load/Loop On/Play/Stop |
 | Whole-source compiler gate | Unsupported `$2b9e` Set Stack at line 2, byte 34; the full decoder checks all source, so later forms also need support |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
@@ -24,7 +24,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
 | Sprites/icons | Four sprites; 117 icons; includes six-plane assets |
 | Images | All five supplied primary IFFs decode already; title is 320×512, six-plane EHB; the others are 320×256, five planes |
-| Browser evidence | [Original-load/MOD inspector](../demos/roller2.html) and [direct song player](../demos/tracker.html), with HTML Preview links from the gallery; no gameplay or VM Track Play yet |
+| Browser evidence | [Original-load/MOD inspector](../demos/roller2.html) and [compiled original music statements](../demos/tracker.html), with HTML Preview links from the gallery; no gameplay yet |
 
 The independent original statement fixture preserves its bytes, but excludes
 Dir$, TRUE, Track Play, startup controls, procedures and gameplay. It is not a
@@ -38,15 +38,17 @@ case-insensitive `RII:` mapping; native relative-directory semantics remain open
    phase-preserving Web Audio loop/volume/rate support. The complete tune traverses
    1,376 rows in 9,631 fields; all 1,997 note triggers and all ten instruments now
    have independent note/PCM checks, including full initial fetches before silent
-   repeats. The direct browser player passes eleven native audio comparisons.
-   Next integrate Track Play/Stop with driver-owned ticks and bank mutation.
-   Share the four hardware voice identities with Sam Play and cover
-   mute/Stop/Resume/failure/replacement using the existing Web Audio session.
+   repeats. Compiled Track Play/Stop now use driver-owned field wakes, native
+   bank preprocessing and the four shared sample voices. The browser player
+   passes twelve native audio comparisons and offers Pause/Resume/Stop. Host
+   pause freezes the sequencer but does not restore held sample phase. Bank
+   replacement/erasure/shrink, active-write rejection and failures are covered.
+   Wider effects, exact DMA/sample interrupt contention and captures remain open.
 2. **Startup and the first title.** Implement Set Stack and Break Off with explicit
    portable semantics; boolean TRUE/FALSE and Not; Dir$ and Exist; Hide/Show
    overloads; Pop Proc and the original `FLOAD`/wait/fade routines. Do not register
-   names without parser/lowerer/runtime behavior. Keep module calls explicit until
-   playback exists. The first actual image request is `terminator el`.
+   names without parser/lowerer/runtime behavior. The first actual image request
+   is `terminator el`.
 3. **Screen/asset setup.** Screen Hide/Show/Clone, Get Palette, Screen To Front,
    Rainbow Del and supported drawing/text forms need integration. The tall EHB
    title requires a bounded presentation window, not an unrepresentable 512-line
@@ -70,7 +72,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 517 tests, 28 offline browser scenario pages,
+Local baseline for this slice: 527 tests, 28 offline browser scenario pages,
 the existing 179 renderer plus eleven live-game GPU/CPU comparisons, and existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

@@ -19,5 +19,7 @@ are not needed for the source/data fixture and have not been copied. The supplie
 `RII/` directory is unchanged.
 
 See [the milestone](../../docs/roller2.md) and
-[the source-load/MOD inspector](../../demos/roller2.html). Full-game compilation
-and music playback are not implemented yet.
+[the source-load/MOD inspector](../../demos/roller2.html). The
+[music demo](../../demos/tracker.html) now plays the main MOD through bounded
+compiled original statements. Full-game compilation and the separate AMOS Music
+bank end tunes remain open.

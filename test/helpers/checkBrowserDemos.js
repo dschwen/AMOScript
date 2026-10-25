@@ -20,6 +20,13 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='tracker'){
+        await page.click('#tracker-play');await page.waitForFunction(()=>Number(document.getElementById('tracker-status').dataset.field)>=6);
+        await page.click('#tracker-pause');await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='paused');
+        await page.click('#tracker-pause');await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='playing');
+        await page.click('#tracker-stop');await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='off');
+        await page.evaluate(()=>globalThis.AMOS_TRACKER_DEMO_CLEANUP());
+      }
       if (scenario.id === 'wonderland-game') {
         await page.click('#frame-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='frame-view');
         await page.click('#frame-fullscreen');await page.waitForFunction(()=>document.fullscreenElement===null);

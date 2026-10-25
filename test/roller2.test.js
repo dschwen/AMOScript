@@ -10,7 +10,7 @@ test('Roller2: supplied source/data manifest is byte-exact; whole-source audit d
   const manifest=JSON.parse(fs.readFileSync(path.join(directory,'manifest.json')));
   for(const [name,entry] of Object.entries(manifest.files)){const b=fs.readFileSync(path.join(directory,name));assert.strictEqual(b.length,entry.byteLength);assert.strictEqual(crypto.createHash('sha256').update(b).digest('hex'),entry.sha256);}
   const a=require('../tools/audit_program').auditProgram(fs.readFileSync(path.join(directory,'Roller II.AMOS')));
-  assert.deepStrictEqual([a.physicalLines,a.distinctEncodings,a.unrecognizedEncodings],[1199,194,41]);assert.strictEqual(a.compiler.ok,false);assert.match(a.compiler.error,/0x2b9e.*line 2/);assert.deepStrictEqual(a.banks,[]);
+  assert.deepStrictEqual([a.physicalLines,a.distinctEncodings,a.unrecognizedEncodings],[1199,194,39]);assert.strictEqual(a.compiler.ok,false);assert.match(a.compiler.error,/0x2b9e.*line 2/);assert.deepStrictEqual(a.banks,[]);
 });
 
 test('Track Load: original Roller2 asset statements run standalone with sample bank 6, raw Tracker bank 22 and zero workspace',()=>{
@@ -37,5 +37,5 @@ test('Track Load: failed reads do not replace banks or selection; successful rep
   p.trackLoad('ok',22);assert.throws(()=>p.peek(address),/retired/);assert.strictEqual(p.state.tracker.bank,22);p.stop();
   for(const result of [Promise.resolve('x'),'\u0100',new Uint8Array(1)])assert.throws(()=>execute(binary([[ext(0x2ba),text('x'),t(','),n(22)]]),100,{files:{read:()=>result}}),/tracker bytes synchronously.*line 1/);
   for(const bank of [0,-1,65536])assert.throws(()=>execute(binary([[ext(0x2ba),text('x'),t(','),n(bank)]]),100,{files:{read:()=>''}}),/Invalid Track Load bank.*line 1/);
-  assert.throws(()=>compile(binary([[ext(0x2a8),n(22)]])),/Unsupported extension 1:0x2a8/);
+  assert.throws(()=>execute(binary([[ext(0x2a8),n(22)]])),/Tracker bank not found.*line 1/);
 });

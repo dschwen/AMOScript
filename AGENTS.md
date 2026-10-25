@@ -46,13 +46,17 @@
   50ths and input-reset subscriptions for lifecycle cleanup; see `docs/key-speed.md`.
 - `lib/amos/mod.js` decodes owned four-channel M.K. files without playback.
   Track Load uses raw synchronous bytes in a chip `Tracker ` bank plus 32 zero
-  workspace bytes; loop flags are per factory. Track Play/Stop remain unsupported.
+  workspace bytes; loop flags are per factory. Track Play/Stop use a driver-owned
+  VBL wake and shared sample voices; all overloads use checked chip Tracker banks.
   Roller II is the current target; see `docs/roller2.md` and `docs/mod-tracker.md`.
   Its end tunes are AMOS Music banks, not MODs. Never count a pattern inspector
   or loop flag as tracker playback.
   `lib/amos/tracker.js` provides direct field-stepped C/A/E/F/D playback with
-  owned PCM preprocessing and raw restart semantics. The playable tracker demo
-  is separate from VM Track Play/Stop and shared Sam voice lifecycle integration.
+  owned PCM preprocessing and raw restart semantics. VM Track Play also mutates
+  the bank's sample-start longs/finetunes. Host Stop freezes music and silences
+  held samples; Resume rebases fields without restoring held sample phase.
+  Bank replacement/erasure/shrink stops playback; active Poke/Bload rejects.
+  The playable tracker demo runs bounded original music statements, not the game.
   Web Audio explicit repeat bounds apply after the full initial sample fetch;
   short/silent repeat regions must not truncate it. The tracker demo verifies
   all 1,997 original triggers and all ten instrument waveforms independently.

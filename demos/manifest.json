@@ -4,13 +4,13 @@
     {
       "file": "tracker.html",
       "title": "Play Roller II MOD music",
-      "description": "Audition the original tune through a field-driven AMOS tracker controller. All 1,997 note triggers and ten instrument waveforms match independent source-derived/native Web Audio expectations, including initial fetches before silent repeats. VM Track Play and full-game integration remain open.",
+      "description": "Original bounded load/Led Off/Track Play statements run in a compiled VM, with independent field wakes, Pause/Resume and Stop. All 1,997 notes and ten instrument waveforms pass source-derived/native Web Audio checks. Full-game integration remains open.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tracker.html"
     },
     {
       "file": "roller2.html",
       "title": "Roller II target and MOD inspector",
-      "description": "Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original four-channel module, instruments and pattern effects. Whole-game compilation and tracker playback remain open.",
+      "description": "Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original module, instruments and effects. The separate music demo runs compiled Track Play; whole-game compilation remains open.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2.html"
     },
     {
