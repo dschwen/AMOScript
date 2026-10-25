@@ -106,7 +106,8 @@ implicit local/hardware conversion. With limits active, injection clamps in the
 same units as the mouse queries. Use the hardware Canvas mode for programs whose
 Limit Mouse and X/Y Mouse expressions use hardware coordinates. These changes do
 not implement pointer locking, browser letterboxing, relative movement,
-Hzone/Mouse Zone, or GPU host switching. Legacy unbounded headless
+Hzone, Mouse Screen/Scin, or GPU host switching. Mouse Zone now follows the
+current screen’s live hardware window and offsets; see [zones](zones.md). Legacy unbounded headless
 injection and all existing local-coordinate demos retain their previous units.
 
 ## Wonderland and evidence

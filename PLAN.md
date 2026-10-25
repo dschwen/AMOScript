@@ -6,7 +6,7 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 23 remain unrecognized (43 at
+The main source has 1,199 lines and 194 encodings; 22 remain unrecognized (43 at
 initial assessment), and whole compilation stops at Boom on line 161.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
@@ -32,9 +32,12 @@ and work/icon/sprite bank loads now execute before the title. Independent checks
 cover loaded/missing/bypassed scores and every handler/connection slot.
 X/Y Mouse assignment now follows native doubled-word clamps after explicit Limit
 Mouse; original LIMM and joystick movement 299–303 run in a separate bounded
-fixture, with fourteen keyboard/Gamepad browser steps. Mouse Zone and menu
-selection remain open. Next cover setup 281–286 and title-menu logic, alongside the
-remaining decoder gate at Boom. Game-over/win
+fixture, with fourteen keyboard/Gamepad browser steps. Mouse Zone now queries
+the selected live hardware window with hires/scroll conversion. A separate
+guarded menu fixture runs original zones/input branches and FDZ after a synthetic
+title load: ten browser cases, nine selections, two independent/GPU frames.
+Next join the original startup/setup path, cover setup 281–286, and implement
+the selected routines, alongside the remaining decoder gate at Boom. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
@@ -145,7 +148,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **561 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **566 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

@@ -44,8 +44,9 @@ physical-buffer contract and do not include zone definitions.
 
 This feature preserves the existing Canvas input contract: its pointer coordinates
 are local to the selected screen. [Mouse limits/clicks and an explicit hardware
-Canvas mode](mouse.md) are now implemented separately; Hzone and Mouse Zone
-remain unsupported. Do not treat a Zone query
+Canvas mode](mouse.md) are implemented separately. Mouse Zone now performs
+selected-screen hardware conversion as described below; Hzone remains open.
+Do not treat a Zone query
 as an implicit conversion between browser-local and Amiga hardware coordinates.
 
 The declared fixture joins unchanged Wonderland screen setup (lines 351–362),
@@ -83,3 +84,32 @@ Amiga execution capture.
 
 The unmodified whole source now compiles. Controlled game entry runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [whole-program evidence](file-selector.md).
+
+## Mouse Zone
+
+`Mouse Zone` (`$16e2`) is a zero-argument integer query using the runtime hardware
+mouse position and the **current selected screen**. It first clips to that
+screen's live window, with an exclusive right/bottom edge. It converts hardware
+x to logical pixels (double in hires), adds the live source offsets, then uses
+the existing unsigned-word zone lookup with inclusive zone edges and lowest
+zone-number overlap priority. No matching rectangle or unreserved zones returns
+zero. A current screen is required, even if nothing is presented.
+
+This follows the language `lib_fn_mouse_zone` in pinned `src/lib/screens.cpp`,
+which dispatches `ZoHd` with screen zero (the current-screen selector). It does
+not call `SyMouZ`, the separate screen-priority scan. `src/w/mouse.cpp` supplies
+`screen_of`, `zone_hardware` and `zone_at`. The reference revision is
+`7f32e0abe1b6b415c9502b598cd3e4cb131018f8`.
+
+Hidden/current-screen selection and Screen Display/Offset changes apply to this
+query immediately, including before View under Auto View Off. The Canvas
+hardware pointer adapter still maps the committed raster. Queries neither
+commit a View nor mutate pixels, palettes, buttons, click history or presentation
+state. Unsupported display modes retain their existing gates; this does not add
+interlace, Hzone/Mouse Screen/Scin, priority scanning or native captures.
+
+Standalone tests cover original token bytes, hardware word conversion, window
+versus zone edges, current/hidden screens, hires scrolling and staged geometry.
+Integer results store through DATA-indexed arrays and procedure results. The
+[Roller II menu fixture](roller2-menu.md) also checks every title position and
+original branch outcomes; it stops at explicit target guards.

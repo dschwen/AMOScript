@@ -20,6 +20,22 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-menu'){
+        await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='menu');
+        assert.strictEqual(await page.locator('#roller2-menu-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#roller2-menu-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-menu-viewport');
+        await page.click('#roller2-menu-stop');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='stopped');
+        await page.click('#roller2-menu-resume');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='menu');
+        const point=await page.locator('#roller2-menu-input').evaluate(canvas=>{const r=canvas.getBoundingClientRect(),sx=r.width/canvas.offsetWidth,sy=r.height/canvas.offsetHeight;return{x:r.left+(canvas.clientLeft+canvas.clientWidth*30/320)*sx,y:r.top+(canvas.clientTop+canvas.clientHeight*140/268)*sy};});
+        await page.mouse.move(point.x,point.y);await page.mouse.down();
+        try{await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.action==='game');}finally{await page.mouse.up();}
+        await page.click('#roller2-menu-restart');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='menu');
+        await page.keyboard.press('h');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.action==='scores');
+        await page.click('#roller2-menu-restart');await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.phase==='menu');
+        await page.locator('#roller2-menu-input').evaluate(canvas=>canvas.dispatchEvent(new KeyboardEvent('keydown',{key:'Help',code:'Help',bubbles:true,cancelable:true})));
+        await page.waitForFunction(()=>document.getElementById('roller2-menu-controls').dataset.action==='help');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_MENU_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-intro'){
         await page.waitForFunction(()=>document.getElementById('roller2-intro-controls').dataset.phase==='waiting-input');
         assert.strictEqual(await page.locator('#roller2-intro-controls').getAttribute('data-backend'),'webgl');

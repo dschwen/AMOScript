@@ -15,7 +15,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 23 after tracker/startup and FLOAD screen/procedure commands |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 22 after tracker/startup, FLOAD screen/procedure commands and Mouse Zone |
 | Whole-source compiler gate | Unsupported extension `1:$0074` Boom at line 161, byte 7,850; recognition alone still does not prove parser/runtime support for later forms |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
@@ -23,12 +23,13 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Original first FLOAD | Unchanged lines 1–18 plus original procedure 63–68 load/fade the first logo; declared Wait Key/End guards stop before WTIN and gameplay |
 | Original intro transition / declared main-title handoff | Unchanged lines 1–20 and WTIN/FDZ/FLOAD now handle input and fade-out. The fixture includes original array/highscore setup 32–56, SASINIT 205–239 and bank loads 275–279, skips remaining setup 281–286, then executes original title load 287; the menu/game remains excluded |
 | Original joystick mouse movement | Original LIMM and lines 299–303 execute in a separate synthetic title-load/step fixture; X/Y Mouse assignment clamps doubled words to explicit bounds. Fourteen keyboard/Gamepad steps pass in the mouse demo; this is not integrated menu selection |
+| Guarded title menu | Separate synthetic title-load fixture runs original LIMM, zones/input branches and FDZ, with target guards replacing game/editor/scores/help routines. Ten browser cases select nine outcomes; two independent/GPU image states. [Contract](roller2-menu.md) |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
 | Sprites/icons | Four sprites; 117 icons; includes six-plane assets |
 | Images | All five primary IFFs decode. Bounded AMSC displays the first logo at (128,42). The 320×512 six-plane EHB main title now displays through a bounded PAL window, preserving lower bitmap rows. Wider modes/placement remain gated |
-| Browser evidence | [Intro, initialization and main-title image](../demos/roller2-intro.html), [first image/FLOAD](../demos/roller2-title.html), [original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [music](../demos/tracker.html), with HTML Preview links; no title-menu actions or gameplay yet |
+| Browser evidence | [Guarded title-menu selection](../demos/roller2-menu.html), [Intro, initialization and main-title image](../demos/roller2-intro.html), [first image/FLOAD](../demos/roller2-title.html), [original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [music](../demos/tracker.html), with HTML Preview links; selected routines and gameplay remain excluded |
 
 The independent load-only statement fixture preserves its bytes, but excludes
 Dir$, TRUE, Track Play, startup controls, procedures and gameplay. It is not a
@@ -62,17 +63,18 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    EHB title after the intro, with thirteen independent states and eleven GPU
    comparisons. Original highscore/array setup, SASINIT and work/icon/sprite bank
    loads now run, with independent table/score assertions in the same browser demo.
-   Next integrate setup 281–286 and the menu.
+   Next integrate setup 281–286 and join the separately guarded menu.
 3. **Screen/asset setup.** Screen Hide/Show/Clone and Get Palette support the first
    image. Original LIMM and joystick X/Y Mouse movement now run in a bounded
-   [mouse demo fixture](../demos/mouse.html). Mouse Zone, selection branches,
+   [mouse demo fixture](../demos/mouse.html). Mouse Zone and original selection branches now execute in a separate
+   [guarded menu fixture](roller2-menu.md). Joining the startup/setup path,
    Screen To Front, Rainbow Del and remaining drawing/text forms still need
    integration. Double-buffered clone/owner retirement forms remain gated. The tall
    EHB title now retains its full bitmap behind a bounded managed window. Direct
    six-plane sprite images need the original low-four-plane
    hardware behavior; the current AMOS bridge rejects depths above four.
 4. **First playable level.** Add Add/Swap forms, checked Doke/Deek/Leek/Copy/Fill,
-   Get Icon, Mouse Zone, Scin and Key State as actually used. Validate tile movement,
+   Get Icon, Scin and Key State as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
    against the unchanged source and level data. Wider general forms remain gates.
 5. **End states and tools.** Implement the AMOS Music bank format/player for
@@ -89,7 +91,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 561 tests, 31 offline browser scenario pages,
-179 renderer, eleven Wonderland live-game, seven Roller II first-image and eleven Roller II intro GPU/CPU comparisons, plus existing
+Local baseline for this slice: 566 tests, 32 offline browser scenario pages,
+179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and two guarded-menu GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

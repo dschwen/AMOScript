@@ -31,3 +31,7 @@ AMSC placement and palette fading. The [intro transition demo](../../demos/rolle
 continues through original WTIN/FDZ input and fade-out, then uses a declared
 handoff to load the main title image. Original scores/arrays, SASINIT and work/
 image-bank loading now run; setup 281–286, the menu and gameplay remain open.
+
+The [guarded menu demo](../../demos/roller2-menu.html) runs original zones, input
+and FDZ after a synthetic title load, with explicit destination guards. It tests
+selection, while the selected game/editor/scores/help routines remain excluded.

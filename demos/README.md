@@ -9,6 +9,7 @@ Every current browser scenario is included:
 
 | Demo | HTML Preview |
 | --- | --- |
+| [Roller II guarded title-menu selection](roller2-menu.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html) |
 | [Roller II intro, initialization and main-title image](roller2-intro.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html) |
 | [Roller II first image and original FLOAD](roller2-title.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-title.html) |
 | [Roller II original startup](roller2-startup.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html) |

@@ -1852,6 +1852,15 @@
     }
     return 0;
   }
+  function mouseZone(x, y) {
+    const target = screen(), scale = target.mode === 0x8000 ? 2 : 1;
+    x = (whole(x) & 65535) - target.hardwareX;
+    y = (whole(y) & 65535) - target.hardwareY;
+    if (x < 0 || x >= target.windowWidth / scale || y < 0 || y >= target.windowHeight) return 0;
+    // The language function uses ZoHd on the current screen, not SyMouZ's
+    // separate priority-list scan. Geometry is live even before View.
+    return zone(x * scale + target.offsetX, y + target.offsetY);
+  }
   function rgba(id = current) {
     const target = typeof id === 'object' ? id : screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
@@ -1960,7 +1969,7 @@
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
-    reserveZones, resetZone, setZone, zone,
+    reserveZones, resetZone, setZone, zone, mouseZone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
@@ -3776,6 +3785,7 @@
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;
+    if (name === 'Mouse Zone') return display.mouseZone(state.input.mouse.x, state.input.mouse.y);
     if (name === 'Mouse Click') {
       const now = state.input.mouse.buttons, clicked = now & ~state.input.mouseClick;
       state.input.mouseClick = now;
