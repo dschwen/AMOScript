@@ -20,6 +20,23 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-input'){
+        assert.strictEqual(await page.locator('#roller2-ready-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#roller2-ready-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-ready-viewport');
+        await page.focus('#roller2-ready-input');await page.keyboard.down('Space');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='input');}finally{await page.keyboard.up('Space');}
+        await page.keyboard.press('Escape');await page.waitForFunction(()=>document.fullscreenElement===null);
+        assert.strictEqual(await page.locator('#roller2-ready-controls').getAttribute('data-phase'),'input');
+        await page.keyboard.press('Escape');await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='menu');
+        await page.click('#roller2-ready-restart');await page.click('#roller2-ready-fullscreen');await page.focus('#roller2-ready-input');await page.keyboard.down('Space');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='input');}finally{await page.keyboard.up('Space');}
+        await page.click('#roller2-ready-pause');await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='stopped');
+        await page.click('#roller2-ready-pause');await page.focus('#roller2-ready-input');await page.keyboard.down('ArrowLeft');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='guarded');}finally{await page.keyboard.up('ArrowLeft');}
+        assert.ok((await page.locator('#roller2-ready-controls').textContent()).includes('(-1, 0)'));
+        await page.click('#roller2-ready-restart');assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'roller2-ready-viewport');
+        await page.evaluate(()=>globalThis.AMOS_ROLLER2_READY_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-ready'){
         assert.strictEqual(await page.locator('#roller2-ready-controls').getAttribute('data-backend'),'webgl');
         await page.click('#roller2-ready-pause');await page.waitForFunction(()=>document.getElementById('roller2-ready-controls').dataset.phase==='stopped');
@@ -349,6 +366,9 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#fade-stop');
       }
       if (scenario.id === 'scancodes') {
+        await page.focus('#scan-input');await page.dispatchEvent('#scan-input','keydown',{key:'Help',code:'Help'});
+        assert.strictEqual(await page.locator('#scan-held').getAttribute('data-help'),'-1');await page.dispatchEvent('#scan-input','keyup',{key:'Help',code:'Help'});
+        assert.strictEqual(await page.locator('#scan-held').getAttribute('data-help'),'0');
         await page.click('#scan-input'); await page.keyboard.press('Escape');
         await page.waitForFunction(() => document.getElementById('scan-log').dataset.scan === '69');
         await page.keyboard.press('ArrowUp');

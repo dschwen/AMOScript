@@ -6,7 +6,7 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 17 remain unrecognized (43 at
+The main source has 1,199 lines and 194 encodings; 16 remain unrecognized (43 at
 initial assessment), and whole compilation stops at Boom on line 161.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
@@ -57,7 +57,11 @@ three more GPU frames pass. The live ready demo now extends through 617: origina
 sprite using its low four planes, initial fade, status border and timer setup.
 Three independent new PNGs and six total ready/ball GPU frames pass; the guard
 precedes JOAB movement. Earlier unit fixtures retain their declared guards.
-Next integrate original input/movement, Key State, Copy/Fill and reached tile handlers. Sprite-bank raw
+A separate connected input fixture now includes unchanged JOAB 619–639, with
+Key State held keys, original toggles/countdown and Escape return. Direction/pause/
+game-over destinations are guarded. Twenty-four Canvas checks and six additional
+GPU frames pass. Next integrate string-based Goto SAS$(HD), cyclic Add, original
+movement/tile handlers and Copy/Fill as reached. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the

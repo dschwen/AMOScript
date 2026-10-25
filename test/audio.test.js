@@ -133,3 +133,13 @@ test('Wonderland: original first fifteen lines load the original volume path and
     assert.deepStrictEqual(events.map(event => event.type), ['filter', 'loop']);
   }
 });
+
+test('audio: uncached Sam Play base token resolves only its verified one/two/three-argument family',()=>{
+  for(const [args,voices,frequency]of [[[n(1)],15,4000],[[n(2),t(','),n(1)],2,4000],[[n(4),t(','),n(1),t(','),n(9000)],4,9000]]){
+    const events=[],{program}=run([[ext(0xde),...args]],{audio:{command:event=>events.push(event)}}),event=events.find(item=>item.type==='play');
+    assert.strictEqual(event.mask,voices);assert.strictEqual(event.period,Math.floor(3546895/frequency));assert.strictEqual(program.state.halted,true);
+  }
+  assert.throws(()=>compile(binary([[ext(0xde),n(1),t(','),n(1),t(','),n(9000),t(','),n(1)]])),/Unsupported Sam Play argument count/);
+  assert.throws(()=>compile(binary([[[w(0x4e),1,1,w(0xde)],n(1),t(','),n(1)]])),/Expected end of statement/);
+  assert.throws(()=>compile(binary([[ext(0xde),n(1),t(','),text('sample')]])),/numeric|number/i);
+});

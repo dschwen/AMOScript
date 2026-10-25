@@ -77,6 +77,11 @@ function createCanvasHost(canvas, options = {}) {
   let joystickInput = createJoystickInput(options.joysticks || []), unsubscribeJoystick = null;
   let joystickStatus = [];
   let focusSuspended = false;
+  const rawHeld = new Map();
+  function releaseRawKeys() {
+    if (program && program.setKeyState) for (const scan of rawHeld.values()) program.setKeyState(scan, false);
+    rawHeld.clear();
+  }
   function focused() {
     return options.hasFocus ? options.hasFocus() : !!(!focusSuspended && canvas.ownerDocument && canvas.ownerDocument.activeElement === canvas && !canvas.ownerDocument.hidden);
   }
@@ -167,9 +172,13 @@ function createCanvasHost(canvas, options = {}) {
     if (!program) return;
     if (event.isComposing || event.key === 'Dead' || event.key === 'Process') return;
     if (event.ctrlKey || event.metaKey || event.altKey) {
-      releaseKey(); resetJoysticks();
+      releaseKey(); releaseRawKeys(); resetJoysticks();
       if (program.clearScanCodes) program.clearScanCodes();
       return;
+    }
+    const rawCode = event.code || event.key, rawScan = amigaScanCode(rawCode);
+    if (!event.repeat && rawScan != null && focused() && !program.state.stopped && !program.state.halted && program.setKeyState) {
+      rawHeld.set(rawCode, rawScan); program.setKeyState(rawScan, true);
     }
     const joystick = joystickInput.keydown(event.code || (event.key === ' ' ? 'Space' : event.key), !!event.repeat);
     if (joystick.matched && (!focused() || program.state.stopped || program.state.halted)) resetJoysticks();
@@ -193,6 +202,11 @@ function createCanvasHost(canvas, options = {}) {
     }
   }
   function keyup(event) {
+    const code = event.code || event.key;
+    if (rawHeld.has(code)) {
+      if (program && program.setKeyState) program.setKeyState(rawHeld.get(code), false);
+      rawHeld.delete(code);
+    }
     if (held && held.code === (event.code || event.key)) releaseKey();
     if (joystickInput.keyup(event.code || (event.key === ' ' ? 'Space' : event.key))) pollJoysticks();
   }
@@ -221,7 +235,7 @@ function createCanvasHost(canvas, options = {}) {
   }
   function blur() {
     focusSuspended = true;
-    releaseKey();
+    releaseKey(); releaseRawKeys();
     resetJoysticks();
     if (program) {
       if (program.clearScanCodes) program.clearScanCodes();
@@ -234,7 +248,7 @@ function createCanvasHost(canvas, options = {}) {
   const events = { keydown, keyup, pointermove: pointer, pointerdown, pointerup: pointer, blur, focus };
 
   function detach() {
-    releaseKey();
+    releaseKey(); releaseRawKeys();
     resetJoysticks();
     if (program && program.clearScanCodes) program.clearScanCodes();
     if (program && program.clearMouseButtons) program.clearMouseButtons();
@@ -261,7 +275,7 @@ function createCanvasHost(canvas, options = {}) {
     if (mouseCoordinates === 'hardware' && typeof next.display.pointerHardwarePosition !== 'function') throw new Error('Hardware mouse coordinates are unavailable');
     program = next;
     if (program.subscribeInputReset) unsubscribeInput = program.subscribeInputReset(reason => {
-      releaseKey(); if (reason !== 'key-speed') resetJoysticks();
+      releaseKey(); if (reason !== 'key-speed') { releaseRawKeys(); resetJoysticks(); }
     });
     bindJoysticks();
     if (canvas.style) previousCursor = canvas.style.cursor;
@@ -4386,6 +4400,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       if (options.resetInput) options.resetInput('key-speed');
     },
     setJoystick, joystickInfo,
+    keyState(code) {
+      code = integer(code);
+      if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
+      return state.input.rawKeys[code] ? -1 : 0;
+    },
     setJoystickReader(reader) {
       if (reader != null && typeof reader !== 'function') throw new Error('Joystick reader must be a function');
       const binding = { reader }; joystickBinding = binding;
@@ -4807,7 +4826,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -4822,7 +4841,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -4830,6 +4849,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function clearMouseButtons() {
     state.input.mouse.buttons = 0;
     state.input.mouseClick = 0;
+  }
+  function clearKeyStates() { state.input.rawKeys.fill(0); }
+  function setKeyState(code, down) {
+    if (!Number.isInteger(code) || code < 0 || code > 127 || typeof down !== 'boolean') throw new Error('Invalid raw key state');
+    state.input.rawKeys[code] = down ? 1 : 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -5083,7 +5107,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
@@ -9077,6 +9101,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       if (options.resetInput) options.resetInput('key-speed');
     },
     setJoystick, joystickInfo,
+    keyState(code) {
+      code = integer(code);
+      if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
+      return state.input.rawKeys[code] ? -1 : 0;
+    },
     setJoystickReader(reader) {
       if (reader != null && typeof reader !== 'function') throw new Error('Joystick reader must be a function');
       const binding = { reader }; joystickBinding = binding;
@@ -9498,7 +9527,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -9513,7 +9542,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -9521,6 +9550,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function clearMouseButtons() {
     state.input.mouse.buttons = 0;
     state.input.mouseClick = 0;
+  }
+  function clearKeyStates() { state.input.rawKeys.fill(0); }
+  function setKeyState(code, down) {
+    if (!Number.isInteger(code) || code < 0 || code > 127 || typeof down !== 'boolean') throw new Error('Invalid raw key state');
+    state.input.rawKeys[code] = down ? 1 : 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -9774,7 +9808,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);
@@ -13785,6 +13819,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       if (options.resetInput) options.resetInput('key-speed');
     },
     setJoystick, joystickInfo,
+    keyState(code) {
+      code = integer(code);
+      if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
+      return state.input.rawKeys[code] ? -1 : 0;
+    },
     setJoystickReader(reader) {
       if (reader != null && typeof reader !== 'function') throw new Error('Joystick reader must be a function');
       const binding = { reader }; joystickBinding = binding;
@@ -14206,7 +14245,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -14221,7 +14260,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -14229,6 +14268,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function clearMouseButtons() {
     state.input.mouse.buttons = 0;
     state.input.mouseClick = 0;
+  }
+  function clearKeyStates() { state.input.rawKeys.fill(0); }
+  function setKeyState(code, down) {
+    if (!Number.isInteger(code) || code < 0 || code > 127 || typeof down !== 'boolean') throw new Error('Invalid raw key state');
+    state.input.rawKeys[code] = down ? 1 : 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -14482,7 +14526,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);

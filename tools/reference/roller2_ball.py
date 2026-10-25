@@ -52,11 +52,18 @@ assert ball['depth'] == 6 and ball['hx'] == 0 and ball['hy'] == 0
 palette = list(assets['palette'])
 palette[17:20] = [0xf66, 0xf00, 0x900]
 frames = []
-for step, border, name in [(2,False,'ball-fade-2.png'),(7,False,'ball-fade-7.png'),(15,True,'ball-start.png')]:
+for step, border, name, time in [(2,False,'ball-fade-2.png',None),(7,False,'ball-fade-7.png',None),(15,True,'ball-start.png',None),(15,True,'ball-idle.png',34)]:
     pixels = indices[:]
     if border:
         for y, value in [(194,30),(193,31),(195,31),(192,23),(196,23)]:
             pixels[y*320:(y+1)*320] = bytes([value])*320
+    if time is not None:
+        pixels[27*8*320:28*8*320] = bytes(8*320)
+        for column, char in enumerate('Time   :'+str(time)+' '):
+            for y, bits in enumerate(panel['glyphs'][char]):
+                for x in range(8):
+                    if bits & (1<<x):
+                        pixels[(27*8+y)*320+column*8+x] = 1
     rgba = bytearray()
     faded = [sum(min(rgb>>shift&15,step)<<shift for shift in (8,4,0)) for rgb in palette]
     for at, value in enumerate(pixels):

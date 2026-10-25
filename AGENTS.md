@@ -76,7 +76,10 @@
   The live fixture now runs through 617: BALLFARBEN, low-four-plane direct sprite
   output from the six-plane bank, initial fade, BDRAW border and timer setup.
   Earlier menu/ready unit guards remain bounded; movement still stops before
-  JOAB. Exact native timing and gameplay remain open. See `docs/roller2-ball.md`. See `docs/roller2-boards.md` and
+  JOAB in the ball fixture. A separate input fixture includes original 619–639,
+  toggles/countdown and Escape title return; movement/pause/game-over targets
+  are guards. Native string Goto and cyclic Add still gate movement.
+  See `docs/roller2-input.md`. Exact native timing and gameplay remain open. See `docs/roller2-ball.md`. See `docs/roller2-boards.md` and
   `docs/screen-priority.md`.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
@@ -128,6 +131,13 @@
   the pointer rectangle. Preserve the container across renderer switches/Restart.
   Escape exits fullscreen before reaching AMOS, and disposal exits only its own
   container, including late requests. See `docs/fullscreen.md`.
+- Key State is a nondestructive per-program raw held map, separate from text
+  and Scancode. Canvas records mapped keydown/keyup before joystick consumption;
+  lifecycle/blur/visibility/detach clear owned state, while Clear Key/Key Speed
+  preserve physical holds. Host sendKey never implies held state. See
+  `docs/key-state.md`. Uncached named Goto/Gosub operands normalize to ordinary
+  checked labels. Only unverified slot-1 Sam Play base tokens resolve the existing
+  1–3 numeric argument family; cached overloads keep exact arities.
 - Scancode is a destructive last-successful-Inkey latch, not held key state.
   Optional sendKey character/raw-code records coexist with legacy text entries.
   Clear Key drains the queue; host clearScanCodes clears metadata while retaining

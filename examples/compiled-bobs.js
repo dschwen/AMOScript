@@ -3949,6 +3949,11 @@
       if (options.resetInput) options.resetInput('key-speed');
     },
     setJoystick, joystickInfo,
+    keyState(code) {
+      code = integer(code);
+      if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
+      return state.input.rawKeys[code] ? -1 : 0;
+    },
     setJoystickReader(reader) {
       if (reader != null && typeof reader !== 'function') throw new Error('Joystick reader must be a function');
       const binding = { reader }; joystickBinding = binding;
@@ -4370,7 +4375,7 @@
     waiting: null,
     location: null,
     column: 0,
-    input: { keys: [], scanCode: 0, mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -4385,7 +4390,7 @@
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -4393,6 +4398,11 @@
   function clearMouseButtons() {
     state.input.mouse.buttons = 0;
     state.input.mouseClick = 0;
+  }
+  function clearKeyStates() { state.input.rawKeys.fill(0); }
+  function setKeyState(code, down) {
+    if (!Number.isInteger(code) || code < 0 || code > 127 || typeof down !== 'boolean') throw new Error('Invalid raw key state');
+    state.input.rawKeys[code] = down ? 1 : 0;
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
@@ -4646,7 +4656,7 @@
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
   return {
-    state, tick, stop, resume, sendKey, clearScanCodes, clearMouseButtons, print,
+    state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');
       inputResetListeners.add(listener); return () => inputResetListeners.delete(listener);

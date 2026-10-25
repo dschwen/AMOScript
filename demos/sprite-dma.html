@@ -23,6 +23,11 @@ function createCanvasHost(canvas, options = {}) {
   let joystickInput = createJoystickInput(options.joysticks || []), unsubscribeJoystick = null;
   let joystickStatus = [];
   let focusSuspended = false;
+  const rawHeld = new Map();
+  function releaseRawKeys() {
+    if (program && program.setKeyState) for (const scan of rawHeld.values()) program.setKeyState(scan, false);
+    rawHeld.clear();
+  }
   function focused() {
     return options.hasFocus ? options.hasFocus() : !!(!focusSuspended && canvas.ownerDocument && canvas.ownerDocument.activeElement === canvas && !canvas.ownerDocument.hidden);
   }
@@ -113,9 +118,13 @@ function createCanvasHost(canvas, options = {}) {
     if (!program) return;
     if (event.isComposing || event.key === 'Dead' || event.key === 'Process') return;
     if (event.ctrlKey || event.metaKey || event.altKey) {
-      releaseKey(); resetJoysticks();
+      releaseKey(); releaseRawKeys(); resetJoysticks();
       if (program.clearScanCodes) program.clearScanCodes();
       return;
+    }
+    const rawCode = event.code || event.key, rawScan = amigaScanCode(rawCode);
+    if (!event.repeat && rawScan != null && focused() && !program.state.stopped && !program.state.halted && program.setKeyState) {
+      rawHeld.set(rawCode, rawScan); program.setKeyState(rawScan, true);
     }
     const joystick = joystickInput.keydown(event.code || (event.key === ' ' ? 'Space' : event.key), !!event.repeat);
     if (joystick.matched && (!focused() || program.state.stopped || program.state.halted)) resetJoysticks();
@@ -139,6 +148,11 @@ function createCanvasHost(canvas, options = {}) {
     }
   }
   function keyup(event) {
+    const code = event.code || event.key;
+    if (rawHeld.has(code)) {
+      if (program && program.setKeyState) program.setKeyState(rawHeld.get(code), false);
+      rawHeld.delete(code);
+    }
     if (held && held.code === (event.code || event.key)) releaseKey();
     if (joystickInput.keyup(event.code || (event.key === ' ' ? 'Space' : event.key))) pollJoysticks();
   }
@@ -167,7 +181,7 @@ function createCanvasHost(canvas, options = {}) {
   }
   function blur() {
     focusSuspended = true;
-    releaseKey();
+    releaseKey(); releaseRawKeys();
     resetJoysticks();
     if (program) {
       if (program.clearScanCodes) program.clearScanCodes();
@@ -180,7 +194,7 @@ function createCanvasHost(canvas, options = {}) {
   const events = { keydown, keyup, pointermove: pointer, pointerdown, pointerup: pointer, blur, focus };
 
   function detach() {
-    releaseKey();
+    releaseKey(); releaseRawKeys();
     resetJoysticks();
     if (program && program.clearScanCodes) program.clearScanCodes();
     if (program && program.clearMouseButtons) program.clearMouseButtons();
@@ -207,7 +221,7 @@ function createCanvasHost(canvas, options = {}) {
     if (mouseCoordinates === 'hardware' && typeof next.display.pointerHardwarePosition !== 'function') throw new Error('Hardware mouse coordinates are unavailable');
     program = next;
     if (program.subscribeInputReset) unsubscribeInput = program.subscribeInputReset(reason => {
-      releaseKey(); if (reason !== 'key-speed') resetJoysticks();
+      releaseKey(); if (reason !== 'key-speed') { releaseRawKeys(); resetJoysticks(); }
     });
     bindJoysticks();
     if (canvas.style) previousCursor = canvas.style.cursor;

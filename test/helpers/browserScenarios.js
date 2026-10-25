@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-input', title: 'Roller II original game input loop', initialFrame: 'Canvas: mouse board and ball ready', description: 'Connected original setup and JOAB through 639: real countdown, physical Key State, keyboard/Gamepad directions, effects/music keys and Escape menu return. Twenty-four independent Canvas checks and six WebGL frames; movement, pause and game-over handlers are guarded.', run: page => require('./roller2ReadyProbe')(page,{input:true}), check(result, assert) {
+    assert.strictEqual(result.inputModes,4);assert.strictEqual(result.frames,24);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:6);assert.strictEqual(result.guardAfter,'movement-dispatch');assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'roller2-ready', title: 'Roller II ready prompt and initial ball', initialFrame: 'Canvas: mouse board and ball ready', description: 'Connected original startup/menu, game setup, GAMEDISP and blinking foreground ready prompt through line 617. Original ball palette, six-plane sprite, fade and status border; independent pixels, eighteen Canvas checks and six WebGL frames. Mouse, keyboard and Gamepad fire reach the guard before movement; live fullscreen preview.', run: require('./roller2ReadyProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,3);assert.strictEqual(result.frames,18);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:6);assert.strictEqual(result.guardAfter,617);assert.strictEqual(result.connectedStartup,true);assert.strictEqual(result.gameRunning,false);
   } },
@@ -260,7 +263,7 @@ const scenarios = [
     assert.deepStrictEqual(result,{fields:9631,orders:22,rows:1376,notes:1997,nativeComparisons:12,instruments:10,nonzero:true,vmPlayback:true});
   } },
   { id:'roller2', capturedFrames:false, title:'Roller II target and MOD inspector', description:'Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original module, instruments and effects. The separate music demo runs compiled Track Play; whole-game compilation remains open.', run:require('./roller2Probe'), check(result,assert){
-    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:17,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
+    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:16,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
   } },
   { id: 'wonderland-game', title: 'Play unmodified Wonderland', initialFrame: 'Original level 1', description: 'The complete original game with default WebGL2 presentation, selectable Canvas 2D, fullscreen, keyboard/Gamepad controls, Stop/Resume and Restart. Input-only keyboard and injected-gamepad replays render three deaths/fades, two life restarts, game over and a fresh game. Enable/Mute controls route original sample commands through Web Audio; three native offline PCM/stereo comparisons cover the replay. No Amiga capture or persistent editor files are claimed.', run: require('./wonderlandGameProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,2);assert.deepStrictEqual(result.deaths,[[2,1,0],[2,1,0]]);
@@ -302,7 +305,7 @@ const scenarios = [
   } },
   { id: 'scancodes', title: 'AMOS scan codes and Wonderland Escape', initialFrame: 'Wonderland Escape to original title', description: 'Inkey$/Scancode consumption, physical key mappings, repeats, joystick passthrough and lifecycle cleanup. Runs the original Wonderland input/Escape branch and title routine in a declared fixture. Includes a live compiled keyboard reader.', run: require('./scancodeProbe'), check(result, assert) {
     assert.deepStrictEqual(result.routes,[{scan:69,route:2},{scan:76,route:1},{scan:77,route:1},{scan:78,route:1},{scan:79,route:1},{scan:32,route:1}]);
-    assert.strictEqual(result.keyChecks,9);assert.deepStrictEqual(result.repeatScans,[53,53,53]);assert.strictEqual(result.lifecycleChecks,6);
+    assert.strictEqual(result.heldChecks,7);assert.strictEqual(result.keyChecks,9);assert.deepStrictEqual(result.repeatScans,[53,53,53]);assert.strictEqual(result.lifecycleChecks,6);
     assert.strictEqual(result.timersRemaining,0);assert.strictEqual(result.titleExact,true);assert.strictEqual(result.gameRunning,false);
   } },
   { id: 'computed-branches', title: 'Computed branches and Wonderland initialization', initialFrame: 'Original enemy initialization 2', description: 'One-based On Gosub/Goto, out-of-range fallthrough and return traces. Executes Wonderland\'s original dispatch line and three unchanged initializers; the other two targets have explicit End guards. Synthetic inputs and image captions; no enemy gameplay.', run: require('./onBranchProbe'), check(result, assert) {

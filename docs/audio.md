@@ -148,3 +148,9 @@ These are source-derived language and browser-adapter checks, not Amiga audio
 captures. Chip/DMA contention, interrupt latency, hardware analog output,
 envelopes, volume commands, synthesized effects, tracker music, speech and other
 sample-bank forms remain open. Remaining Wonderland paths and validation are recorded in [its milestone plan](wonderland.md).
+
+Unverified slot-1 Sam Play base tokens (`0x00de`, count cache 0) now resolve
+one/two/three numeric operands to these existing checked operations, as required
+by original Roller II 624/636. Explicit cached overload arities remain strict.
+The decoder preserves its field named `reference`; native verification uses this
+byte for the parameter-count cache in these tokens. See [input source forms](roller2-input.md).

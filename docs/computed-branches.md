@@ -59,3 +59,8 @@ captured frame through its HTML Preview links.
 The unmodified Wonderland source now compiles completely. Controlled game entry
 now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).
+
+Standalone uncached integer identifiers after Goto/Gosub now normalize to the
+same named-target AST and scoped validation as label-reference tokens. This
+bounded native verifier form enables Roller II’s original input loop; expression
+targets remain unsupported. See [input source forms](roller2-input.md).

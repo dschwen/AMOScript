@@ -128,6 +128,13 @@
       "border": true,
       "rgbaSha256": "85b8cd1d19126540ec47a72b23b3f3aee328362886f74196ce76707e3ed29668",
       "indicesSha256": "0943bb57fc426dc2eecb98f04b3f579add9dac56a07b2798ea92e92cbbb65e69"
+    },
+    {
+      "png": "ball-idle.png",
+      "step": 15,
+      "border": true,
+      "rgbaSha256": "30489dd92b7e054c8f354cd8b59f2bd59981aa975e809bb7599f96f49c74de26",
+      "indicesSha256": "a245ef581881dc363e15196d61b0ecd9ec248b02bf39428a87fbf43fb0b0c4e2"
     }
   ]
 }

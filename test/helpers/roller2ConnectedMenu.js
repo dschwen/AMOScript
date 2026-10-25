@@ -7,14 +7,16 @@
 // The optional ready fixture adds GAMEDISP/MWAIT and original 601–608, guarding
 // before ball/sprite/gameplay setup. The ball fixture adds BALLFARBEN/BDRAW
 // and extends through 617, guarding before JOAB. Other selected routines remain excluded.
-module.exports = function roller2ConnectedMenu({ready = false, ball = false} = {}) {
+module.exports = function roller2ConnectedMenu({ready = false, ball = false, input = false} = {}) {
+  ball = ball || input;
   ready = ready || ball;
   const fs=require('fs'),path=require('path'),Reader=require('../../lib/Buffer');
   const {binary,token:t,text,identifier:id}=require('./tokens');
   const raw=fs.readFileSync(path.join(__dirname,'../../examples/Roller2/Roller II.AMOS')),reader=new Reader(raw);
   const lines=(first,last)=>raw.subarray(reader.lines[first-1],reader.lines[last-1]+raw[reader.lines[last-1]]*2);
   const targets=[['rollergame','game'],['rollereditor','editor'],['highausw','scores'],['help','help'],['backfromgame','backfromgame'],['you_won','win']];
-  const guards=targets.map(([label,action])=>Buffer.concat([label==='rollergame'?lines(565,ball?617:ready?608:600):binary([[id(label,0xc)]]).subarray(20),
+  if (input) targets.push(['beweg','move'],['pause','pause'],['ipause','ipause'],['game_over','timeout']);
+  const guards=targets.map(([label,action])=>Buffer.concat([label==='rollergame'?lines(565,input?639:ball?617:ready?608:600):binary([[id(label,0xc)]]).subarray(20),
     binary([[id('selection',6,2),t('='),text(action)],[t('Wait Key')],[t('End')]]).subarray(20)]));
   const code=Buffer.concat([lines(1,71),...(ready?[lines(72,86),lines(153,155)]:[]),...(ball?[lines(87,102),lines(197,204)]:[]),lines(163,165),lines(205,246),lines(275,316),binary([[t('End')]]).subarray(20),...guards]);
   const header=Buffer.from(raw.subarray(0,20));header.writeUInt32BE(code.length,16);

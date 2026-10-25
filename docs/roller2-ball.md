@@ -44,7 +44,7 @@ explicitly gated. See [sprite display](sprite-display.md) and
 `tools/reference/roller2_ball.py` imports only the independent Python asset/panel
 oracles, reads raw AmIc/AmSp/AmBk bytes, and composes the first map, retained masks,
 source ball palette, low-four-plane sprite, EHB colours, rainbow status text and
-BDRAW border. It writes `ball.json`, three PNGs and image hashes. The first two
+BDRAW border. It writes `ball.json`, three ball/fade PNGs, a separate idle-loop PNG and image hashes. The first two
 images clamp each captured palette component to fade steps 2 and 7 before the
 border; the final image has the complete palette and border. The controlled input
 is injected at 4700 ms, with snapshots at 4800, 5000 and 5400 ms on the existing
@@ -70,3 +70,7 @@ Preview links from the gallery.
 Next: original JOAB input and the first movement/tile-handler path, starting with
 Key State and its exact usage, Copy/Fill and the actual reached label dependencies.
 Do not infer gameplay from the initialized Timer or visible stationary ball.
+
+The separate [input fixture](roller2-input.md) now continues through JOAB 639,
+with countdown/toggles and guarded movement dispatch; this ball fixture retains
+its post-617 guard.

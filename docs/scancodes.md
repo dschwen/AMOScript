@@ -30,7 +30,7 @@ injection rejects explicitly. Each factory owns its queue and saved scan byte.
 entries carry `{ key, scanCode }`. Hosts should inject through sendKey.
 
 Ordinary Put Key text has scan zero. Encoded Chr$(1) packets reject explicitly;
-Scan$, Scanshift, Key Shift, Key State and the full original Put Key comment,
+Scan$, Scanshift, Key Shift and the full original Put Key comment,
 capacity and conversion grammar remain separate work. This slice does not claim
 an emulated Amiga keyboard device or a complete keymap library.
 
@@ -93,3 +93,6 @@ standalone repository demos with HTML Preview links.
 The unmodified Wonderland source now compiles completely. Controlled game entry
 now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).
+
+[Key State](key-state.md) now provides independent nondestructive physical holds.
+The shared demo shows both; clearing text or Scancode never releases a raw key.

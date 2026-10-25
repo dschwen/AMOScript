@@ -44,7 +44,16 @@ module.exports = async function scancodeProbe(page) {
     event(canvas,'keydown','Escape','Escape');host.detach();equal(read(),['\x1b',0,0]);host.attach(p);lifecycleChecks++;
     event(canvas,'keydown','KeyA','a',{isComposing:true});event(canvas,'keydown','Quote','Dead');event(canvas,'keydown','KeyA','\u0100');equal(read(),['',0,0]);
     event(canvas,'keydown','constructor','v');event(canvas,'keyup','constructor','v');equal(read(),['v',0,0]);
-    host.detach();p.stop();equal(clock.pending(),0);
+    let heldChecks=0;
+    canvas.dispatchEvent(new Event('blur'));p.clearKeys();p.clearScanCodes();
+    event(canvas,'keydown','Help','Help');equal(p.keyState(95),-1);equal(p.keyState(95),-1);equal(p.inputValue('Inkey$'),'\0');equal(p.inputValue('Scancode'),95);event(canvas,'keyup','Help','Help');equal(p.keyState(95),0);heldChecks++;
+    event(canvas,'keydown','KeyA','a');event(canvas,'keydown','KeyB','b');equal([p.keyState(32),p.keyState(53)],[-1,-1]);event(canvas,'keyup','KeyB','b');equal([p.keyState(32),p.keyState(53)],[-1,0]);heldChecks++;
+    p.clearKeys();p.clearScanCodes();p.keySpeed(1,1);equal(p.keyState(32),-1);event(canvas,'keyup','KeyA','a');equal(p.keyState(32),0);heldChecks++;
+    host.configureJoysticks([{port:1,keyboard:true}]);event(canvas,'keydown','ArrowUp','ArrowUp');equal([p.keyState(76),p.joystickInfo('Joy',1)],[-1,1]);event(canvas,'keyup','ArrowUp','ArrowUp');equal([p.keyState(76),p.joystickInfo('Joy',1)],[0,0]);host.configureJoysticks([]);heldChecks++;
+    event(canvas,'keydown','Help','Help');canvas.dispatchEvent(new Event('blur'));event(canvas,'keydown','Help','Help',{repeat:true});equal(p.keyState(95),0);heldChecks++;
+    event(canvas,'keydown','Help','Help');p.stop();equal(p.keyState(95),0);p.resume();clock.tick(0);equal(p.keyState(95),0);heldChecks++;
+    p.setKeyState(127,true);event(canvas,'keydown','Help','Help');host.detach();equal([p.keyState(95),p.keyState(127)],[0,-1]);heldChecks++;
+    p.stop();equal(clock.pending(),0);
 
     const image=new Image();image.src=`data:image/png;base64,${golden}`;await image.decode();
     const reference=document.createElement('canvas');reference.width=image.width;reference.height=image.height;reference.getContext('2d').drawImage(image,0,0);
@@ -72,19 +81,23 @@ module.exports = async function scancodeProbe(page) {
     const old=document.getElementById('scan-controls');if(old)old.remove();
     const controls=document.createElement('section');controls.id='scan-controls';controls.dataset.status='running';
     const heading=document.createElement('h2');heading.textContent='Live keyboard scan codes';
-    const help=document.createElement('p');help.textContent='Focus this canvas, then press letters, arrows or Escape. The compiled AMOS loop reads Inkey$ and Scancode; held keys repeat after 200 ms, then every 40 ms.';
+    const help=document.createElement('p');help.textContent='Focus this canvas, then press letters, arrows or Escape. The compiled AMOS loop reads Inkey$ and Scancode; held keys repeat after 200 ms, then every 40 ms. Key State below reports held physical raw keys independently of text and Scancode.';
     const surface=document.createElement('canvas');surface.id='scan-input';surface.tabIndex=0;surface.style.cssText='border:2px solid #8ba;max-width:100%';
+    const heldStatus=document.createElement('p');heldStatus.id='scan-held';
     const status=document.createElement('pre');status.id='scan-log';status.dataset.scan='0';status.dataset.count='0';
     const program=factory(live)({setTimeout,clearTimeout,now:()=>performance.now(),print:(key,scan)=>{
       status.dataset.scan=String(scan);status.dataset.count=String(Number(status.dataset.count)+1);status.textContent=`Inkey$: ${JSON.stringify(key)}\nScancode: ${scan} ($${scan.toString(16)})`;
     }}),adapter=AMOS_BROWSER.createCanvasHost(surface);adapter.attach(program);program.tick(100);
-    controls.append(heading,help,surface,status);
+    const showHeld=()=>{const codes=Array.from(program.state.input.rawKeys).flatMap((value,code)=>value?[code]:[]);heldStatus.textContent=`Held raw keys: ${codes.join(', ')||'none'}`;heldStatus.dataset.help=String(program.keyState(95));};
+    for(const name of ['keydown','keyup','blur'])surface.addEventListener(name,showHeld);
+    const unsubscribeHeld=program.subscribeInputReset(showHeld);window.addEventListener('blur',showHeld);showHeld();
+    controls.append(heading,help,surface,status,heldStatus);
     for(const action of ['stop','resume','clear']){const button=document.createElement('button');button.id=`scan-${action}`;button.textContent=action;
       button.addEventListener('click',()=>{if(action==='stop'){program.stop();controls.dataset.status='stopped';}
         else if(action==='resume'){program.resume();controls.dataset.status='running';adapter.focus();}
         else{program.clearKeys();program.clearScanCodes();status.dataset.scan='0';status.textContent='Input cleared.';adapter.focus();}});controls.append(button);}
     const results=document.getElementById('results');if(results)results.before(controls);else document.body.append(controls);
-    globalThis.AMOS_SCANCODE_DEMO_CLEANUP=()=>{adapter.detach();program.stop();};
-    return {routes,keyChecks:keys.length+1,repeatScans:[53,53,53],lifecycleChecks,timersRemaining:clock.pending(),titleExact:true,gameRunning:false};
+    globalThis.AMOS_SCANCODE_DEMO_CLEANUP=()=>{unsubscribeHeld();window.removeEventListener('blur',showHeld);adapter.detach();program.stop();};
+    return {heldChecks,routes,keyChecks:keys.length+1,repeatScans:[53,53,53],lifecycleChecks,timersRemaining:clock.pending(),titleExact:true,gameRunning:false};
   },{source,live,original,timers,title,golden});
 };

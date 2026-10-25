@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-input.html",
+      "title": "Roller II original game input loop",
+      "description": "Connected original setup and JOAB through 639: real countdown, physical Key State, keyboard/Gamepad directions, effects/music keys and Escape menu return. Twenty-four independent Canvas checks and six WebGL frames; movement, pause and game-over handlers are guarded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-input.html"
+    },
+    {
       "file": "roller2-ready.html",
       "title": "Roller II ready prompt and initial ball",
       "description": "Connected original startup/menu, game setup, GAMEDISP and blinking foreground ready prompt through line 617. Original ball palette, six-plane sprite, fade and status border; independent pixels, eighteen Canvas checks and six WebGL frames. Mouse, keyboard and Gamepad fire reach the guard before movement; live fullscreen preview.",
