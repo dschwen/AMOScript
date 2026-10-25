@@ -15,17 +15,18 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 30 after tracker and startup/path/boolean/pointer commands |
-| Whole-source compiler gate | Unsupported `$033c` Pop Proc at line 47, byte 1,920; the full decoder checks all source, so later forms also need support |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 23 after tracker/startup and FLOAD screen/procedure commands |
+| Whole-source compiler gate | Unsupported extension `1:$0074` Boom at line 161, byte 7,850; recognition alone still does not prove parser/runtime support for later forms |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
+| Original first FLOAD | Unchanged lines 1–18 plus original procedure 63–68 load/fade the first logo; declared Wait Key/End guards stop before WTIN and gameplay |
 | Sample bank | Loaded into bank 6; four Samples records decode (9,900 / 1,000 / 9,200 / 2,000 bytes at 15,000 Hz) |
 | Main module | `mod.Roller_II_mus`: 84,006 bytes, M.K., four channels, 22 orders, twelve patterns, ten nonempty samples |
 | Other music | Over.mus / Ywon.mus are separate AMOS Music banks in bank 3, not MODs |
 | Sprites/icons | Four sprites; 117 icons; includes six-plane assets |
-| Images | All five supplied primary IFFs decode in the pure reader; runtime Load Iff rejects the first `terminator el` image's AMSC chunk. `over` and the win image also carry AMSC. The main title is 320×512, six-plane EHB |
-| Browser evidence | [Original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [compiled music statements](../demos/tracker.html), with HTML Preview links from the gallery; no title rendering/gameplay yet |
+| Images | All five primary IFFs decode. Bounded runtime AMSC placement now displays `terminator el` at coarse origin (128,42). `over` and the win image carry the same AMSC record. The main title remains a separate 320×512 six-plane EHB window gate |
+| Browser evidence | [First image/FLOAD](../demos/roller2-title.html), [original startup](../demos/roller2-startup.html), [load/MOD inspector](../demos/roller2.html) and [music](../demos/tracker.html), with HTML Preview links; no main title/menu or gameplay yet |
 
 The independent load-only statement fixture preserves its bytes, but excludes
 Dir$, TRUE, Track Play, startup controls, procedures and gameplay. It is not a
@@ -50,11 +51,14 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
 2. **Startup and the first title.** Set Stack metadata, Break Off host flag,
    TRUE/FALSE/Not, Dir$/Exist and nested Hide/Show now execute with explicit
    portable contracts. The unchanged first 17 physical lines pass with a synthetic
-   Wait Key guard. Next implement Pop Proc and the original FLOAD/wait/fade
-   routines. The first image request is `terminator el`, whose AMSC placement is
-   still rejected by runtime Load Iff; do not confuse pure decoding with execution.
-3. **Screen/asset setup.** Screen Hide/Show/Clone, Get Palette, Screen To Front,
-   Rainbow Del and supported drawing/text forms need integration. The tall EHB
+   Wait Key guard. Pop Proc and the original first FLOAD now execute with screen
+   visibility, static clones, Get Palette, captured Fade To goals and bounded AMSC
+   placement. Seven source-derived image states match independent Python pixels
+   and seven GPU/Canvas frames; [details and limits](roller2-title.md).
+   Next cover WTIN and FDZ's explicit colour lists before the main title/menu.
+3. **Screen/asset setup.** Screen Hide/Show/Clone and Get Palette support the first
+   image. Screen To Front, Rainbow Del and remaining drawing/text forms still need
+   integration. Double-buffered clone/owner retirement forms remain gated. The tall EHB
    title requires a bounded presentation window, not an unrepresentable 512-line
    PAL scanout. Direct six-plane sprite images need the original low-four-plane
    hardware behavior; the current AMOS bridge rejects depths above four.
@@ -76,7 +80,7 @@ visibility/cloning/palette, drawing/text, memory/tile operations, mouse/keyboard
 and music. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 540 tests, 29 offline browser scenario pages,
-the existing 179 renderer plus eleven live-game GPU/CPU comparisons, and existing
+Local baseline for this slice: 548 tests, 30 offline browser scenario pages,
+179 renderer, eleven Wonderland live-game and seven Roller II first-image GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

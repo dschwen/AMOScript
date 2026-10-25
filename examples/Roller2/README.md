@@ -25,3 +25,6 @@ compiled original statements. Full-game compilation and the separate AMOS Music
 bank end tunes remain open.
 The [startup demo](../../demos/roller2-startup.html) runs the unchanged first 17
 physical lines with a synthetic Wait Key guard before the first image request.
+The [first-image demo](../../demos/roller2-title.html) also executes original
+line 18 and FLOAD (63–68), then stops before WTIN. It shows the first logo through
+AMSC placement and palette fading; the main title/menu is still separate work.

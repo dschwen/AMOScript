@@ -1,0 +1,17 @@
+{
+  "evidence": "Independent Python ILBM/ByteRun1 source analysis; no Amiga execution capture.",
+  "sourceSha256": "81fc4c7ffde65e14a9edfc10ebdfae1a5df6519de21438aec3d19eda5ed88fcd",
+  "width": 320,
+  "height": 256,
+  "rgbaSha256": "32f20646bdf8247c5609a6e29aeac82bb842fb9e00501668e0b8ad319698a3a9",
+  "pngSha256": "fee2346bed55ab5f7d50d28feb5019a6430e69237f16553503265fb20a1e4572",
+  "placement": {
+    "x": 129,
+    "y": 42,
+    "width": 320,
+    "height": 256,
+    "offsetX": 0,
+    "offsetY": 0,
+    "flags": 0
+  }
+}

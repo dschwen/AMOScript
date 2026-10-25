@@ -50,6 +50,12 @@ screen objects and physical buffers until the next commit; live pixel/palette
 changes on those objects remain visible. This extends the static view contract;
 it does not emulate exact VBL display-list update timing.
 
+Screen Hide/Show now stage visibility through the same commit path. Static,
+single-buffer Screen Clone aliases share pixels with independent palettes;
+Get Palette copies bounded screen palettes without selecting the source.
+See [Roller II's first-image contract](roller2-title.md) for clone selection,
+owner-retirement gates and the original FLOAD evidence.
+
 The bridge packs each full physical bitmap with its original plane stride. A
 coarse x/y offset adjusts bitplane pointers; the remainder sets shared BPLCON1
 delay and an earlier data-fetch start. Modulos retain the full bitmap row stride.

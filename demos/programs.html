@@ -927,6 +927,12 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       position = next;
     }
     if (!chunks.BMHD || !chunks.BODY) fail('missing BMHD/BODY');
+    let amosScreen = null;
+    if (chunks.AMSC) {
+      if (chunks.AMSC.size !== 14) fail('invalid AMSC size', chunks.AMSC.start);
+      const start = chunks.AMSC.start;
+      amosScreen = Object.freeze(Object.fromEntries(['x', 'y', 'width', 'height', 'offsetX', 'offsetY', 'flags'].map((key, i) => [key, view.getUint16(start + i * 2, false)])));
+    }
     if (chunks.BMHD.size !== 20) fail('invalid BMHD size', chunks.BMHD.start);
     const at = chunks.BMHD.start, width = view.getUint16(at, false), height = view.getUint16(at + 2, false);
     const depth = bytes[at + 8], masking = bytes[at + 9], compression = bytes[at + 10];
@@ -1014,7 +1020,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     return { snapshot: snapshotModel.createSnapshot({ chip: memory.bytes, frame }), mask,
       image: Object.freeze({ width, height, depth, rowBytes, mode, displayMode, monitor, cycles: Object.freeze(cycles), masking, compression, transparentColour,
         hasPalette: !!chunks.CMAP, paletteSize: chunks.CMAP ? chunks.CMAP.size / 3 : 0,
-        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC,
+        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC, amosScreen,
         x: view.getInt16(at + 4, false), y: view.getInt16(at + 6, false), xAspect, yAspect,
         pageWidth: view.getInt16(at + 16, false), pageHeight: view.getInt16(at + 18, false) }) };
   };
@@ -1746,7 +1752,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (planarBridge) planarBridge.prune();
     if (viewChange) {
       if (!autoView) return;
-      presented = screens.get(current) || null;
+      presented = visibleScreen();
       commitWindows();
     }
     listeners.forEach(listener => listener(version));
@@ -1767,17 +1773,25 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function registerIndex(value) {
     return whole(value) & 31;
   }
+  function visibleScreen() {
+    const selected = screens.get(current);
+    return selected && !selected.hidden ? selected : Array.from(screens.values()).find(target => !target.hidden) || null;
+  }
+  function checkClones(target) {
+    if (target && Array.from(screens.values()).some(other => other.cloneOwner === target)) throw new Error('Close screen clones before replacing or closing their owner');
+  }
   function open(id, width, height, colours, mode) {
     if (!Number.isInteger(id) || id < 0 || id > 7) throw new Error('Invalid screen number');
     if (!Number.isInteger(width) || width < 1 || width > 1024 || !Number.isInteger(height) || height < 1 || height > 1023) throw new Error('Invalid screen dimensions');
     if (![2, 4, 8, 16, 32, 64, 4096].includes(colours)) throw new Error('Unsupported screen colour mode');
     if (mode !== 0 && mode !== 0x8000) throw new Error('Unsupported screen resolution mode');
     if (mode === 0x8000 && colours > 16) throw new Error('Hires screens support at most 16 colours');
+    checkClones(screens.get(id));
     const ham = colours === 4096;
     colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode, ham, zones: null,
+      id, width, height, colours, mode, ham, zones: null, hidden: false, cloneOwner: null,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
@@ -1795,22 +1809,34 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     changed(true);
     return next;
   }
-  function select(id) { screen(id); current = id; changed(true); }
+  function select(id) { if (screen(id).cloneOwner) throw new Error('Cannot select a cloned screen'); current = id; changed(true); }
   function close(id) {
-    screen(id);
+    checkClones(screen(id));
     screens.delete(id);
-    if (current === id) current = screens.size ? screens.keys().next().value : null;
+    if (current === id) { const next = Array.from(screens.values()).find(target => !target.cloneOwner); current = next ? next.id : null; }
     screenListeners.forEach(listener => listener());
     changed(true);
   }
   function commitWindows() {
     presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
       width: presented.width, height: presented.height, mode: presented.mode } : null;
-    const targets = Array.from(screens.values()).filter(target => target.windowed);
+    const targets = Array.from(screens.values()).filter(target => target.windowed && !target.hidden);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
   }
-  function view() { presented = screens.get(current) || null; commitWindows(); changed(); }
+  function view() { presented = visibleScreen(); commitWindows(); changed(); }
+  function hideScreen(id = current) { screen(whole(id)).hidden = true; changed(true); }
+  function showScreen(id = current) { screen(whole(id)).hidden = false; changed(true); }
+  function clone(id) {
+    whole(id);
+    if (id < 0 || id > 7 || screens.has(id)) throw new Error('Invalid or already open clone screen');
+    const owner = screen();
+    if (owner.doubleBuffered || owner.cloneOwner) throw new Error('Cloning double-buffered screens or clones is not implemented');
+    // Static bitmap aliases, with independent display state/palette. A clone is
+    // not selectable; drawing continues on the original owner.
+    const target = { ...owner, id, cloneOwner: owner, palette: owner.palette.slice(), zones: null };
+    screens.set(id, target); screenListeners.forEach(listener => listener()); changed(true); return target;
+  }
   function setAutoView(enabled) { autoView = enabled; if (enabled) view(); }
   function screenDisplay(id, x = null, y = null, width = null, height = null) {
     const target = screen(whole(id));
@@ -1839,6 +1865,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (y != null) target.offsetY = y;
     target.windowed = true;
     changed(true);
+  }
+  function validateAmosScreen(width, height, mode, placement) {
+    const limit = options.snapshotStandard === 'NTSC' ? 262 : 312;
+    if (mode !== 0 || placement.flags !== 0 || placement.offsetX !== 0 || placement.offsetY !== 0 ||
+        (placement.x & ~15) !== 128 || placement.y > 255 || placement.width !== width || placement.height !== height ||
+        width < 128 || width > 320 || (width & 15) || height < 1 || height > 256 || placement.y + height < 128 || placement.y + height > limit) {
+      throw new Error('Load Iff AMSC placement is not implemented for these fields');
+    }
   }
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
@@ -1885,6 +1919,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function doubleBuffer() {
     const target = screen();
+    checkClones(target);
     if (target.doubleBuffered) throw new Error('Screen is already double buffered');
     target.pixels = Uint8Array.from(target.physicalPixels);
     target.doubleBuffered = true;
@@ -2068,6 +2103,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     // AMOS keeps all 32 colour registers, also on lower-depth screens.
     for (let i = 0; i < 32; i++) if (mask & (1 << i)) target.palette[i] = values[i];
     changed();
+  }
+  function getPalette(from, mask = -1) {
+    bankPalette(resolveBuffer(from).target.palette.slice(), whole(mask));
   }
 
   // Clip before stepping, so even very distant coordinates take bounded work.
@@ -2350,7 +2388,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -2787,9 +2825,10 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let step = 0; step < steps && fading; step++) {
       let moving = false;
       for (const entry of job.entries) {
-        if (entry.rgb === 0) continue;
+        if (entry.rgb === entry.to) continue;
         const rgb = entry.rgb;
-        entry.rgb = Math.max(0, (rgb >> 8) - 1) * 256 + Math.max(0, ((rgb >> 4) & 15) - 1) * 16 + Math.max(0, (rgb & 15) - 1);
+        const move = shift => { const from = (rgb >> shift) & 15, to = (entry.to >> shift) & 15; return from + Math.sign(to - from); };
+        entry.rgb = move(8) * 256 + move(4) * 16 + move(0);
         writePalette(job.target, entry.index, entry.rgb, job.nextVbl, 1, job.location);
         moving = true; changed = true;
       }
@@ -2799,13 +2838,19 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     publishFade();
     if (changed && !paletteWrites) display.invalidate();
   }
-  function fade(speed) {
+  function fade(speed, source = null) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    if (source != null) {
+      source = integer(source);
+      if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
+      display.screen(source);
+    }
     const target = display.screen(), vbl = options.vblNow();
     advancePalette(vbl);
-    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff })).filter(entry => entry.rgb !== 0);
+    const destination = source == null ? Array(32).fill(0) : display.screen(source).palette.slice();
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: destination[index] & 0xfff })).filter(entry => entry.rgb !== entry.to);
     fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
     publishFade();
   }
@@ -3239,12 +3284,15 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
     const mode = image.hasMode ? image.displayMode :
       ((image.pageWidth >= 640 && image.depth <= 4 ? 0x8000 : 0) | (image.pageHeight >= 400 ? 4 : 0));
-    if (image.masking || (mode & 4) || image.hasAmosScreen) throw new Error('Load Iff masks, interlace and AMSC placement are not implemented');
+    if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
+    const placement = destination != null ? image.amosScreen : null;
+    if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
     let target;
     if (destination != null) {
       destination = integer(destination);
       target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
         mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
+      if (placement) display.screenDisplay(destination, placement.x, placement.y, placement.width, placement.height);
     } else target = display.screen();
     if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
     clearBobs(target);
@@ -4696,6 +4744,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     }
     if (res.procReturn) {
       const frame = state.frames.pop();
+      if (frame && res.discardGosubs && state.stack.length >= frame.stackDepth) state.stack.length = frame.stackDepth;
       if (!frame || frame.stackDepth !== state.stack.length) { state.halted = true; throw new Error('Invalid procedure return'); }
       state.locals = frame.locals;
       state.data = frame.data;
@@ -5354,6 +5403,12 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       position = next;
     }
     if (!chunks.BMHD || !chunks.BODY) fail('missing BMHD/BODY');
+    let amosScreen = null;
+    if (chunks.AMSC) {
+      if (chunks.AMSC.size !== 14) fail('invalid AMSC size', chunks.AMSC.start);
+      const start = chunks.AMSC.start;
+      amosScreen = Object.freeze(Object.fromEntries(['x', 'y', 'width', 'height', 'offsetX', 'offsetY', 'flags'].map((key, i) => [key, view.getUint16(start + i * 2, false)])));
+    }
     if (chunks.BMHD.size !== 20) fail('invalid BMHD size', chunks.BMHD.start);
     const at = chunks.BMHD.start, width = view.getUint16(at, false), height = view.getUint16(at + 2, false);
     const depth = bytes[at + 8], masking = bytes[at + 9], compression = bytes[at + 10];
@@ -5441,7 +5496,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     return { snapshot: snapshotModel.createSnapshot({ chip: memory.bytes, frame }), mask,
       image: Object.freeze({ width, height, depth, rowBytes, mode, displayMode, monitor, cycles: Object.freeze(cycles), masking, compression, transparentColour,
         hasPalette: !!chunks.CMAP, paletteSize: chunks.CMAP ? chunks.CMAP.size / 3 : 0,
-        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC,
+        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC, amosScreen,
         x: view.getInt16(at + 4, false), y: view.getInt16(at + 6, false), xAspect, yAspect,
         pageWidth: view.getInt16(at + 16, false), pageHeight: view.getInt16(at + 18, false) }) };
   };
@@ -6173,7 +6228,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (planarBridge) planarBridge.prune();
     if (viewChange) {
       if (!autoView) return;
-      presented = screens.get(current) || null;
+      presented = visibleScreen();
       commitWindows();
     }
     listeners.forEach(listener => listener(version));
@@ -6194,17 +6249,25 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function registerIndex(value) {
     return whole(value) & 31;
   }
+  function visibleScreen() {
+    const selected = screens.get(current);
+    return selected && !selected.hidden ? selected : Array.from(screens.values()).find(target => !target.hidden) || null;
+  }
+  function checkClones(target) {
+    if (target && Array.from(screens.values()).some(other => other.cloneOwner === target)) throw new Error('Close screen clones before replacing or closing their owner');
+  }
   function open(id, width, height, colours, mode) {
     if (!Number.isInteger(id) || id < 0 || id > 7) throw new Error('Invalid screen number');
     if (!Number.isInteger(width) || width < 1 || width > 1024 || !Number.isInteger(height) || height < 1 || height > 1023) throw new Error('Invalid screen dimensions');
     if (![2, 4, 8, 16, 32, 64, 4096].includes(colours)) throw new Error('Unsupported screen colour mode');
     if (mode !== 0 && mode !== 0x8000) throw new Error('Unsupported screen resolution mode');
     if (mode === 0x8000 && colours > 16) throw new Error('Hires screens support at most 16 colours');
+    checkClones(screens.get(id));
     const ham = colours === 4096;
     colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode, ham, zones: null,
+      id, width, height, colours, mode, ham, zones: null, hidden: false, cloneOwner: null,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
@@ -6222,22 +6285,34 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     changed(true);
     return next;
   }
-  function select(id) { screen(id); current = id; changed(true); }
+  function select(id) { if (screen(id).cloneOwner) throw new Error('Cannot select a cloned screen'); current = id; changed(true); }
   function close(id) {
-    screen(id);
+    checkClones(screen(id));
     screens.delete(id);
-    if (current === id) current = screens.size ? screens.keys().next().value : null;
+    if (current === id) { const next = Array.from(screens.values()).find(target => !target.cloneOwner); current = next ? next.id : null; }
     screenListeners.forEach(listener => listener());
     changed(true);
   }
   function commitWindows() {
     presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
       width: presented.width, height: presented.height, mode: presented.mode } : null;
-    const targets = Array.from(screens.values()).filter(target => target.windowed);
+    const targets = Array.from(screens.values()).filter(target => target.windowed && !target.hidden);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
   }
-  function view() { presented = screens.get(current) || null; commitWindows(); changed(); }
+  function view() { presented = visibleScreen(); commitWindows(); changed(); }
+  function hideScreen(id = current) { screen(whole(id)).hidden = true; changed(true); }
+  function showScreen(id = current) { screen(whole(id)).hidden = false; changed(true); }
+  function clone(id) {
+    whole(id);
+    if (id < 0 || id > 7 || screens.has(id)) throw new Error('Invalid or already open clone screen');
+    const owner = screen();
+    if (owner.doubleBuffered || owner.cloneOwner) throw new Error('Cloning double-buffered screens or clones is not implemented');
+    // Static bitmap aliases, with independent display state/palette. A clone is
+    // not selectable; drawing continues on the original owner.
+    const target = { ...owner, id, cloneOwner: owner, palette: owner.palette.slice(), zones: null };
+    screens.set(id, target); screenListeners.forEach(listener => listener()); changed(true); return target;
+  }
   function setAutoView(enabled) { autoView = enabled; if (enabled) view(); }
   function screenDisplay(id, x = null, y = null, width = null, height = null) {
     const target = screen(whole(id));
@@ -6266,6 +6341,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (y != null) target.offsetY = y;
     target.windowed = true;
     changed(true);
+  }
+  function validateAmosScreen(width, height, mode, placement) {
+    const limit = options.snapshotStandard === 'NTSC' ? 262 : 312;
+    if (mode !== 0 || placement.flags !== 0 || placement.offsetX !== 0 || placement.offsetY !== 0 ||
+        (placement.x & ~15) !== 128 || placement.y > 255 || placement.width !== width || placement.height !== height ||
+        width < 128 || width > 320 || (width & 15) || height < 1 || height > 256 || placement.y + height < 128 || placement.y + height > limit) {
+      throw new Error('Load Iff AMSC placement is not implemented for these fields');
+    }
   }
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
@@ -6312,6 +6395,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function doubleBuffer() {
     const target = screen();
+    checkClones(target);
     if (target.doubleBuffered) throw new Error('Screen is already double buffered');
     target.pixels = Uint8Array.from(target.physicalPixels);
     target.doubleBuffered = true;
@@ -6495,6 +6579,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     // AMOS keeps all 32 colour registers, also on lower-depth screens.
     for (let i = 0; i < 32; i++) if (mask & (1 << i)) target.palette[i] = values[i];
     changed();
+  }
+  function getPalette(from, mask = -1) {
+    bankPalette(resolveBuffer(from).target.palette.slice(), whole(mask));
   }
 
   // Clip before stepping, so even very distant coordinates take bounded work.
@@ -6777,7 +6864,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -7214,9 +7301,10 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let step = 0; step < steps && fading; step++) {
       let moving = false;
       for (const entry of job.entries) {
-        if (entry.rgb === 0) continue;
+        if (entry.rgb === entry.to) continue;
         const rgb = entry.rgb;
-        entry.rgb = Math.max(0, (rgb >> 8) - 1) * 256 + Math.max(0, ((rgb >> 4) & 15) - 1) * 16 + Math.max(0, (rgb & 15) - 1);
+        const move = shift => { const from = (rgb >> shift) & 15, to = (entry.to >> shift) & 15; return from + Math.sign(to - from); };
+        entry.rgb = move(8) * 256 + move(4) * 16 + move(0);
         writePalette(job.target, entry.index, entry.rgb, job.nextVbl, 1, job.location);
         moving = true; changed = true;
       }
@@ -7226,13 +7314,19 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     publishFade();
     if (changed && !paletteWrites) display.invalidate();
   }
-  function fade(speed) {
+  function fade(speed, source = null) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    if (source != null) {
+      source = integer(source);
+      if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
+      display.screen(source);
+    }
     const target = display.screen(), vbl = options.vblNow();
     advancePalette(vbl);
-    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff })).filter(entry => entry.rgb !== 0);
+    const destination = source == null ? Array(32).fill(0) : display.screen(source).palette.slice();
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: destination[index] & 0xfff })).filter(entry => entry.rgb !== entry.to);
     fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
     publishFade();
   }
@@ -7666,12 +7760,15 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
     const mode = image.hasMode ? image.displayMode :
       ((image.pageWidth >= 640 && image.depth <= 4 ? 0x8000 : 0) | (image.pageHeight >= 400 ? 4 : 0));
-    if (image.masking || (mode & 4) || image.hasAmosScreen) throw new Error('Load Iff masks, interlace and AMSC placement are not implemented');
+    if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
+    const placement = destination != null ? image.amosScreen : null;
+    if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
     let target;
     if (destination != null) {
       destination = integer(destination);
       target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
         mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
+      if (placement) display.screenDisplay(destination, placement.x, placement.y, placement.width, placement.height);
     } else target = display.screen();
     if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
     clearBobs(target);
@@ -9123,6 +9220,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     }
     if (res.procReturn) {
       const frame = state.frames.pop();
+      if (frame && res.discardGosubs && state.stack.length >= frame.stackDepth) state.stack.length = frame.stackDepth;
       if (!frame || frame.stackDepth !== state.stack.length) { state.halted = true; throw new Error('Invalid procedure return'); }
       state.locals = frame.locals;
       state.data = frame.data;
@@ -9798,6 +9896,12 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       position = next;
     }
     if (!chunks.BMHD || !chunks.BODY) fail('missing BMHD/BODY');
+    let amosScreen = null;
+    if (chunks.AMSC) {
+      if (chunks.AMSC.size !== 14) fail('invalid AMSC size', chunks.AMSC.start);
+      const start = chunks.AMSC.start;
+      amosScreen = Object.freeze(Object.fromEntries(['x', 'y', 'width', 'height', 'offsetX', 'offsetY', 'flags'].map((key, i) => [key, view.getUint16(start + i * 2, false)])));
+    }
     if (chunks.BMHD.size !== 20) fail('invalid BMHD size', chunks.BMHD.start);
     const at = chunks.BMHD.start, width = view.getUint16(at, false), height = view.getUint16(at + 2, false);
     const depth = bytes[at + 8], masking = bytes[at + 9], compression = bytes[at + 10];
@@ -9885,7 +9989,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     return { snapshot: snapshotModel.createSnapshot({ chip: memory.bytes, frame }), mask,
       image: Object.freeze({ width, height, depth, rowBytes, mode, displayMode, monitor, cycles: Object.freeze(cycles), masking, compression, transparentColour,
         hasPalette: !!chunks.CMAP, paletteSize: chunks.CMAP ? chunks.CMAP.size / 3 : 0,
-        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC,
+        hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC, amosScreen,
         x: view.getInt16(at + 4, false), y: view.getInt16(at + 6, false), xAspect, yAspect,
         pageWidth: view.getInt16(at + 16, false), pageHeight: view.getInt16(at + 18, false) }) };
   };
@@ -10617,7 +10721,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (planarBridge) planarBridge.prune();
     if (viewChange) {
       if (!autoView) return;
-      presented = screens.get(current) || null;
+      presented = visibleScreen();
       commitWindows();
     }
     listeners.forEach(listener => listener(version));
@@ -10638,17 +10742,25 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function registerIndex(value) {
     return whole(value) & 31;
   }
+  function visibleScreen() {
+    const selected = screens.get(current);
+    return selected && !selected.hidden ? selected : Array.from(screens.values()).find(target => !target.hidden) || null;
+  }
+  function checkClones(target) {
+    if (target && Array.from(screens.values()).some(other => other.cloneOwner === target)) throw new Error('Close screen clones before replacing or closing their owner');
+  }
   function open(id, width, height, colours, mode) {
     if (!Number.isInteger(id) || id < 0 || id > 7) throw new Error('Invalid screen number');
     if (!Number.isInteger(width) || width < 1 || width > 1024 || !Number.isInteger(height) || height < 1 || height > 1023) throw new Error('Invalid screen dimensions');
     if (![2, 4, 8, 16, 32, 64, 4096].includes(colours)) throw new Error('Unsupported screen colour mode');
     if (mode !== 0 && mode !== 0x8000) throw new Error('Unsupported screen resolution mode');
     if (mode === 0x8000 && colours > 16) throw new Error('Hires screens support at most 16 colours');
+    checkClones(screens.get(id));
     const ham = colours === 4096;
     colours = ham ? 64 : colours;
     const paper = colours === 2 ? 0 : 1;
     const next = {
-      id, width, height, colours, mode, ham, zones: null,
+      id, width, height, colours, mode, ham, zones: null, hidden: false, cloneOwner: null,
       pixels: new Uint8Array(width * height),
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
@@ -10666,22 +10778,34 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     changed(true);
     return next;
   }
-  function select(id) { screen(id); current = id; changed(true); }
+  function select(id) { if (screen(id).cloneOwner) throw new Error('Cannot select a cloned screen'); current = id; changed(true); }
   function close(id) {
-    screen(id);
+    checkClones(screen(id));
     screens.delete(id);
-    if (current === id) current = screens.size ? screens.keys().next().value : null;
+    if (current === id) { const next = Array.from(screens.values()).find(target => !target.cloneOwner); current = next ? next.id : null; }
     screenListeners.forEach(listener => listener());
     changed(true);
   }
   function commitWindows() {
     presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
       width: presented.width, height: presented.height, mode: presented.mode } : null;
-    const targets = Array.from(screens.values()).filter(target => target.windowed);
+    const targets = Array.from(screens.values()).filter(target => target.windowed && !target.hidden);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY })) : null;
   }
-  function view() { presented = screens.get(current) || null; commitWindows(); changed(); }
+  function view() { presented = visibleScreen(); commitWindows(); changed(); }
+  function hideScreen(id = current) { screen(whole(id)).hidden = true; changed(true); }
+  function showScreen(id = current) { screen(whole(id)).hidden = false; changed(true); }
+  function clone(id) {
+    whole(id);
+    if (id < 0 || id > 7 || screens.has(id)) throw new Error('Invalid or already open clone screen');
+    const owner = screen();
+    if (owner.doubleBuffered || owner.cloneOwner) throw new Error('Cloning double-buffered screens or clones is not implemented');
+    // Static bitmap aliases, with independent display state/palette. A clone is
+    // not selectable; drawing continues on the original owner.
+    const target = { ...owner, id, cloneOwner: owner, palette: owner.palette.slice(), zones: null };
+    screens.set(id, target); screenListeners.forEach(listener => listener()); changed(true); return target;
+  }
   function setAutoView(enabled) { autoView = enabled; if (enabled) view(); }
   function screenDisplay(id, x = null, y = null, width = null, height = null) {
     const target = screen(whole(id));
@@ -10710,6 +10834,14 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (y != null) target.offsetY = y;
     target.windowed = true;
     changed(true);
+  }
+  function validateAmosScreen(width, height, mode, placement) {
+    const limit = options.snapshotStandard === 'NTSC' ? 262 : 312;
+    if (mode !== 0 || placement.flags !== 0 || placement.offsetX !== 0 || placement.offsetY !== 0 ||
+        (placement.x & ~15) !== 128 || placement.y > 255 || placement.width !== width || placement.height !== height ||
+        width < 128 || width > 320 || (width & 15) || height < 1 || height > 256 || placement.y + height < 128 || placement.y + height > limit) {
+      throw new Error('Load Iff AMSC placement is not implemented for these fields');
+    }
   }
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
@@ -10756,6 +10888,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function doubleBuffer() {
     const target = screen();
+    checkClones(target);
     if (target.doubleBuffered) throw new Error('Screen is already double buffered');
     target.pixels = Uint8Array.from(target.physicalPixels);
     target.doubleBuffered = true;
@@ -10939,6 +11072,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     // AMOS keeps all 32 colour registers, also on lower-depth screens.
     for (let i = 0; i < 32; i++) if (mask & (1 << i)) target.palette[i] = values[i];
     changed();
+  }
+  function getPalette(from, mask = -1) {
+    bankPalette(resolveBuffer(from).target.palette.slice(), whole(mask));
   }
 
   // Clip before stepping, so even very distant coordinates take bounded work.
@@ -11221,7 +11357,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, setColour, setPalette, screenDisplay, screenOffset, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, select, close, clone, hideScreen, showScreen, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -11658,9 +11794,10 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let step = 0; step < steps && fading; step++) {
       let moving = false;
       for (const entry of job.entries) {
-        if (entry.rgb === 0) continue;
+        if (entry.rgb === entry.to) continue;
         const rgb = entry.rgb;
-        entry.rgb = Math.max(0, (rgb >> 8) - 1) * 256 + Math.max(0, ((rgb >> 4) & 15) - 1) * 16 + Math.max(0, (rgb & 15) - 1);
+        const move = shift => { const from = (rgb >> shift) & 15, to = (entry.to >> shift) & 15; return from + Math.sign(to - from); };
+        entry.rgb = move(8) * 256 + move(4) * 16 + move(0);
         writePalette(job.target, entry.index, entry.rgb, job.nextVbl, 1, job.location);
         moving = true; changed = true;
       }
@@ -11670,13 +11807,19 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     publishFade();
     if (changed && !paletteWrites) display.invalidate();
   }
-  function fade(speed) {
+  function fade(speed, source = null) {
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
+    if (source != null) {
+      source = integer(source);
+      if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
+      display.screen(source);
+    }
     const target = display.screen(), vbl = options.vblNow();
     advancePalette(vbl);
-    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff })).filter(entry => entry.rgb !== 0);
+    const destination = source == null ? Array(32).fill(0) : display.screen(source).palette.slice();
+    const entries = target.palette.map((rgb, index) => ({ index, rgb: rgb & 0xfff, to: destination[index] & 0xfff })).filter(entry => entry.rgb !== entry.to);
     fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
     publishFade();
   }
@@ -12110,12 +12253,15 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
     const mode = image.hasMode ? image.displayMode :
       ((image.pageWidth >= 640 && image.depth <= 4 ? 0x8000 : 0) | (image.pageHeight >= 400 ? 4 : 0));
-    if (image.masking || (mode & 4) || image.hasAmosScreen) throw new Error('Load Iff masks, interlace and AMSC placement are not implemented');
+    if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
+    const placement = destination != null ? image.amosScreen : null;
+    if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
     let target;
     if (destination != null) {
       destination = integer(destination);
       target = display.open(destination, Math.ceil(image.width / 16) * 16, image.height,
         mode & 0x800 ? 4096 : 1 << image.depth, mode & 0x8000);
+      if (placement) display.screenDisplay(destination, placement.x, placement.y, placement.width, placement.height);
     } else target = display.screen();
     if (image.width > target.width || image.depth > Math.log2(target.colours)) throw new Error('IFF image does not fit the screen');
     clearBobs(target);
@@ -13567,6 +13713,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     }
     if (res.procReturn) {
       const frame = state.frames.pop();
+      if (frame && res.discardGosubs && state.stack.length >= frame.stackDepth) state.stack.length = frame.stackDepth;
       if (!frame || frame.stackDepth !== state.stack.length) { state.halted = true; throw new Error('Invalid procedure return'); }
       state.locals = frame.locals;
       state.data = frame.data;

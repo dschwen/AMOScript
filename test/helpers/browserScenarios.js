@@ -228,6 +228,11 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-title', title: 'Roller II first image and original FLOAD', initialFrame: 'Canvas: first image (940 ms)', description: 'Unchanged startup through the first FLOAD, original procedure, AMSC placement, hidden palette clone and Fade To. Independent Python image pixels verify seven Canvas/copper states and seven WebGL comparisons. Live fullscreen preview precedes WTIN, the main title and gameplay.', run: require('./roller2TitleProbe'), check(result, assert) {
+    assert.strictEqual(result.originalPrefix,18);assert.deepStrictEqual(result.originalProcedure,[63,68]);assert.strictEqual(result.frames,7);
+    if(result.gpuUnavailable){assert.strictEqual(result.gpuFrames,0);assert.strictEqual(typeof result.gpuUnavailable,'string');}else assert.strictEqual(result.gpuFrames,7);
+    assert.deepStrictEqual(result.origin,[128,42]);assert.deepStrictEqual(result.image,[320,256]);assert.strictEqual(result.paletteCloneRetired,true);assert.strictEqual(result.gameRunning,false);
+  } },
   { id: 'roller2-startup', title: 'Roller II original startup', description: 'Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original sample/tracker loads and Hide. Step/reset controls inspect the silent field clock; native Canvas checks cover nested Hide/Show. The captured default screen precedes FLOAD; title rendering and gameplay remain open.', run: require('./roller2StartupProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { lines:17, variableBufferBytes:20480, stackEntries:501, directory:'RII:', introMusic:-1, pointerChecks:5, trackerField:6, firstInstrument:4, titleRendered:false });
   } },
@@ -235,7 +240,7 @@ const scenarios = [
     assert.deepStrictEqual(result,{fields:9631,orders:22,rows:1376,notes:1997,nativeComparisons:12,instruments:10,nonzero:true,vmPlayback:true});
   } },
   { id:'roller2', capturedFrames:false, title:'Roller II target and MOD inspector', description:'Original sample/Track Load statements execute with explicit fixture boundaries. A bounded M.K. reader decodes the original module, instruments and effects. The separate music demo runs compiled Track Play; whole-game compilation remains open.', run:require('./roller2Probe'), check(result,assert){
-    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:30,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
+    assert.deepStrictEqual(result,{physicalLines:1199,encodings:194,unrecognized:23,wholeCompiled:false,trackerBank:22,moduleBytes:84006,orders:22,patterns:12,instruments:10,playback:false});
   } },
   { id: 'wonderland-game', title: 'Play unmodified Wonderland', initialFrame: 'Original level 1', description: 'The complete original game with default WebGL2 presentation, selectable Canvas 2D, fullscreen, keyboard/Gamepad controls, Stop/Resume and Restart. Input-only keyboard and injected-gamepad replays render three deaths/fades, two life restarts, game over and a fresh game. Enable/Mute controls route original sample commands through Web Audio; three native offline PCM/stereo comparisons cover the replay. No Amiga capture or persistent editor files are claimed.', run: require('./wonderlandGameProbe'), check(result, assert) {
     assert.strictEqual(result.inputModes,2);assert.deepStrictEqual(result.deaths,[[2,1,0],[2,1,0]]);

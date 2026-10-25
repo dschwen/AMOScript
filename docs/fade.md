@@ -3,8 +3,11 @@
 `Fade speed` (`$0dfe`) now starts a nonblocking fade to black on the selected
 screen. The supported speed is an integer 1–32767 after shared numeric conversion.
 Zero, negative, oversized and string speeds reject with source locations. Explicit
-colour lists, Fade To screen/bank/mask forms and the original word-boundary cases
+colour lists, Fade To bank/mask forms and the original word-boundary cases
 remain unsupported; they fail rather than being interpreted as this form.
+`Fade speed To screen` now captures a bounded screen palette (including hidden
+clones) and steps components in either direction through the same wake/lifecycle
+path. See [Roller II's original FLOAD](roller2-title.md) for bounds and evidence.
 
 ## Palette and field semantics
 

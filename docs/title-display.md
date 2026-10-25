@@ -25,8 +25,10 @@ Autoback mirroring; a separate physical buffer changes only when swapped. Only
 CMAP entries actually present are replaced. Missing CMAP leaves the palette intact.
 
 Opaque normal/hires/EHB/HAM images use the existing indexed display model.
-Masks, interlace and AMOS AMSC placement chunks reject explicitly in the language
+Masks and interlace reject explicitly in the language
 loader, even though the lower-level ILBM utility supports some brush/field forms.
+Explicit destinations now support bounded lowres full-bitmap AMSC placement;
+implicit loads retain current geometry. See [Roller II's first image](roller2-title.md).
 Active colour cycles still reject. Image loading invalidates saved logical Bob
 backgrounds before writing and lets the existing automatic Bob flush redraw them.
 Bank `Load` remains a separate command with its existing formats and semantics.
@@ -97,5 +99,5 @@ checks an active rainbow crossing PAL line 256. Including eight
 [screen-window patterns](screen-windows.md), coverage is now 179 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
 
 Remaining gates include whole-program menu/game integration, nonempty rainbow pattern
-strings, NTSC rainbow timing, AMSC placement, runtime laced loads, full screen
+strings, NTSC rainbow timing, remaining AMSC placement, runtime laced loads, full screen
 window/scroll integration and external Amiga captures. See [the milestone](wonderland.md).

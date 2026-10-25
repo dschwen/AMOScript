@@ -43,6 +43,14 @@
   integer AMOS values; Hide/Show have signed-word nesting and On resets. The
   unchanged first 17 Roller II lines stop at a synthetic Wait Key, before FLOAD
   and AMSC title placement. See `docs/startup.md` and `docs/roller2.md`.
+  The separate first-image fixture now runs original lines 1–18 and FLOAD 63–68,
+  with guards before WTIN. Pop Proc unwinds local Gosubs via ordinary procedure
+  return. Static Screen Clone aliases share pixels with independent palettes;
+  clones are unselectable and owner replacement/close requires closing clones.
+  Screen Hide/Show stage visibility; Get Palette and Fade To screen capture all
+  32 registers. Bounded AMSC placement validates before replacement. Independent
+  Python pixels and seven GPU frames cover the first logo, not the main title.
+  See `docs/roller2-title.md`; wider clone/AMSC/fade forms remain gated.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/

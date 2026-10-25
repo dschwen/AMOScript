@@ -87,7 +87,7 @@ test('Fade: End/errors and stale callbacks cancel effects; typed speeds and unsu
   let now=0;const tasks=[],p=compile(idle(2)).create({now:()=>now,setTimeout(fn){tasks.push(fn);return tasks.length;}});p.tick(100);p.stop();p.resume();
   now=20;tasks[0]();assert.strictEqual(p.display.screen().palette[1],0xf31);tasks[1]();assert.strictEqual(p.display.screen().palette[1],0xe20);p.stop();
   for(const speed of [-1,0,32768])assert.throws(()=>execute(idle(speed)),/Unsupported Fade speed.*line 2/);
-  for(const line of [[w(0xdfe),text('2')],[w(0xdfe),n(2),t(','),n(0)],[w(0xdfe),n(2),t('To'),n(1)]])assert.throws(()=>compile(binary([line])),/numeric|end of statement/i);
+  for(const line of [[w(0xdfe),text('2')],[w(0xdfe),n(2),t(','),n(0)],[w(0xdfe),n(2),t('To'),n(1),t(','),n(-1)]])assert.throws(()=>compile(binary([line])),/numeric|end of statement/i);
   const data=binary([[t('Data'),w(0),n(2)],[t('Read'),id('s')],[t('Dim'),id('a'),t('('),n(0),t(')')],
     [id('a'),t('('),n(0),t(')'),t('='),id('s')],[t('Procedure'),dword(0),w(0),0,0,id('speed'),t('['),id('v'),t(']')],
     [t('End Proc'),t('['),id('v'),t(']')],[id('speed',0x12),t('['),id('a'),t('('),n(0),t(')'),t(']')],

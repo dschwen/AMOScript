@@ -6,8 +6,8 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 30 remain unrecognized (43 at
-initial assessment), and whole compilation stops at Pop Proc on line 47.
+The main source has 1,199 lines and 194 encodings; 23 remain unrecognized (43 at
+initial assessment), and whole compilation stops at Boom on line 161.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -19,9 +19,12 @@ comparisons. Host pause freezes the sequencer and silences held samples; Resume
 continues at the next field without replaying elapsed notes. The unchanged first
 17 startup lines now run through directive metadata, Break Off, Dir$, True,
 music and Hide, with a declared Wait Key guard. Not/False/Exist and nested
-pointer visibility are also supported. Next implement Pop Proc, FLOAD screen
-visibility/palette forms and the first image's AMSC placement contract, then
-title/level replays. Game-over/win
+pointer visibility are also supported. The unchanged first FLOAD call and original
+procedure now load/fade the “EL SOFTICUS presents” image through a static palette
+clone and bounded AMSC placement. Seven independently checked image states match
+Canvas/copper and actual WebGL, with a live fullscreen preview. Pop Proc and
+Fade To screen are implemented. Next cover WTIN, FDZ's explicit colour lists,
+the main tall EHB title/window and remaining startup/game forms. Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
 existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
@@ -132,7 +135,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **540 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **548 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

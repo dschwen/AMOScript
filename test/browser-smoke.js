@@ -19,6 +19,10 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const rollerTitle=await runScenario('roller2-title',page);assert.strictEqual(rollerTitle.gpuFrames,7);
+    await page.waitForFunction(()=>document.getElementById('roller2-title-controls').dataset.phase==='ready');
+    await page.evaluate(()=>globalThis.AMOS_ROLLER2_TITLE_CLEANUP());
+    console.log('Roller2 first image passed: original FLOAD, independent pixels and seven native WebGL/Canvas fade states.');
     await runScenario('roller2-startup',page);await page.evaluate(()=>globalThis.AMOS_ROLLER2_STARTUP_CLEANUP());
     console.log('Roller2 startup passed: unmodified first 17 lines, directive/path/boolean/music state and native nested cursor checks.');
     await runScenario('tracker',page);console.log('Roller2 tracker passed: all 1,997 notes, ten original instrument PCM/stereo/repeat comparisons and native loop/voice updates.');

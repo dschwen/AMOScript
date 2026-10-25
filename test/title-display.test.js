@@ -83,7 +83,7 @@ test('Load Iff: current-screen form writes only logical planes, keeps higher pla
   const raw = Buffer.from(fixture('ilbm-4-raw.ilbm'), 'latin1');
   const chunk = Buffer.from('414d53430000000e' + '00'.repeat(14), 'hex');
   const amsc = Buffer.concat([raw.subarray(0, 12), chunk, raw.subarray(12)]); amsc.writeUInt32BE(amsc.length - 8, 4);
-  assert.throws(() => execute(binary([[t('Load Iff'), text('amos')]]), 100,
+  assert.throws(() => execute(binary([[t('Load Iff Screen'), text('amos'), t(','), n(0)]]), 100,
     { files: { read: () => amsc.toString('latin1') } }), /AMSC placement.*at line 1/);
   const hires = Buffer.concat([raw.subarray(0, 70), raw.subarray(82)]);
   hires.writeUInt32BE(hires.length - 8, 4); hires.writeUInt16BE(640, 36);
