@@ -18,6 +18,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Token inventory | 194 distinct encodings; initially 43 unrecognized, now zero after tracker/startup, display/memory commands, Boom, Fill/Copy, Set Line, Writing, Scin, Change Mouse, Get Icon, Rainbow Del, Swap, Edit and AMOS Music commands |
 | Whole-source compiler gate | Complete unchanged source compiles to a standalone 2,528-instruction factory; this does not prove complete runtime/gameplay support |
 | AMOS Music end tunes | Direct decoder/player runs Over.mus and Ywon.mus with all 25 instruments and independent full first-wrap PAL/NTSC traces; VM Music/Mvolume/Music Off, original volume fade and lifecycle integration pass; end-state screens remain open. See [contract](amos-music.md) |
+| Complete-source browser path | Original intro/menu, first-level completion and bonus, level-2 arrows, host Stop/Timer expiry, game-over screen/music and volume exit; keyboard/Gamepad, 20 Canvas frames, 12 independent image regions and 10 GPU comparisons. Post-game return fails at missing original `iffp/roller hi`, line 1044. See [contract](roller2-game.md) |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
@@ -138,7 +139,7 @@ Music, Mvolume and Music Off cleared the final three decoder encodings and the
 whole-source compile gate. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 716 tests, 54 offline browser scenario pages,
+Local baseline for this slice: 719 tests, 55 offline browser scenario pages,
 179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu, two icon-copy, two board and six ready-prompt/ball and six input-loop and six movement and seven colour-collection GPU/CPU comparisons, four Writing, three Set Line and seven Scin GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

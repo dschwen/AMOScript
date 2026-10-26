@@ -146,6 +146,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html"
     },
     {
+      "file": "roller2-game.html",
+      "title": "Play the complete original Roller II program",
+      "description": "Unmodified source/assets: original intro/menu, level-1 colour collection and bonus, level-2 arrows, host Stop/Timer expiry, game-over screen/music and cleanup at the missing original high-score image. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Remaining levels/editor/win paths are not yet accepted.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html"
+    },
+    {
       "file": "roller2-music-vm.html",
       "title": "Roller II VM end music and volume fade",
       "description": "Original Music/Mvolume/Music Off statements run standalone with driver-owned VBL wakes. Full first-wrap PAL/NTSC traces, source fade/erase, Stop/Resume and owned browser audio; end-state graphics remain excluded.",

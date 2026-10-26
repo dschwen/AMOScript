@@ -50,8 +50,10 @@ integer colour words and masks assignments to `$fff`. Bounds and types are check
 `Rainbow n,base,y,height` selects table position and physical row range. Omitted
 base/y/height keep their values; an out-of-table positive base keeps the old base,
 as in the source. Row y is clamped to at least 28. Height zero disables the range;
-positive ranges wrap table indices. The current subset bounds y to 0–311 and
-height to 0–312, and rejects active NTSC placement pending EcYBase verification.
+positive ranges wrap table indices. The current subset accepts nonwrapping
+word Y ranges (0–65,535) and height 0–312, including off-field parking such as
+original Roller II line 1007. Active NTSC placement still rejects pending EcYBase
+verification.
 At an overlapping row, the lowest-numbered active rainbow wins, matching the
 source's slot scan. The normal screen colour is restored when its range ends.
 

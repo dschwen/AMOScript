@@ -115,3 +115,16 @@ test('Wonderland: original title setup renders the source-derived title/Bob gold
   assert.deepStrictEqual(Buffer.from(p.display.renderDisplay()), Buffer.from(decodePng(bytes).rgba));
   assert.strictEqual(p.display.autoView, true); assert.strictEqual(p.display.screen().cursorVisible, false);
 });
+
+test('rainbow: parked nonwrapping word Y ranges remain invisible without mutating pixels or old snapshots', () => {
+  const d = createDisplay(); d.clear(1); d.setColour(1, 0x123); d.setRainbow(0, 1, 16, '', '', '', 0xf00);
+  d.rainbow(0, 0, 50, 24); const active = d.snapshotDisplay(), previousPalette = active.frame.linePal.slice(), pixels = d.screen().pixels.slice();
+  d.rainbow(0, 1, 380, 24); const parked = d.snapshotDisplay(), rgba = d.renderDisplay();
+  assert.strictEqual(d.rainbows.get(0).y, 380); assert.deepStrictEqual(d.screen().pixels, pixels);
+  for (let i = 0; i < rgba.length; i += 4) assert.deepStrictEqual(Array.from(rgba.subarray(i, i + 4)), [17, 34, 51, 255]);
+  assert.notStrictEqual(active.frame.revision, parked.frame.revision); assert.deepStrictEqual(active.frame.linePal, previousPalette);
+  for (const action of [() => d.rainbow(0, 0, 65530, 24), () => d.rainbow(0, 0, 65536, 0), () => d.rainbow(0, 0, -1, 0)]) assert.throws(action, /Rainbow placement/);
+  assert.strictEqual(d.rainbows.get(0).y, 380); assert.strictEqual(d.rainbows.get(0).base, 1);
+  d.rainbow(0, null, 65535, 0); assert.throws(() => d.rainbow(0, null, null, 1), /Wrapped Rainbow/);
+  d.rainbow(0, null, 50, 24); assert.strictEqual(d.rainbows.get(0).height, 24);
+});

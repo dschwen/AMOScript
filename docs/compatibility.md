@@ -1,12 +1,18 @@
 # Compatibility and implementation status
 
-Updated 2026-10-26. The current local baseline has **716 passing tests**, plus a
+Updated 2026-10-26. The current local baseline has **719 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
 The current run includes direct sprites and refreshed demos; the expanded suite
 has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
+
+The [complete Roller II runner](roller2-game.md) now reaches level 2, original
+arrows and timeout game-over image/music with keyboard/Gamepad and GPU checks.
+Its post-game return path fails explicitly at the missing original `iffp/roller hi`
+image (line 1044); full-game completion is not yet accepted. Writes remain in
+session memory; IndexedDB is planned.
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
 encodings, all recognized; the complete source now compiles to 2,528 instructions. Its unchanged first FLOAD call and original

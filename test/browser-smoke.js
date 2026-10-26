@@ -81,7 +81,7 @@ async function run() {
     await page.click('#tracker-stop');
     await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='off');
     await page.evaluate(()=>globalThis.AMOS_TRACKER_DEMO_CLEANUP());
-    await runScenario('roller2',page);console.log('Roller2 inspector passed: original asset loads, twelve MOD patterns and ten instruments; full-game compilation remains open.');
+    await runScenario('roller2',page);console.log('Roller2 inspector passed: original asset loads, twelve MOD patterns and ten instruments; the full source compiles; complete-game execution remains unaccepted.');
     const liveGpu=await runScenario('wonderland-game', page);assert.strictEqual(liveGpu.gpuFrames,11);
     await page.evaluate(()=>globalThis.AMOS_GAME_DEMO_CLEANUP());
     console.log('Wonderland game passed: original keyboard/gamepad replays, eight sample commands, three native PCM/stereo comparisons, eleven live-host GPU/CPU frames, renderer switching and live sound controls.');

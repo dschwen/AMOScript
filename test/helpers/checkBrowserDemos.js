@@ -270,6 +270,36 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#roller2-startup-reset');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'0');
         await page.evaluate(()=>globalThis.AMOS_ROLLER2_STARTUP_CLEANUP());
       }
+      if (scenario.id === 'roller2-game') {
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.line === '164');
+        assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-backend'), 'webgl');
+        await page.click('#roller2-game-sound');
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.sound === 'on');
+        await page.click('#roller2-game-fullscreen'); await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'roller2-game-viewport');
+        await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
+        await page.keyboard.down('Enter');
+        try { await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.level === '1'); } finally { await page.keyboard.up('Enter'); }
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'ready' && document.getElementById('roller2-game-controls').dataset.line === '154');
+        await page.keyboard.down('Enter');
+        try { await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'game'); } finally { await page.keyboard.up('Enter'); }
+        await page.waitForFunction(() => { const n = Number(document.getElementById('roller2-game-controls').dataset.line); return n >= 619 && n <= 639; });
+        await page.click('#roller2-game-stop'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'stopped');
+        assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound-voices'), '0');
+        await page.click('#roller2-game-resume'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'game');
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'game-over', null, { timeout: 45000 });
+        await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'error');
+        assert.match(await page.locator('#roller2-game-controls pre').textContent(), /Missing Roller II asset:.*roller hi.*line 1044/);
+        assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound-voices'), '0');
+        await page.click('#roller2-game-restart'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.line === '164');
+        assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound'), 'on');
+        await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
+        await page.keyboard.press('h'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'scores');
+        const closed = await page.evaluate(() => AMOS_ROLLER2_GAME_CLEANUP());
+        assert.strictEqual(closed.contextState, 'closed'); await page.waitForFunction(() => document.fullscreenElement === null);
+      }
       if (scenario.id === 'roller2-music-vm') {
         await page.click('#music-vm-play');
         await page.waitForFunction(() => Number(document.getElementById('music-vm-status').dataset.plays) > 0);

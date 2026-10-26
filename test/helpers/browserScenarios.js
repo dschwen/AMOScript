@@ -282,6 +282,11 @@ const scenarios = [
   { id: 'roller2-startup', title: 'Roller II original startup', description: 'Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original sample/tracker loads and Hide. Step/reset controls inspect the silent field clock; native Canvas checks cover nested Hide/Show. The captured default screen precedes FLOAD; title rendering and gameplay remain open.', run: require('./roller2StartupProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { lines:17, variableBufferBytes:20480, stackEntries:501, directory:'RII:', introMusic:-1, pointerChecks:5, trackerField:6, firstInstrument:4, titleRendered:false });
   } },
+  { id: 'roller2-game', title: 'Play the complete original Roller II program', description: 'Unmodified source/assets: original intro/menu, level-1 colour collection and bonus, level-2 arrows, host Stop/Timer expiry, game-over screen/music and cleanup at the missing original high-score image. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Remaining levels/editor/win paths are not yet accepted.', run: require('./roller2GameProbe'), check(result, assert) {
+    assert.strictEqual(result.frames, 20); assert.strictEqual(result.gpuFrames, 10); assert.strictEqual(result.independent, 12);
+    assert.strictEqual(result.emptyFrames, 2); assert.strictEqual(result.emptyGpuFrames, 1); assert.strictEqual(result.missingImage, 'iffp/roller hi');
+    assert.deepStrictEqual(result.replays, Array.from({ length: 2 }, () => ({ score: 248, level: 2, ball: [5, 3], frames: 11, writes: 0 })));
+  } },
   { id: 'roller2-music-vm', capturedFrames: false, title: 'Roller II VM end music and volume fade', description: 'Original Music/Mvolume/Music Off statements run standalone with driver-owned VBL wakes. Full first-wrap PAL/NTSC traces, source fade/erase, Stop/Resume and owned browser audio; end-state graphics remain excluded.', run: require('./musicVmProbe'), check(result, assert) {
     assert.deepStrictEqual(result.traces, [3392, 3392, 5731, 5731]); assert.deepStrictEqual(result.fades, [0, 0, 0, 0]);
   } },

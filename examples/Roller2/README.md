@@ -25,6 +25,10 @@ compiled original statements. The complete original game source now compiles. Th
 [AMOS Music VM demo](../../demos/roller2-music-vm.html) runs both end tunes and
 the original volume fade/Off/Erase; full-game and end-state screen integration
 remain open.
+The [complete-source game demo](../../demos/roller2-game.html) now plays original
+startup/menu, level-1 collection, level-2 arrows and game-over music. Post-game return
+requests `iffp/roller hi`, absent from the supplied files; the host reports that
+error and requires Restart. Other paths and full-game completion remain open.
 The [startup demo](../../demos/roller2-startup.html) runs the unchanged first 17
 physical lines with a synthetic Wait Key guard before the first image request.
 The [first-image demo](../../demos/roller2-title.html) also executes original

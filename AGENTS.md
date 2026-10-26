@@ -322,6 +322,18 @@
   `docs/webgl-renderer.md`. Its presentation shader uses shared rational layout
   from `presentation/layout.js`. Bounded live host switching/input is implemented; arbitrary viewport/letterbox
   input routing, HAM/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
+- The live `roller2-game` scenario embeds the complete unchanged source and all
+  pinned assets. Input/host-lifecycle replay completes level 1, enters level 2,
+  follows arrows, then Stop/31-second Timer expiry/Resume reaches original
+  game-over image/Music and volume exit. No variable/IP/bank edits. Twenty Canvas
+  frames, twelve independent image regions, ten GPU comparisons and empty-screen
+  cleanup pass. Original 1007 parks Rainbow at Y=380; accept bounded nonwrapping
+  word Y, height 0–312, without visible palette writes. Original 1044 then fails
+  on missing `iffp/roller hi`, absent from the supplied assets. Surface the error
+  and require Restart; do not substitute another image or claim highscore return
+  works. Session-memory writes survive Restart only; IndexedDB, later handlers,
+  full-game/win/editor acceptance and native captures remain open. See
+  `docs/roller2-game.md`.
 - The live `wonderland-game` scenario embeds the entire original program/assets.
   Its finite input-only replay spends three lives through natural collisions and
   fades, restarts twice, returns to title and starts a fresh game. No variable/IP
