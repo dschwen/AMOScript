@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const scin=await runScenario('roller2-scin',page);assert.strictEqual(scin.gpuFrames,7);assert.strictEqual(scin.pointerSteps,14);await page.evaluate(()=>globalThis.AMOS_ROLLER2_SCIN_CLEANUP());
+    console.log('Roller2 Scin passed: original pointer selection, coordinate/zone readout, independent stripes and seven GPU frames.');
     const writing=await runScenario('roller2-writing',page);assert.strictEqual(writing.gpuFrames,4);await page.evaluate(()=>globalThis.AMOS_ROLLER2_WRITING_CLEANUP());
     console.log('Roller2 Writing passed: original labels, fifteen text modes, independent pixels and four GPU frames.');
     const lines=await runScenario('roller2-lines',page);assert.strictEqual(lines.gpuFrames,3);await page.evaluate(()=>globalThis.AMOS_ROLLER2_LINE_CLEANUP());

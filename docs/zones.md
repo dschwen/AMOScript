@@ -106,7 +106,8 @@ query immediately, including before View under Auto View Off. The Canvas
 hardware pointer adapter still maps the committed raster. Queries neither
 commit a View nor mutate pixels, palettes, buttons, click history or presentation
 state. Unsupported display modes retain their existing gates; this does not add
-interlace, Hzone/Mouse Screen/Scin, priority scanning or native captures.
+interlace, Hzone/Mouse Screen or native captures. [Scin](scin.md) now provides
+separate live-priority hardware-window scanning.
 
 Standalone tests cover original token bytes, hardware word conversion, window
 versus zone edges, current/hidden screens, hires scrolling and staged geometry.

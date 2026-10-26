@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-scin.html",
+      "title": "Roller II screen under pointer",
+      "description": "Original pointer-selection lines on declared overlapping windows. Seven Canvas stripe-oracle frames, seven GPU comparisons and pointer mapping on both hosts; live coordinate/zone readout, fullscreen and Restart. Editor scrolling/actions excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-scin.html"
+    },
+    {
       "file": "roller2-writing.html",
       "title": "Roller II Writing text modes",
       "description": "Original Writing 0,2 label statement, a pen-only background proof and all fifteen mode/part combinations. Four independent Canvas images and four GPU comparisons; fullscreen and Restart. Prepared blank preview with portable font; editor loop excluded.",

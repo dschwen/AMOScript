@@ -71,4 +71,4 @@ cyclic Add and original floor/stop/Lasttest handlers, stopping before colour eff
 Next extend those actual handler dependencies. Keep
 all reached labels checked and add independent trajectory/tile expectations;
 do not replace source dispatch with a synthetic floor handler. Full compilation
-still stops at Scin (line 342), with nine token encodings unrecognized.
+still stops at Change Mouse (line 439), with eight token encodings unrecognized.

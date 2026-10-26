@@ -113,6 +113,14 @@
   on a declared blank/palette preview, with prepared cell Input# replacing 355.
   Three independent Canvas/GPU frames cover it, not full editor/native capture.
   See `docs/set-line.md`; general graphics draw modes remain gated.
+- Scin scans the live priority list using unsigned hardware words, hidden flags
+  and exclusive right/bottom bounds. Its explicit screen starts traversal rather
+  than filtering a single screen; -1 scans all, no hit returns signed EntNul.
+  Keep lookup separate from selection, committed View, offsets and Mouse Zone.
+  Static clones participate; hires halves hardware width. Original 341–342 and
+  344–346 run on prepared windows/zones with scrolling 343/actions omitted.
+  Seven Canvas/GPU frames and both hardware-input hosts are covered; see
+  `docs/scin.md` for supported selectors and remaining mode/capture gates.
 - Writing 0–4 and parts 0–2 affect the default window text writer, not graphics
   Text/Set Line/Cline. Keep one shared pair per factory with per-screen activation;
   Screen Open resets the pair, Pen/Paper preserve activation. Ignore still advances

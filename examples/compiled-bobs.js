@@ -1987,6 +1987,23 @@
     }
     return 0;
   }
+  function screenIn(...args) {
+    screen(); // Like Zone, the language function first requires a current screen.
+    const from = args.length === 3 ? whole(args[0]) : -1;
+    if (from < -1 || from > 7) throw new Error('Unsupported Scin start screen (expected -1..7)');
+    if (from !== -1) screen(from);
+    const x = whole(args[args.length - 2]) & 65535, y = whole(args[args.length - 1]) & 65535;
+    // The optional screen starts a priority-list scan; it is not a screen filter.
+    const first = from === -1 ? 0 : priorityOrder.indexOf(from);
+    for (let index = Math.max(first, 0); index < priorityOrder.length; index++) {
+      const target = screens.get(priorityOrder[index]);
+      if (!target || target.hidden) continue;
+      const width = target.windowWidth / (target.mode === 0x8000 ? 2 : 1);
+      if (x >= target.hardwareX && x < target.hardwareX + width &&
+          y >= target.hardwareY && y < target.hardwareY + target.windowHeight) return target.id;
+    }
+    return -2147483648;
+  }
   function mouseZone(x, y) {
     const target = screen(), scale = target.mode === 0x8000 ? 2 : 1;
     x = (whole(x) & 65535) - target.hardwareX;
@@ -2104,7 +2121,7 @@
   open(0, 320, 200, 16, 0);
   return {
     screens, screen, open, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
-    reserveZones, resetZone, setZone, zone, mouseZone,
+    reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
