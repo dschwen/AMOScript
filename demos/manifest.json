@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-lines.html",
+      "title": "Roller II patterned selection border",
+      "description": "Original Set Line/Box selection, erase and redraw on a declared blank preview with the original palette. Three independent Canvas frames and three GPU comparisons; clipped edge-cell controls, fullscreen and Restart. Editor panel/Writing/game loop are excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-lines.html"
+    },
+    {
       "file": "roller2-transfers.html",
       "title": "Roller II editor memory transfers",
       "description": "Original editor Fill/Copy statements back up, clear and restore all fifteen real level payloads. Tile/colour bytes change while metadata, allocations and backup remain intact; restore waits at a declared redraw guard. Live in-memory preview without persistence or editor/game loops.",

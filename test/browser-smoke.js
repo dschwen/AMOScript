@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const lines=await runScenario('roller2-lines',page);assert.strictEqual(lines.gpuFrames,3);await page.evaluate(()=>globalThis.AMOS_ROLLER2_LINE_CLEANUP());
+    console.log('Roller2 Set Line passed: original selection/erase/redraw, independent pixels and three GPU frames.');
     await runScenario('roller2-transfers',page);await page.evaluate(()=>globalThis.AMOS_ROLLER2_TRANSFER_CLEANUP());
     console.log('Roller2 transfers passed: original backup/Fill/Copy on fifteen maps, exclusive ranges, unchanged metadata and redraw-guard return.');
     const arrows=await runScenario('roller2-arrows',page);assert.strictEqual(arrows.gpuFrames,10);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());

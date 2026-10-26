@@ -129,3 +129,8 @@ The CPU reference also decodes static scroll/dual-playfield state and explicit
 ILBM fields, with pure weave/line-double composition. Those image/model APIs
 provide bounded AMOS Screen Offset/Screen Display; Dual Playfield/Laced commands and live field
 scheduling remain open. See [the mode contract](display-modes.md).
+
+The separate [Set Line contract](set-line.md) adds a per-screen 16-bit pattern
+and bounded portable phase/raster profile to Draw/Draw To/Box. It preserves the
+existing solid path, shares Autoback/Bob hooks and has original selection-border
+Canvas/GPU fixtures. Writing modes and native phase/clipping capture remain open.

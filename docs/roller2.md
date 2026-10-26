@@ -15,8 +15,8 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 11 after tracker/startup, display/memory commands, Boom and Fill/Copy |
-| Whole-source compiler gate | Unsupported Set Line `$1034` at line 333, byte 16,928; recognition alone still does not prove parser/runtime support for later forms |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 10 after tracker/startup, display/memory commands, Boom, Fill/Copy and Set Line |
+| Whole-source compiler gate | Unsupported Writing `$1418` at line 334, byte 17,094; recognition alone still does not prove parser/runtime support for later forms |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
@@ -27,6 +27,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; icon addressing now runs original ICCOPY before its entry guard. [Demo](../demos/roller2-levels.html) |
 | Original game-entry icon copies | Original 565–570 and ICCOPY 240–246 execute after menu game selection. Bounded live icon table/planar views preserve the inclusive allocation-tail byte and old masks. Independent PNGs and two additional GPU frames. [Contract](icon-memory.md) |
 | Game screens and first level load | Original 571–600 creates hidden/game screens, initializes rainbow/status rows, loads level 1 and refreshes text through Cline. Independent portable-font/rainbow panel pixels match Canvas/GPU. Guard precedes overlapping-window presentation, board drawing and gameplay. [Contract](cline.md) |
+| Patterned selection border | Set Line and original 333/354/356 selection/erase/redraw run in a declared blank/palette preview. Per-screen phase, shared buffer/Bob hooks, three independent Canvas images/three GPU frames. Writing/editor loop excluded. [Contract](set-line.md) |
 | Editor memory transfers | Original Fill/Copy clear/backup/restore statements run on all fifteen prepared original payloads. Complete bytes/metadata/allocations and redraw-guard return are checked; no editor loop, redraw or persistence. [Contract](bulk-memory.md) |
 | Boom and original arrows | Source-derived four-voice finite Boom unlocks original PFEIL/N34 and its actual timeout branch. Three level-2 turns, independent one-pixel/PNG expectations, twenty Canvas frames and ten GPU comparisons. [Boom](boom.md), [arrows](roller2-arrows.md) |
 | Original pause modes | Original PAUSE/IPause now run in a separate progression fixture: paid mouse/Help pause, Space popup, keyboard/mouse/joystick exits, source Timer restoration and host lifecycle. Twenty Canvas images/ten GPU comparisons. [Contract](roller2-pauses.md) |
@@ -102,7 +103,8 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    ZAEHLHOCH/LEVLOAD into real level 2; a further fixture runs original PAUSE/IPause.
    Finite Boom synthesis now unlocks unchanged PFEIL/N34, including its timeout.
    Original Fill/Copy now back up, clear and restore all fifteen prepared payloads
-   before a declared redraw guard. Next implement Set Line and other reached handlers,
+   before a declared redraw guard. Set Line now runs original selection boxes in a
+   separate blank preview. Next implement Writing and other reached handlers,
    Swap and remaining bank/text forms, Get Icon and Scin as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
    against the unchanged source and level data. Wider general forms remain gates.

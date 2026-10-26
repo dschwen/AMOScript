@@ -85,5 +85,5 @@ shared browser test through HTML Preview, and all assets run offline.
 The separate [progression fixture](roller2-progression.md) now implements original
 ZAEHLHOCH and real next-level loading. This colour fixture retains its bonus guard.
 Next extend reached colour/obstacle/exit paths. Full compilation still stops at
-Set Line (line 333), with eleven token encodings unrecognized. Pause, death, highscore/editor
+Writing (line 334), with ten token encodings unrecognized. Pause, death, highscore/editor
 and native capture gates remain open.

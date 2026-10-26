@@ -49,4 +49,5 @@ sliding and arrow changes to complete without adding repeated joystick input.
 
 Other obstacle handlers, game-over/win routines, end tunes, editor/highscores and
 full-game progression remain open. The separate [Fill/Copy contract](bulk-memory.md) now covers original editor
-transfers; Set Line and later language forms are still compiler gates; the full original program is not yet compilable.
+transfers and the [selection preview](set-line.md) covers Set Line. Writing and
+later language forms are still compiler gates; the full original program is not yet compilable.

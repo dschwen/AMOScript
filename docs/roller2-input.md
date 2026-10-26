@@ -71,4 +71,4 @@ cyclic Add and original floor/stop/Lasttest handlers, stopping before colour eff
 Next extend those actual handler dependencies. Keep
 all reached labels checked and add independent trajectory/tile expectations;
 do not replace source dispatch with a synthetic floor handler. Full compilation
-still stops at Set Line (line 333), with eleven token encodings unrecognized.
+still stops at Writing (line 334), with ten token encodings unrecognized.

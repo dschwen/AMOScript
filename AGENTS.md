@@ -105,6 +105,14 @@
   Earlier fixture bounds are in `docs/roller2-input.md`, `docs/roller2-ball.md`,
   `docs/roller2-boards.md` and `docs/screen-priority.md`. Exact native timing and
   full gameplay remain open.
+- Set Line stores a per-screen low-word mask and preserves a separate portable
+  phase counter. Patterned Draw/Draw To/Box use bounded signed-word endpoints,
+  MSB-first steps and opaque Ink background; default solid clipping stays intact.
+  Box follows the original PolyDraw traversal. Rewind phase for Autoback replay
+  and preflight patterned geometry before Bob hooks. Original 333/354/356 run
+  on a declared blank/palette preview, with prepared cell Input# replacing 355.
+  Three independent Canvas/GPU frames cover it, not full editor/native capture.
+  See `docs/set-line.md`; Writing and general draw modes remain gated.
 - Fill/Copy use the shared checked bank-memory resolver and signature lowering.
   Fill repeats big-endian long bits with an exclusive end and allows empty ranges;
   the subset caps at 1 MiB and rejects odd starts for 16-byte blocks. Copy uses

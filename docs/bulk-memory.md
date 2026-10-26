@@ -74,6 +74,7 @@ redraw-guard return, with an offline runnable demo and HTML Preview index link.
 Existing GPU/image tests remain separate; no new rendered editor or native
 capture is claimed.
 
-Whole-source compilation now reaches Set Line `$1034` at original line 333,
-byte 16928. Eleven of the 194 encodings remain unrecognized. That count does not
+The separate [selection preview](set-line.md) now implements Set Line.
+Whole-source compilation reaches Writing `$1418` at original line 334, byte
+17094. Ten of the 194 encodings remain unrecognized. That count does not
 measure complete game/editor compatibility.

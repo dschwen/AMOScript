@@ -9,10 +9,10 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 11 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 10 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
-compilation stops at Set Line (line 333). Original WTIN/FDZ now run in a declared fixture that
+compilation stops at Writing (line 334). Original WTIN/FDZ now run in a declared fixture that
 runs original array/highscore setup, SASINIT and work/icon/sprite bank loads,
 then hands off to the main-title image while omitting remaining setup 281–286.
 The connected menu fixture now runs the original executable startup-to-menu
@@ -36,6 +36,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Set Line | Implemented bounded portable raster profile | Per-screen low-word mask, MSB-first foreground/background pattern and phase through Draw/Draw To/Box; signed-word patterned coordinates, shared Autoback/Bob hooks and preflight. Original blank selection preview matches three independent Canvas/GPU frames. General writing modes and native phase/clip capture remain open. [Contract](set-line.md). |
 | Fill / Copy | Implemented bounded bank-memory transfers | Big-endian Fill with exclusive/empty ranges (up to 1 MiB; odd starts only for byte tails), overlap-safe Copy with exclusive/nonempty ranges, complete preflight, active-Tracker and raw-icon protections. Original editor statements back up/clear/restore all fifteen payloads at a redraw guard; no persistence/editor rendering. [Contract](bulk-memory.md). |
 | Boom | Implemented bounded portable synthesis | Four source pitches, shared noise recurrence, integer envelope and fractional onset render finite float PCM with explicit seed/constant-beam choices. Independent PAL/phase/NTSC vectors and five native Web Audio graphs pass. Exact DMA/beam capture and general live wave/envelope controls remain open. [Contract](boom.md). |
 | Roller II arrows / N34 | Implemented bounded original handlers | Original PFEIL follows three real level-2 turns and N34/HCWEG rebound. Thirty-two one-pixel input positions, twenty independent Canvas images/ten GPU comparisons; original arrow timeout runs Boom before game-over guard. [Contract](roller2-arrows.md). |

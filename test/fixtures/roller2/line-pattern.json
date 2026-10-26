@@ -1,0 +1,38 @@
+{
+  "evidence": "Independent portable Set Line/Box preview, not native graphics capture.\nOriginal 333/354/356, raw AmIc palette, declared blank preview and phase 15.\n",
+  "frames": [
+    {
+      "png": "line-selected.png",
+      "pattern": 52428,
+      "phase": 11,
+      "cell": [
+        2,
+        0
+      ],
+      "indicesSha256": "5bd7d463a6098238a1197069e890322a1c1b87c30d80486861e3e2763d76f79a",
+      "rgbaSha256": "77a1350543dc0498fce7e53a34ab997b455895867afcc656106c57aecfe4e060"
+    },
+    {
+      "png": "line-erased.png",
+      "pattern": 65535,
+      "phase": 7,
+      "cell": [
+        2,
+        0
+      ],
+      "indicesSha256": "4f7988030a00d082fe445e00a2ac5dab502300ff1b80e8592dd569867b60ef74",
+      "rgbaSha256": "846f860302bb0486601324e073c35fb69c413b5c9237cf1152bf151a055d3f90"
+    },
+    {
+      "png": "line-moved.png",
+      "pattern": 52428,
+      "phase": 3,
+      "cell": [
+        4,
+        2
+      ],
+      "indicesSha256": "e4fc24900c05482f643a59ba0ec07558bfac6eea4406533426742f0d50f36b7b",
+      "rgbaSha256": "0f4c91881bf832c394ec9746054959ef546c0fca18490b0be84cfa561d8c56c7"
+    }
+  ]
+}

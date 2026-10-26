@@ -75,8 +75,8 @@ those files; it also checks Stop/disposal silence and invalid-float rejection.
 Those are browser graph comparisons, not Amiga captures.
 
 Boom removes the earlier full Roller II compiler gate at line 161. The next gate
-has since moved through Fill/Copy to unsupported Set Line `$1034` at original
-line 333, byte 16928; eleven of the
+has since moved through Fill/Copy and Set Line to unsupported Writing `$1418`
+at original line 334, byte 17094; ten of the
 194 token encodings remain unrecognized. Recognition counts are not a measure
 of completed gameplay. The [arrow fixture](roller2-arrows.md) now includes
 original PFEIL's Boom timeout rather than omitting that branch.

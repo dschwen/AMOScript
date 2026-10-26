@@ -1419,7 +1419,7 @@
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: false,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
-      inkBackground: 0, inkBorder: 0, x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
+      inkBackground: 0, inkBorder: 0, linePattern: 65535, linePhase: 15, x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
       columns: Math.floor(width / 8), rows: Math.floor(height / 8), cursorVisible: true
     };
     next.pixels.fill(paper);
@@ -1619,7 +1619,7 @@
     const target = screen();
     const synchronise = target.autoback === 2 && drawingHooks;
     if (synchronise) drawingHooks.before(target);
-    const fields = ['x', 'y', 'gx', 'gy', 'ink'];
+    const fields = ['x', 'y', 'gx', 'gy', 'ink', 'linePhase'];
     const before = fields.map(field => target[field]);
     const result = painter(...args);
     if (target.doubleBuffered && target.autoback !== 0) {
@@ -1663,6 +1663,7 @@
     if (background != null) target.inkBackground = colourIndex(background, target);
     if (border != null) target.inkBorder = colourIndex(border, target);
   }
+  function setLine(pattern) { screen().linePattern = whole(pattern) & 65535; }
   function plot(x, y, colour = null) {
     const target = screen();
     x = x == null ? target.gx : whole(x);
@@ -1749,8 +1750,32 @@
     bankPalette(resolveBuffer(from).target.palette.slice(), whole(mask));
   }
 
-  // Clip before stepping, so even very distant coordinates take bounded work.
+  function validatePattern(values) {
+    const target = screen();
+    if (target.linePattern === 65535) return;
+    const points = coordinates(target, Array.from({ length: 4 }, (_, index) => values[index]));
+    if (points.some(value => value < -32768 || value > 32767)) throw new Error('Patterned line coordinates require signed words');
+  }
+  function patternedLine(target, x1, y1, x2, y2, colour, phase) {
+    const dx = Math.abs(x2 - x1), dy = -Math.abs(y2 - y1);
+    const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
+    let error = dx + dy, step = 0;
+    // Preserve off-screen phase before clipping writes; signed-word endpoints
+    // bound the walk to 65,536 pixels. Pattern zero uses the opaque background.
+    while (true) {
+      pixel(target, x1, y1, target.linePattern & (1 << ((phase - step) & 15)) ? colour : target.inkBackground);
+      if (x1 === x2 && y1 === y2) break;
+      const doubled = 2 * error;
+      if (doubled >= dy) { error += dy; x1 += sx; }
+      if (doubled <= dx) { error += dx; y1 += sy; }
+      step++;
+    }
+  }
+  // Clip solid lines before stepping, preserving bounded large-coordinate work.
   function line(target, x1, y1, x2, y2, colour) {
+    const phase = target.linePhase, distance = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+    target.linePhase = (phase - distance) & 15;
+    if (target.linePattern !== 65535) { patternedLine(target, x1, y1, x2, y2, colour, phase); return; }
     const code = (x, y) => (x < 0 ? 1 : x >= target.width ? 2 : 0) | (y < 0 ? 4 : y >= target.height ? 8 : 0);
     let a = code(x1, y1), b = code(x2, y2);
     for (let i = 0; i < 8 && (a || b); i++) {
@@ -1796,6 +1821,11 @@
       for (let y = Math.max(0, top); y <= Math.min(target.height - 1, bottom); y++) {
         if (left < target.width && right >= 0) target.pixels.fill(colour, y * target.width + Math.max(0, left), y * target.width + Math.min(target.width - 1, right) + 1);
       }
+    } else if (target.linePattern !== 65535) {
+      // Original Box uses PolyDraw: down the first side, across the bottom,
+      // back up, then across the top. Keep caller endpoint order and phase.
+      line(target, x1, y1, x1, y2, colour); line(target, x1, y2, x2, y2, colour);
+      line(target, x2, y2, x2, y1, colour); line(target, x2, y1, x1, y1, colour);
     } else {
       line(target, left, top, right, top, colour); line(target, right, top, right, bottom, colour);
       line(target, right, bottom, left, bottom, colour); line(target, left, bottom, left, top, colour);
@@ -2052,11 +2082,12 @@
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, setLine, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
-    plot: (...args) => drawing(plot, args), draw: (...args) => drawing(draw, args),
-    drawTo: (...args) => drawing(drawTo, args), box: (...args) => drawing(box, args),
+    plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
+    drawTo: (...args) => { const target = screen(); validatePattern([target.gx, target.gy, ...args]); return drawing(drawTo, args); },
+    box: (...args) => { validatePattern(args); return drawing(box, args); },
     bar: (...args) => drawing(bar, args), write: (...args) => drawing(write, args), clearLine: () => drawing(clearLine, []),
     text: (...args) => drawing(text, args), centre: (...args) => drawing(centre, args),
     pasteGraphic: (...args) => drawing(paste, args),
