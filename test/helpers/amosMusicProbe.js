@@ -47,7 +47,7 @@ module.exports = async function amosMusicProbe(page) {
       }
       p.stop();
     }
-    const container = document.createElement('section'); container.innerHTML = '<p>Direct AMOS Music player: original end tunes. VM Music commands remain pending.</p><select id="amos-music-song"><option>Over.mus</option><option>Ywon.mus</option></select> <button id="amos-music-play">Play</button> <button id="amos-music-stop">Stop</button> <button id="amos-music-restart">Restart</button> <button id="amos-music-step">Step 6 fields</button> <label>Volume <input id="amos-music-volume" type="range" min="0" max="63" value="56"></label><pre id="amos-music-status"></pre>';
+    const container = document.createElement('section'); container.innerHTML = '<p>Direct AMOS Music player: original end tunes. The separate VM demo runs the original music commands.</p><select id="amos-music-song"><option>Over.mus</option><option>Ywon.mus</option></select> <button id="amos-music-play">Play</button> <button id="amos-music-stop">Stop</button> <button id="amos-music-restart">Restart</button> <button id="amos-music-step">Step 6 fields</button> <label>Volume <input id="amos-music-volume" type="range" min="0" max="63" value="56"></label><pre id="amos-music-status"></pre>';
     document.body.appendChild(container);
     const element = id => document.getElementById(`amos-music-${id}`), sound = createSession(createHost);
     let current = null, interval = null, generation = 0;

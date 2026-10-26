@@ -5,9 +5,10 @@
 existing synchronous audio-host protocol. The direct-player
 [demo](../demos/roller2-amos-music.html) auditions Roller II's original `Over.mus`
 and `Ywon.mus`. This is actual sample playback, separate from MOD tracker music.
-**VM Music, Mvolume and Music Off remain unsupported.** Whole-source compilation
-still stops at slot-1 Music `$0058`, original line 992, byte 54,202; three source
-encodings remain unrecognized.
+The VM now implements Music `$0058`, Mvolume `$0196` and Music Off `$002c`.
+All 194 Roller II encodings are recognized; the complete unchanged 1,199-line
+program compiles to 2,528 instructions in a standalone factory. Full game
+execution and integrated end-state graphics are separate acceptance gates.
 
 The implementation follows `src/ext/music.cpp` and `src/ext/music_play.cpp` in
 the AMOS-Professional-Official source checkout at commit
@@ -76,9 +77,48 @@ resampler boundary interpolation. These graph comparisons are browser evidence,
 not Paula/analog parity. Interactive gallery tests cover Play, Stop, song changes
 and owned-context closure.
 
-Next connect checked Music banks to VM commands and driver-owned VBL wakes,
-shared sample voices, bank retirement/mutation guards, Stop/Resume and terminal
-cleanup. Only then integrate original end-state source routines. Multiple stacked
-songs, other effects, live mutable banks, exact DMA/register timing, native pause
-phase and hardware audio captures remain open. No full game or end-state run is
-claimed by this direct-player fixture.
+## VM command and lifecycle integration
+
+The [VM demo](../demos/roller2-music-vm.html) runs original load/play lines
+990/992 or 1012/1014, a declared Wait Key audition boundary, original game-over
+volume fade/Off/Erase line 1006 and a final Wait Key guard. Reusing 1006 for the
+win tune is an explicit harness choice. FLOAD, end-state graphics, win logic,
+highscores and menu return are excluded. Both demos have HTML Preview links in
+the gallery.
+
+Music requires a chip `Musi`-named data bank at number 3 and a checked song
+number 1–65,535. Higher wrapped native selectors reject. Mvolume accepts the
+shared AMOS integer conversion followed by a 0–63 check; the master setting
+persists even with no active song. Music Off explicitly silences all four shared
+channels, including when no Music song is active. Terminal cleanup only cancels
+an active Music controller before the runtime's general audio silence.
+
+A separate driver-owned wake advances fields during waits and cooperative
+execution, independently of requestAnimationFrame. The driver advances due music
+before an instruction; late/cancelled callbacks use ownership tokens. Catch-up
+beyond 250 fields fails with the originating Music source location. Host Stop
+freezes the position, cancels the wake and silences held samples; Resume rebases
+to the next field without replaying elapsed notes or restoring held sample phase.
+End, Edit and failure cancel playback and wakes before terminal notification.
+
+Playback shares the existing four-voice audio controller. Sam loop settings
+remain recorded but cannot change Music's reserved channels. This bounded profile
+rejects stacked Music calls, Music/Tracker overlap and Sam Play/Stop or Boom
+voice stealing during Music, before audio changes. Music Off followed by Music
+starts fresh. Filter changes remain live. Bank replacement, erasure, shrink and
+swaps involving bank 3 stop playback; checked Poke/Bload/Fill/Copy writes into an
+active bank reject before mutation. These portable restrictions do not claim
+native live-bank mutation or native song-stack behavior.
+
+Eight VM test groups verify full-source standalone compilation, all four complete
+first-wrap traces, original volume fade/Off/Erase, typed master volume, bank
+lifecycle/write guards, source-context failures, terminal cleanup, stale callbacks
+and Stop/Resume. The browser repeats those full traces and fade exits, then
+exposes gesture-activated original-statement playback. Interactive gallery checks
+exercise Pause/Resume, real-time volume fade, song replacement and context closure.
+
+Next integrate the original end-state screens and returns into the connected game,
+and exercise the complete compiled program through real input-only replays.
+Multiple stacked songs, other effects, live mutable banks, exact DMA/register
+timing, native pause phase and hardware audio captures remain open. No full-game
+or complete end-state run is claimed by the bounded music fixture.

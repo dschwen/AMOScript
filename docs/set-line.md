@@ -82,6 +82,6 @@ link and embeds all assets for offline use. These are fixture/CPU/GPU comparison
 not an original editor screen or native Amiga execution.
 
 A separate [Writing fixture](writing.md) now runs original 334 labels.
-Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
-byte 54202. Three of the 194 token encodings remain unrecognized; recognition alone
-does not complete game/editor behavior.
+The complete Roller II source now compiles with all 194 encodings recognized.
+Bounded [AMOS Music VM playback](amos-music.md) is implemented; full gameplay,
+end-state screens, integrated editor behavior and native captures remain open.

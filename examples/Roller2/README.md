@@ -21,8 +21,10 @@ are not needed for the source/data fixture and have not been copied. The supplie
 See [the milestone](../../docs/roller2.md) and
 [the source-load/MOD inspector](../../demos/roller2.html). The
 [music demo](../../demos/tracker.html) now plays the main MOD through bounded
-compiled original statements. Full-game compilation and the separate AMOS Music
-bank end tunes remain open.
+compiled original statements. The complete original game source now compiles. The separate
+[AMOS Music VM demo](../../demos/roller2-music-vm.html) runs both end tunes and
+the original volume fade/Off/Erase; full-game and end-state screen integration
+remain open.
 The [startup demo](../../demos/roller2-startup.html) runs the unchanged first 17
 physical lines with a synthetic Wait Key guard before the first image request.
 The [first-image demo](../../demos/roller2-title.html) also executes original

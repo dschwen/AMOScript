@@ -204,9 +204,11 @@
   Its end tunes are AMOS Music banks, not MODs. The owned Music-bank decoder and
   direct field player now cover both tunes with independent full first-wrap
   PAL/NTSC traces and 25 native Web Audio comparisons. Music/Mvolume/Music Off
-  VM commands, driver wakes and bank/shared-voice lifecycle integration remain
-  open; see `docs/amos-music.md`. Never count a pattern inspector
-  or loop flag as tracker playback.
+  now run in the VM with separate driver wakes, checked bank retirement/write
+  guards, shared reserved voices, master fade and Stop/Resume. Stacked songs and
+  Music/Tracker/sample voice stealing reject. The complete unchanged Roller II
+  source compiles; end-state graphics/full gameplay remain open. See
+  `docs/amos-music.md`. Never count a pattern inspector or loop flag as tracker playback.
   `lib/amos/tracker.js` provides direct field-stepped C/A/E/F/D playback with
   owned PCM preprocessing and raw restart semantics. VM Track Play also mutates
   the bank's sample-start longs/finetunes. Host Stop freezes music and silences

@@ -57,6 +57,6 @@ and four actual GPU frames with CPU presentation disabled during GPU rendering.
 Live controls provide text stages, matrix, fullscreen and Restart. Every browser
 scenario has a self-contained demo and HTML Preview link in the gallery.
 
-Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
-byte 54202. Three of 194 token encodings remain unrecognized; full editor/gameplay
-and native reference capture remain separate acceptance gates.
+The complete Roller II source now compiles with all 194 encodings recognized.
+Bounded [AMOS Music VM playback](amos-music.md) is implemented; full gameplay,
+end-state screens, integrated editor behavior and native captures remain open.

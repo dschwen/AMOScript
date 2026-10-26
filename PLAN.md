@@ -6,8 +6,12 @@ Assessment updated: 2026-10-26.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 3 remain unrecognized (43 at
-initial assessment), and whole compilation now stops at Music on line 992.
+The main source has 1,199 lines and 194 encodings, all now recognized (43 were
+unrecognized initially). The complete unchanged source now compiles to a
+standalone 2,528-instruction factory. Full-game execution remains open. A bounded
+headless probe using case-mapped memory assets and input only reaches the original
+menu loop at line 306. Next validate the complete program in the browser and
+extend input-only gameplay/end-state replays. This probe is not full-game acceptance.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -111,11 +115,12 @@ system host. Original ROUNDTURN rotations and its invalid-direction Edit fallbac
 run in a declared PHALT/BEWEG fixture; twelve Canvas frames/four GPU comparisons
 pass. See docs/edit.md. The owned AMOS Music decoder/direct field player now
 covers both end tunes, including all 25 instruments and complete first-loop PAL/NTSC traces. See
-docs/amos-music.md. Next connect Music/Mvolume/Music Off to the VM and the
-remaining gameplay/end-state integrations; see docs/roller2-arrows.md. Sprite-bank raw
+docs/amos-music.md. Music/Mvolume/Music Off now execute with driver-owned VBL
+wakes, checked bank/shared-voice lifecycles and original volume-fade/erase. Next
+connect the remaining gameplay/end-state integrations; see docs/roller2-arrows.md. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
-Game-over/win music uses AMOS Music banks; its direct decoder/player now needs
-VM integration. Preserve the existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
+Game-over/win music uses AMOS Music banks; bounded original music statements
+now run in the VM, separately from end-state screens. Preserve the existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
 
 ## Retained milestone: Wonderland in the browser
@@ -224,7 +229,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **708 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **716 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

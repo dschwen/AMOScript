@@ -56,6 +56,6 @@ Restart/container retention are checked in the generated offline demo. The galle
 includes an HTML Preview link. This establishes fixture and CPU/GPU parity;
 external Amiga reference execution remains outstanding.
 
-Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
-byte 54202. Three of 194 token encodings remain unrecognized. Full gameplay,
-end-state AMOS Music and integrated editor behavior remain acceptance work.
+The complete Roller II source now compiles with all 194 encodings recognized.
+Bounded [AMOS Music VM playback](amos-music.md) is implemented; full gameplay,
+end-state screens, integrated editor behavior and native captures remain open.

@@ -58,7 +58,7 @@ and disposal silence/cancel them, as with existing held sample effects. Resume
 does not replay a queued Boom. The retained script-based driver can still run without loading the optional
 Boom renderer; requesting Boom then reports the missing script explicitly. Generated
 modules always embed it and need no imports. General Bell/Shoot/Play/Wave/Envelope commands and
-AMOS Music banks remain unsupported.
+The separate [AMOS Music player](amos-music.md) now supports the end tunes.
 
 ## Evidence
 
@@ -74,9 +74,7 @@ and combined stereo output against independently built control graphs using
 those files; it also checks Stop/disposal silence and invalid-float rejection.
 Those are browser graph comparisons, not Amiga captures.
 
-Boom removes the earlier full Roller II compiler gate at line 161. The next gate
-has since moved through Fill/Copy and Set Line to unsupported Writing `$1418`
-at original line 334, byte 17094; ten of the
-194 token encodings remain unrecognized. Recognition counts are not a measure
-of completed gameplay. The [arrow fixture](roller2-arrows.md) now includes
-original PFEIL's Boom timeout rather than omitting that branch.
+Boom removed the earlier full Roller II compiler gate at line 161. The complete
+source now compiles with all 194 encodings recognized. That does not establish
+full gameplay. The [arrow fixture](roller2-arrows.md) includes original PFEIL's
+Boom timeout rather than omitting that branch.

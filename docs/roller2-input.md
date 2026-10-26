@@ -70,5 +70,4 @@ A separate [movement fixture](roller2-movement.md) now runs `Goto SAS$(HD)`,
 cyclic Add and original floor/stop/Lasttest handlers, stopping before colour effects.
 Next extend those actual handler dependencies. Keep
 all reached labels checked and add independent trajectory/tile expectations;
-do not replace source dispatch with a synthetic floor handler. Full compilation
-still stops at Music (line 992), with three token encodings unrecognized.
+do not replace source dispatch with a synthetic floor handler. Full-source compilation now passes; this input fixture remains bounded.

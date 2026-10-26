@@ -270,6 +270,23 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#roller2-startup-reset');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'0');
         await page.evaluate(()=>globalThis.AMOS_ROLLER2_STARTUP_CLEANUP());
       }
+      if (scenario.id === 'roller2-music-vm') {
+        await page.click('#music-vm-play');
+        await page.waitForFunction(() => Number(document.getElementById('music-vm-status').dataset.plays) > 0);
+        await page.click('#music-vm-stop');
+        await page.waitForFunction(() => document.getElementById('music-vm-status').dataset.phase === 'paused' && document.getElementById('music-vm-status').dataset.voices === '0');
+        const field = await page.locator('#music-vm-status').getAttribute('data-field');
+        await page.waitForTimeout(80); assert.strictEqual(await page.locator('#music-vm-status').getAttribute('data-field'), field);
+        await page.click('#music-vm-resume');
+        await page.waitForFunction(() => document.getElementById('music-vm-status').dataset.phase === 'playing');
+        await page.click('#music-vm-fade');
+        await page.waitForFunction(() => document.getElementById('music-vm-status').dataset.phase === 'finished');
+        assert.strictEqual(await page.locator('#music-vm-status').getAttribute('data-voices'), '0');
+        await page.selectOption('#music-vm-song', { label: 'Ywon.mus' }); await page.click('#music-vm-play');
+        await page.waitForFunction(() => document.getElementById('music-vm-status').dataset.audio === 'on' && Number(document.getElementById('music-vm-status').dataset.field) > 1);
+        const closed = await page.evaluate(() => AMOS_MUSIC_VM_CLEANUP());
+        assert.strictEqual(closed.contextState, 'closed'); assert.strictEqual(closed.state, 'disposed');
+      }
       if (scenario.id === 'roller2-amos-music') {
         await page.click('#amos-music-step');
         await page.waitForFunction(() => document.getElementById('amos-music-status').dataset.field === '6');

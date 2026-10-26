@@ -63,7 +63,6 @@ CPU presentation. The live page covers the terminal request, guarded rotation,
 fullscreen and fresh Restart. Its HTML Preview link is in the gallery. These
 are source/fixture and CPU/GPU checks, not an Amiga capture or an embedded editor.
 
-Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
-byte 54202. Three of 194 encodings remain unrecognized: Music, Mvolume and
-Music Off. Roller II's end tunes use AMOS Music banks, requiring their decoder/
-player and lifecycle integration; the existing MOD tracker does not provide it.
+The complete Roller II source now compiles with all 194 encodings recognized.
+Bounded [AMOS Music VM playback](amos-music.md) is implemented; full gameplay,
+end-state screens, integrated editor behavior and native captures remain open.
