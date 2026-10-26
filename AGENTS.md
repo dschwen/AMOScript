@@ -271,7 +271,11 @@
   use priority slices even without an explicit Screen To Front. Original DIW
   geometry survives late background resumes; direct sprites require their changed
   palette registers before setup-row capture. The original Roller II editor entry,
-  tile placement and panel selection have four Canvas/GPU checks. Wider actions
+  tile placement, panel selection and level-test/return have ten Canvas/GPU checks.
+  Committed windows clip at nonlaced PAL/NTSC end 310/260, preserving parked
+  geometry and checked bitmap ranges. Share the clipped crop with pointer input;
+  late first slices enable DMA at their real start, and setup-only slices fetch
+  no pixels. All-off-field windows use a zero-bitplane backdrop snapshot. Wider actions
   and persistence remain open. View commits
   geometry and source offsets; Canvas renders the same physical copper snapshot.
   Full bitmap storage remains authoritative. Setup can span real blank rows,

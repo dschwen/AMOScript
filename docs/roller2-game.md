@@ -56,11 +56,15 @@ assets against 48 independent animation hashes and five GPU comparisons.
 
 A separate input-only editor replay follows the original title-menu click,
 opening fade and editor loop, then places tile 3 at cell (2,2) and moves the pointer
-onto the foreground panel. Four additional Canvas frames and four GPU comparisons
-cover the overlapping windows, right-edge sprites and resumed bottom background.
+onto the foreground panel. It then presses T, follows the panel below the field
+into the edited level, exits with Escape, acknowledges the source key prompt and
+returns to the editor with its map restored. Ten additional Canvas frames and ten
+GPU comparisons cover the overlapping windows, field-edge clipping, late DMA,
+right-edge sprites and returned panel.
 See [screen priority](screen-priority.md) for the source-derived slice rules and
 remaining bounds. The live runner reports the editor phase and accepts pointer
-input; real-time gallery checks also enter it from the title.
+input; real-time gallery checks also enter it from the title, test the level and
+return after leaving fullscreen.
 
 Live gallery checks also cover real-time game entry and timeout, fullscreen,
 sound, Stop/Resume, score scroll/menu return, fresh-game selection, Restart,

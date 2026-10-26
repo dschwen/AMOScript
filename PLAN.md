@@ -18,8 +18,10 @@ at (17,11) through original input. See examples/Roller2/current/movement-edge-fi
 
 Ordinary overlapping windows now use the existing native-style priority slices.
 The original Roller II editor opens from the title, renders both windows/right-edge
-sprites, places a tile and selects its foreground panel. Four additional Canvas
-frames and four GPU comparisons cover this entry path. DIW windows retain the owner’s full
+sprites, places a tile and selects its foreground panel. The original level test
+now animates that panel below the field, enters gameplay and returns through its
+key prompt/bounce with the map restored. Ten additional Canvas frames and ten GPU
+comparisons cover these paths. DIW windows retain the owner’s full
 geometry while DMA cuts the slices, including background restoration after row 255.
 Editor persistence/wider actions and native captures remain open; see
 [screen priority](docs/screen-priority.md).
@@ -254,7 +256,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **730 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **732 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

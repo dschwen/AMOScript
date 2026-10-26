@@ -36,17 +36,17 @@ test('Roller2 current assets: byte-exact supplied refresh completes the original
   assert.deepStrictEqual(result, { frames: 15, score: 301, level: 3, returnedToMenu: true, freshGame: true, writes: 0 }); assert.strictEqual(clock.pending(), 0);
 });
 
-test('Roller2 editor: original menu opens overlapping windows, places a tile and selects the foreground panel', () => {
+test('Roller2 editor: original menu opens overlapping windows, places a tile, tests the edited level and returns through the animated panel', () => {
   const current = require('./helpers/roller2CurrentAssets')(), clock = createFakeTimers(4), files = makeFiles(current);
   const { create } = compile(Buffer.from(current['rii:Roller II.AMOS'], 'latin1'));
   let frames = 0;
   const result = require('./helpers/roller2EditorReplay')(create, clock, files, p => ({
-    key: () => p.sendKey('a'), mouse: (...args) => p.setMouse(...args), dispose() {}
+    key: (name = 'a') => p.sendKey(name === 'Escape' ? '\x1b' : name, name === 'Escape' ? 69 : 0), mouse: (...args) => p.setMouse(...args), dispose() {}
   }), (name, p) => {
-    const frame = p.display.canvasFrame(); assert.deepStrictEqual([frame.width, frame.height], [320, 256]);
+    const frame = p.display.canvasFrame(); assert.strictEqual(frame.width, 320); assert.ok(frame.height >= 256 && frame.height <= 268);
     if (name !== 'Editor opening fade') assert.ok(frame.rgba.some((value, i) => i % 4 !== 3 && value > 0), name);
     assert.strictEqual(p.display.snapshotDisplay().frame.overflowEvents.length, 0); frames++;
   });
-  assert.deepStrictEqual(result, { frames: 4, placedTile: 3, selectedScreen: 1, writes: 0 });
-  assert.strictEqual(frames, 4); assert.strictEqual(clock.pending(), 0);
+  assert.deepStrictEqual(result, { frames: 10, placedTile: 3, selectedScreen: 1, testedLevel: true, returnedToEditor: true, writes: 0 });
+  assert.strictEqual(frames, 10); assert.strictEqual(clock.pending(), 0);
 });

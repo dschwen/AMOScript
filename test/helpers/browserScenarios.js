@@ -285,10 +285,10 @@ const scenarios = [
   { id: 'tunnel', title: 'Tunnel animation', description: 'Original Tunneltest program with its supplied icon bank and IFF background. Watch the animation, step frames, use fullscreen or choose an IFF background. Independent checks cover 48 frames and all 24 wheel images.', run: require('./tunnelProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { frames: 48, pngs: 5, gpuFrames: 5, icons: 27, originalAssets: true });
   } },
-  { id: 'roller2-game', title: 'Play the complete original Roller II program', description: 'Source-corrected game with current supplied assets: original intro/menu, level-1 colours and warp into level 3, bottom-right time bonus and safe edge bump, host Stop/Timer expiry, game-over screen/music, restored score image, menu return and a fresh game. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Editor entry, overlapping windows and tile placement are also checked. Remaining levels, editor file actions and win paths are not yet accepted.', run: require('./roller2GameProbe'), check(result, assert) {
+  { id: 'roller2-game', title: 'Play the complete original Roller II program', description: 'Source-corrected game with current supplied assets: original intro/menu, level-1 colours and warp into level 3, bottom-right time bonus and safe edge bump, host Stop/Timer expiry, game-over screen/music, restored score image, menu return and a fresh game. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Editor entry, overlapping windows, tile placement and level testing/return with the animated panel are also checked. Remaining levels, editor file actions and win paths are not yet accepted.', run: require('./roller2GameProbe'), check(result, assert) {
     assert.strictEqual(result.frames, 30); assert.strictEqual(result.gpuFrames, 15); assert.strictEqual(result.independent, 6);
-    assert.strictEqual(result.editorFrames, 4); assert.strictEqual(result.editorGpuFrames, 4);
-    assert.deepStrictEqual(result.editor, { frames: 4, placedTile: 3, selectedScreen: 1, writes: 0 });
+    assert.strictEqual(result.editorFrames, 10); assert.strictEqual(result.editorGpuFrames, 10);
+    assert.deepStrictEqual(result.editor, { frames: 10, placedTile: 3, selectedScreen: 1, testedLevel: true, returnedToEditor: true, writes: 0 });
     assert.strictEqual(result.emptyFrames, 0); assert.strictEqual(result.emptyGpuFrames, 0); assert.strictEqual(result.restoredImage, 'iffp/roller hi');
     assert.deepStrictEqual(result.replays, Array.from({ length: 2 }, () => ({ frames: 15, score: 301, level: 3, returnedToMenu: true, freshGame: true, writes: 0 })));
   } },

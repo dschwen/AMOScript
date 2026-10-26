@@ -92,9 +92,12 @@ structured sprite rows. Source code and asset bytes are unchanged by this displa
 extension.
 
 The shared `roller2EditorReplay.js` uses only input: title selection, opening fade,
-editor entry, placement of tile 3 at cell (2,2), and a pointer move onto the panel.
-Four Canvas and four real GPU frames run in the full-game gallery demo, including
+editor entry, placement of tile 3 at cell (2,2), panel selection, testing the
+edited level and returning through the original key prompt/panel animation.
+Ten Canvas and ten real GPU frames run in the full-game gallery demo, including
 the fade and the two windows. Synthetic row/colour oracles separately verify the
 cuts, source offsets, resumed pointers, sprites, staged visibility and priority.
 These are source-derived expectations and CPU/GPU parity, not Amiga captures.
-Saving/loading, wider editor actions and returning to the game remain unaccepted.
+Saving/loading and wider editor actions remain unaccepted. See
+[field-edge clipping](screen-windows.md#field-edge-clipping-and-parked-panels) for
+the off-field panel animation and late DMA start rules.

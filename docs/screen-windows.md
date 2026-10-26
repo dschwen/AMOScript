@@ -17,7 +17,9 @@ the stored viewport width is doubled for hires. Vertical placement and height
 use physical rows in the supported nonlaced subset.
 
 The current bounded implementation accepts aligned x=128, widths 128–320 lowres
-units, y=0–255 and windows ending on rows 128–312 (262 for NTSC). Other placement,
+units and nonnegative vertical positions whose internal signed-word coordinates
+do not wrap (Y and Y+height at most 28,671, with the existing minimum end 128).
+Committed windows clip to the native nonlaced end row 310 (260 for NTSC). Other placement,
 clipping and scheduling forms reject explicitly. Equal-width lowres overlaps use
 the [priority slice path](screen-priority.md), including ordinary window opens. A window and its offsets
 must fit within its physical bitmap at presentation; wrapped/out-of-bitmap DMA is
@@ -119,3 +121,37 @@ Screen To Front and ordinary overlapping windows use bounded equal-width lowres 
 with shared background colour and real DMA-disabled setup rows. Roller II’s
 connected board/ready prompt and full-source editor entry now render; wider overlays and native timing
 remain open. See [priority and ready-prompt contract](screen-priority.md).
+
+## Field-edge clipping and parked panels
+
+Native `screens.cpp::view` records the requested Y without an eight-bit limit.
+`copperlist.cpp::take_changes`, `cut` and `slices` rebuild visible slices; the
+nonlaced exclusive end is `EcYMax-1-EcYBase`, 310 in PAL and 260 in NTSC.
+Source reviewed at `efddf2c9a09bf61a45b7b096a9be84630853c2b1`. Wrapped signed-word
+coordinates, negative placement and top-border timing remain outside this subset.
+
+The runtime keeps full window Y/height, bitmap ownership and offsets when a window
+crosses that end. Only committed physical views are clipped or omitted. Bitmap
+bounds are still checked even for a fully off-field window. Pointer mapping uses
+the same clipped union as scanout; Auto View Off keeps the previous crop until View.
+If every committed window is off-field, a full-field backdrop is interpreted from
+zero bitplanes using the foremost committed window's palette; structured sprites
+and rainbows still use the shared snapshot. No CPU bitmap compositor is introduced.
+Explicit requested-screen snapshot exports retain their existing geometry gates.
+
+A first visible window beginning after row 255 starts with bitplane DMA disabled;
+the copper enables it at the actual start before fetch. This prevents the eight-bit
+DIW start from advancing source pointers through hidden rows. Later late slices use
+the existing DMA-disabled setup row. A one-row slice consumed entirely by setup
+keeps its palette/control setup but never enables bitplane DMA, so sprites still
+receive the restored palette. The captured geometry retains that blank row.
+
+Original Roller II DROPSCREEN (169–175) moves the panel from 240 through 315 before
+its level-test loop. Escape reaches the original key prompt; HOPSCREEN (176–183)
+then animates the panel back to 240. The full-source replay verifies the edited
+map backup/restoration and foreground pointer selection after return, without
+source changes, VM/IP/bank edits or relaxed memory checks. Ten additional editor
+Canvas frames and ten GPU comparisons are part of the live game demo. Synthetic
+PAL/NTSC row oracles separately cover late first windows, all-off-field backdrops,
+setup-only rows, buffer ownership, View and pointer bounds. These are portable and
+source-derived checks, not external Amiga captures.

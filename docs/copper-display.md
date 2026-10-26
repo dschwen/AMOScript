@@ -37,7 +37,9 @@ and `pixelAspect`. `displayOptions.snapshotStandard` defaults to PAL.
 [Screen Display and Screen Offset](screen-windows.md) now integrate bounded
 nonoverlapping windows and pointer/fine-scroll offsets. Equal-width lowres overlaps
 use DMA-disabled priority slices, including late background resumes and bounded
-direct-sprite palette transitions. Large palette/setup
+direct-sprite palette transitions. Field-edge clipping preserves parked window
+metadata, with an explicitly gated late DMA start and zero-bitplane backdrop when
+all windows are off-field; see [screen windows](screen-windows.md). Large palette/setup
 changes can use actual blank rows, with every chunk complete before capture on
 blank rows and before fetch on visible rows.
 General placement/priority and user-copper commands remain open.

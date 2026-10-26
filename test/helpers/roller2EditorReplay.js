@@ -21,8 +21,21 @@ function replayRoller2Editor(create, clock, files, makeInput, capture = () => {}
     input.mouse(140, 250, 0); clock.tick(120);
     check(v.int_sn === 1 && p.display.current === 1, 'Original editor did not select its foreground panel');
     record('Original foreground panel pointer');
-    check(!p.state.halted && files.writes.length === 0, 'Editor entry halted or wrote a file');
-    return { frames, placedTile: 3, selectedScreen: 1, writes: 0 };
+    const edited = p.banks.get(10).data.slice();
+    input.key('t'); clock.tick(200); record('Editor panel dropping');
+    clock.tick(200); check(p.display.screen(1).hardwareY > 255, 'Panel did not cross raster 255'); record('Editor panel clipped below raster 255');
+    clock.tick(200);
+    check(v.int_edtest === -1 && p.display.screen(1).hardwareY > 310 && p.state.location.line >= 619 && p.state.location.line <= 639, 'Edited level did not reach its test input loop');
+    check(p.banks.has(23), 'Original editor map backup is missing'); record('Edited level running with parked panel');
+    input.key('Escape'); clock.tick(1000);
+    check(p.state.location.line === 164, 'Editor test did not reach its original return prompt'); record('Editor test return prompt');
+    input.key('a'); clock.tick(200); record('Editor panel returning');
+    clock.tick(3800); input.mouse(140, 250, 0); clock.tick(120);
+    check(p.display.screen(1).hardwareY === 240 && v.int_sn === 1 && p.display.current === 1, 'Editor panel/input did not return');
+    check(p.banks.get(10).data.every((value, index) => value === edited[index]), 'Editor test did not restore its saved map');
+    record('Editor restored after level test');
+    check(!p.state.halted && files.writes.length === 0, 'Editor test halted or wrote a file');
+    return { frames, placedTile: 3, selectedScreen: 1, testedLevel: true, returnedToEditor: true, writes: 0 };
   } finally { input.dispose(); p.stop(); check(clock.pending() === 0, 'Editor cleanup retained a wake'); }
 }
 module.exports = replayRoller2Editor;

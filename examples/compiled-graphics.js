@@ -658,8 +658,11 @@
         pointers: view.pointers.map(pointer => pointer + offsetY * view.rowBytes + (offsetX >> 4) * 2),
         scroll: delay | (delay << 4), fetchAdvance: view.hires ? 4 : 8 };
     });
+    const originalViews = views;
+    const bounds = windows ? display.windowGeometry(windows, geometry.standard) : null;
+    if (bounds) views = views.filter(view => view.y < bounds.end).map(view => ({ ...view, height: Math.min(view.height, bounds.end - view.y) }));
     const overlap = views.some((view, index) => views.slice(index + 1).some(other => view.y < other.y + other.height && other.y < view.y + view.height));
-    if (windows && (windows.some(window => window.priority) || overlap)) {
+    if (windows && (windows.some(window => window.priority) || overlap || views.some(view => view.y > 255))) {
       // Native MkD/MkA chooses one screen for each horizontal slice. A switch
       // starts with DMA disabled on a setup row, never a software overlay.
       if (views.some(view => view.hires || view.ham || view.scroll || view.x !== 128 || view.width !== views[0].width || view.palette[0] !== views[0].palette[0])) {
@@ -682,18 +685,21 @@
         const resume = previous && previous.end === slice.y && slice.owner.y < slice.y;
         const y = slice.y + (resume ? 1 : 0);
         const end = slice.end - (next && next.y === slice.end && next.owner.y === next.y ? 1 : 0);
-        if (end <= y) throw new Error('Screen priority slice is too short for setup');
-        return { ...slice.owner, y, windowY: slice.owner.y, windowEnd: slice.owner.y + slice.owner.height, height: end - y,
+        if (end < y) throw new Error('Screen priority slice is too short for setup');
+        return { ...slice.owner, y, windowY: Math.min(slice.owner.y, 255), windowEnd: slice.owner.y + slice.owner.height, height: end - y, setupOnly: end === y,
           pointers: slice.owner.pointers.map(pointer => pointer + (y - slice.owner.y) * slice.owner.rowBytes),
           blankSetup: index > 0 };
       });
     }
-    const top = Math.min(...views.map(view => view.y));
+    views.sort((a, b) => a.y - b.y);
+    views = views.map((view, index) => view.y > 255 ? { ...view, windowY: 255, blankSetup: index > 0 } : view);
+    const top = bounds ? bounds.top : Math.min(...views.map(view => view.y));
     const compiled = copperBuilder(views, { origin: { x: 128, y: top },
-      outputWidth: Math.max(...views.map(view => view.width * (view.hires ? 1 : 2))),
-      lines: Math.max(...views.map(view => view.y + view.height)) - top,
+      outputWidth: bounds ? (bounds.right - bounds.left) * 2 : Math.max(...views.map(view => view.width * (view.hires ? 1 : 2))),
+      lines: bounds ? bounds.bottom - top : Math.max(...views.map(view => view.y + view.height)) - top,
+      backgroundPalette: originalViews[0].palette,
       standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
-      paletteRows: display.paletteRows ? display.paletteRows(views) : [],
+      paletteRows: display.paletteRows ? display.paletteRows(views.length ? views : originalViews) : [],
       pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
     if (copperAllocation) { memory.free(copperAllocation); copperAllocation = null; }
     copperAllocation = memory.allocate(compiled.bytes.length);
@@ -936,10 +942,18 @@
   return function build(screens, options = {}) {
     const fail = message => { throw new Error(`Copper builder: ${message}`); };
     if (options.standard && !['PAL', 'NTSC'].includes(options.standard)) fail('unsupported video standard');
-    if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
+    if (!Array.isArray(screens) || screens.length > 8 || (!screens.length && !options.backgroundPalette)) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
     const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
     const dmaSetupRows = new Set(), spriteSafeSetupRows = [];
+    if (options.backgroundPalette) {
+      if (options.backgroundPalette.length > 32) fail('invalid background palette');
+      for (let index = 0; index < 32; index++) {
+        const colour = options.backgroundPalette[index] == null ? 0 : options.backgroundPalette[index];
+        if (!Number.isInteger(colour) || colour < 0 || colour > 0xfff) fail('invalid background palette');
+        initialRegisters[(R.COLOR00 + index * 2) / 2] = colour;
+      }
+    }
     const paletteRows = options.paletteRows || [], paletteByLine = new Map();
     if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
     for (const row of paletteRows) {
@@ -969,7 +983,7 @@
       const endX = x + sourceWidth, endY = y + height;
       const windowY = view.windowY == null ? y : view.windowY;
       const windowEnd = view.windowEnd == null ? endY : view.windowEnd;
-      if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 1 ||
+      if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 0 || (height === 0 && view.setupOnly !== true) ||
           !Number.isInteger(depth) || depth < 1 || depth > (hires ? 4 : 6) ||
           x !== 128 || !Number.isInteger(y) || y < 0 || y >= (options.standard === 'NTSC' ? 262 : 312) ||
           !Number.isInteger(windowY) || windowY < 0 || windowY > 255 || windowY > y || endX < 256 || endX > 511 ||
@@ -1010,8 +1024,12 @@
         if (!Number.isInteger(colour) || colour < 0 || colour > 0xfff) fail('invalid palette');
         setup.set(R.COLOR00 + index * 2, colour);
       }
-      if (!previous) for (const [reg, value] of setup) initialRegisters[reg / 2] = value;
-      else {
+      if (!previous) {
+        for (const [reg, value] of setup) initialRegisters[reg / 2] = value;
+        // A late first window must not fetch from its 8-bit DIW start.
+        // Enable DMA at the actual slice start, before the first fetch.
+        if (y > 255 && !view.setupOnly) changesByLine.set(y, new Map([[R.DMACON, 0x8300]]));
+      } else {
         const rowPalette = paletteByLine.get(y) || new Map();
         const changes = Array.from(setup).filter(([reg, value]) => !rowPalette.has(reg) &&
           ((reg >= R.BPL1PTH && reg < R.BPL1PTH + 32) || previous.setup.get(reg) !== value));
@@ -1029,7 +1047,7 @@
           if (2 + (1 + early.length) * 4 < captureStart &&
               !Array.from(paletteByLine.get(line) || []).some(([reg]) => spriteColour(reg))) spriteSafeSetupRows.push(line);
           changesByLine.set(line, new Map([[R.DMACON, 0x100], ...early, ...late]));
-          changesByLine.set(y, new Map([[R.DMACON, 0x8300]]));
+          if (!view.setupOnly) changesByLine.set(y, new Map([[R.DMACON, 0x8300]]));
           dmaSetupRows.add(line);
         } else if (2 + combined * 4 >= ddfStart) {
           // Spread setup over actual blank rows, always before fetch/capture.
@@ -1058,7 +1076,7 @@
     let wrapped = false;
     for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
       const view = views.slice().reverse().find(view => view.y <= y) || views[0];
-      const fetchStart = (view.hires ? 0x3c : 0x38) - (view.scroll ? (view.fetchAdvance == null ? 8 : view.fetchAdvance) : 0);
+      const fetchStart = !view ? 0x38 : (view.hires ? 0x3c : 0x38) - (view.scroll ? (view.fetchAdvance == null ? 8 : view.fetchAdvance) : 0);
       // DMA-disabled setup may use a whole blank row. All other writes retain
       // the existing capture/fetch deadline, including re-enabling next row.
       const deadline = dmaSetupRows.has(y) ? 227 : blankRow(y) ? captureStart : fetchStart;
@@ -1077,7 +1095,7 @@
         initialRegisters[(R.SPR0PTH + channel * 4 + 2) / 2] = address & 65535;
       }
     }
-    initialRegisters[R.DMACON / 2] = spritePointers == null ? 0x380 : 0x3a0;
+    initialRegisters[R.DMACON / 2] = (spritePointers == null ? 0x380 : 0x3a0) & (views.length && (views[0].y > 255 || views[0].setupOnly) ? ~0x100 : 0xffff);
     emit(0xffff, 0xfffe);
     const bytes = new Uint8Array(words.length * 2), output = new DataView(bytes.buffer);
     words.forEach((word, index) => output.setUint16(index * 2, word, false));
@@ -1473,6 +1491,15 @@
     priorityEnabled = true;
     changed(true);
   }
+  function windowGeometry(windows = presentedWindows, standard = options.snapshotStandard) {
+    const end = standard === 'NTSC' ? 260 : 310;
+    const visible = windows.filter(window => window.y < end);
+    const left = Math.min(...windows.map(window => window.x));
+    const right = Math.max(...windows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
+    const top = visible.length ? Math.min(...visible.map(window => window.y)) : 0;
+    const bottom = visible.length ? Math.min(end, Math.max(...visible.map(window => window.y + window.height))) : end;
+    return { left, top, right, bottom, end };
+  }
   function view() { presented = visibleScreen(); commitWindows(); changed(); }
   function hideScreen(id = current) { screen(whole(id)).hidden = true; changed(true); }
   function showScreen(id = current) { screen(whole(id)).hidden = false; changed(true); }
@@ -1494,14 +1521,14 @@
     [x, y, width, height].filter(value => value != null).forEach(whole);
     // The current OCS builder supports aligned windows at x=128 only.
     if (x != null && (x & 0xfffffff0) !== 128) throw new Error('Screen Display horizontal placement is not implemented');
-    if (y != null && (y < 0 || y > 255)) throw new Error('Unsupported Screen Display vertical placement');
+    if (y != null && (y < 0 || y > 28671)) throw new Error('Unsupported Screen Display vertical placement');
     if ((width != null && (width < 0 || width > 65535)) || (height != null && (height < 0 || height > 65535))) throw new Error('Invalid Screen Display size');
     const hires = target.mode === 0x8000;
     const nextWidth = width == null || !(width & 0xfff0) ? target.windowWidth : Math.min(width & 0xfff0, target.width / (hires ? 2 : 1)) * (hires ? 2 : 1);
     const nextHeight = height == null || height === 0 ? target.windowHeight : Math.min(height, target.height);
     const bottom = (y == null ? target.hardwareY : y) + nextHeight;
     if (nextWidth / (hires ? 2 : 1) < 128 || nextWidth / (hires ? 2 : 1) > 320 || bottom < 128 ||
-        bottom > (options.snapshotStandard === 'NTSC' ? 262 : 312)) throw new Error('Unsupported Screen Display window');
+        bottom > 28671) throw new Error('Unsupported Screen Display window');
     target.hardwareX = 128;
     if (y != null) target.hardwareY = y;
     target.windowWidth = nextWidth; target.windowHeight = nextHeight; target.windowed = true;
@@ -2118,7 +2145,7 @@
   function getPlanarBridge() {
     if (!planarBridge) {
       if (!planarBridgeFactory || !chipMemoryClass || !frameStateModel || !staticFrameFactory) throw new Error('Planar snapshot helpers are not loaded');
-      planarBridge = planarBridgeFactory({ screens, paletteRows, isPresented: target => presented === target || !!(presentedWindows && presentedWindows.some(window => window.target === target)),
+      planarBridge = planarBridgeFactory({ screens, paletteRows, windowGeometry, isPresented: target => presented === target || !!(presentedWindows && presentedWindows.some(window => window.target === target)),
         writeSprites: frame => { if (spriteWriter) spriteWriter(frame); } }, options, chipMemoryClass, frameStateModel, staticFrameFactory, copperBuilder, copperInterpreter);
     }
     return planarBridge;
@@ -2152,10 +2179,7 @@
   }
   function pointerHardwarePosition(x, y, width, height) {
     if (presentedWindows) {
-      const left = Math.min(...presentedWindows.map(window => window.x));
-      const top = Math.min(...presentedWindows.map(window => window.y));
-      const right = Math.max(...presentedWindows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
-      const bottom = Math.max(...presentedWindows.map(window => window.y + window.height));
+      const { left, top, right, bottom } = windowGeometry();
       return [left + Math.floor(x * (right - left) / width), top + Math.floor(y * (bottom - top) / height)];
     }
     const target = presentedHardware;
@@ -2167,10 +2191,9 @@
     const target = presentedWindows ? screen() : presented || screen();
     if (!presentedWindows) return [Math.max(0, Math.min(target.width - 1, Math.floor(x * target.width / width))),
       Math.max(0, Math.min(target.height - 1, Math.floor(y * target.height / height)))];
-    const top = Math.min(...presentedWindows.map(window => window.y));
+    const { top, bottom } = windowGeometry();
     const view = presentedWindows.find(window => window.target === target);
     const right = Math.max(...presentedWindows.map(window => window.width * (window.target.mode === 0x8000 ? 1 : 2)));
-    const bottom = Math.max(...presentedWindows.map(window => window.y + window.height));
     return [Math.floor(x * right / width / (target.mode === 0x8000 ? 1 : 2)) + (view ? view.offsetX : target.offsetX),
       Math.floor(y * (bottom - top) / height + top - (view ? view.y : target.hardwareY)) + (view ? view.offsetY : target.offsetY)];
   }

@@ -154,7 +154,7 @@
     {
       "file": "roller2-game.html",
       "title": "Play the complete original Roller II program",
-      "description": "Source-corrected game with current supplied assets: original intro/menu, level-1 colours and warp into level 3, bottom-right time bonus and safe edge bump, host Stop/Timer expiry, game-over screen/music, restored score image, menu return and a fresh game. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Editor entry, overlapping windows and tile placement are also checked. Remaining levels, editor file actions and win paths are not yet accepted.",
+      "description": "Source-corrected game with current supplied assets: original intro/menu, level-1 colours and warp into level 3, bottom-right time bonus and safe edge bump, host Stop/Timer expiry, game-over screen/music, restored score image, menu return and a fresh game. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Editor entry, overlapping windows, tile placement and level testing/return with the animated panel are also checked. Remaining levels, editor file actions and win paths are not yet accepted.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html"
     },
     {

@@ -75,7 +75,9 @@ test('screen windows: unsupported wrapping and placements reject explicitly', ()
   d.screenOffset(0,639,0); assert.throws(()=>d.snapshotDisplay(),/outside physical bitmap/); d.screenOffset(0,0,0);
   d.open(1,320,256,16,0); d.screenDisplay(1,128,50,320,128);
   assert.ok(d.snapshotDisplay().frame.lines > 0);
-  assert.throws(()=>d.screenDisplay(1,128,255,320,256),/window/);
+  d.screenDisplay(1,128,255,320,256); assert.strictEqual(d.screen(1).windowHeight,256);
+  assert.strictEqual(d.snapshotDisplay().frame.lines,262);
+  assert.throws(()=>d.screenDisplay(1,128,32768,320,256),/vertical placement/);
   d.open(2,320,256,4096,0); d.screenDisplay(2,128,50,320,128); // HAM decoding still uses the fetched row's history.
   assert.throws(()=>d.screenOffset(2,0,256),/outside bitmap/);
   assert.throws(()=>d.screenOffset(2,1,0),/HAM fine/);

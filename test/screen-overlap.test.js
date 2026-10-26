@@ -50,6 +50,11 @@ test('screen overlap: direct sprites survive setup rows with independently check
     const offset = ((hardwareY - 42) * 320 + 300) * 4;
     assert.deepStrictEqual(Array.from(frame.rgba.slice(offset, offset + 4)), rgba(colour), `sprite row ${hardwareY}`);
   }
+  // At Y=241 only the background setup row remains after the foreground.
+  // It still restores sprite colours even though it fetches no bitplane row.
+  d.screenDisplay(1, null, 241);
+  const setupOnly = d.canvasFrame(), offset = (297 - 42) * 1280 + 300 * 4;
+  assert.deepStrictEqual(Array.from(setupOnly.rgba.slice(offset, offset + 4)), rgba(back.palette[17]));
   front.palette = front.palette.map((value, i) => i >= 16 ? 0xfff : value);
   assert.throws(() => d.snapshotDisplay(), /Sprite palette changes.*capture budget/);
 });
