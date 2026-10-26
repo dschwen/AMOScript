@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const capture=await runScenario('roller2-get-icon',page);assert.strictEqual(capture.gpuFrames,6);await page.evaluate(()=>globalThis.AMOS_ROLLER2_GET_ICON_CLEANUP());
+    console.log('Roller2 Get Icon passed: original requesters, independent capture/restore pixels and six GPU frames.');
     const pointer=await runScenario('roller2-pointer',page);assert.strictEqual(pointer.gpuFrames,7);assert.strictEqual(pointer.cursorChecks,30);await page.evaluate(()=>globalThis.AMOS_ROLLER2_POINTER_CLEANUP());
     console.log('Roller2 pointer passed: seven original Change Mouse statements, owned browser cursors and seven GPU frames.');
     const scin=await runScenario('roller2-scin',page);assert.strictEqual(scin.gpuFrames,7);assert.strictEqual(scin.pointerSteps,14);await page.evaluate(()=>globalThis.AMOS_ROLLER2_SCIN_CLEANUP());

@@ -56,6 +56,6 @@ Restart/container retention are checked in the generated offline demo. The galle
 includes an HTML Preview link. This establishes fixture and CPU/GPU parity;
 external Amiga reference execution remains outstanding.
 
-Whole-source compilation now stops at Get Icon `$1cc6`, original line 480,
-byte 26044. Seven of 194 token encodings remain unrecognized. Full gameplay,
+Whole-source compilation now stops at Rainbow Del `$0dd4`, original line 557,
+byte 30562. Six of 194 token encodings remain unrecognized. Full gameplay,
 end-state AMOS Music and integrated editor behavior remain acceptance work.

@@ -82,6 +82,6 @@ link and embeds all assets for offline use. These are fixture/CPU/GPU comparison
 not an original editor screen or native Amiga execution.
 
 A separate [Writing fixture](writing.md) now runs original 334 labels.
-Whole-source compilation now stops at Get Icon `$1cc6`, original line 480,
-byte 26044. Seven of the 194 token encodings remain unrecognized; recognition alone
+Whole-source compilation now stops at Rainbow Del `$0dd4`, original line 557,
+byte 30562. Six of the 194 token encodings remain unrecognized; recognition alone
 does not complete game/editor behavior.

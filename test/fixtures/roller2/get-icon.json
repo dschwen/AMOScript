@@ -1,0 +1,65 @@
+{
+  "evidence": "Independent raw-icon/pattern capture oracle; not native Amiga execution.\nExclusive 106-pixel capture, word padding and original masked requester images.\n",
+  "frames": [
+    {
+      "mode": "missing",
+      "stage": "before",
+      "png": "get-icon-missing-before.png",
+      "width": 112,
+      "height": 40,
+      "captureSha256": "7c29db24057a0a6b3e720c74f12ba450101b70db5c9224c8e5a124a3ed668e83",
+      "indicesSha256": "a5935ed55bc322f9a0525692c6b5215d5577d06180ccfff990541fd534106499",
+      "rgbaSha256": "31d05bd16a7686598536dfa2c1785230bfc7f44a9b9952d3b5177c1841701747"
+    },
+    {
+      "mode": "missing",
+      "stage": "popup",
+      "png": "get-icon-missing-popup.png",
+      "width": 112,
+      "height": 40,
+      "captureSha256": "7c29db24057a0a6b3e720c74f12ba450101b70db5c9224c8e5a124a3ed668e83",
+      "indicesSha256": "6901d6d842b741cf1d62282fe071842012d219e307d8785c171824db7da1be1f",
+      "rgbaSha256": "8db9aff1b761a960d379eb7b5cd79fe9220635fc145f785cacf26d3f8452da33"
+    },
+    {
+      "mode": "missing",
+      "stage": "restored",
+      "png": "get-icon-missing-restored.png",
+      "width": 112,
+      "height": 40,
+      "captureSha256": "7c29db24057a0a6b3e720c74f12ba450101b70db5c9224c8e5a124a3ed668e83",
+      "indicesSha256": "a5935ed55bc322f9a0525692c6b5215d5577d06180ccfff990541fd534106499",
+      "rgbaSha256": "31d05bd16a7686598536dfa2c1785230bfc7f44a9b9952d3b5177c1841701747"
+    },
+    {
+      "mode": "overwrite",
+      "stage": "before",
+      "png": "get-icon-overwrite-before.png",
+      "width": 112,
+      "height": 70,
+      "captureSha256": "e36090f641303d17a39b579318f451e04c5d1e0bf5da656be9a0899731c79e70",
+      "indicesSha256": "a5935ed55bc322f9a0525692c6b5215d5577d06180ccfff990541fd534106499",
+      "rgbaSha256": "31d05bd16a7686598536dfa2c1785230bfc7f44a9b9952d3b5177c1841701747"
+    },
+    {
+      "mode": "overwrite",
+      "stage": "popup",
+      "png": "get-icon-overwrite-popup.png",
+      "width": 112,
+      "height": 70,
+      "captureSha256": "e36090f641303d17a39b579318f451e04c5d1e0bf5da656be9a0899731c79e70",
+      "indicesSha256": "df2757e9a7bdbe197019a6b965a789a26a6ae969892ecdee8b5e0ff97bdc7501",
+      "rgbaSha256": "b76fb6ac14e64103792423b9e93b1ef066fe86d10181a69d47160af71e9f155e"
+    },
+    {
+      "mode": "overwrite",
+      "stage": "restored",
+      "png": "get-icon-overwrite-restored.png",
+      "width": 112,
+      "height": 70,
+      "captureSha256": "e36090f641303d17a39b579318f451e04c5d1e0bf5da656be9a0899731c79e70",
+      "indicesSha256": "a5935ed55bc322f9a0525692c6b5215d5577d06180ccfff990541fd534106499",
+      "rgbaSha256": "31d05bd16a7686598536dfa2c1785230bfc7f44a9b9952d3b5177c1841701747"
+    }
+  ]
+}

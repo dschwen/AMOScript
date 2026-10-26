@@ -79,3 +79,8 @@ Five headless groups cover raw bytes, inclusive padding, unchanged masks, exact
 saved bytes, orientation, canonical pixel edits, lifecycle retirement and checked
 Bload/Bsave behavior. Connected menu replays additionally verify eight original
 icon copies across its four game-selection cases; the game guard follows them.
+
+[Get Icon](get-icon.md) now creates/grows/replaces bounded icon records from logical
+bitmap pixels, with word padding and a fresh unmasked image. Successful captures
+retire every raw address of that icon bank under the existing portable policy;
+invalid captures retain the old records, masks and addresses.

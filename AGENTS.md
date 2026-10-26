@@ -113,6 +113,14 @@
   on a declared blank/palette preview, with prepared cell Input# replacing 355.
   Three independent Canvas/GPU frames cover it, not full editor/native capture.
   See `docs/set-line.md`; general graphics draw modes remain gated.
+- Get Icon captures current/explicit logical bitmap regions with exclusive bounds,
+  word-rounded widths, zero right padding and new unmasked/zero-hotspot records.
+  Keep existing palettes/other records; new banks use the selected screen palette.
+  Preflight before mutation, retire icon-bank raw addresses on successful capture,
+  and avoid drawing/Autoback/Bob hooks. Original missing-level 480 and overwrite
+  490–491 run on prepared stripes with WTIN/WTREL guards and declared overwrite
+  restoration. Six independent Canvas/GPU frames cover them, not full requesters
+  or editor persistence. See `docs/get-icon.md` for bounds and source evidence.
 - Change Mouse supports built-in 1/2/3 as per-factory pointer intent, independent
   of Hide/Show nesting and screen/pixel/input state. No explicit shape initially
   retains the host cursor. Canvas/WebGL map explicit choices to default/crosshair/

@@ -6,8 +6,8 @@ Assessment updated: 2026-10-26.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 7 remain unrecognized (43 at
-initial assessment), and whole compilation now stops at Get Icon on line 480.
+The main source has 1,199 lines and 194 encodings; 6 remain unrecognized (43 at
+initial assessment), and whole compilation now stops at Rainbow Del on line 557.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -38,7 +38,7 @@ menu fixture now runs the original executable prefix through 316, including both
 FLOADs, setup 281–286 and continuing MOD playback: ten browser cases, nine guarded
 selections and three independent/GPU frames. The live demo offers music activation/
 mute and restart-safe bindings. Next implement the selected routines and their
-dependencies, alongside the remaining decoder gates (now Get Icon). Checked big-endian
+dependencies, alongside the remaining decoder gates (now Rainbow Del). Checked big-endian
 Doke/Deek/Loke/Leek now support generic banks, including odd addresses and atomic
 range checks. Original level metadata/time statements pass across all fifteen
 pinned files in a new demo. Bounded icon table/planar aliases now run original ICCOPY at game entry through
@@ -93,8 +93,12 @@ preview with seven independent Canvas images/seven GPU frames and hardware input
 on both hosts. See docs/scin.md. Change Mouse now selects the three built-in
 pointer meanings through owned CSS cursors in Canvas/WebGL, with visibility nesting
 and seven unchanged original editor statements covered. Configured/native artwork
-and sprite-bank pointers remain gated; see docs/change-mouse.md. Next implement
-Get Icon and other reached compiler/gameplay handlers; see docs/roller2-arrows.md. Sprite-bank raw
+and sprite-bank pointers remain gated; see docs/change-mouse.md.
+Get Icon now captures bounded logical indexed regions into word-padded, unmasked
+images with existing palette/address ownership rules. Original missing-level and
+overwrite requesters match six independent Canvas images and six GPU frames in
+declared previews; see docs/get-icon.md. Next implement Rainbow Del and other
+reached compiler/gameplay handlers; see docs/roller2-arrows.md. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
@@ -207,7 +211,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **679 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **686 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

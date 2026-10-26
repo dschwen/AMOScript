@@ -3233,6 +3233,35 @@
     display.pasteGraphic(image, x, y, image.masked);
     if (bankNumber === 1) imageBobsChanged();
   }
+  function getIcon(...args) {
+    if (args.length !== 5 && args.length !== 6) throw new Error('Invalid Get Icon argument count');
+    args = args.map(integer);
+    const target = display.screen(args.length === 6 ? args.shift() : display.current);
+    const [number, x1, y1, x2, y2] = args;
+    if (number < 1 || number > 16383) throw new Error('Unsupported Get Icon number (expected 1..16383)');
+    if (x1 < 0 || y1 < 0 || x2 > target.width || y2 > target.height || x2 <= x1 || y2 <= y1) throw new Error('Invalid Get Icon rectangle');
+    const width = Math.ceil((x2 - x1) / 16) * 16, height = y2 - y1, depth = Math.log2(target.colours);
+    if (width / 8 * height * depth >= 65536) throw new Error('Unsupported Get Icon planar payload size');
+    const old = banks.get(2);
+    if (old && old.type !== 'icons') throw new Error('Get Icon requires an icon bank or empty bank 2');
+    // Read logical pixels as stored, including held Bobs. Capture is not a
+    // drawing operation and must not restore Bobs or replay Autoback hooks.
+    const pixels = new Uint8Array(width * height);
+    for (let row = 0; row < height; row++) pixels.set(target.pixels.subarray((y1 + row) * target.width + x1,
+      (y1 + row) * target.width + x2), row * width);
+    const image = { width, height, depth, pixels, hotspotX: 0, hotspotY: 0, orientation: 0, masked: false, mask: null };
+    const images = old ? old.images.slice() : [];
+    while (images.length < number) images.push(null);
+    images[number - 1] = image;
+    if (old) {
+      bankMemory.release(old);
+      old.images = images;
+    } else {
+      // Native new-bank allocation uses the selected screen's palette, even
+      // when the explicit capture screen is different. Existing palettes stay.
+      installBanks([{ number: 2, type: 'icons', images, palette: display.screen().palette.slice() }]);
+    }
+  }
   function value(number) { return number && number.numericType ? number.value : number; }
 
   function numberFunction(name, operand, sourceType) {
@@ -4006,6 +4035,7 @@
     pasteBob: (x, y, number) => pasteImage(1, x, y, number),
     pasteIcon: (x, y, number) => pasteImage(2, x, y, number),
     spritePalette: (mask = -1) => display.bankPalette(imageBank(1).palette, mask),
+    getIcon,
     iconPalette: (mask = -1) => display.bankPalette(imageBank(2).palette, mask),
     imageFlags,
     makeMask: (number = null) => setImageMask(1, true, number),

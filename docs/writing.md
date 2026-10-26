@@ -57,6 +57,6 @@ and four actual GPU frames with CPU presentation disabled during GPU rendering.
 Live controls provide text stages, matrix, fullscreen and Restart. Every browser
 scenario has a self-contained demo and HTML Preview link in the gallery.
 
-Whole-source compilation now stops at Get Icon `$1cc6`, original line 480,
-byte 26044. Seven of 194 token encodings remain unrecognized; full editor/gameplay
+Whole-source compilation now stops at Rainbow Del `$0dd4`, original line 557,
+byte 30562. Six of 194 token encodings remain unrecognized; full editor/gameplay
 and native reference capture remain separate acceptance gates.
