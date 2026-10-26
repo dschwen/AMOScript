@@ -100,12 +100,12 @@ existing buffer. No RGB conversion, stretching or drawing minterm is applied.
 Four rectangle test groups cover exclusive bounds, paired clipping, independent
 per-pixel results, overlaps/aliases, tagged physical destinations, hooks/Autoback,
 old snapshots, typed values and rejected forms. Original [Tunneltest](../examples/Tunnel/README.md)
-now compiles completely. Its source and embedded bank run unmodified with explicitly
-prepared substitutes for two absent external files. An independent Python decoder
+now compiles completely. Its source runs unmodified with the supplied
+external icon bank and original IFF background. An independent Python decoder
 and animation oracle verify all 24 wheel icons and both ten-frame branches over
 48 physical-buffer/RGBA hashes. Five PNGs and five actual GPU comparisons cover
-selected animation frames. This establishes prepared fixture and browser parity,
-not original-background or external Amiga reference execution.
+selected animation frames. This establishes source/asset fixture and browser parity,
+not external Amiga reference execution.
 
 The [tunnel demo](../demos/tunnel.html) offers animation, pause/resume, single-frame
 stepping, Restart, fullscreen and an IFF background picker. Uploads complete before

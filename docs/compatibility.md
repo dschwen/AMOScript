@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-26. The current local baseline has **724 passing tests**, plus a
+Updated 2026-10-26. The current local baseline has **725 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -8,11 +8,12 @@ The current run includes direct sprites and refreshed demos; the expanded suite
 has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
-The [complete Roller II runner](roller2-game.md) now reaches level 2, original
-arrows and timeout game-over image/music with keyboard/Gamepad and GPU checks.
-Its post-game return path fails explicitly at the missing original `iffp/roller hi`
-image (line 1044); full-game completion is not yet accepted. Writes remain in
-session memory; IndexedDB is planned.
+The [complete Roller II runner](roller2-game.md) now uses the current supplied
+assets, including the restored high-score image. It follows the level-3 warp,
+Timer-expiry game over, scores/menu return and a fresh game. The frozen earlier
+fixtures retain level-2 arrow and missing-resource regressions. Full-game
+completion remains unaccepted. Writes remain in session memory; IndexedDB is
+planned. Tunnel now uses the supplied external icons and original IFF background.
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
 encodings, all recognized; the complete source now compiles to 2,528 instructions. Its unchanged first FLOAD call and original
@@ -52,7 +53,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 | Fill / Copy | Implemented bounded bank-memory transfers | Big-endian Fill with exclusive/empty ranges (up to 1 MiB; odd starts only for byte tails), overlap-safe Copy with exclusive/nonempty ranges, complete preflight, active-Tracker and raw-icon protections. Original editor statements back up/clear/restore all fifteen payloads at a redraw guard; no persistence/editor rendering. [Contract](bulk-memory.md). |
 | Boom | Implemented bounded portable synthesis | Four source pitches, shared noise recurrence, integer envelope and fractional onset render finite float PCM with explicit seed/constant-beam choices. Independent PAL/phase/NTSC vectors and five native Web Audio graphs pass. Exact DMA/beam capture and general live wave/envelope controls remain open. [Contract](boom.md). |
 | Roller II arrows / N34 | Implemented bounded original handlers | Original PFEIL follows three real level-2 turns and N34/HCWEG rebound. Thirty-two one-pixel input positions, twenty independent Canvas images/ten GPU comparisons; original arrow timeout runs Boom before game-over guard. [Contract](roller2-arrows.md). |
-| Rectangular Screen Copy | Implemented bounded eight-operand form | Exclusive ends, paired bitmap clipping, overlap-safe copies, common planes and Logic/Physic ownership. Original Tunneltest passes 48 source-derived prepared-background frames; five GPU comparisons. Wrapped geometry and explicit minterms remain open. [Contract](screen-copy.md). |
+| Rectangular Screen Copy | Implemented bounded eight-operand form | Exclusive ends, paired bitmap clipping, overlap-safe copies, common planes and Logic/Physic ownership. Original Tunneltest passes 48 independently decoded original-asset frames; five GPU comparisons. Wrapped geometry and explicit minterms remain open. [Contract](screen-copy.md). |
 | AMOS Music banks | Implemented bounded VM playback | Music/Mvolume/Music Off, bank-3 decoder/player, independent driver wakes, master fade, bank/shared-voice lifecycle and Stop/Resume. Four complete first-wrap traces and 25 native Web Audio comparisons; stacked songs, voice stealing and full end-state integration remain open. [Contract](amos-music.md). |
 | MOD / tracker | Implemented bounded playback | Owned M.K. decoder, Track Load/Loop/Play/Stop and C/A/E/F/D effects. Driver-owned VBL wakes share sample voices, cancel on End/failure/bank retirement, and pause without elapsed-note replay. Original music fixture matches 1,997 notes and twelve native Web Audio comparisons. Held sample phase after pause, wider effects, exact DMA contention, live bank editing and wider AMOS Music forms remain open. [Contract](mod-tracker.md). |
 | Roller II pause modes | Implemented bounded original routines | PAUSE/IPause run after real progression, with mouse/Help score costs, native Space popup, three WTIN exits, exact Timer restoration and host lifecycle checks. Twenty independent Canvas images/ten GPU comparisons. Boom and remaining obstacle/game-over paths stay open. [Contract](roller2-pauses.md). |

@@ -25,3 +25,13 @@ test('Roller2 session files: case/volume mapping, missing assets and writes are 
   a.write('RII:Highscores', 'session'); assert.strictEqual(a.read('rii:HIGHSCORES'), 'session'); assert.strictEqual(b.read('RII:Highscores'), before);
   assert.strictEqual(a.writes.length, 1); assert.strictEqual(b.writes.length, 0);
 });
+
+test('Roller2 current assets: byte-exact supplied refresh completes the original warp, restored scores, menu/music return and fresh-game path', () => {
+  const crypto = require('crypto'), root = path.join(directory, 'current'), manifest = require('../examples/Roller2/current/manifest.json');
+  for (const entry of Object.values(manifest.files)) { const bytes = fs.readFileSync(path.join(root, entry.path)); assert.strictEqual(bytes.length, entry.byteLength); assert.strictEqual(crypto.createHash('sha256').update(bytes).digest('hex'), entry.sha256); }
+  const current = require('./helpers/roller2CurrentAssets')(), files = makeFiles(current), clock = createFakeTimers(4);
+  assert.strictEqual(files.exists('RII:iffp/roller hi'), true);
+  const { create } = compile(Buffer.from(current['rii:Roller II.AMOS'], 'latin1'));
+  const result = require('./helpers/roller2CurrentReplay')(create, clock, files, p => ({ joy: m => p.setJoystick(1, m), key: () => p.sendKey('a'), dispose() {} }));
+  assert.deepStrictEqual(result, { frames: 12, score: 278, level: 3, returnedToMenu: true, freshGame: true, writes: 0 }); assert.strictEqual(clock.pending(), 0);
+});

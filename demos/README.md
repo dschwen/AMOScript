@@ -5,8 +5,8 @@
 ## Start here
 
 - [Play Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html): original game, WebGL/Canvas, fullscreen and optional sound.
-- [Play Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html): original pinned game; tested through level 2 and game over. Post-game return needs a missing original image.
-- [Watch the tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html): original animation with embedded icons and a declared blank background; load an original IFF if available.
+- [Play Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html): original program with the current supplied assets; tested through the level-3 warp, game over, scores, menu return and a fresh game.
+- [Watch the tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html): original animation with its supplied external icon bank and IFF background; optionally choose a custom IFF.
 
 The gallery places games first, then animation/music and interactive examples.
 Individual command, parser/runtime and graphics verification demos are grouped

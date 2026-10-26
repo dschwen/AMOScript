@@ -2,14 +2,15 @@
 'use strict';
 const assert = require('assert'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const { compile } = require('./helpers/program'), { createFakeTimers } = require('./helpers/fakeTimers');
-const Reader = require('../lib/Buffer'), reference = require('./fixtures/tunnel/frames.json');
+const reference = require('./fixtures/tunnel/frames.json');
 const raw = fs.readFileSync(path.join(__dirname, '../examples/Tunnel/Tunneltest.amos'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 test('Tunnel: complete original source/bank runs all 24 wheel images over both ten-frame branches against 48 independent physical-buffer hashes', () => {
+  for (const [name, sha] of Object.entries(reference.assets)) assert.strictEqual(hash(fs.readFileSync(path.join(__dirname, '../examples/Tunnel', name))), sha);
   assert.strictEqual(hash(raw), reference.sourceSha256); assert.strictEqual(raw.length, reference.sourceBytes);
-  const r = new Reader(raw), clock = createFakeTimers(), reads = [];
+  const clock = createFakeTimers(), reads = [];
   const p = compile(raw).create({ now: clock.now, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout, files: { read(name) {
-    reads.push(name); return (name === 'df1:intrtunic.abk' ? raw.subarray(26 + r.code_bytes) : fs.readFileSync(path.join(__dirname, 'fixtures/tunnel/blank.iff'))).toString('latin1');
+    reads.push(name); return (name === 'df1:intrtunic.abk' ? fs.readFileSync(path.join(__dirname, '../examples/Tunnel/intrtunic.abk')) : fs.readFileSync(path.join(__dirname, '../examples/Tunnel/intrtunnel'))).toString('latin1');
   } } });
   p.tick(1000); const physical = p.display.screen(0).physicalPixels;
   for (const [i, frame] of reference.frames.entries()) {

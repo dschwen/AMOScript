@@ -5,10 +5,9 @@ Assessment updated: 2026-10-26.
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)
 now highlights complete games, animation/music and interactive examples; individual
 runtime/command checks remain linked in a collapsed section. Original Tunneltest
-compiles with rectangular Screen Copy `$09a8` and runs with declared embedded-icon/
-blank-background substitutes for absent external files. Forty-eight independent
-animation hashes and five actual GPU comparisons cover the prepared preview.
-See docs/screen-copy.md and examples/Tunnel/README.md.
+now uses its supplied external icons and IFF background, with 48 independent
+animation hashes and five actual GPU comparisons. See docs/screen-copy.md and
+examples/Tunnel/README.md.
 
 ## Current priority: Roller II
 
@@ -16,15 +15,13 @@ The user-provided `RII/` game is now the next end-to-end target. Pinned source/d
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
 The main source has 1,199 lines and 194 encodings, all now recognized (43 were
 unrecognized initially). The complete unchanged source now compiles to a
-standalone 2,528-instruction factory. The complete-source browser runner now
-replays original startup/menu, first-level colour collection and bonus, level-2
-arrows, host Stop/Timer expiry, game-over image/music and original music fade-out.
-Keyboard/Gamepad, twelve independent image regions and ten GPU frames pass the
-focused scenario. See docs/roller2-game.md. Post-game return to scores reaches a real missing
-asset: original line 1044 requests `iffp/roller hi`, absent from the supplied files.
-The host reports the error and requires Restart; no replacement image is inferred.
-Next obtain that asset and extend full-source handler/end-state input replays.
-Full-game completion, editor persistence and native reference captures remain open.
+standalone 2,528-instruction factory. The complete-source demo now uses the
+current supplied asset set, including changed title/scores/help/levels and the
+restored high-score image. Its replay follows the level-3 warp, Timer-expiry game
+over, scores/menu return with MOD reload and a fresh game. Older bounded fixtures
+retain their frozen asset set and level-2 arrow/missing-file regressions.
+See docs/roller2-game.md. Full-game completion, high-score entry/writeback, editor
+persistence and native reference captures remain open.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -242,7 +239,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **724 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **725 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

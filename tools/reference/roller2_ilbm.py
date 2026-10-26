@@ -15,8 +15,8 @@ def chunk(tag, payload):
     return struct.pack('>I', len(payload)) + tag + payload + struct.pack('>I', zlib.crc32(tag + payload))
 
 
-def decode(name, label, rows, depth):
-    source = root / 'examples/Roller2/iffp' / name
+def decode(name, label, rows, depth, source_directory=None):
+    source = (source_directory or root / 'examples/Roller2/iffp') / name
     data = source.read_bytes()
     assert data[:4] == b'FORM' and data[8:12] == b'ILBM'
     assert struct.unpack_from('>I', data, 4)[0] + 8 == len(data)
@@ -78,5 +78,7 @@ def decode(name, label, rows, depth):
     (directory / f'{label}.json').write_text(json.dumps(metadata, indent=2) + '\n')
     print(json.dumps(metadata, indent=2))
 
-decode('terminator el', 'terminator-el', 256, 5)
-decode('roller titel', 'roller-title', 512, 6)
+if __name__ == '__main__':
+    decode('terminator el', 'terminator-el', 256, 5)
+    decode('roller titel', 'roller-title', 512, 6)
+    decode('roller titel', 'current-roller-title', 512, 6, root / 'examples/Roller2/current/iffp')

@@ -1,6 +1,7 @@
 # Roller II target assets
 
-These are byte-for-byte copies from the user-provided `RII/` directory. The
+These are frozen byte-for-byte copies from the earlier user-provided `RII/`
+directory. The playable game now uses the [current manifest](current/README.md). The
 manifest records 32 source/data files and SHA-256 hashes. No upstream revision or
 native execution capture is inferred. The supplied main program's credits name
 Daniel Schwen for program and graphics.
@@ -25,10 +26,11 @@ compiled original statements. The complete original game source now compiles. Th
 [AMOS Music VM demo](../../demos/roller2-music-vm.html) runs both end tunes and
 the original volume fade/Off/Erase; full-game and end-state screen integration
 remain open.
-The [complete-source game demo](../../demos/roller2-game.html) now plays original
-startup/menu, level-1 collection, level-2 arrows and game-over music. Post-game return
-requests `iffp/roller hi`, absent from the supplied files; the host reports that
-error and requires Restart. Other paths and full-game completion remain open.
+The [complete-source game demo](../../demos/roller2-game.html) now uses the
+[current supplied asset set](current/README.md). That includes changed title,
+scores/help/levels and the restored `iffp/roller hi` image. The original program
+now returns through post-game scores to the menu and starts a fresh game. The
+earlier asset manifest remains frozen for bounded regression fixtures below.
 The [startup demo](../../demos/roller2-startup.html) runs the unchanged first 17
 physical lines with a synthetic Wait Key guard before the first image request.
 The [first-image demo](../../demos/roller2-title.html) also executes original

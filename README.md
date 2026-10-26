@@ -11,8 +11,8 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 | Featured demo | What to expect |
 | --- | --- |
 | **[Dithell’s Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)** | Original game with WebGL/Canvas, fullscreen, keyboard/Gamepad and optional sound. Replays cover lives, game over and restarting. |
-| **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Original pinned program with music, colour collection and arrow tiles. Tested through level 2 and game over; post-game return needs the missing original high-score image. |
-| **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation and embedded icons, with a declared blank background because its external assets were not supplied. You can load an original IFF. |
+| **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Original program with current supplied assets and music. Tested through the level-3 warp, game over, restored scores, menu return and a fresh game. |
+| **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation with its supplied icon bank and IFF background. Fullscreen, frame stepping and custom IFF upload. |
 
 The gallery also features music players and interactive examples. Compiler,
 individual-command and rendering checks remain available in a collapsed section

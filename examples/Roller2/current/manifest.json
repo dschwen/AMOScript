@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "title": "Roller II current supplied assets",
+  "source": {
+    "kind": "user-provided",
+    "directory": "RII",
+    "evidence": "Current supplied bytes; unchanged assets are shared with the frozen earlier fixture set. No native capture inferred."
+  },
+  "files": {
+    "Roller II.AMOS": {
+      "path": "../Roller II.AMOS",
+      "byteLength": 65808,
+      "sha256": "eead952953651944b295f8503cc8d3704e99920468d256e3f3c7ace18ecc2518"
+    },
+    "RollerIntro.amos": {
+      "path": "../RollerIntro.amos",
+      "byteLength": 10664,
+      "sha256": "b4e4e599bd9839bee060535bd42c794013409aff930d31b038814481e72f423b"
+    },
+    "EditHELP.amos": {
+      "path": "../EditHELP.amos",
+      "byteLength": 312,
+      "sha256": "233d15edd9bfec7c7b647bb4044e1288606cbe097843097a285fe02209866af1"
+    },
+    "Highscores": {
+      "path": "Highscores",
+      "byteLength": 158,
+      "sha256": "510f81548bdd137051e080d49ba0ccb4e2b60de35999d358b85e9ec5988324fb"
+    },
+    "Roller_HELP": {
+      "path": "Roller_HELP",
+      "byteLength": 963,
+      "sha256": "4018f8cf467e23149052d402b3ecc7c284f45f1326cac7fbd7c583c61e9f2eb8"
+    },
+    "music/mod.Roller_II_mus": {
+      "path": "../music/mod.Roller_II_mus",
+      "byteLength": 84006,
+      "sha256": "d820aa74a12b39c3bde916bd582efd1ce5e402296e23cbcf44ff31ee7b3ca5ce"
+    },
+    "music/Roller_II_Samples.Abk": {
+      "path": "../music/Roller_II_Samples.Abk",
+      "byteLength": 22194,
+      "sha256": "9edbc42a33e0fd508ffb21b47f0b1d539a1fee43831b7eab17d5d694ef01258f"
+    },
+    "music/Over.mus": {
+      "path": "../music/Over.mus",
+      "byteLength": 74888,
+      "sha256": "be618b0dd87a873e4399699ed388544a88fd146b0ba01b3802ee838d4885d41d"
+    },
+    "music/Ywon.mus": {
+      "path": "../music/Ywon.mus",
+      "byteLength": 80968,
+      "sha256": "8a75cd764d2aa9f95e93312938d41feddb27d4345255f0b0875e1af89a5757e1"
+    },
+    "iffp/icons.abk": {
+      "path": "../iffp/icons.abk",
+      "byteLength": 36496,
+      "sha256": "bca7d53a245906f638d70335fbd0d6890e92fe21f45af25dc6b057688c6f1418"
+    },
+    "iffp/sprites.abk": {
+      "path": "../iffp/sprites.abk",
+      "byteLength": 606,
+      "sha256": "63555eaa3eed1fb3b2f46010c3df8ef581695f7d0306d8a5ef9ae1300261a14b"
+    },
+    "iffp/terminator el": {
+      "path": "../iffp/terminator el",
+      "byteLength": 6616,
+      "sha256": "81fc4c7ffde65e14a9edfc10ebdfae1a5df6519de21438aec3d19eda5ed88fcd"
+    },
+    "iffp/roller titel": {
+      "path": "iffp/roller titel",
+      "byteLength": 19576,
+      "sha256": "3607d71edc3572072590b158073303f9d987d536fbdcd05c1d7f8683c57d0818"
+    },
+    "iffp/over": {
+      "path": "../iffp/over",
+      "byteLength": 10768,
+      "sha256": "b9672946999f30158498d4062c4248af3eb768c865e01d825c52611463e7c692"
+    },
+    "iffp/gover": {
+      "path": "../iffp/gover",
+      "byteLength": 3876,
+      "sha256": "b8fa8aeecafc052c2525fe14e9cc901a28a09fb78570efd79b11868a377ba049"
+    },
+    "iffp/cons_you_won.iff": {
+      "path": "../iffp/cons_you_won.iff",
+      "byteLength": 5600,
+      "sha256": "7654faa5dbecf12aaa7a15392789c9c6536e1166ae815c873a3800c2e0382c2e"
+    },
+    "iffp/Game over.AMOS": {
+      "path": "../iffp/Game over.AMOS",
+      "byteLength": 518,
+      "sha256": "b947101ad65b076b4334e90f8d065ac04152dd12016f5cba481561d3765dda38"
+    },
+    "levl/1": {
+      "path": "levl/1",
+      "byteLength": 510,
+      "sha256": "c14de8fd2ab96eb1c17f5b5c277363b4a40bbc827edbf38a7e5a4896ac41d617"
+    },
+    "levl/2": {
+      "path": "../levl/2",
+      "byteLength": 510,
+      "sha256": "8b2a9802b7b70164aa004b535821378914a750c9ceb39dc4c703f48e83e8b212"
+    },
+    "levl/3": {
+      "path": "../levl/3",
+      "byteLength": 510,
+      "sha256": "8db993a0a261010ebbbde76067fdfcd87e5cdc6b43dd04b57f606048e9ece2ad"
+    },
+    "levl/4": {
+      "path": "../levl/4",
+      "byteLength": 510,
+      "sha256": "2a0cb3e5564244848b1b7fff13ea48040d293b0330bb40b370adcbd5a2ef6f16"
+    },
+    "levl/5": {
+      "path": "../levl/5",
+      "byteLength": 510,
+      "sha256": "06954aa3b43891a50a135761bdf2a218f901bfcded48a15bdd848d7d24c1becd"
+    },
+    "levl/6": {
+      "path": "../levl/6",
+      "byteLength": 510,
+      "sha256": "ef6e131fcb25f437b44d79913c0750ca5a2cb789d79e181be031c664a4f65e83"
+    },
+    "levl/7": {
+      "path": "levl/7",
+      "byteLength": 510,
+      "sha256": "3340a6123e5e631cadec0dcce1d30202b618c7f5a3ff5ed7be5342d8a9ad5e63"
+    },
+    "levl/8": {
+      "path": "../levl/8",
+      "byteLength": 510,
+      "sha256": "6bf0ced4f2c01d3872f2d8004ad035894291e20782004dc2a62c047d7f0dfa17"
+    },
+    "levl/9": {
+      "path": "../levl/9",
+      "byteLength": 510,
+      "sha256": "cf3da2137526437c0398eeb8bb50698728a016a7d1682a27ee47531c8da1d252"
+    },
+    "levl/10": {
+      "path": "../levl/10",
+      "byteLength": 510,
+      "sha256": "897e3c2d4b09db3d6174058a60c44de958a5cbb827cc654ac47028bf5bb66b8d"
+    },
+    "levl/11": {
+      "path": "../levl/11",
+      "byteLength": 510,
+      "sha256": "f31e795e13435cf761625be50f236aac9e8b2c731001afa463ce4d545a9a7156"
+    },
+    "levl/16": {
+      "path": "levl/16",
+      "byteLength": 510,
+      "sha256": "26a8cd9663233ca62d6c68254c94f401679a343682d569683ce42eef7839f8e0"
+    },
+    "levl/17": {
+      "path": "levl/17",
+      "byteLength": 510,
+      "sha256": "ccf41bfc93752456270bec1c6ec3b36c32f456d9b8cf25f62b3a84468bcdada2"
+    },
+    "levl/20": {
+      "path": "../levl/20",
+      "byteLength": 510,
+      "sha256": "f0f47b189bbf86ee2d85c34b49accd2aa276a696d1e6290e8a0445251df2e54f"
+    },
+    "levl/100": {
+      "path": "../levl/100",
+      "byteLength": 510,
+      "sha256": "907960307e8f6c563dc93be31b04da1c76e20ac785925e05e44117e3c6509c63"
+    },
+    "iffp/roller hi": {
+      "path": "iffp/roller hi",
+      "byteLength": 21588,
+      "sha256": "5d291a39bb3d7ccef02fda79b2ba0c038784d7610f08b98eec9d108ea7cab9fd"
+    },
+    "iffp/roller bounce": {
+      "path": "iffp/roller bounce",
+      "byteLength": 7028,
+      "sha256": "7fb21070a4f462e60a66fb1a05b44767e0141951f4e4308de380fec5cfe4f1c5"
+    }
+  }
+}

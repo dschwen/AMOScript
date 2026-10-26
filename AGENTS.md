@@ -322,18 +322,17 @@
   `docs/webgl-renderer.md`. Its presentation shader uses shared rational layout
   from `presentation/layout.js`. Bounded live host switching/input is implemented; arbitrary viewport/letterbox
   input routing, HAM/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
-- The live `roller2-game` scenario embeds the complete unchanged source and all
-  pinned assets. Input/host-lifecycle replay completes level 1, enters level 2,
-  follows arrows, then Stop/31-second Timer expiry/Resume reaches original
-  game-over image/Music and volume exit. No variable/IP/bank edits. Twenty Canvas
-  frames, twelve independent image regions, ten GPU comparisons and empty-screen
-  cleanup pass. Original 1007 parks Rainbow at Y=380; accept bounded nonwrapping
-  word Y, height 0–312, without visible palette writes. Original 1044 then fails
-  on missing `iffp/roller hi`, absent from the supplied assets. Surface the error
-  and require Restart; do not substitute another image or claim highscore return
-  works. Session-memory writes survive Restart only; IndexedDB, later handlers,
-  full-game/win/editor acceptance and native captures remain open. See
-  `docs/roller2-game.md`.
+- The live `roller2-game` scenario embeds the complete unchanged source and the
+  current supplied asset manifest under `examples/Roller2/current`. Changed assets
+  and restored score/bounce images are pinned there; unchanged files share older
+  bytes. Keep the older manifest frozen for bounded fixtures. Current input/host
+  replay follows six first-level collectibles/warp into level 3, Timer expiry,
+  game-over image/Music, restored scores, menu/MOD reload and a fresh game. No VM
+  variable/IP/bank edits. Twenty-four Canvas frames, six independent image regions
+  and twelve GPU comparisons pass. The old replay retains its historical missing-
+  file error; it is no longer a current-demo blocker. Session writes survive only
+  Restart; high-score entry/writeback, editor/win/completion and native captures
+  remain open. See `docs/roller2-game.md`.
 - The live `wonderland-game` scenario embeds the entire original program/assets.
   Its finite input-only replay spends three lives through natural collisions and
   fades, restarts twice, returns to title and starts a fresh game. No variable/IP
@@ -440,8 +439,8 @@ Rectangular Screen Copy `$09a8` has eight numeric operands and exclusive source
 ends. Pair source/destination clipping as native Sco0, snapshot overlap sources,
 copy common low planes and preserve raw logical/physical/Bob ownership. Signed
 word geometry is bounded; wrapped clipping and explicit minterms remain gated.
-The pinned original Tunneltest runs with declared embedded-icon and blank-ILBM
-adapters for absent df1 assets; 48 independent frame hashes and five GPU frames
+The pinned original Tunneltest now uses its supplied external icon bank and
+original IFF background; 48 independent frame hashes and five GPU frames
 cover it. IFF uploads finish before VM execution. See docs/screen-copy.md.
 Keep the README concise and the gallery games/showcases prominent. All technical
 browser demos retain HTML Preview links inside the closed-by-default checks group.

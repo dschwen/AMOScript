@@ -2,8 +2,9 @@
 'use strict';
 module.exports = async function roller2GameProbe(page) {
   const fs = require('fs'), path = require('path'), directory = path.join(__dirname, '../../examples/Roller2');
-  const assets = Object.fromEntries(Object.keys(require('../../examples/Roller2/manifest.json').files).map(name => [`rii:${name}`, fs.readFileSync(path.join(directory, name)).toString('base64')]));
-  const images = ['terminator-el.png', 'roller-title.png', 'colour-transition.png', 'level-2-start.png', 'arrow-down.png', 'arrow-left.png'];
+  const currentAssets = require('./roller2CurrentAssets')();
+  const assets = Object.fromEntries(Object.entries(currentAssets).map(([name, bytes]) => [name, Buffer.from(bytes, 'latin1').toString('base64')]));
+  const images = ['terminator-el.png', 'current-roller-title.png'];
   return page.evaluate(async ({ source, assets, images, replaySource, filesSource, timerSource, gpuSources, audioSource, sessionSource }) => {
     const compiled = { exports: {} }; new Function('module', source)(compiled);
     const make = text => new Function(`return (${text});`)(), replay = make(replaySource), makeFiles = make(filesSource), makeClock = make(timerSource);
@@ -53,7 +54,7 @@ module.exports = async function roller2GameProbe(page) {
     }
     if (globalThis.AMOS_ROLLER2_GAME_CLEANUP) await globalThis.AMOS_ROLLER2_GAME_CLEANUP();
     const controls = document.createElement('section'); controls.id = 'roller2-game-controls';
-    const help = document.createElement('p'); help.textContent = 'Complete original Roller II source and supplied assets. Press a key at the logo; Enter/gamepad fire starts the game and exits ready prompts. Arrows move; Space pauses; M/F toggle music/effects. Escape returns to title after fullscreen exits. Post-game return currently fails because original iffp/roller hi is missing from the supplied files; H opens the separate title-menu scores view. Errors require Restart. File writes stay in session memory and disappear on page reload; IndexedDB remains planned.';
+    const help = document.createElement('p'); help.textContent = 'Complete original Roller II source and supplied assets. Press a key at the logo; Enter/gamepad fire starts the game and exits ready prompts. Arrows move; Space pauses; M/F toggle music/effects. Escape returns to title after fullscreen exits. The current supplied assets include the restored high-score image; game over returns through scores to the title. H opens the title-menu scores view. Errors require Restart. File writes stay in session memory and disappear on page reload; IndexedDB remains planned.';
     const viewport = document.createElement('section'); viewport.id = 'roller2-game-viewport'; const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar'; const slot = document.createElement('div'), status = document.createElement('pre');
     const fullButton = document.createElement('button'), fullStatus = document.createElement('span'); fullButton.id = 'roller2-game-fullscreen'; toolbar.append(fullButton, fullStatus);
     let surface = document.createElement('canvas'), gpu = null; surface.id = 'roller2-game-input'; surface.tabIndex = 0; surface.setAttribute('aria-label', 'Complete Roller II game'); slot.append(surface); viewport.append(toolbar, slot, status); controls.append(help, viewport); document.body.append(controls);
@@ -62,7 +63,7 @@ module.exports = async function roller2GameProbe(page) {
     const soundButton = document.createElement('button'); soundButton.id = 'roller2-game-sound'; toolbar.append(soundButton);
     function update() {
       if (!live) return; const v = live.state.variables, location = live.state.location, target = live.display.screens.get(0), s = sound.status();
-      const phase = error ? 'error' : live.state.stopped ? 'stopped' : live.state.halted ? 'ended' : live.state.music.playing ? 'game-over' : location && location.line >= 1083 && location.line <= 1108 ? 'scores' : v.int_lv > 0 && live.sprites.has(1) ? 'game' : v.int_lv > 0 ? 'ready' : target && target.height === 512 && target.zones && location && location.line >= 298 && location.line <= 316 && !live.state.fade.active ? 'menu' : 'intro';
+      const phase = error ? 'error' : live.state.stopped ? 'stopped' : live.state.halted ? 'ended' : live.state.music.playing ? 'game-over' : location && location.line >= 1083 && location.line <= 1104 ? 'scores' : location && location.line >= 298 && location.line <= 316 && !live.state.fade.active ? 'menu' : v.int_lv > 0 && (live.sprites.get(1) || {}).image > 0 ? 'game' : v.int_lv > 0 ? 'ready' : 'intro';
       Object.assign(controls.dataset, { phase, line: String(location ? location.line : 0), level: String(v.int_lv || 0), score: String(v.int_hi || 0), backend: gpu ? 'webgl' : 'canvas', sound: s.state, soundContext: s.contextState || 'none', soundVoices: String(s.voices.length), soundPlays: String(s.plays), writes: String(files.writes.length) });
       soundButton.textContent = ['on', 'starting'].includes(s.state) ? 'Mute sound' : 'Enable sound'; status.textContent = error || JSON.stringify({ phase, level: v.int_lv, score: v.int_hi, ball: [v.int_bx, v.int_by], line: location && location.line, audio: s.state, audioError: s.error, writesInSessionMemory: files.writes.length }, null, 2); fullscreen.refresh();
     }
@@ -76,7 +77,7 @@ module.exports = async function roller2GameProbe(page) {
     soundButton.onclick = () => { if (['on', 'starting'].includes(sound.status().state)) sound.mute(); else sound.enable().then(() => { if (!disposed) update(); }); host.focus(); update(); };
     const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: fullButton, statusElement: fullStatus, surface: slot, getContent: () => surface }); start(); const monitor = setInterval(update, 50);
     globalThis.AMOS_ROLLER2_GAME_CLEANUP = async () => { disposed = true; revision++; clearInterval(monitor); host.detach(); live.stop(); release(gpu); await Promise.all([fullscreen.dispose(), sound.dispose()]); update(); return sound.status(); };
-    return { frames, gpuFrames, independent, emptyFrames, emptyGpuFrames, replays: results.map(r => ({ score: r.score, level: r.level, ball: r.ball, frames: r.frames, writes: r.writes })), missingImage: 'iffp/roller hi' };
+    return { frames, gpuFrames, independent, emptyFrames, emptyGpuFrames, replays: results, restoredImage: 'iffp/roller hi' };
   }, { source: new (require('../../lib/Transpiler'))(fs.readFileSync(path.join(directory, 'Roller II.AMOS'))).toModule(), assets,
-    images: Object.fromEntries(images.map(name => [name, fs.readFileSync(path.join(__dirname, '../fixtures/roller2', name)).toString('base64')])), replaySource: require('./roller2Replay').toString(), filesSource: require('./roller2GameFiles').toString(), timerSource: require('./fakeTimers').createFakeTimers.toString(), gpuSources: require('./webglHostSources')(), audioSource: require('../../lib/amos/webAudio').createWebAudioHost.toString(), sessionSource: require('../../lib/amos/browserAudio').createBrowserAudioSession.toString() });
+    images: Object.fromEntries(images.map(name => [name, fs.readFileSync(path.join(__dirname, '../fixtures/roller2', name)).toString('base64')])), replaySource: require('./roller2CurrentReplay').toString(), filesSource: require('./roller2GameFiles').toString(), timerSource: require('./fakeTimers').createFakeTimers.toString(), gpuSources: require('./webglHostSources')(), audioSource: require('../../lib/amos/webAudio').createWebAudioHost.toString(), sessionSource: require('../../lib/amos/browserAudio').createBrowserAudioSession.toString() });
 };
