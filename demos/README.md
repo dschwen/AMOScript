@@ -1,87 +1,43 @@
-# Browser test demos
+# Browser demos
 
-Open [the local gallery](index.html) or
-[the gallery through HTML Preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html).
-Preview links target the repository's `master` branch and become available when
-the generated files are committed and pushed there.
+**[Open the gallery through HTML Preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)** or [open it locally](index.html).
 
-Every current browser scenario is included:
+## Start here
 
-| Demo | HTML Preview |
-| --- | --- |
-| [Roller II original colour collections](roller2-colours.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-colours.html) |
-| [Roller II original floor movement](roller2-movement.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-movement.html) |
-| [Roller II original input loop](roller2-input.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-input.html) |
-| [Roller II ready prompt and initial ball](roller2-ready.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-ready.html) |
-| [Roller II original board rendering](roller2-boards.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-boards.html) |
-| [Roller II raw icon memory and ICCOPY](roller2-icons.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-icons.html) |
-| [Roller II level metadata and word memory](roller2-levels.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-levels.html) |
-| [Roller II intro, menu and first level load](roller2-menu.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-menu.html) |
-| [Roller II intro, initialization and main-title image](roller2-intro.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-intro.html) |
-| [Roller II first image and original FLOAD](roller2-title.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-title.html) |
-| [Roller II original startup](roller2-startup.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html) |
-| [Play Roller II MOD music](tracker.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tracker.html) |
-| [Roller II original loads and MOD inspector](roller2.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2.html) |
-| [Play unmodified Wonderland](wonderland-game.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html) |
-| [Fsel$ and unmodified Wonderland first-level frames](file-selector.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/file-selector.html) |
-| [AMOS Rnd and original enemy initialization](random.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/random.html) |
-| [Wonderland raw level-file save/load](raw-files.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/raw-files.html) |
-| [AMOS hardware mouse and original game input](mouse.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mouse.html) |
-| [Wonderland editor panel zones](zones.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/zones.html) |
-| [AMOS Flash and screen-local Flash Off](flash.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/flash.html) |
-| [Wonderland map copy: five original level loops](screen-copy.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-copy.html) |
-| [Wonderland score fields and Print Using](print-using.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/print-using.html) |
-| [Wonderland Fade and VBL palette timing](fade.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/fade.html) |
-| [AMOS Scancode and original Wonderland Escape/title routing](scancodes.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/scancodes.html) |
-| [Computed branches and original Wonderland initialization](computed-branches.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/computed-branches.html) |
-| [Wonderland screen windows and scrolling](screen-windows.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-windows.html) |
-| [Wonderland menu with keyboard mapping and Gamepad API](wonderland-menu.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-menu.html) |
-| [AMOS keyboard repeat and lifecycle cleanup](key-repeat.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/key-repeat.html) |
-| [Wonderland sample playback and Web Audio checks](music.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/music.html) |
-| [Wonderland executed original title, menu Bob and readiness (menu loop/game blocked)](wonderland.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html) |
-| [Integer GPU readback and PNG decode](webgl-integers.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-integers.html) |
-| [GPU uploads, dirty rows and context lifecycle](webgl-resources.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-resources.html) |
-| [GPU/CPU image, mode, sprite, scaling and seeded-frame gallery](webgl-renderer.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/webgl-renderer.html) |
-| [Sprite DMA and channel reuse](sprite-dma.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html) |
-| [Trigonometry and angle modes](trigonometry.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/trigonometry.html) |
-| [Extra Half Brite](ehb.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/ehb.html) |
-| [HAM6](ham.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/ham.html) |
-| [Direct sprites and manual updates](sprites.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprites.html) |
-| [Bank operations, buffers and Bob backgrounds](banks.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/banks.html) |
-| [Interactive control flow, graphics, Bobs, input and lifecycle](programs.html) | [Run](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/programs.html) |
+- [Play Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html): original game, WebGL/Canvas, fullscreen and optional sound.
+- [Play Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html): original pinned game; tested through level 2 and game over. Post-game return needs a missing original image.
+- [Watch the tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html): original animation with embedded icons and a declared blank background; load an original IFF if available.
 
-The Wonderland game page embeds the complete original program and provides live
-keyboard/Gamepad controls, Stop/Resume and Restart. WebGL2 is the default; the
-Renderer selector switches to Canvas 2D and back without restarting the game.
-Fullscreen keeps controls visible and preserves aspect on both renderers; Escape
-exits fullscreen. The main examples and captured-frame viewers have the same
-control. See [fullscreen behavior and limits](../docs/fullscreen.md). The frame selector also shows
-its controlled loss/restart replay. Enable sound activates original sample effects;
-Mute stops them immediately. Editor file integration remains open;
-see [the live-game contract](../docs/wonderland-game.md).
+The gallery places games first, then animation/music and interactive examples.
+Individual command, parser/runtime and graphics verification demos are grouped
+under **Compiler and runtime checks**, closed by default. All remain linked and
+runnable; the gallery is the complete catalogue.
 
-Each HTML file embeds its runtime, shader factories, compiled programs and fixture
-data. Open it directly from disk or through HTML Preview; no Node process, local
-server, CDN scripts or fixture fetches are needed. WebGL scenarios require WebGL2
-and the context-loss extension used by their tests. Results show failures explicitly.
+## Running locally
 
-Click **Run demo** for a scenario's actual browser-test evaluator and assertions.
-Use the frame selector and pixel zoom to inspect captured images, including all GPU comparison
-frames. The interactive page has Run/Graphics/Moving Bobs/Stop buttons; focus the
-canvas and use the keyboard/mouse. Its live state display helps inspect input and
-wait/stop behavior. Those three programs remain interactive rather than being
-replaced by prerecorded images.
+Open `demos/index.html` in a browser. Each page embeds its scripts and prepared
+assets, so no server or network downloads are required. Click **Run demo** to run
+the shared verification and create live controls where available. WebGL demos
+require WebGL2. Sound requires its Enable/Play button; fullscreen requires a click.
 
-`test/helpers/browserScenarios.js` is shared by Playwright and the generator.
-`tools/build_browser_demos.js` captures browser evaluators and their prepared
-arguments at build time; it does not run a browser while building. The generated
-`manifest.json` inventories the pages. Add new browser scenarios to that catalogue
-so they acquire a demo and coverage automatically.
+HTML Preview links target `master` and reflect committed, pushed files. Prepared
+fixtures and missing resources are described on each page; these are not claims
+of complete original-game or native Amiga parity.
 
-Run `npm run build:demo` to rebuild the three program modules and all gallery
-pages. `npm run check:generated` checks both sets without writes; `npm run check`
-also tests catalogue coverage, inline script syntax and missing/stale detection.
-`npm run test:browser` runs the scenarios and every standalone page offline in
-real Chromium, then exercises the interactive page's input/lifecycle behavior.
-These demos expose current tested behavior; they do not imply full AMOS support,
-hardware captures or GPU performance on other devices.
+## Maintaining the gallery
+
+Browser scenarios live in `test/helpers/browserScenarios.js`. Playwright and the
+generated pages share their inputs and assertions. Every browser test must retain
+a runnable page and an HTML Preview link, including the collapsed technical demos.
+
+```sh
+npm run build:demo
+npm run check:generated
+npm run check
+npm run test:browser
+```
+
+The generated-artifact gate detects stale program modules, pages and catalogue
+entries without writes. Real Chromium tests run every scenario offline and
+exercise the live controls, input and host lifecycle. Screenshots are written to
+the ignored `test/artifacts/` directory.

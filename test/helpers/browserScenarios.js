@@ -282,6 +282,9 @@ const scenarios = [
   { id: 'roller2-startup', title: 'Roller II original startup', description: 'Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original sample/tracker loads and Hide. Step/reset controls inspect the silent field clock; native Canvas checks cover nested Hide/Show. The captured default screen precedes FLOAD; title rendering and gameplay remain open.', run: require('./roller2StartupProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { lines:17, variableBufferBytes:20480, stackEntries:501, directory:'RII:', introMusic:-1, pointerChecks:5, trackerField:6, firstInstrument:4, titleRendered:false });
   } },
+  { id: 'tunnel', title: 'Tunnel animation', description: 'Original Tunneltest program and embedded icons, with an explicit prepared blank background for missing external assets. Watch the animation, step frames, use fullscreen or choose an IFF background. Independent checks cover 48 frames and all 24 wheel images.', run: require('./tunnelProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { frames: 48, pngs: 5, gpuFrames: 5, icons: 27, preparedBackground: true });
+  } },
   { id: 'roller2-game', title: 'Play the complete original Roller II program', description: 'Unmodified source/assets: original intro/menu, level-1 colour collection and bonus, level-2 arrows, host Stop/Timer expiry, game-over screen/music and cleanup at the missing original high-score image. Keyboard/Gamepad, independent image regions, actual WebGL and a live fullscreen/audio host. Remaining levels/editor/win paths are not yet accepted.', run: require('./roller2GameProbe'), check(result, assert) {
     assert.strictEqual(result.frames, 20); assert.strictEqual(result.gpuFrames, 10); assert.strictEqual(result.independent, 12);
     assert.strictEqual(result.emptyFrames, 2); assert.strictEqual(result.emptyGpuFrames, 1); assert.strictEqual(result.missingImage, 'iffp/roller hi');

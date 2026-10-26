@@ -13,6 +13,9 @@ test('browser demos: catalogue covers every shared scenario with self-contained 
   const root = path.join(__dirname, '../demos'), manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json')));
   assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html']);
   const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.ok(index.indexOf('id="games"') < index.indexOf('id="technical-demos"'));
+  assert.match(index, /<details id="technical-demos"><summary>Compiler and runtime checks/);
+  assert.doesNotMatch(index, /<details id="technical-demos"[^>]*\bopen\b/);
   for (const entry of manifest.scenarios) {
     assert.strictEqual(entry.preview, `https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}`);
     assert.ok(index.includes(entry.preview));

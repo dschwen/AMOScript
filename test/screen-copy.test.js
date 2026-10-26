@@ -81,7 +81,7 @@ test('Screen Copy: invalid tags, missing screens, string operands and unsupporte
   assert.throws(()=>compile(binary([[t('Print'),fn('Logic Of',text('0'))]])),/Wrong argument type/);
   assert.throws(()=>compile(binary([[w(0x99c),n(0),t('To'),n(0),t(','),n(0xcc)]])),/Unsupported token/);
   assert.throws(()=>compile(binary([[copy(n(0),n(0)),t(','),n(0xcc)]])),/end of statement/);
-  assert.throws(()=>compile(binary([[w(0x9a8)]])),/Unsupported token/);
+  assert.throws(()=>compile(binary([[w(0x9a8)]])),/expression|Expected/i);
   const q=execute(binary([[t('Print'),fn('Logic Of',n(8))]]));assert.deepStrictEqual(q.logs,[[-2147483640]]);
 });
 

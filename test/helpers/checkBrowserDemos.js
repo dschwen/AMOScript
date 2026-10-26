@@ -7,6 +7,18 @@ const { pathToFileURL } = require('url');
 const { scenarios } = require('./browserScenarios');
 
 module.exports = async function checkBrowserDemos(browser) {
+  const gallery = await browser.newPage();
+  try {
+    await gallery.goto(pathToFileURL(path.join(__dirname, '../../demos/index.html')).href);
+    assert.strictEqual(await gallery.locator('#games article').count(), 2);
+    assert.strictEqual(await gallery.locator('#games a.play').first().isVisible(), true);
+    assert.strictEqual(await gallery.locator('#technical-demos').evaluate(node => node.open), false);
+    assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), false);
+    await gallery.screenshot({ path: path.join(__dirname, '../artifacts/demo-index.png'), fullPage: true });
+    await gallery.locator('#technical-demos summary').click();
+    assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), true);
+    assert.strictEqual(await gallery.locator('#showcases a[href="tunnel.html"]').count(), 1);
+  } finally { await gallery.close(); }
   for (const scenario of scenarios) {
     const page = await browser.newPage(), errors = [], network = [];
     page.on('pageerror', error => errors.push(error.message));
@@ -269,6 +281,21 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#roller2-startup-step');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'12');
         await page.click('#roller2-startup-reset');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'0');
         await page.evaluate(()=>globalThis.AMOS_ROLLER2_STARTUP_CLEANUP());
+      }
+      if (scenario.id === 'tunnel') {
+        assert.strictEqual(await page.locator('#tunnel-controls').getAttribute('data-backend'), 'webgl');
+        await page.click('#tunnel-pause'); const frame = await page.locator('#tunnel-controls').getAttribute('data-frame');
+        await page.waitForTimeout(60); assert.strictEqual(await page.locator('#tunnel-controls').getAttribute('data-frame'), frame);
+        await page.click('#tunnel-step'); assert.strictEqual(Number(await page.locator('#tunnel-controls').getAttribute('data-frame')), Number(frame) + 1);
+        await page.click('#tunnel-fullscreen'); await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'tunnel-viewport');
+        await page.click('#tunnel-restart'); assert.strictEqual(await page.locator('#tunnel-controls').getAttribute('data-frame'), '1');
+        await page.setInputFiles('#tunnel-background', { name: 'background.iff', mimeType: 'application/octet-stream', buffer: require('fs').readFileSync(path.join(__dirname, '../fixtures/tunnel/blank.iff')) });
+        await page.waitForFunction(() => document.getElementById('tunnel-controls').dataset.background === 'uploaded');
+        await page.click('#tunnel-resume'); await page.waitForFunction(() => Number(document.getElementById('tunnel-controls').dataset.frame) > 1);
+        await page.click('#tunnel-pause'); await page.setInputFiles('#tunnel-background', { name: 'bad.iff', mimeType: 'application/octet-stream', buffer: Buffer.from('not an IFF') });
+        await page.waitForFunction(() => document.getElementById('tunnel-controls').dataset.phase === 'error');
+        await page.click('#tunnel-blank'); await page.waitForFunction(() => document.getElementById('tunnel-controls').dataset.background === 'prepared' && document.getElementById('tunnel-controls').dataset.phase === 'paused');
+        await page.evaluate(() => AMOS_TUNNEL_CLEANUP()); await page.waitForFunction(() => document.fullscreenElement === null);
       }
       if (scenario.id === 'roller2-game') {
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.line === '164');

@@ -1,10 +1,12 @@
-# Full screen bitmap copying
+# Screen bitmap copying
 
 The bounded form `Screen Copy source To destination` copies raw pixel codes at
 bitmap origin (0,0). Operands are integers: ordinary screen numbers select logical
 buffers; `Logic`, `Physic`, `Logic(n)` and `Physic(n)` select current or numbered
 logical/physical buffers. The original two-operand token is `$0986`.
-Rectangle and minterm variants remain unsupported and fail explicitly.
+The eight-operand rectangle token `$09a8` is also supported:
+`Screen Copy source,x1,y1,xEnd,yEnd To destination,x,y`. Explicit minterm
+variants `$099c` and `$09be` remain unsupported and fail explicitly.
 
 ## Selectors and ownership
 
@@ -70,3 +72,43 @@ scroll inspection. It appears with an HTML Preview link in the [gallery](../demo
 The unmodified Wonderland source now compiles completely. Controlled game entry
 now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).
+
+## Rectangular copy
+
+Rectangle ends are **exclusive**. Original Tunneltest line 8 copies 95 columns
+and 30 rows with `Screen Copy 1,0,0,95,30 To 0,0,0`. Destination selectors resolve
+before source selectors, after expressions have each been evaluated once in
+source order. The shared display signature lowers all eight numeric operands.
+
+Clipping follows `lib_sco0` in native `src/lib/screens.cpp` at pinned revision
+`efddf2c9a09bf61a45b7b096a9be84630853c2b1`: negative
+source origins shift the destination; negative destination origins consume source
+pixels. Then the source end is bounded to the source bitmap, the adjusted source
+origin is subtracted, and the extent is clipped to the destination bitmap. Empty,
+reversed and fully off-bitmap rectangles are no-ops. Endpoints are not reordered.
+The bounded profile accepts signed-word coordinates and rejects arithmetic that
+would wrap a clipped origin; general wrapped-word geometry remains unsupported.
+
+Copies snapshot source codes before writes, so overlapping self/clone copies are
+safe in every direction. They copy common low planes and preserve extra destination
+planes. Tagged logical/physical selectors, buffer identities, selection, palettes,
+view windows, text cursors and Autoback remain unchanged. Rectangle copies use the
+same raw path as whole-screen copies: no drawing or Bob hooks and no implicit
+publication to the other buffer. A stale saved Bob background stays owned by its
+existing buffer. No RGB conversion, stretching or drawing minterm is applied.
+
+Four rectangle test groups cover exclusive bounds, paired clipping, independent
+per-pixel results, overlaps/aliases, tagged physical destinations, hooks/Autoback,
+old snapshots, typed values and rejected forms. Original [Tunneltest](../examples/Tunnel/README.md)
+now compiles completely. Its source and embedded bank run unmodified with explicitly
+prepared substitutes for two absent external files. An independent Python decoder
+and animation oracle verify all 24 wheel icons and both ten-frame branches over
+48 physical-buffer/RGBA hashes. Five PNGs and five actual GPU comparisons cover
+selected animation frames. This establishes prepared fixture and browser parity,
+not original-background or external Amiga reference execution.
+
+The [tunnel demo](../demos/tunnel.html) offers animation, pause/resume, single-frame
+stepping, Restart, fullscreen and an IFF background picker. Uploads complete before
+VM execution; no asynchronous file object or Promise is returned to AMOS Load.
+The gallery features it alongside games and music; individual command checks remain
+available in its collapsed technical section.

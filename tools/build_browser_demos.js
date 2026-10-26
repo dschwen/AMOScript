@@ -45,7 +45,25 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   outputs.set('programs.html', interactive);
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
-  outputs.set('index.html', page('Browser demos', `<h1>AMOScript browser demos</h1><p>Every browser test scenario is available below. Use HTML Preview to run directly from GitHub, or open the local HTML files after cloning. Pages embed their scripts and fixtures; they do not need a server, Node or asset downloads. WebGL demos require WebGL2.</p>\n` + cards.map(card => `<article><h2>${escape(card.title)}</h2><p>${escape(card.description)}</p><a href="${preview(card.file)}">Run with htmlpreview.github.io</a> · <a href="${card.file}">Open locally</a> · <a href="https://github.com/dschwen/AMOScript/blob/master/demos/${card.file}">HTML source</a></article>`).join('\n')));
+  const games = ['wonderland-game.html', 'roller2-game.html'];
+  const showcases = ['tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
+  const featured = {
+    'wonderland-game.html': { title: 'Dithell’s Wonderland', description: 'Play the original game with keyboard or Gamepad controls, fullscreen and optional sound. Switch between WebGL2 and Canvas presentation.' },
+    'roller2-game.html': { title: 'Roller II', description: 'Play the original puzzle game with music, keyboard/Gamepad and fullscreen. Tested through level 2 and game over; a missing original image currently blocks post-game return.' },
+    'tunnel.html': { title: 'Tunnel animation', description: 'Watch the original animated icons, pause or step frames, and choose an IFF background. The default uses a prepared blank background because the external assets were not supplied.' },
+    'tracker.html': { title: 'Roller II MOD player', description: 'Listen to the original title music with Play, Pause/Resume and Stop controls.' },
+    'roller2-music-vm.html': { title: 'Roller II end tunes', description: 'Play the original game-over and victory music, then run the original volume fade-out.' },
+    'programs.html': { title: 'Interactive AMOS examples', description: 'Try compiled examples with graphics, image banks, moving objects, keyboard/mouse input and program switching.' }
+  };
+  const card = entry => `<article><h3>${escape((featured[entry.file] || entry).title)}</h3><p>${escape((featured[entry.file] || entry).description)}</p><a class="play" href="${preview(entry.file)}">${games.includes(entry.file) ? 'Play game' : 'Run demo'} (HTML Preview)</a><p class="secondary"><a href="${entry.file}">Open locally</a> · <a href="https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}">Source</a></p></article>`;
+  const group = files => files.map(file => cards.find(entry => entry.file === file)).filter(Boolean).map(card).join('\n');
+  const technical = cards.filter(entry => !games.includes(entry.file) && !showcases.includes(entry.file));
+  outputs.set('index.html', page('Browser demos', `<style>.demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,25rem),1fr));gap:1rem}.demo-grid article{margin:0}h3{margin-top:0}.play{display:inline-block;background:#07569c;color:white;padding:.65rem 1rem;text-decoration:none;border-radius:.25rem}.secondary{font-size:.9rem;margin-bottom:0}details{margin:2rem 0}summary{cursor:pointer;font-size:1.2rem;font-weight:600}section{margin:2rem 0}</style>
+    <header><h1>AMOScript demos</h1><p>Play original AMOS games in your browser, or explore animation, music and interactive examples.</p><nav><a href="#games">Games</a> · <a href="#showcases">More to explore</a> · <a href="#technical-demos">Technical checks</a> · <a href="https://github.com/dschwen/AMOScript#quick-start">Project and quick start</a></nav></header>
+    <section id="games"><h2>Play the games</h2><p>Start here. These demos run complete original programs; each page explains its tested paths and current limits. Enable sound and fullscreen through the page controls.</p><div class="demo-grid">${group(games)}</div></section>
+    <section id="showcases"><h2>More to explore</h2><div class="demo-grid">${group(showcases)}</div></section>
+    <details id="technical-demos"><summary>Compiler and runtime checks (${technical.length} demos)</summary><p>Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.</p><div class="demo-grid">${technical.map(card).join('\n')}</div></details>
+    <footer><p>All pages embed scripts and prepared fixtures. Open locally after cloning or use HTML Preview to run from GitHub; no server, Node or asset downloads are needed. WebGL requires WebGL2. Browser writes are volatile unless a demo explicitly says otherwise.</p></footer>`));
   outputs.set('manifest.json', JSON.stringify({ version: 1, scenarios: cards.map(card => ({ ...card, preview: preview(card.file) })) }, null, 2) + '\n');
   const stale = [];
   if (!check) fs.mkdirSync(path.join(directory, 'demos'), { recursive: true });

@@ -1632,6 +1632,35 @@
     }
     changed();
   }
+  function copyScreenRectangle(from, x1, y1, xEnd, yEnd, to, x2, y2) {
+    const destination = resolveBuffer(to), source = resolveBuffer(from);
+    const coordinates = [x1, y1, xEnd, yEnd, x2, y2];
+    coordinates.forEach(whole);
+    if (coordinates.some(value => value < -32768 || value > 32767)) throw new Error('Screen Copy rectangle coordinates require signed words');
+    // Sco0 clips the origins first, then subtracts the adjusted source origin
+    // from the exclusive end. Negative destination coordinates thus consume
+    // source pixels; negative source coordinates shift the destination.
+    if (x1 < 0) { x2 -= x1; x1 = 0; }
+    if (y1 < 0) { y2 -= y1; y1 = 0; }
+    if (x2 < 0) { x1 -= x2; x2 = 0; }
+    if (y2 < 0) { y1 -= y2; y2 = 0; }
+    if ([x1, y1, x2, y2].some(value => value > 32767)) throw new Error('Wrapped Screen Copy clipping is not implemented');
+    const sw = source.target.width, sh = source.target.height, dw = destination.target.width, dh = destination.target.height;
+    const width = Math.min(xEnd, sw) - x1, height = Math.min(yEnd, sh) - y1;
+    if (x1 >= sw || y1 >= sh || x2 >= dw || y2 >= dh || width <= 0 || height <= 0) return;
+    const columns = Math.min(width, dw - x2), rows = Math.min(height, dh - y2);
+    if (source.pixels === destination.pixels && x1 === x2 && y1 === y2) return;
+    // Snapshot raw codes before any write, including aliased clone/self copies.
+    // This gives overlap-safe copies without exposing traversal to the host.
+    const captured = new Uint8Array(columns * rows);
+    for (let y = 0; y < rows; y++) captured.set(source.pixels.subarray((y1 + y) * sw + x1, (y1 + y) * sw + x1 + columns), y * columns);
+    const planes = Math.min(source.target.colours - 1, destination.target.colours - 1);
+    for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
+      const at = (y2 + y) * dw + x2 + x;
+      destination.pixels[at] = (destination.pixels[at] & ~planes) | (captured[y * columns + x] & planes);
+    }
+    changed();
+  }
   function drawing(painter, args) {
     const target = screen();
     const synchronise = target.autoback === 2 && drawingHooks;
@@ -2141,7 +2170,7 @@
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
     ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
-    paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen,
+    paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
     drawTo: (...args) => { const target = screen(); validatePattern([target.gx, target.gy, ...args]); return drawing(drawTo, args); },

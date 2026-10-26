@@ -275,7 +275,7 @@
 - Two-operand Screen Copy resolves Logic/Physic integer selectors at execution
   and copies common bitmap planes without swapping identities or invoking
   Autoback/Bob hooks. Saved Bob backgrounds retain their existing owners. See
-  `docs/screen-copy.md`; rectangle/minterm variants and exact DMA timing remain open.
+  `docs/screen-copy.md`; explicit minterms and exact DMA timing remain open.
 - Reserve/Set/Reset Zone and Zone queries use per-screen unsigned-word rectangles,
   inclusive edges and lowest-number overlap priority. They do not draw or change
   presentation. Keep hardware mouse conversion separate from the existing Canvas
@@ -435,3 +435,13 @@ Bare Cline clears the full current 8x8 text row in paper colour without moving
 the cursor. Use existing drawing/Autoback/Bob hooks; counted Cline and general
 text controls/windows remain gated. See docs/cline.md for the independent
 portable-font/rainbow expectations and original game-load scope.
+
+Rectangular Screen Copy `$09a8` has eight numeric operands and exclusive source
+ends. Pair source/destination clipping as native Sco0, snapshot overlap sources,
+copy common low planes and preserve raw logical/physical/Bob ownership. Signed
+word geometry is bounded; wrapped clipping and explicit minterms remain gated.
+The pinned original Tunneltest runs with declared embedded-icon and blank-ILBM
+adapters for absent df1 assets; 48 independent frame hashes and five GPU frames
+cover it. IFF uploads finish before VM execution. See docs/screen-copy.md.
+Keep the README concise and the gallery games/showcases prominent. All technical
+browser demos retain HTML Preview links inside the closed-by-default checks group.
