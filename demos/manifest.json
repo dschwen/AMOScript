@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-rainbow-del.html",
+      "title": "Roller II rainbow deletion",
+      "description": "Original line 557 deletes rainbow 0 after a declared HOPSCREEN guard. Overlapping prepared PAL tables reveal slot 1, then delete-all restores the screen palette. Three independent Canvas images/three GPU frames, fullscreen and Restart; bounce/editor return excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-rainbow-del.html"
+    },
+    {
       "file": "roller2-get-icon.html",
       "title": "Roller II Get Icon requesters",
       "description": "Original missing-level and overwrite prompt captures on a prepared striped screen. Six independent Canvas images and six GPU frames verify exclusive bounds, padded icon 118 and masked restore. Declared requester guards; fullscreen and Restart, with editor/persistence excluded.",

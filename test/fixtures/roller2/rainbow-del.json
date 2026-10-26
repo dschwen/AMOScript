@@ -1,0 +1,28 @@
+{
+  "evidence": "Independent PAL row-colour oracle for the declared original-557 preview.\nPrepared grayscale slot 0/red slot 1 over colour 1; not a native capture.\n",
+  "frames": [
+    {
+      "stage": "overlap",
+      "png": "rainbow-del-overlap.png",
+      "slots": [
+        0,
+        1
+      ],
+      "rgbaSha256": "36bccf8fea625aa6d57b1fd7c80e97b35377f492781ccdceba7a7c53a9cc3ca5"
+    },
+    {
+      "stage": "slot-zero-deleted",
+      "png": "rainbow-del-slot-zero-deleted.png",
+      "slots": [
+        1
+      ],
+      "rgbaSha256": "f9f4c76b0c69a8e7b3a4496a615772777744db7ae4e9a4536b447dbc9bc63b40"
+    },
+    {
+      "stage": "all-deleted",
+      "png": "rainbow-del-all-deleted.png",
+      "slots": [],
+      "rgbaSha256": "e023d636cc5d4dbfc75f20bc6bf5f2a77f27911c053ac8261f8a040000a04266"
+    }
+  ]
+}

@@ -20,6 +20,11 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-rainbow-del'){
+        assert.strictEqual(await page.locator('#roller2-rainbow-del-controls').getAttribute('data-backend'),'webgl');await page.click('#roller2-rainbow-del-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-rainbow-del-viewport');
+        for(const [phase,slots]of [['slot-zero-deleted','1'],['all-deleted','']]){await page.click('#roller2-rainbow-del-step');assert.strictEqual(await page.locator('#roller2-rainbow-del-controls').getAttribute('data-phase'),phase);assert.strictEqual(await page.locator('#roller2-rainbow-del-controls').getAttribute('data-slots'),slots);}
+        await page.click('#roller2-rainbow-del-restart');assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'roller2-rainbow-del-viewport');assert.strictEqual(await page.locator('#roller2-rainbow-del-controls').getAttribute('data-slots'),'0,1');await page.evaluate(()=>globalThis.AMOS_ROLLER2_RAINBOW_DEL_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
       if(scenario.id==='roller2-get-icon'){
         assert.strictEqual(await page.locator('#roller2-get-icon-controls').getAttribute('data-backend'),'webgl');await page.click('#roller2-get-icon-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-get-icon-viewport');
         for(const phase of ['popup','restored']){await page.click('#roller2-get-icon-step');assert.strictEqual(await page.locator('#roller2-get-icon-controls').getAttribute('data-phase'),phase);}

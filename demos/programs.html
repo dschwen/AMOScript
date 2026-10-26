@@ -1993,6 +1993,15 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (height != null) table.height = height;
     changed();
   }
+  function rainbowDel(number = -1) {
+    whole(number);
+    if (number > 3) throw new Error('Unsupported Rainbow Del number (expected negative or 0..3)');
+    if (number < 0) {
+      if (!rainbows.size) return;
+      rainbows.clear();
+    } else if (!rainbows.delete(number)) return;
+    changed();
+  }
   function rainColour(number, line) {
     const table = rainbows.get(whole(number));
     if (!table || !Number.isInteger(line) || line < 0 || line >= table.colours.length) throw new Error('Rain index out of bounds');
@@ -2577,7 +2586,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   return {
     screens, screen, open, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
-    rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
+    rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
     get autoView() { return autoView; },
@@ -6963,6 +6972,15 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (height != null) table.height = height;
     changed();
   }
+  function rainbowDel(number = -1) {
+    whole(number);
+    if (number > 3) throw new Error('Unsupported Rainbow Del number (expected negative or 0..3)');
+    if (number < 0) {
+      if (!rainbows.size) return;
+      rainbows.clear();
+    } else if (!rainbows.delete(number)) return;
+    changed();
+  }
   function rainColour(number, line) {
     const table = rainbows.get(whole(number));
     if (!table || !Number.isInteger(line) || line < 0 || line >= table.colours.length) throw new Error('Rain index out of bounds');
@@ -7547,7 +7565,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   return {
     screens, screen, open, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
-    rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
+    rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
     get autoView() { return autoView; },
@@ -11950,6 +11968,15 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (height != null) table.height = height;
     changed();
   }
+  function rainbowDel(number = -1) {
+    whole(number);
+    if (number > 3) throw new Error('Unsupported Rainbow Del number (expected negative or 0..3)');
+    if (number < 0) {
+      if (!rainbows.size) return;
+      rainbows.clear();
+    } else if (!rainbows.delete(number)) return;
+    changed();
+  }
   function rainColour(number, line) {
     const table = rainbows.get(whole(number));
     if (!table || !Number.isInteger(line) || line < 0 || line >= table.colours.length) throw new Error('Rain index out of bounds');
@@ -12534,7 +12561,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   return {
     screens, screen, open, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
-    rainbows, setRainbow, rainbow, rainColour, setRain, view, setAutoView,
+    rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
     presentedScreen: () => presented,
     get autoView() { return autoView; },

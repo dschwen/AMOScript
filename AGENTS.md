@@ -113,6 +113,12 @@
   on a declared blank/palette preview, with prepared cell Input# replacing 355.
   Three independent Canvas/GPU frames cover it, not full editor/native capture.
   See `docs/set-line.md`; general graphics draw modes remain gated.
+- Rainbow Del removes slot 0–3 or all tables for any negative selector/bare form;
+  absent valid slots are no-ops. Keep other slots, immutable snapshots, indexed
+  pixels, selection/View and running palette jobs intact. Recreated slots are
+  fresh. Original 557 runs through a declared HOPSCREEN Wait Key guard; three
+  independent Canvas/GPU images cover overlap fallback and base-palette restore.
+  Bounce/editor return and native timing remain open; see `docs/rainbow-del.md`.
 - Get Icon captures current/explicit logical bitmap regions with exclusive bounds,
   word-rounded widths, zero right padding and new unmasked/zero-hotspot records.
   Keep existing palettes/other records; new banks use the selected screen palette.

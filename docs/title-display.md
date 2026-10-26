@@ -36,7 +36,9 @@ Bank `Load` remains a separate command with its existing formats and semantics.
 ## Table-based rainbows
 
 Implemented original tokens are Set Rainbow `$0d90`/`$0dae`, Rainbow `$0ddc`, and
-assignable/readable Rain `$0df0`. Set Rainbow supports empty component strings,
+assignable/readable Rain `$0df0`. [Rainbow Del](rainbow-del.md) now removes
+specific/all tables through that same live palette-row selection, without changing
+bitmap pixels or committing staged geometry. Set Rainbow supports empty component strings,
 the form Wonderland uses before filling the table with Rain. Nonempty pattern
 strings reject; their generation grammar remains a reference-verification gate.
 

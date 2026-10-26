@@ -52,6 +52,6 @@ checks, not evidence of cursor raster fidelity. The offline live demo checks
 fullscreen, hidden shape changes, wait/arrow/crosshair styles and Restart. Every
 browser scenario has a runnable page and an HTML Preview gallery link.
 
-Whole-source compilation now stops at Rainbow Del `$0dd4`, original line 557,
-byte 30562. Six of 194 encodings remain unrecognized; full editor/gameplay,
+Whole-source compilation now stops at Swap `$0670`, original line 956,
+byte 53096. Five of 194 encodings remain unrecognized; full editor/gameplay,
 AMOS Music end tunes and native reference captures remain separate milestones.
