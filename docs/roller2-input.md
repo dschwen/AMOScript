@@ -71,4 +71,4 @@ cyclic Add and original floor/stop/Lasttest handlers, stopping before colour eff
 Next extend those actual handler dependencies. Keep
 all reached labels checked and add independent trajectory/tile expectations;
 do not replace source dispatch with a synthetic floor handler. Full compilation
-still stops at Swap (line 956), with five token encodings unrecognized.
+still stops at Edit (line 956), with four token encodings unrecognized.

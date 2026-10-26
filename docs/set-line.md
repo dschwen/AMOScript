@@ -82,6 +82,6 @@ link and embeds all assets for offline use. These are fixture/CPU/GPU comparison
 not an original editor screen or native Amiga execution.
 
 A separate [Writing fixture](writing.md) now runs original 334 labels.
-Whole-source compilation now stops at Swap `$0670`, original line 956,
-byte 53096. Five of the 194 token encodings remain unrecognized; recognition alone
+Whole-source compilation now stops at Edit `$0670`, original line 956,
+byte 53096. Four of the 194 token encodings remain unrecognized; recognition alone
 does not complete game/editor behavior.

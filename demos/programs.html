@@ -4089,6 +4089,18 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     return offset;
   }
 
+  function arrayTargetIndex(array, indices) {
+    if (!array) throw new Error('Array not dimensioned');
+    if (array.dimensions.length !== indices.length) throw new Error('Wrong number of array indices');
+    let offset = 0;
+    for (let dimension = 0; dimension < indices.length; dimension++) {
+      const index = indices[dimension]();
+      if (!Number.isInteger(index) || index < 0 || index >= array.dimensions[dimension]) throw new Error('Array index out of bounds');
+      offset = offset * array.dimensions[dimension] + index;
+    }
+    return offset;
+  }
+
   function arrayGet(array, indices) {
     const index = arrayIndex(array, indices);
     return array.values.has(index) ? array.values.get(index) : array.defaultValue;
@@ -4511,7 +4523,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       if (text.includes('\x01')) throw new Error('Encoded Put Key packets are not implemented');
       state.input.keys.push(...text);
     },
-    integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, readData,
+    integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, arrayTargetIndex, readData,
     addInteger(current, delta, low = null, high = null) {
       const result = (current + delta) | 0;
       return low == null ? result : result < low ? high : result > high ? low : result;
@@ -9068,6 +9080,18 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     return offset;
   }
 
+  function arrayTargetIndex(array, indices) {
+    if (!array) throw new Error('Array not dimensioned');
+    if (array.dimensions.length !== indices.length) throw new Error('Wrong number of array indices');
+    let offset = 0;
+    for (let dimension = 0; dimension < indices.length; dimension++) {
+      const index = indices[dimension]();
+      if (!Number.isInteger(index) || index < 0 || index >= array.dimensions[dimension]) throw new Error('Array index out of bounds');
+      offset = offset * array.dimensions[dimension] + index;
+    }
+    return offset;
+  }
+
   function arrayGet(array, indices) {
     const index = arrayIndex(array, indices);
     return array.values.has(index) ? array.values.get(index) : array.defaultValue;
@@ -9490,7 +9514,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       if (text.includes('\x01')) throw new Error('Encoded Put Key packets are not implemented');
       state.input.keys.push(...text);
     },
-    integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, readData,
+    integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, arrayTargetIndex, readData,
     addInteger(current, delta, low = null, high = null) {
       const result = (current + delta) | 0;
       return low == null ? result : result < low ? high : result > high ? low : result;
@@ -14064,6 +14088,18 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     return offset;
   }
 
+  function arrayTargetIndex(array, indices) {
+    if (!array) throw new Error('Array not dimensioned');
+    if (array.dimensions.length !== indices.length) throw new Error('Wrong number of array indices');
+    let offset = 0;
+    for (let dimension = 0; dimension < indices.length; dimension++) {
+      const index = indices[dimension]();
+      if (!Number.isInteger(index) || index < 0 || index >= array.dimensions[dimension]) throw new Error('Array index out of bounds');
+      offset = offset * array.dimensions[dimension] + index;
+    }
+    return offset;
+  }
+
   function arrayGet(array, indices) {
     const index = arrayIndex(array, indices);
     return array.values.has(index) ? array.values.get(index) : array.defaultValue;
@@ -14486,7 +14522,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       if (text.includes('\x01')) throw new Error('Encoded Put Key packets are not implemented');
       state.input.keys.push(...text);
     },
-    integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, readData,
+    integer, integerOperation, divide, addStrings, subtractStrings, dim, arrayGet, arraySet, arrayIndex, arrayTargetIndex, readData,
     addInteger(current, delta, low = null, high = null) {
       const result = (current + delta) | 0;
       return low == null ? result : result < low ? high : result > high ? low : result;

@@ -1,0 +1,820 @@
+{
+  "evidence": "Independent source-level high-score sorting and portable-font preview.\nOriginal strict-max/exchange order, not a native AMOS execution capture.\n",
+  "cases": [
+    {
+      "key": "middle",
+      "score": 750,
+      "name": "guest",
+      "frames": [
+        {
+          "stage": "defaults",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              ""
+            ]
+          ],
+          "png": "swap-middle-defaults.png",
+          "indicesSha256": "28bebeeb26991881334d4cf6e7eb438f59375172f80f10f6a55ff47dc8e0a594",
+          "rgbaSha256": "bea9200f16c872ef60cd404134b05b5664ffe2e4abf8cd217058f500d8d2b02d"
+        },
+        {
+          "stage": "inserted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              750,
+              "guest"
+            ]
+          ],
+          "png": "swap-middle-inserted.png",
+          "indicesSha256": "0adff81bc9036e04e679406e04330013911cb4dfc742dbbcaec60be8976541c2",
+          "rgbaSha256": "821f9730f48eec048a855b213793099b6a096df4007d1dd6ad446f0efe5aaeed"
+        },
+        {
+          "stage": "sorted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              750,
+              "guest"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ]
+          ],
+          "png": "swap-middle-sorted.png",
+          "indicesSha256": "ef6128c63fcd654a827401ac9e855ec271f3f7957d275eb1ef8e7c353474bd50",
+          "rgbaSha256": "44243af3dfd7f4b36d1c856167c2f292ad3ed7a983e19bd33ebc273a994f4e39"
+        }
+      ]
+    },
+    {
+      "key": "tie",
+      "score": 900,
+      "name": "equal",
+      "frames": [
+        {
+          "stage": "defaults",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              ""
+            ]
+          ],
+          "png": "swap-tie-defaults.png",
+          "indicesSha256": "28bebeeb26991881334d4cf6e7eb438f59375172f80f10f6a55ff47dc8e0a594",
+          "rgbaSha256": "bea9200f16c872ef60cd404134b05b5664ffe2e4abf8cd217058f500d8d2b02d"
+        },
+        {
+          "stage": "inserted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              900,
+              "equal"
+            ]
+          ],
+          "png": "swap-tie-inserted.png",
+          "indicesSha256": "c1db695fa1d97f5fd31944868e23b2b07c3ed093adeac3f1dc90b4519e038492",
+          "rgbaSha256": "da7283361d9bd1daed8c4b99312dd2847155a01b43926bcff5214eaf9a934c27"
+        },
+        {
+          "stage": "sorted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              900,
+              "equal"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ]
+          ],
+          "png": "swap-tie-sorted.png",
+          "indicesSha256": "69314a6841f50bd7202ca0485ac050324ae3a742603340fe7e8b896921b3401b",
+          "rgbaSha256": "4075bee98437f3e8e18cc6b1f9a2bec72bab7cff9bfddfec3f015b2f32b0cf0a"
+        }
+      ]
+    },
+    {
+      "key": "zero",
+      "score": 0,
+      "name": "zero",
+      "frames": [
+        {
+          "stage": "defaults",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              ""
+            ]
+          ],
+          "png": "swap-zero-defaults.png",
+          "indicesSha256": "28bebeeb26991881334d4cf6e7eb438f59375172f80f10f6a55ff47dc8e0a594",
+          "rgbaSha256": "bea9200f16c872ef60cd404134b05b5664ffe2e4abf8cd217058f500d8d2b02d"
+        },
+        {
+          "stage": "inserted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              "zero"
+            ]
+          ],
+          "png": "swap-zero-inserted.png",
+          "indicesSha256": "68f70373dc30f4beb045a8b45484feade5d90f1cd5e3bfc7ab4c7d28ccaea331",
+          "rgbaSha256": "b30ec923095c09b7a56ea08ca10fb74076a285a16e8127921565291a8fda1333"
+        },
+        {
+          "stage": "sorted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              "zero"
+            ]
+          ],
+          "png": "swap-zero-sorted.png",
+          "indicesSha256": "68f70373dc30f4beb045a8b45484feade5d90f1cd5e3bfc7ab4c7d28ccaea331",
+          "rgbaSha256": "b30ec923095c09b7a56ea08ca10fb74076a285a16e8127921565291a8fda1333"
+        }
+      ]
+    },
+    {
+      "key": "maximum",
+      "score": 2147483647,
+      "name": "winner",
+      "frames": [
+        {
+          "stage": "defaults",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              ""
+            ]
+          ],
+          "png": "swap-maximum-defaults.png",
+          "indicesSha256": "28bebeeb26991881334d4cf6e7eb438f59375172f80f10f6a55ff47dc8e0a594",
+          "rgbaSha256": "bea9200f16c872ef60cd404134b05b5664ffe2e4abf8cd217058f500d8d2b02d"
+        },
+        {
+          "stage": "inserted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              2147483647,
+              "winner"
+            ]
+          ],
+          "png": "swap-maximum-inserted.png",
+          "indicesSha256": "f902e1ce7fe3d2a6d0eeaad6e6f299453446751254adaab1717f84a2c5ac1ecd",
+          "rgbaSha256": "d60a929e66c56f48a8bc702d968645d750a3289c040785ce01cdd2525f21b0ac"
+        },
+        {
+          "stage": "sorted",
+          "rows": [
+            [
+              2147483647,
+              "winner"
+            ],
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ]
+          ],
+          "png": "swap-maximum-sorted.png",
+          "indicesSha256": "f4f58b85d9c8699b893df7c0ea8ddd5e874405965105fc1543d942051d6c26b1",
+          "rgbaSha256": "4ac5a281e422a54d5982d1657edf925ebf824bbc4c9be1e85968c17741e615d4"
+        }
+      ]
+    },
+    {
+      "key": "negative",
+      "score": -5,
+      "name": "negative",
+      "frames": [
+        {
+          "stage": "defaults",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              0,
+              ""
+            ]
+          ],
+          "png": "swap-negative-defaults.png",
+          "indicesSha256": "28bebeeb26991881334d4cf6e7eb438f59375172f80f10f6a55ff47dc8e0a594",
+          "rgbaSha256": "bea9200f16c872ef60cd404134b05b5664ffe2e4abf8cd217058f500d8d2b02d"
+        },
+        {
+          "stage": "inserted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              -5,
+              "negative"
+            ]
+          ],
+          "png": "swap-negative-inserted.png",
+          "indicesSha256": "0885de78fc33717b50d2164a6c6d871f17286fefd0c9c6bc36f789276bf233df",
+          "rgbaSha256": "7918f3d17e083bbd54c8156d370da5f5784d31d27dc8a42adf7de95ccecf374b"
+        },
+        {
+          "stage": "sorted",
+          "rows": [
+            [
+              1000,
+              "program"
+            ],
+            [
+              900,
+              "von"
+            ],
+            [
+              800,
+              "daniel"
+            ],
+            [
+              700,
+              "schwen"
+            ],
+            [
+              600,
+              "gfx"
+            ],
+            [
+              500,
+              "auch"
+            ],
+            [
+              400,
+              "von"
+            ],
+            [
+              300,
+              "daniel"
+            ],
+            [
+              200,
+              "schwen"
+            ],
+            [
+              0,
+              "..."
+            ],
+            [
+              -5,
+              "negative"
+            ]
+          ],
+          "png": "swap-negative-sorted.png",
+          "indicesSha256": "0885de78fc33717b50d2164a6c6d871f17286fefd0c9c6bc36f789276bf233df",
+          "rgbaSha256": "7918f3d17e083bbd54c8156d370da5f5784d31d27dc8a42adf7de95ccecf374b"
+        }
+      ]
+    }
+  ]
+}
