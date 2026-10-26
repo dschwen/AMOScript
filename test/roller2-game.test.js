@@ -33,5 +33,5 @@ test('Roller2 current assets: byte-exact supplied refresh completes the original
   assert.strictEqual(files.exists('RII:iffp/roller hi'), true);
   const { create } = compile(Buffer.from(current['rii:Roller II.AMOS'], 'latin1'));
   const result = require('./helpers/roller2CurrentReplay')(create, clock, files, p => ({ joy: m => p.setJoystick(1, m), key: () => p.sendKey('a'), dispose() {} }));
-  assert.deepStrictEqual(result, { frames: 12, score: 278, level: 3, returnedToMenu: true, freshGame: true, writes: 0 }); assert.strictEqual(clock.pending(), 0);
+  assert.deepStrictEqual(result, { frames: 15, score: 301, level: 3, returnedToMenu: true, freshGame: true, writes: 0 }); assert.strictEqual(clock.pending(), 0);
 });

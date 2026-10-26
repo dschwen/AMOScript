@@ -49,7 +49,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const showcases = ['tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
     'wonderland-game.html': { title: 'Dithell’s Wonderland', description: 'Play the original game with keyboard or Gamepad controls, fullscreen and optional sound. Switch between WebGL2 and Canvas presentation.' },
-    'roller2-game.html': { title: 'Roller II', description: 'Play the original puzzle game with music, keyboard/Gamepad and fullscreen. Current supplied assets include the restored score image. Tested through the level-3 warp, game over, scores and a fresh game.' },
+    'roller2-game.html': { title: 'Roller II', description: 'Play the original puzzle game with music, keyboard/Gamepad and fullscreen. Includes the AMOS source fix for the level-3 time-bonus crash and the restored score image. Tested through the level-3 warp, game over, scores and a fresh game.' },
     'tunnel.html': { title: 'Tunnel animation', description: 'Watch the original animated icons, pause or step frames, and choose an IFF background. The original supplied icon bank and IFF background are included.' },
     'tracker.html': { title: 'Roller II MOD player', description: 'Listen to the original title music with Play, Pause/Resume and Stop controls.' },
     'roller2-music-vm.html': { title: 'Roller II end tunes', description: 'Play the original game-over and victory music, then run the original volume fade-out.' },

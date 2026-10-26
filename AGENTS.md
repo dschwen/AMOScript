@@ -323,13 +323,16 @@
   from `presentation/layout.js`. Bounded live host switching/input is implemented; arbitrary viewport/letterbox
   input routing, HAM/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
 - The live `roller2-game` scenario embeds the complete unchanged source and the
-  current supplied asset manifest under `examples/Roller2/current`. Changed assets
+  current supplied asset manifest under `examples/Roller2/current`. The playable
+  AMOS file has a source-level edge-guard ordering fix on lines 642/645; preserve
+  the original frozen source and keep compiler/bank checks unchanged. Changed assets
   and restored score/bounce images are pinned there; unchanged files share older
   bytes. Keep the older manifest frozen for bounded fixtures. Current input/host
   replay follows six first-level collectibles/warp into level 3, Timer expiry,
   game-over image/Music, restored scores, menu/MOD reload and a fresh game. No VM
-  variable/IP/bank edits. Twenty-four Canvas frames, six independent image regions
-  and twelve GPU comparisons pass. The old replay retains its historical missing-
+  variable/IP/bank edits. Level-3 time-bonus pickup and repeated bottom-edge bump
+  now pass through the corrected AMOS source. Thirty Canvas frames, six independent
+  image regions and fifteen GPU comparisons pass. The old replay retains its historical missing-
   file error; it is no longer a current-demo blocker. Session writes survive only
   Restart; high-score entry/writeback, editor/win/completion and native captures
   remain open. See `docs/roller2-game.md`.

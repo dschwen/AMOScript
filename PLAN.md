@@ -9,6 +9,13 @@ now uses its supplied external icons and IFF background, with 48 independent
 animation hashes and five actual GPU comparisons. See docs/screen-copy.md and
 examples/Tunnel/README.md.
 
+The playable Roller II AMOS file now contains a source-level fix for speculative
+next-cell reads at board edges: original lines 642/645 check the edge before the
+two Peeks. Compiler and bank bounds are unchanged. The original supplied source
+is retained in the frozen fixtures; the corrected file is pinned in the current
+manifest. The level-3 bottom-right bonus regression reaches TM=20 and a safe stop
+at (17,11) through original input. See examples/Roller2/current/movement-edge-fix.md.
+
 ## Current priority: Roller II
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
@@ -239,7 +246,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **725 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **727 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-26. The current local baseline has **725 passing tests**, plus a
+Updated 2026-10-26. The current local baseline has **727 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.

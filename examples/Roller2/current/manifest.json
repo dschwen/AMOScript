@@ -4,13 +4,21 @@
   "source": {
     "kind": "user-provided",
     "directory": "RII",
-    "evidence": "Current supplied bytes; unchanged assets are shared with the frozen earlier fixture set. No native capture inferred."
+    "evidence": "Current supplied assets with the documented AMOS movement edge-guard source fix. Unchanged assets share the frozen earlier files. No native capture inferred.",
+    "movementFix": {
+      "originalSha256": "eead952953651944b295f8503cc8d3704e99920468d256e3f3c7ace18ecc2518",
+      "changedLines": [
+        642,
+        645
+      ],
+      "description": "Check the board edges before next-cell HD/HC Peeks; keep the original wall handling after the reads."
+    }
   },
   "files": {
     "Roller II.AMOS": {
-      "path": "../Roller II.AMOS",
-      "byteLength": 65808,
-      "sha256": "eead952953651944b295f8503cc8d3704e99920468d256e3f3c7ace18ecc2518"
+      "path": "Roller II.AMOS",
+      "byteLength": 65966,
+      "sha256": "3637b3b07b79d1b352174f8a3e770a5a0f28b73cf8077f2110853b03071836c8"
     },
     "RollerIntro.amos": {
       "path": "../RollerIntro.amos",
