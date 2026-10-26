@@ -70,8 +70,12 @@ A separate progression fixture now runs unchanged ZAEHLHOCH and returns through
 LEVLOAD into the real second-level bank, ready prompt and starting ball. Its
 inclusive bonus, bank retirement, Stop/Resume and missing-file win guard pass;
 fourteen Canvas frames and seven additional GPU comparisons cover keyboard/Gamepad.
-See docs/roller2-progression.md. Next extend reached level-2 obstacle paths, then
-Copy/Fill and other handlers. Sprite-bank raw
+See docs/roller2-progression.md. A further pause fixture now runs original
+PAUSE/IPause, including paid mouse/Help pause, Space popup and source Timer
+restoration. Twenty Canvas images and ten GPU comparisons cover native input
+and host lifecycle; see docs/roller2-pauses.md. The next level-2 arrow path
+requires Boom synthesis even in its unreached timeout branch. Next implement
+source-backed noise/envelope playback, then PFEIL and other reached handlers. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the

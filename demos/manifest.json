@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-pauses.html",
+      "title": "Roller II original pause modes",
+      "description": "Original PAUSE/IPause after real level progression: mouse/Help paid pause, Space pause popup, keyboard/Gamepad WTIN return and source Timer restoration. Twenty independent Canvas images and ten GPU comparisons; live fullscreen/Stop/Resume/Restart. Enter is joystick fire so Space reaches AMOS. Arrows and game-over remain guarded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-pauses.html"
+    },
+    {
       "file": "roller2-progression.html",
       "title": "Roller II bonus and next level",
       "description": "Original five-tile collection continues through ZAEHLHOCH inclusive bonus scoring, Return and LEVLOAD into the real second-level bank, ready prompt and starting ball. Fourteen independent Canvas images and seven GPU comparisons using keyboard/Gamepad. Other obstacle/pause/game-over handlers remain guarded.",

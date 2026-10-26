@@ -41,5 +41,6 @@ audio events. The existing metadata-only level demo remains separate.
 
 Other tile handlers, pause, game-over and win remain explicit guards. The demo
 ships only levels 1 and 2; it does not claim complete gameplay or all-level
-progression. Next extend reached level-2 obstacle paths, then the remaining
-handlers and end-game music. Whole-program compilation still stops at Boom.
+progression. The separate [pause fixture](roller2-pauses.md) now runs original PAUSE/IPause;
+this progression fixture retains its pause guards. Next implement Boom synthesis
+needed by the level-2 arrow timeout, then remaining handlers and end-game music. Whole-program compilation still stops at Boom.

@@ -90,7 +90,13 @@
   metadata, fade and starting ball. Its inclusive bonus, captured For bound,
   bank-address retirement and missing-file win guard are checked. Fourteen
   Canvas frames/seven GPU comparisons use keyboard/Gamepad. See
-  `docs/roller2-progression.md`; other handlers and later-level progression remain open.
+  `docs/roller2-progression.md`. A separate pause fixture adds original 966–984:
+  mouse/Help paid pause, Space popup and WTIN exits preserve source Timer
+  restoration (including negative values) and ordinary stacks. Keyboard fire is
+  Enter in that demo so Space reaches AMOS. Twenty Canvas frames/ten GPU
+  comparisons cover the source paths and host lifecycle; see `docs/roller2-pauses.md`.
+  PFEIL still needs Boom synthesis for its timeout branch; other handlers and
+  later-level progression remain open.
   Prepared original stop/collapse maps are declared adapter fixtures, not native
   level progression. See `docs/roller2-movement.md`, `docs/add.md` and
   `docs/string-branches.md`. Numeric/procedure/non-ASCII string branches remain open.

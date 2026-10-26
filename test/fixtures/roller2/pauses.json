@@ -1,0 +1,17 @@
+{
+  "evidence": "Independent raw assets and original 966\u2013984; portable font/origin, injected clock, not native execution.",
+  "frames": [
+    {
+      "png": "pause-paid.png",
+      "rgbaSha256": "8ec26b3f3dae696a4ca66d818767fe270fc0e331b1b51b8a12dcdc0ef99cca4a"
+    },
+    {
+      "png": "pause-screen.png",
+      "rgbaSha256": "6f0e1f3876c0bc1a5a032200512dc30ebc22498f6f0a3925405b7c838f4330d5"
+    },
+    {
+      "png": "pause-resumed.png",
+      "rgbaSha256": "0dcc518d4a5715b3234282f99ed76e19283b9494163596c983dcb76e65ed4af9"
+    }
+  ]
+}
