@@ -15,8 +15,8 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Evidence | Current result |
 | --- | --- |
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
-| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 4 after tracker/startup, display/memory commands, Boom, Fill/Copy, Set Line, Writing, Scin, Change Mouse, Get Icon, Rainbow Del and Swap |
-| Whole-source compiler gate | Unsupported Edit `$0670` at line 956, byte 53,096; recognition alone still does not prove parser/runtime support for later forms |
+| Token inventory | 194 distinct encodings; initially 43 unrecognized, now 3 after tracker/startup, display/memory commands, Boom, Fill/Copy, Set Line, Writing, Scin, Change Mouse, Get Icon, Rainbow Del, Swap and Edit |
+| Whole-source compiler gate | Unsupported slot-1 Music `$0058` at line 992, byte 54,202; recognition alone still does not prove parser/runtime support for later forms |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
@@ -27,6 +27,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; icon addressing now runs original ICCOPY before its entry guard. [Demo](../demos/roller2-levels.html) |
 | Original game-entry icon copies | Original 565–570 and ICCOPY 240–246 execute after menu game selection. Bounded live icon table/planar views preserve the inclusive allocation-tail byte and old masks. Independent PNGs and two additional GPU frames. [Contract](icon-memory.md) |
 | Game screens and first level load | Original 571–600 creates hidden/game screens, initializes rainbow/status rows, loads level 1 and refreshes text through Cline. Independent portable-font/rainbow panel pixels match Canvas/GPU. Guard precedes overlapping-window presentation, board drawing and gameplay. [Contract](cline.md) |
+| Edit host boundary | Frozen source request and terminal cleanup precede optional synchronous host notification; no embedded editor. Original ROUNDTURN rotates four prepared cardinal directions and exits on zero/diagonal fallbacks, with PHALT/BEWEG guards. Twelve Canvas frames/four GPU comparisons. [Contract](edit.md) |
 | Swap/high-score sorting | Same-type scalar/element exchange captures both addresses before stores. Original defaults, insertion and paired integer/string sort match five independent orders/fifteen Canvas images/three GPU frames. Prepared entry/portable table; name entry, saving and menu return excluded. [Contract](swap.md) |
 | Rainbow deletion | Individual/all slots, absent-slot no-op and fresh recreation preserve indexed pixels and ongoing palette jobs. Original 557 returns through a declared HOPSCREEN guard; three independent Canvas images/three GPU frames show overlap fallback and base colour. Bounce/editor return excluded. [Contract](rainbow-del.md) |
 | Get Icon requester backups | Both capture signatures use exclusive logical bitmap bounds, zero-padded word widths and unmasked images, preserving bank palettes and retiring replaced raw addresses. Original missing-level/overwrite captures match six independent Canvas images/six GPU frames in declared previews. [Contract](get-icon.md) |
@@ -117,7 +118,8 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    preview with six independent Canvas/GPU frames. Rainbow Del now runs original
    557 through a declared HOPSCREEN guard and checks overlap/base-palette restoration.
    Swap now runs original paired high-score sorting in a declared preview.
-   Next implement Edit and other reached handlers and bank/text
+   Edit now terminates at its original invalid-direction fallback and issues a
+   post-cleanup host request. Next implement AMOS Music and other reached handlers and bank/text
    forms as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
    against the unchanged source and level data. Wider general forms remain gates.
@@ -130,10 +132,10 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    traces and external reference captures. Token recognition is not a completion
    percentage; the MOD inspector is not tracker playback.
 
-The four remaining decoder encodings are Edit, Music, Mvolume and Music Off. The full audit command reports exact offsets, counts and first source
+The three remaining decoder encodings are Music, Mvolume and Music Off. The full audit command reports exact offsets, counts and first source
 locations; use that inventory rather than guessing offsets from command names.
 
-Local baseline for this slice: 696 tests, 51 offline browser scenario pages,
+Local baseline for this slice: 701 tests, 52 offline browser scenario pages,
 179 renderer, eleven Wonderland live-game, seven Roller II first-image, eleven Roller II intro and three connected-menu, two icon-copy, two board and six ready-prompt/ball and six input-loop and six movement and seven colour-collection GPU/CPU comparisons, four Writing, three Set Line and seven Scin GPU/CPU comparisons, plus existing
 native sample/fullscreen checks. These do not establish Roller II gameplay,
 tracker audio fidelity, target-device performance or new hosted CI evidence.

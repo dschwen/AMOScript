@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-26. The current local baseline has **696 passing tests**, plus a
+Updated 2026-10-26. The current local baseline has **701 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,10 +9,10 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 4 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 3 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
-compilation stops at Edit (line 956). Original WTIN/FDZ now run in a declared fixture that
+compilation stops at Music (line 992). Original WTIN/FDZ now run in a declared fixture that
 runs original array/highscore setup, SASINIT and work/icon/sprite bank loads,
 then hands off to the main-title image while omitting remaining setup 281–286.
 The connected menu fixture now runs the original executable startup-to-menu
@@ -36,6 +36,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Edit | Implemented terminal host boundary | Frozen source request; VM/audio/palette/input cleanup before optional synchronous notification, once-only handling, no continuation or embedded editor. Original ROUNDTURN fixture covers guarded rotations and fallback. Native editor UI/end-state music remain open. [Contract](edit.md). |
 | Swap | Implemented same-type lvalue exchange | Integer/float/string scalar and array elements, captured addresses/indices/local owners, checked before writes, ordinary scopes and fallthrough. Original paired high-score sorting matches five independent cases/fifteen Canvas previews and three GPU frames. Native captures/end-state integration remain open. [Contract](swap.md). |
 | Rainbow Del | Implemented table deletion | Specific 0–3, negative/all forms, absent-slot no-op and fresh recreation; live palette-row removal restores overlap/base colour without changing pixels, View or fade jobs. Original 557 fixture matches three independent Canvas/GPU frames. Native timing/positive wrapped aliases remain open. [Contract](rainbow-del.md). |
 | Get Icon | Implemented bounded current/explicit-screen capture | Exclusive logical bitmap rectangle, word-padded zero tails, all planes, zero hotspots and no mask. Sparse growth/replacement preserves other images/palette and retires raw addresses. Original requester captures/restores match six independent Canvas/GPU frames; general capture aliases/native timing remain open. [Contract](get-icon.md). |

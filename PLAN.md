@@ -6,8 +6,8 @@ Assessment updated: 2026-10-26.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 4 remain unrecognized (43 at
-initial assessment), and whole compilation now stops at Edit on line 956.
+The main source has 1,199 lines and 194 encodings; 3 remain unrecognized (43 at
+initial assessment), and whole compilation now stops at Music on line 992.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -38,7 +38,7 @@ menu fixture now runs the original executable prefix through 316, including both
 FLOADs, setup 281–286 and continuing MOD playback: ten browser cases, nine guarded
 selections and three independent/GPU frames. The live demo offers music activation/
 mute and restart-safe bindings. Next implement the selected routines and their
-dependencies, alongside the remaining decoder gates (now Edit). Checked big-endian
+dependencies, alongside the remaining decoder gates (now Music). Checked big-endian
 Doke/Deek/Loke/Leek now support generic banks, including odd addresses and atomic
 range checks. Original level metadata/time statements pass across all fifteen
 pinned files in a new demo. Bounded icon table/planar aliases now run original ICCOPY at game entry through
@@ -105,8 +105,12 @@ Swap now exchanges same-type scalar/array targets after capturing and checking
 both addresses. Original high-score insertion/sorting matches five independent
 pair-order cases and fifteen Canvas images/three GPU frames in a declared preview;
 see docs/swap.md. The previous gate label was incorrect: $0670 at line 956 is Edit,
-while Swap is $00a6 at line 1073. Next implement Edit and other reached
-compiler/gameplay handlers; see docs/roller2-arrows.md. Sprite-bank raw
+while Swap is $00a6 at line 1073. Edit now terminates with a frozen source
+request after VM/audio/palette/input cleanup, then optionally notifies a synchronous
+system host. Original ROUNDTURN rotations and its invalid-direction Edit fallback
+run in a declared PHALT/BEWEG fixture; twelve Canvas frames/four GPU comparisons
+pass. See docs/edit.md. Next implement AMOS Music bank decoding/playback with
+Mvolume/Music Off and the remaining gameplay/end-state integrations; see docs/roller2-arrows.md. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
@@ -219,7 +223,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **696 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **701 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

@@ -52,6 +52,6 @@ checks, not evidence of cursor raster fidelity. The offline live demo checks
 fullscreen, hidden shape changes, wait/arrow/crosshair styles and Restart. Every
 browser scenario has a runnable page and an HTML Preview gallery link.
 
-Whole-source compilation now stops at Edit `$0670`, original line 956,
-byte 53096. Four of 194 encodings remain unrecognized; full editor/gameplay,
+Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
+byte 54202. Three of 194 encodings remain unrecognized; full editor/gameplay,
 AMOS Music end tunes and native reference captures remain separate milestones.

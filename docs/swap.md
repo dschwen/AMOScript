@@ -58,7 +58,7 @@ GPU rendering. Live controls offer prepared score/name inputs, stepping,
 fullscreen and Restart; the gallery supplies an HTML Preview link.
 
 The previous milestone mislabeled the first remaining token. `$0670` at original
-line 956, byte 53096, is **Edit**, not Swap. The audit now asserts that catalog
-name. Full-source compilation still stops there. Four encodings remain
-unrecognized: Edit, Music, Mvolume and Music Off. Supporting Swap advances the
-high-score slice without claiming a working editor return or end-state music.
+line 956, byte 53096, is **Edit**, not Swap. Edit now has a separate [terminal host boundary](edit.md). Full-source compilation
+now stops at slot-1 Music `$0058`, original line 992, byte 54202. Three encodings
+remain unrecognized: Music, Mvolume and Music Off. The high-score slice remains
+separate from editor UI, persistent scores and end-state music.

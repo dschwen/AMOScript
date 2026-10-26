@@ -54,6 +54,6 @@ supports stepping, fullscreen and Restart while retaining the container. Its
 HTML Preview link is in the gallery. This establishes fixture and CPU/GPU parity;
 full editor return, HOPSCREEN animation and native execution remain separate work.
 
-Whole-source compilation now stops at Edit `$0670`, original line 956,
-byte 53096. Four of 194 encodings remain unrecognized. Recognition is separate
+Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
+byte 54202. Three of 194 encodings remain unrecognized. Recognition is separate
 from full-game/editor behavior and AMOS Music end-state acceptance.

@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const edit=await runScenario('roller2-edit',page);assert.strictEqual(edit.gpuFrames,4);assert.strictEqual(edit.editRequests,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_EDIT_CLEANUP());
+    console.log('Roller2 Edit passed: original turn/fallback branches, terminal cleanup/input ownership and four GPU frames.');
     const swap=await runScenario('roller2-swap',page);assert.strictEqual(swap.gpuFrames,3);await page.evaluate(()=>globalThis.AMOS_ROLLER2_SWAP_CLEANUP());
     console.log('Roller2 Swap passed: five original paired sorts, fifteen independent previews and three GPU frames.');
     const rainbowDel=await runScenario('roller2-rainbow-del',page);assert.strictEqual(rainbowDel.gpuFrames,3);await page.evaluate(()=>globalThis.AMOS_ROLLER2_RAINBOW_DEL_CLEANUP());

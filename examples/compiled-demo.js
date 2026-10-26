@@ -4661,6 +4661,7 @@
     stopped: false,
     waiting: null,
     location: null,
+    editRequest: null,
     column: 0,
     input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
@@ -4670,6 +4671,7 @@
   let paletteWake = null;
   let trackerWake = null;
   let sleepRemaining = 0;
+  let pendingEdit = null;
   const keys = state.input.keys;
   const inputResetListeners = new Set();
   function clearScanCodes() {
@@ -4800,6 +4802,13 @@
       throw error;
     }
     state.ticks++;
+    if (res.edit) {
+      state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });
+      pendingEdit = state.editRequest;
+      state.halted = true;
+      state.waiting = null;
+      return { done: true };
+    }
 
     if (res.goto != null) state.ip = res.goto;
     if (res.call != null) { state.stack.push(ipBefore + 1); state.ip = res.call; }
@@ -4873,6 +4882,7 @@
       operations.flushBobs();
       if (state.halted) { cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); resetInput(); operations.audio.silence(); }
     } catch (error) {
+      pendingEdit = null;
       state.halted = true;
       state.waiting = null;
       cancelScheduled();
@@ -4881,6 +4891,21 @@
       silenceAfterFailure();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       throw error;
+    }
+    // Notify only after terminal cleanup. Consume the request first so a
+    // reentrant/throwing host cannot replay it or run old cleanup after a new VM.
+    const request = pendingEdit;
+    pendingEdit = null;
+    if (request && options.system != null) {
+      try {
+        if (typeof options.system.command !== 'function') throw new Error('System host requires a synchronous command method');
+        const result = options.system.command('Edit', request);
+        if (result && typeof result.then === 'function') throw new Error('System host commands must complete synchronously');
+      } catch (error) {
+        const failure = error && typeof error.message === 'string' ? error : new Error(String(error));
+        if (request.location && !failure.message.includes(' at line ')) failure.message += ` at line ${request.location.line}, byte ${request.location.offset}`;
+        throw failure;
+      }
     }
     if (!state.halted && !state.waiting && steps >= maxSteps) scheduleNext(0);
     return { steps, ip: state.ip, halted: state.halted };

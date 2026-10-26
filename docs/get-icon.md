@@ -76,6 +76,6 @@ both requester previews, fullscreen, restoration and Restart. The gallery has an
 HTML Preview link. These are source/fixture and CPU/GPU comparisons, not native
 requester or full-game reference execution.
 
-Whole-source compilation now stops at Edit `$0670`, original line 956,
-byte 53096. Four of 194 token encodings remain unrecognized; whole-game/editor
+Whole-source compilation now stops at slot-1 Music `$0058`, original line 992,
+byte 54202. Three of 194 token encodings remain unrecognized; whole-game/editor
 integration and end-state AMOS Music remain acceptance work.

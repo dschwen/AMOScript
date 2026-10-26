@@ -1,0 +1,11 @@
+{
+  "evidence": "Literal original ROUNDTURN direction cases; PHALT is a Return stub and BEWEG a guard. Prepared vector pixels are an axis/diagonal oracle, not game/native capture.",
+  "cases": [
+    { "name": "left", "input": [-1, 0], "output": [0, -1], "edit": false },
+    { "name": "up", "input": [0, -1], "output": [1, 0], "edit": false },
+    { "name": "right", "input": [1, 0], "output": [0, 1], "edit": false },
+    { "name": "down", "input": [0, 1], "output": [-1, 0], "edit": false },
+    { "name": "zero", "input": [0, 0], "output": [0, 0], "edit": true },
+    { "name": "diagonal", "input": [1, 1], "output": [1, 1], "edit": true }
+  ]
+}

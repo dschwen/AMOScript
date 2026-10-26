@@ -131,3 +131,7 @@ invalid forms and adapter failures. The
 [Wonderland demo](../demos/wonderland.html) executes the exact 64-line original
 prefix under two fake-clock schedules and displays both benchmark outcomes,
 alongside the four independently checked image assets and remaining blockers.
+
+[Edit](edit.md) now provides a separate terminal editor-request control with
+post-cleanup synchronous system notification. It does not open or embed the native
+source editor or change the existing startup command flags.

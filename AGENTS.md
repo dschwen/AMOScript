@@ -113,6 +113,14 @@
   on a declared blank/palette preview, with prepared cell Input# replacing 355.
   Three independent Canvas/GPU frames cover it, not full editor/native capture.
   See `docs/set-line.md`; general graphics draw modes remain gated.
+- Edit emits a terminal control and frozen `state.editRequest` source metadata.
+  Halt/cleanup audio, palette wakes and held input before optionally calling
+  synchronous `system.command('Edit', request)` once. No adapter is required and
+  no editor UI is implied. Consume before notification; host failure/reentry must
+  not repeat it or run old cleanup after a replacement VM starts. Retain final
+  state/frame for inspection; Resume cannot continue it. Original ROUNDTURN runs
+  with PHALT/BEWEG stubs/guards in six cases, twelve Canvas/four GPU frames. See
+  `docs/edit.md`; source-editor UI and native teardown/captures remain open.
 - Swap exchanges same-type integer/float/string scalars/elements. Keep its AST
   pure, capture and validate both lvalues left-to-right, retain array objects/
   linear offsets and local owners. Check array existence/rank before callbacks
@@ -121,7 +129,7 @@
   Original high-score insertion/sorting matches five independent paired orders
   and fifteen Canvas images/three GPU frames in a declared Print Using preview.
   Entry UI, scoresave and menu return remain open; see `docs/swap.md`.
-  The first whole-source gate is Edit $0670 at 956; Swap is $00a6 at 1073.
+  Swap is $00a6 at 1073; Edit $0670 at 956 now uses the terminal host boundary.
 - Rainbow Del removes slot 0–3 or all tables for any negative selector/bare form;
   absent valid slots are no-ops. Keep other slots, immutable snapshots, indexed
   pixels, selection/View and running palette jobs intact. Recreated slots are
