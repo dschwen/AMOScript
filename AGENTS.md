@@ -201,7 +201,11 @@
   workspace bytes; loop flags are per factory. Track Play/Stop use a driver-owned
   VBL wake and shared sample voices; all overloads use checked chip Tracker banks.
   Roller II is the current target; see `docs/roller2.md` and `docs/mod-tracker.md`.
-  Its end tunes are AMOS Music banks, not MODs. Never count a pattern inspector
+  Its end tunes are AMOS Music banks, not MODs. The owned Music-bank decoder and
+  direct field player now cover both tunes with independent full first-wrap
+  PAL/NTSC traces and 25 native Web Audio comparisons. Music/Mvolume/Music Off
+  VM commands, driver wakes and bank/shared-voice lifecycle integration remain
+  open; see `docs/amos-music.md`. Never count a pattern inspector
   or loop flag as tracker playback.
   `lib/amos/tracker.js` provides direct field-stepped C/A/E/F/D playback with
   owned PCM preprocessing and raw restart semantics. VM Track Play also mutates

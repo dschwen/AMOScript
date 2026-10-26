@@ -109,12 +109,13 @@ while Swap is $00a6 at line 1073. Edit now terminates with a frozen source
 request after VM/audio/palette/input cleanup, then optionally notifies a synchronous
 system host. Original ROUNDTURN rotations and its invalid-direction Edit fallback
 run in a declared PHALT/BEWEG fixture; twelve Canvas frames/four GPU comparisons
-pass. See docs/edit.md. Next implement AMOS Music bank decoding/playback with
-Mvolume/Music Off and the remaining gameplay/end-state integrations; see docs/roller2-arrows.md. Sprite-bank raw
+pass. See docs/edit.md. The owned AMOS Music decoder/direct field player now
+covers both end tunes, including all 25 instruments and complete first-loop PAL/NTSC traces. See
+docs/amos-music.md. Next connect Music/Mvolume/Music Off to the VM and the
+remaining gameplay/end-state integrations; see docs/roller2-arrows.md. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
-Game-over/win
-music uses AMOS Music banks and needs a separate decoder/player. Preserve the
-existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
+Game-over/win music uses AMOS Music banks; its direct decoder/player now needs
+VM integration. Preserve the existing WebGL/audio/fullscreen host and Wonderland regressions. IndexedDB
 persistence, full mode/reference captures and the broader language work stay open.
 
 ## Retained milestone: Wonderland in the browser
@@ -223,7 +224,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **701 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **708 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

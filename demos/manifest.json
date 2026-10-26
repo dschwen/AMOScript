@@ -146,6 +146,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-startup.html"
     },
     {
+      "file": "roller2-amos-music.html",
+      "title": "Roller II AMOS Music end tunes",
+      "description": "Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. VM Music integration remains pending.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
+    },
+    {
       "file": "tracker.html",
       "title": "Play Roller II MOD music",
       "description": "Original bounded load/Led Off/Track Play statements run in a compiled VM, with independent field wakes, Pause/Resume and Stop. All 1,997 notes and ten instrument waveforms pass source-derived/native Web Audio checks. Full-game integration remains open.",

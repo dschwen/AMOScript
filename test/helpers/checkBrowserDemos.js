@@ -270,6 +270,19 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#roller2-startup-reset');assert.strictEqual(await page.locator('#roller2-startup-controls').getAttribute('data-field'),'0');
         await page.evaluate(()=>globalThis.AMOS_ROLLER2_STARTUP_CLEANUP());
       }
+      if (scenario.id === 'roller2-amos-music') {
+        await page.click('#amos-music-step');
+        await page.waitForFunction(() => document.getElementById('amos-music-status').dataset.field === '6');
+        await page.click('#amos-music-play');
+        await page.waitForFunction(() => Number(document.getElementById('amos-music-status').dataset.plays) > 0);
+        await page.click('#amos-music-stop');
+        await page.waitForFunction(() => document.getElementById('amos-music-status').dataset.state === 'off' && document.getElementById('amos-music-status').dataset.voices === '0');
+        await page.selectOption('#amos-music-song', { label: 'Ywon.mus' });
+        await page.click('#amos-music-play');
+        await page.waitForFunction(() => document.getElementById('amos-music-status').dataset.state === 'on' && Number(document.getElementById('amos-music-status').dataset.field) > 1);
+        const closed = await page.evaluate(() => AMOS_MUSIC_DEMO_CLEANUP());
+        assert.strictEqual(closed.state, 'disposed'); assert.strictEqual(closed.contextState, 'closed');
+      }
       if(scenario.id==='tracker'){
         await page.click('#tracker-play');await page.waitForFunction(()=>Number(document.getElementById('tracker-status').dataset.field)>=6);
         await page.click('#tracker-pause');await page.waitForFunction(()=>document.getElementById('tracker-status').dataset.state==='paused');

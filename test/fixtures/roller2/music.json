@@ -1,0 +1,1256 @@
+{
+  "evidence": "Independent raw-bank AMOS Music decode and register-state trace.\nPinned src/ext/music.cpp and music_play.cpp rules; not an Amiga audio capture.\n",
+  "banks": [
+    {
+      "file": "Over.mus",
+      "byteLength": 74868,
+      "sourceSha256": "be618b0dd87a873e4399699ed388544a88fd146b0ba01b3802ee838d4885d41d",
+      "instrumentCount": 12,
+      "songName": "sll2",
+      "orders": [
+        [
+          0,
+          1,
+          2,
+          2,
+          3,
+          3,
+          1,
+          2,
+          4,
+          4,
+          2,
+          2,
+          5,
+          5,
+          2,
+          2,
+          3,
+          3,
+          6,
+          6,
+          7,
+          7,
+          7,
+          7,
+          8
+        ],
+        [
+          0,
+          1,
+          2,
+          2,
+          3,
+          3,
+          1,
+          2,
+          4,
+          4,
+          2,
+          2,
+          5,
+          5,
+          2,
+          2,
+          3,
+          3,
+          6,
+          6,
+          7,
+          7,
+          7,
+          7,
+          8
+        ],
+        [
+          0,
+          1,
+          2,
+          2,
+          3,
+          3,
+          1,
+          2,
+          4,
+          4,
+          2,
+          2,
+          5,
+          5,
+          2,
+          2,
+          3,
+          3,
+          6,
+          6,
+          7,
+          7,
+          7,
+          7,
+          8
+        ],
+        [
+          0,
+          1,
+          2,
+          2,
+          3,
+          3,
+          1,
+          2,
+          4,
+          4,
+          2,
+          2,
+          5,
+          5,
+          2,
+          2,
+          3,
+          3,
+          6,
+          6,
+          7,
+          7,
+          7,
+          7,
+          8
+        ]
+      ],
+      "patternCount": 9,
+      "commands": {
+        "00": 36,
+        "03": 287,
+        "08": 1,
+        "09": 287,
+        "10": 1030
+      },
+      "instruments": [
+        {
+          "number": 0,
+          "name": "st-01:funkbass",
+          "offset": 406,
+          "repeatOffset": 402,
+          "length": 5300,
+          "repeatLength": 4,
+          "storedLength": 5300,
+          "volume": 64,
+          "pcmSha256": "ceac72fb72a24f79a72bc27f374a872cb03262b99f28a123bda456e999e1667f",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "ceac72fb72a24f79a72bc27f374a872cb03262b99f28a123bda456e999e1667f"
+        },
+        {
+          "number": 1,
+          "name": "st-01:hallbrass",
+          "offset": 5706,
+          "repeatOffset": 402,
+          "length": 9400,
+          "repeatLength": 4,
+          "storedLength": 9400,
+          "volume": 50,
+          "pcmSha256": "0b016a6a53a129528bb77526ac0e6a18c0174ae331039146eba62954ba5dc086",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "0b016a6a53a129528bb77526ac0e6a18c0174ae331039146eba62954ba5dc086"
+        },
+        {
+          "number": 2,
+          "name": "st-01:monsterbas",
+          "offset": 15106,
+          "repeatOffset": 402,
+          "length": 9000,
+          "repeatLength": 4,
+          "storedLength": 9000,
+          "volume": 64,
+          "pcmSha256": "4c6aaf7c5ca3d2a6a973389f5fc523d9501d265972b5ef95e00f772b75861c33",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "4c6aaf7c5ca3d2a6a973389f5fc523d9501d265972b5ef95e00f772b75861c33"
+        },
+        {
+          "number": 3,
+          "name": "st-01:dxtom",
+          "offset": 24106,
+          "repeatOffset": 402,
+          "length": 4000,
+          "repeatLength": 4,
+          "storedLength": 4000,
+          "volume": 64,
+          "pcmSha256": "0c0bf2e04a57f3c187ea84c2ed8229e013d36ee5807d4617300e4592320b1140",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "0c0bf2e04a57f3c187ea84c2ed8229e013d36ee5807d4617300e4592320b1140"
+        },
+        {
+          "number": 4,
+          "name": "st-01:popsnare1",
+          "offset": 28106,
+          "repeatOffset": 402,
+          "length": 2000,
+          "repeatLength": 4,
+          "storedLength": 2000,
+          "volume": 64,
+          "pcmSha256": "64ca78815a0c0694ea40721b1f72c3ca19c66cc2b258fa0b47d24ec91b63b13a",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "64ca78815a0c0694ea40721b1f72c3ca19c66cc2b258fa0b47d24ec91b63b13a"
+        },
+        {
+          "number": 5,
+          "name": "st-01:bassdrum3",
+          "offset": 30106,
+          "repeatOffset": 402,
+          "length": 3400,
+          "repeatLength": 4,
+          "storedLength": 3400,
+          "volume": 55,
+          "pcmSha256": "ad2941b4037a24798a978dfd09dbc4dabb6dd482dc32a02708f2b4b3f905a988",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "ad2941b4037a24798a978dfd09dbc4dabb6dd482dc32a02708f2b4b3f905a988"
+        },
+        {
+          "number": 6,
+          "name": "st-01:hihat2",
+          "offset": 33506,
+          "repeatOffset": 402,
+          "length": 2000,
+          "repeatLength": 4,
+          "storedLength": 2000,
+          "volume": 60,
+          "pcmSha256": "c32e53f91651d6800a59de3384986c0d97f2e576a97bffe02925c8d3123fc6a8",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "c32e53f91651d6800a59de3384986c0d97f2e576a97bffe02925c8d3123fc6a8"
+        },
+        {
+          "number": 7,
+          "name": "st-01:heaven",
+          "offset": 35506,
+          "repeatOffset": 402,
+          "length": 8500,
+          "repeatLength": 4,
+          "storedLength": 8500,
+          "volume": 37,
+          "pcmSha256": "792f299ed8ced76e9cd8484ba4197eca62e8b92a58ee3a4d395e929fa8edb784",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "792f299ed8ced76e9cd8484ba4197eca62e8b92a58ee3a4d395e929fa8edb784"
+        },
+        {
+          "number": 8,
+          "name": "st-01:blast",
+          "offset": 44006,
+          "repeatOffset": 402,
+          "length": 9710,
+          "repeatLength": 4,
+          "storedLength": 9710,
+          "volume": 35,
+          "pcmSha256": "dfef2b6093ec535ad3fa94f36bd516c21b51a2e80df06b29e725bd11366a59f0",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "dfef2b6093ec535ad3fa94f36bd516c21b51a2e80df06b29e725bd11366a59f0"
+        },
+        {
+          "number": 9,
+          "name": "st-01:claps1",
+          "offset": 53716,
+          "repeatOffset": 402,
+          "length": 2300,
+          "repeatLength": 4,
+          "storedLength": 2300,
+          "volume": 64,
+          "pcmSha256": "3d33e0c2b0c2282cfea32e3c7873aa4458904c467af377e2b32671c1cdc66cbb",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "3d33e0c2b0c2282cfea32e3c7873aa4458904c467af377e2b32671c1cdc66cbb"
+        },
+        {
+          "number": 10,
+          "name": "st-01:licks",
+          "offset": 56016,
+          "repeatOffset": 402,
+          "length": 6200,
+          "repeatLength": 4,
+          "storedLength": 6200,
+          "volume": 35,
+          "pcmSha256": "60eaa2febd0abf2bb9ffb647d0d5a6fad57cdeb650560ccb343fe54b8392d588",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "60eaa2febd0abf2bb9ffb647d0d5a6fad57cdeb650560ccb343fe54b8392d588"
+        },
+        {
+          "number": 11,
+          "name": "st-01:korgbeau",
+          "offset": 62216,
+          "repeatOffset": 402,
+          "length": 7000,
+          "repeatLength": 4,
+          "storedLength": 7000,
+          "volume": 55,
+          "pcmSha256": "2899d4d4d3811ca727be06deefef8c8a515af5aeabe3b47ffb5ff55bf0a26aeb",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "2899d4d4d3811ca727be06deefef8c8a515af5aeabe3b47ffb5ff55bf0a26aeb"
+        }
+      ],
+      "traces": {
+        "PAL": {
+          "fields": 10000,
+          "noteCount": 3392,
+          "notesSha256": "bf92fb93652ae08d121fa6ada314c463666f38e0f023de2163d9cab6373e7d5f",
+          "controlsSha256": "04da79e1478ca191c0a0136bf4d19889409d22a989578b9241ceba8226349f52",
+          "controlCount": 33596,
+          "firstNotes": [
+            [
+              1,
+              0,
+              0,
+              269,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              269,
+              0
+            ],
+            [
+              1,
+              2,
+              2,
+              538,
+              0
+            ],
+            [
+              7,
+              1,
+              1,
+              269,
+              43
+            ],
+            [
+              13,
+              1,
+              1,
+              302,
+              43
+            ],
+            [
+              19,
+              0,
+              0,
+              135,
+              55
+            ],
+            [
+              19,
+              1,
+              1,
+              226,
+              43
+            ],
+            [
+              38,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              44,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              63,
+              0,
+              0,
+              135,
+              55
+            ],
+            [
+              75,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              75,
+              1,
+              1,
+              240,
+              43
+            ]
+          ],
+          "perVoice": [
+            735,
+            702,
+            682,
+            1273
+          ],
+          "lastNotes": [
+            [
+              9594,
+              3,
+              6,
+              160,
+              52
+            ],
+            [
+              9600,
+              0,
+              9,
+              320,
+              55
+            ],
+            [
+              9600,
+              1,
+              8,
+              808,
+              48
+            ],
+            [
+              9600,
+              2,
+              2,
+              508,
+              55
+            ],
+            [
+              9600,
+              3,
+              1,
+              508,
+              52
+            ],
+            [
+              10000,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              10000,
+              1,
+              1,
+              269,
+              30
+            ],
+            [
+              10000,
+              2,
+              2,
+              538,
+              55
+            ]
+          ]
+        },
+        "NTSC": {
+          "fields": 12000,
+          "noteCount": 3392,
+          "notesSha256": "8996f5d9eb90c4ab9332e8f946b9b6bf6c26b2665167864585c8b013a66f243a",
+          "controlsSha256": "ddfb2c4a0c3a30334501ed0e9e140e9cb8f0066ca038dac71ca9e0e13a4b4a44",
+          "controlCount": 41596,
+          "firstNotes": [
+            [
+              1,
+              0,
+              0,
+              269,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              269,
+              0
+            ],
+            [
+              1,
+              2,
+              2,
+              538,
+              0
+            ],
+            [
+              8,
+              1,
+              1,
+              269,
+              43
+            ],
+            [
+              15,
+              1,
+              1,
+              302,
+              43
+            ],
+            [
+              23,
+              0,
+              0,
+              135,
+              55
+            ],
+            [
+              23,
+              1,
+              1,
+              226,
+              43
+            ],
+            [
+              45,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              53,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              75,
+              0,
+              0,
+              135,
+              55
+            ],
+            [
+              90,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              90,
+              1,
+              1,
+              240,
+              43
+            ]
+          ],
+          "perVoice": [
+            735,
+            702,
+            682,
+            1273
+          ],
+          "lastNotes": [
+            [
+              11513,
+              3,
+              6,
+              160,
+              52
+            ],
+            [
+              11520,
+              0,
+              9,
+              320,
+              55
+            ],
+            [
+              11520,
+              1,
+              8,
+              808,
+              48
+            ],
+            [
+              11520,
+              2,
+              2,
+              508,
+              55
+            ],
+            [
+              11520,
+              3,
+              1,
+              508,
+              52
+            ],
+            [
+              12000,
+              0,
+              0,
+              269,
+              55
+            ],
+            [
+              12000,
+              1,
+              1,
+              269,
+              30
+            ],
+            [
+              12000,
+              2,
+              2,
+              538,
+              55
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "file": "Ywon.mus",
+      "byteLength": 80948,
+      "sourceSha256": "8a75cd764d2aa9f95e93312938d41feddb27d4345255f0b0875e1af89a5757e1",
+      "instrumentCount": 13,
+      "songName": "tanktitle",
+      "orders": [
+        [
+          0,
+          3,
+          3,
+          1,
+          2,
+          1,
+          2,
+          4,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10,
+          1,
+          2,
+          5,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10
+        ],
+        [
+          0,
+          3,
+          3,
+          1,
+          2,
+          1,
+          2,
+          4,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10,
+          1,
+          2,
+          5,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10
+        ],
+        [
+          0,
+          3,
+          3,
+          1,
+          2,
+          1,
+          2,
+          4,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10,
+          1,
+          2,
+          5,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10
+        ],
+        [
+          0,
+          3,
+          3,
+          1,
+          2,
+          1,
+          2,
+          4,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10,
+          1,
+          2,
+          5,
+          5,
+          6,
+          6,
+          7,
+          8,
+          7,
+          8,
+          9,
+          10
+        ]
+      ],
+      "patternCount": 11,
+      "commands": {
+        "00": 44,
+        "03": 380,
+        "09": 380,
+        "0e": 50,
+        "10": 1876
+      },
+      "instruments": [
+        {
+          "number": 0,
+          "name": "digdug",
+          "offset": 438,
+          "repeatOffset": 434,
+          "length": 3100,
+          "repeatLength": 4,
+          "storedLength": 3100,
+          "volume": 64,
+          "pcmSha256": "3802db865dbc54c064f51b59e8123de91c65b3eac5f61ba54e3f9272de4dfc1b",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "3802db865dbc54c064f51b59e8123de91c65b3eac5f61ba54e3f9272de4dfc1b"
+        },
+        {
+          "number": 1,
+          "name": "synthpiano",
+          "offset": 3538,
+          "repeatOffset": 434,
+          "length": 5500,
+          "repeatLength": 4,
+          "storedLength": 5500,
+          "volume": 22,
+          "pcmSha256": "2fb0581ad82d7b843badb076bb364c941c594df2c9f81d3c59cdf6522dcbe4c6",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "2fb0581ad82d7b843badb076bb364c941c594df2c9f81d3c59cdf6522dcbe4c6"
+        },
+        {
+          "number": 2,
+          "name": "strings1",
+          "offset": 9038,
+          "repeatOffset": 434,
+          "length": 8900,
+          "repeatLength": 4,
+          "storedLength": 8900,
+          "volume": 54,
+          "pcmSha256": "a6b9c42c1749b72cc14842350e8d6741b875ee34854657b12fa4f643a0866ada",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "a6b9c42c1749b72cc14842350e8d6741b875ee34854657b12fa4f643a0866ada"
+        },
+        {
+          "number": 3,
+          "name": "pizza",
+          "offset": 17938,
+          "repeatOffset": 434,
+          "length": 9400,
+          "repeatLength": 4,
+          "storedLength": 9400,
+          "volume": 38,
+          "pcmSha256": "c81d857168464155d112f16158ba34596466e62be0cf7b2db9cce6386e8be5ff",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "c81d857168464155d112f16158ba34596466e62be0cf7b2db9cce6386e8be5ff"
+        },
+        {
+          "number": 4,
+          "name": "perco",
+          "offset": 27338,
+          "repeatOffset": 434,
+          "length": 4500,
+          "repeatLength": 4,
+          "storedLength": 4500,
+          "volume": 28,
+          "pcmSha256": "af480f1210c71a1d2ce2e8e81d274378703ceb73b0c46130a9a5d51c2acac4ba",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "af480f1210c71a1d2ce2e8e81d274378703ceb73b0c46130a9a5d51c2acac4ba"
+        },
+        {
+          "number": 5,
+          "name": "noteman",
+          "offset": 31838,
+          "repeatOffset": 434,
+          "length": 7000,
+          "repeatLength": 4,
+          "storedLength": 7000,
+          "volume": 58,
+          "pcmSha256": "11fb1dbfe920e8ed4f9932b2c15ff07132dd7aa9bd931f7d33c48873ded0e510",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "11fb1dbfe920e8ed4f9932b2c15ff07132dd7aa9bd931f7d33c48873ded0e510"
+        },
+        {
+          "number": 6,
+          "name": "hallbrass",
+          "offset": 38838,
+          "repeatOffset": 434,
+          "length": 9400,
+          "repeatLength": 4,
+          "storedLength": 9400,
+          "volume": 38,
+          "pcmSha256": "0b016a6a53a129528bb77526ac0e6a18c0174ae331039146eba62954ba5dc086",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "0b016a6a53a129528bb77526ac0e6a18c0174ae331039146eba62954ba5dc086"
+        },
+        {
+          "number": 7,
+          "name": "strings4",
+          "offset": 48238,
+          "repeatOffset": 49458,
+          "length": 1220,
+          "repeatLength": 3410,
+          "storedLength": 9700,
+          "volume": 42,
+          "pcmSha256": "66496c0661f4bee11339e63e49fff1169dcc602bb5caaab020a0e0b3f4b6edea",
+          "repeatSha256": "c42d9823b6828064e2b73c3624021263a965202bd43a7204ee4d05995200b089",
+          "storedSha256": "022b17dc61ceac0ef3ba813422059a846b7709905d8d3d14c4773da6b9c080fd"
+        },
+        {
+          "number": 8,
+          "name": "popsnare2",
+          "offset": 57938,
+          "repeatOffset": 434,
+          "length": 4000,
+          "repeatLength": 4,
+          "storedLength": 4000,
+          "volume": 48,
+          "pcmSha256": "e781f8ad76f67d3c5fae8c025bef96e3afb965b98161bc8cec203d82d217a399",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "e781f8ad76f67d3c5fae8c025bef96e3afb965b98161bc8cec203d82d217a399"
+        },
+        {
+          "number": 9,
+          "name": "shaker",
+          "offset": 61938,
+          "repeatOffset": 434,
+          "length": 2300,
+          "repeatLength": 4,
+          "storedLength": 2300,
+          "volume": 18,
+          "pcmSha256": "5f446999d452cc4b02acc2de4511ce34a958436fff754482c4b6f58f37546e40",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "5f446999d452cc4b02acc2de4511ce34a958436fff754482c4b6f58f37546e40"
+        },
+        {
+          "number": 10,
+          "name": "hihat2",
+          "offset": 64238,
+          "repeatOffset": 434,
+          "length": 2000,
+          "repeatLength": 4,
+          "storedLength": 2000,
+          "volume": 20,
+          "pcmSha256": "c32e53f91651d6800a59de3384986c0d97f2e576a97bffe02925c8d3123fc6a8",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "c32e53f91651d6800a59de3384986c0d97f2e576a97bffe02925c8d3123fc6a8"
+        },
+        {
+          "number": 11,
+          "name": "claps1",
+          "offset": 66238,
+          "repeatOffset": 434,
+          "length": 4000,
+          "repeatLength": 4,
+          "storedLength": 4000,
+          "volume": 42,
+          "pcmSha256": "9f16d875ff7b0275720d409a8188a7aa5f6dcf611afa48bc17b99d9fc4ed3edc",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "9f16d875ff7b0275720d409a8188a7aa5f6dcf611afa48bc17b99d9fc4ed3edc"
+        },
+        {
+          "number": 12,
+          "name": "bassdrum1",
+          "offset": 70238,
+          "repeatOffset": 434,
+          "length": 1100,
+          "repeatLength": 4,
+          "storedLength": 1100,
+          "volume": 55,
+          "pcmSha256": "829d732368474f0549d1b5e5fea0981af4dfb4abbcdaaba3aac5ba83709f524c",
+          "repeatSha256": "df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119",
+          "storedSha256": "829d732368474f0549d1b5e5fea0981af4dfb4abbcdaaba3aac5ba83709f524c"
+        }
+      ],
+      "traces": {
+        "PAL": {
+          "fields": 13177,
+          "noteCount": 5731,
+          "notesSha256": "c534939bb5a3862292320ba2ca3c656977610c3e2c6cac2d0841949b5926cc4f",
+          "controlsSha256": "1a745485f159fefff390c40781b15774c308e6020cb2af4fa1b876483838c4f7",
+          "controlCount": 43744,
+          "firstNotes": [
+            [
+              1,
+              0,
+              10,
+              190,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              285,
+              0
+            ],
+            [
+              1,
+              2,
+              0,
+              428,
+              0
+            ],
+            [
+              1,
+              3,
+              12,
+              320,
+              0
+            ],
+            [
+              6,
+              1,
+              1,
+              285,
+              19
+            ],
+            [
+              6,
+              2,
+              0,
+              428,
+              55
+            ],
+            [
+              6,
+              3,
+              10,
+              254,
+              48
+            ],
+            [
+              12,
+              1,
+              1,
+              285,
+              19
+            ],
+            [
+              12,
+              3,
+              10,
+              254,
+              17
+            ],
+            [
+              18,
+              2,
+              0,
+              428,
+              55
+            ],
+            [
+              18,
+              3,
+              10,
+              254,
+              17
+            ],
+            [
+              24,
+              1,
+              1,
+              285,
+              19
+            ]
+          ],
+          "perVoice": [
+            775,
+            1529,
+            1479,
+            1948
+          ],
+          "lastNotes": [
+            [
+              13165,
+              3,
+              10,
+              226,
+              42
+            ],
+            [
+              13171,
+              1,
+              1,
+              320,
+              19
+            ],
+            [
+              13171,
+              2,
+              0,
+              320,
+              55
+            ],
+            [
+              13171,
+              3,
+              10,
+              214,
+              17
+            ],
+            [
+              13177,
+              0,
+              10,
+              190,
+              33
+            ],
+            [
+              13177,
+              1,
+              1,
+              285,
+              19
+            ],
+            [
+              13177,
+              2,
+              0,
+              428,
+              55
+            ],
+            [
+              13177,
+              3,
+              12,
+              320,
+              17
+            ]
+          ]
+        },
+        "NTSC": {
+          "fields": 15812,
+          "noteCount": 5731,
+          "notesSha256": "26db76e0bd01715906dc744b0942ee6e72aa395f8b1e7bda78caa6f836ccba74",
+          "controlsSha256": "2f93dbd9b7027e2401231fa3e428b9fd786f74a6e869e74f7c76945a7d461c45",
+          "controlCount": 54284,
+          "firstNotes": [
+            [
+              1,
+              0,
+              10,
+              190,
+              0
+            ],
+            [
+              1,
+              1,
+              1,
+              285,
+              0
+            ],
+            [
+              1,
+              2,
+              0,
+              428,
+              0
+            ],
+            [
+              1,
+              3,
+              12,
+              320,
+              0
+            ],
+            [
+              8,
+              1,
+              1,
+              285,
+              19
+            ],
+            [
+              8,
+              2,
+              0,
+              428,
+              55
+            ],
+            [
+              8,
+              3,
+              10,
+              254,
+              48
+            ],
+            [
+              15,
+              1,
+              1,
+              285,
+              19
+            ],
+            [
+              15,
+              3,
+              10,
+              254,
+              17
+            ],
+            [
+              22,
+              2,
+              0,
+              428,
+              55
+            ],
+            [
+              22,
+              3,
+              10,
+              254,
+              17
+            ],
+            [
+              29,
+              1,
+              1,
+              285,
+              19
+            ]
+          ],
+          "perVoice": [
+            775,
+            1529,
+            1479,
+            1948
+          ],
+          "lastNotes": [
+            [
+              15798,
+              3,
+              10,
+              226,
+              42
+            ],
+            [
+              15805,
+              1,
+              1,
+              320,
+              19
+            ],
+            [
+              15805,
+              2,
+              0,
+              320,
+              55
+            ],
+            [
+              15805,
+              3,
+              10,
+              214,
+              17
+            ],
+            [
+              15812,
+              0,
+              10,
+              190,
+              33
+            ],
+            [
+              15812,
+              1,
+              1,
+              285,
+              19
+            ],
+            [
+              15812,
+              2,
+              0,
+              428,
+              55
+            ],
+            [
+              15812,
+              3,
+              12,
+              320,
+              17
+            ]
+          ]
+        }
+      }
+    }
+  ]
+}

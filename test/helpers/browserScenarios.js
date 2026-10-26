@@ -282,6 +282,9 @@ const scenarios = [
   { id: 'roller2-startup', title: 'Roller II original startup', description: 'Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original sample/tracker loads and Hide. Step/reset controls inspect the silent field clock; native Canvas checks cover nested Hide/Show. The captured default screen precedes FLOAD; title rendering and gameplay remain open.', run: require('./roller2StartupProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { lines:17, variableBufferBytes:20480, stackEntries:501, directory:'RII:', introMusic:-1, pointerChecks:5, trackerField:6, firstInstrument:4, titleRendered:false });
   } },
+  { id: 'roller2-amos-music', capturedFrames: false, title: 'Roller II AMOS Music end tunes', description: 'Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. VM Music integration remains pending.', run: require('./amosMusicProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.traces, [3392, 3392, 5731, 5731]); assert.strictEqual(result.graphs, 25); assert.ok(result.maxDifference <= 1e-6);
+  } },
   { id:'tracker', capturedFrames:false, title:'Play Roller II MOD music', description:'Original bounded load/Led Off/Track Play statements run in a compiled VM, with independent field wakes, Pause/Resume and Stop. All 1,997 notes and ten instrument waveforms pass source-derived/native Web Audio checks. Full-game integration remains open.', run:require('./trackerProbe'), check(result,assert){
     assert.deepStrictEqual(result,{fields:9631,orders:22,rows:1376,notes:1997,nativeComparisons:12,instruments:10,nonzero:true,vmPlayback:true});
   } },

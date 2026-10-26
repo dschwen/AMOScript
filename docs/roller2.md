@@ -17,6 +17,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Main source | 65,808 bytes; AMOS Basic v134 header; 65,782 code bytes; 1,199 physical lines |
 | Token inventory | 194 distinct encodings; initially 43 unrecognized, now 3 after tracker/startup, display/memory commands, Boom, Fill/Copy, Set Line, Writing, Scin, Change Mouse, Get Icon, Rainbow Del, Swap and Edit |
 | Whole-source compiler gate | Unsupported slot-1 Music `$0058` at line 992, byte 54,202; recognition alone still does not prove parser/runtime support for later forms |
+| AMOS Music end tunes | Direct decoder/player runs Over.mus and Ywon.mus with all 25 instruments and independent full first-wrap PAL/NTSC traces; VM commands and end-state integration remain open. See [contract](amos-music.md) |
 | Embedded banks | None; original source loads external assets |
 | Original asset-load slice | Full physical line 15 and leading Track Load statement of line 16 execute standalone, followed by a declared End guard |
 | Original startup prefix | Unchanged physical lines 1–17 execute through Hide, followed by a synthetic Wait Key; Set Stack records 501 entries, Dir$ is RII:, ITROM is -1, tracker playback/looping is active |
