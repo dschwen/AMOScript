@@ -9,10 +9,10 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 13 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 11 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
-compilation stops at Fill (line 325). Original WTIN/FDZ now run in a declared fixture that
+compilation stops at Set Line (line 333). Original WTIN/FDZ now run in a declared fixture that
 runs original array/highscore setup, SASINIT and work/icon/sprite bank loads,
 then hands off to the main-title image while omitting remaining setup 281–286.
 The connected menu fixture now runs the original executable startup-to-menu
@@ -36,6 +36,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Fill / Copy | Implemented bounded bank-memory transfers | Big-endian Fill with exclusive/empty ranges (up to 1 MiB; odd starts only for byte tails), overlap-safe Copy with exclusive/nonempty ranges, complete preflight, active-Tracker and raw-icon protections. Original editor statements back up/clear/restore all fifteen payloads at a redraw guard; no persistence/editor rendering. [Contract](bulk-memory.md). |
 | Boom | Implemented bounded portable synthesis | Four source pitches, shared noise recurrence, integer envelope and fractional onset render finite float PCM with explicit seed/constant-beam choices. Independent PAL/phase/NTSC vectors and five native Web Audio graphs pass. Exact DMA/beam capture and general live wave/envelope controls remain open. [Contract](boom.md). |
 | Roller II arrows / N34 | Implemented bounded original handlers | Original PFEIL follows three real level-2 turns and N34/HCWEG rebound. Thirty-two one-pixel input positions, twenty independent Canvas images/ten GPU comparisons; original arrow timeout runs Boom before game-over guard. [Contract](roller2-arrows.md). |
 | MOD / tracker | Implemented bounded playback | Owned M.K. decoder, Track Load/Loop/Play/Stop and C/A/E/F/D effects. Driver-owned VBL wakes share sample voices, cancel on End/failure/bank retirement, and pause without elapsed-note replay. Original music fixture matches 1,997 notes and twelve native Web Audio comparisons. Held sample phase after pause, wider effects, exact DMA contention, live bank editing and AMOS Music-bank playback remain open. [Contract](mod-tracker.md). |

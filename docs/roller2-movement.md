@@ -29,8 +29,8 @@ procedure string-branch visibility, slow/colour/collectible/arrow/exit handlers,
 edge pre-read behavior, full pause/death and whole-program compilation remain
 open. Native BEWEG reads neighbor bytes before its bounds check; this subset does
 not silently repair source ordering. The tested first-level corridor meets real
-walls/guards before an out-of-bank read. Full compilation still stops at Fill (line 325),
-with thirteen encodings unrecognized.
+walls/guards before an out-of-bank read. Full compilation still stops at Set Line (line 333),
+with eleven encodings unrecognized.
 
 ## Independent evidence
 

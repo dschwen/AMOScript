@@ -20,6 +20,11 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-transfers'){
+        await page.selectOption('#roller2-transfer-level','7');const metadata=await page.locator('#roller2-transfer-controls').getAttribute('data-metadata');
+        await page.click('#roller2-transfer-clear');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-phase'),'cleared');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-tiles-one'),'240');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-colours-zero'),'240');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-metadata'),metadata);
+        await page.click('#roller2-transfer-restore');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-phase'),'restored');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-metadata'),metadata);await page.click('#roller2-transfer-load');assert.strictEqual(await page.locator('#roller2-transfer-controls').getAttribute('data-phase'),'backed-up');await page.evaluate(()=>globalThis.AMOS_ROLLER2_TRANSFER_CLEANUP());
+      }
       if(scenario.id==='roller2-arrows'){
         assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-backend'),'webgl');
         await page.click('#roller2-movement-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-movement-viewport');

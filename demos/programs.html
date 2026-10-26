@@ -4400,6 +4400,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     bankStart: number => bankMemory.start(integer(number)),
     peek: address => bankMemory.peek(integer(address)),
     poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    fillMemory(start, end, pattern) {
+      start = integer(start); end = integer(end) >>> 0; pattern = integer(pattern);
+      bankMemory.fill(bankMemory.address(start), end, pattern);
+    },
+    copyMemory: (start, end, destination) => bankMemory.copy(integer(start), integer(end) >>> 0, integer(destination)),
     deek: address => bankMemory.deek(integer(address)),
     leek: address => bankMemory.leek(integer(address)),
     doke: (address, value) => bankMemory.doke(integer(address), integer(value)),
@@ -4905,6 +4910,29 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const access = resolve(address, bytes.length); writable(access, bytes.length);
       if (!access.region.kind) { access.bank.data.set(bytes, access.offset); return; }
       for (let index = 0; index < bytes.length; index++) putByte(access, index, bytes[index]);
+    },
+    fill(address, end, pattern) {
+      const length = end - address;
+      if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid Fill range (end precedes start)');
+      // Native Fill uses a word-counted DBRA loop for its 16-byte blocks.
+      // Larger wrapped-count forms require their own contract.
+      if (length > 1048576) throw new Error('Unsupported Fill range above 1 MiB');
+      if (length >= 16 && address % 2) throw new Error('Odd Fill block addresses are not implemented');
+      const access = resolve(address, length); writable(access, length);
+      for (let index = 0; index < length; index++) putByte(access, index, pattern >>> (24 - (index & 3) * 8));
+    },
+    copy(address, end, destination) {
+      const length = end - address;
+      if (!Number.isSafeInteger(length) || length <= 0) throw new Error('Invalid Copy range (end must follow start)');
+      const source = resolve(address, length), target = resolve(destination, length);
+      readable(source, length); writable(target, length);
+      if (!source.region.kind && !target.region.kind) {
+        // TypedArray#set snapshots overlapping sources, including either direction.
+        target.bank.data.set(source.bank.data.subarray(source.offset, source.offset + length), target.offset);
+      } else {
+        const bytes = Uint8Array.from({ length }, (_, index) => byteAt(source, index));
+        for (let index = 0; index < length; index++) putByte(target, index, bytes[index]);
+      }
     },
     peek: address => readNumber(address, 1),
     poke: (address, value) => writeNumber(address, value, 1),
@@ -9227,6 +9255,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     bankStart: number => bankMemory.start(integer(number)),
     peek: address => bankMemory.peek(integer(address)),
     poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    fillMemory(start, end, pattern) {
+      start = integer(start); end = integer(end) >>> 0; pattern = integer(pattern);
+      bankMemory.fill(bankMemory.address(start), end, pattern);
+    },
+    copyMemory: (start, end, destination) => bankMemory.copy(integer(start), integer(end) >>> 0, integer(destination)),
     deek: address => bankMemory.deek(integer(address)),
     leek: address => bankMemory.leek(integer(address)),
     doke: (address, value) => bankMemory.doke(integer(address), integer(value)),
@@ -9732,6 +9765,29 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const access = resolve(address, bytes.length); writable(access, bytes.length);
       if (!access.region.kind) { access.bank.data.set(bytes, access.offset); return; }
       for (let index = 0; index < bytes.length; index++) putByte(access, index, bytes[index]);
+    },
+    fill(address, end, pattern) {
+      const length = end - address;
+      if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid Fill range (end precedes start)');
+      // Native Fill uses a word-counted DBRA loop for its 16-byte blocks.
+      // Larger wrapped-count forms require their own contract.
+      if (length > 1048576) throw new Error('Unsupported Fill range above 1 MiB');
+      if (length >= 16 && address % 2) throw new Error('Odd Fill block addresses are not implemented');
+      const access = resolve(address, length); writable(access, length);
+      for (let index = 0; index < length; index++) putByte(access, index, pattern >>> (24 - (index & 3) * 8));
+    },
+    copy(address, end, destination) {
+      const length = end - address;
+      if (!Number.isSafeInteger(length) || length <= 0) throw new Error('Invalid Copy range (end must follow start)');
+      const source = resolve(address, length), target = resolve(destination, length);
+      readable(source, length); writable(target, length);
+      if (!source.region.kind && !target.region.kind) {
+        // TypedArray#set snapshots overlapping sources, including either direction.
+        target.bank.data.set(source.bank.data.subarray(source.offset, source.offset + length), target.offset);
+      } else {
+        const bytes = Uint8Array.from({ length }, (_, index) => byteAt(source, index));
+        for (let index = 0; index < length; index++) putByte(target, index, bytes[index]);
+      }
     },
     peek: address => readNumber(address, 1),
     poke: (address, value) => writeNumber(address, value, 1),
@@ -14071,6 +14127,11 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     bankStart: number => bankMemory.start(integer(number)),
     peek: address => bankMemory.peek(integer(address)),
     poke: (address, byte) => bankMemory.poke(integer(address), integer(byte)),
+    fillMemory(start, end, pattern) {
+      start = integer(start); end = integer(end) >>> 0; pattern = integer(pattern);
+      bankMemory.fill(bankMemory.address(start), end, pattern);
+    },
+    copyMemory: (start, end, destination) => bankMemory.copy(integer(start), integer(end) >>> 0, integer(destination)),
     deek: address => bankMemory.deek(integer(address)),
     leek: address => bankMemory.leek(integer(address)),
     doke: (address, value) => bankMemory.doke(integer(address), integer(value)),
@@ -14576,6 +14637,29 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const access = resolve(address, bytes.length); writable(access, bytes.length);
       if (!access.region.kind) { access.bank.data.set(bytes, access.offset); return; }
       for (let index = 0; index < bytes.length; index++) putByte(access, index, bytes[index]);
+    },
+    fill(address, end, pattern) {
+      const length = end - address;
+      if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid Fill range (end precedes start)');
+      // Native Fill uses a word-counted DBRA loop for its 16-byte blocks.
+      // Larger wrapped-count forms require their own contract.
+      if (length > 1048576) throw new Error('Unsupported Fill range above 1 MiB');
+      if (length >= 16 && address % 2) throw new Error('Odd Fill block addresses are not implemented');
+      const access = resolve(address, length); writable(access, length);
+      for (let index = 0; index < length; index++) putByte(access, index, pattern >>> (24 - (index & 3) * 8));
+    },
+    copy(address, end, destination) {
+      const length = end - address;
+      if (!Number.isSafeInteger(length) || length <= 0) throw new Error('Invalid Copy range (end must follow start)');
+      const source = resolve(address, length), target = resolve(destination, length);
+      readable(source, length); writable(target, length);
+      if (!source.region.kind && !target.region.kind) {
+        // TypedArray#set snapshots overlapping sources, including either direction.
+        target.bank.data.set(source.bank.data.subarray(source.offset, source.offset + length), target.offset);
+      } else {
+        const bytes = Uint8Array.from({ length }, (_, index) => byteAt(source, index));
+        for (let index = 0; index < length; index++) putByte(target, index, bytes[index]);
+      }
     },
     peek: address => readNumber(address, 1),
     poke: (address, value) => writeNumber(address, value, 1),

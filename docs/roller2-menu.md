@@ -10,7 +10,7 @@ Destination guards record `game`, `editor`, `scores` or `help`
 and wait. Game selection now runs original entry/setup through 600: ICCOPY, game screens,
 rainbow/status rows and level 1 loading. The guard precedes board drawing;
 editor/scores/help routines remain excluded. This is not a running game. The complete source still fails
-decoding at Fill in the omitted editor; selected routines, gameplay and their
+decoding at Set Line in the omitted editor; selected routines, gameplay and their
 later dependencies remain open. The earlier isolated menu helper remains in
 headless tests, and the earlier [intro demo](roller2-intro.md) retains its declared
 handoff for focused rendering/input regression coverage.

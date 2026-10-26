@@ -48,5 +48,5 @@ original pause path. Live checks release direction after entry, allowing native
 sliding and arrow changes to complete without adding repeated joystick input.
 
 Other obstacle handlers, game-over/win routines, end tunes, editor/highscores and
-full-game progression remain open. Fill/Copy and later language forms are still
-compiler gates; the full original program is not yet compilable.
+full-game progression remain open. The separate [Fill/Copy contract](bulk-memory.md) now covers original editor
+transfers; Set Line and later language forms are still compiler gates; the full original program is not yet compilable.

@@ -112,4 +112,6 @@ and browser checks, not native execution captures.
 
 Game entry now runs original ICCOPY through bounded Start(2)/Leek icon views;
 see [its contract](icon-memory.md). Generic-bank word/long commands also prepare
-later level work. Screen/level setup, Copy/Fill and other gameplay gates remain open.
+later level work. The separate [Fill/Copy contract](bulk-memory.md) now covers checked bulk
+transfers and original editor backup/clear/restore statements. Other gameplay
+and editor rendering gates remain open.

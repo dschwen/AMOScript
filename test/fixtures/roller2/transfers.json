@@ -1,0 +1,95 @@
+{
+  "evidence": "Independent raw-asset expectations for original editor Fill/Copy statements.\nNo AMOScript imports, editor execution or Amiga captures.\n",
+  "levels": [
+    {
+      "level": "1",
+      "payloadSha256": "e3ae4607f9af21b828dccf060795ff53a9ee59cadae7b4759882622ad8b0c762",
+      "clearedSha256": "093637343c3671d102bac591126c93be96cd799373b2616e16ad9598bdcbe123",
+      "metadataHex": "00000509010000230000"
+    },
+    {
+      "level": "2",
+      "payloadSha256": "96dca1b46a7b8843adc5f582b1da76ccaaa454fb2c87bc42118893b29a9ec71f",
+      "clearedSha256": "467fbd3c3db53d6158631ad7615cbf3c7c24c031163f51f19378de29c003f13d",
+      "metadataHex": "000008010100001e0000"
+    },
+    {
+      "level": "3",
+      "payloadSha256": "9c167a0cf701fd6c41c08b3c472e4ec05606fc8f93aebd7909d0a9b5a679c831",
+      "clearedSha256": "887c7b2551e96cbfd94661fed53a72d6ac956f2fc7a92b0eb8f41ee824ab6b43",
+      "metadataHex": "00000a090100000a0000"
+    },
+    {
+      "level": "4",
+      "payloadSha256": "a7258401ee50f2fe599dd35075276d0e75758c565cfaa59ce2d1fc1e37dfd5d7",
+      "clearedSha256": "fdf0bbd94b05a20b25ec8496a2ec389d90fcd95b504c12a1240c9ffe6a153066",
+      "metadataHex": "00000c04010000230000"
+    },
+    {
+      "level": "5",
+      "payloadSha256": "dc8d09ff386f0884c00d09ae82254b6db50df35636a011ab3cea285bf07d5791",
+      "clearedSha256": "f20047226e11396bb2ea4c8d6e9bcd600d799819c99e0fe646e1a8d7a1cfba10",
+      "metadataHex": "00001006010000410000"
+    },
+    {
+      "level": "6",
+      "payloadSha256": "d1aa500d7783331cb8cd72185b9b19f77ec4487e75b5ad3b027eefcba284ba31",
+      "clearedSha256": "bfb9d269f8e000845cd989773da106835390badaaf9ada0e36d4e69bc7694c54",
+      "metadataHex": "00001006010000640000"
+    },
+    {
+      "level": "7",
+      "payloadSha256": "59fd740801b80e3ef70cf5c64011ddfc656511e7173fb9106f65b36c96992a9f",
+      "clearedSha256": "b7fe42b019a072ee93bec1cd97e470d62d32d1fcdb2da6ff01ecd7edb7c557f9",
+      "metadataHex": "000002060100012c0000"
+    },
+    {
+      "level": "8",
+      "payloadSha256": "c55ed55598ecd8ce31394297026aaacfdc1b2873cbe8d38cdfa69b6135916e0c",
+      "clearedSha256": "1576e7cbcf0f2b8b87406aa8bd95034f1c94afa9ed2f2a022db83e46523c307e",
+      "metadataHex": "00000604020000190000"
+    },
+    {
+      "level": "9",
+      "payloadSha256": "7802736baabe2b8f85427238ca2bf3add1cb91f6040baaba0317b1fe9873ba0a",
+      "clearedSha256": "159fb7f7aa2a8c8ecd047f50d34d8a45a3b3b9d952fc162c35ed1d21df4facca",
+      "metadataHex": "000006070100001e0000"
+    },
+    {
+      "level": "10",
+      "payloadSha256": "9f16bfff6f8124ebd51b2d07d8c0f5da0fffed5e81973254b2c9a9cf902fa05a",
+      "clearedSha256": "0ea3dbba9c72c21d8f3d7da9f7c852282864f74275c67c60cd2016ac23e6d174",
+      "metadataHex": "000004070100000f0000"
+    },
+    {
+      "level": "11",
+      "payloadSha256": "7ad4480c52d39b044d399bd632b781d834e0d11028ff7445c669cade36e7b380",
+      "clearedSha256": "22cb2d4f594c6ec8f26c646cb5f67213a1d7bc2c3b30cb57dec7426591a64f88",
+      "metadataHex": "00000407010000140000"
+    },
+    {
+      "level": "16",
+      "payloadSha256": "33055b00fb89c759f663766ddd90905ebf46d1753495e0c6bb1e840d0b53ce2a",
+      "clearedSha256": "2effa810545f6311aee2c5838f89c72efd3dce605d7985e5887f781321c7918f",
+      "metadataHex": "000006060100012c0000"
+    },
+    {
+      "level": "17",
+      "payloadSha256": "33055b00fb89c759f663766ddd90905ebf46d1753495e0c6bb1e840d0b53ce2a",
+      "clearedSha256": "2effa810545f6311aee2c5838f89c72efd3dce605d7985e5887f781321c7918f",
+      "metadataHex": "000006060100012c0000"
+    },
+    {
+      "level": "20",
+      "payloadSha256": "db50471ad76eb246556f7302a3e2508ceb9b6648275d4dbfa947ac0a10bb909c",
+      "clearedSha256": "44e95526238730e3d25027dc5aa54ba2a25b38c7678dce52977c24f35a556196",
+      "metadataHex": "000006090100012c0000"
+    },
+    {
+      "level": "100",
+      "payloadSha256": "ec77ea2a62ea68423c81d7595b7edca7d2a9486eb24cf817d2d17e79839d1291",
+      "clearedSha256": "dce5c6008579a6afad1570a3df8536622e85488cd49aa419de81a340955f5d7a",
+      "metadataHex": "000000000100012c0000"
+    }
+  ]
+}

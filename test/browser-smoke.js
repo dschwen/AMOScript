@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('roller2-transfers',page);await page.evaluate(()=>globalThis.AMOS_ROLLER2_TRANSFER_CLEANUP());
+    console.log('Roller2 transfers passed: original backup/Fill/Copy on fifteen maps, exclusive ranges, unchanged metadata and redraw-guard return.');
     const arrows=await runScenario('roller2-arrows',page);assert.strictEqual(arrows.gpuFrames,10);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());
     console.log('Roller2 arrows passed: 32 one-pixel keyboard/Gamepad steps, three original turns, independent pixels and ten GPU frames.');
     await runScenario('boom',page);await page.evaluate(()=>globalThis.AMOS_BOOM_CLEANUP());

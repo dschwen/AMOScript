@@ -67,4 +67,4 @@ audio adapter in this demo. The menu demo retains its optional sound controls.
 
 The live demo now also runs BALLFARBEN, six-plane sprites’ low-four-plane hardware
 behavior and initial fade/status border through 617. See [initial ball](roller2-ball.md).
-The movement loop remains the next gate. Whole compilation still stops at Fill (line 325).
+The movement loop remains the next gate. Whole compilation still stops at Set Line (line 333).

@@ -10,7 +10,7 @@ test('Roller2: supplied source/data manifest is byte-exact; whole-source audit d
   const manifest=JSON.parse(fs.readFileSync(path.join(directory,'manifest.json')));
   for(const [name,entry] of Object.entries(manifest.files)){const b=fs.readFileSync(path.join(directory,name));assert.strictEqual(b.length,entry.byteLength);assert.strictEqual(crypto.createHash('sha256').update(b).digest('hex'),entry.sha256);}
   const a=require('../tools/audit_program').auditProgram(fs.readFileSync(path.join(directory,'Roller II.AMOS')));
-  assert.deepStrictEqual([a.physicalLines,a.distinctEncodings,a.unrecognizedEncodings],[1199,194,13]);assert.strictEqual(a.compiler.ok,false);assert.match(a.compiler.error,/0x219a.*line 325/);assert.deepStrictEqual(a.banks,[]);
+  assert.deepStrictEqual([a.physicalLines,a.distinctEncodings,a.unrecognizedEncodings],[1199,194,11]);assert.strictEqual(a.compiler.ok,false);assert.match(a.compiler.error,/0x1034.*line 333/);assert.deepStrictEqual(a.banks,[]);
 });
 
 test('Track Load: original Roller2 asset statements run standalone with sample bank 6, raw Tracker bank 22 and zero workspace',()=>{

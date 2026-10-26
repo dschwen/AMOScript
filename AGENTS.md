@@ -105,6 +105,14 @@
   Earlier fixture bounds are in `docs/roller2-input.md`, `docs/roller2-ball.md`,
   `docs/roller2-boards.md` and `docs/screen-priority.md`. Exact native timing and
   full gameplay remain open.
+- Fill/Copy use the shared checked bank-memory resolver and signature lowering.
+  Fill repeats big-endian long bits with an exclusive end and allows empty ranges;
+  the subset caps at 1 MiB and rejects odd starts for 16-byte blocks. Copy uses
+  raw addresses, an exclusive/nonempty range and memmove overlap semantics.
+  Preflight both ranges/permissions; preserve identities, raw-icon stale masks
+  and the active-Tracker write guard. Original editor 415, 325–326 and 561 run
+  on all fifteen prepared payloads before an explicit EDDISP procedure guard.
+  No editor rendering or persistence is claimed. See `docs/bulk-memory.md`.
 - Rnd/Randomize keep per-factory seed/cache state and the source's swapped-word
   multiplication, masked rejection and zero-bound repeat. Positive bounds accept
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/

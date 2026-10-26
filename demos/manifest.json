@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-transfers.html",
+      "title": "Roller II editor memory transfers",
+      "description": "Original editor Fill/Copy statements back up, clear and restore all fifteen real level payloads. Tile/colour bytes change while metadata, allocations and backup remain intact; restore waits at a declared redraw guard. Live in-memory preview without persistence or editor/game loops.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-transfers.html"
+    },
+    {
       "file": "roller2-arrows.html",
       "title": "Roller II original arrow movement",
       "description": "Original PFEIL/N34 after real level progression: one-pixel arrow steps and down/up/left turns, native timeout Boom, pause and source bank integrity. Twenty independent Canvas images/ten GPU comparisons over keyboard/Gamepad paths; remaining obstacle and game-over handlers stay guarded.",

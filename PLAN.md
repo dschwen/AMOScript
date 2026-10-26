@@ -6,8 +6,8 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 13 remain unrecognized (43 at
-initial assessment), and whole compilation now stops at Fill on line 325.
+The main source has 1,199 lines and 194 encodings; 11 remain unrecognized (43 at
+initial assessment), and whole compilation now stops at Set Line on line 333.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -38,7 +38,7 @@ menu fixture now runs the original executable prefix through 316, including both
 FLOADs, setup 281–286 and continuing MOD playback: ten browser cases, nine guarded
 selections and three independent/GPU frames. The live demo offers music activation/
 mute and restart-safe bindings. Next implement the selected routines and their
-dependencies, alongside the remaining decoder gates (now Fill). Checked big-endian
+dependencies, alongside the remaining decoder gates (now Set Line). Checked big-endian
 Doke/Deek/Loke/Leek now support generic banks, including odd addresses and atomic
 range checks. Original level metadata/time statements pass across all fifteen
 pinned files in a new demo. Bounded icon table/planar aliases now run original ICCOPY at game entry through
@@ -79,7 +79,10 @@ Independent PAL/phase/NTSC vectors and five native Web Audio graph comparisons
 pass; see docs/boom.md for fetch/beam/live-control limits. The new arrow fixture
 runs unchanged PFEIL/N34 through three level-2 turns, including actual Boom in
 the source deadline branch. Twenty Canvas images/ten GPU comparisons cover the
-route. Next implement Fill/Copy and other reached handlers; see docs/roller2-arrows.md. Sprite-bank raw
+route. Checked Fill/Copy now run original editor clear/backup/restore statements
+on all fifteen payloads, preserving metadata and allocations at a declared redraw
+guard. See docs/bulk-memory.md. Next implement Set Line and other reached
+compiler/gameplay handlers; see docs/roller2-arrows.md. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the
