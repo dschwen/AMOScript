@@ -1,0 +1,25 @@
+{
+  "evidence": "Independent indexed-plane Writing oracle, portable font/blank fixtures.\nPinned AMOS source w/windows.cpp writing/draw/combine; not native captures.\n",
+  "frames": [
+    {
+      "png": "writing-selection.png",
+      "indicesSha256": "5bd7d463a6098238a1197069e890322a1c1b87c30d80486861e3e2763d76f79a",
+      "rgbaSha256": "77a1350543dc0498fce7e53a34ab997b455895867afcc656106c57aecfe4e060"
+    },
+    {
+      "png": "writing-panel.png",
+      "indicesSha256": "04fe3dd95ed937bd61b5dee65bf24a0ac7fd05a24ce7f164b0b1279205818767",
+      "rgbaSha256": "3e1f503faa589d7d51e98ac9a85bffd2e90022fb7cdb2a8d9a568604da6b5547"
+    },
+    {
+      "png": "writing-pen-only.png",
+      "indicesSha256": "724601153e5f444429b63176ec405254489cc77d4ebcde882d20a8c6be05f2e1",
+      "rgbaSha256": "8450ae9852d5955f4d592b4778ed149bed25a79c53710535fec732f555a67afc"
+    },
+    {
+      "png": "writing-matrix.png",
+      "indicesSha256": "bbee9563cede53674282e6a458cd167c71f52e2740a487cf1dded3fe98db45ab",
+      "rgbaSha256": "71d87f5d78131e0938332d630d1f62a88ee8b7a9ba1c7bfa2a91acf6e40c08fc"
+    }
+  ]
+}

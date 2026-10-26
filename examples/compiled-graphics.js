@@ -1359,6 +1359,9 @@
   let current = null;
   let version = 0;
   let drawingHooks = null;
+  // The native window writer patches one shared mode/parts pair. Only windows
+  // with their Writing flag set use it; opening a window resets the pair.
+  let writingMode = 0, writingParts = 0;
   let spriteWriter = null;
   let planarBridge = null;
   let autoView = true, presented = null, presentedHardware = null;
@@ -1419,7 +1422,7 @@
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: false,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
-      inkBackground: 0, inkBorder: 0, linePattern: 65535, linePhase: 15, x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
+      inkBackground: 0, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
       columns: Math.floor(width / 8), rows: Math.floor(height / 8), cursorVisible: true
     };
     next.pixels.fill(paper);
@@ -1427,6 +1430,7 @@
     screens.set(id, next);
     priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
     current = id;
+    writingMode = writingParts = 0;
     screenListeners.forEach(listener => listener());
     changed(true);
     return next;
@@ -1858,6 +1862,30 @@
       }
     }
   }
+  function writing(mode, parts = 0) {
+    whole(mode); whole(parts);
+    if (mode < 0 || mode > 4 || parts < 0 || parts > 2) throw new Error('Invalid Writing mode/parts');
+    const target = screen();
+    writingMode = mode; writingParts = parts;
+    target.writingActive = mode !== 0 || parts !== 0;
+  }
+  function printGlyph(target, code, x, y) {
+    if (!target.writingActive) { glyph(target, code, x, y, target.pen, target.paper); return; }
+    if (writingMode === 4) return;
+    if (code < 32 || code > 127) code = 63;
+    for (let row = 0; row < 8; row++) {
+      const bits = font[code * 8 + row];
+      for (let col = 0; col < 8; col++) {
+        const px = x + col, py = y + row;
+        if (px < 0 || py < 0 || px >= target.width || py >= target.height) continue;
+        const foreground = !!(bits & (1 << col));
+        const value = foreground ? (writingParts === 1 ? 0 : target.pen) : (writingParts === 2 ? 0 : target.paper);
+        const at = py * target.width + px, previous = target.pixels[at];
+        target.pixels[at] = (writingMode === 0 ? value : writingMode === 1 ? previous | value :
+          writingMode === 2 ? previous ^ value : previous & value) & (target.colours - 1);
+      }
+    }
+  }
   function scroll(target) {
     if (target.y < target.rows) return;
     target.pixels.copyWithin(0, target.width * 8);
@@ -1887,7 +1915,7 @@
     changed();
     function put(code) {
       if (target.x >= target.columns) { target.x = 0; target.y++; scroll(target); }
-      glyph(target, code, target.x * 8, target.y * 8, target.pen, target.paper);
+      printGlyph(target, code, target.x * 8, target.y * 8);
       target.x++;
     }
   }
@@ -2082,7 +2110,7 @@
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, setLine, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },

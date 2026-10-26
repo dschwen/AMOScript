@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-25. The current local baseline has **633 passing tests**, plus a
+Updated 2026-10-26. The current local baseline has **670 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,10 +9,10 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 10 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 9 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
-compilation stops at Writing (line 334). Original WTIN/FDZ now run in a declared fixture that
+compilation stops at Scin (line 342). Original WTIN/FDZ now run in a declared fixture that
 runs original array/highscore setup, SASINIT and work/icon/sprite bank loads,
 then hands off to the main-title image while omitting remaining setup 281–286.
 The connected menu fixture now runs the original executable startup-to-menu
@@ -36,7 +36,8 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
-| Set Line | Implemented bounded portable raster profile | Per-screen low-word mask, MSB-first foreground/background pattern and phase through Draw/Draw To/Box; signed-word patterned coordinates, shared Autoback/Bob hooks and preflight. Original blank selection preview matches three independent Canvas/GPU frames. General writing modes and native phase/clip capture remain open. [Contract](set-line.md). |
+| Writing | Implemented default-window subset | Modes 0–4 and parts 0–2, shared pair/per-screen activation, checked selectors and existing buffer/Bob hooks. Original labels and fifteen-case matrix match four independent Canvas/GPU frames. Portable font; general windows and graphics Gr Writing remain open. [Contract](writing.md). |
+| Set Line | Implemented bounded portable raster profile | Per-screen low-word mask, MSB-first foreground/background pattern and phase through Draw/Draw To/Box; signed-word patterned coordinates, shared Autoback/Bob hooks and preflight. Original blank selection preview matches three independent Canvas/GPU frames. General graphics writing modes and native phase/clip capture remain open. [Contract](set-line.md). |
 | Fill / Copy | Implemented bounded bank-memory transfers | Big-endian Fill with exclusive/empty ranges (up to 1 MiB; odd starts only for byte tails), overlap-safe Copy with exclusive/nonempty ranges, complete preflight, active-Tracker and raw-icon protections. Original editor statements back up/clear/restore all fifteen payloads at a redraw guard; no persistence/editor rendering. [Contract](bulk-memory.md). |
 | Boom | Implemented bounded portable synthesis | Four source pitches, shared noise recurrence, integer envelope and fractional onset render finite float PCM with explicit seed/constant-beam choices. Independent PAL/phase/NTSC vectors and five native Web Audio graphs pass. Exact DMA/beam capture and general live wave/envelope controls remain open. [Contract](boom.md). |
 | Roller II arrows / N34 | Implemented bounded original handlers | Original PFEIL follows three real level-2 turns and N34/HCWEG rebound. Thirty-two one-pixel input positions, twenty independent Canvas images/ten GPU comparisons; original arrow timeout runs Boom before game-over guard. [Contract](roller2-arrows.md). |

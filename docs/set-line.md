@@ -11,7 +11,8 @@ bitmap drawing path. The portable profile starts at bit 15, walks toward bit 0
 and repeats. Set bits paint Ink's foreground; clear bits paint its existing
 background register. This is the default opaque graphics profile. Bar, Plot,
 text, Cline and image pastes retain their existing behavior. General graphics
-writing/complement/inverse/transparent modes remain gated with Writing/Gr Writing.
+writing/complement/inverse/transparent modes remain gated with Gr Writing.
+[Writing](writing.md) affects window text separately.
 
 The phase is a separate per-screen value, initially 15. Each line advances it
 by its major-axis distance, keeping the shared endpoint's bit when continuing
@@ -80,6 +81,7 @@ Restart while preserving its container. The gallery provides its HTML Preview
 link and embeds all assets for offline use. These are fixture/CPU/GPU comparisons,
 not an original editor screen or native Amiga execution.
 
-Whole-source compilation now stops at Writing `$1418`, original line 334,
-byte 17094. Ten of the 194 token encodings remain unrecognized; recognition alone
+A separate [Writing fixture](writing.md) now runs original 334 labels.
+Whole-source compilation now stops at Scin `$16b6`, original line 342,
+byte 17552. Nine of the 194 token encodings remain unrecognized; recognition alone
 does not complete game/editor behavior.

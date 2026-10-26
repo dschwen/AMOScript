@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-writing.html",
+      "title": "Roller II Writing text modes",
+      "description": "Original Writing 0,2 label statement, a pen-only background proof and all fifteen mode/part combinations. Four independent Canvas images and four GPU comparisons; fullscreen and Restart. Prepared blank preview with portable font; editor loop excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-writing.html"
+    },
+    {
       "file": "roller2-lines.html",
       "title": "Roller II patterned selection border",
       "description": "Original Set Line/Box selection, erase and redraw on a declared blank preview with the original palette. Three independent Canvas frames and three GPU comparisons; clipped edge-cell controls, fullscreen and Restart. Editor panel/Writing/game loop are excluded.",

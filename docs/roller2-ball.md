@@ -13,7 +13,7 @@ the menu input. The earlier menu and ready-only unit fixtures keep their declare
 post-600 and post-608 guards.
 
 This is visible first-level initialization, not movement or collision gameplay.
-Whole-source compilation still stops at Writing (line 334); Key State and the larger movement,
+Whole-source compilation still stops at Scin (line 342); Key State and the larger movement,
 pause, tile and game-over dependencies remain open. Original source and assets
 are unchanged, and only reached procedures are included in this bounded fixture.
 

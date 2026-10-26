@@ -112,7 +112,13 @@
   and preflight patterned geometry before Bob hooks. Original 333/354/356 run
   on a declared blank/palette preview, with prepared cell Input# replacing 355.
   Three independent Canvas/GPU frames cover it, not full editor/native capture.
-  See `docs/set-line.md`; Writing and general draw modes remain gated.
+  See `docs/set-line.md`; general graphics draw modes remain gated.
+- Writing 0–4 and parts 0–2 affect the default window text writer, not graphics
+  Text/Set Line/Cline. Keep one shared pair per factory with per-screen activation;
+  Screen Open resets the pair, Pen/Paper preserve activation. Ignore still advances
+  controls/scrolling and host output intent. Original 333–334 labels and a separate
+  fifteen-case matrix match four independent Canvas/GPU frames on prepared blank
+  previews. General windows/native capture remain open; see `docs/writing.md`.
 - Fill/Copy use the shared checked bank-memory resolver and signature lowering.
   Fill repeats big-endian long bits with an exclusive end and allows empty ranges;
   the subset caps at 1 MiB and rejects odd starts for 16-byte blocks. Copy uses
