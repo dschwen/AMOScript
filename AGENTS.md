@@ -267,7 +267,12 @@
   Catch-up reduces writes by field, preserving Flash-before-Fade ties and later
   Flash writes after Fade completes. Jobs follow actual screen identity; see
   `docs/flash.md`. Implicit Screen Open flashing and wrapped speeds remain open.
-- Screen Display/Screen Offset manage bounded nonoverlapping windows. View commits
+- Screen Display/Screen Offset manage bounded windows; equal-width lowres overlaps
+  use priority slices even without an explicit Screen To Front. Original DIW
+  geometry survives late background resumes; direct sprites require their changed
+  palette registers before setup-row capture. The original Roller II editor entry,
+  tile placement and panel selection have four Canvas/GPU checks. Wider actions
+  and persistence remain open. View commits
   geometry and source offsets; Canvas renders the same physical copper snapshot.
   Full bitmap storage remains authoritative. Setup can span real blank rows,
   with each chunk completed before fetch. See `docs/screen-windows.md`; general
@@ -334,7 +339,7 @@
   now pass through the corrected AMOS source. Thirty Canvas frames, six independent
   image regions and fifteen GPU comparisons pass. The old replay retains its historical missing-
   file error; it is no longer a current-demo blocker. Session writes survive only
-  Restart; high-score entry/writeback, editor/win/completion and native captures
+  Restart; high-score entry/writeback, editor persistence/win/completion and native captures
   remain open. See `docs/roller2-game.md`.
 - The live `wonderland-game` scenario embeds the entire original program/assets.
   Its finite input-only replay spends three lives through natural collisions and

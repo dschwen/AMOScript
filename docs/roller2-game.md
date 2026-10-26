@@ -54,6 +54,14 @@ supplied ILBM. New board/score-scroll frames have CPU/GPU parity evidence; they
 are not external Amiga captures. The tunnel demo separately verifies its supplied
 assets against 48 independent animation hashes and five GPU comparisons.
 
+A separate input-only editor replay follows the original title-menu click,
+opening fade and editor loop, then places tile 3 at cell (2,2) and moves the pointer
+onto the foreground panel. Four additional Canvas frames and four GPU comparisons
+cover the overlapping windows, right-edge sprites and resumed bottom background.
+See [screen priority](screen-priority.md) for the source-derived slice rules and
+remaining bounds. The live runner reports the editor phase and accepts pointer
+input; real-time gallery checks also enter it from the title.
+
 Live gallery checks also cover real-time game entry and timeout, fullscreen,
 sound, Stop/Resume, score scroll/menu return, fresh-game selection, Restart,
 separate H/scores entry and owned context/fullscreen cleanup.
@@ -83,7 +91,7 @@ Browser files are synchronous prepared byte strings, with case/volume mapping in
 the adapter. Writes, if reached, stay in session memory across Restart and vanish
 on page reload. The accepted replay performs no writes; IndexedDB is still planned.
 
-High-score name entry/writeback, editor/requesters, help/win flows, other handlers,
+High-score name entry/writeback, editor save/load/requesters and wider actions, help/win flows, other handlers,
 later-level completion and external Amiga execution/audio captures remain open.
 The refreshed assets fix the reached resource failure; passing this bounded path
 does not establish full game or general AMOS compatibility.

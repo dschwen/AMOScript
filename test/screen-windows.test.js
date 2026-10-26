@@ -69,12 +69,12 @@ test('screen windows: Wonderland original game/editor setup presents panels and 
   }
 });
 
-test('screen windows: unsupported wrapping, overlaps and placements reject explicitly', () => {
+test('screen windows: unsupported wrapping and placements reject explicitly', () => {
   const d=createDisplay(); d.open(0,640,288,16,0); d.screenDisplay(0,128,48,320,168);
   assert.throws(()=>d.screenOffset(0,-1,0),/outside bitmap/);
   d.screenOffset(0,639,0); assert.throws(()=>d.snapshotDisplay(),/outside physical bitmap/); d.screenOffset(0,0,0);
   d.open(1,320,256,16,0); d.screenDisplay(1,128,50,320,128);
-  assert.throws(()=>d.snapshotDisplay(),/overlapping/);
+  assert.ok(d.snapshotDisplay().frame.lines > 0);
   assert.throws(()=>d.screenDisplay(1,128,255,320,256),/window/);
   d.open(2,320,256,4096,0); d.screenDisplay(2,128,50,320,128); // HAM decoding still uses the fetched row's history.
   assert.throws(()=>d.screenOffset(2,0,256),/outside bitmap/);

@@ -327,6 +327,13 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
         await page.keyboard.press('h'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'scores');
+        await page.click('#roller2-game-restart'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.line === '164');
+        await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
+        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
+        const editorMenu = await page.locator('#roller2-game-input').boundingBox();
+        await page.locator('#roller2-game-input').click({ position: { x: editorMenu.width * 282 / 320, y: editorMenu.height * 140 / 268 }, delay: 100 });
+        await page.waitForFunction(() => { const c = document.getElementById('roller2-game-controls'); return c.dataset.phase === 'editor' && Number(c.dataset.line) >= 341; });
+        await page.screenshot({ path: path.join(__dirname, '../artifacts/roller2-editor.png'), fullPage: true });
         const closed = await page.evaluate(() => AMOS_ROLLER2_GAME_CLEANUP());
         assert.strictEqual(closed.contextState, 'closed'); await page.waitForFunction(() => document.fullscreenElement === null);
       }

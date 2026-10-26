@@ -658,7 +658,8 @@
         pointers: view.pointers.map(pointer => pointer + offsetY * view.rowBytes + (offsetX >> 4) * 2),
         scroll: delay | (delay << 4), fetchAdvance: view.hires ? 4 : 8 };
     });
-    if (windows && windows.some(window => window.priority)) {
+    const overlap = views.some((view, index) => views.slice(index + 1).some(other => view.y < other.y + other.height && other.y < view.y + view.height));
+    if (windows && (windows.some(window => window.priority) || overlap)) {
       // Native MkD/MkA chooses one screen for each horizontal slice. A switch
       // starts with DMA disabled on a setup row, never a software overlay.
       if (views.some(view => view.hires || view.ham || view.scroll || view.x !== 128 || view.width !== views[0].width || view.palette[0] !== views[0].palette[0])) {
@@ -682,7 +683,7 @@
         const y = slice.y + (resume ? 1 : 0);
         const end = slice.end - (next && next.y === slice.end && next.owner.y === next.y ? 1 : 0);
         if (end <= y) throw new Error('Screen priority slice is too short for setup');
-        return { ...slice.owner, y, height: end - y,
+        return { ...slice.owner, y, windowY: slice.owner.y, windowEnd: slice.owner.y + slice.owner.height, height: end - y,
           pointers: slice.owner.pointers.map(pointer => pointer + (y - slice.owner.y) * slice.owner.rowBytes),
           blankSetup: index > 0 };
       });
@@ -700,8 +701,10 @@
     const result = copperInterpreter(memory.bytes, { ...compiled.interpretOptions, initialRegisters: compiled.initialRegisters,
       address: copperAllocation.address, revision: ++revision }).snapshot;
     if (display.writeSprites) display.writeSprites(result.frame);
-    if (views.some(view => view.blankSetup) && result.frame.lineSprites.some((value, index) => index % 4 === 3 && (value & 0x80000000))) {
-      throw new Error('Sprites across screen priority setup rows are not implemented');
+    for (const view of views.filter(view => view.blankSetup)) {
+      const row = view.y - 1 - result.frame.origin.y;
+      const active = row >= 0 && row < result.frame.lines && result.frame.lineSprites.subarray(row * 32, (row + 1) * 32).some((value, index) => index % 4 === 3 && (value & 0x80000000));
+      if (active && !compiled.spriteSafeSetupRows.includes(view.y - 1)) throw new Error('Sprite palette changes exceed screen setup capture budget');
     }
     return snapshotModel.createSnapshot(result);
   }
@@ -936,7 +939,7 @@
     if (!Array.isArray(screens) || !screens.length || screens.length > 8) fail('expected 1–8 screens');
     const views = screens.slice().sort((a, b) => a.y - b.y);
     const initialRegisters = new Uint16Array(256), words = [], changesByLine = new Map();
-    const dmaSetupRows = new Set();
+    const dmaSetupRows = new Set(), spriteSafeSetupRows = [];
     const paletteRows = options.paletteRows || [], paletteByLine = new Map();
     if (!Array.isArray(paletteRows) || paletteRows.length > 624) fail('invalid palette row count');
     for (const row of paletteRows) {
@@ -964,10 +967,14 @@
       const { width, height, depth, pointers, rowBytes, palette, x, y } = view;
       const hires = view.hires === true, sourceWidth = hires ? Math.ceil(width / 2) : width;
       const endX = x + sourceWidth, endY = y + height;
+      const windowY = view.windowY == null ? y : view.windowY;
+      const windowEnd = view.windowEnd == null ? endY : view.windowEnd;
       if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 1 ||
           !Number.isInteger(depth) || depth < 1 || depth > (hires ? 4 : 6) ||
-          x !== 128 || !Number.isInteger(y) || y < 0 || y > 255 || endX < 256 || endX > 511 ||
-          endY < 128 || endY > (options.standard === 'NTSC' ? 262 : 312) ||
+          x !== 128 || !Number.isInteger(y) || y < 0 || y >= (options.standard === 'NTSC' ? 262 : 312) ||
+          !Number.isInteger(windowY) || windowY < 0 || windowY > 255 || windowY > y || endX < 256 || endX > 511 ||
+          !Number.isInteger(windowEnd) || windowEnd < 128 || windowEnd < endY ||
+          windowEnd > (options.standard === 'NTSC' ? 262 : 312) ||
           !Number.isInteger(rowBytes) || rowBytes % 2 || rowBytes < Math.ceil(width / 16) * 2 ||
           !pointers || pointers.length !== depth || !palette || palette.length > 32) fail('unsupported OCS screen geometry/depth');
       if (previous && y < previous.endY) fail('overlapping screen windows are not implemented');
@@ -985,8 +992,8 @@
       try { fetchedBytes = fetchBytes(control, ddfStart, ddfStop); } catch (error) { fail(error.message); }
       const mod = rowBytes - fetchedBytes;
       if (mod < -32768 || mod > 32766) fail('modulo out of range');
-      setup.set(R.DIWSTRT, (y << 8) | x);
-      setup.set(R.DIWSTOP, ((endY & 255) << 8) | (endX & 255));
+      setup.set(R.DIWSTRT, (windowY << 8) | x);
+      setup.set(R.DIWSTOP, ((windowEnd & 255) << 8) | (endX & 255));
       setup.set(R.DDFSTRT, ddfStart); setup.set(R.DDFSTOP, ddfStop);
       const priority = view.bplcon2 == null ? (view.pf2Priority ? 0x40 : 0) : view.bplcon2;
       if (!Number.isInteger(priority) || priority < 0 || priority > 127) fail('invalid playfield/sprite priority');
@@ -1014,7 +1021,14 @@
         if (view.blankSetup) {
           const line = y - 1;
           if (line < previous.endY || changesByLine.has(line) || palette[0] !== previous.setup.get(R.COLOR00)) fail('unsafe priority setup row');
-          changesByLine.set(line, new Map([[R.DMACON, 0x100], ...changes]));
+          // Complete sprite palette changes before the row snapshot. Later
+          // playfield-only writes remain invisible while bitplane DMA is off.
+          const spriteColour = reg => reg >= R.COLOR00 + 32 && reg <= R.COLOR00 + 62;
+          const early = changes.filter(([reg]) => spriteColour(reg));
+          const late = changes.filter(([reg]) => !spriteColour(reg));
+          if (2 + (1 + early.length) * 4 < captureStart &&
+              !Array.from(paletteByLine.get(line) || []).some(([reg]) => spriteColour(reg))) spriteSafeSetupRows.push(line);
+          changesByLine.set(line, new Map([[R.DMACON, 0x100], ...early, ...late]));
           changesByLine.set(y, new Map([[R.DMACON, 0x8300]]));
           dmaSetupRows.add(line);
         } else if (2 + combined * 4 >= ddfStart) {
@@ -1067,7 +1081,7 @@
     emit(0xffff, 0xfffe);
     const bytes = new Uint8Array(words.length * 2), output = new DataView(bytes.buffer);
     words.forEach((word, index) => output.setUint16(index * 2, word, false));
-    return { bytes, initialRegisters,
+    return { bytes, initialRegisters, spriteSafeSetupRows,
       interpretOptions: { standard: options.standard || 'PAL', origin: options.origin || { x: 128, y: 50 },
         outputWidth: options.outputWidth == null ? 640 : options.outputWidth,
         lines: options.lines == null ? 200 : options.lines,
@@ -1448,7 +1462,7 @@
     presentedHardware = presented ? { x: presented.hardwareX, y: presented.hardwareY,
       width: presented.width, height: presented.height, mode: presented.mode } : null;
     const targets = priorityEnabled ? priorityOrder.map(id => screens.get(id)).filter(target => target && !target.hidden) :
-      Array.from(screens.values()).filter(target => target.windowed && !target.hidden);
+      priorityOrder.map(id => screens.get(id)).filter(target => target && target.windowed && !target.hidden);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY,
       priority: priorityEnabled })) : null;

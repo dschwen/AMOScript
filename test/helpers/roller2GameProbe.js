@@ -5,7 +5,7 @@ module.exports = async function roller2GameProbe(page) {
   const currentAssets = require('./roller2CurrentAssets')();
   const assets = Object.fromEntries(Object.entries(currentAssets).map(([name, bytes]) => [name, Buffer.from(bytes, 'latin1').toString('base64')]));
   const images = ['terminator-el.png', 'current-roller-title.png'];
-  return page.evaluate(async ({ source, assets, images, replaySource, filesSource, timerSource, gpuSources, audioSource, sessionSource }) => {
+  return page.evaluate(async ({ source, assets, images, replaySource, editorReplaySource, filesSource, timerSource, gpuSources, audioSource, sessionSource }) => {
     const compiled = { exports: {} }; new Function('module', source)(compiled);
     const make = text => new Function(`return (${text});`)(), replay = make(replaySource), makeFiles = make(filesSource), makeClock = make(timerSource);
     const initial = Object.fromEntries(Object.entries(assets).map(([name, value]) => [name, atob(value)]));
@@ -52,9 +52,38 @@ module.exports = async function roller2GameProbe(page) {
         }));
       } finally { if (host) host.detach(); if (gpuHost) gpuHost.detach(); release(gpu); surface.remove(); }
     }
+    let editorHost = null, editorGpu = null, editorGpuHost = null, editorFrames = 0, editorGpuFrames = 0;
+    const editorSurface = document.createElement('canvas'); document.body.append(editorSurface);
+    let editor;
+    try {
+      editorGpu = createGpu(document.createElement('canvas'));
+      editor = make(editorReplaySource)(compiled.exports, makeClock(4), makeFiles(initial), p => {
+        editorHost = AMOS_BROWSER.createCanvasHost(editorSurface, { mouseCoordinates: 'hardware', requestAnimationFrame: () => 1, cancelAnimationFrame() {} }); editorHost.attach(p);
+        editorGpuHost = AMOS_BROWSER.createCanvasHost(editorGpu.resources.context.canvas, { renderer: editorGpu, requestAnimationFrame: () => 1, cancelAnimationFrame() {} }); editorGpuHost.attach(p);
+        return {
+          key() { for (const type of ['keydown', 'keyup']) editorSurface.dispatchEvent(new KeyboardEvent(type, { code: 'KeyA', key: 'a', bubbles: true })); },
+          mouse(x, y, buttons) {
+            editorHost.render(); const rect = editorSurface.getBoundingClientRect(), frame = p.display.snapshotDisplay().frame;
+            const sx = rect.width / editorSurface.offsetWidth, sy = rect.height / editorSurface.offsetHeight;
+            editorSurface.dispatchEvent(new PointerEvent('pointermove', { clientX: rect.left + editorSurface.clientLeft * sx + (x - frame.origin.x + .25) * editorSurface.clientWidth * sx / (frame.outputWidth / 2), clientY: rect.top + editorSurface.clientTop * sy + (y - frame.origin.y + .25) * editorSurface.clientHeight * sy / frame.lines, buttons, bubbles: true }));
+          }, dispose() {}
+        };
+      }, (name, p) => {
+        editorHost.render(); const expected = p.display.canvasFrame(), actual = editorSurface.getContext('2d').getImageData(0, 0, expected.width, expected.height).data;
+        check(actual.length === expected.rgba.length && actual.every((v, i) => v === expected.rgba[i]), `Editor Canvas mismatch: ${name}`); editorFrames++;
+        const previous = p.display.canvasFrame; p.display.canvasFrame = () => { throw Error('Editor GPU used CPU presentation'); };
+        try { editorGpuHost.render(); } finally { p.display.canvasFrame = previous; }
+        const gpuPixels = editorGpu.readPixels(), cpu = p.display.renderDisplay();
+        check(editorGpu.stats.lastResult.backend === 'gpu' && gpuPixels.length === cpu.length && gpuPixels.every((v, i) => v === cpu[i]), `Editor GPU mismatch: ${name}`); editorGpuFrames++;
+        if (globalThis.AMOS_DEMO_OBSERVE) {
+          globalThis.AMOS_DEMO_OBSERVE({ name: `Canvas: ${name}`, width: expected.width, height: expected.height, rgba: actual });
+          globalThis.AMOS_DEMO_OBSERVE({ name: `WebGL: ${name}`, width: editorGpu.stats.lastResult.width, height: editorGpu.stats.lastResult.lines, rgba: gpuPixels });
+        }
+      });
+    } finally { if (editorHost) editorHost.detach(); if (editorGpuHost) editorGpuHost.detach(); release(editorGpu); editorSurface.remove(); }
     if (globalThis.AMOS_ROLLER2_GAME_CLEANUP) await globalThis.AMOS_ROLLER2_GAME_CLEANUP();
     const controls = document.createElement('section'); controls.id = 'roller2-game-controls';
-    const help = document.createElement('p'); help.textContent = 'Roller II with the level-3 time-bonus crash fixed and the current supplied assets. Press a key at the logo; Enter/gamepad fire starts the game and exits ready prompts. Arrows move; Space pauses; M/F toggle music/effects. Escape returns to title after fullscreen exits. The current supplied assets include the restored high-score image; game over returns through scores to the title. H opens the title-menu scores view. Errors require Restart. File writes stay in session memory and disappear on page reload; IndexedDB remains planned.';
+    const help = document.createElement('p'); help.textContent = 'Roller II with the level-3 time-bonus crash fixed and the current supplied assets. Press a key at the logo; Enter/gamepad fire starts the game and exits ready prompts. Arrows move; Space pauses; M/F toggle music/effects. Escape returns to title after fullscreen exits. The current supplied assets include the restored high-score image; game over returns through scores to the title. H opens the title-menu scores view. Click Editor on the title to open the original overlapping editor windows and place tiles with the mouse. Editor save/load and other actions remain unverified. Errors require Restart. File writes stay in session memory and disappear on page reload; IndexedDB remains planned.';
     const viewport = document.createElement('section'); viewport.id = 'roller2-game-viewport'; const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar'; const slot = document.createElement('div'), status = document.createElement('pre');
     const fullButton = document.createElement('button'), fullStatus = document.createElement('span'); fullButton.id = 'roller2-game-fullscreen'; toolbar.append(fullButton, fullStatus);
     let surface = document.createElement('canvas'), gpu = null; surface.id = 'roller2-game-input'; surface.tabIndex = 0; surface.setAttribute('aria-label', 'Complete Roller II game'); slot.append(surface); viewport.append(toolbar, slot, status); controls.append(help, viewport); document.body.append(controls);
@@ -63,7 +92,7 @@ module.exports = async function roller2GameProbe(page) {
     const soundButton = document.createElement('button'); soundButton.id = 'roller2-game-sound'; toolbar.append(soundButton);
     function update() {
       if (!live) return; const v = live.state.variables, location = live.state.location, target = live.display.screens.get(0), s = sound.status();
-      const phase = error ? 'error' : live.state.stopped ? 'stopped' : live.state.halted ? 'ended' : live.state.music.playing ? 'game-over' : location && location.line >= 1083 && location.line <= 1104 ? 'scores' : location && location.line >= 298 && location.line <= 316 && !live.state.fade.active ? 'menu' : v.int_lv > 0 && (live.sprites.get(1) || {}).image > 0 ? 'game' : v.int_lv > 0 ? 'ready' : 'intro';
+      const phase = error ? 'error' : live.state.stopped ? 'stopped' : live.state.halted ? 'ended' : live.state.music.playing ? 'game-over' : location && location.line >= 1083 && location.line <= 1104 ? 'scores' : location && location.line >= 298 && location.line <= 316 && !live.state.fade.active ? 'menu' : location && location.line >= 324 && location.line <= 564 ? 'editor' : v.int_lv > 0 && (live.sprites.get(1) || {}).image > 0 ? 'game' : v.int_lv > 0 ? 'ready' : 'intro';
       Object.assign(controls.dataset, { phase, line: String(location ? location.line : 0), level: String(v.int_lv || 0), score: String(v.int_hi || 0), backend: gpu ? 'webgl' : 'canvas', sound: s.state, soundContext: s.contextState || 'none', soundVoices: String(s.voices.length), soundPlays: String(s.plays), writes: String(files.writes.length) });
       soundButton.textContent = ['on', 'starting'].includes(s.state) ? 'Mute sound' : 'Enable sound'; status.textContent = error || JSON.stringify({ phase, level: v.int_lv, score: v.int_hi, ball: [v.int_bx, v.int_by], line: location && location.line, audio: s.state, audioError: s.error, writesInSessionMemory: files.writes.length }, null, 2); fullscreen.refresh();
     }
@@ -77,7 +106,7 @@ module.exports = async function roller2GameProbe(page) {
     soundButton.onclick = () => { if (['on', 'starting'].includes(sound.status().state)) sound.mute(); else sound.enable().then(() => { if (!disposed) update(); }); host.focus(); update(); };
     const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: fullButton, statusElement: fullStatus, surface: slot, getContent: () => surface }); start(); const monitor = setInterval(update, 50);
     globalThis.AMOS_ROLLER2_GAME_CLEANUP = async () => { disposed = true; revision++; clearInterval(monitor); host.detach(); live.stop(); release(gpu); await Promise.all([fullscreen.dispose(), sound.dispose()]); update(); return sound.status(); };
-    return { frames, gpuFrames, independent, emptyFrames, emptyGpuFrames, replays: results, restoredImage: 'iffp/roller hi' };
+    return { frames, gpuFrames, independent, emptyFrames, emptyGpuFrames, editorFrames, editorGpuFrames, editor, replays: results, restoredImage: 'iffp/roller hi' };
   }, { source: new (require('../../lib/Transpiler'))(Buffer.from(currentAssets['rii:Roller II.AMOS'], 'latin1')).toModule(), assets,
-    images: Object.fromEntries(images.map(name => [name, fs.readFileSync(path.join(__dirname, '../fixtures/roller2', name)).toString('base64')])), replaySource: require('./roller2CurrentReplay').toString(), filesSource: require('./roller2GameFiles').toString(), timerSource: require('./fakeTimers').createFakeTimers.toString(), gpuSources: require('./webglHostSources')(), audioSource: require('../../lib/amos/webAudio').createWebAudioHost.toString(), sessionSource: require('../../lib/amos/browserAudio').createBrowserAudioSession.toString() });
+    images: Object.fromEntries(images.map(name => [name, fs.readFileSync(path.join(__dirname, '../fixtures/roller2', name)).toString('base64')])), replaySource: require('./roller2CurrentReplay').toString(), editorReplaySource: require('./roller2EditorReplay').toString(), filesSource: require('./roller2GameFiles').toString(), timerSource: require('./fakeTimers').createFakeTimers.toString(), gpuSources: require('./webglHostSources')(), audioSource: require('../../lib/amos/webAudio').createWebAudioHost.toString(), sessionSource: require('../../lib/amos/browserAudio').createBrowserAudioSession.toString() });
 };

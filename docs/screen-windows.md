@@ -18,7 +18,8 @@ use physical rows in the supported nonlaced subset.
 
 The current bounded implementation accepts aligned x=128, widths 128–320 lowres
 units, y=0–255 and windows ending on rows 128–312 (262 for NTSC). Other placement,
-overlap, clipping and scheduling forms reject explicitly. A window and its offsets
+clipping and scheduling forms reject explicitly. Equal-width lowres overlaps use
+the [priority slice path](screen-priority.md), including ordinary window opens. A window and its offsets
 must fit within its physical bitmap at presentation; wrapped/out-of-bitmap DMA is
 unsupported. Negative coordinates and word-overflow behavior remain outside this
 subset. Hires offsets discard the low x bit, following the original scroll logic.
@@ -114,7 +115,7 @@ gap writes may be omitted only when the next row overwrites the same register;
 border/sprite colours and final restoration writes remain. The original death
 fade now fits the two-row gap. See [the live-game contract](wonderland-game.md).
 
-Explicit Screen To Front now opts into bounded equal-width lowres priority slices
+Screen To Front and ordinary overlapping windows use bounded equal-width lowres priority slices
 with shared background colour and real DMA-disabled setup rows. Roller II’s
-connected board/ready prompt runs through 608; wider overlays and native timing
+connected board/ready prompt and full-source editor entry now render; wider overlays and native timing
 remain open. See [priority and ready-prompt contract](screen-priority.md).

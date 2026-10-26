@@ -7,8 +7,9 @@ screens participate, including implicit default windows. Selecting a logical
 screen does not reorder them. Open/clone inserts at the front; close removes it.
 Auto View Off stages order, visibility and geometry until View; retained screen
 objects/buffers continue presenting across replacement or closure until commit.
-Legacy window presentation without an explicit priority command retains its
-existing contract.
+Ordinary explicitly positioned windows also use this order when they overlap;
+no explicit Screen To Front is required. Logical Screen selection never raises
+a window. Nonoverlapping windows retain their existing presentation contract.
 
 The physical bridge chooses the foremost screen for each vertical interval and
 coalesces adjacent intervals with the same owner. It emits planar slices using
@@ -36,11 +37,23 @@ invisible nonzero palette/window/control writes do not produce pixel events.
 COLOR00 and sprite events remain observable. The blank rows are real output, not
 invented extra gaps or a relaxed visible-row budget.
 
+The portable copper keeps each owner's full display-window bounds in DIW and uses
+DMA disable/enable for the cuts. Slice coordinates schedule the transitions
+rather than becoming new 8-bit DIW starts. This permits short slices before row 128 and background resumes
+after row 255 without wrapping the source row or inventing ECS registers.
+
+Direct AMOS sprites can cross setup rows when changed sprite colours (16–31)
+finish before the row snapshot. The builder orders those colours immediately after
+DMA disable, ahead of invisible playfield setup, and records which rows meet that
+strict deadline. The bridge checks active sprite rows after the structured sprite
+writer runs. A transition that misses that deadline still rejects; no mid-line
+palette effects are discarded or silently composited.
+
 Current bounds: equal-width lowres windows at X=128, whole-word horizontal offsets,
-shared COLOR00, no HAM or active sprites across setup, at most eight resulting
-slices, and the existing OCS geometry/palette budget limits. Vertical offsets and
-full bitmap ownership remain intact. Unequal-width overlays, arbitrary placement,
-short/unrepresentable slices, sprite/palette transitions, wrapped DMA and native
+shared COLOR00, no HAM, at most eight resulting slices, and the existing OCS
+geometry/palette budget limits. Vertical offsets and full bitmap ownership remain
+intact. Unequal-width overlays, arbitrary placement,
+unrepresentable slices, larger sprite/palette transitions, wrapped DMA and native
 capture parity remain open and reject explicitly. SnapshotPlayfield still exports
 the complete physical bitmap without priority cropping.
 
@@ -68,3 +81,20 @@ audio adapter in this demo. The menu demo retains its optional sound controls.
 The live demo now also runs BALLFARBEN, six-plane sprites’ low-four-plane hardware
 behavior and initial fade/status border through 617. See [initial ball](roller2-ball.md).
 This display fixture remains bounded. Whole-source compilation now passes; see [current milestone](roller2.md).
+
+## Connected Roller II editor
+
+The complete current game now follows its original menu click into lines 324–337
+and the editor input loop. Screen 0 occupies Y=42–297; the foreground panel occupies
+Y=240–295. Row 239 is a setup row, row 296 restores the background, and row 297
+fetches original background row 255. Both right-edge hardware sprites remain
+structured sprite rows. Source code and asset bytes are unchanged by this display
+extension.
+
+The shared `roller2EditorReplay.js` uses only input: title selection, opening fade,
+editor entry, placement of tile 3 at cell (2,2), and a pointer move onto the panel.
+Four Canvas and four real GPU frames run in the full-game gallery demo, including
+the fade and the two windows. Synthetic row/colour oracles separately verify the
+cuts, source offsets, resumed pointers, sprites, staged visibility and priority.
+These are source-derived expectations and CPU/GPU parity, not Amiga captures.
+Saving/loading, wider editor actions and returning to the game remain unaccepted.

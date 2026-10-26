@@ -16,6 +16,14 @@ is retained in the frozen fixtures; the corrected file is pinned in the current
 manifest. The level-3 bottom-right bonus regression reaches TM=20 and a safe stop
 at (17,11) through original input. See examples/Roller2/current/movement-edge-fix.md.
 
+Ordinary overlapping windows now use the existing native-style priority slices.
+The original Roller II editor opens from the title, renders both windows/right-edge
+sprites, places a tile and selects its foreground panel. Four additional Canvas
+frames and four GPU comparisons cover this entry path. DIW windows retain the owner’s full
+geometry while DMA cuts the slices, including background restoration after row 255.
+Editor persistence/wider actions and native captures remain open; see
+[screen priority](docs/screen-priority.md).
+
 ## Current priority: Roller II
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
@@ -246,7 +254,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **727 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **730 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

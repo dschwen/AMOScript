@@ -27,13 +27,17 @@ playfield storage remains the migration path.
 For example, `snapshotDisplay([1, 2], { origin: { x: 128, y: 50 },
 outputWidth: 640, lines: 200 })` exports a physical stack using the screens'
 hardware positions. Without geometry overrides, the crop encloses the requested
-views. Multiple views are sorted vertically; they must not overlap. Their native
+views. Explicitly requested views are sorted vertically and must not overlap. The default
+committed window stack first resolves bounded overlaps into native-style priority
+slices; see [screen priority](screen-priority.md). Their native
 sampling grid is shared, so lowres pixels occupy two samples and hires one.
 Geometry can override `standard`, `origin`, `outputWidth`, `lines`, `videoRate`
 and `pixelAspect`. `displayOptions.snapshotStandard` defaults to PAL.
 
 [Screen Display and Screen Offset](screen-windows.md) now integrate bounded
-nonoverlapping windows and pointer/fine-scroll offsets. Large palette/setup
+nonoverlapping windows and pointer/fine-scroll offsets. Equal-width lowres overlaps
+use DMA-disabled priority slices, including late background resumes and bounded
+direct-sprite palette transitions. Large palette/setup
 changes can use actual blank rows, with every chunk complete before capture on
 blank rows and before fetch on visible rows.
 General placement/priority and user-copper commands remain open.
@@ -150,7 +154,7 @@ its changes before DDF start on visible rows or before snapshot capture on
 genuinely blank rows. DIW setup precedes pointer changes. Excessive palette/pointer
 setup still rejects. [The live-game contract](wonderland-game.md) documents the
 bounded gap-write elimination and independent budget tests. Arbitrary positioning,
-overlapping screens, wider transitions, ECS/AGA, sprite bus contention,
+unequal-width overlays, wider transitions, ECS/AGA, sprite bus contention,
 interlace and user AMOS copper commands remain open. The interpreter records
 supported mode/scroll events but does not claim all mid-line register effects.
 Static scroll, EHB and dual-playfield views are now supported, including early
