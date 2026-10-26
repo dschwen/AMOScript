@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const levels=await runScenario('roller2-progression',page);assert.strictEqual(levels.gpuFrames,7);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());
+    console.log('Roller2 levels passed: original bonus/Return/LEVLOAD, real second-level ready and ball, independent pixels and seven GPU frames.');
     const colours=await runScenario('roller2-colours',page);assert.strictEqual(colours.gpuFrames,7);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());
     console.log('Roller2 colours passed: original five-tile keyboard/Gamepad collections, independent fades/pixels, exact map/score/count and seven WebGL frames.');
     const movement=await runScenario('roller2-movement',page);assert.strictEqual(movement.gpuFrames,6);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());

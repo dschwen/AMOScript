@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-progression', title: 'Roller II bonus and next level', initialFrame: 'Canvas: keyboard level 2 started', description: 'Original five-tile collection continues through ZAEHLHOCH inclusive bonus scoring, Return and LEVLOAD into the real second-level bank, ready prompt and starting ball. Fourteen independent Canvas images and seven GPU comparisons using keyboard/Gamepad. Other obstacle/pause/game-over handlers remain guarded.', run: page=>require('./roller2MovementProbe')(page,{levels:true}), check(result, assert) {
+    assert.strictEqual(result.inputModes,2);assert.strictEqual(result.collections,10);assert.strictEqual(result.frames,14);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:7);assert.strictEqual(result.guard,'other-tile-handlers');assert.strictEqual(result.fullGame,false);
+  } },
   { id: 'roller2-colours', title: 'Roller II original colour collections', initialFrame: 'Canvas: keyboard colour 5 collected', description: 'Original KCWEG/BCL/GAMED collect all five first-level colour tiles, update exact map bytes, score and remaining count, and fade only the ball palette. Fourteen independent Canvas images and seven WebGL comparisons across keyboard/Gamepad input; bonus scoring/level loading remains guarded.', run: page=>require('./roller2MovementProbe')(page,{colours:true}), check(result, assert) {
     assert.strictEqual(result.inputModes,2);assert.strictEqual(result.collections,10);assert.strictEqual(result.frames,14);assert.strictEqual(result.gpuFrames,result.gpuUnavailable?0:7);assert.strictEqual(result.guard,'level-bonus');assert.strictEqual(result.mapUnchanged,false);assert.strictEqual(result.fullGame,false);
   } },

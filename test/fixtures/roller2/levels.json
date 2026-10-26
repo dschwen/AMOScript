@@ -1,0 +1,16 @@
+{
+  "evidence": "Independent raw assets and portable-font source composition; deterministic injected clock, not native timing/capture.",
+  "bonusTimer": 282,
+  "bonusUpper": 176,
+  "bonusPoints": 177,
+  "score": 227,
+  "level": 2,
+  "remaining": 3,
+  "bx": 8,
+  "by": 1,
+  "colour": 1,
+  "time": 30,
+  "png": "level-2-start.png",
+  "payloadSha256": "96dca1b46a7b8843adc5f582b1da76ccaaa454fb2c87bc42118893b29a9ec71f",
+  "rgbaSha256": "fd5aea691d86ced2b8e6c36da0c424b2b6d27fd136ab53a275c5bf7bb6918afa"
+}

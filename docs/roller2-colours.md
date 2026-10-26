@@ -82,7 +82,8 @@ alone records audio events; the live preview is silent and does not accumulate
 an audio log. The optional audible menu demo is retained. The gallery links every
 shared browser test through HTML Preview, and all assets run offline.
 
-Next implement original ZAEHLHOCH bonus scoring and the next real level load,
-then extend reached colour/obstacle/exit paths. Full compilation still stops at
+The separate [progression fixture](roller2-progression.md) now implements original
+ZAEHLHOCH and real next-level loading. This colour fixture retains its bonus guard.
+Next extend reached colour/obstacle/exit paths. Full compilation still stops at
 Boom, with fourteen token encodings unrecognized. Pause, death, highscore/editor
 and native capture gates remain open.

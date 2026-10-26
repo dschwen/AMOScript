@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-progression.html",
+      "title": "Roller II bonus and next level",
+      "description": "Original five-tile collection continues through ZAEHLHOCH inclusive bonus scoring, Return and LEVLOAD into the real second-level bank, ready prompt and starting ball. Fourteen independent Canvas images and seven GPU comparisons using keyboard/Gamepad. Other obstacle/pause/game-over handlers remain guarded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-progression.html"
+    },
+    {
       "file": "roller2-colours.html",
       "title": "Roller II original colour collections",
       "description": "Original KCWEG/BCL/GAMED collect all five first-level colour tiles, update exact map bytes, score and remaining count, and fade only the ball palette. Fourteen independent Canvas images and seven WebGL comparisons across keyboard/Gamepad input; bonus scoring/level loading remains guarded.",

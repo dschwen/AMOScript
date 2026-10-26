@@ -66,8 +66,12 @@ guarded colour tile. Independent 24-step/PNG expectations, prepared original
 stop/collapse maps and six more GPU comparisons pass. Original KCWEG/HCWEG, sparse BCL fades and GAMED now run in a separate colour
 fixture. All five first-level colour tiles clear with exact score/count/map/RNG
 expectations, fourteen independent Canvas images and seven more GPU comparisons.
-The next guard precedes ZAEHLHOCH bonus scoring/level loading. Next implement that
-original bonus/next-level path, then Copy/Fill and other reached handlers. Sprite-bank raw
+A separate progression fixture now runs unchanged ZAEHLHOCH and returns through
+LEVLOAD into the real second-level bank, ready prompt and starting ball. Its
+inclusive bonus, bank retirement, Stop/Resume and missing-file win guard pass;
+fourteen Canvas frames and seven additional GPU comparisons cover keyboard/Gamepad.
+See docs/roller2-progression.md. Next extend reached level-2 obstacle paths, then
+Copy/Fill and other handlers. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the

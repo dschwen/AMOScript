@@ -27,6 +27,7 @@ node tools/audit_mod.js examples/Roller2/music/mod.Roller_II_mus
 | Level metadata | Original line 608 reads all fifteen pinned level headers; original Doke/Wait Vbl line 474 edits only the time word. Generic-bank word/long access is bounded; icon addressing now runs original ICCOPY before its entry guard. [Demo](../demos/roller2-levels.html) |
 | Original game-entry icon copies | Original 565–570 and ICCOPY 240–246 execute after menu game selection. Bounded live icon table/planar views preserve the inclusive allocation-tail byte and old masks. Independent PNGs and two additional GPU frames. [Contract](icon-memory.md) |
 | Game screens and first level load | Original 571–600 creates hidden/game screens, initializes rainbow/status rows, loads level 1 and refreshes text through Cline. Independent portable-font/rainbow panel pixels match Canvas/GPU. Guard precedes overlapping-window presentation, board drawing and gameplay. [Contract](cline.md) |
+| Original bonus / next level | ZAEHLHOCH returns through LEVLOAD into the real second-level bank, ready prompt and starting ball. Inclusive bonus, bank retirement, Stop/Resume and absent-next-file win guard pass; fourteen Canvas frames and seven GPU comparisons. Other handlers remain guarded. [Contract](roller2-progression.md) |
 | Original colour collections | KCWEG/HCWEG, sparse BCL Fade lists and GAMED now execute. All five level-1 colour tiles clear; independent pixels/map bytes/score/count/RNG and seven further GPU comparisons pass. Guard precedes bonus scoring/level loading. [Contract](roller2-colours.md) |
 | First original floor movement | Original BEWEG/floor/stop/Lasttest now run through main string dispatch and cyclic Add. Level 1 slides to the colour-handler guard; independent trajectories/PNGs, original prepared stop/collapse maps and six more GPU comparisons pass. [Contract](roller2-movement.md) |
 | Original game input loop | Unchanged JOAB 619–639 after connected setup: countdown, toggles, Key State and Escape title return. Four guarded direction paths, twenty-four Canvas checks and six additional GPU frames; movement/pause/game-over handlers remain gated. [Contract](roller2-input.md) |
@@ -94,7 +95,8 @@ Exist metadata queries are implemented; parent/assign/lock semantics remain open
    JOAB input and Key State now run through 639 with guarded destinations.
    Main string Goto and cyclic Add now run original floor/stop/collapse paths.
    KCWEG/HCWEG, sparse BCL and score/tile effects now collect the five first-level
-   colour tiles before a bonus guard. Next integrate ZAEHLHOCH/next-level loading, Copy/Fill,
+   colour tiles before a retained bonus guard. A separate progression fixture runs
+   ZAEHLHOCH/LEVLOAD into real level 2. Next extend reached level-2 paths, Copy/Fill,
    Swap and remaining bank/text forms, Get Icon and Scin as actually used. Validate tile movement,
    colours, collision, scrolling modes, timers and keyboard/joystick controls
    against the unchanged source and level data. Wider general forms remain gates.

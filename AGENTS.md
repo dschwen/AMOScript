@@ -85,7 +85,12 @@
   Sparse Fade omissions preserve register positions and skip jobs for those
   entries; malformed values reject before replacing the job. The colour fixture
   stops at a declared ZAEHLHOCH bonus guard with its ordinary Gosub frame.
-  See `docs/roller2-colours.md`; bonus scoring/next-level loading remain open.
+  See `docs/roller2-colours.md`. A separate progression fixture now runs original
+  ZAEHLHOCH and Return/Goto LEVLOAD into real level 2, including ready input,
+  metadata, fade and starting ball. Its inclusive bonus, captured For bound,
+  bank-address retirement and missing-file win guard are checked. Fourteen
+  Canvas frames/seven GPU comparisons use keyboard/Gamepad. See
+  `docs/roller2-progression.md`; other handlers and later-level progression remain open.
   Prepared original stop/collapse maps are declared adapter fixtures, not native
   level progression. See `docs/roller2-movement.md`, `docs/add.md` and
   `docs/string-branches.md`. Numeric/procedure/non-ASCII string branches remain open.
