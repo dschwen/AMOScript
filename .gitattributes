@@ -1,0 +1,3 @@
+# Original AMOS data files are byte-exact fixtures, including their CRLF bytes.
+examples/Roller2/**/Highscores binary
+examples/Roller2/**/Roller_HELP binary
