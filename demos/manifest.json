@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-pointer.html",
+      "title": "Roller II mouse pointer shapes",
+      "description": "Seven original Change Mouse statements select browser arrow/crosshair/wait cursors. Canvas/WebGL ownership, Hide/Show nesting and program switching are checked, with seven GPU comparisons. Prepared hover surface; editor actions and native pointer pixels excluded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-pointer.html"
+    },
+    {
       "file": "roller2-scin.html",
       "title": "Roller II screen under pointer",
       "description": "Original pointer-selection lines on declared overlapping windows. Seven Canvas stripe-oracle frames, seven GPU comparisons and pointer mapping on both hosts; live coordinate/zone readout, fullscreen and Restart. Editor scrolling/actions excluded.",

@@ -113,6 +113,13 @@
   on a declared blank/palette preview, with prepared cell Input# replacing 355.
   Three independent Canvas/GPU frames cover it, not full editor/native capture.
   See `docs/set-line.md`; general graphics draw modes remain gated.
+- Change Mouse supports built-in 1/2/3 as per-factory pointer intent, independent
+  of Hide/Show nesting and screen/pixel/input state. No explicit shape initially
+  retains the host cursor. Canvas/WebGL map explicit choices to default/crosshair/
+  wait; hidden uses none. Detach/replacement restores each host's owned cursor.
+  Seven original editor statements and thirty browser style checks are covered,
+  with seven GPU surface regressions. Configured/native artwork and sprite-bank
+  pointers remain gated; see `docs/change-mouse.md`.
 - Scin scans the live priority list using unsigned hardware words, hidden flags
   and exclusive right/bottom bounds. Its explicit screen starts traversal rather
   than filtering a single screen; -1 scans all, no hit returns signed EntNul.

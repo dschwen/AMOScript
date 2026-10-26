@@ -144,3 +144,7 @@ injected/browser checks, not Amiga or physical-device captures.
 The unmodified Wonderland source now compiles completely. Controlled game entry
 now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).
+
+[Change Mouse](change-mouse.md) now maps built-in shapes 1–3 to owned browser
+arrow/crosshair/wait cursors independently of Hide/Show nesting. Configured native
+artwork and sprite-bank pointer forms remain gated.

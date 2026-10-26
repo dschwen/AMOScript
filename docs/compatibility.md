@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-26. The current local baseline has **675 passing tests**, plus a
+Updated 2026-10-26. The current local baseline has **679 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -9,10 +9,10 @@ has not been rerun across those Node versions. Hosted CI is still pending. See
 [development evidence](development.md).
 
 The current end-to-end target is [Roller II](roller2.md): 1,199 lines, 194 token
-encodings, 8 still unrecognized. Its unchanged first FLOAD call and original
+encodings, 7 still unrecognized. Its unchanged first FLOAD call and original
 procedure now load/fade the initial logo in a bounded browser VM, with original
 paths/music, static clones, captured palette fade and AMSC placement. Whole
-compilation stops at Change Mouse (line 439). Original WTIN/FDZ now run in a declared fixture that
+compilation stops at Get Icon (line 480). Original WTIN/FDZ now run in a declared fixture that
 runs original array/highscore setup, SASINIT and work/icon/sprite bank loads,
 then hands off to the main-title image while omitting remaining setup 281–286.
 The connected menu fixture now runs the original executable startup-to-menu
@@ -36,6 +36,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Change Mouse | Implemented built-in portable profile | Per-program 1/2/3 map to CSS arrow/crosshair/wait through Canvas/WebGL with independent Hide/Show nesting and cursor restoration. Seven original statements and thirty browser style checks. Configured/native artwork and sprite-bank forms remain unsupported. [Contract](change-mouse.md). |
 | Scin | Implemented bounded hardware-window lookup | Two/three-argument priority scan, explicit start -1..7, unsigned coordinates, exclusive right/bottom edges, hidden/clone handling and EntNul. Live geometry before View; original pointer lines and seven Canvas/GPU frames with both input hosts. General modes/native capture remain open. [Contract](scin.md). |
 | Writing | Implemented default-window subset | Modes 0–4 and parts 0–2, shared pair/per-screen activation, checked selectors and existing buffer/Bob hooks. Original labels and fifteen-case matrix match four independent Canvas/GPU frames. Portable font; general windows and graphics Gr Writing remain open. [Contract](writing.md). |
 | Set Line | Implemented bounded portable raster profile | Per-screen low-word mask, MSB-first foreground/background pattern and phase through Draw/Draw To/Box; signed-word patterned coordinates, shared Autoback/Bob hooks and preflight. Original blank selection preview matches three independent Canvas/GPU frames. General graphics writing modes and native phase/clip capture remain open. [Contract](set-line.md). |
