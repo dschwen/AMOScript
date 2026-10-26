@@ -20,6 +20,25 @@ module.exports = async function checkBrowserDemos(browser) {
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
+      if(scenario.id==='roller2-arrows'){
+        assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-backend'),'webgl');
+        await page.click('#roller2-movement-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-movement-viewport');
+        await page.focus('#roller2-movement-input');await page.keyboard.down('ArrowRight');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-movement-controls').dataset.level==='2');}finally{await page.keyboard.up('ArrowRight');}
+        await page.waitForFunction(()=>document.getElementById('roller2-movement-controls').dataset.remaining==='3');await page.keyboard.down('Enter');
+        try{await page.waitForFunction(()=>document.getElementById('roller2-movement-controls').dataset.cell==='8,1');}finally{await page.keyboard.up('Enter');}
+        await page.keyboard.down('ArrowRight');try{await page.waitForFunction(()=>Number(document.getElementById('roller2-movement-controls').dataset.x)>256);}finally{await page.keyboard.up('ArrowRight');}
+        await page.click('#roller2-movement-pause');const x=await page.locator('#roller2-movement-controls').getAttribute('data-x');await page.waitForTimeout(80);assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-x'),x);await page.click('#roller2-movement-pause');
+        await page.waitForFunction(()=>{const s=document.getElementById('roller2-movement-controls').dataset;return s.cell==='9,4'&&s.phase==='idle';});
+        await page.focus('#roller2-movement-input');await page.keyboard.down('ArrowLeft');try{await page.waitForFunction(()=>Number(document.getElementById('roller2-movement-controls').dataset.x)<272);}finally{await page.keyboard.up('ArrowLeft');}
+        await page.waitForFunction(()=>{const s=document.getElementById('roller2-movement-controls').dataset;return s.cell==='5,3'&&s.phase==='idle';});
+        await page.click('#roller2-movement-restart');assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'roller2-movement-viewport');assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-level'),'1');await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());await page.waitForFunction(()=>document.fullscreenElement===null);
+      }
+      if(scenario.id==='boom'){
+        await page.click('#boom-play');await page.waitForFunction(()=>document.getElementById('boom-controls').dataset.plays==='4');assert.strictEqual(await page.locator('#boom-controls').getAttribute('data-sound'),'on');
+        await page.click('#boom-mute');assert.strictEqual(await page.locator('#boom-controls').getAttribute('data-sound'),'off');assert.strictEqual(await page.locator('#boom-controls').getAttribute('data-voices'),'0');
+        await page.click('#boom-play');await page.waitForFunction(()=>document.getElementById('boom-controls').dataset.plays==='8');await page.evaluate(()=>globalThis.AMOS_BOOM_CLEANUP());
+      }
       if(scenario.id==='roller2-pauses'){
         assert.strictEqual(await page.locator('#roller2-movement-controls').getAttribute('data-backend'),'webgl');
         await page.click('#roller2-movement-fullscreen');await page.waitForFunction(()=>document.fullscreenElement&&document.fullscreenElement.id==='roller2-movement-viewport');

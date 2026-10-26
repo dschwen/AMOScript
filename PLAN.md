@@ -6,8 +6,8 @@ Assessment updated: 2026-10-25.
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
 and the ordered [Roller II milestone](docs/roller2.md) preserve original bytes.
-The main source has 1,199 lines and 194 encodings; 14 remain unrecognized (43 at
-initial assessment), and whole compilation stops at Boom on line 161.
+The main source has 1,199 lines and 194 encodings; 13 remain unrecognized (43 at
+initial assessment), and whole compilation now stops at Fill on line 325.
 
 The bounded four-channel M.K. reader, Track Load and loop configuration now form
 the [tracker foundation](docs/mod-tracker.md). Original sample/track load statements
@@ -38,7 +38,7 @@ menu fixture now runs the original executable prefix through 316, including both
 FLOADs, setup 281–286 and continuing MOD playback: ten browser cases, nine guarded
 selections and three independent/GPU frames. The live demo offers music activation/
 mute and restart-safe bindings. Next implement the selected routines and their
-dependencies, alongside the remaining decoder gate at Boom. Checked big-endian
+dependencies, alongside the remaining decoder gates (now Fill). Checked big-endian
 Doke/Deek/Loke/Leek now support generic banks, including odd addresses and atomic
 range checks. Original level metadata/time statements pass across all fifteen
 pinned files in a new demo. Bounded icon table/planar aliases now run original ICCOPY at game entry through
@@ -73,9 +73,13 @@ fourteen Canvas frames and seven additional GPU comparisons cover keyboard/Gamep
 See docs/roller2-progression.md. A further pause fixture now runs original
 PAUSE/IPause, including paid mouse/Help pause, Space popup and source Timer
 restoration. Twenty Canvas images and ten GPU comparisons cover native input
-and host lifecycle; see docs/roller2-pauses.md. The next level-2 arrow path
-requires Boom synthesis even in its unreached timeout branch. Next implement
-source-backed noise/envelope playback, then PFEIL and other reached handlers. Sprite-bank raw
+and host lifecycle; see docs/roller2-pauses.md. Source-derived finite Boom synthesis now models four pitches, shared noise,
+integer envelopes and fractional field onset with explicit portable beam choices.
+Independent PAL/phase/NTSC vectors and five native Web Audio graph comparisons
+pass; see docs/boom.md for fetch/beam/live-control limits. The new arrow fixture
+runs unchanged PFEIL/N34 through three level-2 turns, including actual Boom in
+the source deadline branch. Twenty Canvas images/ten GPU comparisons cover the
+route. Next implement Fill/Copy and other reached handlers; see docs/roller2-arrows.md. Sprite-bank raw
 addresses and icon metadata writes and mask-pointer access remain open.
 Game-over/win
 music uses AMOS Music banks and needs a separate decoder/player. Preserve the

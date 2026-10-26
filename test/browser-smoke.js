@@ -19,6 +19,10 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    const arrows=await runScenario('roller2-arrows',page);assert.strictEqual(arrows.gpuFrames,10);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());
+    console.log('Roller2 arrows passed: 32 one-pixel keyboard/Gamepad steps, three original turns, independent pixels and ten GPU frames.');
+    await runScenario('boom',page);await page.evaluate(()=>globalThis.AMOS_BOOM_CLEANUP());
+    console.log('Boom passed: four independent source PCM/pitches, five native stereo graphs and silent Stop/disposal.');
     const pauses=await runScenario('roller2-pauses',page);assert.strictEqual(pauses.gpuFrames,10);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());
     console.log('Roller2 pauses passed: original paid/popup pause, keyboard/mouse/Gamepad exits, source Timer restore and ten GPU frames.');
     const levels=await runScenario('roller2-progression',page);assert.strictEqual(levels.gpuFrames,7);await page.evaluate(()=>globalThis.AMOS_ROLLER2_MOVEMENT_CLEANUP());

@@ -1,0 +1,219 @@
+{
+  "evidence": "Independent integer/Fraction transcription of Music Shout/EnvBoom/noise.\nPinned source efddf2c9a09bf61a45b7b096a9be84630853c2b1; no JS imports.\nPortable beam/fetch/resampling choices, not an Amiga execution capture.\n",
+  "volumes": [
+    0,
+    56,
+    54,
+    53,
+    52,
+    50,
+    49,
+    48,
+    46,
+    45,
+    44,
+    43,
+    42,
+    41,
+    40,
+    39,
+    38,
+    37,
+    36,
+    36,
+    35,
+    34,
+    33,
+    32,
+    31,
+    30,
+    30,
+    29,
+    28,
+    27,
+    26,
+    25,
+    24,
+    24,
+    23,
+    22,
+    21,
+    20,
+    19,
+    18,
+    18,
+    17,
+    16,
+    15,
+    14,
+    13,
+    12,
+    12,
+    11,
+    10,
+    9,
+    8,
+    7,
+    6,
+    6,
+    5,
+    4,
+    3,
+    2,
+    1,
+    0,
+    0
+  ],
+  "cases": [
+    {
+      "name": "pal",
+      "clock": 3546895,
+      "hz": 50,
+      "seed": 0,
+      "beam": 257,
+      "phase": 0.0,
+      "initialSeed": 62047,
+      "initialWaveSha256": "d07dd038bd73fdd152d929ce55a87be3160bbad9c96948f1d5e297c1f504584b",
+      "field1WaveSha256": "4f0d5f06f8a79b3c9e08feeb369d234a75b8e84bd6690209386b052ae8f6dfb4",
+      "field60WaveSha256": "a5a34848bf490558594346824fd485d3ce7b4b45681f0bffdd010f844fa9a44b",
+      "voices": [
+        {
+          "voice": 3,
+          "mask": 8,
+          "frequency": 1122,
+          "period": 3161,
+          "length": 20045,
+          "sha256": "2f48841209402f255eabcc0e25aec08015cb8cd5b0a9112a8f5486856978b0a1",
+          "file": "boom-3.f32"
+        },
+        {
+          "voice": 2,
+          "mask": 4,
+          "frequency": 1190,
+          "period": 2980,
+          "length": 18897,
+          "sha256": "376e337eabc4ed91ba520ce69022a2c35d3de392e8ec6d85c6eee91a1f527731",
+          "file": "boom-2.f32"
+        },
+        {
+          "voice": 1,
+          "mask": 2,
+          "frequency": 1259,
+          "period": 2817,
+          "length": 17863,
+          "sha256": "7bbae5e227a1a11f7763612f8b671e7a5591053510bd0888609076c2ed7be74d",
+          "file": "boom-1.f32"
+        },
+        {
+          "voice": 0,
+          "mask": 1,
+          "frequency": 1336,
+          "period": 2654,
+          "length": 16830,
+          "sha256": "87baaa8b378b44f2b81229bddc76018cb46bf8ff9a6ed609a2829abdd1fd5765",
+          "file": "boom-0.f32"
+        }
+      ]
+    },
+    {
+      "name": "phase",
+      "clock": 3546895,
+      "hz": 50,
+      "seed": 48879,
+      "beam": 4660,
+      "phase": 0.65,
+      "initialSeed": 7847,
+      "initialWaveSha256": "d8d915bfc7b3f55709118636ded625dd2a4e5c3d5cbed3c31ecbcaf577123c47",
+      "field1WaveSha256": "f8da5c4af7ce0c41ac2f021da3e1d5990b7a99d4e213d03be805241678ec3969",
+      "field60WaveSha256": "7987095e3cc13aa29f38479d69d964725a3125a400b261a04b41eee4145743a0",
+      "voices": [
+        {
+          "voice": 3,
+          "mask": 8,
+          "frequency": 1122,
+          "period": 3161,
+          "length": 20045,
+          "sha256": "3da779c6cf8d39e1b36b25f2ddc59cda6d98dfcb427879be1a8331d8200c91f0",
+          "file": null
+        },
+        {
+          "voice": 2,
+          "mask": 4,
+          "frequency": 1190,
+          "period": 2980,
+          "length": 18897,
+          "sha256": "cf00235b23d0b6ef581a7fbf7b4544cf3bd3281120d43fd2588da0f3d2e05408",
+          "file": null
+        },
+        {
+          "voice": 1,
+          "mask": 2,
+          "frequency": 1259,
+          "period": 2817,
+          "length": 17863,
+          "sha256": "b6ed189ef1e9b26ce459d0ba22d142f80f48dd42a9b145fafb313f80ba7631d3",
+          "file": null
+        },
+        {
+          "voice": 0,
+          "mask": 1,
+          "frequency": 1336,
+          "period": 2654,
+          "length": 16830,
+          "sha256": "b3960bf097d969773b6bbf96a2b3662b097686456331bb20faa40501f8947d19",
+          "file": null
+        }
+      ]
+    },
+    {
+      "name": "ntsc",
+      "clock": 3579545,
+      "hz": 60,
+      "seed": 0,
+      "beam": 257,
+      "phase": 0.0,
+      "initialSeed": 62047,
+      "initialWaveSha256": "d07dd038bd73fdd152d929ce55a87be3160bbad9c96948f1d5e297c1f504584b",
+      "field1WaveSha256": "4f0d5f06f8a79b3c9e08feeb369d234a75b8e84bd6690209386b052ae8f6dfb4",
+      "field60WaveSha256": "a5a34848bf490558594346824fd485d3ce7b4b45681f0bffdd010f844fa9a44b",
+      "voices": [
+        {
+          "voice": 3,
+          "mask": 8,
+          "frequency": 1122,
+          "period": 3190,
+          "length": 20044,
+          "sha256": "a49fe7438ebb8d121e71d4905346072d7e35c0c46b5f024cad604bf4311202c8",
+          "file": null
+        },
+        {
+          "voice": 2,
+          "mask": 4,
+          "frequency": 1190,
+          "period": 3008,
+          "length": 18900,
+          "sha256": "3b62765877c566028ce8c6c2226ecb2f93278581f93f0550821df2536f7ed795",
+          "file": null
+        },
+        {
+          "voice": 1,
+          "mask": 2,
+          "frequency": 1259,
+          "period": 2843,
+          "length": 17864,
+          "sha256": "9a757772492893ca0ccf83e9187dbdded7f9474dd137fa00ece70ce4e25b7f89",
+          "file": null
+        },
+        {
+          "voice": 0,
+          "mask": 1,
+          "frequency": 1336,
+          "period": 2679,
+          "length": 16833,
+          "sha256": "bf4980a639057322f207e0f011077bab423e20b8aba075ebb76475f3fd33e201",
+          "file": null
+        }
+      ]
+    }
+  ]
+}

@@ -2708,7 +2708,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   const bankMemory = bankMemoryFactory(banks, { beforeWrite(bank) {
     if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
   } });
-  const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
+  const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard,
+    fieldTime: options.audioFieldTime, vblHz: options.audioVblHz, noiseSeed: options.audioNoiseSeed, noiseBeam: options.audioNoiseBeam });
   state.audio = audio.state;
   state.tracker = { bank: null, loop: false, playing: false, paused: false, position: null };
   function trackStop() {
@@ -4427,6 +4428,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),
+    boom: () => audio.boom(),
     samPlay: number => audio.play(15, integer(number)),
     samPlayVoices: (mask, number, frequency = null) => audio.play(integer(mask), integer(number), frequency == null ? null : integer(frequency)),
     samStop: (mask = 15) => audio.stop(integer(mask)),
@@ -4440,13 +4442,105 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
 };
+  const boomFactory = function createBoom(options = {}) {
+  const standard = options.standard || 'PAL', hz = options.vblHz == null ? 50 : options.vblHz;
+  const clock = standard === 'PAL' ? 3546895 : 3579545, rate = 44100;
+  const beam = options.beam == null ? 0x0101 : options.beam;
+  let seed = options.seed == null ? 0 : options.seed;
+  if (!['PAL','NTSC'].includes(standard) || !Number.isFinite(hz) || hz <= 0) throw new Error('Unsupported Boom timing');
+  if (![seed,beam].every(n=>Number.isInteger(n)&&n>=0&&n<=65535)) throw new Error('Invalid Boom noise seed/beam word');
+  if (options.fieldTime != null && typeof options.fieldTime !== 'function') throw new Error('Boom fieldTime must be synchronous');
+  const wave = new Uint8Array(510);
+  let initialized = false, pointer = 0, mask = 0, started = 0, lastField = 0;
+  const volumes = [0];
+  // EnvBoom {1,64,10,50,50,0,0,0}, EnvDVol=56. Signed DIVS truncates.
+  let fixed = 0;
+  for (const [steps,goal] of [[1,64],[10,50],[50,0]]) {
+    const delta = Math.trunc((((56*goal)>>6)-(fixed>>16))*256/steps)*256;
+    for (let i=0;i<steps;i++) { fixed += delta; volumes.push(fixed>>16); }
+    fixed &= 0xffff0000;
+  }
+  function time() {
+    const value = options.fieldTime ? options.fieldTime() : 0;
+    if (!Number.isFinite(value) || value < 0 || value > Number.MAX_SAFE_INTEGER-64) throw new Error('Invalid Boom field clock');
+    return value;
+  }
+  function word(value) { return (((value+beam)&65535)*0x3171>>>8)&65535; }
+  function write(bytes,at,value) { bytes[at]=value>>>8;bytes[at+1]=value&255; }
+  function initialize() {
+    if (initialized) return;
+    for(let at=0;at<510;at+=2){seed=word(seed);write(wave,at,seed);}
+    initialized = true;
+  }
+  function advance(now = time()) {
+    const field = Math.floor(now);
+    if (field < lastField) throw new Error('Boom clock moved backwards');
+    const changed = field>lastField ? mask : 0;
+    const until = Math.min(field,started+61);
+    if (mask) for(let next=lastField+1;next<=until;next++) {
+      if(next-started===61){mask=0;break;}
+      for(let i=0;i<8;i++){seed=word(seed);write(wave,pointer,seed);pointer=pointer===0?508:pointer-2;}
+    }
+    lastField = field;
+    return {mask:changed,volume:volumes[Math.min(61,Math.max(0,field-started))]};
+  }
+  function cancel(bits) { mask &= ~(bits&15); }
+  function begin(initialVolumes = [56,56,56,56]) {
+    if(hz>1000)throw new Error('Unsupported Boom timing');
+    const now=time();advance(now);initialize();
+    const field=Math.floor(now), phase=now-field;
+    const snapshots=[wave.slice()];let nextSeed=seed,nextPointer=pointer;
+    // The slowest voice finishes its 510-byte initial fetch within about 24 PAL fields.
+    // Build only the bounded future shared-noise states needed for these streams.
+    // Shout notes 36..39 on voices 3..0; 2000*TNotes[note+2]/440.
+    const frequencies=[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
+    const fieldCount=Math.ceil(phase+510/(clock/Math.max(...periods))*hz);
+    for(let frame=1;frame<=fieldCount;frame++){
+      const bytes=snapshots[frame-1].slice();
+      for(let i=0;i<8;i++){nextSeed=word(nextSeed);write(bytes,nextPointer,nextSeed);nextPointer=nextPointer===0?508:nextPointer-2;}
+      snapshots.push(bytes);
+    }
+    const events=[];
+    for(let voice=3;voice>=0;voice--){
+      const nativeRate=clock/periods[voice],length=Math.ceil(510/nativeRate*rate),data=new Float32Array(length);
+      for(let at=0;at<length;at++){
+        const frame=Math.floor(phase+at*hz/rate),index=Math.min(509,Math.floor(at*clock/(rate*periods[voice])));
+        const value=(snapshots[frame][index]<<24)>>24,volume=frame===0?initialVolumes[voice]:volumes[frame];
+        data[at]=value/128*volume/64;
+      }
+      events.push({type:'play',effect:'boom',mask:1<<voice,period:periods[voice],nativeRate,
+        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:'Boom    ',frequency:rate,length,data,format:'float32'}});
+    }
+    mask=0;started=field;lastField=field;
+    return events;
+  }
+  return {begin,advance,cancel,activate(bits){mask|=bits&15;},snapshot(synchronize = true){if(synchronize)advance();return {seed,pointer,mask,started,lastField,wave:wave.slice(),volumes:volumes.slice(),beam};}};
+};
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
   if (!['PAL', 'NTSC'].includes(standard)) throw new Error('Unsupported audio standard');
   const clock = standard === 'PAL' ? 3546895 : 3579545;
   const state = { bank: 5, loopMask: 0, filterEnabled: true };
+  let noise = null;
+  function boomEngine() {
+    if (!noise) {
+      const factory = typeof boomFactory === 'function' ? boomFactory : globalThis.AMOS_BOOM;
+      if (typeof factory !== 'function') throw new Error('Boom renderer is unavailable: load lib/amos/boom.js');
+      noise = factory({ standard, vblHz: options.vblHz, fieldTime: options.fieldTime,
+        seed: options.noiseSeed, beam: options.noiseBeam });
+    }
+    return noise;
+  }
+  const levels = [56, 56, 56, 56];
+  function syncBoom() {
+    if (!noise) return;
+    const step = noise.advance();
+    for (let voice = 0; voice < 4; voice++) if (step.mask & (1 << voice)) levels[voice] = step.volume;
+  }
   let activeMask = 0;
   let trackerMask = 0;
+  let effectMask = 0;
+  let effectGeneration = 0;
   function notify(event) {
     if (options.host == null) return;
     if (typeof options.host.command !== 'function') throw new Error('Audio host requires a synchronous command method');
@@ -4454,13 +4548,21 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (result && typeof result.then === 'function') throw new Error('Audio host commands must complete synchronously');
   }
   function command(event, origin = 'tracker') {
+    syncBoom();
+    if (event.type === 'stop' && (event.mask & 15) === 15) effectGeneration++;
+    if (event.type === 'play' && event.effect === 'boom') boomEngine().activate(event.mask);
+    if ((event.type === 'play' && event.effect !== 'boom') || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
+    if (event.effect !== 'boom' && event.volume != null) {
+      for (let voice = 0; voice < 4; voice++) if (event.mask & (1 << voice)) levels[voice] = event.volume;
+    }
     if (event.type === 'play') {
       const mask = event.mask & 15;
       activeMask |= mask;
+      effectMask = (effectMask & ~mask) | (event.effect === 'boom' ? mask : 0);
       trackerMask = (trackerMask & ~mask) | (origin === 'tracker' ? mask : 0);
     }
     try { notify(event); }
-    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); } }
+    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); effectMask &= ~(event.mask & 15); } }
   }
   function sample(number) {
     const bank = banks.get(state.bank);
@@ -4492,7 +4594,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function loop(enabled, mask = 15) {
     mask &= 15;
     // Sam loops configure the sample interrupt stream, not tracker DMA loops.
-    notify({ type: 'loop', mask: mask & ~trackerMask, enabled });
+    notify({ type: 'loop', mask: mask & ~trackerMask & ~effectMask, enabled });
     state.loopMask = enabled ? state.loopMask | mask : state.loopMask & ~mask;
   }
   function filter(enabled) {
@@ -4513,6 +4615,16 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     command({ type: 'stop', mask });
   }
   return { state, sample, selectBank, loop, filter, play, stop, command,
+    boom() {
+      const engine = boomEngine();
+      syncBoom();
+      const generation = ++effectGeneration, events = engine.begin(levels);
+      for (const event of events) {
+        if (generation !== effectGeneration) break;
+        command({ ...event, filterEnabled: state.filterEnabled }, 'effect');
+      }
+    },
+    noiseState() { const engine = boomEngine(); syncBoom(); return engine.snapshot(false); },
     silence() { if (activeMask) stop(15); } };
 };
   const modReaderFactory = function readMod(bytes) {
@@ -5116,7 +5228,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount,
+    audioFieldTime: () => (timing.now() - timerEpoch) * timing.vblHz / 1000, audioVblHz: timing.vblHz,
+    requestPaletteWake, requestTrackerWake }));
   return {
     state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
@@ -7421,7 +7535,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   const bankMemory = bankMemoryFactory(banks, { beforeWrite(bank) {
     if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
   } });
-  const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
+  const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard,
+    fieldTime: options.audioFieldTime, vblHz: options.audioVblHz, noiseSeed: options.audioNoiseSeed, noiseBeam: options.audioNoiseBeam });
   state.audio = audio.state;
   state.tracker = { bank: null, loop: false, playing: false, paused: false, position: null };
   function trackStop() {
@@ -9140,6 +9255,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),
+    boom: () => audio.boom(),
     samPlay: number => audio.play(15, integer(number)),
     samPlayVoices: (mask, number, frequency = null) => audio.play(integer(mask), integer(number), frequency == null ? null : integer(frequency)),
     samStop: (mask = 15) => audio.stop(integer(mask)),
@@ -9153,13 +9269,105 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
 };
+  const boomFactory = function createBoom(options = {}) {
+  const standard = options.standard || 'PAL', hz = options.vblHz == null ? 50 : options.vblHz;
+  const clock = standard === 'PAL' ? 3546895 : 3579545, rate = 44100;
+  const beam = options.beam == null ? 0x0101 : options.beam;
+  let seed = options.seed == null ? 0 : options.seed;
+  if (!['PAL','NTSC'].includes(standard) || !Number.isFinite(hz) || hz <= 0) throw new Error('Unsupported Boom timing');
+  if (![seed,beam].every(n=>Number.isInteger(n)&&n>=0&&n<=65535)) throw new Error('Invalid Boom noise seed/beam word');
+  if (options.fieldTime != null && typeof options.fieldTime !== 'function') throw new Error('Boom fieldTime must be synchronous');
+  const wave = new Uint8Array(510);
+  let initialized = false, pointer = 0, mask = 0, started = 0, lastField = 0;
+  const volumes = [0];
+  // EnvBoom {1,64,10,50,50,0,0,0}, EnvDVol=56. Signed DIVS truncates.
+  let fixed = 0;
+  for (const [steps,goal] of [[1,64],[10,50],[50,0]]) {
+    const delta = Math.trunc((((56*goal)>>6)-(fixed>>16))*256/steps)*256;
+    for (let i=0;i<steps;i++) { fixed += delta; volumes.push(fixed>>16); }
+    fixed &= 0xffff0000;
+  }
+  function time() {
+    const value = options.fieldTime ? options.fieldTime() : 0;
+    if (!Number.isFinite(value) || value < 0 || value > Number.MAX_SAFE_INTEGER-64) throw new Error('Invalid Boom field clock');
+    return value;
+  }
+  function word(value) { return (((value+beam)&65535)*0x3171>>>8)&65535; }
+  function write(bytes,at,value) { bytes[at]=value>>>8;bytes[at+1]=value&255; }
+  function initialize() {
+    if (initialized) return;
+    for(let at=0;at<510;at+=2){seed=word(seed);write(wave,at,seed);}
+    initialized = true;
+  }
+  function advance(now = time()) {
+    const field = Math.floor(now);
+    if (field < lastField) throw new Error('Boom clock moved backwards');
+    const changed = field>lastField ? mask : 0;
+    const until = Math.min(field,started+61);
+    if (mask) for(let next=lastField+1;next<=until;next++) {
+      if(next-started===61){mask=0;break;}
+      for(let i=0;i<8;i++){seed=word(seed);write(wave,pointer,seed);pointer=pointer===0?508:pointer-2;}
+    }
+    lastField = field;
+    return {mask:changed,volume:volumes[Math.min(61,Math.max(0,field-started))]};
+  }
+  function cancel(bits) { mask &= ~(bits&15); }
+  function begin(initialVolumes = [56,56,56,56]) {
+    if(hz>1000)throw new Error('Unsupported Boom timing');
+    const now=time();advance(now);initialize();
+    const field=Math.floor(now), phase=now-field;
+    const snapshots=[wave.slice()];let nextSeed=seed,nextPointer=pointer;
+    // The slowest voice finishes its 510-byte initial fetch within about 24 PAL fields.
+    // Build only the bounded future shared-noise states needed for these streams.
+    // Shout notes 36..39 on voices 3..0; 2000*TNotes[note+2]/440.
+    const frequencies=[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
+    const fieldCount=Math.ceil(phase+510/(clock/Math.max(...periods))*hz);
+    for(let frame=1;frame<=fieldCount;frame++){
+      const bytes=snapshots[frame-1].slice();
+      for(let i=0;i<8;i++){nextSeed=word(nextSeed);write(bytes,nextPointer,nextSeed);nextPointer=nextPointer===0?508:nextPointer-2;}
+      snapshots.push(bytes);
+    }
+    const events=[];
+    for(let voice=3;voice>=0;voice--){
+      const nativeRate=clock/periods[voice],length=Math.ceil(510/nativeRate*rate),data=new Float32Array(length);
+      for(let at=0;at<length;at++){
+        const frame=Math.floor(phase+at*hz/rate),index=Math.min(509,Math.floor(at*clock/(rate*periods[voice])));
+        const value=(snapshots[frame][index]<<24)>>24,volume=frame===0?initialVolumes[voice]:volumes[frame];
+        data[at]=value/128*volume/64;
+      }
+      events.push({type:'play',effect:'boom',mask:1<<voice,period:periods[voice],nativeRate,
+        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:'Boom    ',frequency:rate,length,data,format:'float32'}});
+    }
+    mask=0;started=field;lastField=field;
+    return events;
+  }
+  return {begin,advance,cancel,activate(bits){mask|=bits&15;},snapshot(synchronize = true){if(synchronize)advance();return {seed,pointer,mask,started,lastField,wave:wave.slice(),volumes:volumes.slice(),beam};}};
+};
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
   if (!['PAL', 'NTSC'].includes(standard)) throw new Error('Unsupported audio standard');
   const clock = standard === 'PAL' ? 3546895 : 3579545;
   const state = { bank: 5, loopMask: 0, filterEnabled: true };
+  let noise = null;
+  function boomEngine() {
+    if (!noise) {
+      const factory = typeof boomFactory === 'function' ? boomFactory : globalThis.AMOS_BOOM;
+      if (typeof factory !== 'function') throw new Error('Boom renderer is unavailable: load lib/amos/boom.js');
+      noise = factory({ standard, vblHz: options.vblHz, fieldTime: options.fieldTime,
+        seed: options.noiseSeed, beam: options.noiseBeam });
+    }
+    return noise;
+  }
+  const levels = [56, 56, 56, 56];
+  function syncBoom() {
+    if (!noise) return;
+    const step = noise.advance();
+    for (let voice = 0; voice < 4; voice++) if (step.mask & (1 << voice)) levels[voice] = step.volume;
+  }
   let activeMask = 0;
   let trackerMask = 0;
+  let effectMask = 0;
+  let effectGeneration = 0;
   function notify(event) {
     if (options.host == null) return;
     if (typeof options.host.command !== 'function') throw new Error('Audio host requires a synchronous command method');
@@ -9167,13 +9375,21 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (result && typeof result.then === 'function') throw new Error('Audio host commands must complete synchronously');
   }
   function command(event, origin = 'tracker') {
+    syncBoom();
+    if (event.type === 'stop' && (event.mask & 15) === 15) effectGeneration++;
+    if (event.type === 'play' && event.effect === 'boom') boomEngine().activate(event.mask);
+    if ((event.type === 'play' && event.effect !== 'boom') || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
+    if (event.effect !== 'boom' && event.volume != null) {
+      for (let voice = 0; voice < 4; voice++) if (event.mask & (1 << voice)) levels[voice] = event.volume;
+    }
     if (event.type === 'play') {
       const mask = event.mask & 15;
       activeMask |= mask;
+      effectMask = (effectMask & ~mask) | (event.effect === 'boom' ? mask : 0);
       trackerMask = (trackerMask & ~mask) | (origin === 'tracker' ? mask : 0);
     }
     try { notify(event); }
-    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); } }
+    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); effectMask &= ~(event.mask & 15); } }
   }
   function sample(number) {
     const bank = banks.get(state.bank);
@@ -9205,7 +9421,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function loop(enabled, mask = 15) {
     mask &= 15;
     // Sam loops configure the sample interrupt stream, not tracker DMA loops.
-    notify({ type: 'loop', mask: mask & ~trackerMask, enabled });
+    notify({ type: 'loop', mask: mask & ~trackerMask & ~effectMask, enabled });
     state.loopMask = enabled ? state.loopMask | mask : state.loopMask & ~mask;
   }
   function filter(enabled) {
@@ -9226,6 +9442,16 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     command({ type: 'stop', mask });
   }
   return { state, sample, selectBank, loop, filter, play, stop, command,
+    boom() {
+      const engine = boomEngine();
+      syncBoom();
+      const generation = ++effectGeneration, events = engine.begin(levels);
+      for (const event of events) {
+        if (generation !== effectGeneration) break;
+        command({ ...event, filterEnabled: state.filterEnabled }, 'effect');
+      }
+    },
+    noiseState() { const engine = boomEngine(); syncBoom(); return engine.snapshot(false); },
     silence() { if (activeMask) stop(15); } };
 };
   const modReaderFactory = function readMod(bytes) {
@@ -9829,7 +10055,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount,
+    audioFieldTime: () => (timing.now() - timerEpoch) * timing.vblHz / 1000, audioVblHz: timing.vblHz,
+    requestPaletteWake, requestTrackerWake }));
   return {
     state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
@@ -12151,7 +12379,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   const bankMemory = bankMemoryFactory(banks, { beforeWrite(bank) {
     if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
   } });
-  const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard });
+  const audio = audioFactory(banks, { host: options.audio, standard: options.audioStandard,
+    fieldTime: options.audioFieldTime, vblHz: options.audioVblHz, noiseSeed: options.audioNoiseSeed, noiseBeam: options.audioNoiseBeam });
   state.audio = audio.state;
   state.tracker = { bank: null, loop: false, playing: false, paused: false, position: null };
   function trackStop() {
@@ -13870,6 +14099,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),
+    boom: () => audio.boom(),
     samPlay: number => audio.play(15, integer(number)),
     samPlayVoices: (mask, number, frequency = null) => audio.play(integer(mask), integer(number), frequency == null ? null : integer(frequency)),
     samStop: (mask = 15) => audio.stop(integer(mask)),
@@ -13883,13 +14113,105 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
 };
+  const boomFactory = function createBoom(options = {}) {
+  const standard = options.standard || 'PAL', hz = options.vblHz == null ? 50 : options.vblHz;
+  const clock = standard === 'PAL' ? 3546895 : 3579545, rate = 44100;
+  const beam = options.beam == null ? 0x0101 : options.beam;
+  let seed = options.seed == null ? 0 : options.seed;
+  if (!['PAL','NTSC'].includes(standard) || !Number.isFinite(hz) || hz <= 0) throw new Error('Unsupported Boom timing');
+  if (![seed,beam].every(n=>Number.isInteger(n)&&n>=0&&n<=65535)) throw new Error('Invalid Boom noise seed/beam word');
+  if (options.fieldTime != null && typeof options.fieldTime !== 'function') throw new Error('Boom fieldTime must be synchronous');
+  const wave = new Uint8Array(510);
+  let initialized = false, pointer = 0, mask = 0, started = 0, lastField = 0;
+  const volumes = [0];
+  // EnvBoom {1,64,10,50,50,0,0,0}, EnvDVol=56. Signed DIVS truncates.
+  let fixed = 0;
+  for (const [steps,goal] of [[1,64],[10,50],[50,0]]) {
+    const delta = Math.trunc((((56*goal)>>6)-(fixed>>16))*256/steps)*256;
+    for (let i=0;i<steps;i++) { fixed += delta; volumes.push(fixed>>16); }
+    fixed &= 0xffff0000;
+  }
+  function time() {
+    const value = options.fieldTime ? options.fieldTime() : 0;
+    if (!Number.isFinite(value) || value < 0 || value > Number.MAX_SAFE_INTEGER-64) throw new Error('Invalid Boom field clock');
+    return value;
+  }
+  function word(value) { return (((value+beam)&65535)*0x3171>>>8)&65535; }
+  function write(bytes,at,value) { bytes[at]=value>>>8;bytes[at+1]=value&255; }
+  function initialize() {
+    if (initialized) return;
+    for(let at=0;at<510;at+=2){seed=word(seed);write(wave,at,seed);}
+    initialized = true;
+  }
+  function advance(now = time()) {
+    const field = Math.floor(now);
+    if (field < lastField) throw new Error('Boom clock moved backwards');
+    const changed = field>lastField ? mask : 0;
+    const until = Math.min(field,started+61);
+    if (mask) for(let next=lastField+1;next<=until;next++) {
+      if(next-started===61){mask=0;break;}
+      for(let i=0;i<8;i++){seed=word(seed);write(wave,pointer,seed);pointer=pointer===0?508:pointer-2;}
+    }
+    lastField = field;
+    return {mask:changed,volume:volumes[Math.min(61,Math.max(0,field-started))]};
+  }
+  function cancel(bits) { mask &= ~(bits&15); }
+  function begin(initialVolumes = [56,56,56,56]) {
+    if(hz>1000)throw new Error('Unsupported Boom timing');
+    const now=time();advance(now);initialize();
+    const field=Math.floor(now), phase=now-field;
+    const snapshots=[wave.slice()];let nextSeed=seed,nextPointer=pointer;
+    // The slowest voice finishes its 510-byte initial fetch within about 24 PAL fields.
+    // Build only the bounded future shared-noise states needed for these streams.
+    // Shout notes 36..39 on voices 3..0; 2000*TNotes[note+2]/440.
+    const frequencies=[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
+    const fieldCount=Math.ceil(phase+510/(clock/Math.max(...periods))*hz);
+    for(let frame=1;frame<=fieldCount;frame++){
+      const bytes=snapshots[frame-1].slice();
+      for(let i=0;i<8;i++){nextSeed=word(nextSeed);write(bytes,nextPointer,nextSeed);nextPointer=nextPointer===0?508:nextPointer-2;}
+      snapshots.push(bytes);
+    }
+    const events=[];
+    for(let voice=3;voice>=0;voice--){
+      const nativeRate=clock/periods[voice],length=Math.ceil(510/nativeRate*rate),data=new Float32Array(length);
+      for(let at=0;at<length;at++){
+        const frame=Math.floor(phase+at*hz/rate),index=Math.min(509,Math.floor(at*clock/(rate*periods[voice])));
+        const value=(snapshots[frame][index]<<24)>>24,volume=frame===0?initialVolumes[voice]:volumes[frame];
+        data[at]=value/128*volume/64;
+      }
+      events.push({type:'play',effect:'boom',mask:1<<voice,period:periods[voice],nativeRate,
+        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:'Boom    ',frequency:rate,length,data,format:'float32'}});
+    }
+    mask=0;started=field;lastField=field;
+    return events;
+  }
+  return {begin,advance,cancel,activate(bits){mask|=bits&15;},snapshot(synchronize = true){if(synchronize)advance();return {seed,pointer,mask,started,lastField,wave:wave.slice(),volumes:volumes.slice(),beam};}};
+};
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
   if (!['PAL', 'NTSC'].includes(standard)) throw new Error('Unsupported audio standard');
   const clock = standard === 'PAL' ? 3546895 : 3579545;
   const state = { bank: 5, loopMask: 0, filterEnabled: true };
+  let noise = null;
+  function boomEngine() {
+    if (!noise) {
+      const factory = typeof boomFactory === 'function' ? boomFactory : globalThis.AMOS_BOOM;
+      if (typeof factory !== 'function') throw new Error('Boom renderer is unavailable: load lib/amos/boom.js');
+      noise = factory({ standard, vblHz: options.vblHz, fieldTime: options.fieldTime,
+        seed: options.noiseSeed, beam: options.noiseBeam });
+    }
+    return noise;
+  }
+  const levels = [56, 56, 56, 56];
+  function syncBoom() {
+    if (!noise) return;
+    const step = noise.advance();
+    for (let voice = 0; voice < 4; voice++) if (step.mask & (1 << voice)) levels[voice] = step.volume;
+  }
   let activeMask = 0;
   let trackerMask = 0;
+  let effectMask = 0;
+  let effectGeneration = 0;
   function notify(event) {
     if (options.host == null) return;
     if (typeof options.host.command !== 'function') throw new Error('Audio host requires a synchronous command method');
@@ -13897,13 +14219,21 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (result && typeof result.then === 'function') throw new Error('Audio host commands must complete synchronously');
   }
   function command(event, origin = 'tracker') {
+    syncBoom();
+    if (event.type === 'stop' && (event.mask & 15) === 15) effectGeneration++;
+    if (event.type === 'play' && event.effect === 'boom') boomEngine().activate(event.mask);
+    if ((event.type === 'play' && event.effect !== 'boom') || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
+    if (event.effect !== 'boom' && event.volume != null) {
+      for (let voice = 0; voice < 4; voice++) if (event.mask & (1 << voice)) levels[voice] = event.volume;
+    }
     if (event.type === 'play') {
       const mask = event.mask & 15;
       activeMask |= mask;
+      effectMask = (effectMask & ~mask) | (event.effect === 'boom' ? mask : 0);
       trackerMask = (trackerMask & ~mask) | (origin === 'tracker' ? mask : 0);
     }
     try { notify(event); }
-    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); } }
+    finally { if (event.type === 'stop') { activeMask &= ~(event.mask & 15); trackerMask &= ~(event.mask & 15); effectMask &= ~(event.mask & 15); } }
   }
   function sample(number) {
     const bank = banks.get(state.bank);
@@ -13935,7 +14265,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function loop(enabled, mask = 15) {
     mask &= 15;
     // Sam loops configure the sample interrupt stream, not tracker DMA loops.
-    notify({ type: 'loop', mask: mask & ~trackerMask, enabled });
+    notify({ type: 'loop', mask: mask & ~trackerMask & ~effectMask, enabled });
     state.loopMask = enabled ? state.loopMask | mask : state.loopMask & ~mask;
   }
   function filter(enabled) {
@@ -13956,6 +14286,16 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     command({ type: 'stop', mask });
   }
   return { state, sample, selectBank, loop, filter, play, stop, command,
+    boom() {
+      const engine = boomEngine();
+      syncBoom();
+      const generation = ++effectGeneration, events = engine.begin(levels);
+      for (const event of events) {
+        if (generation !== effectGeneration) break;
+        command({ ...event, filterEnabled: state.filterEnabled }, 'effect');
+      }
+    },
+    noiseState() { const engine = boomEngine(); syncBoom(); return engine.snapshot(false); },
     silence() { if (activeMask) stop(15); } };
 };
   const modReaderFactory = function readMod(bytes) {
@@ -14559,7 +14899,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     else (options.print || ((...args) => console.log(...args)))(...values);
   }
 
-  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount, requestPaletteWake, requestTrackerWake }));
+  const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount,
+    audioFieldTime: () => (timing.now() - timerEpoch) * timing.vblHz / 1000, audioVblHz: timing.vblHz,
+    requestPaletteWake, requestTrackerWake }));
   return {
     state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {

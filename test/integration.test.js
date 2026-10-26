@@ -106,6 +106,9 @@ test('integration: browser facade retains support for the original driver demo',
   }
   context.driverDemoRun();
   timers.runAll();
+  assert.throws(() => vm.runInContext('AMOS_AUDIO(new Map()).boom()', context), /Boom renderer is unavailable/);
+  vm.runInContext(fs.readFileSync(path.join(root, 'lib/amos/boom.js'), 'utf8'), context);
+  vm.runInContext('AMOS_AUDIO(new Map()).boom()', context);
   assert.deepStrictEqual(logs, [
     '[demo] start', '[demo] proc enter', '[demo] proc work', '[demo] proc return', '[demo] after call'
   ]);

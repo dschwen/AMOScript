@@ -95,8 +95,10 @@
   restoration (including negative values) and ordinary stacks. Keyboard fire is
   Enter in that demo so Space reaches AMOS. Twenty Canvas frames/ten GPU
   comparisons cover the source paths and host lifecycle; see `docs/roller2-pauses.md`.
-  PFEIL still needs Boom synthesis for its timeout branch; other handlers and
-  later-level progression remain open.
+  A new arrow fixture adds unchanged PFEIL/N34, three level-2 turns and actual
+  Boom at the arrow deadline before the game-over guard. Thirty-two one-pixel
+  positions, twenty Canvas frames/ten GPU comparisons pass; see `docs/roller2-arrows.md`.
+  Other handlers and later-level progression remain open.
   Prepared original stop/collapse maps are declared adapter fixtures, not native
   level progression. See `docs/roller2-movement.md`, `docs/add.md` and
   `docs/string-branches.md`. Numeric/procedure/non-ASCII string branches remain open.
@@ -119,6 +121,13 @@
   zero-initialized as a portable default. See `docs/icon-memory.md`. Preserve addresses across swap/shrink; retire them on replacement
   or erasure. See `docs/bank-memory.md`. Canvas Key Speed repeats use fixed
   50ths and input-reset subscriptions for lifecycle cleanup; see `docs/key-speed.md`.
+- `lib/amos/boom.js` renders bounded four-voice source-derived Boom with owned
+  shared noise, integer envelope and fractional field onset. Portable seed/constant
+  beam choices are explicit; finite float PCM feeds the existing Web Audio voice
+  host. Independent Python PAL/phase/NTSC vectors and five native browser graph
+  comparisons pass. Exact DMA/beam capture, interrupt tails and live mutable
+  wave/envelope parity remain open. Sam loops cannot loop the effect; Stop/End
+  cancels held effect PCM without phase restoration. See `docs/boom.md`.
 - `lib/amos/mod.js` decodes owned four-channel M.K. files without playback.
   Track Load uses raw synchronous bytes in a chip `Tracker ` bank plus 32 zero
   workspace bytes; loop flags are per factory. Track Play/Stop use a driver-owned

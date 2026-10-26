@@ -154,3 +154,8 @@ one/two/three numeric operands to these existing checked operations, as required
 by original Roller II 624/636. Explicit cached overload arities remain strict.
 The decoder preserves its field named `reference`; native verification uses this
 byte for the parameter-count cache in these tokens. See [input source forms](roller2-input.md).
+
+The separate [finite Boom synthesis contract](boom.md) now supports source-derived
+four-voice noise/envelope PCM without a sample bank. Its float PCM path, explicit
+portable beam choices and native capture/live-control limits are separate from
+the existing signed-byte Samples records.

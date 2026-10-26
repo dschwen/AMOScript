@@ -54,8 +54,8 @@ Their input paths cover keyboard Help/Space/text and pointer-paid pause/Gamepad
 return. Live gallery checks additionally use real mouse holds, fullscreen,
 host Stop/Resume inside the popup, and Restart.
 
-The next level-2 movement path reaches PFEIL. Its original timeout branch calls
-Boom, so adding the whole routine requires synthesized noise/envelope playback.
-The existing Samples/MOD controllers do not implement that command. Do not omit
-its timeout or count a replacement sample as native Boom. Pause support does not
-complete level-2 movement, game-over/win music, editor/highscores or full compilation.
+The separate [arrow fixture](roller2-arrows.md) now includes PFEIL/N34 and
+its original Boom timeout, using [finite portable synthesis](boom.md). This pause
+fixture retains its arrow guard. Exact native beam/DMA and broader synthesis forms
+remain open. Pause support does not complete other obstacles, game-over/win music,
+editor/highscores or full compilation.

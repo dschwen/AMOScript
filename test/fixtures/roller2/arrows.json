@@ -1,0 +1,149 @@
+{
+  "evidence": "Independent raw assets and source PFEIL 930\u2013947/N34 767\u2013768; portable font/origin and injected clock, not native timing/capture.",
+  "frames": [
+    {
+      "png": "arrow-step-7.png",
+      "time": 13140,
+      "bx": 8,
+      "by": 1,
+      "x": 263,
+      "y": 66,
+      "countdown": 29,
+      "rgbaSha256": "334e029aa5051253a57e9d38c0365f582cbed12dfd96ff3b858743d40ac4933c"
+    },
+    {
+      "png": "arrow-down.png",
+      "time": 14000,
+      "bx": 9,
+      "by": 4,
+      "x": 272,
+      "y": 114,
+      "countdown": 28,
+      "rgbaSha256": "06ddc824cea25dac15a7896e5c4a52581fc6c9304e8aa627c49a4a9d36ddd0bd"
+    },
+    {
+      "png": "arrow-left.png",
+      "time": 15400,
+      "bx": 5,
+      "by": 3,
+      "x": 208,
+      "y": 98,
+      "countdown": 27,
+      "rgbaSha256": "c3afd19908924c4240778c093f87c146e55a4f84deeb818417a55ffd4f55d7e5"
+    }
+  ],
+  "trajectory": [
+    {
+      "time": 13020,
+      "x": 257,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13040,
+      "x": 258,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13060,
+      "x": 259,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13080,
+      "x": 260,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13100,
+      "x": 261,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13120,
+      "x": 262,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13140,
+      "x": 263,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13160,
+      "x": 264,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13180,
+      "x": 265,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13200,
+      "x": 266,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13220,
+      "x": 267,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13240,
+      "x": 268,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13260,
+      "x": 269,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13280,
+      "x": 270,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13300,
+      "x": 271,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    },
+    {
+      "time": 13320,
+      "x": 272,
+      "y": 66,
+      "bx": 8,
+      "by": 1
+    }
+  ]
+}

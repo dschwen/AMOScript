@@ -2,6 +2,18 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-arrows.html",
+      "title": "Roller II original arrow movement",
+      "description": "Original PFEIL/N34 after real level progression: one-pixel arrow steps and down/up/left turns, native timeout Boom, pause and source bank integrity. Twenty independent Canvas images/ten GPU comparisons over keyboard/Gamepad paths; remaining obstacle and game-over handlers stay guarded.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-arrows.html"
+    },
+    {
+      "file": "boom.html",
+      "title": "Synthesized AMOS Boom",
+      "description": "Original four pitches, shared field-mutated noise and integer EnvBoom rendered as finite PCM with explicit portable beam/phase choices. Five independent native Web Audio stereo comparisons, Stop/disposal and gesture-controlled audition. Exact DMA/beam capture parity remains open.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/boom.html"
+    },
+    {
       "file": "roller2-pauses.html",
       "title": "Roller II original pause modes",
       "description": "Original PAUSE/IPause after real level progression: mouse/Help paid pause, Space pause popup, keyboard/Gamepad WTIN return and source Timer restoration. Twenty independent Canvas images and ten GPU comparisons; live fullscreen/Stop/Resume/Restart. Enter is joystick fire so Space reaches AMOS. Arrows and game-over remain guarded.",
