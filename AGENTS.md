@@ -355,8 +355,9 @@
   Editor requester/writeback remains unintegrated; surface errors and require Restart.
 - Full-game pages launch directly through a prominent Play Game button; browser
   checks/captured frames stay in a collapsed section. The live-only evaluator path
-  must reach audio/fullscreen requests before its first await. Startup automation
-  uses ordinary input and owned, cancellable timers; repeat Play retains the VM.
+  must reach audio/fullscreen requests before its first await. Roller II stays on
+  its original intro with no injected input; Wonderland startup automation uses
+  ordinary input and owned, cancellable timers; repeat Play retains the VM.
   Keep Stop/Restart/disposal and fullscreen focus cleanup covered in both demos.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.
 - `examples/` contains Test1–27 and synthetic programs with `.Asc` references.

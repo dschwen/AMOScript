@@ -28,7 +28,8 @@ Editor persistence/wider actions and native captures remain open; see
 
 Full-game pages now put a red Play Game button ahead of a collapsed verification
 section. Direct launch requests audio/fullscreen in the click before any await,
-then sends ordinary startup input. Replays remain separately runnable; repeat
+then leaves Roller II on its original intro; Wonderland uses ordinary startup
+input to enter gameplay. Replays remain separately runnable; repeat
 Play preserves the session, and Stop/Restart/disposal retire startup input.
 
 ## Current priority: Roller II

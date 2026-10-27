@@ -18,9 +18,10 @@ the container and rebinds the owned audio session. Errors still require Restart.
 
 
 The large red **Play Game** button launches the live host directly, requests sound
-and fullscreen in the same browser click, and uses ordinary startup input to enter
-gameplay. It does not run the verification replays first. Repeat clicks reuse the
-running session; Stop, Restart and disposal cancel pending startup input. The
+and fullscreen in the same browser click, and leaves the original intro waiting
+for input. Press a key to continue to the menu, then select Game or Editor yourself.
+It does not run the verification replays first. Repeat clicks reuse the running
+session; no automatic key or joystick input is injected. The
 shared checks and captured frames remain under a collapsed **Browser checks and
 captured frames** section. The original sound/fullscreen controls remain available
 when a browser denies either API. No VM variables, IPs or assets are patched.

@@ -18,7 +18,8 @@ runnable; the gallery is the complete catalogue.
 Open `demos/index.html` in a browser. Each page embeds its scripts and prepared
 assets, so no server or network downloads are required. On the full-game pages,
 click the large red **Play Game** button to launch directly with sound, fullscreen
-and ordinary startup input. **Browser checks and captured frames** is a separate,
+and game startup. Roller II stays on its original intro until you press a key;
+Wonderland advances into gameplay. **Browser checks and captured frames** is a separate,
 collapsed section; its **Run demo** button runs the shared verification.
 Other demos retain their Run demo controls. WebGL demos require WebGL2.
 

@@ -89,7 +89,7 @@ module.exports = async function roller2GameProbe(page) {
     const fullButton = document.createElement('button'), fullStatus = document.createElement('span'); fullButton.id = 'roller2-game-fullscreen'; toolbar.append(fullButton, fullStatus);
     let surface = document.createElement('canvas'), gpu = null; surface.id = 'roller2-game-input'; surface.tabIndex = 0; surface.setAttribute('aria-label', 'Complete Roller II game'); slot.append(surface); viewport.append(toolbar, slot, status); controls.append(help, viewport); (document.getElementById('game-player') || document.body).append(controls);
     try { gpu = createGpu(surface); } catch (_) { const gl = surface.getContext('webgl2'), ext = gl && gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); const next = surface.cloneNode(); surface.replaceWith(next); surface = next; }
-    const sound = make(sessionSource)(make(audioSource)), files = makeFiles(initial); let live = null, host = null, disposed = false, revision = 0, error = '', launcher = null, launchStage = 0, launchHeld = false;
+    const sound = make(sessionSource)(make(audioSource)), files = makeFiles(initial); let live = null, host = null, disposed = false, revision = 0, error = '', launcher = null;
     const soundButton = document.createElement('button'); soundButton.id = 'roller2-game-sound'; toolbar.append(soundButton);
     function update() {
       if (!live) return; const v = live.state.variables, location = live.state.location, target = live.display.screens.get(0), s = sound.status();
@@ -99,7 +99,7 @@ module.exports = async function roller2GameProbe(page) {
     }
     function fail(e) { error = e.message; if (launcher) launcher.cancel(); if (live) live.stop(); update(); }
     function start() {
-      if (launcher) launcher.cancel(); launchStage = 0;
+      if (launcher) launcher.cancel();
       const token = ++revision; if (host) host.detach(); if (live) live.stop(); if (gpu) gpu.clear(); error = '';
       live = compiled.exports({ files, print() {}, audio: sound.bind(), now: () => performance.now(), clearTimeout, setTimeout(fn, delay) { return setTimeout(() => { if (!disposed && token === revision) { try { fn(); } catch (e) { fail(e); } } }, delay); } });
       host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', joysticks: [{ port: 1, keyboard: { fire: ['Enter'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
@@ -107,24 +107,9 @@ module.exports = async function roller2GameProbe(page) {
     for (const action of ['restart', 'stop', 'resume']) { const button = document.createElement('button'); button.id = `roller2-game-${action}`; button.textContent = action; toolbar.append(button); button.onclick = () => { try { if (action === 'restart') start(); else if (action === 'stop') { launcher.cancel(); live.stop(); } else if (!error) live.resume(); host.focus(); update(); } catch (e) { fail(e); } }; }
     soundButton.onclick = () => { if (['on', 'starting'].includes(sound.status().state)) sound.mute(); else sound.enable().then(() => { if (!disposed) update(); }); host.focus(); update(); };
     const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: fullButton, statusElement: fullStatus, surface: slot, getContent: () => surface }); start(); const monitor = setInterval(update, 50);
-    function fire(held) {
-      if (!held && !launchHeld) return;
-      launchHeld = held; surface.dispatchEvent(new KeyboardEvent(held ? 'keydown' : 'keyup', { code: 'Enter', key: 'Enter', bubbles: true, cancelable: true }));
-    }
     launcher = make(launchSource)({ sound, fullscreen, focus: () => host.focus(), update, fail,
       prepare() { if (error || live.state.halted) start(); else if (live.state.stopped) live.resume(); },
-      release: () => fire(false),
-      step() {
-        const line = live.state.location.line;
-        if (launchStage === 4) return true;
-        if (launchStage === 0 && line === 164) { live.sendKey('a'); launchStage = 1; }
-        if (launchStage === 1 && line >= 298 && line <= 316 && !live.state.fade.active) fire(true);
-        if (launchStage === 1 && live.state.variables.int_lv === 1) { fire(false); launchStage = 2; }
-        if (launchStage === 2 && line === 154) launchStage = 3;
-        if (launchStage === 3) fire(true);
-        if (line >= 619 && line <= 639) { launchStage = 4; return true; }
-        return false;
-      }
+      release() {}, step: () => true
     });
     const play = () => launcher.play(); globalThis.AMOS_PLAY_GAME = play;
     globalThis.AMOS_ROLLER2_GAME_CLEANUP = async () => { disposed = true; revision++; launcher.dispose(); if (globalThis.AMOS_PLAY_GAME === play) delete globalThis.AMOS_PLAY_GAME; clearInterval(monitor); host.detach(); live.stop(); release(gpu); await Promise.all([fullscreen.dispose(), sound.dispose()]); update(); return sound.status(); };

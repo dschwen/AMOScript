@@ -33,7 +33,7 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#play-game');
         await page.waitForFunction(({ roller }) => {
           const c = document.querySelector(roller ? '#roller2-game-controls' : '#game-controls');
-          return c && c.dataset.sound === 'on' && (roller ? c.dataset.phase === 'game' : c.dataset.game === '1' && Number(c.dataset.line) >= 204);
+          return c && c.dataset.sound === 'on' && (roller ? c.dataset.phase === 'intro' && c.dataset.line === '164' : c.dataset.game === '1' && Number(c.dataset.line) >= 204);
         }, { roller });
         assert.strictEqual(await page.evaluate(() => document.fullscreenElement.id), roller ? 'roller2-game-viewport' : 'game-viewport');
         assert.strictEqual(await page.locator('#results').textContent(), '');
@@ -44,6 +44,16 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#play-game');
         await page.waitForFunction(() => document.fullscreenElement !== null);
         assert.strictEqual(await page.locator(surface).getAttribute('data-launch-identity'), 'retained');
+        if (roller) {
+          await page.waitForTimeout(1500);
+          assert.strictEqual(await page.locator(controls).getAttribute('data-line'), '164');
+          assert.strictEqual(await page.locator(controls).getAttribute('data-level'), '0');
+          await page.locator(surface).focus(); await page.keyboard.press('a');
+          await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
+          await page.waitForTimeout(300);
+          assert.strictEqual(await page.locator(controls).getAttribute('data-phase'), 'menu');
+          assert.strictEqual(await page.locator(controls).getAttribute('data-level'), '0');
+        }
         if (!roller) {
           await page.selectOption('#game-input-mode', 'gamepad'); await page.click('#game-restart');
           await page.keyboard.press('Escape'); await page.waitForFunction(() => document.fullscreenElement === null);
