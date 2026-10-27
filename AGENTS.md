@@ -344,7 +344,7 @@
   now pass through the corrected AMOS source. Thirty Canvas frames, six independent
   image regions and fifteen GPU comparisons pass. The old replay retains its historical missing-
   file error; it is no longer a current-demo blocker. Session writes survive only
-  Restart; high-score entry/writeback, editor persistence/win/completion and native captures
+  Restart; shipped-score qualification, editor persistence/win/completion and native captures
   remain open. See `docs/roller2-game.md`.
 - The live `wonderland-game` scenario embeds the entire original program/assets.
   Its finite input-only replay spends three lives through natural collisions and
@@ -481,3 +481,9 @@ original IFF background; 48 independent frame hashes and five GPU frames
 cover it. IFF uploads finish before VM execution. See docs/screen-copy.md.
 Keep the README concise and the gallery games/showcases prominent. All technical
 browser demos retain HTML Preview links inside the closed-by-default checks group.
+
+Roller II full-game hosts map fire to ControlLeft/ControlRight, preserving Enter
+for high-score text and Space for pause. Browser modifier filtering permits only
+explicitly configured Ctrl joystick chords; unmapped Ctrl and Alt/Meta shortcuts
+must not leak text or retain owned holds. Keep the zero-score-table full-source
+high-score entry/writeback replay distinct from an unmodified saved-score capture.

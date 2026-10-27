@@ -37,7 +37,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const { buildGamePage, loadAssets } = require('./build_game_page');
   const rollerRoot = path.join(root, 'examples/Roller2/current');
   const debugPage = buildGamePage(fs.readFileSync(path.join(rollerRoot, 'Roller II.AMOS')), {
-    title: 'Roller II — Debug', debug: true, fire: ['Enter'],
+    title: 'Roller II — Debug', debug: true, fire: ['ControlLeft', 'ControlRight'],
     assets: loadAssets(path.join(rollerRoot, 'manifest.json'), 'RII:')
   });
   const navigation = `<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('roller2-game.html')}">Regular Roller II</a></nav>`;

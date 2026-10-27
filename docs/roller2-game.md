@@ -12,7 +12,7 @@ present; no compiler/runtime special cases are used.
 
 The [HTML Preview link](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)
 is in the gallery. WebGL2 is the default, with fullscreen, keyboard/Gamepad input
-and optional gesture-activated sound. Enter fires, arrows move, Space reaches the
+and optional gesture-activated sound. Left/right Ctrl fires, arrows move, Space reaches the
 original pause screen, and M/F toggle music/effects. H opens title-menu scores.
 Escape exits fullscreen before a later Escape reaches AMOS. Restart preserves
 the container and rebinds the owned audio session. Errors still require Restart.
@@ -110,9 +110,10 @@ writes. Wrapped ends and active NTSC rainbows remain open. See [display contract
 
 Browser files are synchronous prepared byte strings, with case/volume mapping in
 the adapter. Writes, if reached, stay in session memory across Restart and vanish
-on page reload. The accepted replay performs no writes; IndexedDB is still planned.
+on page reload. The default shipped-score replay performs no writes; the declared zero-score
+qualification fixture writes one verified score file. IndexedDB is still planned.
 
-High-score name entry/writeback, editor save/load/requesters and wider actions, help/win flows, other handlers,
+Qualification against shipped high scores, editor save/load/requesters and wider actions, win flows, other handlers,
 later-level completion and external Amiga execution/audio captures remain open.
 The refreshed assets fix the reached resource failure; passing this bounded path
 does not establish full game or general AMOS compatibility.
@@ -138,3 +139,10 @@ replay slides directly from (17,6) to the time bonus at (17,11). Its metadata no
 starts with TM=20; the pickup raises it to 30. The current input-only result is
 score 299. Earlier map-specific expectations (TM=20 after pickup, score 301)
 are historical and do not describe the refreshed map. Frozen assets stay intact.
+
+Keyboard fire uses `ControlLeft` and `ControlRight` in both full-game pages.
+Enter remains available to the original high-score name-entry code; Space remains
+the original pause key. The full-source high-score fixture supplies a declared
+zero-score table, earns 299 through normal gameplay, types a name and Enter,
+checks the exact saved Highscores bytes and returns to the menu/fresh game.
+It uses ordinary keyboard input without changing VM variables or instructions.

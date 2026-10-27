@@ -774,3 +774,12 @@ compiler/display bounds stay strict. A complete-source input replay covers all
 seven icon pages, timed demonstrations and menu/MOD return. Independent raw-asset
 icon pixels and nine CPU/GPU frame comparisons are published in `roller2-help`.
 The frozen earlier source and assets remain unchanged.
+
+### Roller II keyboard fire and high-score entry
+
+Full-game pages use both Ctrl keys for fire, leaving Enter for source name entry
+and Space for pause. Explicit Ctrl joystick chords work without admitting
+unmapped modified text. The declared zero-score-table replay earns a real score,
+types a name, confirms with Enter, verifies exact Highscores writeback and reaches
+the menu/fresh game through ordinary input. Original shipped-score qualification
+and all-level completion remain separate acceptance work.

@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 'use strict';
 // Corrected AMOS source/current assets. Input and host lifecycle only.
-function replayRoller2Current(create, clock, files, makeInput, capture = () => {}) {
+function replayRoller2Current(create, clock, files, makeInput, capture = () => {}, enterScore = null) {
   const check = (value, message) => { if (!value) throw Error(message); };
   const p = create({ files, now: clock.now, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout, print() {} });
   const input = makeInput(p), frames = [];
@@ -37,6 +37,7 @@ function replayRoller2Current(create, clock, files, makeInput, capture = () => {
     p.resume(); clock.tick(2000);
     check(p.state.music.playing && !p.state.tracker.playing && !p.banks.has(22), 'Current game-over handoff differs'); record('Original game over with AMOS Music');
     input.key('KeyA'); clock.tick(6000);
+    if (enterScore) { enterScore(p, input, clock); clock.tick(6000); }
     check(!p.state.halted && !p.state.music.playing && !p.banks.has(3), 'Restored score image did not allow Music exit');
     check(p.state.location.line >= 1094 && p.state.location.line <= 1103, 'Current post-game scores scroll differs'); record('Original post-game scores');
     clock.tick(10000);
@@ -44,8 +45,8 @@ function replayRoller2Current(create, clock, files, makeInput, capture = () => {
     input.joy(16); clock.tick(2300); input.joy(0); record('Fresh first-level ready');
     input.joy(16); clock.tick(800); input.joy(0);
     check(v.int_lv === 1 && v.int_hi === 0 && v.int_bx === 5 && v.int_by === 9, 'Current menu did not start a fresh game'); record('Fresh original game');
-    check(files.writes.length === 0 && !p.state.halted, 'Current bounded path wrote files or halted');
-    return { frames: frames.length, ...completed, returnedToMenu: true, freshGame: true, writes: 0 };
+    check((enterScore || files.writes.length === 0) && !p.state.halted, 'Current bounded path wrote files or halted');
+    return { frames: frames.length, ...completed, returnedToMenu: true, freshGame: true, writes: files.writes.length };
   } finally { input.dispose(); p.stop(); check(clock.pending() === 0, 'Current full-game cleanup retained a wake'); }
 }
 module.exports = replayRoller2Current;

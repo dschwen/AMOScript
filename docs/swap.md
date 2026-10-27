@@ -62,3 +62,8 @@ line 956, byte 53096, is **Edit**, not Swap. Edit now has a separate [terminal h
 Bounded [AMOS Music VM playback](amos-music.md) is implemented; full gameplay,
 end-state screens, integrated editor behavior and native captures remain open.
 The high-score fixture remains separate from entry UI and persistent scores.
+
+A separate [full-source name-entry replay](roller2-game.md) now covers keyboard
+text, Enter confirmation and score-file writeback using a declared zero-score
+table. The isolated Swap preview remains bounded as described above; persistent
+storage, shipped-score qualification and native captures remain separate work.

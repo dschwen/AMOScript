@@ -95,3 +95,13 @@ test('Wonderland: original menu routines animate, toggle background and return b
     assert.strictEqual(p.state.halted,true);assert.strictEqual(p.state.variables.int_game,selected);assert.strictEqual(clock.pending(),0);
   }
 });
+
+test('joystick mapping: Ctrl chords require an explicit Ctrl binding and a mapped joystick key', () => {
+  const normal = createJoystickInput([{ port: 1, keyboard: true }]);
+  assert.strictEqual(normal.controlChord('ArrowRight'), false);
+  const control = createJoystickInput([{ port: 1, keyboard: { fire: ['ControlLeft', 'ControlRight'] } }]);
+  for (const code of ['ControlLeft', 'ControlRight', 'ArrowRight']) assert.strictEqual(control.controlChord(code), true);
+  for (const code of ['Enter', 'KeyC']) assert.strictEqual(control.controlChord(code), false);
+  control.keydown('ControlRight'); control.keydown('ArrowRight'); assert.strictEqual(control.read([])[0].mask, 24);
+  control.reset(); assert.strictEqual(control.read([])[0].mask, 0);
+});

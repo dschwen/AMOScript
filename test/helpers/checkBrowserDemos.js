@@ -439,11 +439,11 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#roller2-game-fullscreen'); await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'roller2-game-viewport');
         await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
-        await page.keyboard.down('Enter');
-        try { await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.level === '1'); } finally { await page.keyboard.up('Enter'); }
+        await page.keyboard.down('ControlLeft');
+        try { await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.level === '1'); } finally { await page.keyboard.up('ControlLeft'); }
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'ready' && document.getElementById('roller2-game-controls').dataset.line === '154');
-        await page.keyboard.down('Enter');
-        try { await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'game'); } finally { await page.keyboard.up('Enter'); }
+        await page.keyboard.down('ControlLeft');
+        try { await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'game'); } finally { await page.keyboard.up('ControlLeft'); }
         await page.waitForFunction(() => { const n = Number(document.getElementById('roller2-game-controls').dataset.line); return n >= 619 && n <= 639; });
         await page.click('#roller2-game-stop'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'stopped');
         assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound-voices'), '0');
@@ -453,8 +453,8 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'scores');
         assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound-voices'), '0');
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
-        await page.locator('#roller2-game-input').focus(); await page.keyboard.down('Enter');
-        try { await page.waitForFunction(() => { const n = Number(document.getElementById('roller2-game-controls').dataset.line); return n < 298 || n > 316; }); } finally { await page.keyboard.up('Enter'); }
+        await page.locator('#roller2-game-input').focus(); await page.keyboard.down('ControlLeft');
+        try { await page.waitForFunction(() => { const n = Number(document.getElementById('roller2-game-controls').dataset.line); return n < 298 || n > 316; }); } finally { await page.keyboard.up('ControlLeft'); }
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'ready' && document.getElementById('roller2-game-controls').dataset.line === '154');
         await page.click('#roller2-game-restart'); await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.line === '164');
         assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound'), 'on');

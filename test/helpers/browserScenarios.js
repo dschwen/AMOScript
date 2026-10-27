@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-highscore', title: 'Roller II Ctrl fire and Enter high-score confirmation', initialFrame: 'Typed high-score name', description: 'Complete original game execution with a declared zero-score input file so the natural 299-point run qualifies. Both Ctrl keys fire, Ctrl+arrows combine, and unmapped shortcuts stay outside AMOS. Real keyboard input types and confirms a name with Enter; the original code saves Highscores, returns to the menu and starts a fresh game. No VM variable/IP edits or native capture.', run: require('./roller2HighscoreProbe'), check(result, assert) {
+    assert.ok(result.assertions >= 18); assert.deepStrictEqual({ ...result, assertions: 0 }, { assertions: 0, name: 'codex', score: 299, writes: 1, entered: true, returnedToMenu: true, freshGame: true });
+  } },
   { id: 'roller2-help', title: 'Roller II help pages and menu return', initialFrame: 'Canvas: Help icons 49–52', description: 'The complete current AMOS source runs all seven help icon pages and the original timed colour/ball examples, then returns to the menu. Line 1129 has a source-level final-page offset fix; compiler cursor bounds remain strict. Four independent raw-asset icon regions and nine actual GPU/CPU frame comparisons. Input-only replay, not an Amiga capture.', run: require('./roller2HelpProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { pages: 7, finalEntries: [49, 50, 51, 52], frames: 9, returnedToMenu: true, writes: 0, gpuFrames: 9, independentPixels: 1024 });
   } },

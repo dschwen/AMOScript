@@ -21,15 +21,15 @@ module.exports = async function roller2GameProbe(page) {
     for (const mode of liveOnly ? [] : ['keyboard', 'gamepad']) {
       const surface = document.createElement('canvas'); surface.tabIndex = 0; document.body.append(surface);
       let host, gpu = null, gpuHost = null, pad = null, held = null;
-      const key = (type, code) => surface.dispatchEvent(new KeyboardEvent(type, { code, key: code === 'KeyA' ? 'a' : code, bubbles: true, cancelable: true }));
+      const key = (type, code) => surface.dispatchEvent(new KeyboardEvent(type, { code, key: code === 'KeyA' ? 'a' : code, ctrlKey: type === 'keydown' && (code === 'ControlLeft' || code === 'ControlRight'), bubbles: true, cancelable: true }));
       try {
         results.push(replay(compiled.exports, makeClock(4), makeFiles(initial), p => {
-          host = AMOS_BROWSER.createCanvasHost(surface, { mouseCoordinates: 'hardware', hasFocus: () => true, requestAnimationFrame: () => 1, cancelAnimationFrame() {}, getGamepads: () => [pad], joysticks: [{ port: 1, keyboard: { fire: ['Enter'] }, gamepad: true }] }); host.attach(p);
+          host = AMOS_BROWSER.createCanvasHost(surface, { mouseCoordinates: 'hardware', hasFocus: () => true, requestAnimationFrame: () => 1, cancelAnimationFrame() {}, getGamepads: () => [pad], joysticks: [{ port: 1, keyboard: { fire: ['ControlLeft', 'ControlRight'] }, gamepad: true }] }); host.attach(p);
           if (mode === 'keyboard') { gpu = createGpu(document.createElement('canvas')); gpuHost = AMOS_BROWSER.createCanvasHost(gpu.resources.context.canvas, { renderer: gpu, requestAnimationFrame: () => 1, cancelAnimationFrame() {} }); gpuHost.attach(p); }
           return {
             joy(mask) {
               if (held) key('keyup', held); held = null;
-              if (mode === 'keyboard') { held = mask === 16 ? 'Enter' : mask === 8 ? 'ArrowRight' : mask === 4 ? 'ArrowLeft' : mask === 1 ? 'ArrowUp' : mask === 2 ? 'ArrowDown' : null; if (held) key('keydown', held); }
+              if (mode === 'keyboard') { held = mask === 16 ? 'ControlLeft' : mask === 8 ? 'ArrowRight' : mask === 4 ? 'ArrowLeft' : mask === 1 ? 'ArrowUp' : mask === 2 ? 'ArrowDown' : null; if (held) key('keydown', held); }
               else pad = { index: 0, connected: true, mapping: 'standard', axes: [mask === 8 ? 1 : mask === 4 ? -1 : 0, mask === 1 ? -1 : mask === 2 ? 1 : 0], buttons: [{ pressed: mask === 16, value: mask === 16 ? 1 : 0 }] };
             },
             key(code) { key('keydown', code); key('keyup', code); }, dispose() { if (held) key('keyup', held); host.detach(); }
@@ -84,7 +84,7 @@ module.exports = async function roller2GameProbe(page) {
     if (globalThis.AMOS_ROLLER2_GAME_CLEANUP) await globalThis.AMOS_ROLLER2_GAME_CLEANUP();
     const previous = document.getElementById('roller2-game-controls'); if (previous) previous.remove();
     const controls = document.createElement('section'); controls.id = 'roller2-game-controls';
-    const help = document.createElement('p'); help.textContent = 'Roller II with the level-3 time-bonus crash fixed and the current supplied assets. Press a key at the logo; Enter/gamepad fire starts the game and exits ready prompts. Arrows move; Space pauses; M/F toggle music/effects. Escape returns to title after fullscreen exits. The current supplied assets include the restored high-score image; game over returns through scores to the title. H opens the title-menu scores view. Click Editor on the title to open the original overlapping editor windows and place tiles with the mouse. Press T to test the edited level; Escape returns through the original key prompt. Editor save/load and other actions remain unverified. Errors require Restart. File writes stay in session memory and disappear on page reload; IndexedDB remains planned.';
+    const help = document.createElement('p'); help.textContent = 'Roller II with the level-3 time-bonus crash fixed and the current supplied assets. Press a key at the logo; Ctrl/gamepad fire starts the game and exits ready prompts. Arrows move; Space pauses; M/F toggle music/effects. Escape returns to title after fullscreen exits. The current supplied assets include the restored high-score image; game over returns through scores to the title. H opens the title-menu scores view. Click Editor on the title to open the original overlapping editor windows and place tiles with the mouse. Press T to test the edited level; Escape returns through the original key prompt. Editor save/load and other actions remain unverified. Errors require Restart. File writes stay in session memory and disappear on page reload; IndexedDB remains planned.';
     const viewport = document.createElement('section'); viewport.id = 'roller2-game-viewport'; const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar'; const slot = document.createElement('div'), status = document.createElement('p');
     const fullButton = document.createElement('button'), fullStatus = document.createElement('span'); fullButton.id = 'roller2-game-fullscreen'; toolbar.append(fullButton, fullStatus);
     let surface = document.createElement('canvas'), gpu = null; surface.id = 'roller2-game-input'; surface.tabIndex = 0; surface.setAttribute('aria-label', 'Complete Roller II game'); slot.append(surface); viewport.append(toolbar, slot, status); const instructions = document.createElement('details'), summary = document.createElement('summary'); summary.textContent = 'Controls and help'; instructions.append(summary, help); controls.append(instructions, viewport); (document.getElementById('game-player') || document.body).append(controls);
@@ -105,7 +105,7 @@ module.exports = async function roller2GameProbe(page) {
       if (launcher) launcher.cancel();
       const token = ++revision; if (host) host.detach(); if (live) live.stop(); if (gpu) gpu.clear(); error = '';
       live = compiled.exports({ files, print() {}, audio: sound.bind(), now: () => performance.now(), clearTimeout, setTimeout(fn, delay) { return setTimeout(() => { if (!disposed && token === revision) { try { fn(); } catch (e) { fail(e); } } }, delay); } });
-      host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', virtualJoystick: { container: viewport, port: 1, visibility: touchMode.value }, joysticks: [{ port: 1, keyboard: { fire: ['Enter'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
+      host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', virtualJoystick: { container: viewport, port: 1, visibility: touchMode.value }, joysticks: [{ port: 1, keyboard: { fire: ['ControlLeft', 'ControlRight'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
     }
     for (const action of ['restart', 'stop', 'resume']) { const button = document.createElement('button'); button.id = `roller2-game-${action}`; button.textContent = action; toolbar.append(button); button.onclick = () => { try { if (action === 'restart') start(); else if (action === 'stop') { launcher.cancel(); live.stop(); } else if (!error) live.resume(); host.focus(); update(); } catch (e) { fail(e); } }; }
     ui = make(uiSource)({ container: viewport, toolbar, files, debug: !liveOnly });

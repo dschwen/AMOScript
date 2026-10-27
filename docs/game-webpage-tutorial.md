@@ -91,11 +91,11 @@ command builds a standalone page using the same source and bytes as the live dem
 ```sh
 node tools/build_game_page.js "examples/Roller2/current/Roller II.AMOS" \
   /tmp/roller2.html --assets examples/Roller2/current/manifest.json \
-  --prefix RII: --title "Roller II" --port 1 --fire Enter
+  --prefix RII: --title "Roller II" --port 1 --fire ControlLeft,ControlRight
 ```
 
-The `RII:` prefix matches the source's `Dir$`. Enter is the fire key so Space
-continues to reach Roller II's own pause handler. The touch fire button also
+The `RII:` prefix matches the source's `Dir$`. Ctrl fires, leaving Enter for
+high-score text input. Space continues to reach Roller II's own pause handler. The touch fire button also
 feeds joystick port 1, without synthesizing a text key or AMOS mouse click.
 
 Click **Play Game** to enable sound and request fullscreen. Roller II stays at its
@@ -164,7 +164,7 @@ Touch controls are a browser-host option, not a compiler command:
 const host = AMOS_BROWSER.createCanvasHost(canvas, {
   renderer, // Omit for Canvas 2D presentation.
   mouseCoordinates: 'hardware',
-  joysticks: [{ port: 1, keyboard: { fire: ['Enter'] }, gamepad: true }],
+  joysticks: [{ port: 1, keyboard: { fire: ['ControlLeft', 'ControlRight'] }, gamepad: true }],
   virtualJoystick: {
     container: viewport, // The stable fullscreen element.
     port: 1,
@@ -265,7 +265,7 @@ Add `--debug` when you need filesystem exports or detailed diagnostics:
 node tools/build_game_page.js \
   'examples/Roller2/current/Roller II.AMOS' /tmp/roller2-debug.html \
   --assets examples/Roller2/current/manifest.json --prefix RII: \
-  --fire Enter --title 'Roller II' --debug
+  --fire ControlLeft,ControlRight --title 'Roller II' --debug
 ```
 
 The JavaScript API accepts `buildGamePage(source, { debug: true, ...options })`.

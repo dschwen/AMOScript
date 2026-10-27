@@ -140,11 +140,13 @@ function createCanvasHost(canvas, options = {}) {
   function keydown(event) {
     if (!program) return;
     if (event.isComposing || event.key === 'Dead' || event.key === 'Process') return;
-    if (event.ctrlKey || event.metaKey || event.altKey) {
+    const controlJoystick = event.ctrlKey && !event.metaKey && !event.altKey && joystickInput.controlChord(event.code || event.key);
+    if ((event.ctrlKey || event.metaKey || event.altKey) && !controlJoystick) {
       releaseKey(); releaseRawKeys(); resetJoysticks();
       if (program.clearScanCodes) program.clearScanCodes();
       return;
     }
+    if (controlJoystick) releaseKey();
     const rawCode = event.code || event.key, rawScan = amigaScanCode(rawCode);
     if (!event.repeat && rawScan != null && focused() && !program.state.stopped && !program.state.halted && program.setKeyState) {
       rawHeld.set(rawCode, rawScan); program.setKeyState(rawScan, true);
@@ -152,6 +154,9 @@ function createCanvasHost(canvas, options = {}) {
     const joystick = joystickInput.keydown(event.code || (event.key === ' ' ? 'Space' : event.key), !!event.repeat);
     if (joystick.matched && (!focused() || program.state.stopped || program.state.halted)) resetJoysticks();
     if (joystick.matched) { pollJoysticks(); if (joystick.consume) { event.preventDefault(); return; } }
+    // Explicit Ctrl joystick chords may update held input, but never produce
+    // modified text when a mapping opts out of consuming browser events.
+    if (event.ctrlKey) return;
     const code = event.code || event.key;
     const special = { Enter: '\r', NumpadEnter: '\r', Escape: '\x1b', Backspace: '\b', Tab: '\t',
       ArrowUp: '\x1e', ArrowDown: '\x1f', ArrowRight: '\x1c', ArrowLeft: '\x1d', Delete: '\0', Help: '\0' };
@@ -301,6 +306,7 @@ function createJoystickInput(configurations) {
   });
   function match(code) { return configs.some(config => config.keyboard.some(binding => binding.code === code)); }
   return { ports: [...ports], usesGamepad: configs.some(config => config.gamepad),
+    controlChord: code => (match('ControlLeft') || match('ControlRight')) && match(code),
     keydown(code, repeat = false) {
       const matching = configs.filter(config => config.keyboard.some(binding => binding.code === code));
       if (matching.length && !repeat) keys.add(code);

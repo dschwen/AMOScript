@@ -160,3 +160,17 @@ coverage, not a physical phone/controller or Amiga capture.
 
 See [the webpage tutorial](game-webpage-tutorial.md) for a working Roller II build
 command and complete host wiring.
+
+### Ctrl as fire
+
+Set `keyboard: { fire: ['ControlLeft', 'ControlRight'] }`, or pass
+`--fire ControlLeft,ControlRight` to the page builder. Roller II uses this mapping
+so Enter can confirm high-score text and Space can pause. Default keyboard
+profiles elsewhere remain unchanged.
+
+Explicit Ctrl mappings accept the Ctrl key itself and Ctrl with other mapped
+joystick keys (for example Ctrl+ArrowRight). Unmapped Ctrl shortcuts and all
+Alt/Meta combinations retain the existing modifier filtering. Modified joystick
+chords never inject AMOS text, including with `consume: false`. Entering a Ctrl
+chord cancels owned text repeat without changing the AMOS Key Speed settings. Keyup, blur,
+Stop and detach use the same owned hold cleanup as other joystick keys.
