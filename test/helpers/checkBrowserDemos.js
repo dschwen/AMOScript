@@ -25,6 +25,37 @@ module.exports = async function checkBrowserDemos(browser) {
     await page.route(/^https?:/, route => { network.push(route.request().url()); return route.abort(); });
     try {
       await page.goto(pathToFileURL(path.join(__dirname, '../../demos', `${scenario.id}.html`)).href);
+      if (['roller2-game', 'wonderland-game'].includes(scenario.id)) {
+        const roller = scenario.id === 'roller2-game', controls = roller ? '#roller2-game-controls' : '#game-controls', surface = roller ? '#roller2-game-input' : '#game-input';
+        assert.strictEqual(await page.locator('#play-game').isVisible(), true);
+        assert.strictEqual(await page.locator('#demo-checks').evaluate(node => node.open), false);
+        await page.screenshot({ path: path.join(__dirname, '../artifacts', `${scenario.id}-play-button.png`), fullPage: true });
+        await page.click('#play-game');
+        await page.waitForFunction(({ roller }) => {
+          const c = document.querySelector(roller ? '#roller2-game-controls' : '#game-controls');
+          return c && c.dataset.sound === 'on' && (roller ? c.dataset.phase === 'game' : c.dataset.game === '1' && Number(c.dataset.line) >= 204);
+        }, { roller });
+        assert.strictEqual(await page.evaluate(() => document.fullscreenElement.id), roller ? 'roller2-game-viewport' : 'game-viewport');
+        assert.strictEqual(await page.locator('#results').textContent(), '');
+        assert.strictEqual(await page.evaluate(() => document.body.dataset.status), 'idle');
+        assert.strictEqual(await page.locator(controls).getAttribute('data-backend'), 'webgl');
+        await page.locator(surface).evaluate(canvas => { canvas.dataset.launchIdentity = 'retained'; });
+        await page.keyboard.press('Escape'); await page.waitForFunction(() => document.fullscreenElement === null);
+        await page.click('#play-game');
+        await page.waitForFunction(() => document.fullscreenElement !== null);
+        assert.strictEqual(await page.locator(surface).getAttribute('data-launch-identity'), 'retained');
+        if (!roller) {
+          await page.selectOption('#game-input-mode', 'gamepad'); await page.click('#game-restart');
+          await page.keyboard.press('Escape'); await page.waitForFunction(() => document.fullscreenElement === null);
+          await page.click('#play-game');
+          await page.waitForFunction(() => { const c = document.getElementById('game-controls'); return c.dataset.game === '1' && Number(c.dataset.line) >= 204; });
+          assert.strictEqual(await page.locator('#game-input-mode').inputValue(), 'gamepad');
+        }
+        await page.evaluate(roller => roller ? AMOS_ROLLER2_GAME_CLEANUP() : AMOS_GAME_DEMO_CLEANUP(), roller);
+        await page.waitForFunction(() => document.fullscreenElement === null);
+        assert.strictEqual(await page.evaluate(() => typeof globalThis.AMOS_PLAY_GAME), 'undefined');
+        await page.locator('#demo-checks summary').click();
+      }
       await page.click('#run-demo');
       await page.waitForFunction(() => ['passed', 'failed'].includes(document.body.dataset.status), null, { timeout: 60000 });
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,

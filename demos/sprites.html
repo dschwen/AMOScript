@@ -416,6 +416,19 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     deepStrictEqual(a, b) { if (!equal(a, b)) throw new Error(`Result differs: expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
     match(value, expression) { if (!expression.test(value)) throw new Error(`${value} does not match ${expression}`); }
   };
+  const playButton = document.getElementById('play-game'), playStatus = document.getElementById('play-status');
+  if (playButton) playButton.addEventListener('click', async () => {
+    playButton.disabled = true; button.disabled = true; playStatus.textContent = 'Starting game…';
+    try {
+      // Do not yield before invoking the live host: audio and fullscreen must
+      // request permission within this click's transient user activation.
+      if (globalThis.AMOS_PLAY_GAME) await globalThis.AMOS_PLAY_GAME();
+      else await config.evaluate({ ...config.argument, liveOnly: true });
+      playStatus.textContent = 'Game running. Use the controls below to adjust sound or fullscreen.';
+      document.body.dataset.playing = 'true';
+    } catch (error) { playStatus.textContent = `Could not start the game: ${error.message}`; }
+    finally { playButton.disabled = false; button.disabled = false; }
+  });
   let frames = [];
   function show() {
     stage.replaceChildren();
@@ -435,7 +448,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   selector.addEventListener('change', show);
   zoom.addEventListener('change', show);
   button.addEventListener('click', async () => {
-    button.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
+    button.disabled = true; if (playButton) playButton.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
     fullscreenButton.hidden=true;frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
     const previousObserver = globalThis.AMOS_DEMO_OBSERVE;
     const originalPut = CanvasRenderingContext2D.prototype.putImageData;
@@ -480,7 +493,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         const copper = frames.findIndex(frame => frame.name === 'copper-stack-dma');
         selector.value = preferred >= 0 ? preferred : copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
       }
-      button.disabled = false;
+      button.disabled = false; if (playButton) playButton.disabled = false;
     }
   });
   document.body.dataset.status = 'idle';

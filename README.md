@@ -14,6 +14,8 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 | **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Game with its AMOS boundary bug fixed, current supplied assets and music. Tested through the level-3 warp, game over, restored scores, menu return and a fresh game. |
 | **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation with its supplied icon bank and IFF background. Fullscreen, frame stepping and custom IFF upload. |
 
+Both game pages have a large red **Play Game** button for sound, fullscreen and direct launch.
+
 The gallery also features music players and interactive examples. Compiler,
 individual-command and rendering checks remain available in a collapsed section
 for development. Every browser test has a self-contained demo and HTML Preview

@@ -1,6 +1,6 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-26.
+Assessment updated: 2026-10-27.
 
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)
 now highlights complete games, animation/music and interactive examples; individual
@@ -25,6 +25,11 @@ comparisons cover these paths. DIW windows retain the owner’s full
 geometry while DMA cuts the slices, including background restoration after row 255.
 Editor persistence/wider actions and native captures remain open; see
 [screen priority](docs/screen-priority.md).
+
+Full-game pages now put a red Play Game button ahead of a collapsed verification
+section. Direct launch requests audio/fullscreen in the click before any await,
+then sends ordinary startup input. Replays remain separately runnable; repeat
+Play preserves the session, and Stop/Restart/disposal retire startup input.
 
 ## Current priority: Roller II
 
@@ -256,7 +261,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **732 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **733 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

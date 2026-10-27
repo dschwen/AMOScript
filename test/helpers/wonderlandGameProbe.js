@@ -5,7 +5,7 @@ module.exports=async function wonderlandGameProbe(page){
   const fs=require('fs'),path=require('path'),Transpiler=require('../../lib/Transpiler');
   const source=new Transpiler(fs.readFileSync(path.join(__dirname,'../../examples/Wonderland/Wonderland.AMOS'))).toModule();
   const assets=Object.fromEntries(['Wonderland_Samples.Abk','Title_Screen.Iff','Landscape.Iff','Score_Panel.Iff','Editor_Panel.Iff','Game1.lev','Game2.lev'].map(name=>[name,fs.readFileSync(path.join(__dirname,'../../examples/Wonderland',name)).toString('base64')]));
-  return page.evaluate(async ({source,assets,timerSource,replaySource,audioHostSource,audioSessionSource,samples,gpuSources})=>{
+  return page.evaluate(async ({source,assets,timerSource,replaySource,audioHostSource,audioSessionSource,samples,gpuSources,launchSource,liveOnly=false})=>{
     const module={exports:{}};new Function('module',source)(module);const create=module.exports;
     const makeClock=new Function(`return (${timerSource});`)(),replay=new Function(`return (${replaySource});`)();
     const files={read:name=>{const bytes=assets[name.split('/').pop()];if(bytes==null)throw new Error(`File not preloaded: ${name}`);return atob(bytes);}};
@@ -17,9 +17,9 @@ module.exports=async function wonderlandGameProbe(page){
     const createGpu=gpuFactory('renderer')(snapshotModel,spriteModel,gpuFactory('resources')(snapshotModel),gpuFactory('shaders'),gpuFactory('layout'));
     function releaseGpu(renderer){if(!renderer)return;const gl=renderer.resources.context;renderer.dispose();const extension=gl.getExtension('WEBGL_lose_context');if(extension&&!gl.isContextLost())extension.loseContext();}
     const gpuSurface=document.createElement('canvas');let probeGpu=null,gpuUnavailable=null,gpuFrames=0,gpuReplay=null;
-    try{probeGpu=createGpu(gpuSurface);}catch(error){gpuUnavailable=error.message;}
+    try{if(!liveOnly)probeGpu=createGpu(gpuSurface);}catch(error){gpuUnavailable=error.message;}
     const audioEvents=[],replays=[];let frames=0;
-    for(const mode of ['keyboard','gamepad',...(probeGpu?['webgl']:[])]){
+    for(const mode of liveOnly?[]:['keyboard','gamepad',...(probeGpu?['webgl']:[])]){
       const surface=mode==='webgl'?gpuSurface:document.createElement('canvas'),clock=makeClock();let adapter=null,pad=null,held=null;
       const result=replay(options=>create({...options,audio:{command(event){if(mode==='keyboard'&&event.type==='play')audioEvents.push(event);}}}),clock,files,p=>{
         if(mode==='webgl')p.display.canvasFrame=()=>{throw new Error('GPU host called CPU presentation');};
@@ -47,9 +47,9 @@ module.exports=async function wonderlandGameProbe(page){
       });
       check(JSON.stringify(result.deaths)==='[2,1,0]'&&result.restarts===2&&result.fades===3&&result.freshLives===3,'Original game replay did not complete');if(mode==='webgl')gpuReplay=result;else replays.push(result);
     }
-    check(JSON.stringify(audioEvents.map(e=>[e.sample.number,e.mask]))==='[[1,1],[1,1],[1,1],[1,1],[5,12],[5,12],[5,12],[6,12]]','Original game sample sequence changed');
+    if(!liveOnly)check(JSON.stringify(audioEvents.map(e=>[e.sample.number,e.mask]))==='[[1,1],[1,1],[1,1],[1,1],[5,12],[5,12],[5,12],[6,12]]','Original game sample sequence changed');
     let audioComparisons=0;
-    for(const number of [1,5,6]){
+    for(const number of liveOnly?[]:[1,5,6]){
       const event=audioEvents.find(e=>e.sample.number===number),sample=samples[number-1];
       const actualContext=new OfflineAudioContext(2,16000,8000),expectedContext=new OfflineAudioContext(2,16000,8000),audioHost=createAudioHost(actualContext);
       check(event.sample.data.every((v,i)=>((v<<24)>>24)/128===sample.pcm[i]),'Original game PCM bytes differ');
@@ -92,8 +92,8 @@ module.exports=async function wonderlandGameProbe(page){
     const status=document.createElement('p');status.id='game-status';status.setAttribute('aria-live','polite');
     const sound=createAudioSession(createAudioHost),soundButton=document.createElement('button'),soundStatus=document.createElement('p');
     soundButton.id='game-sound';soundStatus.id='game-sound-status';soundStatus.setAttribute('aria-live','polite');
-    let live=null,host=null,gpu=null,guard=callback=>callback,revision=0,errorMessage='',disposed=false;
-    const configuration=()=>[{port:1,keyboard:mode.value==='gamepad'?false:layout.value==='wasd'?{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',fire:'KeyZ'}:true,gamepad:mode.value!=='keyboard'}];
+    let live=null,host=null,gpu=null,guard=callback=>callback,revision=0,errorMessage='',disposed=false,launcher=null,launchCode=null,launched=false,launchOverride=false;
+    const configuration=()=>[{port:1,keyboard:mode.value==='gamepad'&&!launchOverride?false:layout.value==='wasd'?{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',fire:'KeyZ'}:true,gamepad:mode.value!=='keyboard'}];
     function update(){
       if(!live)return;const v=live.state.variables;
       controls.dataset.phase=errorMessage?'error':live.state.halted?'halted':live.state.stopped?'stopped':'running';
@@ -106,7 +106,7 @@ module.exports=async function wonderlandGameProbe(page){
       const pads=host?host.pollJoysticks():[];
       status.textContent=errorMessage||`${controls.dataset.phase}. ${gpu?'WebGL2 ('+gpu.state+')':'Canvas 2D'}. Level ${v.int_lev}, lives ${v.int_li}. ${pads.map(p=>`Gamepad: ${p.status}`).join(' ')}`;
     }
-    function fail(error){errorMessage=`${error.message} Restart to begin a new session.`;if(live)live.stop();if(host)host.detach();update();}
+    function fail(error){if(launcher)launcher.cancel();errorMessage=`${error.message} Restart to begin a new session.`;if(live)live.stop();if(host)host.detach();update();}
     function installHost(){
       const surface=makeCanvas();let nextGpu=null,nextHost=null;
       try{
@@ -117,6 +117,7 @@ module.exports=async function wonderlandGameProbe(page){
       if(host)host.detach();releaseGpu(gpu);canvas.replaceWith(surface);canvas=surface;gpu=nextGpu;host=nextHost;
     }
     function start(){
+      if(launcher)launcher.cancel();launched=false;
       const bindings=configuration();AMOS_BROWSER.createJoystickInput(bindings);
       revision++;const token=revision;if(host)host.detach();if(live)live.stop();errorMessage='';
       if(sound.status().requested)sound.enable().then(()=>{if(!disposed&&token===revision)update();});
@@ -127,14 +128,25 @@ module.exports=async function wonderlandGameProbe(page){
     const label=(text,input)=>{const label=document.createElement('label');label.append(`${text} `,input);return label;};
     controls.append(heading,help);toolbar.append(label('Renderer',backend),label('Input',mode),label('Keyboard',layout));
     for(const action of ['restart','stop','resume']){const button=document.createElement('button');button.id=`game-${action}`;button.textContent=action;
-      button.addEventListener('click',()=>{try{if(action==='restart')start();else if(action==='stop')live.stop();else if(!errorMessage){if(sound.status().requested)sound.enable().then(()=>{if(!disposed)update();});live.resume();}host.focus();update();}catch(error){fail(error);}});toolbar.append(button);}
-    backend.addEventListener('change',()=>{try{installHost();host.focus();update();}catch(error){fail(error);}});
-    for(const input of [mode,layout])input.addEventListener('change',()=>{try{host.configureJoysticks(configuration());host.focus();update();}catch(error){fail(error);}});
+      button.addEventListener('click',()=>{try{if(action==='restart')start();else if(action==='stop'){launcher.cancel();live.stop();}else if(!errorMessage){if(sound.status().requested)sound.enable().then(()=>{if(!disposed)update();});live.resume();}host.focus();update();}catch(error){fail(error);}});toolbar.append(button);}
+    backend.addEventListener('change',()=>{try{launcher.cancel();installHost();host.focus();update();}catch(error){fail(error);}});
+    for(const input of [mode,layout])input.addEventListener('change',()=>{try{launcher.cancel();host.configureJoysticks(configuration());host.focus();update();}catch(error){fail(error);}});
     soundButton.addEventListener('click',()=>{if(['on','starting'].includes(sound.status().state)){sound.mute();update();}else{sound.enable().then(()=>{if(!disposed)update();});update();}host.focus();});
-    toolbar.append(soundButton,fullscreenButton,fullscreenStatus);const messages=document.createElement('div');messages.className='amos-fullscreen-messages';messages.append(soundStatus,status);viewport.append(toolbar,surfaceSlot,messages);controls.append(viewport);const results=document.getElementById('results');if(results)results.before(controls);else document.body.append(controls);
-    const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullscreenButton,statusElement:fullscreenStatus,surface:surfaceSlot,getContent:()=>canvas,onChange(){if(host&&!disposed){canvas.dispatchEvent(new Event('blur'));host.focus();}}});
-    const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
+    toolbar.append(soundButton,fullscreenButton,fullscreenStatus);const messages=document.createElement('div');messages.className='amos-fullscreen-messages';messages.append(soundStatus,status);viewport.append(toolbar,surfaceSlot,messages);controls.append(viewport);const player=document.getElementById('game-player'),results=document.getElementById('results');if(player)player.append(controls);else if(results)results.before(controls);else document.body.append(controls);
+    const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullscreenButton,statusElement:fullscreenStatus,surface:surfaceSlot,getContent:()=>canvas,onChange(){if(host&&!disposed){canvas.blur();host.focus();}}});
+    const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;if(launcher)launcher.dispose();if(globalThis.AMOS_PLAY_GAME===play)delete globalThis.AMOS_PLAY_GAME;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
     try{start();}catch(error){fail(error);}
+    function fire(held){
+      if(!held&&!launchCode)return;const code=launchCode||(layout.value==='wasd'?'KeyZ':'Space');launchCode=held?code:null;
+      key(canvas,held?'keydown':'keyup',code);
+    }
+    launcher=new Function(`return (${launchSource});`)()({sound,fullscreen,focus:()=>host.focus(),update,fail,
+      prepare(){if(errorMessage||live.state.halted)start();else if(live.state.stopped)live.resume();if(mode.value==='gamepad'){launchOverride=true;host.configureJoysticks(configuration());}},
+      release(){fire(false);if(launchOverride){launchOverride=false;host.configureJoysticks(configuration());}},
+      step(){if(launched)return true;const v=live.state.variables;if(v.int_game>0&&live.state.location.line>=204&&live.state.location.line<=228){launched=true;return true;}fire(true);return false;}
+    });
+    const play=()=>launcher.play();globalThis.AMOS_PLAY_GAME=play;
+    if(liveOnly)return play();
     return {inputModes:2,deaths:replays.map(r=>r.deaths),restarts:replays.map(r=>r.restarts),fades:replays.map(r=>r.fades),freshLives:replays.map(r=>r.freshLives),stopResume:replays.every(r=>r.stopResume),frames,audioCommands:audioEvents.length,audioComparisons,gpuFrames,gpuUnavailable,gpuDeaths:gpuReplay?gpuReplay.deaths:null,gameRunning:true};
-  },{source,assets,timerSource:require('./steppedTimers').createSteppedTimers.toString(),replaySource:require('./wonderlandReplay').toString(),audioHostSource:require('../../lib/amos/webAudio').createWebAudioHost.toString(),audioSessionSource:require('../../lib/amos/browserAudio').createBrowserAudioSession.toString(),samples:require('./wonderlandSamples')(),gpuSources:require('./webglHostSources')()});
+  },{source,assets,launchSource:require('../../tools/gameLauncher').toString(),timerSource:require('./steppedTimers').createSteppedTimers.toString(),replaySource:require('./wonderlandReplay').toString(),audioHostSource:require('../../lib/amos/webAudio').createWebAudioHost.toString(),audioSessionSource:require('../../lib/amos/browserAudio').createBrowserAudioSession.toString(),samples:require('./wonderlandSamples')(),gpuSources:require('./webglHostSources')()});
 };

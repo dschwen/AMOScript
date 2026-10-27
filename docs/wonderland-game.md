@@ -7,6 +7,15 @@ presentation by default. The Renderer selector explicitly switches to Canvas 2D
 and back while retaining the current program, timers and sound session.
 No game variables, instruction pointers, source branches or assets are patched.
 
+
+The large red **Play Game** button launches the live host directly, requests sound
+and fullscreen in the same browser click, and uses ordinary startup input to enter
+gameplay. It does not run the verification replays first. Repeat clicks reuse the
+running session; Stop, Restart and disposal cancel pending startup input. The
+shared checks and captured frames remain under a collapsed **Browser checks and
+captured frames** section. The original sound/fullscreen controls remain available
+when a browser denies either API. No VM variables, IPs or assets are patched.
+
 Focus the canvas. Arrows move and jump; Space/Enter selects in the original menu.
 Escape returns to the original title. The selector switches to WASD + Z, browser
 standard-gamepad input, or both. The Gamepad API uses controller zero with the

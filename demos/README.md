@@ -16,9 +16,11 @@ runnable; the gallery is the complete catalogue.
 ## Running locally
 
 Open `demos/index.html` in a browser. Each page embeds its scripts and prepared
-assets, so no server or network downloads are required. Click **Run demo** to run
-the shared verification and create live controls where available. WebGL demos
-require WebGL2. Sound requires its Enable/Play button; fullscreen requires a click.
+assets, so no server or network downloads are required. On the full-game pages,
+click the large red **Play Game** button to launch directly with sound, fullscreen
+and ordinary startup input. **Browser checks and captured frames** is a separate,
+collapsed section; its **Run demo** button runs the shared verification.
+Other demos retain their Run demo controls. WebGL demos require WebGL2.
 
 HTML Preview links target `master` and reflect committed, pushed files. Prepared
 fixtures and missing resources are described on each page; these are not claims
