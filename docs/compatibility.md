@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-27. The current local baseline has **746 passing tests**, plus a
+Updated 2026-10-27. The current local baseline has **748 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -42,6 +42,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Roller II help source fix | Complete help/menu replay | Source line 1129 subtracts 48 for final entries 49–52. Strict text cursor checks remain unchanged. Seven icon pages, timed demonstrations and menu return; 1,024 independently decoded icon pixels and nine Canvas/GPU comparisons. [Fix](../examples/Roller2/current/help-page-fix.md). |
 | Application debug UI | Optional builder/host presentation | `--debug` adds new/modified session-file downloads and bounded source error/state logs. Normal pages use accessible lifecycle icons and compact errors. Binary Bsave exports, reverted-file filtering and URL cleanup have a shared browser demo. Storage is still session-only. [Tutorial](game-webpage-tutorial.md#debug-builds-and-downloading-session-files). |
 | Optimized emission | Opt-in scalar blocks | Pure scalar assignments and Inc/Dec share dispatch, capped at 32 instructions and split at every label. Original instruction budgets/locations remain intact; calls, arrays and active music/palette engines retain ordinary dispatch. Differential target replay and standalone browser comparison; no established Roller II speedup. [Contract and measurements](optimization.md). |
 | Edit | Implemented terminal host boundary | Frozen source request; VM/audio/palette/input cleanup before optional synchronous notification, once-only handling, no continuation or embedded editor. Original ROUNDTURN fixture covers guarded rotations and fallback. Native editor UI/end-state music remain open. [Contract](edit.md). |

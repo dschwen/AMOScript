@@ -16,19 +16,21 @@ function replayRoller2Current(create, clock, files, makeInput, capture = () => {
     clock.tick(6480); input.joy(0);
     check(v.int_lv === 3 && v.int_hi === 278 && v.int_noi === 5, 'Current original warp/level-3 path differs'); record('Original warp into level 3');
     input.joy(16); clock.tick(800); input.joy(0); record('Current level 3 ball');
-    const route = [8,2,8,1,8,2,1,8,2,2];
-    const positions = [[6,9],[6,10],[6,10],[6,9],[13,9],[13,10],[13,6],[17,6],[17,7],[17,11]];
+    // The refreshed level 3 removes the old stop at (17,7); Down from
+    // (17,6) now reaches the bonus at (17,11) in one slide.
+    const route = [8,2,8,1,8,2,1,8,2];
+    const positions = [[6,9],[6,10],[6,10],[6,9],[13,9],[13,10],[13,6],[17,6],[17,11]];
     function move(mask) {
       input.joy(mask); clock.tick(20); input.joy(0);
       for (let fields = 0; fields < 250; fields++) { clock.tick(20); const line = p.state.location.line; if (line >= 619 && line <= 639 && !p.state.waiting) return; }
       throw Error('Time-bonus route did not reach its input loop');
     }
     for (const [index, direction] of route.entries()) {
-      if (index === 9) record('Before bottom-right time bonus');
+      if (index === 8) record('Before bottom-right time bonus');
       move(direction); check(v.int_bx === positions[index][0] && v.int_by === positions[index][1], `Time-bonus route ${index}: (${v.int_bx},${v.int_by}) differs from (${positions[index]})`);
     }
-    check(v.int_tm === 20 && v.int_hi === 301 && p.banks.get(10).data[237] === 1, 'Bottom-right time bonus was not collected once'); record('Bottom-right time bonus collected');
-    move(2); check(v.int_bx === 17 && v.int_by === 11 && v.int_tm === 20 && !p.state.halted, 'Bottom edge bump failed after time bonus'); record('Bottom boundary safely blocked');
+    check(v.int_tm === 30 && v.int_hi === 299 && p.banks.get(10).data[237] === 1, 'Bottom-right time bonus was not collected once'); record('Bottom-right time bonus collected');
+    move(2); check(v.int_bx === 17 && v.int_by === 11 && v.int_tm === 30 && !p.state.halted, 'Bottom edge bump failed after time bonus'); record('Bottom boundary safely blocked');
     const completed = { score: v.int_hi, level: v.int_lv }, field = p.state.tracker.position.field;
     p.stop(); check(clock.pending() === 0, 'Current Stop retained a wake'); clock.tick(v.int_tm * 1000 + 1000);
     check(p.state.tracker.position.field === field, 'Stopped current tracker advanced');

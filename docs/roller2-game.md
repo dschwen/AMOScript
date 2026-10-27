@@ -4,7 +4,8 @@ The [live demo](../demos/roller2-game.html) embeds the 65,966-byte
 [source-corrected program](../examples/Roller2/current/movement-edge-fix.md) and the [current supplied asset manifest](../examples/Roller2/current/README.md).
 The original executable is retained unchanged in the frozen fixture set. The
 playable AMOS file moves its existing board-edge check before two map reads;
-only physical lines 642 and 645 change. No compiler or memory workaround is used. The
+the final help-page position calculation is also corrected on line 1129.
+Only lines 642, 645 and 1129 differ from the frozen source. No compiler or memory workaround is used. The
 refresh includes changed title, scores, help and levels, plus the restored
 `iffp/roller hi` and `iffp/roller bounce` images. All game procedures remain
 present; no compiler/runtime special cases are used.
@@ -42,8 +43,8 @@ this source and current asset manifest into a smaller standalone game page.
 3. The source follows its warp/bonus path into actual level 3. The declared 4 ms
    cooperative clock produces score 278. Ready input starts that level's ball.
 4. The level-3 input route collects the bottom-right time bonus, increasing TM
-   from 10 to 20 and removing that tile. The ball stops at (17,11); a second Down
-   bumps without another pickup or invalid read. The resulting score is 301.
+   from 20 to 30 and removing that tile. The ball stops at (17,11); a second Down
+   bumps without another pickup or invalid read. The resulting score is 299.
 5. Host Stop freezes audio positions and removes owned wakes. The injected clock
    advances past the source Timer deadline; Resume rebases audio and the original
    game loop follows its Timer-expiry branch.
@@ -126,3 +127,14 @@ Standalone builder pages enable those diagnostics only with `--debug`; see
 for a standalone application page with the current source/assets and Debug enabled
 from launch. It is generated with `build_game_page.js` by `npm run build:demo`,
 requires no verification replay, and is linked from the regular game and gallery.
+
+The [help-page regression](../demos/roller2-help.html) runs all seven icon pages,
+the original timed demonstrations and return to the menu. The final four entries
+use a corrected base of 48 on source line 1129; see the
+[source fix and evidence](../examples/Roller2/current/help-page-fix.md).
+
+The supplied level-3 refresh removes the stop tile at (17,7), so the current
+replay slides directly from (17,6) to the time bonus at (17,11). Its metadata now
+starts with TM=20; the pickup raises it to 30. The current input-only result is
+score 299. Earlier map-specific expectations (TM=20 after pickup, score 301)
+are historical and do not describe the refreshed map. Frozen assets stay intact.

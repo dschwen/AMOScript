@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "roller2-help.html",
+      "title": "Roller II help pages and menu return",
+      "description": "The complete current AMOS source runs all seven help icon pages and the original timed colour/ball examples, then returns to the menu. Line 1129 has a source-level final-page offset fix; compiler cursor bounds remain strict. Four independent raw-asset icon regions and nine actual GPU/CPU frame comparisons. Input-only replay, not an Amiga capture.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-help.html"
+    },
+    {
       "file": "game-page-debug.html",
       "title": "Application debug menu and binary file downloads",
       "description": "Normal and --debug page-builder examples: accessible icon controls, AMOS Bsave exports of new/modified files, exact binary bytes, compact errors, source logs and owned download URL cleanup. The examples below remain playable after checks.",

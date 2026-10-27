@@ -4,11 +4,13 @@ The playable `roller2-game` demo uses this manifest. It records all 34 source/da
 files by byte length and SHA-256. Files changed in the latest supplied `RII/`
 directory are copied here; unchanged entries refer to the earlier pinned files
 with `../` paths. Assets are supplied files, not generated artwork. The current AMOS source has
-the documented [movement edge-check fix](movement-edge-fix.md).
+the documented [movement edge-check fix](movement-edge-fix.md) and
+[final help-page position fix](help-page-fix.md).
 
 The restored input was byte-identical to the earlier working 65,808-byte source.
 The playable file is now 65,966 bytes after moving its existing board-edge check
-before the next-cell reads; only physical lines 642 and 645 change. The refresh changes Highscores, Roller_HELP, the title image and levels
+before the next-cell reads. Lines 642/645 contain that fix; line 1129 also corrects
+the final help-page offset. The refresh changes Highscores, Roller_HELP, the title image and levels
 1, 7, 16 and 17, and adds `iffp/roller hi` and `iffp/roller bounce`.
 
 The earlier `examples/Roller2/manifest.json` and its assets stay frozen for the

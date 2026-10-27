@@ -33,7 +33,7 @@ test('Roller2 current assets: byte-exact supplied refresh completes the original
   assert.strictEqual(files.exists('RII:iffp/roller hi'), true);
   const { create } = compile(Buffer.from(current['rii:Roller II.AMOS'], 'latin1'));
   const result = require('./helpers/roller2CurrentReplay')(create, clock, files, p => ({ joy: m => p.setJoystick(1, m), key: () => p.sendKey('a'), dispose() {} }));
-  assert.deepStrictEqual(result, { frames: 15, score: 301, level: 3, returnedToMenu: true, freshGame: true, writes: 0 }); assert.strictEqual(clock.pending(), 0);
+  assert.deepStrictEqual(result, { frames: 15, score: 299, level: 3, returnedToMenu: true, freshGame: true, writes: 0 }); assert.strictEqual(clock.pending(), 0);
 });
 
 test('Roller2 editor: original menu opens overlapping windows, places a tile, tests the edited level and returns through the animated panel', () => {
@@ -49,4 +49,32 @@ test('Roller2 editor: original menu opens overlapping windows, places a tile, te
   });
   assert.deepStrictEqual(result, { frames: 10, placedTile: 3, selectedScreen: 1, testedLevel: true, returnedToEditor: true, writes: 0 });
   assert.strictEqual(frames, 10); assert.strictEqual(clock.pending(), 0);
+});
+
+test('Roller2 help: original full-source input path displays all seven icon pages and timed examples, then returns to the menu', () => {
+  const current = require('./helpers/roller2CurrentAssets')(), files = makeFiles(current), clock = createFakeTimers(4);
+  const { create } = compile(Buffer.from(current['rii:Roller II.AMOS'], 'latin1'));
+  const result = require('./helpers/roller2HelpReplay')(create, clock, files, p => ({ key: name => p.sendKey(name === 'Help' ? '\0' : 'a', name === 'Help' ? 95 : 0), dispose() {} }), (name, p) => {
+    if (name !== 'Help icons 49–52') return;
+    const target = p.display.screen();
+    assert.strictEqual(target.columns, 40); assert.strictEqual(target.rows, 25);
+    for (const image of require('./fixtures/roller2/help.json').images) {
+      const expected = Buffer.from(image.pixelsHex, 'hex');
+      for (let i = 0; i < expected.length; i++) assert.strictEqual(target.pixels[(image.y + Math.floor(i / 16)) * target.width + image.x + i % 16], expected[i], `Help icon ${image.number}, pixel ${i}`);
+    }
+    assert.ok(p.state.variables.array_string_descr.values.size >= 52);
+  });
+  assert.deepStrictEqual(result, { pages: 7, finalEntries: [49, 50, 51, 52], frames: 9, returnedToMenu: true, writes: 0 });
+});
+
+test('Roller2 help: only two integer literals change on line 1129, and restoring them reproduces the reported source failure', () => {
+  const bytes = fs.readFileSync(path.join(directory, 'current/Roller II.AMOS')), original = Buffer.from(bytes);
+  const Reader = require('../lib/TokenReader'), BufferReader = require('../lib/Buffer');
+  const tokens = new Reader(new BufferReader(bytes)).read().filter(t => t.location.line === 1129 && t.name === 'number' && t.value === 48);
+  assert.deepStrictEqual(tokens.map(t => t.location.offset), [60496, 60554]);
+  tokens.forEach(t => original.writeInt32BE(40, t.location.offset + 2));
+  assert.strictEqual(require('crypto').createHash('sha256').update(original).digest('hex'), '3637b3b07b79d1b352174f8a3e770a5a0f28b73cf8077f2110853b03071836c8');
+  const current = require('./helpers/roller2CurrentAssets')(), files = makeFiles(current), clock = createFakeTimers(4);
+  const { create } = compile(original);
+  assert.throws(() => require('./helpers/roller2HelpReplay')(create, clock, files, p => ({ key: name => p.sendKey(name === 'Help' ? '\0' : 'a', name === 'Help' ? 95 : 0), dispose() {} })), /Text cursor out of bounds at line 1129, byte 60532/);
 });

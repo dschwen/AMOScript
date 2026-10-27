@@ -12,10 +12,10 @@ function fixture(source, bx, by, dx, dy, wall = false) {
   const header=Buffer.from(source.subarray(0,20));header.writeUInt32BE(body.length,16);return Buffer.concat([header,body,source.subarray(20+r.code_bytes)]);
 }
 const files = { read: () => fs.readFileSync(path.join(root,'music/Roller_II_Samples.Abk'),'latin1') };
-test('Roller2 AMOS source: only movement lines 642/645 change; the edge guard precedes both map reads and the original wall branch remains', () => {
+test('Roller2 AMOS source: only documented movement/help lines change; the edge guard precedes both map reads and the original wall branch remains', () => {
   const a = new Reader(original), b = new Reader(fixed); assert.strictEqual(a.lines.length,b.lines.length);
   const changed=[];for(let i=0;i<a.lines.length;i++){const aa=original.subarray(a.lines[i],a.lines[i]+original[a.lines[i]]*2),bb=fixed.subarray(b.lines[i],b.lines[i]+fixed[b.lines[i]]*2);if(!aa.equals(bb))changed.push(i+1);}
-  assert.deepStrictEqual(changed,[642,645]); assert.deepStrictEqual(original.subarray(20+a.code_bytes),fixed.subarray(20+b.code_bytes));
+  assert.deepStrictEqual(changed,[642,645,1129]); assert.deepStrictEqual(original.subarray(20+a.code_bytes),fixed.subarray(20+b.code_bytes));
   const tokens=new Tokens(b).read();assert.ok(tokens.filter(x=>x.location.line===642).some(x=>x.name==='If'));
   assert.strictEqual(tokens.filter(x=>x.location.line===643&&x.name==='Peek').length,1); assert.strictEqual(tokens.filter(x=>x.location.line===644&&x.name==='Peek').length,1);
   const expected=require('../examples/Roller2/current/manifest.json');assert.strictEqual(crypto.createHash('sha256').update(fixed).digest('hex'),expected.files['Roller II.AMOS'].sha256);

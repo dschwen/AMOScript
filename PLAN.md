@@ -13,7 +13,7 @@ The playable Roller II AMOS file now contains a source-level fix for speculative
 next-cell reads at board edges: original lines 642/645 check the edge before the
 two Peeks. Compiler and bank bounds are unchanged. The original supplied source
 is retained in the frozen fixtures; the corrected file is pinned in the current
-manifest. The level-3 bottom-right bonus regression reaches TM=20 and a safe stop
+manifest. The level-3 bottom-right bonus regression reaches TM=30 and a safe stop
 at (17,11) through original input. See examples/Roller2/current/movement-edge-fix.md.
 
 Ordinary overlapping windows now use the existing native-style priority slices.
@@ -765,3 +765,12 @@ verification host provides diagnostics. Session exports do not replace the plann
 IndexedDB persistence or finish game requester/editor integration. The shared
 `game-page-debug` scenario publishes normal/debug examples and checks Bsave bytes,
 unchanged/reverted filtering, error notices and owned download URL cleanup.
+
+### Roller II help-page correction
+
+Source line 1129 now subtracts 48 for both final help-page positions. The previous
+40 produced Locate row 26 on a 25-row screen. Only two AMOS literal bytes change;
+compiler/display bounds stay strict. A complete-source input replay covers all
+seven icon pages, timed demonstrations and menu/MOD return. Independent raw-asset
+icon pixels and nine CPU/GPU frame comparisons are published in `roller2-help`.
+The frozen earlier source and assets remain unchanged.

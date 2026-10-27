@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'roller2-help', title: 'Roller II help pages and menu return', initialFrame: 'Canvas: Help icons 49–52', description: 'The complete current AMOS source runs all seven help icon pages and the original timed colour/ball examples, then returns to the menu. Line 1129 has a source-level final-page offset fix; compiler cursor bounds remain strict. Four independent raw-asset icon regions and nine actual GPU/CPU frame comparisons. Input-only replay, not an Amiga capture.', run: require('./roller2HelpProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { pages: 7, finalEntries: [49, 50, 51, 52], frames: 9, returnedToMenu: true, writes: 0, gpuFrames: 9, independentPixels: 1024 });
+  } },
   { id: 'game-page-debug', title: 'Application debug menu and binary file downloads', capturedFrames: false, description: 'Normal and --debug page-builder examples: accessible icon controls, AMOS Bsave exports of new/modified files, exact binary bytes, compact errors, source logs and owned download URL cleanup. The examples below remain playable after checks.', run: require('./gamePageDebugProbe'), check(result, assert) {
     assert.strictEqual(result.modifiedFiles, 2); assert.deepStrictEqual(result.binaryBytes, [0, 128, 255, 10]);
     assert.strictEqual(result.compactErrors, 2); assert.strictEqual(result.revokedUrls, 2); assert.strictEqual(result.icons, 3);
@@ -301,7 +304,7 @@ const scenarios = [
     assert.strictEqual(result.editorFrames, 10); assert.strictEqual(result.editorGpuFrames, 10);
     assert.deepStrictEqual(result.editor, { frames: 10, placedTile: 3, selectedScreen: 1, testedLevel: true, returnedToEditor: true, writes: 0 });
     assert.strictEqual(result.emptyFrames, 0); assert.strictEqual(result.emptyGpuFrames, 0); assert.strictEqual(result.restoredImage, 'iffp/roller hi');
-    assert.deepStrictEqual(result.replays, Array.from({ length: 2 }, () => ({ frames: 15, score: 301, level: 3, returnedToMenu: true, freshGame: true, writes: 0 })));
+    assert.deepStrictEqual(result.replays, Array.from({ length: 2 }, () => ({ frames: 15, score: 299, level: 3, returnedToMenu: true, freshGame: true, writes: 0 })));
   } },
   { id: 'roller2-music-vm', capturedFrames: false, title: 'Roller II VM end music and volume fade', description: 'Original Music/Mvolume/Music Off statements run standalone with driver-owned VBL wakes. Full first-wrap PAL/NTSC traces, source fade/erase, Stop/Resume and owned browser audio; end-state graphics remain excluded.', run: require('./musicVmProbe'), check(result, assert) {
     assert.deepStrictEqual(result.traces, [3392, 3392, 5731, 5731]); assert.deepStrictEqual(result.fades, [0, 0, 0, 0]);

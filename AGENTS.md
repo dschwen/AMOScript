@@ -333,7 +333,8 @@
   input routing, HAM/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
 - The live `roller2-game` scenario embeds the complete unchanged source and the
   current supplied asset manifest under `examples/Roller2/current`. The playable
-  AMOS file has a source-level edge-guard ordering fix on lines 642/645; preserve
+  AMOS file has source-level edge-guard ordering fixes on lines 642/645 and a final
+  help-page offset fix on 1129 (subtract 48 for entries 49–52); preserve
   the original frozen source and keep compiler/bank checks unchanged. Changed assets
   and restored score/bounce images are pinned there; unchanged files share older
   bytes. Keep the older manifest frozen for bounded fixtures. Current input/host
