@@ -111,9 +111,9 @@
       "sha256": "8b2a9802b7b70164aa004b535821378914a750c9ceb39dc4c703f48e83e8b212"
     },
     "levl/3": {
-      "path": "../levl/3",
+      "path": "levl/3",
       "byteLength": 510,
-      "sha256": "8db993a0a261010ebbbde76067fdfcd87e5cdc6b43dd04b57f606048e9ece2ad"
+      "sha256": "4c0a55d34fe2ca57f73b6f306f4ea31c922d3b91e4e8ca2df559d0f20519a10c"
     },
     "levl/4": {
       "path": "../levl/4",
