@@ -33,7 +33,7 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.click('#play-game');
         await page.waitForFunction(({ roller }) => {
           const c = document.querySelector(roller ? '#roller2-game-controls' : '#game-controls');
-          return c && c.dataset.sound === 'on' && (roller ? c.dataset.phase === 'intro' && c.dataset.line === '164' : c.dataset.game === '1' && Number(c.dataset.line) >= 204);
+          return c && c.dataset.sound === 'on' && (roller ? c.dataset.phase === 'intro' && c.dataset.line === '164' : c.dataset.game === '0' && Number(c.dataset.line) >= 66 && Number(c.dataset.line) < 100);
         }, { roller });
         assert.strictEqual(await page.evaluate(() => document.fullscreenElement.id), roller ? 'roller2-game-viewport' : 'game-viewport');
         assert.strictEqual(await page.locator('#results').textContent(), '');
@@ -55,11 +55,26 @@ module.exports = async function checkBrowserDemos(browser) {
           assert.strictEqual(await page.locator(controls).getAttribute('data-level'), '0');
         }
         if (!roller) {
+          await page.waitForTimeout(1500);
+          assert.strictEqual(await page.locator(controls).getAttribute('data-game'), '0');
+          assert.strictEqual(await page.locator(controls).getAttribute('data-level'), '0');
+          await page.locator(surface).focus(); await page.keyboard.down('Enter');
+          await page.waitForFunction(() => { const c = document.getElementById('game-controls'); return c.dataset.game === '1' && Number(c.dataset.line) >= 204; });
+          await page.keyboard.up('Enter');
           await page.selectOption('#game-input-mode', 'gamepad'); await page.click('#game-restart');
           await page.keyboard.press('Escape'); await page.waitForFunction(() => document.fullscreenElement === null);
           await page.click('#play-game');
-          await page.waitForFunction(() => { const c = document.getElementById('game-controls'); return c.dataset.game === '1' && Number(c.dataset.line) >= 204; });
+          await page.waitForTimeout(1500);
+          assert.strictEqual(await page.locator(controls).getAttribute('data-game'), '0');
+          assert.strictEqual(await page.locator(controls).getAttribute('data-level'), '0');
           assert.strictEqual(await page.locator('#game-input-mode').inputValue(), 'gamepad');
+          // Explicit controller input starts the game; Play never supplies fire.
+          await page.evaluate(() => {
+            globalThis.AMOS_LAUNCH_PAD = true;
+            Object.defineProperty(navigator, 'getGamepads', { configurable: true, value: () => [{ connected: true, mapping: 'standard', axes: [0, 0], buttons: [{ pressed: globalThis.AMOS_LAUNCH_PAD }] }] });
+          });
+          await page.waitForFunction(() => { const c = document.getElementById('game-controls'); return c.dataset.game === '1' && Number(c.dataset.line) >= 204; });
+          await page.evaluate(() => { globalThis.AMOS_LAUNCH_PAD = false; delete navigator.getGamepads; delete globalThis.AMOS_LAUNCH_PAD; });
         }
         await page.evaluate(roller => roller ? AMOS_ROLLER2_GAME_CLEANUP() : AMOS_GAME_DEMO_CLEANUP(), roller);
         await page.waitForFunction(() => document.fullscreenElement === null);

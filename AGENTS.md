@@ -356,8 +356,8 @@
 - Full-game pages launch directly through a prominent Play Game button; browser
   checks/captured frames stay in a collapsed section. The live-only evaluator path
   must reach audio/fullscreen requests before its first await. Roller II stays on
-  its original intro with no injected input; Wonderland startup automation uses
-  ordinary input and owned, cancellable timers; repeat Play retains the VM.
+  its original intro and Wonderland on its original menu, with no injected input
+  or input-profile overrides in either launcher; repeat Play retains the VM.
   Keep Stop/Restart/disposal and fullscreen focus cleanup covered in both demos.
 - Default font bytes now include pinned public-domain Latin-1 rows 160–255;
   Print/Writing/Text share that coverage, retaining ASCII pixels and `?` fallback

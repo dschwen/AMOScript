@@ -9,9 +9,10 @@ No game variables, instruction pointers, source branches or assets are patched.
 
 
 The large red **Play Game** button launches the live host directly, requests sound
-and fullscreen in the same browser click, and uses ordinary startup input to enter
-gameplay. It does not run the verification replays first. Repeat clicks reuse the
-running session; Stop, Restart and disposal cancel pending startup input. The
+and fullscreen in the same browser click, and leaves the original menu on screen.
+The user selects the first level with their own keyboard, Gamepad or touch input. It does not run the verification replays first. Repeat clicks reuse the
+running session. Launch never injects keys or joystick fire, or overrides the
+selected input profile. The
 shared checks and captured frames remain under a collapsed **Browser checks and
 captured frames** section. The original sound/fullscreen controls remain available
 when a browser denies either API. No VM variables, IPs or assets are patched.

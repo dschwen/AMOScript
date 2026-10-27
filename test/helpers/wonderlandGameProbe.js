@@ -94,8 +94,8 @@ module.exports=async function wonderlandGameProbe(page){
     const status=document.createElement('p');status.id='game-status';status.setAttribute('aria-live','polite');
     const sound=createAudioSession(createAudioHost),soundButton=document.createElement('button'),soundStatus=document.createElement('p');
     soundButton.id='game-sound';soundStatus.id='game-sound-status';soundStatus.setAttribute('aria-live','polite');
-    let live=null,host=null,gpu=null,guard=callback=>callback,revision=0,errorMessage='',disposed=false,launcher=null,launchCode=null,launched=false,launchOverride=false;
-    const configuration=()=>[{port:1,keyboard:mode.value==='gamepad'&&!launchOverride?false:layout.value==='wasd'?{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',fire:'KeyZ'}:true,gamepad:mode.value!=='keyboard'}];
+    let live=null,host=null,gpu=null,guard=callback=>callback,revision=0,errorMessage='',disposed=false,launcher=null;
+    const configuration=()=>[{port:1,keyboard:mode.value==='gamepad'?false:layout.value==='wasd'?{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',fire:'KeyZ'}:true,gamepad:mode.value!=='keyboard'}];
     function update(){
       if(!live)return;const v=live.state.variables;
       controls.dataset.phase=errorMessage?'error':live.state.halted?'halted':live.state.stopped?'stopped':'running';
@@ -119,7 +119,7 @@ module.exports=async function wonderlandGameProbe(page){
       if(host)host.detach();releaseGpu(gpu);canvas.replaceWith(surface);canvas=surface;gpu=nextGpu;host=nextHost;
     }
     function start(){
-      if(launcher)launcher.cancel();launched=false;
+      if(launcher)launcher.cancel();
       const bindings=configuration();AMOS_BROWSER.createJoystickInput(bindings);
       revision++;const token=revision;if(host)host.detach();if(live)live.stop();errorMessage='';
       if(sound.status().requested)sound.enable().then(()=>{if(!disposed&&token===revision)update();});
@@ -139,14 +139,9 @@ module.exports=async function wonderlandGameProbe(page){
     const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullscreenButton,statusElement:fullscreenStatus,surface:surfaceSlot,getContent:()=>canvas,onChange(){if(host&&!disposed){canvas.blur();host.focus();}}});
     const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;if(launcher)launcher.dispose();if(globalThis.AMOS_PLAY_GAME===play)delete globalThis.AMOS_PLAY_GAME;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
     try{start();}catch(error){fail(error);}
-    function fire(held){
-      if(!held&&!launchCode)return;const code=launchCode||(layout.value==='wasd'?'KeyZ':'Space');launchCode=held?code:null;
-      key(canvas,held?'keydown':'keyup',code);
-    }
     launcher=new Function(`return (${launchSource});`)()({sound,fullscreen,focus:()=>host.focus(),update,fail,
-      prepare(){if(errorMessage||live.state.halted)start();else if(live.state.stopped)live.resume();if(mode.value==='gamepad'){launchOverride=true;host.configureJoysticks(configuration());}},
-      release(){fire(false);if(launchOverride){launchOverride=false;host.configureJoysticks(configuration());}},
-      step(){if(launched)return true;const v=live.state.variables;if(v.int_game>0&&live.state.location.line>=204&&live.state.location.line<=228){launched=true;return true;}fire(true);return false;}
+      prepare(){if(errorMessage||live.state.halted)start();else if(live.state.stopped)live.resume();},
+      release(){},step:()=>true
     });
     const play=()=>launcher.play();globalThis.AMOS_PLAY_GAME=play;
     if(liveOnly)return play();

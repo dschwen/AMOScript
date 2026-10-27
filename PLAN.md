@@ -28,9 +28,9 @@ Editor persistence/wider actions and native captures remain open; see
 
 Full-game pages now put a red Play Game button ahead of a collapsed verification
 section. Direct launch requests audio/fullscreen in the click before any await,
-then leaves Roller II on its original intro; Wonderland uses ordinary startup
-input to enter gameplay. Replays remain separately runnable; repeat
-Play preserves the session, and Stop/Restart/disposal retire startup input.
+then leaves Roller II on its original intro and Wonderland on its original menu.
+Neither launch injects input; users start gameplay themselves. Replays remain separately runnable; repeat
+Play preserves the session; Stop/Restart/disposal retain owned lifecycle cleanup.
 
 The default font now includes pinned Latin-1 glyphs, fixing umlaut/ß rendering in
 Print/Writing/Text while keeping ASCII pixels. Optional host-owned touch controls
