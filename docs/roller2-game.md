@@ -121,3 +121,8 @@ routine runtime diagnostics. The browser-check host offers a collapsed Debug
 menu for exporting new/modified session files and inspecting source errors.
 Standalone builder pages enable those diagnostics only with `--debug`; see
 [debug builds and exports](game-webpage-tutorial.md#debug-builds-and-downloading-session-files).
+
+[Play the full Roller II debug build](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game-debug.html)
+for a standalone application page with the current source/assets and Debug enabled
+from launch. It is generated with `build_game_page.js` by `npm run build:demo`,
+requires no verification replay, and is linked from the regular game and gallery.

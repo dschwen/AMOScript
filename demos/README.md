@@ -6,6 +6,7 @@
 
 - [Play Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html): original game, WebGL/Canvas, fullscreen and optional sound.
 - [Play Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html): game with the AMOS boundary-check fix and current supplied assets; tested through the level-3 warp, game over, scores, menu return and a fresh game.
+- [Play Roller II with debug enabled](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game-debug.html): the full game with modified-file downloads and source error logs, without running verification replays.
 - [Watch the tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html): original animation with its supplied external icon bank and IFF background; optionally choose a custom IFF.
 
 The gallery places games first, then animation/music and interactive examples.
@@ -19,7 +20,7 @@ Open `demos/index.html` in a browser. Each page embeds its scripts and prepared
 assets, so no server or network downloads are required. On the full-game pages,
 click the large red **Play Game** button to launch directly with sound, fullscreen
 and game startup. Roller II stays on its original intro until you press a key;
-Wonderland advances into gameplay. **Browser checks and captured frames** is a separate,
+Wonderland stays on its original menu until you select the first level. **Browser checks and captured frames** is a separate,
 collapsed section; its **Run demo** button runs the shared verification.
 Other demos retain their Run demo controls. WebGL demos require WebGL2.
 

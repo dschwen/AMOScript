@@ -34,6 +34,15 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
       `<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a></nav>\n<h1>${escape(scenario.title)}</h1>${game ? '<style>#play-game{display:block;background:#c71920;color:white;border:0;border-radius:.6rem;padding:1.1rem 2.5rem;font-size:2rem;font-weight:800;box-shadow:0 4px 0 #830d12}#play-game:hover{background:#a81219}#play-game:focus-visible{outline:4px solid #17202a;outline-offset:4px}#play-game:disabled{opacity:.65}#demo-checks{margin-top:2rem}#demo-checks>summary{cursor:pointer;font-size:1.15rem}</style><button id="play-game" type="button">Play Game</button><p id="play-status" role="status" aria-live="polite">Start playing with sound and fullscreen. Escape leaves fullscreen.</p><section id="game-player" aria-label="Live game"></section><details id="demo-checks"><summary>Browser checks and captured frames</summary>' : ''}<p>${escape(scenario.description)}</p><p>Run the same scenario and assertions as the browser test suite. ${scenario.capturedFrames === false ? 'Inspect the data controls and byte results below.' : 'Select a captured frame to inspect it.'}</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label${scenario.capturedFrames === false ? ' hidden' : ''}>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><section id="frame-view"><div class="amos-fullscreen-toolbar"><button id="frame-fullscreen" hidden>Fullscreen</button><span id="frame-fullscreen-status" role="status"></span></div><div id="stage"></div></section><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>${game ? '</details>' : ''}\n` +
       script(browserSource) + script(fullscreenSource) + script(`(${installDemo.toString()})(${config});`)));
   }
+  const { buildGamePage, loadAssets } = require('./build_game_page');
+  const rollerRoot = path.join(root, 'examples/Roller2/current');
+  const debugPage = buildGamePage(fs.readFileSync(path.join(rollerRoot, 'Roller II.AMOS')), {
+    title: 'Roller II — Debug', debug: true, fire: ['Enter'],
+    assets: loadAssets(path.join(rollerRoot, 'manifest.json'), 'RII:')
+  });
+  const navigation = `<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('roller2-game.html')}">Regular Roller II</a></nav>`;
+  outputs.set('roller2-game-debug.html', debugPage.replace('<h1>', '<style>nav a{color:#9bc9ff}</style>' + navigation + '<h1>'));
+  outputs.set('roller2-game.html', outputs.get('roller2-game.html').replace('</nav>', ` · <a href="${preview('roller2-game-debug.html')}">Play debug version</a></nav>`));
   let interactive = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const programs = { 'examples/compiled-demo.js': 'Test21.AMOS', 'examples/compiled-graphics.js': 'Graphics.AMOS', 'examples/compiled-bobs.js': 'Bobs.AMOS' };
   interactive = interactive.replace(/<script src="([^"]+)"><\/script>/g, (_, filename) => script(programs[filename]
@@ -46,6 +55,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   outputs.set('programs.html', interactive);
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
+  cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
   const games = ['wonderland-game.html', 'roller2-game.html'];
   const showcases = ['tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
@@ -56,7 +66,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
     'roller2-music-vm.html': { title: 'Roller II end tunes', description: 'Play the original game-over and victory music, then run the original volume fade-out.' },
     'programs.html': { title: 'Interactive AMOS examples', description: 'Try compiled examples with graphics, image banks, moving objects, keyboard/mouse input and program switching.' }
   };
-  const card = entry => `<article><h3>${escape((featured[entry.file] || entry).title)}</h3><p>${escape((featured[entry.file] || entry).description)}</p><a class="play" href="${preview(entry.file)}">${games.includes(entry.file) ? 'Play game' : 'Run demo'} (HTML Preview)</a><p class="secondary"><a href="${entry.file}">Open locally</a> · <a href="https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}">Source</a></p></article>`;
+  const card = entry => `<article><h3>${escape((featured[entry.file] || entry).title)}</h3><p>${escape((featured[entry.file] || entry).description)}</p><a class="play" href="${preview(entry.file)}">${games.includes(entry.file) ? 'Play game' : 'Run demo'} (HTML Preview)</a><p class="secondary">${entry.file === 'roller2-game.html' ? `<a href="${preview('roller2-game-debug.html')}">Debug version (HTML Preview)</a> · ` : ''}<a href="${entry.file}">Open locally</a> · <a href="https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}">Source</a></p></article>`;
   const group = files => files.map(file => cards.find(entry => entry.file === file)).filter(Boolean).map(card).join('\n');
   const technical = cards.filter(entry => !games.includes(entry.file) && !showcases.includes(entry.file));
   outputs.set('index.html', page('Browser demos', `<style>.demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,25rem),1fr));gap:1rem}.demo-grid article{margin:0}h3{margin-top:0}.play{display:inline-block;background:#07569c;color:white;padding:.65rem 1rem;text-decoration:none;border-radius:.25rem}.secondary{font-size:.9rem;margin-bottom:0}details{margin:2rem 0}summary{cursor:pointer;font-size:1.2rem;font-weight:600}section{margin:2rem 0}</style>

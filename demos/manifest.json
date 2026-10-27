@@ -360,6 +360,12 @@
       "title": "Interactive programs, input and lifecycle",
       "description": "Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/programs.html"
+    },
+    {
+      "file": "roller2-game-debug.html",
+      "title": "Roller II — full game with debug enabled",
+      "description": "The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game-debug.html"
     }
   ]
 }

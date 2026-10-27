@@ -19,6 +19,27 @@ module.exports = async function checkBrowserDemos(browser) {
     assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), true);
     assert.strictEqual(await gallery.locator('#showcases a[href="tunnel.html"]').count(), 1);
   } finally { await gallery.close(); }
+  const debug = await browser.newPage(), debugErrors = [], debugNetwork = [];
+  debug.on('pageerror', error => debugErrors.push(error.message));
+  await debug.route(/^https?:/, route => { debugNetwork.push(route.request().url()); return route.abort(); });
+  try {
+    await debug.goto(pathToFileURL(path.join(__dirname, '../../demos/roller2-game-debug.html')).href);
+    assert.strictEqual(await debug.locator('.game-debug').count(), 1);
+    assert.strictEqual(await debug.locator('.game-debug').evaluate(menu => menu.open), false);
+    await debug.click('#play-game');
+    await debug.waitForFunction(() => document.getElementById('game-viewport').dataset.sound === 'on' && /"line": 164/.test(document.querySelector('[data-debug-log]').textContent));
+    assert.strictEqual(await debug.evaluate(() => document.fullscreenElement.id), 'game-viewport');
+    assert.strictEqual(await debug.locator('#game-viewport').getAttribute('data-backend'), 'webgl');
+    await debug.keyboard.press('Escape'); await debug.waitForFunction(() => !document.fullscreenElement);
+    await debug.click('.game-debug summary');
+    assert.strictEqual(await debug.locator('[data-debug-files] a').count(), 0);
+    assert.match(await debug.locator('[data-debug-files]').textContent(), /No new or modified files/);
+    await debug.locator('#game-input').focus(); await debug.keyboard.press('a');
+    await debug.waitForFunction(() => { const text = document.querySelector('[data-debug-log]').textContent; const line = JSON.parse(text.split('\n\n')[0]).location.line; return line >= 298 && line <= 316; });
+    await debug.screenshot({ path: path.join(__dirname, '../artifacts/roller2-game-debug.png'), fullPage: true });
+    await debug.evaluate(() => AMOS_GAME_PAGE.dispose());
+    assert.deepStrictEqual(debugErrors, []); assert.deepStrictEqual(debugNetwork, []);
+  } finally { await debug.close(); }
   for (const scenario of scenarios) {
     const page = await browser.newPage(), errors = [], network = [];
     page.on('pageerror', error => errors.push(error.message));
