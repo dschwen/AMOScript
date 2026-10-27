@@ -5,10 +5,12 @@ module.exports=async function wonderlandGameProbe(page){
   const fs=require('fs'),path=require('path'),Transpiler=require('../../lib/Transpiler');
   const source=new Transpiler(fs.readFileSync(path.join(__dirname,'../../examples/Wonderland/Wonderland.AMOS'))).toModule();
   const assets=Object.fromEntries(['Wonderland_Samples.Abk','Title_Screen.Iff','Landscape.Iff','Score_Panel.Iff','Editor_Panel.Iff','Game1.lev','Game2.lev'].map(name=>[name,fs.readFileSync(path.join(__dirname,'../../examples/Wonderland',name)).toString('base64')]));
-  return page.evaluate(async ({source,assets,timerSource,replaySource,audioHostSource,audioSessionSource,samples,gpuSources,launchSource,liveOnly=false})=>{
+  return page.evaluate(async ({source,assets,timerSource,replaySource,audioHostSource,audioSessionSource,samples,gpuSources,launchSource,uiSource,liveOnly=false})=>{
     const module={exports:{}};new Function('module',source)(module);const create=module.exports;
     const makeClock=new Function(`return (${timerSource});`)(),replay=new Function(`return (${replaySource});`)();
-    const files={read:name=>{const bytes=assets[name.split('/').pop()];if(bytes==null)throw new Error(`File not preloaded: ${name}`);return atob(bytes);}};
+    const contents=new Map(Object.entries(assets).map(([name,bytes])=>[name.toLowerCase(),atob(bytes)]));
+    const fileKey=name=>name.replace(/\\/g,'/').split('/').pop().toLowerCase();
+    const files={read:name=>{const bytes=contents.get(fileKey(name));if(bytes==null)throw new Error(`File not preloaded: ${name}`);return bytes;},write:(name,bytes)=>contents.set(fileKey(name),bytes),snapshot:()=>Object.fromEntries(contents)};
     const key=(canvas,type,code)=>canvas.dispatchEvent(new KeyboardEvent(type,{code,key:code==='Space'?' ':code,bubbles:true,cancelable:true}));
     const check=(condition,message)=>{if(!condition)throw new Error(message);};
     const createAudioHost=new Function(`return (${audioHostSource});`)(),createAudioSession=new Function(`return (${audioSessionSource});`)();
@@ -94,7 +96,7 @@ module.exports=async function wonderlandGameProbe(page){
     const status=document.createElement('p');status.id='game-status';status.setAttribute('aria-live','polite');
     const sound=createAudioSession(createAudioHost),soundButton=document.createElement('button'),soundStatus=document.createElement('p');
     soundButton.id='game-sound';soundStatus.id='game-sound-status';soundStatus.setAttribute('aria-live','polite');
-    let live=null,host=null,gpu=null,guard=callback=>callback,revision=0,errorMessage='',disposed=false,launcher=null;
+    let live=null,host=null,gpu=null,guard=callback=>callback,revision=0,errorMessage='',disposed=false,launcher=null,ui=null;
     const configuration=()=>[{port:1,keyboard:mode.value==='gamepad'?false:layout.value==='wasd'?{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',fire:'KeyZ'}:true,gamepad:mode.value!=='keyboard'}];
     function update(){
       if(!live)return;const v=live.state.variables;
@@ -107,8 +109,9 @@ module.exports=async function wonderlandGameProbe(page){
       soundStatus.textContent=audio.error?`Sound unavailable: ${audio.error}. The game can continue silently.`:audio.state==='off'?'Sound off. Click Enable sound.':audio.state==='suspended'?'Sound suspended. Click Enable sound or Resume.':`Sound ${audio.state}.`;
       const pads=host?host.pollJoysticks():[];
       status.textContent=errorMessage||`${controls.dataset.phase}. ${gpu?'WebGL2 ('+gpu.state+')':'Canvas 2D'}. Level ${v.int_lev}, lives ${v.int_li}. ${pads.map(p=>`Gamepad: ${p.status}`).join(' ')}`;
+      status.hidden=liveOnly&&!errorMessage&&!live.state.stopped&&!live.state.halted&&!audio.error; soundStatus.hidden=liveOnly&&!audio.error; if(liveOnly)status.textContent=errorMessage?'Game stopped after an error. Restart to try again.':live.state.stopped?'Stopped.':live.state.halted?'Ended. Restart to play again.':audio.error?'Sound unavailable.':''; if(ui)ui.update({location:live.state.location,error:errorMessage,audio,phase:controls.dataset.phase});
     }
-    function fail(error){if(launcher)launcher.cancel();errorMessage=`${error.message} Restart to begin a new session.`;if(live)live.stop();if(host)host.detach();update();}
+    function fail(error){if(ui)ui.recordError(error);if(launcher)launcher.cancel();errorMessage=`${error.message} Restart to begin a new session.`;if(live)live.stop();if(host)host.detach();update();}
     function installHost(){
       const surface=makeCanvas();let nextGpu=null,nextHost=null;
       try{
@@ -128,7 +131,7 @@ module.exports=async function wonderlandGameProbe(page){
       installHost();live.tick(2000);update();
     }
     const label=(text,input)=>{const label=document.createElement('label');label.append(`${text} `,input);return label;};
-    controls.append(heading,help);toolbar.append(label('Renderer',backend),label('Input',mode),label('Keyboard',layout));
+    const instructions=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Controls and help';instructions.append(summary,help);controls.append(heading,instructions);toolbar.append(label('Renderer',backend),label('Input',mode),label('Keyboard',layout));
     for(const action of ['restart','stop','resume']){const button=document.createElement('button');button.id=`game-${action}`;button.textContent=action;
       button.addEventListener('click',()=>{try{if(action==='restart')start();else if(action==='stop'){launcher.cancel();live.stop();}else if(!errorMessage){if(sound.status().requested)sound.enable().then(()=>{if(!disposed)update();});live.resume();}host.focus();update();}catch(error){fail(error);}});toolbar.append(button);}
     backend.addEventListener('change',()=>{try{launcher.cancel();installHost();host.focus();update();}catch(error){fail(error);}});
@@ -136,8 +139,9 @@ module.exports=async function wonderlandGameProbe(page){
     soundButton.addEventListener('click',()=>{if(['on','starting'].includes(sound.status().state)){sound.mute();update();}else{sound.enable().then(()=>{if(!disposed)update();});update();}host.focus();});
     touchMode.addEventListener('change',()=>{if(host){host.setVirtualJoystickVisibility(touchMode.value);host.focus();}});
     toolbar.append(soundButton,fullscreenButton,fullscreenStatus,touchMode);const messages=document.createElement('div');messages.className='amos-fullscreen-messages';messages.append(soundStatus,status);viewport.append(toolbar,surfaceSlot,messages);controls.append(viewport);const player=document.getElementById('game-player'),results=document.getElementById('results');if(player)player.append(controls);else if(results)results.before(controls);else document.body.append(controls);
+    ui=new Function(`return (${uiSource});`)()({container:viewport,toolbar,files,debug:!liveOnly});
     const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullscreenButton,statusElement:fullscreenStatus,surface:surfaceSlot,getContent:()=>canvas,onChange(){if(host&&!disposed){canvas.blur();host.focus();}}});
-    const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;if(launcher)launcher.dispose();if(globalThis.AMOS_PLAY_GAME===play)delete globalThis.AMOS_PLAY_GAME;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
+    const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;if(launcher)launcher.dispose();if(globalThis.AMOS_PLAY_GAME===play)delete globalThis.AMOS_PLAY_GAME;clearInterval(monitor);ui.dispose();if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
     try{start();}catch(error){fail(error);}
     launcher=new Function(`return (${launchSource});`)()({sound,fullscreen,focus:()=>host.focus(),update,fail,
       prepare(){if(errorMessage||live.state.halted)start();else if(live.state.stopped)live.resume();},
@@ -146,5 +150,5 @@ module.exports=async function wonderlandGameProbe(page){
     const play=()=>launcher.play();globalThis.AMOS_PLAY_GAME=play;
     if(liveOnly)return play();
     return {inputModes:2,deaths:replays.map(r=>r.deaths),restarts:replays.map(r=>r.restarts),fades:replays.map(r=>r.fades),freshLives:replays.map(r=>r.freshLives),stopResume:replays.every(r=>r.stopResume),frames,audioCommands:audioEvents.length,audioComparisons,gpuFrames,gpuUnavailable,gpuDeaths:gpuReplay?gpuReplay.deaths:null,gameRunning:true};
-  },{source,assets,launchSource:require('../../tools/gameLauncher').toString(),timerSource:require('./steppedTimers').createSteppedTimers.toString(),replaySource:require('./wonderlandReplay').toString(),audioHostSource:require('../../lib/amos/webAudio').createWebAudioHost.toString(),audioSessionSource:require('../../lib/amos/browserAudio').createBrowserAudioSession.toString(),samples:require('./wonderlandSamples')(),gpuSources:require('./webglHostSources')()});
+  },{source,assets,launchSource:require('../../tools/gameLauncher').toString(),uiSource:require('../../tools/gamePageUI').toString(),timerSource:require('./steppedTimers').createSteppedTimers.toString(),replaySource:require('./wonderlandReplay').toString(),audioHostSource:require('../../lib/amos/webAudio').createWebAudioHost.toString(),audioSessionSource:require('../../lib/amos/browserAudio').createBrowserAudioSession.toString(),samples:require('./wonderlandSamples')(),gpuSources:require('./webglHostSources')()});
 };

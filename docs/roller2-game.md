@@ -115,3 +115,9 @@ High-score name entry/writeback, editor save/load/requesters and wider actions, 
 later-level completion and external Amiga execution/audio captures remain open.
 The refreshed assets fix the reached resource failure; passing this bounded path
 does not establish full game or general AMOS compatibility.
+
+The live **Play Game** path now uses compact, labelled icon controls and hides
+routine runtime diagnostics. The browser-check host offers a collapsed Debug
+menu for exporting new/modified session files and inspecting source errors.
+Standalone builder pages enable those diagnostics only with `--debug`; see
+[debug builds and exports](game-webpage-tutorial.md#debug-builds-and-downloading-session-files).

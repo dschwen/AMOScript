@@ -35,3 +35,19 @@ test('game page: invalid ports, fire mapping and duplicate normalized asset name
     assert.ok(buildGamePage(bytes, { assets }).includes('JSON.parse('));
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 });
+
+test('game page: debug is an explicit boolean CLI/API option and the default page keeps diagnostics out of its markup', () => {
+  const bytes = binary([[t('End')]]);
+  assert.throws(() => buildGamePage(bytes, { debug: 'true' }), /boolean/);
+  const normal = buildGamePage(bytes), debug = buildGamePage(bytes, { debug: true });
+  assert.notStrictEqual(debug, normal);
+  assert.ok(normal.includes("createRenderer, 1, [\"Space\",\"Enter\"], false,"));
+  assert.ok(debug.includes("createRenderer, 1, [\"Space\",\"Enter\"], true,"));
+  assert.match(normal, /<details class="game-help">/);
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'amos-game-debug-'));
+  try {
+    const source = path.join(directory, 'game.AMOS'), output = path.join(directory, 'game.html'); fs.writeFileSync(source, bytes);
+    const result = spawnSync(process.execPath, [path.join(__dirname, '../tools/build_game_page.js'), source, output, '--debug'], { encoding: 'utf8' });
+    assert.strictEqual(result.status, 0, result.stderr); assert.strictEqual(fs.readFileSync(output, 'utf8'), buildGamePage(bytes, { title: 'game', debug: true }));
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});

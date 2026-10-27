@@ -754,3 +754,14 @@ changes.
 This plan does not require restarting the compiler or reopening the resolved
 Tests7/14/21 work. Existing uncommitted files, including the format notes and
 out14.module.js, are working-tree material to preserve during implementation.
+
+### Application presentation and debug exports
+
+Standalone game pages default to compact, accessible icon controls and collapsed
+help. `build_game_page.js --debug` opts into source error/state logs and binary
+downloads of new/changed in-memory files. Shared presentation also serves both
+full-game gallery hosts; their direct Play path stays compact and their separate
+verification host provides diagnostics. Session exports do not replace the planned
+IndexedDB persistence or finish game requester/editor integration. The shared
+`game-page-debug` scenario publishes normal/debug examples and checks Bsave bytes,
+unchanged/reverted filtering, error notices and owned download URL cleanup.

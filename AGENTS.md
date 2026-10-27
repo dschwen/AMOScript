@@ -371,6 +371,10 @@
 - `tools/build_game_page.js` builds a standalone user page from AMOS plus optional
   asset JSON (paths relative to the manifest, optional prefix/size/hash checks).
   Keep reads synchronous and preloaded, session writes honest, and output exclusive.
+  `--debug` opts into a shared Debug menu with new/modified session-file downloads
+  and bounded source error logs; normal pages keep compact icon controls and errors.
+  Download byte strings through Uint8Array/Blob, filter against the initial snapshot,
+  and revoke owned URLs on refresh/disposal/page exit.
   `gamePageRuntime.js` is the editable sample harness. See
   `docs/game-webpage-tutorial.md`; its generated sample is a gallery/browser test.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.

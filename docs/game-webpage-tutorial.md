@@ -251,3 +251,42 @@ Optional: add `--optimize` to emit scalar instruction blocks. The reference emit
 remains the default; see [optimization and measurements](optimization.md). Active
 music and palette effects retain ordinary dispatch, so this currently provides
 little batching during Roller II gameplay.
+
+## Debug builds and downloading session files
+
+The default output is a game page: compact Stop (■), Resume (▶) and Restart (↻)
+icons, sound/fullscreen controls, a touch selector and collapsed control help.
+Each icon has a tooltip and accessible name. Running status stays out of the way;
+a failure shows a short notice with a Restart instruction.
+
+Add `--debug` when you need filesystem exports or detailed diagnostics:
+
+```sh
+node tools/build_game_page.js \
+  'examples/Roller2/current/Roller II.AMOS' /tmp/roller2-debug.html \
+  --assets examples/Roller2/current/manifest.json --prefix RII: \
+  --fire Enter --title 'Roller II' --debug
+```
+
+The JavaScript API accepts `buildGamePage(source, { debug: true, ...options })`.
+Without that flag the Debug menu and detailed log are not created. This controls
+the interface, not access permissions or VM behavior.
+
+Open **Debug → Modified files**, then **Refresh files** after saving in the game.
+Each link downloads the current raw bytes of one new or changed file. The list
+compares the session filesystem with the initially loaded assets: unchanged files
+and files restored to their original contents are omitted. Full AMOS paths remain
+visible in the list; the browser download uses the filename without its volume or
+directories. Downloaded files do not automatically replace repository assets.
+
+Restart preserves session files. Reloading the page discards them; IndexedDB
+persistence is still planned. Download exports do not implement a missing game
+requester or otherwise complete unverified editor save/load paths. The debug log
+keeps the latest runtime state and up to 50 source-located errors. Blob download
+URLs are released on refresh, disposal and page exit.
+
+The repository's full-game gallery uses the same icon controls. **Play Game**
+uses the compact interface; running the separately collapsed browser checks
+creates the diagnostic host with the Debug menu. The
+[normal/debug application examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/game-page-debug.html)
+exercise real AMOS Bsave writes, binary downloads, error reporting and cleanup.

@@ -170,3 +170,10 @@ VM progress during context loss and restoration while stopped. The renderer's
 These are local Chromium/SwiftShader and CPU/GPU parity checks, not Amiga captures
 or sustained GPU performance measurements. HAM/events and remaining mode gates
 remain explicit renderer limits.
+
+The live player uses labelled icon controls and a compact error notice. Detailed
+logs and exports belong to the diagnostic host created by running browser checks.
+Its session adapter accepts raw writes and exports new/modified files; this does
+not implement the editor's missing requester. Standalone application pages expose
+that menu only with `--debug`. See
+[debug builds and exports](game-webpage-tutorial.md#debug-builds-and-downloading-session-files).

@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "game-page-debug.html",
+      "title": "Application debug menu and binary file downloads",
+      "description": "Normal and --debug page-builder examples: accessible icon controls, AMOS Bsave exports of new/modified files, exact binary bytes, compact errors, source logs and owned download URL cleanup. The examples below remain playable after checks.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/game-page-debug.html"
+    },
+    {
       "file": "optimizer.html",
       "title": "Optimized scalar instruction blocks",
       "description": "Compare reference and opt-in optimized standalone modules across nine instruction budgets, preserving typed values, source locations and original instruction counts. This is a semantic comparison, not a browser performance benchmark.",

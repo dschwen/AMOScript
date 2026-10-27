@@ -228,6 +228,10 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'game-page-debug', title: 'Application debug menu and binary file downloads', capturedFrames: false, description: 'Normal and --debug page-builder examples: accessible icon controls, AMOS Bsave exports of new/modified files, exact binary bytes, compact errors, source logs and owned download URL cleanup. The examples below remain playable after checks.', run: require('./gamePageDebugProbe'), check(result, assert) {
+    assert.strictEqual(result.modifiedFiles, 2); assert.deepStrictEqual(result.binaryBytes, [0, 128, 255, 10]);
+    assert.strictEqual(result.compactErrors, 2); assert.strictEqual(result.revokedUrls, 2); assert.strictEqual(result.icons, 3);
+  } },
   { id: 'optimizer', title: 'Optimized scalar instruction blocks', capturedFrames: false, description: 'Compare reference and opt-in optimized standalone modules across nine instruction budgets, preserving typed values, source locations and original instruction counts. This is a semantic comparison, not a browser performance benchmark.', run: require('./optimizerProbe'), check(result, assert) {
     assert.strictEqual(result.comparisons, 9); assert.strictEqual(result.originalTicks, 5159);
     assert.ok(result.blocksExecuted > 0); assert.ok(result.instructionsBatched > 0);

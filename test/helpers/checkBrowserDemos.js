@@ -39,6 +39,8 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#results').textContent(), '');
         assert.strictEqual(await page.evaluate(() => document.body.dataset.status), 'idle');
         assert.strictEqual(await page.locator(controls).getAttribute('data-backend'), 'webgl');
+        assert.strictEqual(await page.locator(`${controls} .game-debug`).count(), 0);
+        for (const action of ['stop', 'resume', 'restart']) assert.ok(await page.locator(`${controls} button[aria-label="${action[0].toUpperCase() + action.slice(1)}"] svg`).count());
         await page.locator(surface).evaluate(canvas => { canvas.dataset.launchIdentity = 'retained'; });
         await page.keyboard.press('Escape'); await page.waitForFunction(() => document.fullscreenElement === null);
         await page.click('#play-game');
@@ -86,6 +88,20 @@ module.exports = async function checkBrowserDemos(browser) {
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
+      if (scenario.id === 'game-page-debug') {
+        const frame = page.frameLocator('#game-page-debug');
+        await frame.locator('#game-restart').click();
+        await frame.locator('.game-debug summary').click();
+        const downloadEvent = page.waitForEvent('download');
+        await frame.locator('a[download="save.dat"]').click();
+        const download = await downloadEvent;
+        assert.strictEqual(download.suggestedFilename(), 'save.dat');
+        const filename = path.join(__dirname, '../artifacts/game-page-save.dat');
+        await download.saveAs(filename);
+        assert.deepStrictEqual([...require('fs').readFileSync(filename)], [0, 128, 255, 10]);
+        await page.screenshot({ path: path.join(__dirname, '../artifacts/game-page-debug.png'), fullPage: true });
+        await page.evaluate(() => { for (const frame of document.querySelectorAll('#game-page-debug-examples iframe')) frame.contentWindow.AMOS_GAME_PAGE.dispose(); });
+      }
       if (scenario.id === 'browser-game-harness') {
         const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
         try {
