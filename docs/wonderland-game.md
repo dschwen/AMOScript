@@ -16,6 +16,10 @@ shared checks and captured frames remain under a collapsed **Browser checks and
 captured frames** section. The original sound/fullscreen controls remain available
 when a browser denies either API. No VM variables, IPs or assets are patched.
 
+The optional Touch Auto/On/Off selector shows a fullscreen cross with a central
+fire button, feeding joystick port 1 alongside keyboard/Gamepad input. See
+[the page-building tutorial](game-webpage-tutorial.md) to use it in your own host.
+
 Focus the canvas. Arrows move and jump; Space/Enter selects in the original menu.
 Escape returns to the original title. The selector switches to WASD + Z, browser
 standard-gamepad input, or both. The Gamepad API uses controller zero with the

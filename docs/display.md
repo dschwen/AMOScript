@@ -106,11 +106,20 @@ page, exact Canvas shapes and bank image colours, transparency, keyboard
 wait/resumption, pointer events, switching
 programs and Stop. It writes `test/artifacts/graphics.png` for visual inspection.
 
-The current font is the public-domain basic Latin 8×8 bitmap by Daniel Hepper,
+The current font is the public-domain basic Latin and Latin-1 8×8 bitmap by Daniel Hepper,
 Marcel Sondaar and IBM, from
 [font8x8_basic.h](https://github.com/dhepper/font8x8/blob/master/font8x8_basic.h).
-The pixel data and attribution are preserved in `lib/amos/font.js`. This is not
-the Amiga Topaz typeface; unsupported characters use a question-mark glyph.
+The basic rows are unchanged; extended rows come from
+[font8x8_ext_latin.h](https://github.com/dhepper/font8x8/blob/8e279d2d864e79128e96188a6b9526cfa3fbfef9/font8x8_ext_latin.h),
+pinned with its public-domain attribution and SHA-256 under `test/fixtures/font/`.
+The earlier font contained only ASCII, and both graphics Text and the Print/Writing
+rasterizers replaced bytes above 127 with `?`. AMOS string decoding already kept
+the Latin-1 bytes; changing the page's UTF-8 declaration would not fix that.
+All three paths now render bytes 160–255, including `ÄÖÜ äöü ß`. C1 controls and
+characters outside the supported range still use `?`; 160 is a blank no-break
+space. Each factory owns its font bytes. This remains a portable font, not the
+Amiga Topaz typeface or a native font capture. Independent upstream rows check
+all 96 Latin-1 records and visible umlaut pixels, including actual GPU output.
 Initial palette entries beyond the conventional basic colours are approximate.
 
 Programs without window commands select one screen for presentation. Explicit

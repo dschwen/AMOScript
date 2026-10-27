@@ -359,6 +359,20 @@
   its original intro with no injected input; Wonderland startup automation uses
   ordinary input and owned, cancellable timers; repeat Play retains the VM.
   Keep Stop/Restart/disposal and fullscreen focus cleanup covered in both demos.
+- Default font bytes now include pinned public-domain Latin-1 rows 160–255;
+  Print/Writing/Text share that coverage, retaining ASCII pixels and `?` fallback
+  for C1/unsupported characters. This is portable font evidence, not Topaz.
+- `browser.js` optionally owns a virtualJoystick cross in a stable fullscreen
+  container. Merge raw touch/keyboard/Gamepad masks before cancelling opposites;
+  never synthesize AMOS text/raw keys/mouse clicks for touch. Preserve independent
+  pointers and clear holds/listeners on cancellation, blur, Stop, exit and detach.
+  Key Speed preserves holds. Auto is for coarse/touch devices in owned fullscreen;
+  explicit visibility/inline options belong to the host, not the compiler.
+- `tools/build_game_page.js` builds a standalone user page from AMOS plus optional
+  asset JSON (paths relative to the manifest, optional prefix/size/hash checks).
+  Keep reads synchronous and preloaded, session writes honest, and output exclusive.
+  `gamePageRuntime.js` is the editable sample harness. See
+  `docs/game-webpage-tutorial.md`; its generated sample is a gallery/browser test.
 - `bin/amoscript` invokes `lib/command.js`; `index.html` runs generated demos.
 - `examples/` contains Test1–27 and synthetic programs with `.Asc` references.
   ASCII is not an accepted compiler input yet.

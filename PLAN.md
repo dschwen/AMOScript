@@ -32,6 +32,14 @@ then leaves Roller II on its original intro; Wonderland uses ordinary startup
 input to enter gameplay. Replays remain separately runnable; repeat
 Play preserves the session, and Stop/Restart/disposal retire startup input.
 
+The default font now includes pinned Latin-1 glyphs, fixing umlaut/ß rendering in
+Print/Writing/Text while keeping ASCII pixels. Optional host-owned touch controls
+merge with keyboard/Gamepad input and have native touch-event checks in an emulated
+mobile Chromium viewport. A small standalone page builder and
+[webpage tutorial](docs/game-webpage-tutorial.md) document the Roller II page and
+provide a working command for users' own games. The new harness/font/touch scenario
+is runnable from the gallery; there are now 57 offline browser scenario pages.
+
 ## Current priority: Roller II
 
 The user-provided `RII/` game is now the next end-to-end target. Pinned source/data
@@ -262,7 +270,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 
 ## Recorded baseline and current state
 
-- Current local baseline: `npm run check`, **733 passed, 0 failed**, including
+- Current local baseline: `npm run check`, **737 passed, 0 failed**, including
   sprites, snapshot/diff foundations, chip memory, planar reference/bridge and
   independent ILBM goldens, bounded copper/stack exports, EHB/DPF/scroll and
   explicit fields and HAM6. Source-backed palette rules are covered; demos are current.

@@ -91,6 +91,9 @@ module.exports = async function roller2GameProbe(page) {
     try { gpu = createGpu(surface); } catch (_) { const gl = surface.getContext('webgl2'), ext = gl && gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); const next = surface.cloneNode(); surface.replaceWith(next); surface = next; }
     const sound = make(sessionSource)(make(audioSource)), files = makeFiles(initial); let live = null, host = null, disposed = false, revision = 0, error = '', launcher = null;
     const soundButton = document.createElement('button'); soundButton.id = 'roller2-game-sound'; toolbar.append(soundButton);
+    const touchMode = document.createElement('select'); touchMode.id = 'roller2-game-touch'; touchMode.setAttribute('aria-label', 'Touch joystick');
+    for (const [value, label] of [['auto', 'Touch: Auto'], ['always', 'Touch: On'], ['off', 'Touch: Off']]) { const option = document.createElement('option'); option.value = value; option.textContent = label; touchMode.append(option); }
+    toolbar.append(touchMode); touchMode.onchange = () => { if (host) { host.setVirtualJoystickVisibility(touchMode.value); host.focus(); } };
     function update() {
       if (!live) return; const v = live.state.variables, location = live.state.location, target = live.display.screens.get(0), s = sound.status();
       const phase = error ? 'error' : live.state.stopped ? 'stopped' : live.state.halted ? 'ended' : live.state.music.playing ? 'game-over' : location && location.line >= 1083 && location.line <= 1104 ? 'scores' : location && location.line >= 298 && location.line <= 316 && !live.state.fade.active ? 'menu' : location && location.line >= 324 && location.line <= 564 ? 'editor' : v.int_lv > 0 && (live.sprites.get(1) || {}).image > 0 ? 'game' : v.int_lv > 0 ? 'ready' : 'intro';
@@ -102,7 +105,7 @@ module.exports = async function roller2GameProbe(page) {
       if (launcher) launcher.cancel();
       const token = ++revision; if (host) host.detach(); if (live) live.stop(); if (gpu) gpu.clear(); error = '';
       live = compiled.exports({ files, print() {}, audio: sound.bind(), now: () => performance.now(), clearTimeout, setTimeout(fn, delay) { return setTimeout(() => { if (!disposed && token === revision) { try { fn(); } catch (e) { fail(e); } } }, delay); } });
-      host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', joysticks: [{ port: 1, keyboard: { fire: ['Enter'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
+      host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', virtualJoystick: { container: viewport, port: 1, visibility: touchMode.value }, joysticks: [{ port: 1, keyboard: { fire: ['Enter'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
     }
     for (const action of ['restart', 'stop', 'resume']) { const button = document.createElement('button'); button.id = `roller2-game-${action}`; button.textContent = action; toolbar.append(button); button.onclick = () => { try { if (action === 'restart') start(); else if (action === 'stop') { launcher.cancel(); live.stop(); } else if (!error) live.resume(); host.focus(); update(); } catch (e) { fail(e); } }; }
     soundButton.onclick = () => { if (['on', 'starting'].includes(sound.status().state)) sound.mute(); else sound.enable().then(() => { if (!disposed) update(); }); host.focus(); update(); };

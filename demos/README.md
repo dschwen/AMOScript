@@ -27,6 +27,9 @@ HTML Preview links target `master` and reflect committed, pushed files. Prepared
 fixtures and missing resources are described on each page; these are not claims
 of complete original-game or native Amiga parity.
 
+[Tutorial: build your own complete game page](../docs/game-webpage-tutorial.md),
+including the Roller II build command, assets and optional touch joystick.
+
 ## Maintaining the gallery
 
 Browser scenarios live in `test/helpers/browserScenarios.js`. Playwright and the

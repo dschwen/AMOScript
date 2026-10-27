@@ -40,5 +40,7 @@ pointer mapping; switching and Restart while fullscreen; Escape priority without
 leaving gameplay; GPU context loss/restoration; and cleanup while fullscreen.
 Four unit groups cover CSS/bitmap separation, unsupported/denied requests, surface
 replacement, listener ownership and late request disposal. The browser checks
-use the shared gallery and live-demo controls; they do not claim mobile/browser
-coverage or external Amiga execution evidence.
+use the shared gallery and live-demo controls. The optional touch joystick now
+has additional 390×844 touch-enabled Chromium coverage, including native pointer
+input and fullscreen exit; this is not a physical phone/iOS or Amiga capture.
+See [touch input](joysticks.md#optional-fullscreen-touch-cross).

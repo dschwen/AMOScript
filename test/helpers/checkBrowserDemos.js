@@ -71,6 +71,47 @@ module.exports = async function checkBrowserDemos(browser) {
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
+      if (scenario.id === 'browser-game-harness') {
+        const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+        try {
+          const child = await mobile.newPage();
+          await child.route(/^https?:/, route => { network.push(route.request().url()); return route.abort(); });
+          child.on('pageerror', error => errors.push(error.message));
+          await child.setContent(await page.locator('#harness-tutorial').evaluate(iframe => iframe.srcdoc));
+          await child.waitForFunction(() => !!globalThis.AMOS_GAME_PAGE);
+          const session = await mobile.newCDPSession(child);
+          await child.click('#play-game');
+          await child.waitForFunction(() => { const v = document.getElementById('game-viewport'); return v.dataset.phase === 'running' && v.dataset.sound === 'on'; });
+          assert.strictEqual(await child.locator('.amos-virtual-joystick').isVisible(), true, 'Touch Auto appears on a mobile fullscreen page');
+          await child.screenshot({ path: path.join(__dirname, '../artifacts/mobile-game-harness.png') });
+          const rect = async direction => child.locator(`[data-direction="${direction}"]`).boundingBox();
+          const up = await rect('up'), fire = await rect('fire'), left = await rect('left'), right = await rect('right'), down = await rect('down');
+          assert.strictEqual(up.x, fire.x); assert.strictEqual(down.x, fire.x); assert.strictEqual(left.y, fire.y); assert.strictEqual(right.y, fire.y);
+          assert.ok(up.y < fire.y && down.y > fire.y && left.x < fire.x && right.x > fire.x);
+          const point = (r, id) => ({ x: r.x + r.width / 2, y: r.y + r.height / 2, id });
+          const value = () => child.evaluate(() => AMOS_GAME_PAGE.joystickStatus()[0].mask);
+          const expectMask = async expected => { await child.waitForFunction(value => AMOS_GAME_PAGE.joystickStatus()[0].mask === value, expected); assert.strictEqual(await value(), expected); };
+          await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(up, 1)] });
+          await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(up, 1), point(fire, 2)] });
+          await expectMask(17);
+          await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(right, 1), point(fire, 2)] });
+          await expectMask(24);
+          await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }); await expectMask(0);
+          await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(fire, 3)] });
+          await child.click('#game-stop'); await expectMask(0);
+          await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
+          await child.click('#game-resume'); await expectMask(0);
+          await child.click('#game-restart'); assert.strictEqual(await child.locator('.amos-virtual-joystick').count(), 1);
+          const currentFire = await rect('fire');
+          await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(currentFire, 4)] });
+          await child.locator('#game-input').focus(); await child.keyboard.press('Escape');
+          await child.waitForFunction(() => document.fullscreenElement === null);
+          await child.locator('.amos-virtual-joystick').waitFor({ state: 'hidden' }); await expectMask(0);
+          await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
+          await child.evaluate(() => AMOS_GAME_PAGE.dispose()); assert.strictEqual(await child.locator('.amos-virtual-joystick').count(), 0);
+          await session.detach();
+        } finally { await mobile.close(); }
+      }
       if (scenario.initialFrame) assert.strictEqual(await page.locator('#frames option:checked').textContent(), scenario.initialFrame);
       if(scenario.id==='roller2'){await page.selectOption('#roller2-pattern','11');assert.strictEqual(await page.locator('#roller2-controls').getAttribute('data-pattern'),'11');assert.strictEqual((await page.locator('#roller2-cells').textContent()).split('\n').length,65);}
       if(scenario.id==='roller2-edit'){

@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "browser-game-harness.html",
+      "title": "Game page tutorial, Latin-1 font and touch joystick",
+      "description": "Independent umlaut glyph pixels, real GPU text, multi-pointer cross controls, keyboard/Gamepad merging and owned input cleanup. Includes a fully generated playable HTML example with sound, fullscreen and touch settings.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/browser-game-harness.html"
+    },
+    {
       "file": "roller2-edit.html",
       "title": "Roller II Edit host boundary",
       "description": "Original ROUNDTURN rotates four directions and reaches its Edit fallback for prepared zero/diagonal inputs. Twelve vector-oracle Canvas frames, four GPU comparisons and two post-cleanup editor requests; fullscreen and Restart. PHALT/movement are guarded; no embedded editor.",

@@ -1,3 +1,6 @@
 # Original AMOS data files are byte-exact fixtures, including their CRLF bytes.
 examples/Roller2/**/Highscores binary
 examples/Roller2/**/Roller_HELP binary
+
+# Preserve the bytes of the pinned public-domain font header used by conformance tests.
+test/fixtures/font/font8x8_ext_latin.h -text whitespace=-blank-at-eol

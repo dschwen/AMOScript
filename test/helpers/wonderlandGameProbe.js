@@ -85,6 +85,8 @@ module.exports=async function wonderlandGameProbe(page){
     const backend=document.createElement('select');backend.id='game-renderer';backend.setAttribute('aria-label','Display renderer');
     for(const [value,text] of [['webgl','WebGL2'],['canvas','Canvas 2D']]){const option=document.createElement('option');option.value=value;option.textContent=text;backend.append(option);}
     const viewport=document.createElement('section');viewport.id='game-viewport';
+    const touchMode=document.createElement('select');touchMode.id='game-touch';touchMode.setAttribute('aria-label','Touch joystick');
+    for(const [value,text]of[['auto','Touch: Auto'],['always','Touch: On'],['off','Touch: Off']]){const option=document.createElement('option');option.value=value;option.textContent=text;touchMode.append(option);}
     const toolbar=document.createElement('div');toolbar.className='amos-fullscreen-toolbar';
     const surfaceSlot=document.createElement('div');surfaceSlot.id='game-surface';surfaceSlot.append(canvas);
     const fullscreenButton=document.createElement('button');fullscreenButton.id='game-fullscreen';
@@ -111,7 +113,7 @@ module.exports=async function wonderlandGameProbe(page){
       const surface=makeCanvas();let nextGpu=null,nextHost=null;
       try{
         if(backend.value==='webgl')nextGpu=createGpu(surface,{onStateChange:event=>{if(event.state==='error'&&gpu===nextGpu)fail(new Error(event.error||'GPU restoration failed'));}});
-        nextHost=AMOS_BROWSER.createCanvasHost(surface,{renderer:nextGpu,joysticks:configuration(),mouseCoordinates:'hardware',requestAnimationFrame:callback=>requestAnimationFrame(guard(callback)),cancelAnimationFrame});
+        nextHost=AMOS_BROWSER.createCanvasHost(surface,{renderer:nextGpu,joysticks:configuration(),virtualJoystick:{container:viewport,port:1,visibility:touchMode.value},mouseCoordinates:'hardware',requestAnimationFrame:callback=>requestAnimationFrame(guard(callback)),cancelAnimationFrame});
         nextHost.attach(live);
       }catch(error){if(nextHost)nextHost.detach();releaseGpu(nextGpu);throw error;}
       if(host)host.detach();releaseGpu(gpu);canvas.replaceWith(surface);canvas=surface;gpu=nextGpu;host=nextHost;
@@ -132,7 +134,8 @@ module.exports=async function wonderlandGameProbe(page){
     backend.addEventListener('change',()=>{try{launcher.cancel();installHost();host.focus();update();}catch(error){fail(error);}});
     for(const input of [mode,layout])input.addEventListener('change',()=>{try{launcher.cancel();host.configureJoysticks(configuration());host.focus();update();}catch(error){fail(error);}});
     soundButton.addEventListener('click',()=>{if(['on','starting'].includes(sound.status().state)){sound.mute();update();}else{sound.enable().then(()=>{if(!disposed)update();});update();}host.focus();});
-    toolbar.append(soundButton,fullscreenButton,fullscreenStatus);const messages=document.createElement('div');messages.className='amos-fullscreen-messages';messages.append(soundStatus,status);viewport.append(toolbar,surfaceSlot,messages);controls.append(viewport);const player=document.getElementById('game-player'),results=document.getElementById('results');if(player)player.append(controls);else if(results)results.before(controls);else document.body.append(controls);
+    touchMode.addEventListener('change',()=>{if(host){host.setVirtualJoystickVisibility(touchMode.value);host.focus();}});
+    toolbar.append(soundButton,fullscreenButton,fullscreenStatus,touchMode);const messages=document.createElement('div');messages.className='amos-fullscreen-messages';messages.append(soundStatus,status);viewport.append(toolbar,surfaceSlot,messages);controls.append(viewport);const player=document.getElementById('game-player'),results=document.getElementById('results');if(player)player.append(controls);else if(results)results.before(controls);else document.body.append(controls);
     const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(viewport,{button:fullscreenButton,statusElement:fullscreenStatus,surface:surfaceSlot,getContent:()=>canvas,onChange(){if(host&&!disposed){canvas.blur();host.focus();}}});
     const monitor=setInterval(update,100);globalThis.AMOS_GAME_DEMO_CLEANUP=()=>{disposed=true;revision++;if(launcher)launcher.dispose();if(globalThis.AMOS_PLAY_GAME===play)delete globalThis.AMOS_PLAY_GAME;clearInterval(monitor);if(host)host.detach();if(live)live.stop();releaseGpu(gpu);const closing=Promise.all([sound.dispose(),fullscreen.dispose()]);update();return closing.then(()=>update());};
     try{start();}catch(error){fail(error);}

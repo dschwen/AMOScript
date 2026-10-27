@@ -118,3 +118,45 @@ a bounded two-second first-level run with attached sprites. See
 [the milestone](wonderland.md). The
 [HTML Preview menu](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-menu.html)
 is linked from the shared [demo index](../demos/index.html).
+
+## Optional fullscreen touch cross
+
+`createCanvasHost` accepts `virtualJoystick: { container, port: 1,
+visibility: 'auto', fullscreenOnly: true }`. Omit the option or pass false to
+create no UI. `container` is the stable fullscreen element. Auto shows the pad
+when that element is fullscreen and the device has a coarse pointer or touch
+points; always forces visibility in fullscreen, off hides it. For inline controls,
+including where fullscreen is unavailable, opt into `fullscreenOnly: false`.
+
+The DOM is a five-button cross: up above, left/fire/right across the middle, down
+below. Buttons have labels, pressed state, pointer capture, a minimum 44px target,
+safe-area spacing and touch-action suppression. It does not alter canvas/GPU
+buffer dimensions or pointer coordinate transforms. Both full-game pages expose
+Touch Auto/On/Off. `setVirtualJoystickVisibility(mode)` changes it without replacing
+the VM; `virtualJoystickStatus()` reports visible/raw-mask/mode/port or null.
+
+The port must be 0 or 1 (default 1); an otherwise unconfigured touch port gets its
+own joystick reader without implicitly enabling keyboard/Gamepad mappings. The
+host ORs the raw touch, keyboard and gamepad masks, then cancels opposite axis
+pairs. Independent pointer IDs allow direction+fire, diagonals and multiple
+fingers on the same button. Releasing one pointer preserves the others and all
+physical keyboard/controller holds. Dragging between buttons updates that
+pointer's hold; leaving the cross gives it no direction.
+
+Touch never sends text, Scancode/Key State records or AMOS mouse buttons. Pointer
+up, cancellation, lost capture, blur, page hiding, Stop/End/failure, configuration
+replacement, fullscreen exit and host detach retire owned holds. Key Speed keeps
+physical holds, as with keyboard/Gamepad input. Disposal removes only the host's
+pad, CSS and listeners, including across renderer replacement/Restart.
+
+The [game-page tutorial/demo](../demos/browser-game-harness.html) checks independent
+Latin-1 pixels and actual GPU output, synthetic multi-pointer masks, keyboard and
+injected Gamepad combinations, opposite cancellation and lifecycle cleanup. Its
+embedded page is built by `tools/build_game_page.js`. The offline browser suite
+also opens that generated page in a 390×844 touch-enabled Chromium context and
+uses native touch event dispatch for direction+fire, dragging, cancellation,
+Stop/Resume, Restart, fullscreen exit and disposal. This is emulated-device
+coverage, not a physical phone/controller or Amiga capture.
+
+See [the webpage tutorial](game-webpage-tutorial.md) for a working Roller II build
+command and complete host wiring.

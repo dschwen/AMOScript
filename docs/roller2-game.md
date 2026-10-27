@@ -26,6 +26,12 @@ shared checks and captured frames remain under a collapsed **Browser checks and
 captured frames** section. The original sound/fullscreen controls remain available
 when a browser denies either API. No VM variables, IPs or assets are patched.
 
+The optional Touch Auto/On/Off control enables a five-button joystick cross in
+fullscreen. Auto appears on touch/coarse-pointer devices; On also lets desktop
+users try it. It feeds port 1 independently of text/mouse input. See the
+[page-building tutorial](game-webpage-tutorial.md), including a command that builds
+this source and current asset manifest into a smaller standalone game page.
+
 ## Current acceptance path
 
 `test/helpers/roller2CurrentReplay.js` runs the complete source and current assets:
