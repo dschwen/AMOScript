@@ -22,10 +22,10 @@ function loadAssets(filename, prefix = '') {
   }
   return assets;
 }
-function buildGamePage(source, { title = 'AMOS game', assets = {}, port = 1, fire = ['Space', 'Enter'] } = {}) {
+function buildGamePage(source, { title = 'AMOS game', assets = {}, port = 1, fire = ['Space', 'Enter'], optimize = false } = {}) {
   if (![0, 1].includes(port)) throw new Error('Joystick port must be 0 or 1');
   if (!Array.isArray(fire) || !fire.length || fire.some(code => typeof code !== 'string' || !code)) throw new Error('Fire keys must be nonempty keyboard codes');
-  const compiled = new Transpiler(source).toModule();
+  const compiled = new Transpiler(source).toModule({ optimize });
   const scripts = ['browser', 'fullscreen', 'webAudio', 'browserAudio', 'files'].map(name => script(fs.readFileSync(path.join(root, 'lib/amos', `${name}.js`), 'utf8'))).join('\n');
   const model = require('../lib/display/model/frameState').createFrameStateModel;
   const sprites = require('../lib/display/reference/sprites').createSpriteModel;
@@ -49,16 +49,17 @@ ${script(runtime)}
 function main(args) {
   const positional = [], options = {};
   for (let i = 0; i < args.length; i++) {
-    if (['--assets', '--prefix', '--port', '--title', '--fire'].includes(args[i])) {
+    if (args[i] === '--optimize') options.optimize = true;
+    else if (['--assets', '--prefix', '--port', '--title', '--fire'].includes(args[i])) {
       const name = args[i].slice(2); if (i + 1 === args.length || args[i + 1].startsWith('--')) throw new Error(`Missing value for --${name}`);
       options[name] = args[++i];
     } else if (args[i].startsWith('--')) throw new Error(`Unknown option: ${args[i]}`);
     else positional.push(args[i]);
   }
-  if (positional.length !== 2) throw new Error('Usage: node tools/build_game_page.js input.AMOS output.html [--assets manifest.json] [--prefix RII:] [--port 1] [--fire Enter,Space] [--title "My game"]');
+  if (positional.length !== 2) throw new Error('Usage: node tools/build_game_page.js input.AMOS output.html [--optimize] [--assets manifest.json] [--prefix RII:] [--port 1] [--fire Enter,Space] [--title "My game"]');
   const [input, output] = positional;
   const page = buildGamePage(fs.readFileSync(input), { title: options.title || path.basename(input, path.extname(input)),
-    assets: loadAssets(options.assets, options.prefix || ''), port: options.port == null ? 1 : Number(options.port), fire: options.fire == null ? ['Space', 'Enter'] : options.fire.split(',') });
+    assets: loadAssets(options.assets, options.prefix || ''), port: options.port == null ? 1 : Number(options.port), fire: options.fire == null ? ['Space', 'Enter'] : options.fire.split(','), optimize: !!options.optimize });
   fs.writeFileSync(output, page, { flag: 'wx' });
 }
 if (require.main === module) try { main(process.argv.slice(2)); } catch (error) { console.error(error.message); process.exitCode = 1; }

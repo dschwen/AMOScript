@@ -426,8 +426,11 @@ every stage. Keep host APIs separate from language semantics and instantiate
 mutable runtime state separately for every program.
 
 The current instruction-function table is suitable for AMOS jumps and waits.
-A switch dispatcher or optimizer is optional future work, justified by profiling
-after correctness is established.
+An opt-in scalar block emitter now batches pure assignments without renumbering
+instructions or changing budgets. The reference emitter remains the default;
+active music/palette engines retain per-instruction dispatch. See
+[optimization measurements and limits](docs/optimization.md). Broader batching
+and any dispatcher replacement still require profiling and semantic evidence.
 
 ### Display evolution: reference and WebGL2
 
@@ -609,7 +612,7 @@ unsupported formats and unavailable hosts produce clear diagnostics.
 - Choose representative real AMOS programs, list every unsupported dependency,
   and close gaps in bounded increments rather than promising general support.
 - Add source-to-generated-code mapping/debugging support when required by those
-  programs; defer optimization until measured.
+  programs; extend optimization only with measurements.
 - Add an ASCII lexer/parser sharing the existing AST once the core contracts
   are stable, with binary/ASCII equivalence tests.
 

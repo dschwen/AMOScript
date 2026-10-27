@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-27. The current local baseline has **737 passing tests**, plus a
+Updated 2026-10-27. The current local baseline has **745 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -42,6 +42,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Optimized emission | Opt-in scalar blocks | Pure scalar assignments and Inc/Dec share dispatch, capped at 32 instructions and split at every label. Original instruction budgets/locations remain intact; calls, arrays and active music/palette engines retain ordinary dispatch. Differential target replay and standalone browser comparison; no established Roller II speedup. [Contract and measurements](optimization.md). |
 | Edit | Implemented terminal host boundary | Frozen source request; VM/audio/palette/input cleanup before optional synchronous notification, once-only handling, no continuation or embedded editor. Original ROUNDTURN fixture covers guarded rotations and fallback. Native editor UI/end-state music remain open. [Contract](edit.md). |
 | Swap | Implemented same-type lvalue exchange | Integer/float/string scalar and array elements, captured addresses/indices/local owners, checked before writes, ordinary scopes and fallthrough. Original paired high-score sorting matches five independent cases/fifteen Canvas previews and three GPU frames. Native captures/end-state integration remain open. [Contract](swap.md). |
 | Rainbow Del | Implemented table deletion | Specific 0–3, negative/all forms, absent-slot no-op and fresh recreation; live palette-row removal restores overlap/base colour without changing pixels, View or fade jobs. Original 557 fixture matches three independent Canvas/GPU frames. Native timing/positive wrapped aliases remain open. [Contract](rainbow-del.md). |

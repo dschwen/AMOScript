@@ -1,0 +1,86 @@
+{
+  "node": "v18.19.1",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "AMD Ryzen 7 5700X 8-Core Processor",
+  "warmups": 2,
+  "measuredRuns": 5,
+  "results": [
+    {
+      "name": "scalar loop (2,000,000 original instructions)",
+      "referenceMs": 116.36,
+      "optimizedMs": 63.85,
+      "speedup": 1.822,
+      "moduleBytes": [
+        301466,
+        303827
+      ],
+      "compilation": {
+        "mode": "scalar-blocks",
+        "instructions": 17,
+        "blocks": 2,
+        "batchedInstructions": 16,
+        "maxBlockSize": 32
+      },
+      "executed": {
+        "blocksExecuted": 131335,
+        "instructionsBatched": 1838678
+      },
+      "totalInstructions": 2000000,
+      "samplesMs": [
+        [
+          98.645672,
+          94.251081,
+          119.828195,
+          116.940876,
+          116.35879
+        ],
+        [
+          63.847519,
+          64.050447,
+          67.400439,
+          63.326346,
+          63.840014
+        ]
+      ]
+    },
+    {
+      "name": "Roller II current input-only milestone replay",
+      "referenceMs": 240.87,
+      "optimizedMs": 251.23,
+      "speedup": 0.959,
+      "moduleBytes": [
+        796817,
+        820959
+      ],
+      "compilation": {
+        "mode": "scalar-blocks",
+        "instructions": 2535,
+        "blocks": 59,
+        "batchedInstructions": 169,
+        "maxBlockSize": 32
+      },
+      "executed": {
+        "blocksExecuted": 1,
+        "instructionsBatched": 2
+      },
+      "totalInstructions": 583012,
+      "samplesMs": [
+        [
+          278.582498,
+          240.865326,
+          238.275572,
+          244.839162,
+          231.675355
+        ],
+        [
+          259.174947,
+          238.868068,
+          259.442416,
+          232.949693,
+          251.231372
+        ]
+      ]
+    }
+  ]
+}

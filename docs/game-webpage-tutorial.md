@@ -246,3 +246,8 @@ movement with fire, blur/Stop/Resume, fullscreen exit, Restart and the game's
 save/load paths. Compilation and CPU/GPU parity alone do not prove every game
 path or native Amiga fidelity. The repository's default font is a public-domain
 portable 8×8 font with Latin-1 glyphs, not an Amiga Topaz capture.
+
+Optional: add `--optimize` to emit scalar instruction blocks. The reference emitter
+remains the default; see [optimization and measurements](optimization.md). Active
+music and palette effects retain ordinary dispatch, so this currently provides
+little batching during Roller II gameplay.

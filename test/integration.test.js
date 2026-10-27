@@ -133,3 +133,22 @@ test('integration: browser output runs sequential files through the browser memo
   assert.strictEqual(output, 'AMOS 42\n');
   assert.strictEqual(files.read('greetings.txt'), 'AMOS,42\r\n');
 });
+
+test('integration: CLI opt-in optimization produces a standalone module and preserves output protection', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'amoscript-optimized-'));
+  try {
+    const input = path.join(directory, 'source.AMOS'), output = path.join(directory, 'optimized.js');
+    fs.writeFileSync(input, require('./helpers/optimizerProgram')());
+    const result = spawnSync(process.execPath, [cli, '--optimize', input, output], { encoding: 'utf8' });
+    assert.strictEqual(result.status, 0, result.stderr); assert.strictEqual(result.stdout, '');
+    const context = { module: { exports: {} } }; vm.runInNewContext(fs.readFileSync(output, 'utf8'), context);
+    const p = context.module.exports({ setTimeout() {} }); p.tick(100);
+    assert.ok(p.compilation.optimization.blocks > 0); assert.ok(p.optimization.instructionsBatched > 0); p.stop();
+    const overwrite = spawnSync(process.execPath, [cli, '--optimize', input, output], { encoding: 'utf8' });
+    assert.strictEqual(overwrite.status, 1); assert.match(overwrite.stderr, /Refusing to overwrite/);
+    const unknown = spawnSync(process.execPath, [cli, '--unknown', input], { encoding: 'utf8' });
+    assert.strictEqual(unknown.status, 1); assert.strictEqual(unknown.stdout, '');
+    const page = require('../tools/build_game_page').buildGamePage(fs.readFileSync(input), { optimize: true });
+    assert.ok(page.includes('const blocks = [];'));
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});

@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "optimizer.html",
+      "title": "Optimized scalar instruction blocks",
+      "description": "Compare reference and opt-in optimized standalone modules across nine instruction budgets, preserving typed values, source locations and original instruction counts. This is a semantic comparison, not a browser performance benchmark.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/optimizer.html"
+    },
+    {
       "file": "browser-game-harness.html",
       "title": "Game page tutorial, Latin-1 font and touch joystick",
       "description": "Independent umlaut glyph pixels, real GPU text, multi-pointer cross controls, keyboard/Gamepad merging and owned input cleanup. Includes a fully generated playable HTML example with sound, fullscreen and touch settings.",

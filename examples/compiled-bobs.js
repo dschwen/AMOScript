@@ -5048,7 +5048,8 @@
     poke: (address, value) => writeNumber(address, value, 1),
     release(bank) { allocations.delete(bank); } };
 };
-  const createProgram = function createProgram(cases, options = {}) {
+  const createProgram = function createProgram(cases, options = {}, blocks = null) {
+  const optimization = { blocksExecuted: 0, instructionsBatched: 0 };
   const timing = {
     setTimeout: options.setTimeout || (typeof setTimeout !== 'undefined' ? setTimeout : null),
     clearTimeout: options.clearTimeout || (typeof clearTimeout !== 'undefined' ? clearTimeout : null),
@@ -5320,6 +5321,18 @@
     while (steps < maxSteps && !state.halted) {
       let out;
       try {
+        const block = blocks && blocks[state.ip];
+        // Preserve the original per-instruction clock/host hooks while any
+        // asynchronous engine is active. Pure blocks cannot start those engines.
+        if (block && block.length <= maxSteps - steps &&
+          operations.nextTrackerVbl() == null && operations.nextMusicVbl() == null &&
+          operations.nextPaletteVbl() == null) {
+          block.run(state);
+          steps += block.length;
+          optimization.blocksExecuted++;
+          optimization.instructionsBatched += block.length;
+          continue;
+        }
         out = step();
       } catch (error) {
         state.halted = true;
@@ -5429,6 +5442,10 @@
     audioFieldTime: () => (timing.now() - timerEpoch) * timing.vblHz / 1000, audioVblHz: timing.vblHz,
     requestPaletteWake, requestTrackerWake, requestMusicWake }));
   return {
+    ...(blocks ? { optimization: Object.freeze({
+      get blocksExecuted() { return optimization.blocksExecuted; },
+      get instructionsBatched() { return optimization.instructionsBatched; }
+    }) } : {}),
     state, tick, stop, resume, sendKey, clearScanCodes, clearKeyStates, setKeyState, clearMouseButtons, print,
     subscribeInputReset(listener) {
       if (typeof listener !== 'function') throw new Error('Input listener must be a function');

@@ -228,6 +228,10 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'optimizer', title: 'Optimized scalar instruction blocks', capturedFrames: false, description: 'Compare reference and opt-in optimized standalone modules across nine instruction budgets, preserving typed values, source locations and original instruction counts. This is a semantic comparison, not a browser performance benchmark.', run: require('./optimizerProbe'), check(result, assert) {
+    assert.strictEqual(result.comparisons, 9); assert.strictEqual(result.originalTicks, 5159);
+    assert.ok(result.blocksExecuted > 0); assert.ok(result.instructionsBatched > 0);
+  } },
   { id: 'browser-game-harness', title: 'Game page tutorial, Latin-1 font and touch joystick', description: 'Independent umlaut glyph pixels, real GPU text, multi-pointer cross controls, keyboard/Gamepad merging and owned input cleanup. Includes a fully generated playable HTML example with sound, fullscreen and touch settings.', run: require('./browserGameHarnessProbe'), check(result, assert) {
     assert.ok(result.assertions >= 15); assert.strictEqual(result.gpuFrames, 1); assert.strictEqual(result.latin1Glyphs, 96); assert.strictEqual(result.tutorial, true);
   } },
