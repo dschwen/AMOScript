@@ -577,3 +577,14 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   images, five independent composites, restored background and eight Canvas/GPU
   frames pass. Source busy-loop timing and native circle raster parity remain
   open; see `docs/bob-test.md`. Keep both original key prompts in the live host.
+- At ($13c6) returns pure ESC-X/Y byte strings with optional 0..207 coordinates
+  and EntNul omissions. Its string type must survive storage/DATA/procedure calls;
+  only the window writer consumes controls. Keep partial escapes per screen and
+  replay Autoback from the original cursor/escape state. Print comma tabs predict
+  cursor changes without drawing or replaying expressions. Other window escape
+  commands remain gated. Planet Zybex's declared score fixture adds original
+  hires strip/lowres playfield setup and both score statements to its preview;
+  four independent PAL/NTSC Canvas/GPU frames pass, 39 GPU frames total.
+  Separate hires strips may accompany aligned equal-hardware-width lowres
+  priority slices with shared COLOR00; overlaps retain lowres restrictions and real
+  setup rows/budgets. No AMAL/manual-update or gameplay claim; see docs/at-text.md.

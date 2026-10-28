@@ -66,7 +66,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const showcases = ['bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
     'bob-test.html': { title: 'BobTest — 64 bouncing objects', description: 'Run the original BobTest program with WebGL, pause/resume, restart and fullscreen. Press a key to start its 500-frame run.' },
-    'planet-zybex.html': { title: 'Planet Zybex — in development', description: 'The next game target. Explore all seven original level backgrounds with WebGL and fullscreen while gameplay support is being implemented.' },
+    'planet-zybex.html': { title: 'Planet Zybex — in development', description: 'The next game target. Explore all seven original backgrounds and the hires score/lowres playfield fixture with WebGL and fullscreen while gameplay support is being implemented.' },
     'screen-slide.html': { title: 'Roller II sliding-screen intro', description: 'Play both original RolIntrIdee2 intros live, with fullscreen, pause/resume and optional sample sound. Watch the screens slide in from above and below.' },
     'anim5.html': { title: 'Logoanim sphere intro', description: 'Watch the original sphere animation and logo sequence play live. Choose either original version, pause, resume, restart or enter fullscreen.' },
     'wonderland-game.html': { title: 'Dithell’s Wonderland', description: 'Play the original game with keyboard or Gamepad controls, fullscreen and optional sound. Switch between WebGL2 and Canvas presentation.' },

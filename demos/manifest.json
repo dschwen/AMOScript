@@ -345,8 +345,8 @@
     },
     {
       "file": "planet-zybex.html",
-      "title": "Planet Zybex: level background preview",
-      "description": "First milestone toward a playable Planet Zybex showcase. The seven original packed level banks decode through the original Load/Unpack statements; 35 scrolled windows match independent pixels and actual WebGL output. The full game still needs AMAL, computed/wide sprites and update control. This is a background preview, not gameplay.",
+      "title": "Planet Zybex: background and score preview",
+      "description": "First milestone toward a playable Planet Zybex showcase. The seven original packed level banks decode through the original Load/Unpack statements; 35 scrolled windows match independent pixels and actual WebGL output. The original score updates also run in a declared fixture: the hires strip and lowres playfield match four independent frames and GPU output. The full game still needs startup, AMAL, computed/wide sprites and update control. This is a presentation preview, not gameplay.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html"
     },
     {

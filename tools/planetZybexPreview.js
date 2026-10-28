@@ -1,12 +1,13 @@
 /* jshint esversion: 6 */
 'use strict';
 // Original packed-background inspector. This is explicitly not a game launcher.
-function installPlanetZybexPreview({ sources, assets, oracle, gpuSources }) {
+function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource }) {
   const root = document.getElementById('planet-zybex-preview'), make = source => new Function(`return (${source});`)();
-  const introduction = document.createElement('p'); introduction.textContent = 'Planet Zybex is the next game target. Preview its original level backgrounds below. Player controls, enemies and bullets still require AMAL and sprite support.';
+  const introduction = document.createElement('p'); introduction.textContent = 'Planet Zybex is the next game target. Preview its original level backgrounds and a prepared score-display fixture below. Player controls, enemies and bullets still require AMAL and sprite support.';
   const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar';
   const select = document.createElement('select'); select.id = 'zybex-level'; select.setAttribute('aria-label', 'Level background');
   for (const level of oracle.levels) select.add(new Option(`Level ${level.level}`, String(level.level)));
+  select.add(new Option('Score display (fixture)', 'score'));
   const scroll = document.createElement('input'); scroll.id = 'zybex-scroll'; scroll.type = 'range'; scroll.min = '0'; scroll.step = '1'; scroll.value = '0'; scroll.setAttribute('aria-label', 'Scroll through level background');
   const fullButton = document.createElement('button'); fullButton.type = 'button'; fullButton.id = 'zybex-fullscreen'; fullButton.textContent = 'Fullscreen';
   toolbar.append(select, scroll, fullButton);
@@ -25,6 +26,11 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources }) {
   const files = { read(name) { const value = assets[name.toLowerCase()]; if (!value) throw Error(`Missing level asset: ${name}`); return atob(value); } };
   function update() {
     if (!program || disposed) return;
+    if (select.value === 'score') {
+      host.render(); root.dataset.level = 'score'; root.dataset.scroll = '0'; root.dataset.score = String(program.state.variables.int_score); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
+      status.textContent = `Prepared score ${program.state.variables.int_score}, lives ${program.state.variables.int_lives}. Original hires score strip below a lowres level-1 playfield. ${program.state.halted ? 'Fixture finished; select again to restart.' : 'Press a key in the canvas to advance or finish the fixture.'} Gameplay is not running.`;
+      fullscreen.refresh(); return;
+    }
     const level = oracle.levels[Number(select.value) - 1], position = Number(scroll.value);
     program.display.screenOffset(1, level.width > 320 ? position : 0, level.height > 160 ? position : 0); host.render();
     root.dataset.level = select.value; root.dataset.scroll = String(position); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
@@ -34,15 +40,16 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources }) {
   function choose() {
     if (disposed) return;
     if (host) host.detach(); if (program) program.stop(); if (gpu) gpu.clear();
-    const module = { exports: {} }; new Function('module', sources[Number(select.value) - 1])(module);
+    const module = { exports: {} }; new Function('module', select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
     program = module.exports({ files }); host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu }); host.attach(program);
     try {
-      program.tick(1000); const level = oracle.levels[Number(select.value) - 1]; scroll.max = String(Math.max(level.width - 320, level.height - 160)); scroll.value = '0'; update();
+      program.tick(1000); scroll.disabled = select.value === 'score'; const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
     } catch (error) { program.stop(); root.dataset.phase = 'error'; status.textContent = error.message; }
   }
   select.onchange = choose; scroll.oninput = update;
+  const monitor = setInterval(() => { if (select.value === 'score') update(); }, 50);
   function dispose() {
-    if (disposed) return; disposed = true; if (host) host.detach(); if (program) program.stop(); fullscreen.dispose();
+    if (disposed) return; disposed = true; clearInterval(monitor); if (host) host.detach(); if (program) program.stop(); fullscreen.dispose();
     if (gpu) { const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
     root.dataset.phase = 'disposed'; window.removeEventListener('pagehide', dispose);
   }

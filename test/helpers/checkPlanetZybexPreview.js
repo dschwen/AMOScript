@@ -13,7 +13,13 @@ module.exports = async function checkPlanetZybexPreview(page) {
     assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-level'), String(level));
     assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-scroll'), limit);
   }
-  await page.selectOption('#zybex-level', '1'); await page.click('#zybex-fullscreen');
+  await page.selectOption('#zybex-level', 'score');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.score==='1234');
+  assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),true);
+  await page.locator('#zybex-preview-input').focus();await page.keyboard.press('a');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.score==='9876');
+  await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-score.png'),fullPage:true});
+  await page.selectOption('#zybex-level', '1');assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),false); await page.click('#zybex-fullscreen');
   await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'planet-zybex-preview');
   await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.fullscreenElement);
   await page.screenshot({ path: path.join(__dirname, '../artifacts/planet-zybex-preview.png'), fullPage: true });

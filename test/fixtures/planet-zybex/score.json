@@ -1,0 +1,26 @@
+{
+  "width": 640,
+  "height": 171,
+  "origin": [
+    128,
+    50
+  ],
+  "gapRow": 160,
+  "scoreRow": 161,
+  "frames": [
+    {
+      "score": 1234,
+      "lives": 5,
+      "png": "score-1.png",
+      "scoreSha256": "9b7fefd3ca991060b5adbe79356ef639c19c11bbf0250c8183700c07b8eee666",
+      "rgbaSha256": "613cc2242560a8468d3aa82658498e14a3fb30c4b047fc0898fe85a98b5ce292"
+    },
+    {
+      "score": 9876,
+      "lives": 4,
+      "png": "score-2.png",
+      "scoreSha256": "d8e29a8fd657ac01aaef96f21821e7b2e60cc4ca8041289a5ad3f70aa09eae18",
+      "rgbaSha256": "be79c63b53d7b00528bbc8e0340ce4d0f4d04522ba52a691c0a57bfd2e500272"
+    }
+  ]
+}
