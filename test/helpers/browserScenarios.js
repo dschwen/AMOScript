@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'polygon', title: 'Polygon: sphere animation generator', initialFrame: 'Canvas: Saved df1:kugel017', description: 'Solid polygons with independently checked interiors/boundaries, plus the unchanged backup sphere generator. All eight exported IFFs match their rendered pixels and are downloadable below. The portable raster profile is documented; native AreaEnd edge parity remains unverified.', run: require('./polygonProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { matrixFrames: 12, matrixPixels: 2304, savedFrames: 8, savedPixels: 512000, gpuFrames: 12, downloads: 8, sourceUnchanged: true });
+  } },
   { id: 'save-iff', title: 'Save Iff: render, save and download a sphere', initialFrame: 'Canvas: Reloaded rollerball IFF', description: 'The unchanged KugelanimBerech program renders its sphere and saves rollerball after a real Canvas key event. An independent decoder checks all saved pixels; a separate Load Iff preview and two actual GPU comparisons verify presentation. Download the generated IFF from the Debug menu below. Session files are volatile.', run: require('./saveIffProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { writes: 1, filename: 'rollerball', comparedPixels: 128000, gpuFrames: 2, downloadExact: true, reloaded: true, sourceUnchanged: true });
   } },

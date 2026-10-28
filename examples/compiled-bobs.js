@@ -2117,6 +2117,51 @@
   }
   function bar(...values) { const target = screen(); rectangle(target, ...values, target.ink, true); changed(); }
   function box(...values) { const target = screen(); rectangle(target, ...values, target.ink, false); changed(); }
+  function polygon(points) {
+    const target = screen();
+    if (!Array.isArray(points) || points.length < 3 || points.length > 16 ||
+        points.some(pair => !Array.isArray(pair) || pair.length !== 2 || pair.some(value => !Number.isInteger(value) || value < -32768 || value > 32767))) {
+      throw new Error('Polygon requires 3..16 signed-word coordinate pairs');
+    }
+    const last = points[points.length - 1], first = points[0];
+    if (points.length === 16 && (first[0] !== last[0] || first[1] !== last[1])) throw new Error('Polygon closing vertex exceeds the 16-point area buffer');
+    // InPolygon calls AreaMove/AreaDraw/AreaEnd directly, without GfxFunc's
+    // Bob/Autoback replay. Solid fill does not consume Set Line phase/cursors.
+    const left = Math.max(0, Math.min(...points.map(pair => pair[0])));
+    const right = Math.min(target.width - 1, Math.max(...points.map(pair => pair[0])));
+    const top = Math.max(0, Math.min(...points.map(pair => pair[1])));
+    const bottom = Math.min(target.height - 1, Math.max(...points.map(pair => pair[1])));
+    if (left > right || top > bottom) return;
+    // Portable solid-area profile: even/odd pixel-centre interiors plus an
+    // inclusive, lower-Y-first Bresenham boundary. Native edge ties need captures.
+    for (let y = top; y <= bottom; y++) {
+      const scan = y + 0.5, intersections = [];
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i], b = points[(i + 1) % points.length];
+        if ((a[1] > scan) !== (b[1] > scan)) intersections.push(a[0] + (scan - a[1]) * (b[0] - a[0]) / (b[1] - a[1]));
+      }
+      intersections.sort((a, b) => a - b);
+      for (let i = 0; i + 1 < intersections.length; i += 2) {
+        const start = Math.max(left, Math.ceil(intersections[i] - 0.5));
+        const end = Math.min(right + 1, Math.ceil(intersections[i + 1] - 0.5));
+        if (end > start) target.pixels.fill(target.ink, y * target.width + start, y * target.width + end);
+      }
+    }
+    for (let i = 0; i < points.length; i++) {
+      let [x, y] = points[i], [endX, endY] = points[(i + 1) % points.length];
+      if (y > endY || (y === endY && x > endX)) { [x, endX] = [endX, x]; [y, endY] = [endY, y]; }
+      const dx = Math.abs(endX - x), dy = -Math.abs(endY - y), sx = x < endX ? 1 : -1;
+      let error = dx + dy;
+      for (;;) {
+        pixel(target, x, y, target.ink);
+        if (x === endX && y === endY) break;
+        const doubled = 2 * error;
+        if (doubled >= dy) { error += dy; x += sx; }
+        if (doubled <= dx) { error += dx; y++; }
+      }
+    }
+    changed();
+  }
   function locate(x, y) {
     const target = screen();
     x = x == null ? target.x : whole(x); y = y == null ? target.y : whole(y);
@@ -2402,7 +2447,7 @@
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },

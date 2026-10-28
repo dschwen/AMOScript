@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-28. The current local baseline has **769 passing tests**, plus a
+Updated 2026-10-28. The current local baseline has **775 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -42,6 +42,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Polygon | Implemented bounded portable solid fill | Explicit coordinate list, even/odd interiors and inclusive solid boundary, bitmap clipping and preflight; direct logical writes bypass Bob/Autoback. Twelve independent matrices and original eight-image generator/export/download replay pass with 12 GPU comparisons. Native AreaEnd edge parity and wider forms remain open. [Contract](polygon.md). |
 | Save Iff | Implemented one-filename compressed export | Owned ILBM writer, row-bounded ByteRun1, current logical bitmap, palette/mode/AMSC metadata and one synchronous write after validation. Original generator saves rollerball; independent decoding/reload match pixels and Debug exports exact bytes. Buffering/wider forms/native byte identity remain gated. [Contract](save-iff.md). |
 | Zoom | Implemented bounded raw bitmap resize | Ten numeric operands, exclusive in-bitmap extents, source-derived sampling, explicit logical/physical buffers and live overlap. Bypasses Bob/Autoback hooks. Original 49-line intro completes; all generated icons and 29 frames match independent expectations, with four Canvas/GPU frames. Wrapped geometry/native captures remain open. [Contract](zoom.md). |
 | Sqr | Implemented source-derived FFP profile | Unary numeric function with float results, promotion, typed/DATA/procedure boundaries and negative-domain errors. 345 exact independent vectors; 4,096 grayscale pixels and two actual GPU comparisons. Original Kugel compiles but stops at its negative Plot colour; full sphere/native library capture remain open. [Contract](sqr.md). |

@@ -105,6 +105,11 @@
   Earlier fixture bounds are in `docs/roller2-input.md`, `docs/roller2-ball.md`,
   `docs/roller2-boards.md` and `docs/screen-priority.md`. Exact native timing and
   full gameplay remain open.
+- Polygon ($0eba) supports explicit 3..16 signed-word pairs with
+  validated closure capacity, portable even/odd interiors and a solid inclusive
+  boundary. InPolygon bypasses GfxFunc: keep logical-only writes, no Bob/Autoback
+  replay and unchanged cursor/line phase. Original KugelanimBerech.Bak completes
+  eight IFFs; native AreaEnd edge parity remains unverified. See docs/polygon.md.
 - Set Line stores a per-screen low-word mask and preserves a separate portable
   phase counter. Patterned Draw/Draw To/Box use bounded signed-word endpoints,
   MSB-first steps and opaque Ink background; default solid clipping stays intact.

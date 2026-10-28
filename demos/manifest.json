@@ -338,6 +338,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
     },
     {
+      "file": "polygon.html",
+      "title": "Polygon: sphere animation generator",
+      "description": "Solid polygons with independently checked interiors/boundaries, plus the unchanged backup sphere generator. All eight exported IFFs match their rendered pixels and are downloadable below. The portable raster profile is documented; native AreaEnd edge parity remains unverified.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/polygon.html"
+    },
+    {
       "file": "save-iff.html",
       "title": "Save Iff: render, save and download a sphere",
       "description": "The unchanged KugelanimBerech program renders its sphere and saves rollerball after a real Canvas key event. An independent decoder checks all saved pixels; a separate Load Iff preview and two actual GPU comparisons verify presentation. Download the generated IFF from the Debug menu below. Session files are volatile.",

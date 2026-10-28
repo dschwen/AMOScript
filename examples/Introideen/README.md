@@ -27,7 +27,16 @@ saves the literal filename `rollerball` and ends. The browser
 [Save Iff demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/save-iff.html)
 checks saved pixels and offers the file through its Debug download menu.
 
+`KugelanimBerech.Bak` is also unchanged; its hash is pinned in
+`test/fixtures/polygon.json`. Its solid polygons now render eight sphere images,
+saved as `df1:kugel010` through `df1:kugel017`. The
+[Polygon demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/polygon.html)
+checks the portable raster profile, rendered/exported pixels and GPU frames,
+and offers all eight files through Debug downloads. Native AreaEnd pixel parity
+remains a separate capture gate.
+
 See [Sqr semantics and evidence](../../docs/sqr.md),
+[Polygon semantics and evidence](../../docs/polygon.md),
 [Save Iff semantics and evidence](../../docs/save-iff.md),
 [Zoom semantics and evidence](../../docs/zoom.md) and the
 [remaining Introideen plan](../../docs/introideen.md). Other supplied sources

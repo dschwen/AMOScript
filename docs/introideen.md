@@ -24,8 +24,12 @@ Save Iff now runs the unchanged KugelanimBerech generator through its key prompt
 one `rollerball` write and clean termination. Independent decoding matches every
 saved pixel; a separate reload preview and shared Debug download are covered in
 the gallery. See [Save Iff](save-iff.md) for the compressed subset and limits.
-The sibling catalogue is rebuilt: nine programs compile. Next implement Polygon;
-four token encodings remain unsupported.
+Polygon now completes the unchanged backup generator and its eight original
+IFF exports using a documented portable solid-fill profile. Matrix pixels,
+decoded exports, browser downloads and GPU frames are checked; exact native
+AreaEnd edges remain unverified. See [Polygon](polygon.md). The sibling catalogue
+is rebuilt: ten programs compile. Next implement the ANIM-5 foundation and
+Frame Load/Frame Play; three token encodings remain unsupported.
 
 ## Pre-implementation baseline and evidence
 
@@ -134,9 +138,10 @@ first errors are removed; rebuild and execute after each step.
 - Add `$0eba` with a coordinate-list AST and numeric lowering. Implement the
   supplied explicit-start, solid-fill form first; `Polygon To`, patterned fills
   and outline modes require their own verified forms rather than silent fallback.
-- Establish native edge inclusion, closure, degenerate/repeated vertices,
-  clipping and graphics-cursor effects. Validate the whole list before invoking
-  drawing/Bob hooks; preserve Autoback behavior and indexed buffer ownership.
+- Establish edge inclusion, closure, degenerate/repeated vertices, clipping and
+  cursor effects. The implemented portable profile is documented separately;
+  native pixel parity remains open. Original InPolygon bypasses GfxFunc, so
+  preserve that absence of Bob/Autoback replay. Validate before writing pixels.
 - Use independent small polygon matrices for triangles, quads, reversed winding,
   horizontal edges and repeated closing points. The
   [graphics manual](https://amospromanual.dev/06-04-graphics.html) documents the
