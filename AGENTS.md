@@ -539,3 +539,14 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Uncached untyped identifiers followed by bracketed statement arguments normalize
   to checked ordinary procedure calls. Input, Port(), SER:/PRT:, physical printing
   and PCL interpretation remain gated. See docs/open-port.md.
+
+- Signed Screen Display supports Y -4095..28671 with nonwrapping biased ends.
+  Commit clipped raster [26,310) PAL / [26,260) NTSC geometry together with
+  pointer mapping; advance planar source pointers without altering bitmap/window
+  identity. Early-ending/top-cropped windows use explicit copper DMA starts/stops,
+  and following normal windows re-enable DMA. Preserve setup rows/budgets, strict
+  full bitmap ranges and off-field no-fetch snapshots. Both unchanged RolIntrIdee2
+  sources complete: 200 independent frames, 28 GPU/pointer comparisons and live
+  version-selectable playback with optional owned sample sound. Activate sound
+  before the first VM tick; dispose VM/timers/GPU/audio on replacement/page exit.
+  Wider wraps/clamps/native captures remain gated. See docs/screen-slide.md.

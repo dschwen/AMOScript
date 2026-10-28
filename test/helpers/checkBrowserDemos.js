@@ -105,6 +105,7 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.evaluate(() => typeof globalThis.AMOS_PLAY_GAME), 'undefined');
         await page.locator('#demo-checks summary').click();
       }
+      if (scenario.id === 'screen-slide') await require('./checkScreenSlidePlayer')(page);
       if (scenario.id === 'anim5') await require('./checkAnim5Player')(page);
       await page.click('#run-demo');
       await page.waitForFunction(() => ['passed', 'failed'].includes(document.body.dataset.status), null, { timeout: 60000 });

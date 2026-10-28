@@ -1,0 +1,22 @@
+'use strict';
+const assert = require('assert');
+module.exports = async function checkScreenSlidePlayer(page) {
+  await page.click('#animation-play');
+  await page.waitForFunction(() => { const d = document.getElementById('animation-player').dataset; return d.phase === 'running' && d.sound === 'on' && Number(d.plays) >= 1; });
+  await page.click('#animation-stop'); await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'paused');
+  await page.click('#animation-resume'); await page.waitForFunction(() => document.getElementById('animation-player').dataset.waiting === 'key');
+  assert.strictEqual(await page.locator('#animation-player').getAttribute('data-backend'), 'webgl');
+  assert.strictEqual(await page.locator('#animation-player').getAttribute('data-plays'), '2');
+  await page.locator('#animation-input').focus(); await page.keyboard.press('a');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'ended');
+  await page.selectOption('#animation-version', 'RolIntrIdee2.Bak');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.waiting === 'key');
+  assert.strictEqual(await page.locator('#animation-player').getAttribute('data-plays'), '2');
+  await page.click('#animation-fullscreen'); await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'animation-player');
+  await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.fullscreenElement);
+  await page.locator('#animation-input').focus(); await page.keyboard.press('b');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'ended');
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  assert.strictEqual(await page.locator('#animation-player').getAttribute('data-sound'), 'disposed');
+  await page.locator('#demo-checks summary').click();
+};

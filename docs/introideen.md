@@ -35,9 +35,12 @@ is retained and IconCutter now finishes its bounded startup run. Open Port was t
 last missing encoding and is now implemented with an explicit parallel-output
 adapter. All three original printer programs finish and match 5,661 independent
 expected bytes, downloadable in the [Open Port demo](open-port.md). Fifteen of
-sixteen files compile; the remaining backup is truncated. Next investigate signed
-Screen Display placement for the two RolIntrIdee2 sources, retaining shared
-copper geometry and pointer clipping. Runtime/input blockers below still apply.
+sixteen files compile; the remaining backup is truncated. Signed Screen Display
+placement now completes both unchanged RolIntrIdee2 intros through their final
+key prompt, with all 200 PAL/NTSC movement frames independently checked and live
+playback/sample sound in the [sliding-screen demo](screen-slide.md). Next inventory
+the missing RII: volume for the older rol sources without substituting assets
+from the newer game. Other runtime/input blockers below still apply.
 
 ## Pre-implementation baseline and evidence
 
@@ -215,7 +218,7 @@ first errors are removed; rebuild and execute after each step.
 
 | Blocker | Observation | Planned follow-up |
 | --- | --- | --- |
-| Negative Screen Display Y | Both RolIntrIdee2 versions move Y1 from -80 toward 120; first display uses -76 | Verify signed-word/native clipping semantics, then extend the committed window/copper and pointer-crop paths together. Regress parked positive windows, overlaps, late DMA, PAL/NTSC and input mapping. Do not just remove the validation. |
+| Wider Screen Display placement | Both RolIntrIdee2 versions now complete using signed Y and native raster clipping | Wrapped coordinates, more-negative clamps, general horizontal placement and native captures remain open; see [the accepted slice](screen-slide.md). |
 | Active ILBM DRNG | Inactive records in IconCutter's `armartures` and Logoanim's `introroller` now validate and remain metadata | Active ranges still require explicit clock/palette integration. Original chunks are preserved. |
 | Missing RII volume | rol.amos and rol.Bak fail at original Dir$ setup | Inventory expected assets and provide an explicit matching manifest/volume mapping. Do not silently combine these older sources with current Roller II data. |
 | Truncated Roller II.Bak | File is 65,536 bytes; header declares 67,210 code bytes, requiring at least 67,230 bytes before any trailing data | Recover a complete source copy if available. Keep Buffer's bounds validation unchanged; this is not an unsupported-token task. |

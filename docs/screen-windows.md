@@ -17,14 +17,16 @@ the stored viewport width is doubled for hires. Vertical placement and height
 use physical rows in the supported nonlaced subset.
 
 The current bounded implementation accepts aligned x=128, widths 128–320 lowres
-units and nonnegative vertical positions whose internal signed-word coordinates
-do not wrap (Y and Y+height at most 28,671, with the existing minimum end 128).
-Committed windows clip to the native nonlaced end row 310 (260 for NTSC). Other placement,
-clipping and scheduling forms reject explicitly. Equal-width lowres overlaps use
-the [priority slice path](screen-priority.md), including ordinary window opens. A window and its offsets
-must fit within its physical bitmap at presentation; wrapped/out-of-bitmap DMA is
-unsupported. Negative coordinates and word-overflow behavior remain outside this
-subset. Hires offsets discard the low x bit, following the original scroll logic.
+units and signed vertical positions -4095..28671, with Y+height at most 28671.
+Managed windows clip to the native nonlaced raster interval [26,310) in PAL or
+[26,260) in NTSC, advancing source pointers at the top. Small early-ending windows
+use explicit copper DMA control. Fully off-field windows fetch no pixels. See
+[the original sliding intros](screen-slide.md) for the source evidence and demo.
+Equal-width lowres overlaps use the [priority slice path](screen-priority.md),
+including ordinary window opens. A window and its offsets must fit within its
+physical bitmap at presentation; wrapped/out-of-bitmap DMA, lower signed clamp
+cases and general horizontal placement remain unsupported.
+Hires offsets discard the low x bit, following the original scroll logic.
 HAM fine horizontal offsets reject pending fetched-prefix colour-history support.
 
 `Screen Offset n,x,y` changes the source origin in bitmap pixels. Omitted x/y

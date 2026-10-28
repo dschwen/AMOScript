@@ -55,3 +55,11 @@ matches independently transcribed streams (2,409 / 178 / 3,074 bytes). The
 [Open Port demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/open-port.html)
 offers exact raw `.prn` downloads and hexadecimal inspection. See [the adapter
 contract](../../docs/open-port.md); physical printing and PCL rendering are open.
+
+`RolIntrIdee2.amos`, `RolIntrIdee2.Bak`, `rolIntr` and `RolIntrSam.abk` are unchanged
+copies pinned in `test/fixtures/screen-slide.json`. Both slide screens from above
+and below the display, reveal the image and finish after a key. The newer source
+also clears strip regions and plays two samples; the backup preserves the image
+strips and is silent. The [live sliding-screen demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/screen-slide.html)
+includes both versions, sound, pause/resume and fullscreen. See [the clipping
+contract and independent evidence](../../docs/screen-slide.md).

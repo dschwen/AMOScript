@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'screen-slide', title: 'Roller II intro: sliding screen windows', initialFrame: 'Canvas: RolIntrIdee2.Bak PAL slide 50', description: 'Both unchanged RolIntrIdee2 sources slide cropped screens from above and below the display. All 200 PAL/NTSC movement frames match independent ILBM and raster-crop expectations, with 28 actual GPU comparisons, pointer checks and Stop/Resume. Includes live playback with optional original sample sound; no native capture is claimed.', run: require('./screenSlideProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { frames: 200, gpuFrames: 28, pointerChecks: 28, plays: 4, paused: true, bothSourcesEnded: true });
+  } },
   { id: 'open-port', title: 'Open Port: original printer programs', capturedFrames: false, description: 'Run three unchanged Introideen printer programs through an explicit parallel-output capture. All 5,661 bytes match independently transcribed expectations, including escape codes, tabs and high characters. Download raw .prn files and inspect their hexadecimal bytes. No printer driver or physical printing is emulated.', run: require('./openPortProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { programs: 3, lengths: [2409, 178, 3074], totalBytes: 5661, downloads: 3, allClosed: true });
   } },

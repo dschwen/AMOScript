@@ -16,8 +16,10 @@ under a documented portable raster profile. Frame Load/Frame Play now finish
 both unchanged Logoanim intros with independent frame hashes and Canvas/WebGL
 checks. Open Port now completes all three original printer programs through an
 explicit parallel-output capture adapter with independent downloadable bytes.
-All audited token encodings are implemented; next extend signed Screen Display
-placement for the two RolIntrIdee2 sources using source-backed clipping. Each step includes an original-program
+All audited token encodings are implemented. Signed Screen Display placement now
+completes both RolIntrIdee2 intros, with independent PAL/NTSC pixels and live
+WebGL/sample-sound playback. Next inventory the RII: assets required by the older
+rol sources, preserving their source/asset version boundary. Each step includes an original-program
 acceptance target and repository browser demo. Keep Roller II and Wonderland
 as full-game regressions throughout.
 
@@ -25,13 +27,14 @@ Fifteen files currently compile; the remaining backup is truncated. Both Kugelan
 RollerIIIntroIdee pass the 1,000-instruction startup check, but Kugel later stops
 at its negative Plot colour.
 Inactive DRNG records now validate and IconCutter finishes its startup run.
-Negative Screen Display placement, active DRNG cycling, missing RII assets and
+Wider wrapped screen placement, active DRNG cycling, missing RII assets and
 a truncated backup are separate blockers, with their own investigation gates.
 Source hashes, all missing-token locations and baseline outcomes are recorded
 in [the pre-implementation inventory](docs/introideen-inventory.json). See
 [Sqr support](docs/sqr.md), [Zoom support](docs/zoom.md),
 [Save Iff support](docs/save-iff.md), [Polygon support](docs/polygon.md)
-[ANIM-5 support](docs/anim5.md) and [Open Port support](docs/open-port.md)
+[ANIM-5 support](docs/anim5.md), [Open Port support](docs/open-port.md)
+and [signed screen placement](docs/screen-slide.md)
 for the completed slices.
 
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)

@@ -27,7 +27,7 @@ test('browser demos: catalogue covers every shared scenario with self-contained 
       assert.match(html, /<details id="demo-checks"><summary>Browser checks and captured frames/);
       assert.doesNotMatch(html, /<details id="demo-checks"[^>]*\bopen\b/);
     }
-    if (entry.file === 'anim5.html') {
+    if (['anim5.html', 'screen-slide.html'].includes(entry.file)) {
       assert.ok(html.indexOf('id="animation-player"') < html.indexOf('id="demo-checks"'));
       assert.match(html, /Play Animation/);
       assert.match(html, /<details id="demo-checks"><summary>Browser checks and captured frames/);
