@@ -4,14 +4,25 @@ Assessment: 2026-10-28. Goal: compile the supplied programs without source
 rewrites, then run the visual intros and expose generated pictures/printer bytes
 through the existing browser harness.
 
-## Baseline and evidence
+## Current progress
+
+Sqr is implemented; see [semantics and evidence](sqr.md). The sibling catalogue
+has been rebuilt: seven files compile. Kugel's unchanged source passes the short
+startup check, then reaches a source-level negative Plot colour at line 14,
+byte 520, GX=89/GY=42/P=-1. Keep the native negative-colour rejection. The Sqr
+gallery demo shows the partial sphere and this expected failure; the original
+complete-rendering acceptance goal below is still unmet. The current animation
+generator advances to Save Iff, and its backup advances to Polygon.
+Next implement Zoom. Six token encodings remain unsupported.
+
+## Pre-implementation baseline and evidence
 
 The directory contains 16 AMOS-header files: nine `.amos` files and seven `.Bak`
 files. Six compile. Nine fail on unsupported tokens; one backup is truncated.
 The bounded startup check executes at most 1,000 instructions with a fixed clock;
 only `Drums.amos` passes. This is not a full playback test.
 
-The [machine-readable inventory](introideen-inventory.json) records source hashes,
+The [machine-readable baseline inventory](introideen-inventory.json) records source hashes,
 all missing-token occurrences and startup results. Source/assets in `introideen/`
 are currently untracked; the inventory identifies the inspected bytes but is not
 a portable source fixture. Before adding conformance tests, pin the required
@@ -39,7 +50,7 @@ No other unrecognized encoding appears in the 15 structurally valid files.
 Existing recognized forms may still expose parser or runtime limits once the
 first errors are removed; rebuild and execute after each step.
 
-## Ordered implementation
+## Ordered implementation and acceptance goals
 
 ### 1. Sqr: first visual result
 

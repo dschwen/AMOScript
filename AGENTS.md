@@ -178,6 +178,12 @@
   an optional synchronous `readRandomBeam` word; defaults are explicit zero seed/
   beam choices, not native startup/timing claims. See `docs/random.md` for the
   rejection bound, independent vectors and original enemy fixtures.
+- Sqr ($0768) promotes numeric arguments to float and uses a source-derived
+  restoring FFP mantissa recurrence; negative inputs reject before assignment.
+  Keep static/DATA, Val and typed storage consistent. The unchanged pinned Kugel
+  source now compiles but produces colour -1 at line 14, byte 520 after 240132
+  instructions. Preserve that source error and strict Plot checks; its partial
+  sphere/demo is not completed execution or a native capture. See docs/sqr.md.
 - `lib/amos/bankMemory.js` maps generic-bank payloads to checked per-factory
   virtual addresses for Start/Peek/Poke. These are separate from display chip
   addresses. Doke/Deek and Loke/Leek use checked complete two/four-byte ranges,

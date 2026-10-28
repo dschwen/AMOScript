@@ -6,18 +6,21 @@ Assessment updated: 2026-10-28.
 
 The [Introideen implementation plan](docs/introideen.md) audits all 16 AMOS
 sources/backups, including commands hidden behind each first compiler error.
-Seven encodings remain unsupported. Implement in this order: Sqr; Zoom;
-Save Iff; Polygon; Frame Load/Frame Play with ANIM-5 decoding; Open Port with
+Sqr is now implemented with source-derived FFP rounding and an original Kugel
+demo; its source produces colour -1 before completing the sphere. Six encodings
+remain unsupported. Continue in this order: Zoom; Save Iff; Polygon;
+Frame Load/Frame Play with ANIM-5 decoding; Open Port with
 an explicit printer-output adapter. Each step includes an original-program
 acceptance target and repository browser demo. Keep Roller II and Wonderland
 as full-game regressions throughout.
 
-Six files currently compile; only Drums passes the bounded startup check.
+Seven files currently compile; Drums and Kugel pass the 1,000-instruction startup
+check, but Kugel later stops at its negative Plot colour.
 Negative Screen Display placement, ILBM DRNG metadata, missing RII assets and
 a truncated backup are separate blockers, with their own investigation gates.
 Source hashes, all missing-token locations and baseline outcomes are recorded
-in [the inventory](docs/introideen-inventory.json). This is planned work; no
-additional compiler support is enabled by this assessment.
+in [the pre-implementation inventory](docs/introideen-inventory.json). See
+[Sqr support and evidence](docs/sqr.md) for the first completed command slice.
 
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)
 now highlights complete games, animation/music and interactive examples; individual

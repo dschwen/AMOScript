@@ -338,6 +338,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
     },
     {
+      "file": "sqr.html",
+      "title": "Sqr and the original Kugel shading program",
+      "description": "Exact FFP square roots, independently checked grayscale tiles and the unchanged Kugel sphere program. The original source stops when its shading expression produces colour -1; the retained partial sphere is not a completed rendering. Two actual GPU/CPU comparisons.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sqr.html"
+    },
+    {
       "file": "trigonometry.html",
       "title": "Trigonometry and angle modes",
       "description": "Source-compiled Sin/Cos/Tan, degree/radian modes and matching Canvas/planar/copper pixels.",

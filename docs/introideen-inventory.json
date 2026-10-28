@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Static inventory and bounded startup observations, not native AMOS execution. Sources currently live in the untracked introideen directory; hashes identify the inspected bytes.",
+  "description": "Pre-implementation baseline: static inventory and bounded startup observations, not native AMOS execution. Sources were inspected in the untracked introideen directory; hashes identify the original bytes. Current progress is in introideen.md.",
   "catalogRevision": "7f32e0abe1b6b415c9502b598cd3e4cb131018f8",
   "programs": [
     {

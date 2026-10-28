@@ -1,6 +1,6 @@
 # Compatibility and implementation status
 
-Updated 2026-10-27. The current local baseline has **749 passing tests**, plus a
+Updated 2026-10-28. The current local baseline has **756 passing tests**, plus a
 passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -42,6 +42,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Sqr | Implemented source-derived FFP profile | Unary numeric function with float results, promotion, typed/DATA/procedure boundaries and negative-domain errors. 345 exact independent vectors; 4,096 grayscale pixels and two actual GPU comparisons. Original Kugel compiles but stops at its negative Plot colour; full sphere/native library capture remain open. [Contract](sqr.md). |
 | Roller II high-score input | Prepared-file full-source replay | Both Ctrl keys fire and combine with arrows; Enter reaches original name entry. A declared zero-score table lets the natural 299-point path qualify, type a name, confirm, verify exact Highscores writeback and return to menu/fresh game. Shipped-score qualification and native captures remain separate. [Contract](roller2-game.md). |
 | Roller II help source fix | Complete help/menu replay | Source line 1129 subtracts 48 for final entries 49–52. Strict text cursor checks remain unchanged. Seven icon pages, timed demonstrations and menu return; 1,024 independently decoded icon pixels and nine Canvas/GPU comparisons. [Fix](../examples/Roller2/current/help-page-fix.md). |
 | Application debug UI | Optional builder/host presentation | `--debug` adds new/modified session-file downloads and bounded source error/state logs. Normal pages use accessible lifecycle icons and compact errors. Binary Bsave exports, reverted-file filtering and URL cleanup have a shared browser demo. Storage is still session-only. [Tutorial](game-webpage-tutorial.md#debug-builds-and-downloading-session-files). |

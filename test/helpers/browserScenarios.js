@@ -419,6 +419,12 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'sqr', title: 'Sqr and the original Kugel shading program', initialFrame: 'Canvas: Original Kugel — stopped at negative colour', description: 'Exact FFP square roots, independently checked grayscale tiles and the unchanged Kugel sphere program. The original source stops when its shading expression produces colour -1; the retained partial sphere is not a completed rendering. Two actual GPU/CPU comparisons.', run: require('./sqrProbe'), check(result, assert) {
+    assert.strictEqual(result.gpuFrames, 2); assert.strictEqual(result.independentPixels, 4096);
+    assert.strictEqual(result.error, 'Invalid colour index at line 14, byte 520');
+    assert.strictEqual(result.ticks, 240132); assert.strictEqual(result.partialSphere, true);
+    assert.strictEqual(result.gameRunning, false);
+  } },
   { id: 'trigonometry', title: 'Trigonometry and angle modes', description: 'Source-compiled Sin/Cos/Tan, degree/radian modes and matching Canvas/planar/copper pixels.', run: trigonometry, check: checkTrigonometry },
   { id: 'ehb', title: 'Extra Half Brite', description: 'Six-bit pixel codes, masked palette registers and exact four-bit halving.', run: ehb, check: checkEhb },
   { id: 'ham', title: 'HAM6 colour history', description: 'Palette and component commands, row resets, independent factories and three matching output paths.', run: ham, check: checkHam },

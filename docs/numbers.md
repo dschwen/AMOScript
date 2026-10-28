@@ -229,6 +229,14 @@ records this discrepancy pending comparison with the selected Kickstart library.
 Unit tests cover state isolation, small angles, poles and reduction boundaries;
 Chromium executes a standalone trigonometric program and checks its Canvas pixels.
 
+## Square roots
+
+`Sqr` now uses the source-derived restoring FFP square-root recurrence after
+ordinary integer/Val promotion. It returns a float and rejects negative operands
+before assignment. See [the Sqr contract](sqr.md) for 345 independently rounded
+vectors, typed boundary checks and the original Kugel source's negative-colour
+stop. Exact target-library captures remain open.
+
 ## Absolute value, sign and floor
 
 `Abs` and `Int` preserve integer/float type, including when the argument comes
