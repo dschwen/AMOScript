@@ -291,6 +291,12 @@
   and copies common bitmap planes without swapping identities or invoking
   Autoback/Bob hooks. Saved Bob backgrounds retain their existing owners. See
   `docs/screen-copy.md`; explicit minterms and exact DMA timing remain open.
+- Zoom ($10d6) uses ten numeric operands, exclusive in-bitmap rectangles and
+  ZooTab reduction/enlargement sampling. Resolve source then destination;
+  preserve raw common planes and column/plane/row live alias feedback, bypassing
+  Bob/Autoback hooks. Validate geometry/table bounds before writes. The unchanged
+  RollerIIIntroIdee source and R.abk match independent icons/all 29 frames and
+  complete the final key prompt; four Canvas/GPU comparisons pass. See docs/zoom.md.
 - Reserve/Set/Reset Zone and Zone queries use per-screen unsigned-word rectangles,
   inclusive edges and lowest-number overlap priority. They do not draw or change
   presentation. Keep hardware mouse conversion separate from the existing Canvas

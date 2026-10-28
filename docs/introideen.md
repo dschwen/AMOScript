@@ -13,7 +13,12 @@ byte 520, GX=89/GY=42/P=-1. Keep the native negative-colour rejection. The Sqr
 gallery demo shows the partial sphere and this expected failure; the original
 complete-rendering acceptance goal below is still unmet. The current animation
 generator advances to Save Iff, and its backup advances to Polygon.
-Next implement Zoom. Six token encodings remain unsupported.
+Zoom now runs the unchanged RollerIIIntroIdee source through all 29 original
+animation frames and its final key prompt; all generated icons/frames match
+independent expectations. See [the Zoom contract](zoom.md). The sibling catalogue
+is rebuilt: eight programs compile. Source inspection corrected two initial
+assumptions: Zoom rejects out-of-bitmap rectangles and bypasses Bob/Autoback hooks
+with live overlap feedback. Next implement Save Iff. Five encodings remain unsupported.
 
 ## Pre-implementation baseline and evidence
 
@@ -77,11 +82,12 @@ first errors are removed; rebuild and execute after each step.
 - Add `$10d6` and the explicit five-operands/To/five-operands grammar. Keep AST
   construction pure and operand evaluation left-to-right, once each. Reuse the
   existing Logic/Physic selector resolution where native semantics agree.
-- Implement indexed bitmap resizing through the existing display drawing path,
-  preserving palette ownership, logical/physical buffers, Autoback and Bob hooks.
+- Implement indexed bitmap resizing through the existing display model,
+  preserving palette ownership and logical/physical buffers. Source inspection
+  established that Zoom bypasses Autoback/Bob hooks as a raw plane operation.
   Define sampling, rectangle ends, clipping, plane-depth transfer and overlap from
-  original source before implementation. Snapshot aliased source pixels where
-  required; preflight unsupported geometry before any destination mutation.
+  original source before implementation. Preserve native live alias traversal;
+  preflight unsupported geometry before any destination mutation.
   Never delegate semantics to browser canvas image interpolation.
 - The [screen manual](https://amospromanual.dev/06-02-using-screens.html) documents
   source/destination rectangles and logical/physical selectors. The supplied

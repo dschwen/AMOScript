@@ -1804,6 +1804,42 @@
     }
     changed();
   }
+  function zoom(from, x1, y1, xEnd, yEnd, to, x2, y2, x2End, y2End) {
+    // InZoom uses GetEc source first, then destination, and writes raw planes.
+    // It bypasses GfxFunc/Bob/Autoback hooks and never selects either screen.
+    const source = resolveBuffer(from), destination = resolveBuffer(to);
+    const coordinates = [x1, y1, xEnd, yEnd, x2, y2, x2End, y2End];
+    coordinates.forEach(whole);
+    if (coordinates.some(value => value < 0 || value > 32767) ||
+        x1 >= xEnd || y1 >= yEnd || x2 >= x2End || y2 >= y2End ||
+        xEnd > source.target.width || yEnd > source.target.height ||
+        x2End > destination.target.width || y2End > destination.target.height) {
+      throw new Error('Invalid Zoom rectangle (expected positive in-bitmap extents)');
+    }
+    const sw = xEnd - x1, sh = yEnd - y1, dw = x2End - x2, dh = y2End - y2;
+    if (dw + dh + 2 > 2048) throw new Error('Zoom tables exceed the supported 4 KiB limit');
+    // ZooTab chooses the last source cell in each reduction interval, and
+    // the first cell in each enlargement interval. Ends are exclusive.
+    const samples = (size, count) => Array.from({ length: count }, (_, index) =>
+      size > count ? Math.ceil((index + 1) * size / count) - 1 : Math.floor(index * size / count));
+    const xs = samples(sw, dw), ys = samples(sh, dh);
+    const planes = Math.min(source.target.colours - 1, destination.target.colours - 1);
+    // Preserve native column / plane / row traversal for aliased bitmaps.
+    // Repeated destination rows reuse the previously fetched source bit.
+    for (let x = 0; x < dw; x++) for (let plane = 1; plane <= planes; plane *= 2) {
+      let previous = -1, bit = 0;
+      for (let y = 0; y < dh; y++) {
+        if (ys[y] !== previous) {
+          bit = source.pixels[(y1 + ys[y]) * source.target.width + x1 + xs[x]] & plane;
+          previous = ys[y];
+        }
+        const at = (y2 + y) * destination.target.width + x2 + x;
+        destination.pixels[at] = (destination.pixels[at] & ~plane) | bit;
+      }
+    }
+    changed();
+  }
+
   function drawing(painter, args) {
     const target = screen();
     const synchronise = target.autoback === 2 && drawingHooks;
@@ -2309,7 +2345,7 @@
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
     ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
-    paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle,
+    paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
     drawTo: (...args) => { const target = screen(); validatePattern([target.gx, target.gy, ...args]); return drawing(drawTo, args); },

@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'zoom', title: 'Roller II intro idea: Zoom animation', initialFrame: 'Canvas: Original intro frame 29', description: 'The unchanged 49-line RollerIIIntroIdee program and its supplied R.abk asset. Sixteen generated icons and all 29 animation frames match independent Python expectations; four Canvas/GPU frames are compared. Select captured frames to inspect the original animation.', run: require('./zoomProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { frames: 29, icons: 17, iconPixels: 4352, canvasPixels: 256000, gpuFrames: 4, ended: true, sourceUnchanged: true });
+  } },
   { id: 'sqr', title: 'Sqr and the original Kugel shading program', initialFrame: 'Canvas: Original Kugel — stopped at negative colour', description: 'Exact FFP square roots, independently checked grayscale tiles and the unchanged Kugel sphere program. The original source stops when its shading expression produces colour -1; the retained partial sphere is not a completed rendering. Two actual GPU/CPU comparisons.', run: require('./sqrProbe'), check(result, assert) {
     assert.strictEqual(result.gpuFrames, 2); assert.strictEqual(result.independentPixels, 4096);
     assert.strictEqual(result.error, 'Invalid colour index at line 14, byte 520');

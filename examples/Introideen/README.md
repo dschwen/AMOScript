@@ -12,6 +12,15 @@ This follows the original negative-colour guard; no clamp or source edit is
 applied. The [Sqr demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sqr.html)
 retains the partially drawn frame and explains the stop.
 
-See [Sqr semantics and evidence](../../docs/sqr.md) and the
+`RollerIIIntroIdee.amos` and `R.abk` are also unchanged copies from `introideen/`.
+SHA-256 hashes are recorded in `test/fixtures/zoom.json` and verified by the
+original-program regression. The 49-line intro loads `df1:r.abk`, builds 16
+icons using Zoom/Get Icon, animates nine letters through 29 Screen Swaps and ends
+after its final key prompt. No source fixes or prepared VM state are used.
+Its [browser demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/zoom.html)
+embeds the source/asset and independently checked captured frames.
+
+See [Sqr semantics and evidence](../../docs/sqr.md),
+[Zoom semantics and evidence](../../docs/zoom.md) and the
 [remaining Introideen plan](../../docs/introideen.md). Other supplied sources
 and assets will be pinned with their own implementation slices.
