@@ -27,6 +27,12 @@ test('browser demos: catalogue covers every shared scenario with self-contained 
       assert.match(html, /<details id="demo-checks"><summary>Browser checks and captured frames/);
       assert.doesNotMatch(html, /<details id="demo-checks"[^>]*\bopen\b/);
     }
+    if (entry.file === 'anim5.html') {
+      assert.ok(html.indexOf('id="animation-player"') < html.indexOf('id="demo-checks"'));
+      assert.match(html, /Play Animation/);
+      assert.match(html, /<details id="demo-checks"><summary>Browser checks and captured frames/);
+      assert.doesNotMatch(html, /<details id="demo-checks"[^>]*\bopen\b/);
+    }
     for (const match of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) new vm.Script(match[1], { filename: entry.file });
   }
 });

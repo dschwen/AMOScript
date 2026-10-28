@@ -7,6 +7,20 @@ contains both programs and the supplied assets. It checks all 20 stored frames,
 including the two loop buffers, and Stop/Resume. This is independent decoder and
 browser evidence, not an Amiga capture.
 
+## Watching the intro
+
+Click **Play Animation** at the top of the demo page. The player runs the complete
+original source on real browser timers with WebGL presentation (Canvas fallback
+when WebGL is unavailable). Choose either source version, pause/resume, restart
+or enter fullscreen. Click the animation to finish the source's final logo
+sequence. No startup input is injected. Ended intros can be played again.
+
+The browser checks and captured-frame selector are in a closed section below the
+player; running those checks is optional. `tools/anim5Player.js` owns the live VM,
+input host, timers and GPU resources, disposing previous programs on restart and
+all owned resources on page exit. Both playback versions, pause/resume, restart,
+fullscreen, pointer-driven completion and page-exit cleanup have browser coverage.
+
 ## Language and bank contract
 
 Implemented encodings are `$25e0`, `N=Frame Load(channel To bank,count)`, and

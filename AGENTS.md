@@ -522,3 +522,8 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Load Iff treats transparent-colour metadata opaquely; actual mask planes remain
   gated. ILBM DRNG flags exactly zero retain frozen validated metadata with no
   palette job; active/reserved flags reject.
+
+- The ANIM-5 demo features a live original-program player before collapsed test
+  captures. tools/anim5Player.js owns real timers, Canvas/WebGL input/presentation,
+  source-version selection, pause/resume, restart and fullscreen; page exit retires
+  its timers/VM/GPU. No fake clock or startup input belongs in this live path.
