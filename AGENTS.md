@@ -260,6 +260,12 @@
   changes without conflating Key Speed with held joystick state. See
   `docs/joysticks.md`; menu fixture/injected device evidence is not a hardware capture.
 - `Load Iff` embeds the bounded ILBM reader for opaque non-laced screen loading.
+  Save Iff ($0afc) embeds a pure ILBM writer with default ByteRun1 compression,
+  zero-padded planar rows and current palette/mode/AMSC metadata. Validate/encode
+  completely before one synchronous files.write with the retained resolved name.
+  No drawing/Bob/Autoback hooks; double buffers/clones and $0b0c remain gated.
+  Original KugelanimBerech saves rollerball after its key prompt; independent
+  decoding/reload and exact Debug exports pass. See docs/save-iff.md.
   Table-based rainbows materialize palette rows through the copper builder;
   Canvas uses the same slot/row selection. Auto View/View stage screen replacement
   separately from selected logical output. See `docs/title-display.md` for the

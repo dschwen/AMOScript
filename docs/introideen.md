@@ -18,7 +18,14 @@ animation frames and its final key prompt; all generated icons/frames match
 independent expectations. See [the Zoom contract](zoom.md). The sibling catalogue
 is rebuilt: eight programs compile. Source inspection corrected two initial
 assumptions: Zoom rejects out-of-bitmap rectangles and bypasses Bob/Autoback hooks
-with live overlap feedback. Next implement Save Iff. Five encodings remain unsupported.
+with live overlap feedback.
+
+Save Iff now runs the unchanged KugelanimBerech generator through its key prompt,
+one `rollerball` write and clean termination. Independent decoding matches every
+saved pixel; a separate reload preview and shared Debug download are covered in
+the gallery. See [Save Iff](save-iff.md) for the compressed subset and limits.
+The sibling catalogue is rebuilt: nine programs compile. Next implement Polygon;
+four token encodings remain unsupported.
 
 ## Pre-implementation baseline and evidence
 

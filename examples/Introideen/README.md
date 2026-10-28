@@ -20,7 +20,15 @@ after its final key prompt. No source fixes or prepared VM state are used.
 Its [browser demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/zoom.html)
 embeds the source/asset and independently checked captured frames.
 
+`KugelanimBerech.amos` is an unchanged copy of the supplied current generator;
+its hash is pinned in `test/fixtures/save-iff.json`. Unlike Kugel, this source
+explicitly clamps negative P to zero. It renders one sphere, waits for a key,
+saves the literal filename `rollerball` and ends. The browser
+[Save Iff demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/save-iff.html)
+checks saved pixels and offers the file through its Debug download menu.
+
 See [Sqr semantics and evidence](../../docs/sqr.md),
+[Save Iff semantics and evidence](../../docs/save-iff.md),
 [Zoom semantics and evidence](../../docs/zoom.md) and the
 [remaining Introideen plan](../../docs/introideen.md). Other supplied sources
 and assets will be pinned with their own implementation slices.

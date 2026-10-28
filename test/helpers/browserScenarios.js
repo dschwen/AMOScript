@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'save-iff', title: 'Save Iff: render, save and download a sphere', initialFrame: 'Canvas: Reloaded rollerball IFF', description: 'The unchanged KugelanimBerech program renders its sphere and saves rollerball after a real Canvas key event. An independent decoder checks all saved pixels; a separate Load Iff preview and two actual GPU comparisons verify presentation. Download the generated IFF from the Debug menu below. Session files are volatile.', run: require('./saveIffProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { writes: 1, filename: 'rollerball', comparedPixels: 128000, gpuFrames: 2, downloadExact: true, reloaded: true, sourceUnchanged: true });
+  } },
   { id: 'zoom', title: 'Roller II intro idea: Zoom animation', initialFrame: 'Canvas: Original intro frame 29', description: 'The unchanged 49-line RollerIIIntroIdee program and its supplied R.abk asset. Sixteen generated icons and all 29 animation frames match independent Python expectations; four Canvas/GPU frames are compared. Select captured frames to inspect the original animation.', run: require('./zoomProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { frames: 29, icons: 17, iconPixels: 4352, canvasPixels: 256000, gpuFrames: 4, ended: true, sourceUnchanged: true });
   } },

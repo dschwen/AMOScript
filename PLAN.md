@@ -9,20 +9,22 @@ sources/backups, including commands hidden behind each first compiler error.
 Sqr is now implemented with source-derived FFP rounding and an original Kugel
 demo; its source produces colour -1 before completing the sphere. Zoom now runs
 the unchanged RollerIIIntroIdee source through all 29 animation frames and its
-final key prompt. Five encodings remain unsupported.
-Continue in this order: Save Iff; Polygon;
+final key prompt. Save Iff now runs the unchanged KugelanimBerech generator
+through its key prompt, file write and a separately declared reload preview.
+Four encodings remain unsupported. Continue in this order: Polygon;
 Frame Load/Frame Play with ANIM-5 decoding; Open Port with
 an explicit printer-output adapter. Each step includes an original-program
 acceptance target and repository browser demo. Keep Roller II and Wonderland
 as full-game regressions throughout.
 
-Eight files currently compile; Drums, Kugel and RollerIIIntroIdee pass the
+Nine files currently compile; Drums, Kugel, KugelanimBerech and RollerIIIntroIdee pass the
 1,000-instruction startup check, but Kugel later stops at its negative Plot colour.
 Negative Screen Display placement, ILBM DRNG metadata, missing RII assets and
 a truncated backup are separate blockers, with their own investigation gates.
 Source hashes, all missing-token locations and baseline outcomes are recorded
 in [the pre-implementation inventory](docs/introideen-inventory.json). See
-[Sqr support](docs/sqr.md) and [Zoom support](docs/zoom.md) for the completed slices.
+[Sqr support](docs/sqr.md), [Zoom support](docs/zoom.md) and
+[Save Iff support](docs/save-iff.md) for the completed slices.
 
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)
 now highlights complete games, animation/music and interactive examples; individual
