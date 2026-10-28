@@ -48,3 +48,10 @@ play through their original double buffers/waits, copy the logo and finish on
 mouse input. The [ANIM-5 demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/anim5.html)
 also checks all twenty asset frames and loop buffers. See [the contract and
 independent evidence](../../docs/anim5.md); native captures remain open.
+
+`ASCIIPC.Bak`, `LetterQualityProcs.amos` and `LetterQualityProcs.Bak` are unchanged
+copies pinned in `test/fixtures/open-port.json`. Their complete parallel output
+matches independently transcribed streams (2,409 / 178 / 3,074 bytes). The
+[Open Port demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/open-port.html)
+offers exact raw `.prn` downloads and hexadecimal inspection. See [the adapter
+contract](../../docs/open-port.md); physical printing and PCL rendering are open.

@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'open-port', title: 'Open Port: original printer programs', capturedFrames: false, description: 'Run three unchanged Introideen printer programs through an explicit parallel-output capture. All 5,661 bytes match independently transcribed expectations, including escape codes, tabs and high characters. Download raw .prn files and inspect their hexadecimal bytes. No printer driver or physical printing is emulated.', run: require('./openPortProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { programs: 3, lengths: [2409, 178, 3074], totalBytes: 5661, downloads: 3, allClosed: true });
+  } },
   { id: 'anim5', title: 'ANIM-5 and the original Logoanim intro', initialFrame: 'Canvas: Logoanim.amos sphere 18', description: 'All twenty asset frames match independent Python history/bitplane expectations. Both unchanged Logoanim sources load/play eighteen frames through ordinary bank addresses and swaps, continue their logo-copy sequence and finish through mouse input. Includes Stop/Resume and actual GPU comparisons; no native Amiga capture is claimed.', run: require('./anim5Probe'), check(result, assert) {
     assert.deepStrictEqual(result, { assetFrames: 20, sourceFrames: 36, independentPixels: 1280000, gpuFrames: 16, paused: true, bothSourcesEnded: true });
   } },

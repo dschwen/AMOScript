@@ -527,3 +527,15 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   captures. tools/anim5Player.js owns real timers, Canvas/WebGL input/presentation,
   source-version selection, pause/resume, restart and fullscreen; page exit retires
   its timers/VM/GPU. No fake clock or startup input belongs in this live path.
+
+- Open Port ($18de) uses channels 1–10 and an explicit synchronous ports.open
+  adapter returning write/close handles. Device names bypass Dir$ and files;
+  Print # emits byte strings immediately with TAB/CRLF separators. Guard callback
+  reentry and consume handles before Close callbacks. End/Edit/failure close owned
+  ports; Stop preserves them for Resume, and hosts dispose paused VMs with
+  closePorts(). lib/amos/ports.js captures output-only PAR: with checked bounds.
+  Three unchanged printer programs match 5,661 independently transcribed bytes;
+  the open-port demo exports exact Uint8Array/Blob downloads with URL cleanup.
+  Uncached untyped identifiers followed by bracketed statement arguments normalize
+  to checked ordinary procedure calls. Input, Port(), SER:/PRT:, physical printing
+  and PCL interpretation remain gated. See docs/open-port.md.

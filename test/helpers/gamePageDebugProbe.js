@@ -18,8 +18,8 @@ module.exports = async function gamePageDebugProbe(page) {
     for (const [name, source] of [['normal', normal], ['debug', debug]]) {
       const heading = document.createElement('h2'); heading.textContent = `${name === 'debug' ? 'Debug' : 'Normal'} application page`;
       const frame = document.createElement('iframe'); frame.id = `game-page-${name}`; frame.title = heading.textContent; frame.style.cssText = 'width:100%;height:580px;border:1px solid #888'; frame.allow = 'fullscreen *; autoplay *'; frame.allowFullscreen = true;
-      area.append(heading, frame); document.body.append(area);
-      const loaded = new Promise(resolve => { frame.onload = resolve; }); frame.srcdoc = source; await loaded;
+      const loaded = new Promise(resolve => { frame.onload = resolve; }); frame.srcdoc = source;
+      area.append(heading, frame); document.body.append(area); await loaded;
       frames.push(frame);
     }
     const plain = frames[0].contentDocument, doc = frames[1].contentDocument, win = frames[1].contentWindow;

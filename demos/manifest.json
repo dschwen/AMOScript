@@ -338,6 +338,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
     },
     {
+      "file": "open-port.html",
+      "title": "Open Port: original printer programs",
+      "description": "Run three unchanged Introideen printer programs through an explicit parallel-output capture. All 5,661 bytes match independently transcribed expectations, including escape codes, tabs and high characters. Download raw .prn files and inspect their hexadecimal bytes. No printer driver or physical printing is emulated.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/open-port.html"
+    },
+    {
       "file": "anim5.html",
       "title": "ANIM-5 and the original Logoanim intro",
       "description": "All twenty asset frames match independent Python history/bitplane expectations. Both unchanged Logoanim sources load/play eighteen frames through ordinary bank addresses and swaps, continue their logo-copy sequence and finish through mouse input. Includes Stop/Resume and actual GPU comparisons; no native Amiga capture is claimed.",

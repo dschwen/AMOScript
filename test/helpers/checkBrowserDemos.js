@@ -111,6 +111,23 @@ module.exports = async function checkBrowserDemos(browser) {
       const status = await page.evaluate(() => ({ state: document.body.dataset.status, results: document.getElementById('results').textContent,
         frames: document.getElementById('frames').options.length }));
       assert.strictEqual(status.state, 'passed', `${scenario.id}: ${status.results}`);
+      if (scenario.id === 'open-port') {
+        const fixture = require('../fixtures/open-port.json');
+        for (const [name, expected] of Object.entries(fixture)) {
+          const downloadEvent = page.waitForEvent('download');
+          await page.locator(`[data-port-download="${name}"]`).click();
+          const download = await downloadEvent; assert.strictEqual(download.suggestedFilename(), `${name}.prn`);
+          const filename = path.join(__dirname, '../artifacts', `${name}.prn`); await download.saveAs(filename);
+          assert.strictEqual(require('fs').readFileSync(filename).toString('base64'), expected.base64);
+        }
+        const oldUrl = await page.locator('[data-port-download]').first().getAttribute('href');
+        await page.click('#run-demo'); await page.waitForFunction(() => document.body.dataset.status === 'passed');
+        assert.strictEqual(await page.locator('#port-captures').count(), 1);
+        assert.strictEqual(await page.evaluate(async url => { try { await fetch(url); return false; } catch (_) { return true; } }, oldUrl), true);
+        await page.screenshot({ path: path.join(__dirname, '../artifacts/open-port.png'), fullPage: true });
+        await page.evaluate(() => AMOS_PORT_CAPTURE_CLEANUP());
+        assert.strictEqual(await page.locator('#port-captures').count(), 0);
+      }
       if (scenario.id === 'game-page-debug') {
         const frame = page.frameLocator('#game-page-debug');
         await frame.locator('#game-restart').click();

@@ -31,8 +31,13 @@ AreaEnd edges remain unverified. See [Polygon](polygon.md). The sibling catalogu
 is rebuilt: twelve programs compile. Frame Load/Frame Play now complete both
 unchanged Logoanim variants, with all twenty stored frames independently checked
 and a repository Canvas/WebGL demo. See [ANIM-5](anim5.md). Inactive DRNG metadata
-is retained and IconCutter now finishes its bounded startup run. Open Port is the
-only remaining unsupported encoding; implement its explicit device adapter next.
+is retained and IconCutter now finishes its bounded startup run. Open Port was the
+last missing encoding and is now implemented with an explicit parallel-output
+adapter. All three original printer programs finish and match 5,661 independent
+expected bytes, downloadable in the [Open Port demo](open-port.md). Fifteen of
+sixteen files compile; the remaining backup is truncated. Next investigate signed
+Screen Display placement for the two RolIntrIdee2 sources, retaining shared
+copper geometry and pointer clipping. Runtime/input blockers below still apply.
 
 ## Pre-implementation baseline and evidence
 

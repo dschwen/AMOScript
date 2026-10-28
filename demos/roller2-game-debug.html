@@ -5162,6 +5162,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   const channels = new Map();
+  let portsTerminated = false;
   function frameLoad(channel, number, count) {
     if (number < 1 || number >= 1024 || count < 1 || count > 32767) throw new Error('Unsupported Frame Load bank/count');
     const file = fileChannel(channel, 'read');
@@ -5188,6 +5189,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!Number.isInteger(number) || number < 1 || number > 10) throw new Error('Invalid file channel');
     const file = channels.get(number);
     if (!file) throw new Error('File channel is not open');
+    if (file.busy) throw new Error('File channel is busy in a port callback');
     if (mode && file.mode !== mode) throw new Error('Wrong file access mode');
     return file;
   }
@@ -5195,6 +5197,24 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function fileOpen(number, name, mode) {
     if (!Number.isInteger(number) || number < 1 || number > 10) throw new Error('Invalid file channel');
     if (channels.has(number)) throw new Error('File channel is already open');
+    if (mode === 'Open Port') {
+      if (portsTerminated) throw new Error('Port session has terminated');
+      if (typeof name !== 'string' || !name.length || /[^\x01-\xff]/.test(name)) throw new Error('Invalid port device name');
+      if (!options.ports || typeof options.ports.open !== 'function') throw new Error('Open Port requires a synchronous ports host adapter');
+      const entry = { mode: 'port', name, busy: true }; channels.set(number, entry);
+      try {
+        const handle = options.ports.open(name, Object.freeze({ channel: number }));
+        if (!handle || typeof handle.then === 'function' || typeof handle.write !== 'function' || typeof handle.close !== 'function') throw new Error('Port open must return a synchronous write/close handle');
+        entry.handle = handle; entry.busy = false;
+        if (portsTerminated) {
+          channels.delete(number);
+          const result = handle.close();
+          if (result && typeof result.then === 'function') throw new Error('Port close must complete synchronously');
+          throw new Error('Port session terminated during open');
+        }
+      } catch (error) { if (channels.get(number) === entry) channels.delete(number); throw error; }
+      return;
+    }
     if (!options.files || typeof options.files.read !== 'function' || typeof options.files.write !== 'function') throw new Error('File I/O requires a files host adapter');
     name = resolveFileName(name);
     let contents = '';
@@ -5207,9 +5227,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   function fileClose(number = null) {
-    const numbers = number == null ? Array.from(channels.keys()) : [number];
-    for (const value of numbers) {
+    const entries = number == null ? Array.from(channels) : [[number, fileChannel(number)]];
+    for (const [value, expected] of entries) {
+      if (channels.get(value) !== expected) continue;
       const file = fileChannel(value);
+      if (file.mode === 'port') {
+        channels.delete(value); // Consume before notifying the host, as native Close does.
+        const result = file.handle.close();
+        if (result && typeof result.then === 'function') throw new Error('Port close must complete synchronously');
+        continue;
+      }
       if (file.mode === 'write') {
         const result = options.files.write(file.name, file.contents);
         if (result && typeof result.then === 'function') throw new Error('Files host must write synchronously');
@@ -5219,12 +5246,41 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   function filePrint(number, values, separators) {
-    const file = fileChannel(number, 'write');
+    const file = fileChannel(number);
+    if (!['write', 'port'].includes(file.mode)) throw new Error('Wrong file access mode');
     let text = '';
     values.forEach((entry, i) => { text += String(value(entry)); if (separators[i] === ',') text += '\t'; });
     if (!values.length || separators.length < values.length) text += '\r\n';
-    file.contents += text;
-    file.position = file.contents.length;
+    if (file.mode === 'port') {
+      if (/[^\x00-\xff]/.test(text)) throw new Error('Port output must contain byte characters');
+      file.busy = true; let failure = null;
+      try {
+        const result = file.handle.write(text);
+        if (result && typeof result.then === 'function') throw new Error('Port writes must complete synchronously');
+      } catch (error) { failure = error; }
+      finally { file.busy = false; }
+      // Terminal disposal requested inside write takes effect after that callback.
+      if (portsTerminated && channels.get(number) === file) {
+        channels.delete(number);
+        try {
+          const result = file.handle.close();
+          if (result && typeof result.then === 'function') throw new Error('Port close must complete synchronously');
+        } catch (error) { if (!failure) failure = error; }
+      }
+      if (failure) throw failure;
+    } else { file.contents += text; file.position = file.contents.length; }
+  }
+
+  function closePorts() {
+    portsTerminated = true;
+    const pending = [...channels].filter(([, entry]) => entry.mode === 'port' && !entry.busy);
+    for (const [number] of pending) channels.delete(number);
+    let failure = null;
+    for (const [, entry] of pending) try {
+      const result = entry.handle.close();
+      if (result && typeof result.then === 'function') throw new Error('Port close must complete synchronously');
+    } catch (error) { if (!failure) failure = error; }
+    if (failure) throw failure;
   }
 
   function fileRead(number, type, wholeLine = false) {
@@ -5247,6 +5303,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
 
   function fileInfo(name, number) {
     const file = fileChannel(number);
+    if (file.mode === 'port') throw new Error('Disc information is not available for ports');
     if (name === 'Eof') return file.position >= file.contents.length ? -1 : 0;
     if (name === 'Lof') return file.contents.length;
     if (name === 'Pof') return file.position;
@@ -5427,7 +5484,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     amosLock: () => systemCommand('Amos Lock'),
     breakOff: () => systemCommand('Break Off'),
     closeEditor: () => systemCommand('Close Editor'),
-    stringFunction, replaceSubstring, formatUsing, fileOpen, fileClose, filePrint, fileRead, fileInfo,
+    stringFunction, replaceSubstring, formatUsing, fileOpen, fileClose, closePorts, filePrint, fileRead, fileInfo,
     min: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, false),
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
@@ -6188,6 +6245,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     try { operations.cancelMusic(); } catch (_) { /* best-effort cleanup */ }
     try { operations.trackStop(); } catch (_) { /* best-effort cleanup */ }
     try { operations.audio.silence(); } catch (_) { /* best-effort cleanup */ }
+    try { operations.closePorts(); } catch (_) { /* Consume terminal port handles once. */ }
   }
 
   function cancelScheduled() {
@@ -6411,7 +6469,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
     try {
       operations.flushBobs();
-      if (state.halted) { cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); }
+      if (state.halted) { cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); operations.closePorts(); }
     } catch (error) {
       pendingEdit = null;
       state.halted = true;
