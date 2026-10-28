@@ -12,21 +12,24 @@ the unchanged RollerIIIntroIdee source through all 29 animation frames and its
 final key prompt. Save Iff now runs the unchanged KugelanimBerech generator
 through its key prompt, file write and a separately declared reload preview.
 Polygon now completes the unchanged backup generator and all eight IFF exports
-under a documented portable raster profile. Three encodings remain unsupported.
-Continue with Frame Load/Frame Play and ANIM-5 decoding, then Open Port with
+under a documented portable raster profile. Frame Load/Frame Play now finish
+both unchanged Logoanim intros with independent frame hashes and Canvas/WebGL
+checks. Open Port is the only remaining unsupported encoding. Continue with
 an explicit printer-output adapter. Each step includes an original-program
 acceptance target and repository browser demo. Keep Roller II and Wonderland
 as full-game regressions throughout.
 
-Ten files currently compile. Both KugelanimBerech variants, Drums, Kugel and
+Twelve files currently compile. Both KugelanimBerech variants, Drums, Kugel and
 RollerIIIntroIdee pass the 1,000-instruction startup check, but Kugel later stops
 at its negative Plot colour.
-Negative Screen Display placement, ILBM DRNG metadata, missing RII assets and
+Inactive DRNG records now validate and IconCutter finishes its startup run.
+Negative Screen Display placement, active DRNG cycling, missing RII assets and
 a truncated backup are separate blockers, with their own investigation gates.
 Source hashes, all missing-token locations and baseline outcomes are recorded
 in [the pre-implementation inventory](docs/introideen-inventory.json). See
 [Sqr support](docs/sqr.md), [Zoom support](docs/zoom.md),
-[Save Iff support](docs/save-iff.md) and [Polygon support](docs/polygon.md)
+[Save Iff support](docs/save-iff.md), [Polygon support](docs/polygon.md)
+and [ANIM-5 support](docs/anim5.md)
 for the completed slices.
 
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)

@@ -1,7 +1,8 @@
 # Compatibility and implementation status
 
-Updated 2026-10-28. The current local baseline has **775 passing tests**, plus a
-passing real-Chromium rendering/input smoke test and WebGL2 capability probe.
+Updated 2026-10-28. The current local baseline has **787 passing tests**, plus a
+passing real-Chromium rendering/input smoke test, 66 offline demo scenarios and
+WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
 The current run includes direct sprites and refreshed demos; the expanded suite
@@ -42,6 +43,7 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Frame Load / Frame Play | Implemented ANIM-5 subset | Checked channel prefix to temporary fast bank, native raw forms/AenD, integer count/continuation addresses and logical delta stores under caller swaps/waits. Both unchanged Logoanim sources finish; all twenty asset frames match independent hashes, with 16 GPU comparisons. Other operations/overloads, mutable/restored banks and native captures remain gated. [Contract](anim5.md). |
 | Polygon | Implemented bounded portable solid fill | Explicit coordinate list, even/odd interiors and inclusive solid boundary, bitmap clipping and preflight; direct logical writes bypass Bob/Autoback. Twelve independent matrices and original eight-image generator/export/download replay pass with 12 GPU comparisons. Native AreaEnd edge parity and wider forms remain open. [Contract](polygon.md). |
 | Save Iff | Implemented one-filename compressed export | Owned ILBM writer, row-bounded ByteRun1, current logical bitmap, palette/mode/AMSC metadata and one synchronous write after validation. Original generator saves rollerball; independent decoding/reload match pixels and Debug exports exact bytes. Buffering/wider forms/native byte identity remain gated. [Contract](save-iff.md). |
 | Zoom | Implemented bounded raw bitmap resize | Ten numeric operands, exclusive in-bitmap extents, source-derived sampling, explicit logical/physical buffers and live overlap. Bypasses Bob/Autoback hooks. Original 49-line intro completes; all generated icons and 29 frames match independent expectations, with four Canvas/GPU frames. Wrapped geometry/native captures remain open. [Contract](zoom.md). |

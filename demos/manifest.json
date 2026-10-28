@@ -338,6 +338,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
     },
     {
+      "file": "anim5.html",
+      "title": "ANIM-5 and the original Logoanim intro",
+      "description": "All twenty asset frames match independent Python history/bitplane expectations. Both unchanged Logoanim sources load/play eighteen frames through ordinary bank addresses and swaps, continue their logo-copy sequence and finish through mouse input. Includes Stop/Resume and actual GPU comparisons; no native Amiga capture is claimed.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/anim5.html"
+    },
+    {
       "file": "polygon.html",
       "title": "Polygon: sphere animation generator",
       "description": "Solid polygons with independently checked interiors/boundaries, plus the unchanged backup sphere generator. All eight exported IFFs match their rendered pixels and are downloadable below. The portable raster profile is documented; native AreaEnd edge parity remains unverified.",

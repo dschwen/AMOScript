@@ -567,13 +567,29 @@
     if (tag(0) !== 'FORM' || tag(8) !== 'ILBM') fail('expected FORM ILBM');
     const end = view.getUint32(4, false) + 8;
     if (end !== bytes.length) fail('invalid FORM bounds', 4);
-    const chunks = {}, cycles = [];
+    const chunks = {}, cycles = [], ranges = [];
     for (let position = 12; position < end;) {
       if (position + 8 > end) fail('truncated chunk header', position);
       const type = tag(position), size = view.getUint32(position + 4, false), start = position + 8;
       const next = start + size + (size & 1);
       if (next > end) fail('truncated chunk/padding', position);
-      if (['DEST', 'PCHG', 'SHAM', 'CTBL', 'CCRT', 'DRNG'].includes(type)) fail(`unsupported ${type} semantics`, position);
+      if (['DEST', 'PCHG', 'SHAM', 'CTBL', 'CCRT'].includes(type)) fail(`unsupported ${type} semantics`, position);
+      if (type === 'DRNG') {
+        if (size < 8 || chunks.BODY || ranges.length >= 256) fail('invalid DRNG size/order', position);
+        const low = bytes[start], high = bytes[start + 1], rate = view.getInt16(start + 2, false), flags = view.getUint16(start + 4, false);
+        const trueCount = bytes[start + 6], registerCount = bytes[start + 7];
+        if (flags) fail('unsupported active/reserved DRNG semantics', position);
+        if (low > high || size !== 8 + trueCount * 4 + registerCount * 2) fail('invalid DRNG metadata', position);
+        const cells = [], used = new Set(); let at = start + 8;
+        for (let i = 0; i < trueCount + registerCount; i++) {
+          const cell = bytes[at];
+          if (cell < low || cell > high || used.has(cell) || (i >= trueCount && bytes[at + 1] > 31)) fail('invalid DRNG cell', position);
+          used.add(cell);
+          cells.push(Object.freeze(i < trueCount ? { cell, rgb: Object.freeze(Array.from(bytes.subarray(at + 1, at + 4))) } : { cell, register: bytes[at + 1] }));
+          at += i < trueCount ? 4 : 2;
+        }
+        ranges.push(Object.freeze({ low, high, rate, flags, cells: Object.freeze(cells) }));
+      }
       if (type === 'CRNG') {
         if (cycles.length >= 256) fail('too many CRNG records', position);
         if (chunks.BODY) fail('properties must precede BODY', position);
@@ -686,7 +702,7 @@
       image: Object.freeze({ width, height, depth, rowBytes, mode, displayMode, monitor, cycles: Object.freeze(cycles), masking, compression, transparentColour,
         hasPalette: !!chunks.CMAP, paletteSize: chunks.CMAP ? chunks.CMAP.size / 3 : 0,
         hasMode: !!chunks.CAMG, hasAmosScreen: !!chunks.AMSC, amosScreen,
-        x: view.getInt16(at + 4, false), y: view.getInt16(at + 6, false), xAspect, yAspect,
+        ranges: Object.freeze(ranges), x: view.getInt16(at + 4, false), y: view.getInt16(at + 6, false), xAspect, yAspect,
         pageWidth: view.getInt16(at + 16, false), pageHeight: view.getInt16(at + 18, false) }) };
   };
 })(chipMemoryClass, frameStateModel, staticFrameFactory);
@@ -748,6 +764,107 @@
   for (const bytes of chunks) { result.set(bytes, position); position += bytes.length; }
   return result;
 };
+  const animReaderFactory = (function createAnimReader(readIlbm) {
+  return function readAnim(input, { position = 0, count = 32767 } = {}) {
+    const fail = message => { throw new Error(`ANIM-5: ${message}`); };
+    if (!ArrayBuffer.isView(input) || Object.prototype.toString.call(input) !== '[object Uint8Array]' || input.length > 16 * 1024 * 1024 ||
+        !Number.isInteger(position) || position < 0 || position % 2 || !Number.isInteger(count) || count < 1 || count > 32767) fail('invalid input/range');
+    const bytes = Uint8Array.from(input), view = new DataView(bytes.buffer);
+    const tag = at => String.fromCharCode(...bytes.subarray(at, at + 4));
+    const need = (at, size, end) => { if (at < 0 || size < 0 || at + size > end) fail('truncated chunk/stream'); };
+    need(position, 12, bytes.length);
+    if (tag(position) !== 'FORM' || tag(position + 8) !== 'ANIM') fail('expected FORM ANIM at channel cursor');
+    const end = position + 8 + view.getUint32(position + 4, false);
+    need(position, end - position, bytes.length);
+    const frames = [], forms = []; let at = position + 12, format = null, budget = 0, rawSize = 0;
+    while (at < end && frames.length < count) {
+      if (frames.length >= 256) fail('frame count exceeds 256');
+      need(at, 12, end);
+      if (tag(at) !== 'FORM' || tag(at + 8) !== 'ILBM') fail('expected nested FORM ILBM');
+      const formEnd = at + 8 + view.getUint32(at + 4, false), next = formEnd + (formEnd & 1);
+      need(at, next - at, end);
+      if (formEnd < at + 12) fail('invalid frame bounds');
+      const chunks = {};
+      for (let p = at + 12; p < formEnd;) {
+        need(p, 8, formEnd); const name = tag(p), length = view.getUint32(p + 4, false), start = p + 8;
+        need(start, length + (length & 1), formEnd);
+        if (chunks[name]) fail(`duplicate ${name}`);
+        chunks[name] = { start, length }; p = start + length + (length & 1);
+      }
+      const header = chunks.ANHD; let delay = 0, interleave = 2;
+      if (header) {
+        if (header.length !== 40) fail('invalid ANHD size'); const h = header.start;
+        if (bytes[h + 1] || bytes[h + 19] || view.getUint32(h + 20, false) || bytes.subarray(h + 24, h + 40).some(Boolean)) fail('unsupported ANHD mask/flags');
+        interleave = bytes[h + 18] || 2;
+        if (![1, 2].includes(interleave)) fail('unsupported interleave');
+        delay = view.getUint32(h + 14, false);
+      }
+      let planar, palette = null, offsets = [], values = [];
+      if (!frames.length) {
+        if (header && bytes[header.start] !== 0) fail('first frame must contain a full bitmap');
+        const loaded = readIlbm(bytes.subarray(at, formEnd)), image = loaded.image;
+        if (image.masking || image.hasAmosScreen || chunks.DLTA || (image.displayMode & 4)) fail('masks/interlace/AMSC are not supported');
+        format = { width: image.width, height: image.height, depth: image.depth, rowBytes: image.rowBytes,
+          mode: image.displayMode, paletteSize: image.paletteSize };
+        planar = new Uint8Array(image.rowBytes * image.height * image.depth);
+        for (let plane = 0; plane < image.depth; plane++) planar.set(loaded.snapshot.chip.subarray(loaded.snapshot.frame.lineRegs[plane],
+          loaded.snapshot.frame.lineRegs[plane] + image.rowBytes * image.height), plane * image.rowBytes * image.height);
+        if (image.hasPalette) palette = Array.from({ length: image.paletteSize }, (_, i) => {
+          const p = i * 4, rgba = loaded.snapshot.frame.linePal;
+          return (rgba[p] >> 4) * 256 + (rgba[p + 1] >> 4) * 16 + (rgba[p + 2] >> 4);
+        }).slice(0, 32);
+      } else {
+        if (!header || bytes[header.start] !== 5 || !chunks.DLTA) fail('expected ANIM-5 ANHD/DLTA');
+        if (Object.keys(chunks).some(name => !['ANHD', 'DLTA'].includes(name))) fail('unsupported delta property');
+        const h = header.start;
+        if (view.getUint16(h + 2, false) !== format.width || view.getUint16(h + 4, false) !== format.height ||
+            view.getUint16(h + 6, false) || view.getUint16(h + 8, false)) fail('delta geometry differs');
+        planar = frames[Math.max(0, frames.length - interleave)].planar.slice();
+        const d = chunks.DLTA;
+        if (d.length < 64) fail('truncated plane-offset table');
+        const pointers = Array.from({ length: 16 }, (_, i) => view.getUint32(d.start + i * 4, false));
+        if (pointers.slice(format.depth).some(Boolean)) fail('unsupported delta planes');
+        const used = pointers.filter(Boolean).sort((a, b) => a - b);
+        if (new Set(used).size !== used.length || used.some(p => p < 64 || p >= d.length)) fail('invalid delta plane offset');
+        const planeSize = format.rowBytes * format.height;
+        for (let plane = 0; plane < format.depth; plane++) {
+          if (!pointers[plane]) continue;
+          let cursor = d.start + pointers[plane];
+          const boundary = d.start + (used.find(p => p > pointers[plane]) || d.length);
+          const take = () => { need(cursor, 1, boundary); return bytes[cursor++]; };
+          for (let column = 0; column < format.rowBytes; column++) {
+            const operations = take(); let row = 0;
+            for (let operation = 0; operation < operations; operation++) {
+              const opcode = take();
+              if (opcode > 0 && opcode < 128) { row += opcode; if (row > format.height) fail('skip crosses bitmap'); continue; }
+              const length = opcode ? opcode & 127 : take(), repeated = !opcode;
+              if (!length || row + length > format.height) fail('run crosses bitmap');
+              const value = repeated ? take() : 0;
+              for (let i = 0; i < length; i++) {
+                const offset = plane * planeSize + row++ * format.rowBytes + column, byte = repeated ? value : take();
+                planar[offset] = byte; offsets.push(offset); values.push(byte);
+              }
+            }
+          }
+          if (cursor !== boundary && !(cursor + 1 === boundary && bytes[cursor] === 0)) fail('trailing plane stream data');
+        }
+      }
+      budget += planar.length + format.width * format.height + offsets.length * 5;
+      if (budget > 64 * 1024 * 1024) fail('decoded data exceeds 64 MiB');
+      const pixels = new Uint8Array(format.width * format.height), planeSize = format.rowBytes * format.height;
+      for (let y = 0; y < format.height; y++) for (let x = 0; x < format.width; x++) for (let plane = 0; plane < format.depth; plane++) {
+        if (planar[plane * planeSize + y * format.rowBytes + (x >> 3)] & (128 >> (x & 7))) pixels[y * format.width + x] |= 1 << plane;
+      }
+      frames.push({ offset: rawSize, sourceOffset: at, planar, pixels, palette, delay, interleave,
+        offsets: Uint32Array.from(offsets), values: Uint8Array.from(values) });
+      forms.push(bytes.slice(at, next)); rawSize += next - at; at = next;
+    }
+    if (!frames.length) fail('empty animation');
+    const raw = new Uint8Array(rawSize + 4); let p = 0;
+    for (const form of forms) { raw.set(form, p); p += form.length; } raw.set([65, 101, 110, 68], p);
+    return { ...format, frames, raw, nextPosition: at, endPosition: end, sentinel: rawSize };
+  };
+})(ilbmReaderFactory);
   const planarBridgeFactory = function createPhysicalBridge(display, options, ChipMemory, snapshotModel, staticFrame, copperBuilder, copperInterpreter) {
   const memory = new ChipMemory(options.snapshotChipBytes);
   const records = new Map();
@@ -2117,6 +2234,27 @@
   }
   function bar(...values) { const target = screen(); rectangle(target, ...values, target.ink, true); changed(); }
   function box(...values) { const target = screen(); rectangle(target, ...values, target.ink, false); changed(); }
+  function playAnimationFrames(format, frames) {
+    const target = screen();
+    if (target.width !== format.width || target.height !== format.height || Math.log2(target.colours) !== format.depth ||
+        target.mode !== (format.mode & 0x8000) || !!target.ham !== !!(format.mode & 0x800)) throw new Error('Frame Play bitmap format differs from selected screen');
+    // Raw logical writes: preserve unrelated drawing, physical storage,
+    // saved Bob backgrounds and the caller's explicit swaps/waits.
+    const planeSize = format.rowBytes * format.height;
+    for (const frame of frames) {
+      if (frame.offset === 0) { target.pixels.set(frame.pixels); target.cursorVisible = false; }
+      else for (let i = 0; i < frame.offsets.length; i++) {
+        const offset = frame.offsets[i], plane = Math.floor(offset / planeSize), local = offset % planeSize;
+        const y = Math.floor(local / format.rowBytes), x = (local % format.rowBytes) * 8, mask = 1 << plane;
+        for (let bit = 0; bit < 8 && x + bit < target.width; bit++) {
+          const at = y * target.width + x + bit;
+          target.pixels[at] = (target.pixels[at] & ~mask) | (frame.values[i] & (128 >> bit) ? mask : 0);
+        }
+      }
+      if (frame.palette) frame.palette.forEach((rgb, index) => { target.palette[index] = rgb; });
+    }
+    if (frames.length) changed();
+  }
   function polygon(points) {
     const target = screen();
     if (!Array.isArray(points) || points.length < 3 || points.length > 16 ||
@@ -2447,7 +2585,7 @@
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, setLine, writing, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
@@ -2649,9 +2787,11 @@
     };
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
+  const animations = new WeakMap();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const bankMemory = bankMemoryFactory(banks, { beforeWrite(bank) {
+    if (animations.has(bank)) throw new Error('Writing a Frame Load animation bank is not implemented');
     if (bank === musicBank) throw new Error('Writing an active Music bank is not implemented; Music Off first');
     if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
   } });
@@ -3434,7 +3574,9 @@
     const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
     const mode = image.hasMode ? image.displayMode :
       ((image.pageWidth >= 640 && image.depth <= 4 ? 0x8000 : 0) | (image.pageHeight >= 400 ? 4 : 0));
-    if (image.masking || (mode & 4)) throw new Error('Load Iff masks and interlace are not implemented');
+    // Transparent-colour metadata has no extra plane. Native IffBODY copies
+    // these screen pixels opaquely; an actual mask plane remains unsupported.
+    if (image.masking === 1 || (mode & 4)) throw new Error('Load Iff mask planes and interlace are not implemented');
     const placement = destination != null ? image.amosScreen : null;
     if (placement) display.validateAmosScreen(image.width, image.height, mode & 0x8000, placement);
     const tall = destination != null && !placement && image.height > 256 && image.width === 320 && !(mode & 0x8000);
@@ -3540,6 +3682,7 @@
     if (bank.images) throw new Error('Cannot shrink an image bank');
     if (length > bank.data.length) throw new Error('Invalid bank length');
     if (length !== bank.data.length) {
+      if (animations.has(bank)) throw new Error('Shrinking a Frame Load animation bank is not implemented');
       if (bank === musicBank) musicOff();
       if (bank === trackerBank) trackStop();
       bank.data = bank.data.slice(0, length);
@@ -4292,6 +4435,28 @@
   }
 
   const channels = new Map();
+  function frameLoad(channel, number, count) {
+    if (number < 1 || number >= 1024 || count < 1 || count > 32767) throw new Error('Unsupported Frame Load bank/count');
+    const file = fileChannel(channel, 'read');
+    if (file.contents.length > 16 * 1024 * 1024) throw new Error('ANIM file exceeds 16 MiB');
+    const decoded = animReaderFactory(Uint8Array.from(file.contents, c => c.charCodeAt(0)), { position: file.position, count });
+    const bank = { number, type: 'data', memory: 'fast', permanent: false, name: 'Iff     ', data: decoded.raw.slice() };
+    installBanks([bank]); animations.set(bank, decoded); file.position = decoded.nextPosition;
+    return decoded.frames.length;
+  }
+  function framePlay(selector, count) {
+    if (count < 0 || count >= 32768) throw new Error('Invalid Frame Play count');
+    const address = bankMemory.address(selector), access = bankMemory.locate(address), decoded = animations.get(access.bank);
+    if (!decoded || access.bank.data.length !== decoded.raw.length || !access.bank.data.every((v, i) => v === decoded.raw[i])) throw new Error('Frame Play requires an unchanged Frame Load bank');
+    const index = decoded.frames.findIndex(frame => frame.offset === access.offset);
+    if (access.offset === decoded.sentinel) return address;
+    if (index < 0) throw new Error('Frame Play address is not a frame boundary');
+    const selected = decoded.frames.slice(index, index + count);
+    if (!selected.length) return address;
+    display.playAnimationFrames(decoded, selected);
+    const next = index + selected.length;
+    return bankMemory.start(access.bank.number) + (next < decoded.frames.length ? decoded.frames[next].offset : decoded.sentinel);
+  }
   function fileChannel(number, mode = null) {
     if (!Number.isInteger(number) || number < 1 || number > 10) throw new Error('Invalid file channel');
     const file = channels.get(number);
@@ -4520,7 +4685,7 @@
       const binding = { reader }; joystickBinding = binding;
       return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
-    audio, loadIff, saveIff, trackLoad,
+    audio, loadIff, saveIff, frameLoad, framePlay, trackLoad,
     trackLoopOn: () => { state.tracker.loop = true; },
     trackLoopOff: () => { state.tracker.loop = false; },
     samBank: number => audio.selectBank(integer(number)),
@@ -5171,7 +5336,7 @@
     const access = resolve(address, length); writable(access, length);
     for (let index = 0; index < length; index++) putByte(access, index, value >>> ((length - index - 1) * 8));
   }
-  return { start,
+  return { start, locate: (address, length = 0) => resolve(address, length),
     deek: address => readNumber(address, 2),
     leek: address => readNumber(address, 4),
     doke: (address, value) => writeNumber(address, value, 2),

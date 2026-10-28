@@ -32,6 +32,16 @@ function small(body, options = {}) {
   return Buffer.concat([form, payload]);
 }
 
+test('ILBM: inactive DRNG metadata is retained without cycling; active/reserved, bad lengths and cells reject', () => {
+  const data = Buffer.from('001f00240000000200031f13', 'hex');
+  const result = readIlbm(small([0, 0], { extra: [chunk('DRNG', data)] }));
+  assert.deepStrictEqual(result.image.ranges, [{ low: 0, high: 31, rate: 36, flags: 0, cells: [{ cell: 0, register: 3 }, { cell: 31, register: 19 }] }]);
+  assert.ok(Object.isFrozen(result.image.ranges[0].cells[0]));
+  for (const mutate of [b => b.writeUInt16BE(1, 4), b => b.writeUInt16BE(4, 4), b => { b[7] = 3; }, b => { b[9] = 32; }, b => { b[10] = 0; }]) {
+    const bytes = Buffer.from(data); mutate(bytes); assert.throws(() => readIlbm(small([0, 0], { extra: [chunk('DRNG', bytes)] })), /DRNG/);
+  }
+});
+
 test('ILBM: inactive CRNG metadata is retained; active, malformed and excessive cycles reject', () => {
   const cycle = Buffer.from('000000240002070f', 'hex');
   const result = readIlbm(small([0, 0], { extra: [chunk('CRNG', cycle), chunk('CRNG', cycle)] }));

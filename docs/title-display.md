@@ -25,11 +25,12 @@ Autoback mirroring; a separate physical buffer changes only when swapped. Only
 CMAP entries actually present are replaced. Missing CMAP leaves the palette intact.
 
 Opaque normal/hires/EHB/HAM images use the existing indexed display model.
-Masks and interlace reject explicitly in the language
-loader, even though the lower-level ILBM utility supports some brush/field forms.
+Transparent-colour metadata loads opaquely, including zero pixels. Actual mask
+planes and interlace reject explicitly in the language loader, even though the lower-level ILBM utility supports some brush/field forms.
 Explicit destinations now support bounded lowres full-bitmap AMSC placement;
 implicit loads retain current geometry. See [Roller II's first image](roller2-title.md).
-Active colour cycles still reject. Image loading invalidates saved logical Bob
+Validated inactive DRNG records are retained as frozen metadata; active colour
+cycles still reject. See [ANIM-5](anim5.md) for the supplied logo profile. Image loading invalidates saved logical Bob
 backgrounds before writing and lets the existing automatic Bob flush redraw them.
 Bank `Load` remains a separate command with its existing formats and semantics.
 

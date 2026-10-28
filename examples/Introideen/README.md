@@ -41,3 +41,10 @@ See [Sqr semantics and evidence](../../docs/sqr.md),
 [Zoom semantics and evidence](../../docs/zoom.md) and the
 [remaining Introideen plan](../../docs/introideen.md). Other supplied sources
 and assets will be pinned with their own implementation slices.
+
+`Logoanim.amos`, `Logoanim.Bak`, `KugelAnim` and `introroller` are unchanged
+copies pinned in `test/fixtures/anim5.json`. Both intros load eighteen frames,
+play through their original double buffers/waits, copy the logo and finish on
+mouse input. The [ANIM-5 demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/anim5.html)
+also checks all twenty asset frames and loop buffers. See [the contract and
+independent evidence](../../docs/anim5.md); native captures remain open.

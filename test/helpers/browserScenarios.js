@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'anim5', title: 'ANIM-5 and the original Logoanim intro', initialFrame: 'Canvas: Logoanim.amos sphere 18', description: 'All twenty asset frames match independent Python history/bitplane expectations. Both unchanged Logoanim sources load/play eighteen frames through ordinary bank addresses and swaps, continue their logo-copy sequence and finish through mouse input. Includes Stop/Resume and actual GPU comparisons; no native Amiga capture is claimed.', run: require('./anim5Probe'), check(result, assert) {
+    assert.deepStrictEqual(result, { assetFrames: 20, sourceFrames: 36, independentPixels: 1280000, gpuFrames: 16, paused: true, bothSourcesEnded: true });
+  } },
   { id: 'polygon', title: 'Polygon: sphere animation generator', initialFrame: 'Canvas: Saved df1:kugel017', description: 'Solid polygons with independently checked interiors/boundaries, plus the unchanged backup sphere generator. All eight exported IFFs match their rendered pixels and are downloadable below. The portable raster profile is documented; native AreaEnd edge parity remains unverified.', run: require('./polygonProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { matrixFrames: 12, matrixPixels: 2304, savedFrames: 8, savedPixels: 512000, gpuFrames: 12, downloads: 8, sourceUnchanged: true });
   } },

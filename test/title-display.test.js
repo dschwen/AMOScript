@@ -93,6 +93,16 @@ test('Load Iff: current-screen form writes only logical planes, keeps higher pla
   assert.strictEqual(loaded.palette[4], 0xf00);
 });
 
+test('Load Iff: transparent-colour metadata still copies zero pixels opaquely', () => {
+  const bytes = Buffer.from(fixture('ilbm-4-raw.ilbm'), 'latin1');
+  const bmhd = bytes.indexOf(Buffer.from('BMHD')) + 8;
+  bytes[bmhd + 9] = 2; bytes.writeUInt16BE(0, bmhd + 12);
+  const load = data => execute(binary([[t('Screen Open'), n(0), t(','), n(64), t(','), n(2), t(','), n(4), t(','), t('Lowres')],
+    [t('Cls Colour'), n(3)], [t('Load Iff'), text('image')]]), 100, { files: { read: () => data.toString('latin1') } }).program.display.screen().pixels;
+  const actual = load(bytes); bytes[bmhd + 9] = 0;
+  assert.deepStrictEqual(Array.from(actual), Array.from(load(bytes))); assert.ok(actual.slice(0, 33).includes(0));
+});
+
 test('Auto View: replacement screens are staged while physical output stays on the previous buffer', () => {
   const d = createDisplay(); d.clear(2); const old = d.presentedScreen();
   d.autoViewOff(); d.open(0, 320, 256, 16, 0); d.clear(4);

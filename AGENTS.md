@@ -510,3 +510,15 @@ for high-score text and Space for pause. Browser modifier filtering permits only
 explicitly configured Ctrl joystick chords; unmapped Ctrl and Alt/Meta shortcuts
 must not leak text or retain owned holds. Keep the zero-score-table full-source
 high-score entry/writeback replay distinct from an unmodified saved-score capture.
+
+- Frame Load ($25e0) reads a checked ANIM prefix from an Open In cursor into a
+  managed temporary fast `Iff     ` bank; raw nested forms end with AenD. Frame
+  Play ($25ec) returns checked continuation addresses and patches the selected
+  logical bitmap without private timing/history repair or Bob/Autoback hooks.
+  Preserve caller buffer initialization/swaps/waits. All twenty KugelAnim frames
+  match independent Python hashes; both unchanged Logoanim sources finish with
+  pointer input and 16 GPU comparisons. Raw writes/shrink, restored-bank playback,
+  other operations/overloads and native captures remain gated. See docs/anim5.md.
+  Load Iff treats transparent-colour metadata opaquely; actual mask planes remain
+  gated. ILBM DRNG flags exactly zero retain frozen validated metadata with no
+  palette job; active/reserved flags reject.

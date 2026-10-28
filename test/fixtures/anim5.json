@@ -1,0 +1,172 @@
+{
+  "evidence": "Independent Python ByteRun1/column-plane ANIM-5 extraction with two-frame history; not an Amiga capture.",
+  "hashes": {
+    "KugelAnim": "07767fbbcfb029c3d67b2c19e8fceb96f4565c71da2d56d0cfa2a3d7ac3d1c3d",
+    "Logoanim.amos": "f64ffc949e049019d3f7342e0d539203735d442f490f9f67aced600f3fc25efc",
+    "Logoanim.Bak": "5c4e5e1ea435989b830db80ac027bf824b88f30ba202731f91e7e612ca16a085",
+    "introroller": "10ec167ff1cf26fd1349a4bc789d28cba4ba8de977d1652966523aa6dc51e9c7"
+  },
+  "width": 320,
+  "height": 200,
+  "depth": 4,
+  "palette": [
+    0,
+    512,
+    1024,
+    1536,
+    1792,
+    2304,
+    2816,
+    3328,
+    3840,
+    3874,
+    3908,
+    3942,
+    3993,
+    4027,
+    4061,
+    4095
+  ],
+  "frames": [
+    {
+      "frame": 1,
+      "offset": 0,
+      "sourceOffset": 12,
+      "sha256": "1cfbed74c79a6c08e8917f746aea825ac679d74807373c22b204028279bc72ec",
+      "rgbaSha256": "0fee987a5e2e38352f6ec69b62d1669ced816db3101feec7b50b11fee33ab47a"
+    },
+    {
+      "frame": 2,
+      "offset": 1854,
+      "sourceOffset": 1866,
+      "sha256": "ce2b78b8eef8ae05fa29c3ba178db91695d83aaa038420bb04c7a5be1bafb51a",
+      "rgbaSha256": "a65789ddbce666cd1bc087828cbdc33da05779e87ca2c6bd4fb52f1d3e6f1e87"
+    },
+    {
+      "frame": 3,
+      "offset": 2094,
+      "sourceOffset": 2106,
+      "sha256": "c89ac66ec095429695b798b4937c7fbe143e151746f7c8e9a0fe33ea9bc52fdd",
+      "rgbaSha256": "cac2d952f35e8b91fd244bd3583885d5cafaa84af3094af5bb66a304daf53d4c"
+    },
+    {
+      "frame": 4,
+      "offset": 2388,
+      "sourceOffset": 2400,
+      "sha256": "9a53cd57bd88bd57480dcf665bcf359f24099210bb4838d0e54bbb32fec3a427",
+      "rgbaSha256": "995370212bd91196a1a80eb7298c1f3ed0538aac977dff2c0ab7f63b7a146f84"
+    },
+    {
+      "frame": 5,
+      "offset": 2824,
+      "sourceOffset": 2836,
+      "sha256": "f02bab802a74c25dabd0a17d9a3e1eee8c540bb72bc2015fbbccf4fab08f4876",
+      "rgbaSha256": "18378266d5fb78c27e74f1447d9dd34c51589e2be5493df5f4cf7c680bc48f46"
+    },
+    {
+      "frame": 6,
+      "offset": 3362,
+      "sourceOffset": 3374,
+      "sha256": "5d008946b0524e6882fe7aeaf1b5b93133bdebfdd1393920772cc12e4ea9166d",
+      "rgbaSha256": "7de3182c415df42f8f1b21a70474c288e4ab9c24245914eb225f6acbfab1f089"
+    },
+    {
+      "frame": 7,
+      "offset": 4056,
+      "sourceOffset": 4068,
+      "sha256": "d967d492cb759ec0457b386cb6f04760ff3f84d68ae6cc6ed532f1c15bca43e4",
+      "rgbaSha256": "d200a4a5316af5f78916e8d9ca697a7d7e464532eddc40509f7373bbe9121268"
+    },
+    {
+      "frame": 8,
+      "offset": 4948,
+      "sourceOffset": 4960,
+      "sha256": "82a836f5e4694915ea188cb2f4060b079a31acea5c2a803e3faf84edda5e8c4c",
+      "rgbaSha256": "a15672ca21ba5b61b59893c5b637e19295699578e2dfefecb5f4656a5eba3f30"
+    },
+    {
+      "frame": 9,
+      "offset": 6094,
+      "sourceOffset": 6106,
+      "sha256": "92bcc19f94bde00815e2ecaccb3b9631ba3d362ad011c6f1fd1701192ff7b634",
+      "rgbaSha256": "f9c454f0da78fd746f6be5be3652a1cd17acfaa12769cefcec7e0131e1708782"
+    },
+    {
+      "frame": 10,
+      "offset": 7474,
+      "sourceOffset": 7486,
+      "sha256": "eafbdea1c01e2848613e4171a6c9e72ad079ec1235ddffe4454f73c653bae312",
+      "rgbaSha256": "6c01cab6650cea22c6f93df33dbe59e33e238a75aa905627232f4644cc73be72"
+    },
+    {
+      "frame": 11,
+      "offset": 9146,
+      "sourceOffset": 9158,
+      "sha256": "efa51ebde909a1e099e99c8e5a7ce0002d9eb5cab8fba24a394341b2a0c521c7",
+      "rgbaSha256": "216aa961b0b4453b010903b1c01e55d642b0242745ff6cd4db52a3eaace55c76"
+    },
+    {
+      "frame": 12,
+      "offset": 11014,
+      "sourceOffset": 11026,
+      "sha256": "0b9a1ee3f7bd49cbcbac07dea2d886306ebb45a8c1153897513613d346d3c78a",
+      "rgbaSha256": "c975e872f4af270773dee48f1acfcd77f8d1611080dd5930e76584bc8a0d3e12"
+    },
+    {
+      "frame": 13,
+      "offset": 13220,
+      "sourceOffset": 13232,
+      "sha256": "0512fe81cb7bacf6697b164113ad0b8535929dd7833eefdba3bbc13caafd54e5",
+      "rgbaSha256": "6f1414ae45a3a5fa5ab1437638211dea72eb33d96ebe92596ac880c793558219"
+    },
+    {
+      "frame": 14,
+      "offset": 15752,
+      "sourceOffset": 15764,
+      "sha256": "d24b0fbe5a278b8d0ef5d8fee42a233251a7bace8940a5351f4d281da327a7e2",
+      "rgbaSha256": "ffcbbd7c4d9cabab4158099308bced830d809410bccf74905e9e430581ede416"
+    },
+    {
+      "frame": 15,
+      "offset": 18604,
+      "sourceOffset": 18616,
+      "sha256": "72f8cbe6173fe4539712e9234c79846e2857f6b9b5a8f232cbb41f8d709861e5",
+      "rgbaSha256": "237448ca0e9adff2e4b35fc0c6226784a92a26f24f242166ec6e0081959fd633"
+    },
+    {
+      "frame": 16,
+      "offset": 21842,
+      "sourceOffset": 21854,
+      "sha256": "29f77eaaf4802442ebd146f6f56f2f308289399ef01074ab3a2ea5f25842bac9",
+      "rgbaSha256": "4cc1675132d8089ee1c90303c62008e5a5df13e8445ecc927b32c1e10471d111"
+    },
+    {
+      "frame": 17,
+      "offset": 25262,
+      "sourceOffset": 25274,
+      "sha256": "fb829d5eb02e17083fad0d7611d60751154d00c7c79f8603a60954482130aaaf",
+      "rgbaSha256": "65500a7f156060c8744ccacc2d1b7bb3356544f6ca182eaf86c2cfcdc4e7aea5"
+    },
+    {
+      "frame": 18,
+      "offset": 28846,
+      "sourceOffset": 28858,
+      "sha256": "4873413f9891cf5bf848452d20388e9c10fe3c3e92f3f8a11e1fde02fbfb7508",
+      "rgbaSha256": "ff5126a8f4470b34629bd1505dccf88e0322d3b670b027073b6ee852b3a3d989"
+    },
+    {
+      "frame": 19,
+      "offset": 32456,
+      "sourceOffset": 32468,
+      "sha256": "1cfbed74c79a6c08e8917f746aea825ac679d74807373c22b204028279bc72ec",
+      "rgbaSha256": "0fee987a5e2e38352f6ec69b62d1669ced816db3101feec7b50b11fee33ab47a"
+    },
+    {
+      "frame": 20,
+      "offset": 33748,
+      "sourceOffset": 33760,
+      "sha256": "ce2b78b8eef8ae05fa29c3ba178db91695d83aaa038420bb04c7a5be1bafb51a",
+      "rgbaSha256": "a65789ddbce666cd1bc087828cbdc33da05779e87ca2c6bd4fb52f1d3e6f1e87"
+    }
+  ]
+}

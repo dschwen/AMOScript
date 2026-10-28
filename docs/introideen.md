@@ -28,8 +28,11 @@ Polygon now completes the unchanged backup generator and its eight original
 IFF exports using a documented portable solid-fill profile. Matrix pixels,
 decoded exports, browser downloads and GPU frames are checked; exact native
 AreaEnd edges remain unverified. See [Polygon](polygon.md). The sibling catalogue
-is rebuilt: ten programs compile. Next implement the ANIM-5 foundation and
-Frame Load/Frame Play; three token encodings remain unsupported.
+is rebuilt: twelve programs compile. Frame Load/Frame Play now complete both
+unchanged Logoanim variants, with all twenty stored frames independently checked
+and a repository Canvas/WebGL demo. See [ANIM-5](anim5.md). Inactive DRNG metadata
+is retained and IconCutter now finishes its bounded startup run. Open Port is the
+only remaining unsupported encoding; implement its explicit device adapter next.
 
 ## Pre-implementation baseline and evidence
 
@@ -208,7 +211,7 @@ first errors are removed; rebuild and execute after each step.
 | Blocker | Observation | Planned follow-up |
 | --- | --- | --- |
 | Negative Screen Display Y | Both RolIntrIdee2 versions move Y1 from -80 toward 120; first display uses -76 | Verify signed-word/native clipping semantics, then extend the committed window/copper and pointer-crop paths together. Regress parked positive windows, overlaps, late DMA, PAL/NTSC and input mapping. Do not just remove the validation. |
-| ILBM DRNG | IconCutter's `armartures` has a 12-byte DRNG at byte 262 | Validate its actual flags/count layout against the format. Decide whether inactive metadata can be safely retained without cycling; active ranges require explicit clock/palette integration. Do not strip the chunk to hide the failure. |
+| Active ILBM DRNG | Inactive records in IconCutter's `armartures` and Logoanim's `introroller` now validate and remain metadata | Active ranges still require explicit clock/palette integration. Original chunks are preserved. |
 | Missing RII volume | rol.amos and rol.Bak fail at original Dir$ setup | Inventory expected assets and provide an explicit matching manifest/volume mapping. Do not silently combine these older sources with current Roller II data. |
 | Truncated Roller II.Bak | File is 65,536 bytes; header declares 67,210 code bytes, requiring at least 67,230 bytes before any trailing data | Recover a complete source copy if available. Keep Buffer's bounds validation unchanged; this is not an unsupported-token task. |
 
