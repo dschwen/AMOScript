@@ -338,6 +338,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
     },
     {
+      "file": "bob-test.html",
+      "title": "BobTest: 64 bouncing Bobs",
+      "description": "The unchanged BobTest.amos draws and captures its three images, bounces 64 objects for 500 frames, restores the grid and ends after a second key. Live WebGL/Canvas, pause, restart and fullscreen. Configured for 65 Bob slots because the source uses IDs 1–64. Portable circle raster and zero startup random seed/beam; source has no frame wait and is not a native speed benchmark. Checks verify independent image/path/composite expectations and eight actual GPU frames.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bob-test.html"
+    },
+    {
       "file": "planet-zybex.html",
       "title": "Planet Zybex: level background preview",
       "description": "First milestone toward a playable Planet Zybex showcase. The seven original packed level banks decode through the original Load/Unpack statements; 35 scrolled windows match independent pixels and actual WebGL output. The full game still needs AMAL, computed/wide sprites and update control. This is a background preview, not gameplay.",

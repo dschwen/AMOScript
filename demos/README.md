@@ -7,6 +7,7 @@
 - [Play Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html): original game, WebGL/Canvas, fullscreen and optional sound.
 - [Play Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html): game with the AMOS boundary-check fix and current supplied assets; tested through the level-3 warp, game over, scores, menu return and a fresh game.
 - [Play Roller II with debug enabled](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game-debug.html): the full game with modified-file downloads and source error logs, without running verification replays.
+- [Run BobTest](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bob-test.html): 64 bouncing objects with live WebGL, pause/restart and fullscreen; press a key to start the 500-frame run.
 - [Watch the tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html): original animation with its supplied external icon bank and IFF background; optionally choose a custom IFF.
 
 The gallery places games first, then animation/music and interactive examples.

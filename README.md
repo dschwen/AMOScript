@@ -12,6 +12,7 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 | --- | --- |
 | **[Dithell’s Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)** | Original game with WebGL/Canvas, fullscreen, keyboard/Gamepad and optional sound. Replays cover lives, game over and restarting. |
 | **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Game with its AMOS boundary bug fixed, current supplied assets and music. Tested through the level-3 warp, game over, restored scores, menu return and a fresh game. |
+| **[BobTest](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bob-test.html)** | Original 64-object bouncing demo with live WebGL, pause/restart and fullscreen. Press a key to start its 500-frame run. |
 | **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation with its supplied icon bank and IFF background. Fullscreen, frame stepping and custom IFF upload. |
 
 The next game target is [Planet Zybex](docs/planet-zybex.md). Its

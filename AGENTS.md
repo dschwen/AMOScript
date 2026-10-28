@@ -567,3 +567,13 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   words and sign-extend integer queries. Reuse this storage for the future AMAL
   interpreter. Original clear_amal passes a declared register fixture; channel
   overloads and program execution remain gated. See docs/amreg.md.
+- The complete unchanged `examples/BobTest/BobTest.amos` now runs its 64 Bobs and
+  500 movement frames in the live `bob-test` showcase. It uses IDs 1–64, so this
+  host passes `maxBobs:65`; the per-factory default remains 64, bounded to 1–256.
+  Circle is a bounded lowres solid portable midpoint outline; Paint is the
+  two-argument seed-colour fill with the seed retained before Bob/Autoback hooks.
+  Get Bob captures exclusive logical rectangles into transparent bank-1 records
+  through the shared Get Icon capture path. All 32,064 positions, three generated
+  images, five independent composites, restored background and eight Canvas/GPU
+  frames pass. Source busy-loop timing and native circle raster parity remain
+  open; see `docs/bob-test.md`. Keep both original key prompts in the live host.

@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'bob-test', title: 'BobTest: 64 bouncing Bobs', initialFrame: 'Canvas: BobTest frame 319', description: 'The unchanged BobTest.amos draws and captures its three images, bounces 64 objects for 500 frames, restores the grid and ends after a second key. Live WebGL/Canvas, pause, restart and fullscreen. Configured for 65 Bob slots because the source uses IDs 1–64. Portable circle raster and zero startup random seed/beam; source has no frame wait and is not a native speed benchmark. Checks verify independent image/path/composite expectations and eight actual GPU frames.', run: require('./bobTestProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { images:3, objects:64, movementFrames:500, positionChecks:32064, frames:8, gpuFrames:8, restored:true, ended:true });
+  } },
   { id: 'planet-zybex', title: 'Planet Zybex: level background preview', initialFrame: 'Canvas: Level 1 at 0,0', description: 'First milestone toward a playable Planet Zybex showcase. The seven original packed level banks decode through the original Load/Unpack statements; 35 scrolled windows match independent pixels and actual WebGL output. The full game still needs AMAL, computed/wide sprites and update control. This is a background preview, not gameplay.', run: require('./planetZybexProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { registersVerified: true, levels: 7, windows: 35, gpuFrames: 35, fullGameCompiled: false, previewOnly: true });
   } },
