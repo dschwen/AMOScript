@@ -1,0 +1,401 @@
+{
+  "version": 1,
+  "description": "Static inventory and bounded startup observations, not native AMOS execution. Sources currently live in the untracked introideen directory; hashes identify the inspected bytes.",
+  "catalogRevision": "7f32e0abe1b6b415c9502b598cd3e4cb131018f8",
+  "programs": [
+    {
+      "source": "ASCIIPC.Bak",
+      "sha256": "be1a0946358f36f484c72afa533a568bb03434fe8019ebc31bbcef2e6106fb68",
+      "bytes": 1316,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x18de at line 1, byte 22"
+      },
+      "physicalLines": 27,
+      "missing": [
+        {
+          "code": "18de",
+          "name": "open port",
+          "signature": "I0,2",
+          "count": 1,
+          "locations": [
+            {
+              "line": 1,
+              "offset": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "Drums.amos",
+      "sha256": "309b9d23f6770b6da50eab6e7ed6e7f583c3672b0ec6d0e2756cf73680b65e47",
+      "bytes": 716,
+      "compiler": {
+        "ok": true
+      },
+      "physicalLines": 16,
+      "missing": [],
+      "boundedStartup": {
+        "result": "bounded startup completed",
+        "halted": false,
+        "location": {
+          "line": 15,
+          "offset": 642
+        }
+      }
+    },
+    {
+      "source": "IconCutter.amos",
+      "sha256": "71231ef67908a7702b90d59c602c0824d8c06dd6fc9ef6910fe2e51a6ba2ab86",
+      "bytes": 15702,
+      "compiler": {
+        "ok": true
+      },
+      "physicalLines": 19,
+      "missing": [],
+      "boundedStartup": {
+        "result": "runtime error",
+        "error": "ILBM at byte 262: unsupported DRNG semantics at line 1, byte 22"
+      }
+    },
+    {
+      "source": "Kugel.amos",
+      "sha256": "881ef539bb8f9bd0db7cd87915ad2ec74fe4e5a02f021a5874fb4515ca947d0e",
+      "bytes": 662,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x768 at line 13, byte 440"
+      },
+      "physicalLines": 18,
+      "missing": [
+        {
+          "code": "0768",
+          "name": "sqr",
+          "signature": "11",
+          "count": 1,
+          "locations": [
+            {
+              "line": 13,
+              "offset": 440
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "KugelanimBerech.Bak",
+      "sha256": "55520cb27d935eff1e6c242c6fc2ba11d90eeacbf3d6debe8f68cf36ca2e8dd1",
+      "bytes": 1440,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x768 at line 24, byte 942"
+      },
+      "physicalLines": 40,
+      "missing": [
+        {
+          "code": "0768",
+          "name": "sqr",
+          "signature": "11",
+          "count": 1,
+          "locations": [
+            {
+              "line": 24,
+              "offset": 942
+            }
+          ]
+        },
+        {
+          "code": "0eba",
+          "name": "polygon",
+          "signature": "I",
+          "count": 1,
+          "locations": [
+            {
+              "line": 27,
+              "offset": 1096
+            }
+          ]
+        },
+        {
+          "code": "0afc",
+          "name": "save iff",
+          "signature": "I2",
+          "count": 1,
+          "locations": [
+            {
+              "line": 36,
+              "offset": 1404
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "KugelanimBerech.amos",
+      "sha256": "17780262a677d2f80cd09e669325a599c82926f15e093f0ce51fb3a72f615d93",
+      "bytes": 1204,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x768 at line 24, byte 752"
+      },
+      "physicalLines": 37,
+      "missing": [
+        {
+          "code": "0768",
+          "name": "sqr",
+          "signature": "11",
+          "count": 1,
+          "locations": [
+            {
+              "line": 24,
+              "offset": 752
+            }
+          ]
+        },
+        {
+          "code": "0afc",
+          "name": "save iff",
+          "signature": "I2",
+          "count": 1,
+          "locations": [
+            {
+              "line": 33,
+              "offset": 1162
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "LetterQualityProcs.Bak",
+      "sha256": "b913d24947c6b92f4af95d3d606da984a0253a705d0ef20c14fda16bba9dbed2",
+      "bytes": 1634,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x18de at line 25, byte 1220"
+      },
+      "physicalLines": 38,
+      "missing": [
+        {
+          "code": "18de",
+          "name": "open port",
+          "signature": "I0,2",
+          "count": 1,
+          "locations": [
+            {
+              "line": 25,
+              "offset": 1220
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "LetterQualityProcs.amos",
+      "sha256": "1c2b0b4c0cacdec90bf25c192036e6e139de2b04af9e731bef3152be4c2b1d03",
+      "bytes": 1578,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x18de at line 30, byte 1416"
+      },
+      "physicalLines": 36,
+      "missing": [
+        {
+          "code": "18de",
+          "name": "open port",
+          "signature": "I0,2",
+          "count": 1,
+          "locations": [
+            {
+              "line": 30,
+              "offset": 1416
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "Logoanim.Bak",
+      "sha256": "5c4e5e1ea435989b830db80ac027bf824b88f30ba202731f91e7e612ca16a085",
+      "bytes": 1902,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x25e0 at line 6, byte 282"
+      },
+      "physicalLines": 45,
+      "missing": [
+        {
+          "code": "25e0",
+          "name": "frame load",
+          "signature": "00t0,0",
+          "count": 1,
+          "locations": [
+            {
+              "line": 6,
+              "offset": 282
+            }
+          ]
+        },
+        {
+          "code": "25ec",
+          "name": "frame play",
+          "signature": "00,0",
+          "count": 2,
+          "locations": [
+            {
+              "line": 20,
+              "offset": 852
+            },
+            {
+              "line": 23,
+              "offset": 938
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "Logoanim.amos",
+      "sha256": "f64ffc949e049019d3f7342e0d539203735d442f490f9f67aced600f3fc25efc",
+      "bytes": 1964,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x25e0 at line 6, byte 282"
+      },
+      "physicalLines": 46,
+      "missing": [
+        {
+          "code": "25e0",
+          "name": "frame load",
+          "signature": "00t0,0",
+          "count": 1,
+          "locations": [
+            {
+              "line": 6,
+              "offset": 282
+            }
+          ]
+        },
+        {
+          "code": "25ec",
+          "name": "frame play",
+          "signature": "00,0",
+          "count": 2,
+          "locations": [
+            {
+              "line": 20,
+              "offset": 852
+            },
+            {
+              "line": 23,
+              "offset": 938
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "RolIntrIdee2.Bak",
+      "sha256": "73fecc2a65b4511f963e217fb5a163790afdc9e0367f4f5720c97728f19f138e",
+      "bytes": 602,
+      "compiler": {
+        "ok": true
+      },
+      "physicalLines": 21,
+      "missing": [],
+      "boundedStartup": {
+        "result": "runtime error",
+        "error": "Unsupported Screen Display vertical placement at line 16, byte 508"
+      }
+    },
+    {
+      "source": "RolIntrIdee2.amos",
+      "sha256": "979103bae17f09627fe958636f8a2e19e5625c055f2d8fbe0bb55debb3af08df",
+      "bytes": 770,
+      "compiler": {
+        "ok": true
+      },
+      "physicalLines": 26,
+      "missing": [],
+      "boundedStartup": {
+        "result": "runtime error",
+        "error": "Unsupported Screen Display vertical placement at line 20, byte 660"
+      }
+    },
+    {
+      "source": "Roller II.Bak",
+      "sha256": "ab02e4a8e94cc805776fea73e043b0eb6f33ebb7cc2a52b609eef3c2e11aaa1a",
+      "bytes": 65536,
+      "compiler": {
+        "ok": false,
+        "error": "Truncated AMOS data at byte 20 (need 67210 bytes)"
+      }
+    },
+    {
+      "source": "RollerIIIntroIdee.amos",
+      "sha256": "046ea04db7498dd1799f5e03e25d98facad3f5d82454ba6e15c59673f4a6bc8b",
+      "bytes": 4070,
+      "compiler": {
+        "ok": false,
+        "error": "Unsupported token 0x10d6 at line 11, byte 346"
+      },
+      "physicalLines": 49,
+      "missing": [
+        {
+          "code": "10d6",
+          "name": "zoom",
+          "signature": "I0,0,0,0,0t0,0,0,0,0",
+          "count": 1,
+          "locations": [
+            {
+              "line": 11,
+              "offset": 346
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": "rol.Bak",
+      "sha256": "ab128bf3d3c610b9611d695e8085e5f68da36833da26bd38fce71cb28e79ec93",
+      "bytes": 67272,
+      "compiler": {
+        "ok": true
+      },
+      "physicalLines": 1229,
+      "missing": [],
+      "boundedStartup": {
+        "result": "runtime error",
+        "error": "Directory not found: RII: at line 14, byte 220"
+      }
+    },
+    {
+      "source": "rol.amos",
+      "sha256": "433b9d70b873e36a3414cb2bcc46461903fd88ce384d9d927a2201143f1ef24a",
+      "bytes": 126818,
+      "compiler": {
+        "ok": true
+      },
+      "physicalLines": 1232,
+      "missing": [],
+      "boundedStartup": {
+        "result": "runtime error",
+        "error": "Directory not found: RII: at line 14, byte 232"
+      }
+    }
+  ],
+  "animation": {
+    "source": "KugelAnim",
+    "sha256": "07767fbbcfb029c3d67b2c19e8fceb96f4565c71da2d56d0cfa2a3d7ac3d1c3d",
+    "bytes": 35084,
+    "form": "ANIM",
+    "frames": 20,
+    "initial": "ILBM BMHD/BODY",
+    "deltas": 19,
+    "operation": 5,
+    "interleave": 0,
+    "bits": 0,
+    "requestedFrames": 18
+  }
+}

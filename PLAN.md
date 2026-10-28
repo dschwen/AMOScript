@@ -1,6 +1,23 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-27.
+Assessment updated: 2026-10-28.
+
+## Next implementation sequence: Introideen
+
+The [Introideen implementation plan](docs/introideen.md) audits all 16 AMOS
+sources/backups, including commands hidden behind each first compiler error.
+Seven encodings remain unsupported. Implement in this order: Sqr; Zoom;
+Save Iff; Polygon; Frame Load/Frame Play with ANIM-5 decoding; Open Port with
+an explicit printer-output adapter. Each step includes an original-program
+acceptance target and repository browser demo. Keep Roller II and Wonderland
+as full-game regressions throughout.
+
+Six files currently compile; only Drums passes the bounded startup check.
+Negative Screen Display placement, ILBM DRNG metadata, missing RII assets and
+a truncated backup are separate blockers, with their own investigation gates.
+Source hashes, all missing-token locations and baseline outcomes are recorded
+in [the inventory](docs/introideen-inventory.json). This is planned work; no
+additional compiler support is enabled by this assessment.
 
 The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)
 now highlights complete games, animation/music and interactive examples; individual
