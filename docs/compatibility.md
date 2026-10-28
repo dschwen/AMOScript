@@ -1,7 +1,7 @@
 # Compatibility and implementation status
 
-Updated 2026-10-28. The current local baseline has **801 passing tests**, plus a
-passing real-Chromium rendering/input smoke test, 68 offline demo scenarios and
+Updated 2026-10-28. The current local baseline has **810 passing tests**, plus a
+passing real-Chromium rendering/input smoke test, 69 offline demo scenarios and
 WebGL2 capability probe.
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.
@@ -43,6 +43,9 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
+| Planet Zybex | New full-game milestone; background preview only | Seven original packed worlds and original Load/Unpack excerpts pass independent pixels, 35 GPU windows and live scrolling/fullscreen. Global register exchange passes; complete source still stops at Default and AMAL/player gameplay remain open. [Milestone](planet-zybex.md). |
+| Unpack bank To screen | Implemented slot-2 full packed-screen subset | Owned checked SCCode/BMCode decoder, native square/column traversal, palette/window metadata, replacement preflight and retained bank addresses. Other overloads, partial/raw-address forms and modes remain gated. [Contract](packed-pictures.md). |
+| Amreg globals | Implemented signed-word access | Per-factory RA–RZ, integer queries, low-word stores and checked indices. Original clear_amal runs in a declared fixture; channel-local registers/interpreter remain open. [Contract](amreg.md). |
 | Signed Screen Display | Implemented bounded raster crop | Y -4095..28671 without biased-word overflow; committed top/bottom clipping, advanced planar pointers and early DMA endings. Both original RolIntrIdee2 sources complete, with all 200 PAL/NTSC frames independently checked, 28 GPU/pointer checks and live sample sound. Wider wrapping/horizontal forms and native captures remain open. [Contract](screen-slide.md). |
 | Open Port | Implemented output-only adapter boundary | Shared file-channel ownership with explicit synchronous ports.open/write/close, raw byte Print #, terminal cleanup and opt-in bounded PAR: capture. All three original printer sources match 5,661 independent bytes; browser downloads/revocation pass. Input, serial/printer handlers, physical printing and PCL rendering remain gated. [Contract](open-port.md). |
 | Frame Load / Frame Play | Implemented ANIM-5 subset | Checked channel prefix to temporary fast bank, native raw forms/AenD, integer count/continuation addresses and logical delta stores under caller swaps/waits. Both unchanged Logoanim sources finish; all twenty asset frames match independent hashes, with 16 GPU comparisons. Other operations/overloads, mutable/restored banks and native captures remain gated. [Contract](anim5.md). |

@@ -338,6 +338,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sprite-dma.html"
     },
     {
+      "file": "planet-zybex.html",
+      "title": "Planet Zybex: level background preview",
+      "description": "First milestone toward a playable Planet Zybex showcase. The seven original packed level banks decode through the original Load/Unpack statements; 35 scrolled windows match independent pixels and actual WebGL output. The full game still needs AMAL, computed/wide sprites and update control. This is a background preview, not gameplay.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html"
+    },
+    {
       "file": "screen-slide.html",
       "title": "Roller II intro: sliding screen windows",
       "description": "Both unchanged RolIntrIdee2 sources slide cropped screens from above and below the display. All 200 PAL/NTSC movement frames match independent ILBM and raster-crop expectations, with 28 actual GPU comparisons, pointer checks and Stop/Resume. Includes live playback with optional original sample sound; no native capture is claimed.",

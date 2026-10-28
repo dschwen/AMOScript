@@ -419,6 +419,9 @@ const scenarios = [
     assert.deepStrictEqual(result.pixels, [[255,0,0,255],[255,0,0,255],[0,0,0,255],[0,255,0,255],[0,0,0,255]]);
     assert.deepStrictEqual(result.held, [255,0,0,255]); assert.strictEqual(result.words, 26); assert.strictEqual(result.pointer, 0x3018);
   } },
+  { id: 'planet-zybex', title: 'Planet Zybex: level background preview', initialFrame: 'Canvas: Level 1 at 0,0', description: 'First milestone toward a playable Planet Zybex showcase. The seven original packed level banks decode through the original Load/Unpack statements; 35 scrolled windows match independent pixels and actual WebGL output. The full game still needs AMAL, computed/wide sprites and update control. This is a background preview, not gameplay.', run: require('./planetZybexProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { registersVerified: true, levels: 7, windows: 35, gpuFrames: 35, fullGameCompiled: false, previewOnly: true });
+  } },
   { id: 'screen-slide', title: 'Roller II intro: sliding screen windows', initialFrame: 'Canvas: RolIntrIdee2.Bak PAL slide 50', description: 'Both unchanged RolIntrIdee2 sources slide cropped screens from above and below the display. All 200 PAL/NTSC movement frames match independent ILBM and raster-crop expectations, with 28 actual GPU comparisons, pointer checks and Stop/Resume. Includes live playback with optional original sample sound; no native capture is claimed.', run: require('./screenSlideProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { frames: 200, gpuFrames: 28, pointerChecks: 28, plays: 4, paused: true, bothSourcesEnded: true });
   } },

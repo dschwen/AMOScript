@@ -19,6 +19,7 @@ module.exports = async function checkBrowserDemos(browser) {
     assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), true);
     assert.strictEqual(await gallery.locator('#showcases a[href="tunnel.html"]').count(), 1);
     assert.strictEqual(await gallery.locator('#showcases a[href="anim5.html"]').count(), 1);
+    assert.strictEqual(await gallery.locator('#showcases a[href="planet-zybex.html"]').count(), 1);
   } finally { await gallery.close(); }
   const debug = await browser.newPage(), debugErrors = [], debugNetwork = [];
   debug.on('pageerror', error => debugErrors.push(error.message));
@@ -105,6 +106,7 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.evaluate(() => typeof globalThis.AMOS_PLAY_GAME), 'undefined');
         await page.locator('#demo-checks summary').click();
       }
+      if (scenario.id === 'planet-zybex') await require('./checkPlanetZybexPreview')(page);
       if (scenario.id === 'screen-slide') await require('./checkScreenSlidePlayer')(page);
       if (scenario.id === 'anim5') await require('./checkAnim5Player')(page);
       await page.click('#run-demo');

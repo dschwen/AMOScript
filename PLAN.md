@@ -2,6 +2,19 @@
 
 Assessment updated: 2026-10-28.
 
+## Current game priority: Planet Zybex
+
+[Planet Zybex](docs/planet-zybex.md) is the next full-game showcase target.
+Its unchanged source/assets are pinned and all seven packed backgrounds now
+render in an interactive WebGL preview. Global Amreg signed-word access and the
+original clear_amal routine are covered. The full game still fails at Default;
+13 unsupported encodings remain, plus runtime work for computed/wide sprites,
+manual updates and mixed-resolution presentation. Next implement the startup
+contracts and AMAL/channel execution, then connect input-driven level-1 gameplay.
+The milestone tracks horizontal/vertical progression and the eventual shared
+Play Game/debug pages. Keep Roller II/Wonderland as full-game regressions.
+A background inspector must remain explicitly labelled until gameplay works.
+
 ## Next implementation sequence: Introideen
 
 The [Introideen implementation plan](docs/introideen.md) audits all 16 AMOS

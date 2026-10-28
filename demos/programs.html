@@ -1319,6 +1319,54 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   for (const bytes of chunks) { result.set(bytes, position); position += bytes.length; }
   return result;
 };
+  const packedPictureReader = function readPackedPicture(input) {
+  const fail = message => { throw new Error(`Packed picture: ${message}`); };
+  if (!ArrayBuffer.isView(input) || Object.prototype.toString.call(input) !== '[object Uint8Array]' || input.length > 16 * 1024 * 1024) fail('expected bounded bytes');
+  const bytes = Uint8Array.from(input), view = new DataView(bytes.buffer);
+  if (bytes.length < 117) fail('truncated screen/bitmap headers');
+  const word = at => view.getUint16(at, false), long = at => view.getUint32(at, false);
+  if (long(0) !== 0x12031990 || long(90) !== 0x06071963) fail('expected packed screen and bitmap signatures');
+  const width = word(4), height = word(6), depth = word(24), control = word(20), colours = word(22);
+  const hires = !!(control & 0x8000), scale = hires ? 2 : 1;
+  if (width < 16 || width > 1024 || width % 16 || height < 1 || height > 1023 || depth < 1 || depth > (hires ? 4 : 6) ||
+      colours !== 1 << depth || control !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
+  const x = word(8), y = view.getInt16(10, false), windowWidth = word(12), windowHeight = word(14), offsetX = word(16), offsetY = word(18);
+  if (x !== 128 || y < -4095 || windowWidth < 128 || windowWidth > 320 || windowWidth % 16 || !windowHeight ||
+      windowWidth * scale + offsetX > width || windowHeight + offsetY > height || y + windowHeight > 28671 ||
+      (hires && offsetX % 2)) fail('unsupported screen window/offset');
+  const palette = Array.from({ length: 32 }, (_, index) => word(26 + index * 2));
+  if (palette.some(value => value > 0xfff)) fail('invalid palette word');
+  const bitmap = 90, columns = word(bitmap + 8), bands = word(bitmap + 10), squareHeight = word(bitmap + 12);
+  if (word(bitmap + 4) || word(bitmap + 6) || word(bitmap + 14) !== depth || columns * 8 !== width ||
+      !bands || !squareHeight || squareHeight > height || bands * squareHeight !== height) fail('unsupported partial bitmap/geometry');
+  const flagsStart = bitmap + long(bitmap + 16), pointersStart = bitmap + long(bitmap + 20), dataStart = bitmap + 24;
+  if (pointersStart <= dataStart || flagsStart <= pointersStart || flagsStart >= bytes.length) fail('invalid stream offsets');
+  let dataAt = dataStart, flagsAt = flagsStart, pointerAt = pointersStart;
+  const data = () => { if (dataAt >= pointersStart) fail('truncated byte stream'); return bytes[dataAt++]; };
+  const flags = () => { if (flagsAt >= bytes.length) fail('truncated flag stream'); return bytes[flagsAt++]; };
+  const pointerBit = bit => { if (pointerAt >= flagsStart) fail('truncated pointer stream'); return bytes[pointerAt] & (1 << bit); };
+  let flag = flags(), value = data(), flagBit = 7, tableBit = 7;
+  if (pointerBit(tableBit)) flag = flags(); tableBit--;
+  const planeSize = columns * height, planar = new Uint8Array(planeSize * depth);
+  for (let plane = 0; plane < depth; plane++) for (let band = 0; band < bands; band++) for (let column = 0; column < columns; column++) {
+    for (let row = 0; row < squareHeight; row++) {
+      if (flag & (1 << flagBit)) value = data();
+      planar[plane * planeSize + (band * squareHeight + row) * columns + column] = value;
+      if (--flagBit < 0) {
+        flagBit = 7;
+        if (pointerBit(tableBit)) flag = flags();
+        if (--tableBit < 0) { tableBit = 7; pointerAt++; }
+      }
+    }
+  }
+  const pixels = new Uint8Array(width * height);
+  for (let plane = 0; plane < depth; plane++) for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    if (planar[plane * planeSize + y * columns + (x >> 3)] & (128 >> (x & 7))) pixels[y * width + x] |= 1 << plane;
+  }
+  return { width, height, depth, colours, mode: hires ? 0x8000 : 0, palette, pixels,
+    window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
+    consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
+};
   const animReaderFactory = (function createAnimReader(readIlbm) {
   return function readAnim(input, { position = 0, count = 32767 } = {}) {
     const fail = message => { throw new Error(`ANIM-5: ${message}`); };
@@ -3357,6 +3405,12 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       ...(bank.images ? { images: bank.images.map(image => image && { ...image, pixels: Uint8Array.from(image.pixels), orientation: 0, masked: bank.number === 1, mask: null }), palette: bank.palette.slice() } : { data: Uint8Array.from(bank.data) })
     };
   }
+  const amalRegisters = new Int16Array(26);
+  function amregIndex(index) {
+    index = integer(index);
+    if (index < 0 || index >= 26) throw new Error('Invalid global AMAL register');
+    return index;
+  }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
   const animations = new WeakMap();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
@@ -4135,6 +4189,22 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let offset = 0; offset < bytes.length; offset += 8192) contents += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
     const result = options.files.write(path, contents);
     if (result && typeof result.then === 'function') throw new Error('Files host must write synchronously');
+  }
+
+  function unpackScreen(selector, destination) {
+    selector = integer(selector); destination = integer(destination);
+    if (destination < 0 || destination > 7) throw new Error('Invalid Unpack screen number');
+    const bank = banks.get(selector);
+    if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
+    if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
+    const image = packedPictureReader(Uint8Array.from(bank.data));
+    // Decode/validate completely before screen replacement. New-screen Unpack
+    // does not use the current-screen Autoback path in the native extension.
+    const target = display.open(destination, image.width, image.height, image.colours, image.mode);
+    display.screenDisplay(destination, image.window.x, image.window.y, image.window.width, image.window.height);
+    display.screenOffset(destination, image.window.offsetX, image.window.offsetY);
+    target.pixels.set(image.pixels); target.palette = image.palette.slice(); target.cursorVisible = false;
+    display.invalidate();
   }
 
   function loadIff(filename, destination = null) {
@@ -5313,7 +5383,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const binding = { reader }; joystickBinding = binding;
       return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
-    audio, loadIff, saveIff, frameLoad, framePlay, trackLoad,
+    amreg: index => amalRegisters[amregIndex(index)],
+    setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
+    audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
     trackLoopOn: () => { state.tracker.loop = true; },
     trackLoopOff: () => { state.tracker.loop = false; },
     samBank: number => audio.selectBank(integer(number)),
@@ -7220,6 +7292,54 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   for (const bytes of chunks) { result.set(bytes, position); position += bytes.length; }
   return result;
 };
+  const packedPictureReader = function readPackedPicture(input) {
+  const fail = message => { throw new Error(`Packed picture: ${message}`); };
+  if (!ArrayBuffer.isView(input) || Object.prototype.toString.call(input) !== '[object Uint8Array]' || input.length > 16 * 1024 * 1024) fail('expected bounded bytes');
+  const bytes = Uint8Array.from(input), view = new DataView(bytes.buffer);
+  if (bytes.length < 117) fail('truncated screen/bitmap headers');
+  const word = at => view.getUint16(at, false), long = at => view.getUint32(at, false);
+  if (long(0) !== 0x12031990 || long(90) !== 0x06071963) fail('expected packed screen and bitmap signatures');
+  const width = word(4), height = word(6), depth = word(24), control = word(20), colours = word(22);
+  const hires = !!(control & 0x8000), scale = hires ? 2 : 1;
+  if (width < 16 || width > 1024 || width % 16 || height < 1 || height > 1023 || depth < 1 || depth > (hires ? 4 : 6) ||
+      colours !== 1 << depth || control !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
+  const x = word(8), y = view.getInt16(10, false), windowWidth = word(12), windowHeight = word(14), offsetX = word(16), offsetY = word(18);
+  if (x !== 128 || y < -4095 || windowWidth < 128 || windowWidth > 320 || windowWidth % 16 || !windowHeight ||
+      windowWidth * scale + offsetX > width || windowHeight + offsetY > height || y + windowHeight > 28671 ||
+      (hires && offsetX % 2)) fail('unsupported screen window/offset');
+  const palette = Array.from({ length: 32 }, (_, index) => word(26 + index * 2));
+  if (palette.some(value => value > 0xfff)) fail('invalid palette word');
+  const bitmap = 90, columns = word(bitmap + 8), bands = word(bitmap + 10), squareHeight = word(bitmap + 12);
+  if (word(bitmap + 4) || word(bitmap + 6) || word(bitmap + 14) !== depth || columns * 8 !== width ||
+      !bands || !squareHeight || squareHeight > height || bands * squareHeight !== height) fail('unsupported partial bitmap/geometry');
+  const flagsStart = bitmap + long(bitmap + 16), pointersStart = bitmap + long(bitmap + 20), dataStart = bitmap + 24;
+  if (pointersStart <= dataStart || flagsStart <= pointersStart || flagsStart >= bytes.length) fail('invalid stream offsets');
+  let dataAt = dataStart, flagsAt = flagsStart, pointerAt = pointersStart;
+  const data = () => { if (dataAt >= pointersStart) fail('truncated byte stream'); return bytes[dataAt++]; };
+  const flags = () => { if (flagsAt >= bytes.length) fail('truncated flag stream'); return bytes[flagsAt++]; };
+  const pointerBit = bit => { if (pointerAt >= flagsStart) fail('truncated pointer stream'); return bytes[pointerAt] & (1 << bit); };
+  let flag = flags(), value = data(), flagBit = 7, tableBit = 7;
+  if (pointerBit(tableBit)) flag = flags(); tableBit--;
+  const planeSize = columns * height, planar = new Uint8Array(planeSize * depth);
+  for (let plane = 0; plane < depth; plane++) for (let band = 0; band < bands; band++) for (let column = 0; column < columns; column++) {
+    for (let row = 0; row < squareHeight; row++) {
+      if (flag & (1 << flagBit)) value = data();
+      planar[plane * planeSize + (band * squareHeight + row) * columns + column] = value;
+      if (--flagBit < 0) {
+        flagBit = 7;
+        if (pointerBit(tableBit)) flag = flags();
+        if (--tableBit < 0) { tableBit = 7; pointerAt++; }
+      }
+    }
+  }
+  const pixels = new Uint8Array(width * height);
+  for (let plane = 0; plane < depth; plane++) for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    if (planar[plane * planeSize + y * columns + (x >> 3)] & (128 >> (x & 7))) pixels[y * width + x] |= 1 << plane;
+  }
+  return { width, height, depth, colours, mode: hires ? 0x8000 : 0, palette, pixels,
+    window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
+    consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
+};
   const animReaderFactory = (function createAnimReader(readIlbm) {
   return function readAnim(input, { position = 0, count = 32767 } = {}) {
     const fail = message => { throw new Error(`ANIM-5: ${message}`); };
@@ -9258,6 +9378,12 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       ...(bank.images ? { images: bank.images.map(image => image && { ...image, pixels: Uint8Array.from(image.pixels), orientation: 0, masked: bank.number === 1, mask: null }), palette: bank.palette.slice() } : { data: Uint8Array.from(bank.data) })
     };
   }
+  const amalRegisters = new Int16Array(26);
+  function amregIndex(index) {
+    index = integer(index);
+    if (index < 0 || index >= 26) throw new Error('Invalid global AMAL register');
+    return index;
+  }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
   const animations = new WeakMap();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
@@ -10036,6 +10162,22 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let offset = 0; offset < bytes.length; offset += 8192) contents += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
     const result = options.files.write(path, contents);
     if (result && typeof result.then === 'function') throw new Error('Files host must write synchronously');
+  }
+
+  function unpackScreen(selector, destination) {
+    selector = integer(selector); destination = integer(destination);
+    if (destination < 0 || destination > 7) throw new Error('Invalid Unpack screen number');
+    const bank = banks.get(selector);
+    if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
+    if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
+    const image = packedPictureReader(Uint8Array.from(bank.data));
+    // Decode/validate completely before screen replacement. New-screen Unpack
+    // does not use the current-screen Autoback path in the native extension.
+    const target = display.open(destination, image.width, image.height, image.colours, image.mode);
+    display.screenDisplay(destination, image.window.x, image.window.y, image.window.width, image.window.height);
+    display.screenOffset(destination, image.window.offsetX, image.window.offsetY);
+    target.pixels.set(image.pixels); target.palette = image.palette.slice(); target.cursorVisible = false;
+    display.invalidate();
   }
 
   function loadIff(filename, destination = null) {
@@ -11214,7 +11356,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const binding = { reader }; joystickBinding = binding;
       return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
-    audio, loadIff, saveIff, frameLoad, framePlay, trackLoad,
+    amreg: index => amalRegisters[amregIndex(index)],
+    setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
+    audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
     trackLoopOn: () => { state.tracker.loop = true; },
     trackLoopOff: () => { state.tracker.loop = false; },
     samBank: number => audio.selectBank(integer(number)),
@@ -13138,6 +13282,54 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   for (const bytes of chunks) { result.set(bytes, position); position += bytes.length; }
   return result;
 };
+  const packedPictureReader = function readPackedPicture(input) {
+  const fail = message => { throw new Error(`Packed picture: ${message}`); };
+  if (!ArrayBuffer.isView(input) || Object.prototype.toString.call(input) !== '[object Uint8Array]' || input.length > 16 * 1024 * 1024) fail('expected bounded bytes');
+  const bytes = Uint8Array.from(input), view = new DataView(bytes.buffer);
+  if (bytes.length < 117) fail('truncated screen/bitmap headers');
+  const word = at => view.getUint16(at, false), long = at => view.getUint32(at, false);
+  if (long(0) !== 0x12031990 || long(90) !== 0x06071963) fail('expected packed screen and bitmap signatures');
+  const width = word(4), height = word(6), depth = word(24), control = word(20), colours = word(22);
+  const hires = !!(control & 0x8000), scale = hires ? 2 : 1;
+  if (width < 16 || width > 1024 || width % 16 || height < 1 || height > 1023 || depth < 1 || depth > (hires ? 4 : 6) ||
+      colours !== 1 << depth || control !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
+  const x = word(8), y = view.getInt16(10, false), windowWidth = word(12), windowHeight = word(14), offsetX = word(16), offsetY = word(18);
+  if (x !== 128 || y < -4095 || windowWidth < 128 || windowWidth > 320 || windowWidth % 16 || !windowHeight ||
+      windowWidth * scale + offsetX > width || windowHeight + offsetY > height || y + windowHeight > 28671 ||
+      (hires && offsetX % 2)) fail('unsupported screen window/offset');
+  const palette = Array.from({ length: 32 }, (_, index) => word(26 + index * 2));
+  if (palette.some(value => value > 0xfff)) fail('invalid palette word');
+  const bitmap = 90, columns = word(bitmap + 8), bands = word(bitmap + 10), squareHeight = word(bitmap + 12);
+  if (word(bitmap + 4) || word(bitmap + 6) || word(bitmap + 14) !== depth || columns * 8 !== width ||
+      !bands || !squareHeight || squareHeight > height || bands * squareHeight !== height) fail('unsupported partial bitmap/geometry');
+  const flagsStart = bitmap + long(bitmap + 16), pointersStart = bitmap + long(bitmap + 20), dataStart = bitmap + 24;
+  if (pointersStart <= dataStart || flagsStart <= pointersStart || flagsStart >= bytes.length) fail('invalid stream offsets');
+  let dataAt = dataStart, flagsAt = flagsStart, pointerAt = pointersStart;
+  const data = () => { if (dataAt >= pointersStart) fail('truncated byte stream'); return bytes[dataAt++]; };
+  const flags = () => { if (flagsAt >= bytes.length) fail('truncated flag stream'); return bytes[flagsAt++]; };
+  const pointerBit = bit => { if (pointerAt >= flagsStart) fail('truncated pointer stream'); return bytes[pointerAt] & (1 << bit); };
+  let flag = flags(), value = data(), flagBit = 7, tableBit = 7;
+  if (pointerBit(tableBit)) flag = flags(); tableBit--;
+  const planeSize = columns * height, planar = new Uint8Array(planeSize * depth);
+  for (let plane = 0; plane < depth; plane++) for (let band = 0; band < bands; band++) for (let column = 0; column < columns; column++) {
+    for (let row = 0; row < squareHeight; row++) {
+      if (flag & (1 << flagBit)) value = data();
+      planar[plane * planeSize + (band * squareHeight + row) * columns + column] = value;
+      if (--flagBit < 0) {
+        flagBit = 7;
+        if (pointerBit(tableBit)) flag = flags();
+        if (--tableBit < 0) { tableBit = 7; pointerAt++; }
+      }
+    }
+  }
+  const pixels = new Uint8Array(width * height);
+  for (let plane = 0; plane < depth; plane++) for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    if (planar[plane * planeSize + y * columns + (x >> 3)] & (128 >> (x & 7))) pixels[y * width + x] |= 1 << plane;
+  }
+  return { width, height, depth, colours, mode: hires ? 0x8000 : 0, palette, pixels,
+    window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
+    consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
+};
   const animReaderFactory = (function createAnimReader(readIlbm) {
   return function readAnim(input, { position = 0, count = 32767 } = {}) {
     const fail = message => { throw new Error(`ANIM-5: ${message}`); };
@@ -15176,6 +15368,12 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       ...(bank.images ? { images: bank.images.map(image => image && { ...image, pixels: Uint8Array.from(image.pixels), orientation: 0, masked: bank.number === 1, mask: null }), palette: bank.palette.slice() } : { data: Uint8Array.from(bank.data) })
     };
   }
+  const amalRegisters = new Int16Array(26);
+  function amregIndex(index) {
+    index = integer(index);
+    if (index < 0 || index >= 26) throw new Error('Invalid global AMAL register');
+    return index;
+  }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
   const animations = new WeakMap();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
@@ -15954,6 +16152,22 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let offset = 0; offset < bytes.length; offset += 8192) contents += String.fromCharCode(...bytes.subarray(offset, offset + 8192));
     const result = options.files.write(path, contents);
     if (result && typeof result.then === 'function') throw new Error('Files host must write synchronously');
+  }
+
+  function unpackScreen(selector, destination) {
+    selector = integer(selector); destination = integer(destination);
+    if (destination < 0 || destination > 7) throw new Error('Invalid Unpack screen number');
+    const bank = banks.get(selector);
+    if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
+    if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
+    const image = packedPictureReader(Uint8Array.from(bank.data));
+    // Decode/validate completely before screen replacement. New-screen Unpack
+    // does not use the current-screen Autoback path in the native extension.
+    const target = display.open(destination, image.width, image.height, image.colours, image.mode);
+    display.screenDisplay(destination, image.window.x, image.window.y, image.window.width, image.window.height);
+    display.screenOffset(destination, image.window.offsetX, image.window.offsetY);
+    target.pixels.set(image.pixels); target.palette = image.palette.slice(); target.cursorVisible = false;
+    display.invalidate();
   }
 
   function loadIff(filename, destination = null) {
@@ -17132,7 +17346,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const binding = { reader }; joystickBinding = binding;
       return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
-    audio, loadIff, saveIff, frameLoad, framePlay, trackLoad,
+    amreg: index => amalRegisters[amregIndex(index)],
+    setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
+    audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
     trackLoopOn: () => { state.tracker.loop = true; },
     trackLoopOff: () => { state.tracker.loop = false; },
     samBank: number => audio.selectBank(integer(number)),

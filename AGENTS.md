@@ -550,3 +550,20 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   version-selectable playback with optional owned sample sound. Activate sound
   before the first VM tick; dispose VM/timers/GPU/audio on replacement/page exit.
   Wider wraps/clamps/native captures remain gated. See docs/screen-slide.md.
+
+- Planet Zybex is the next full-game showcase target. Keep its unchanged source,
+  seven level banks and hashes in examples/PlanetZybex. Current planet-zybex demo
+  is explicitly a background preview: original Load/Unpack excerpts plus guards,
+  not the full game. No AMAL stubs or injected VM/asset edits may stand in for
+  gameplay. Track startup, AMAL/manual update, wide/computed sprites and full
+  progression in docs/planet-zybex.md; retain Roller II/Wonderland regressions.
+- Slot-2 Unpack To ($0056) decodes a checked full SCCode/BMCode screen from a
+  generic bank. Own input; bound byte/flag/pointer streams and decode completely
+  before normal screen replacement, metadata and palette installation. Retain
+  bank identity/addresses and clone/Auto View contracts. Other overloads/modes,
+  partial rectangles and raw addresses remain gated. Seven worlds/35 independent
+  windows and actual GPU comparisons are covered. See docs/packed-pictures.md.
+- Amreg ($1fa2) globals RA–RZ are per-factory signed WORDS, not longs. Store low
+  words and sign-extend integer queries. Reuse this storage for the future AMAL
+  interpreter. Original clear_amal passes a declared register fixture; channel
+  overloads and program execution remain gated. See docs/amreg.md.

@@ -14,6 +14,10 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 | **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Game with its AMOS boundary bug fixed, current supplied assets and music. Tested through the level-3 warp, game over, restored scores, menu return and a fresh game. |
 | **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation with its supplied icon bank and IFF background. Fullscreen, frame stepping and custom IFF upload. |
 
+The next game target is [Planet Zybex](docs/planet-zybex.md). Its
+[level background preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
+is available while AMAL gameplay support is being implemented.
+
 [Build your own complete game page](docs/game-webpage-tutorial.md): compilation, assets, Play/sound/fullscreen buttons, touch controls and optional `--debug` file downloads.
 
 Both game pages have a large red **Play Game** button for sound, fullscreen and direct launch.
