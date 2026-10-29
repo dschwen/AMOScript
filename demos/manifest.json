@@ -16,7 +16,7 @@
     {
       "file": "compiler-examples-runtime.html",
       "title": "Compiler examples: bitplanes, dual playfields and cube",
-      "description": "All nineteen originals compile. A declared fixture checks planar Copy, blocks, Dual Playfield and Shift Up against independent pixels and actual WebGL output. The unchanged 3Dcube1 runs for sixty and 120 PAL fields. Other examples remain development builds with explicit asset and display limits; no native Amiga capture is claimed.",
+      "description": "All nineteen originals compile. A declared fixture checks planar Copy, blocks, Dual Playfield and Shift Up against independent pixels and actual WebGL output. The unchanged 3Dcube1 runs for sixty and 120 PAL fields. The supplied Graphics images also run through unchanged Mapping preview and BouncBobs animation, with independent bitmap checks and three further GPU frames. Other examples remain development builds with explicit runtime/display limits; no native Amiga capture is claimed.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples-runtime.html"
     },
     {
@@ -472,7 +472,7 @@
     {
       "file": "compiler-examples.html",
       "title": "AMOS Compiler Examples — 19 original programs",
-      "description": "Browse standalone builds of the original compiler examples, including cubes, fractals, stars and GALAX. Debug pages expose current runtime limits and missing Graphics assets.",
+      "description": "Browse standalone builds of the original compiler examples, including cubes, fractals, stars and GALAX. Supplied graphics and Galax banks are embedded; debug pages expose remaining runtime limits.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.html"
     }
   ]

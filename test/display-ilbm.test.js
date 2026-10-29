@@ -160,3 +160,13 @@ test('ILBM: FORM/chunk bounds, semantic extensions, unsupported modes and malfor
   huge.writeUInt16BE(1024, 20); huge.writeUInt16BE(1023, 22); huge[28] = 5;
   assert.throws(() => readIlbm(huge, { chipBytes: 524288 }), /ILBM at byte 20: image exceeds chip capacity/);
 });
+
+
+test('ILBM: explicit AMOS loading ignores monitor metadata without enabling unsupported standalone modes',()=>{
+  for(const mode of [0xa1000,0x31000,0x21000,0x11000]) {
+    const data=Buffer.alloc(4);data.writeUInt32BE(mode);const bytes=small([0x80,0],{extra:[chunk('CAMG',data)]});
+    const {image,snapshot}=readIlbm(bytes,{ignoreMonitor:true});assert.strictEqual(image.mode,mode);assert.strictEqual(image.displayMode,0);assert.strictEqual(image.monitor,null);assert.deepStrictEqual(snapshot.frame.videoRate,{numerator:50,denominator:1});
+    if(mode===0xa1000||mode===0x31000)assert.throws(()=>readIlbm(bytes),/unsupported CAMG monitor/);
+  }
+  const data=Buffer.alloc(4);data.writeUInt32BE(0xa1020);assert.throws(()=>readIlbm(small([0,0],{extra:[chunk('CAMG',data)]}),{ignoreMonitor:true}),/unsupported CAMG mode/);
+});

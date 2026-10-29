@@ -627,12 +627,13 @@
       if (chunks.CAMG.size !== 4) fail('invalid CAMG size', chunks.CAMG.start);
       mode = view.getUint32(chunks.CAMG.start, false);
       const monitorId = mode >>> 16;
-      if (monitorId && (![1, 2].includes(monitorId) || !(mode & 0x1000))) fail('unsupported CAMG monitor ID', chunks.CAMG.start);
-      if (!monitorId && (mode & 0x1000)) fail('unsupported CAMG extended mode without monitor ID', chunks.CAMG.start);
-      monitor = monitorId === 1 ? 'NTSC' : monitorId === 2 ? 'PAL' : null;
+      if (!options.ignoreMonitor && monitorId && (![1, 2].includes(monitorId) || !(mode & 0x1000))) fail('unsupported CAMG monitor ID', chunks.CAMG.start);
+      if (!options.ignoreMonitor && !monitorId && (mode & 0x1000)) fail('unsupported CAMG extended mode without monitor ID', chunks.CAMG.start);
+      monitor = options.ignoreMonitor ? null : monitorId === 1 ? 'NTSC' : monitorId === 2 ? 'PAL' : null;
       // SPRITES describes a ViewPort flag, not ILBM pixel planes. The extended
-      // marker belongs to a recognized PAL/NTSC ModeID, not BPLCON0.
-      displayMode = (mode & 65535) & ~(0x4000 | (monitorId ? 0x1000 : 0));
+      // marker belongs to a ModeID, not BPLCON0. AMOS Load Iff ignores
+      // the monitor selector (Lib.s IfS1/IfS2); standalone decoding stays strict.
+      displayMode = (mode & 65535) & ~(0x4000 | ((monitorId || options.ignoreMonitor) ? 0x1000 : 0));
       if (displayMode & ~0x8884) fail('unsupported CAMG mode (AGA/other extended modes remain planned)', chunks.CAMG.start);
     }
     const ham = !!(displayMode & 0x800), ehb = !!(displayMode & 0x80);
@@ -3992,7 +3993,7 @@
     if (typeof ilbmReaderFactory !== 'function') throw new Error('Load Iff requires the ILBM runtime');
     const contents = options.files.read(resolveFileName(filename));
     if (typeof contents !== 'string' || /[^\x00-\xff]/.test(contents)) throw new Error('Files host must return IFF bytes synchronously');
-    const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)));
+    const { snapshot, image } = ilbmReaderFactory(Uint8Array.from(contents, character => character.charCodeAt(0)), { ignoreMonitor: true });
     const mode = image.hasMode ? image.displayMode :
       ((image.pageWidth >= 640 && image.depth <= 4 ? 0x8000 : 0) | (image.pageHeight >= 400 ? 4 : 0));
     // Transparent-colour metadata has no extra plane. Native IffBODY copies

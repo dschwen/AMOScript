@@ -8,7 +8,8 @@ All 19 supplied `compiler_examples/AMOS_versions` programs now compile.
 `npm run build:compiler-examples` rebuilds local modules/pages; pinned originals
 also feed the repository demo catalogue. Shared Input/error handling, palette
 shifting, bitplane memory, dual playfields and GALAX command forms are implemented
-with explicit bounds. Next: missing Graphics assets, horizontal Screen Display
+with explicit bounds. Supplied Graphics assets now load into BouncBobs animation and Mapping preview.
+Next: horizontal Screen Display
 placements, Bump Circle behavior and full input-only runs. See
 [contracts and evidence](docs/compiler-examples.md).
 

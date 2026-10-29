@@ -822,7 +822,7 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
 - All 19 pinned examples/CompilerExamples sources compile; hashes and supplied
   GALAX banks are in its manifest. build_compiler_examples.js rebuilds user-local
   compiler_examples/build by default; build:demo uses pinned copies and emits a
-  catalogue plus debug pages. Keep compilation distinct from missing Graphics,
+  catalogue plus debug pages. Keep compilation distinct from remaining asset-mode,
   horizontal placement/raster gates and complete interactive execution.
   See docs/compiler-examples.md for bounded contracts/native references.
 - Logbase/Phybase are selected-bitmap plane addresses in the 0x40000000 namespace,
@@ -839,3 +839,12 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   simultaneous Flash/Fade. Fixed-decimal Using is explicitly portable rounding;
   exact FFP and exponent formats remain open. Dreg/Forbid/Permit model owned
   state only, never arbitrary native calls or host multitasking suspension.
+
+- Compiler-example builds discover Graphics beside AMOS_versions (or within the
+  pinned fixture root), embed supplied ABK/IFF/ANIM bytes with original volume
+  aliases and ignore .uaem sidecars. All three supplied Graphics files are pinned
+  with hashes. Load Iff explicitly requests ignoreMonitor from the ILBM reader,
+  matching Lib.s IfS1/IfS2; standalone decoding remains strict and pixel-mode gates
+  remain intact. Do not strip/rewrite source assets or claim monitor timing parity.
+  Original BouncBobs/Mapping run animation (seven active Bobs)/preview with 82,176 independent loaded
+  image/Bob pixels and three additional GPU frames; full benchmark runs stay open.

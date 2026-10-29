@@ -15,9 +15,15 @@ function buildCompilerExamples({ source = path.join(root, 'examples/CompilerExam
     });
   }
   const inputs = walk(source);
-  // Only supplied bytes: never fabricate the missing Graphics directory.
-  for (const filename of inputs.filter(name => /\.abk$/i.test(name))) {
-    const relative = path.relative(source, filename).replace(/\\/g, '/').toLowerCase();
+  // Original distributions keep Graphics beside AMOS_versions. Pinned
+  // repository fixtures keep both under one root. Ignore .uaem metadata.
+  const assetInputs = inputs.map(filename => ({filename, relative:path.relative(source, filename)}));
+  const graphics = path.join(path.dirname(source), 'Graphics');
+  if (path.basename(source).toLowerCase() === 'amos_versions' && fs.existsSync(graphics)) {
+    for (const filename of walk(graphics)) assetInputs.push({filename, relative:path.join('Graphics',path.relative(graphics,filename))});
+  }
+  for (const {filename, relative: name} of assetInputs.filter(entry => /\.(abk|iff|anim)$/i.test(entry.filename))) {
+    const relative = name.replace(/\\/g, '/').toLowerCase();
     const bytes = fs.readFileSync(filename).toString('base64');
     assets[relative] = bytes;
     assets[`amospro_extras:compiler_examples/${relative}`] = bytes;
@@ -31,16 +37,16 @@ function buildCompilerExamples({ source = path.join(root, 'examples/CompilerExam
     try {
       const module = new Transpiler(bytes).toModule({ optimize: true });
       const page = buildGamePage(bytes, {title: relative, assets, debug: true, optimize: true});
-      outputs.set(file, page.replace('<h1>', `<p><a href="${repository ? preview('compiler-examples.html') : 'index.html'}">Compiler examples catalogue</a></p><p>Compiled original source. Some examples need missing Graphics assets or display modes beyond the current runtime. Use Keyboard: Typing for Input prompts; click the canvas to focus it.</p><h1>`));
+      outputs.set(file, page.replace('<h1>', `<p><a href="${repository ? preview('compiler-examples.html') : 'index.html'}">Compiler examples catalogue</a></p><p>Compiled original source. Some examples still require display modes or runtime behavior beyond the current implementation. Use Keyboard: Typing for Input prompts; click the canvas to focus it.</p><h1>`));
       if (modules) outputs.set(name + '.module.js', module);
       item.compiled = true;
     } catch (error) { item.compiled = false; item.error = error.message; }
     programs.push(item);
   }
   const index = repository ? 'compiler-examples.html' : 'index.html';
-  outputs.set(index, `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMOS Compiler Examples</title><style>body{font:16px system-ui;max-width:60rem;margin:2rem auto;padding:1rem;background:#101721;color:#eef2f6}a{color:#9bc9ff}li{margin:1rem 0}</style><h1>AMOS Compiler Examples</h1><p>${programs.filter(p=>p.compiled).length}/${programs.length} original AMOS programs compile. These are development builds, with sound, fullscreen, typing controls and debug errors. Compilation does not imply completed execution. Missing Graphics files and unsupported display geometry still affect some programs. The supplied Galax banks are embedded.</p><ul>${programs.map(p=>`<li>${p.compiled ? `<a href="${p.file}">${escape(p.source)}</a>${repository ? ` · <a href="${preview(p.file)}">HTML Preview</a>` : ''}` : `${escape(p.source)}: ${escape(p.error)}`}</li>`).join('')}</ul></html>\n`);
+  outputs.set(index, `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMOS Compiler Examples</title><style>body{font:16px system-ui;max-width:60rem;margin:2rem auto;padding:1rem;background:#101721;color:#eef2f6}a{color:#9bc9ff}li{margin:1rem 0}</style><h1>AMOS Compiler Examples</h1><p>${programs.filter(p=>p.compiled).length}/${programs.length} original AMOS programs compile. These are development builds, with sound, fullscreen, typing controls and debug errors. Compilation does not imply completed execution. Unsupported display geometry and other runtime limits still affect some programs. Supplied graphics, animation files and Galax banks are embedded.</p><ul>${programs.map(p=>`<li>${p.compiled ? `<a href="${p.file}">${escape(p.source)}</a>${repository ? ` · <a href="${preview(p.file)}">HTML Preview</a>` : ''}` : `${escape(p.source)}: ${escape(p.error)}`}</li>`).join('')}</ul></html>\n`);
   outputs.set(repository ? 'compiler-examples-manifest.json' : 'manifest.json', JSON.stringify({programs}, null, 2) + '\n');
-  return {outputs, programs};
+  return {outputs, programs, assets};
 }
 if (require.main === module) {
   const args = process.argv.slice(2);

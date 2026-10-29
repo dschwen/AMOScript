@@ -146,6 +146,21 @@
       "path": "Galax/Sprites.Abk",
       "sha256": "4cb41fb229b39d5c360c2da4319161c0e0e5891012cf3e5aa24cea6e7ceb058f",
       "byteLength": 12564
+    },
+    "Graphics/Demo_pic.iff": {
+      "path": "Graphics/Demo_pic.iff",
+      "sha256": "92b9b8ababc642db68b91353967864c99fb526d85071cf31f1dd383724e2b2a1",
+      "byteLength": 16396
+    },
+    "Graphics/Sprites_pic.iff": {
+      "path": "Graphics/Sprites_pic.iff",
+      "sha256": "c2246b2b1b3fcec57818ac8ea432d7660bc14f4ae3d6fb7bb4ac3894a74e410d",
+      "byteLength": 5598
+    },
+    "Graphics/Turtle.anim": {
+      "path": "Graphics/Turtle.anim",
+      "sha256": "eca7bcebc5e7e47d027ba69b2a70e01590d96a2dfe9fb4f4baa254fb1cfeef02",
+      "byteLength": 87770
     }
   }
 }

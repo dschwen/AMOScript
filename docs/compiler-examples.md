@@ -2,7 +2,8 @@
 
 All **19 editable AMOS programs** supplied in `compiler_examples/AMOS_versions`
 now compile. `.uaem` sidecars contain host metadata and are not compiler inputs.
-The unmodified originals and all ten supplied GALAX banks are pinned under
+The unmodified originals, all ten supplied GALAX banks and the three supplied
+Graphics files are pinned under
 `examples/CompilerExamples`, with byte lengths and SHA-256 hashes in its manifest.
 Their original author and copyright comments remain in the programs.
 
@@ -16,7 +17,8 @@ locations. Compilation is covered for every source; full execution is not.
 npm run build:compiler-examples
 ```
 
-This reads the user's current `compiler_examples/AMOS_versions` files and writes
+This reads the user's current `compiler_examples/AMOS_versions` files, discovers
+the sibling `compiler_examples/Graphics` directory, and writes
 19 standalone `.module.js` files, 19 self-contained debug pages, `manifest.json`
 and `index.html` in `compiler_examples/build`. Open that index in a browser.
 The builder overwrites its generated outputs so subsequent edits can be rebuilt.
@@ -32,7 +34,10 @@ Update the pinned copies and hashes deliberately when adopting newer originals.
 Choose **Keyboard: Typing** for text/number prompts, then focus the canvas. There
 is no injected startup input. The supplied GALAX bank names are embedded under
 relative paths and the original `AMOSPro_Extras:Compiler_Examples/AMOS_versions/`
-volume paths (plus the shorter Compiler_Examples alias).
+volume paths (plus the shorter Compiler_Examples alias). IFF/ANIM assets also
+use their original `AMOSPro_Extras:Compiler_Examples/Graphics/` names. `.uaem`
+sidecars are excluded. Turtle.anim is embedded; playback is not covered by these
+AMOS programs.
 
 ## Added language/runtime support
 
@@ -107,7 +112,17 @@ unlinks the pair. Hires, clones and arbitrary raster geometry remain gated.
 The shared [runtime browser demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples-runtime.html)
 checks a declared planar Copy/block/dual-playfield/Shift fixture against 20,480
 independent Canvas pixels and two GPU frames. The unchanged `3Dcube1.AMOS` also
-runs for 60 and 120 PAL fields, with two further actual GPU comparisons.
+runs for 60 and 120 PAL fields, with two further actual GPU comparisons. With the newly supplied images,
+unchanged BouncBobs runs its live animation with seven active Bobs (63 configured slots) and Mapping reaches its real
+instructions and interactive preview. Three further Canvas/GPU comparisons and
+82,176 independent decoded image/captured-Bob pixels cover these paths. Complete
+benchmark runs and mapped-texture completion remain unverified.
+
+Both images carry CAMG `$A1000`. Native `Load Iff` (`Lib.s` IfS1/IfS2) ignores
+monitor selectors and extracts bitmap mode bits; the VM now explicitly requests
+that policy from the shared reader. Raw metadata and image bytes remain intact.
+This does not emulate another monitor's refresh rate, and standalone ILBM
+reading continues to reject unsupported monitor IDs.
 Unit checks cover all 19 standalone factories, source hashes, input/error paths,
 planar memory lifetime, typed formatting, palette timing and finite Bell voices.
 These are portable implementation checks, not native Amiga captures.
@@ -116,15 +131,15 @@ Initial bounded startup inspection found these remaining issues:
 
 | Sources | Current startup limit |
 | --- | --- |
-| BouncBobs, Mapping | Referenced `Graphics` IFF files were not supplied. |
+| BouncBobs, Mapping | Supplied graphics now load; live animation/preview are checked. Full benchmark/completion replays remain open. |
 | GALAX | Supplied banks are embedded; their packed headers use x=129 and additional control flags outside the current decoder subset. Geometry and complete gameplay remain unverified. |
 | Fractal3, Plasma; NTSC cube startup | Horizontal Screen Display placements and oversized default screen windows beyond the current runtime subset. |
 | Bump | Original initial Circle call produces a radius rejected by the current checked raster. |
 | DotBall1, Fractal1, Fractal2 | Reach real Input prompts; complete interactive runs remain unverified. |
 | Other examples | Compile and reach execution/precalculation/waits in bounded startup checks; completion and native timing remain unverified. |
 
-Next work should expand the actual screen-placement/raster contracts, supply the
-missing Graphics assets, and add input-only completion replays for each example.
+Next work should expand the actual screen-placement/raster and GALAX packed-header
+contracts, and add input-only completion replays for each example.
 Do not replace missing files with blank images or weaken runtime checks merely
 to make a page appear to run.
 

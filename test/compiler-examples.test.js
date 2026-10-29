@@ -134,3 +134,45 @@ test('Compiler examples: no-destination Unpack retains bitmap identity/palette a
   p.reserveWork(14,decoded.data.length);p.banks.get(14).data.set(decoded.data);const d=p.display;d.open(0,image.width,image.height,image.colours,0);d.clear(0);const target=d.screen(),pixels=target.pixels,palette=Array.from(target.palette);
   p.unpackExisting(14);assert.strictEqual(d.screen(),target);assert.strictEqual(target.pixels,pixels);assert.deepStrictEqual(Array.from(target.palette),palette);assert.deepStrictEqual(Array.from(target.pixels),Array.from(image.pixels));p.stop();
 });
+
+
+test('Compiler examples: supplied Graphics files retain hashes and both directory layouts embed their exact bytes',()=>{
+  const builder=require('../tools/build_compiler_examples'), pinned=path.join(__dirname,'../examples/CompilerExamples');
+  const manifest=require('../examples/CompilerExamples/manifest.json'), built=builder.buildCompilerExamples();
+  for(const [name,entry] of Object.entries(manifest.files)) {
+    const bytes=fs.readFileSync(path.join(pinned,entry.path));assert.strictEqual(bytes.length,entry.byteLength);assert.strictEqual(crypto.createHash('sha256').update(bytes).digest('hex'),entry.sha256);
+    assert.strictEqual(built.assets[name.toLowerCase()],bytes.toString('base64'));
+  }
+  const directory=fs.mkdtempSync('/tmp/amos-graphics-layout-');
+  try {
+    fs.mkdirSync(path.join(directory,'AMOS_versions'));fs.mkdirSync(path.join(directory,'Graphics'));
+    fs.copyFileSync(path.join(pinned,'Mapping.AMOS'),path.join(directory,'AMOS_versions/Mapping.AMOS'));
+    for(const name of ['Demo_pic.iff','Sprites_pic.iff','Turtle.anim'])fs.copyFileSync(path.join(pinned,'Graphics',name),path.join(directory,'Graphics',name));
+    fs.writeFileSync(path.join(directory,'Graphics/Demo_pic.iff.uaem'),'metadata');
+    const local=builder.buildCompilerExamples({source:path.join(directory,'AMOS_versions')});
+    for(const name of ['demo_pic.iff','sprites_pic.iff','turtle.anim'])assert.strictEqual(local.assets['amospro_extras:compiler_examples/graphics/'+name],built.assets['graphics/'+name]);
+    assert(!Object.keys(local.assets).some(name=>name.endsWith('.uaem')));
+  } finally {fs.rmSync(directory,{recursive:true,force:true});}
+});
+
+test('Compiler examples: original BouncBobs and Mapping load supplied images and reach real animation/preview waits',()=>{
+  const root=path.join(__dirname,'../examples/CompilerExamples'), {assets}=require('../tools/build_compiler_examples').buildCompilerExamples();
+  const data=Object.fromEntries(Object.entries(assets).map(([name,bytes])=>[name,Buffer.from(bytes,'base64').toString('latin1')]));
+  const memory=require('../lib/amos/files').createMemoryFiles(data);
+  const files={read:name=>memory.read(name.toLowerCase()),isDirectory:name=>memory.isDirectory(name.toLowerCase()),exists:name=>memory.exists(name.toLowerCase())};
+  for(const name of ['BouncBobs.AMOS','Mapping.AMOS']) {
+    const clock=createFakeTimers(), p=compile(fs.readFileSync(path.join(root,name))).create({files,now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,print(){}});
+    try {
+      p.tick(1000);assert.strictEqual(p.state.waiting,'sleep');
+      const expected=require('./helpers/decodeSavedIff')(fs.readFileSync(path.join(root,'Graphics',name==='Mapping.AMOS'?'Demo_pic.iff':'Sprites_pic.iff')));
+      if(name==='Mapping.AMOS') {
+        assert.deepStrictEqual(Array.from(p.display.screen(1).palette.slice(0,expected.palette.length)),expected.palette);assert.deepStrictEqual(Array.from(p.display.screen(1).pixels),Array.from(expected.pixels));clock.tick(3200);assert.strictEqual(p.state.location.line,107);
+      } else {
+        const image=p.banks.get(1).images[0];assert.strictEqual(image.width,16);assert.strictEqual(image.height,16);
+        for(let y=0;y<16;y++)assert.deepStrictEqual(Array.from(image.pixels.slice(y*16,y*16+16)),Array.from(expected.pixels.slice(y*320,y*320+16)));
+        clock.tick(2000);assert.strictEqual(p.state.location.line,120);assert.strictEqual(p.bobs.size,63);assert.strictEqual([...p.bobs.values()].filter(b=>b.image&0x3fff).length,7);
+      }
+      assert.strictEqual(p.state.halted,false);
+    } finally {p.stop();assert.strictEqual(clock.pending(),0);}
+  }
+});

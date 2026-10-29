@@ -37,9 +37,9 @@ module.exports = function decodeSavedIff(bytes) {
     for (let x = width; x < rowSize * 8; x++) check(!(row[x >> 3] & (128 >> (x & 7))), 'nonzero planar padding');
   }
   check(position === end, 'trailing BODY data');
-  const a = chunks.AMSC.start, c = chunks.CMAP.start;
+  const a = chunks.AMSC && chunks.AMSC.start, c = chunks.CMAP.start;
   return { width, height, depth, compression, mode: long(chunks.CAMG.start),
-    amosScreen: Array.from({ length: 7 }, (_, i) => word(a + i * 2)),
+    amosScreen: a == null ? null : Array.from({ length: 7 }, (_, i) => word(a + i * 2)),
     aspect: [bytes[b + 14], bytes[b + 15]], page: [word(b + 16), word(b + 18)],
     palette: Array.from({ length: chunks.CMAP.length / 3 }, (_, i) =>
       (bytes[c + i * 3] >> 4) * 256 + (bytes[c + i * 3 + 1] >> 4) * 16 + (bytes[c + i * 3 + 2] >> 4)), pixels, chunks };

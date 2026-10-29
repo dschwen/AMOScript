@@ -118,7 +118,12 @@ mode IDs reject instead of being guessed. Legacy CAMG SPRITES (`$4000`) is
 retained as metadata and removed from display-mode interpretation. PAL/NTSC
 monitor IDs (`$21000`/`$11000`) select nominal 50/60 Hz unless overridden;
 their extended marker is removed before checking supported pixel-mode bits.
-Other monitor IDs remain unsupported. BMHD aspect is converted from source
+Other monitor IDs remain unsupported for standalone decoding. The explicit
+`ignoreMonitor: true` reader option is used by AMOS Load Iff: native Lib.s
+IfS1/IfS2 ignores the monitor selector when opening an AMOS screen. The original
+CAMG value is retained, nominal timing stays with the host, and unsupported pixel
+mode bits still reject. This lets the supplied Compiler Examples `$A1000` images
+load without claiming to emulate that monitor. BMHD aspect is converted from source
 pixels to native samples. Signed image position/page metadata is retained; it
 does not move the standalone crop window. Options include `chipBytes`, `origin`
 and nominal `videoRate`.
