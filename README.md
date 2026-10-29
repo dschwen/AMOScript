@@ -12,19 +12,17 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 | --- | --- |
 | **[Dithell’s Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)** | Original game with WebGL/Canvas, fullscreen, keyboard/Gamepad and optional sound. Replays cover lives, game over and restarting. |
 | **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Game with its AMOS boundary bug fixed, current supplied assets and music. Tested through the level-3 warp, game over, restored scores, menu return and a fresh game. |
+| **[Planet Zybex](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)** | Original shooter with sound, fullscreen, keyboard/Gamepad and touch controls. Tested through firing, five life losses, GAME OVER and a fresh game; later-level progression remains open. |
 | **[BobTest](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bob-test.html)** | Original 64-object bouncing demo with live WebGL, pause/restart and fullscreen. Press a key to start its 500-frame run. |
 | **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation with its supplied icon bank and IFF background. Fullscreen, frame stepping and custom IFF upload. |
 
-The next game target is [Planet Zybex](docs/planet-zybex.md). Its
-[level background preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
-also includes score/startup fixtures, ship sprites and original AMAL enemy drop, missile and random-hunter previews.
-The whole source now compiles; computed/wide sprites render through shared hardware channels.
-Ship controls/animation now run in a declared preview; the full source passes a bounded
-movement/firing/explosion replay. Longer gameplay, audio and the full launcher are next.
+[Planet Zybex development previews](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
+include all seven backgrounds, ship controls and individual enemy programs.
+See the [showcase milestone](docs/planet-zybex.md) for progress and remaining coverage.
 
 [Build your own complete game page](docs/game-webpage-tutorial.md): compilation, assets, Play/sound/fullscreen buttons, touch controls and optional `--debug` file downloads.
 
-Both game pages have a large red **Play Game** button for sound, fullscreen and direct launch.
+The game pages have a large red **Play Game** button for sound, fullscreen and direct launch.
 
 The gallery also features music players and interactive examples. Compiler,
 individual-command and rendering checks remain available in a collapsed section

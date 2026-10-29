@@ -286,7 +286,26 @@ keeps the latest runtime state and up to 50 source-located errors. Blob download
 URLs are released on refresh, disposal and page exit.
 
 The repository's full-game gallery uses the same icon controls. **Play Game**
-uses the compact interface; running the separately collapsed browser checks
-creates the diagnostic host with the Debug menu. The
+uses the compact interface. Roller II and Wonderland’s separately collapsed
+browser checks create their diagnostic hosts with the Debug menu. Planet Zybex
+keeps its shared application launcher separate from the verification replay. The
 [normal/debug application examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/game-page-debug.html)
 exercise real AMOS Bsave writes, binary downloads, error reporting and cleanup.
+
+## Planet Zybex example
+
+[Planet Zybex](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
+now uses this builder directly, with its complete unchanged source and the asset
+manifest under `examples/PlanetZybex`. It needs no volume prefix:
+
+```sh
+node tools/build_game_page.js examples/PlanetZybex/Zybex.AMOS /tmp/zybex.html \
+  --assets examples/PlanetZybex/manifest.json \
+  --fire ControlLeft,ControlRight --title "Planet Zybex"
+```
+
+The gallery adds navigation and collapsed checks around the generated application;
+Play Game remains owned by the sample harness and runs no verification input.
+See [the Zybex page notes](planet-zybex-game.md) for the tested loss/restart path,
+independent images/audio and remaining progression coverage. This is a second
+concrete source/manifest example for adapting the harness to your own game.

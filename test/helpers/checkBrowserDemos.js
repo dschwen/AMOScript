@@ -10,7 +10,7 @@ module.exports = async function checkBrowserDemos(browser) {
   const gallery = await browser.newPage();
   try {
     await gallery.goto(pathToFileURL(path.join(__dirname, '../../demos/index.html')).href);
-    assert.strictEqual(await gallery.locator('#games article').count(), 2);
+    assert.strictEqual(await gallery.locator('#games article').count(), 3);
     assert.strictEqual(await gallery.locator('#games a.play').first().isVisible(), true);
     assert.strictEqual(await gallery.locator('#technical-demos').evaluate(node => node.open), false);
     assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), false);
@@ -107,6 +107,7 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.evaluate(() => typeof globalThis.AMOS_PLAY_GAME), 'undefined');
         await page.locator('#demo-checks summary').click();
       }
+      if (scenario.id === 'planet-zybex-game') await require('./checkPlanetZybexGamePage')(page);
       if (scenario.id === 'planet-zybex') await require('./checkPlanetZybexPreview')(page);
       if (scenario.id === 'bob-test') await require('./checkBobTestPlayer')(page);
       if (scenario.id === 'screen-slide') await require('./checkScreenSlidePlayer')(page);

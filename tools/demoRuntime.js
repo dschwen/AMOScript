@@ -22,7 +22,7 @@ function installDemo(config) {
     match(value, expression) { if (!expression.test(value)) throw new Error(`${value} does not match ${expression}`); }
   };
   const playButton = document.getElementById('play-game'), playStatus = document.getElementById('play-status');
-  if (playButton) playButton.addEventListener('click', async () => {
+  if (playButton && !config.externalLauncher) playButton.addEventListener('click', async () => {
     playButton.disabled = true; button.disabled = true; playStatus.textContent = 'Starting game…';
     try {
       // Do not yield before invoking the live host: audio and fullscreen must

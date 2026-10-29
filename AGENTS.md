@@ -722,3 +722,20 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   life/restart/progression, independent whole-game pixels/audio, full launcher and
   native captures remain open. See docs/amal-input-animation.md for source order,
   native word timing, fixture bounds and host failure/Stop guarantees.
+
+- Planet Zybex now has a separate full-game page built by buildGamePage from the
+  unchanged source and all seven checked manifest assets. Its externalLauncher
+  verification config leaves Play owned by gamePageRuntime: no verification replay
+  or injected startup input on Play. Ctrl fire, sound/fullscreen, keyboard/Gamepad,
+  optional touch and compact controls reuse the public harness. Development
+  previews stay separate; the Games index now features three full-source games.
+  Input-only PAL/NTSC keyboard/Gamepad replays cover five natural losses, four
+  reloads, GAME OVER and a fresh game: 419 Update calls each, no VM/IP/bank edits.
+  The declared 1ms callback floor makes fin_wait's native busy loop observable.
+  76 independent raw-world/font regions (including full GAME OVER), 40 GPU checks
+  and two native Web Audio sample-4 comparisons bring Zybex to 214 GPU comparisons.
+  Source-derived shot bytes/period/stereo/filter and twenty Boom events per run
+  are checked. Stop/Resume and live-page activation/repeat Play/Restart/mute/owned
+  context disposal pass. Level-1 completion/docking, vertical/later progression,
+  other enemies/audio, full independent moving composites and native captures
+  remain open. See docs/planet-zybex-game.md for exact source/clock/image boundaries.

@@ -111,3 +111,12 @@ Longer life/restart and horizontal/vertical progression replays, audible sample
 verification, a full application launcher, remaining AMAL functions and native
 beam/interrupt captures remain open. Automatic synchronization is still gated;
 Zybex explicitly uses Synchro Off and Update Off.
+
+## Connected loss/restart update
+
+The [full-game replay and page](planet-zybex-game.md) now extend this prefix through
+all five life losses, four reloads, GAME OVER and a fresh game, with keyboard/
+Gamepad, independent regions and original sample verification. The Play Game
+launcher uses the public shared harness. Later-level completion/progression and
+native captures remain open; this document's 40-field/174-GPU figures describe
+the earlier input/animation slice (current total: 214 Zybex GPU comparisons).

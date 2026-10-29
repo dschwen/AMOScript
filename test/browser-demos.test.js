@@ -21,7 +21,7 @@ test('browser demos: catalogue covers every shared scenario with self-contained 
     assert.ok(index.includes(entry.preview));
     const html = fs.readFileSync(path.join(root, entry.file), 'utf8');
     assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=/i, `${entry.file} embeds dependencies`);
-    if (['roller2-game.html', 'wonderland-game.html'].includes(entry.file)) {
+    if (['roller2-game.html', 'wonderland-game.html', 'planet-zybex-game.html'].includes(entry.file)) {
       assert.match(html, /<button id="play-game" type="button">Play Game<\/button>/);
       assert.ok(html.indexOf('id="play-game"') < html.indexOf('id="demo-checks"'));
       assert.match(html, /<details id="demo-checks"><summary>Browser checks and captured frames/);

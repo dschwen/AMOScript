@@ -7,6 +7,7 @@ const { scenarios } = require('../test/helpers/browserScenarios');
 const { encodePng } = require('../test/helpers/displayPng');
 const installDemo = require('./demoRuntime');
 const Transpiler = require('../lib/Transpiler');
+const { buildGamePage, loadAssets } = require('./build_game_page');
 const root = path.join(__dirname, '..');
 const preview = file => `https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/${file}`;
 const escape = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -39,8 +40,18 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
         : animation
         ? `{ const config = ${config}; (${require('./anim5Player')})(config.argument); (${installDemo.toString()})(config); }`
         : `(${installDemo.toString()})(${config});`)));
+    if(scenario.id==='planet-zybex-game'){
+      const generated=outputs.get(`${scenario.id}.html`),start=generated.indexOf(`<p>${escape(scenario.description)}</p>`),end=generated.indexOf('<script>',start);
+      if(start<0||end<0)throw Error('Missing Zybex verification markup');
+      const zybexRoot=path.join(root,'examples/PlanetZybex');
+      const app=buildGamePage(fs.readFileSync(path.join(zybexRoot,'Zybex.AMOS')),{
+        title:'Planet Zybex',fire:['ControlLeft','ControlRight'],assets:loadAssets(path.join(zybexRoot,'manifest.json'))
+      });
+      const navigation=`<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('planet-zybex.html')}">Development previews</a></nav>`;
+      outputs.set(`${scenario.id}.html`,app.replace('<h1>','<style>nav a{color:#9bc9ff}#demo-checks{margin-top:2rem}#stage{overflow:auto;max-height:65vh}#stage canvas,#stage img{max-width:none;min-width:0}#results{white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}</style>'+navigation+'<h1>').replace('</body>',()=>
+        '<details id="demo-checks"><summary>Browser checks and captured frames</summary>'+generated.slice(start,end)+'</details>'+script(`(${installDemo.toString()})({...${config},externalLauncher:true});`)+'</body>'));
+    }
   }
-  const { buildGamePage, loadAssets } = require('./build_game_page');
   const rollerRoot = path.join(root, 'examples/Roller2/current');
   const debugPage = buildGamePage(fs.readFileSync(path.join(rollerRoot, 'Roller II.AMOS')), {
     title: 'Roller II — Debug', debug: true, fire: ['ControlLeft', 'ControlRight'],
@@ -62,11 +73,12 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
   cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
-  const games = ['wonderland-game.html', 'roller2-game.html'];
+  const games = ['wonderland-game.html', 'roller2-game.html', 'planet-zybex-game.html'];
   const showcases = ['bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
     'bob-test.html': { title: 'BobTest — 64 bouncing objects', description: 'Run the original BobTest program with WebGL, pause/resume, restart and fullscreen. Press a key to start its 500-frame run.' },
-    'planet-zybex.html': { title: 'Planet Zybex — in development', description: 'The next game target. Explore all seven original backgrounds and the hires score/lowres playfield fixture with WebGL and fullscreen while gameplay support is being implemented.' },
+    'planet-zybex.html': { title: 'Planet Zybex — development previews', description: 'Explore all seven level backgrounds, ship controls, animation, enemies and allocation fixtures. The full game has its own Play Game page above.' },
+    'planet-zybex-game.html': {title:'Planet Zybex',description:'Play the original shooter with sound, fullscreen, keyboard/Gamepad and optional touch controls. Tested through firing, five life losses, GAME OVER and a fresh game. Later-level progression remains in development.'},
     'screen-slide.html': { title: 'Roller II sliding-screen intro', description: 'Play both original RolIntrIdee2 intros live, with fullscreen, pause/resume and optional sample sound. Watch the screens slide in from above and below.' },
     'anim5.html': { title: 'Logoanim sphere intro', description: 'Watch the original sphere animation and logo sequence play live. Choose either original version, pause, resume, restart or enter fullscreen.' },
     'wonderland-game.html': { title: 'Dithell’s Wonderland', description: 'Play the original game with keyboard or Gamepad controls, fullscreen and optional sound. Switch between WebGL2 and Canvas presentation.' },

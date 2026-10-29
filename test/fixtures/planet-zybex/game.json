@@ -1,0 +1,203 @@
+{
+  "sourceSha256": "fdcd685b871cadc7473e103d80cf78293402c839a5dd71922ffcef0213371145",
+  "frames": [
+    {
+      "name": "First field",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "92d4e67cf5506b8ebb1a3e99ea5e79bb4cb089aa0df7acee1f1cb280d62aff33"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "19aa30b76ac830e5993912b77f51c29542914dd213d4f4c393b94326982182b8"
+        }
+      ]
+    },
+    {
+      "name": "Field 6",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "e3a1a833476e1271dd01ab418ae63c3daac20a9a29542247edb8fca43951ed1b"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "19aa30b76ac830e5993912b77f51c29542914dd213d4f4c393b94326982182b8"
+        }
+      ]
+    },
+    {
+      "name": "Field 15",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "6bf3ec7f1b597684e3dbe70ddd103b72db59ed7f0d2b684f8f193ce3e7cc7899"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "19aa30b76ac830e5993912b77f51c29542914dd213d4f4c393b94326982182b8"
+        }
+      ]
+    },
+    {
+      "name": "Field 25",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "c667b1d6962c655ac798ee6c58b93e8490e9e53f5e58dc6d447f0e3e66977646"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "19aa30b76ac830e5993912b77f51c29542914dd213d4f4c393b94326982182b8"
+        }
+      ]
+    },
+    {
+      "name": "Restart with 4 lives",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "92d4e67cf5506b8ebb1a3e99ea5e79bb4cb089aa0df7acee1f1cb280d62aff33"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "9c107068d97c521e66bc84dd5c8ca1cc0ca283b8f78c14afb3bb921cc1d1ff1e"
+        }
+      ]
+    },
+    {
+      "name": "Restart with 3 lives",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "92d4e67cf5506b8ebb1a3e99ea5e79bb4cb089aa0df7acee1f1cb280d62aff33"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "21a770a8d780e8219d0facc3e5661e19de97e48e7accc895055e3850889713e4"
+        }
+      ]
+    },
+    {
+      "name": "Restart with 2 lives",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "92d4e67cf5506b8ebb1a3e99ea5e79bb4cb089aa0df7acee1f1cb280d62aff33"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "ec111b47a19cd40e9c774ed0719fd37d335f193881e33940156e0a91507b9245"
+        }
+      ]
+    },
+    {
+      "name": "Restart with 1 lives",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "92d4e67cf5506b8ebb1a3e99ea5e79bb4cb089aa0df7acee1f1cb280d62aff33"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "a50cb031925bbb945ab9a367701d10d14ff5748ddce01fb0801d208492f1485b"
+        }
+      ]
+    },
+    {
+      "name": "Fresh game",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 160,
+          "sha256": "92d4e67cf5506b8ebb1a3e99ea5e79bb4cb089aa0df7acee1f1cb280d62aff33"
+        },
+        {
+          "x": 0,
+          "y": 161,
+          "width": 640,
+          "height": 10,
+          "sha256": "19aa30b76ac830e5993912b77f51c29542914dd213d4f4c393b94326982182b8"
+        }
+      ]
+    },
+    {
+      "name": "Game over",
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 171,
+          "sha256": "6a321296a39afa762d916a59dd46256f5b11db8cb2a288065f47fe3d98b5a0c6"
+        }
+      ],
+      "png": "game-over-full.png"
+    }
+  ],
+  "audio": {
+    "number": 4,
+    "mask": 1,
+    "volume": 56,
+    "length": 4554,
+    "frequency": 4463,
+    "sha256": "25fa6fb120d8da9af02da94b1a0abecb7aa6bf52e1fd0b5c9b58a7012cd8067c",
+    "pcm": "sample4.f32",
+    "pcmSha256": "c55a46f80e8ca6406a720a42c0236d913c149f0e03d7742fc7f07ac0bdf20eeb",
+    "periods": {
+      "PAL": 794,
+      "NTSC": 802
+    }
+  }
+}

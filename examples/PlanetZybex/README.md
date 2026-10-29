@@ -25,3 +25,10 @@ Regenerate independent expectations with `python3 tools/reference/packed-picture
 then rebuild pages with `npm run build:demo`. Builds read these pinned files;
 they do not automatically import changes from the untracked supplied directory.
 Adopt future source/asset versions explicitly and update the manifest/oracles.
+
+[Play the full original game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html).
+The shared-builder page is tested through firing, five natural life losses,
+GAME OVER and a fresh game with keyboard/Gamepad, sound/fullscreen and lifecycle
+checks. Later-level completion/progression remains open; see
+[full-game acceptance](../../docs/planet-zybex-game.md). All seven supplied banks
+are embedded, with unchanged manifest hashes.

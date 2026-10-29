@@ -5,6 +5,12 @@ Wonderland regressions. The supplied `Planet_Zybex/Zybex.AMOS` is attributed in
 its original comments to **P.J. Hickman**. The unchanged source and seven external
 level banks are pinned under [examples/PlanetZybex](../examples/PlanetZybex/README.md).
 
+[Play the full game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
+with the unchanged source, sound/fullscreen, Ctrl fire, keyboard/Gamepad and touch
+controls. The current acceptance path covers real firing, five life losses,
+four reloads, GAME OVER and a fresh game. Later-level progression remains open;
+see [full-game page and replay](planet-zybex-game.md).
+
 The [browser preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
 currently shows all seven original level backgrounds, with horizontal/vertical
 scrolling, WebGL2 and fullscreen. The **Score display (fixture)** option shows
@@ -21,9 +27,8 @@ hunter programs with portable/controlled beam inputs. **Computed ship sprites**
 now displays all thirteen ship images, row reuse, contention and pointer reservation.
 **Ship controls and animation** runs the original ship procedure with keyboard/
 Gamepad input, a declared explosion trigger and a finite slowed frame loop.
-**The complete source now passes a bounded forty-field input replay per video
-standard, including movement, real firing and its first explosion.** Longer
-gameplay and full application-page acceptance remain open. All options remain marked as previews. No AMAL commands are replaced by
+**The full application page now has a tested loss/restart path.** The separate
+preview options remain bounded fixtures. All options remain marked as previews. No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
 ## Source and dependency audit
@@ -137,8 +142,8 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slices are **longer connected level-1 replay, independent gameplay
-pixels/audio and the full application launcher**. Ship input/Anim now pass their
+The next slices are **level-1 completion/docking, vertical level-2 progression
+and wider independent gameplay/audio coverage**. Ship input/Anim now pass their
 isolated fixture and a bounded full-source movement/firing/explosion replay. Autotest/Direct/eXit, For/Next and BC retain their
 first-enemy fixtures.
 Default and Set Sprite
@@ -202,7 +207,7 @@ RX=260/RN=0 and a thirteen-pass loop replace the player/game loop; the Bob draws
 on the original level-1 bitmap instead of the omitted screen-2 setup. Fourteen
 independent movement/composite frames in PAL/NTSC and ten GPU comparisons bring
 the total to **68 GPU comparisons**. The live preview slows waits by 5×. A separate
-full-source run checks the current ship-AMAL input gate and owned cleanup. See
+full-source run now checks the loss/restart path and owned cleanup. See
 [manual AMAL](amal.md); full gameplay is not inferred from successful compilation.
 
 The first missile fixture retains original Channel/Bob/string installation
@@ -231,3 +236,9 @@ remaining connected acceptance; no complete gameplay or native capture is claime
 Live-host checks cover level replacement, scroll limits, score fixture
 selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, timed AMAL playback, fullscreen and owned input/GPU disposal. Existing
 Roller II/Wonderland launch, gameplay, audio and editor regressions remain required.
+
+The newer [full-game loss/restart replay](planet-zybex-game.md) adds four PAL/NTSC
+keyboard/Gamepad runs, 76 independent regions, a full GAME OVER PNG, 40 GPU
+comparisons and two native Web Audio shot comparisons. Zybex now has **214 GPU
+comparisons**. The shared-builder Play Game page is featured in the Games index;
+all older bounded previews remain on this development page.

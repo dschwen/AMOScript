@@ -5,26 +5,24 @@ Assessment updated: 2026-10-29.
 ## Current game priority: Planet Zybex
 
 [Planet Zybex](docs/planet-zybex.md) is the next full-game showcase target.
-Its unchanged source/assets are pinned; all seven backgrounds, startup/score
-presentation and channel routing have declared browser previews. The complete
-source now compiles to 1,122 instructions with no unrecognized encodings. It
-now runs a bounded forty-field input replay in PAL and NTSC: movement, real
-bullet launch, first explosion and host Stop. No unsupported runtime feature
-is reached in that tested prefix. The original
-Bob 21 drop program executes through manual Synchro/Update with independent
-PAL/NTSC pixels and actual GPU checks. Autotest/Direct/eXit, For/Next and BC now
-run the original first missile program in declared idle/collision fixtures.
-AMAL Z runs the original hunters. J0/J1 and independent Anim now run the original
-horizontal ship procedure with 178 independent PAL/NTSC input/animation/explosion
-frames and 32 additional GPU checks (including the bounded full game). See
-[AMAL input/animation](docs/amal-input-animation.md). Next extend the connected
-level-1 replay through natural life loss/restart, verify independent gameplay
-pixels and sample audio, then expose the shared full-game launcher.
-Computed/wide Sprite packing now has an original-image preview and 34 additional
-GPU comparisons; see [computed Sprites](docs/computed-sprites.md).
-The milestone tracks horizontal/vertical progression and the eventual shared
-Play Game/debug pages. Keep Roller II/Wonderland as full-game regressions.
-A background inspector must remain explicitly labelled until gameplay works.
+Its unchanged source/assets are pinned; the complete program compiles to 1,122
+instructions with no unrecognized encodings. The new
+[full-game page](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
+uses the public page builder, prominent Play Game, sound/fullscreen, Ctrl fire,
+keyboard/Gamepad and optional touch controls. Development fixtures remain separate.
+
+The input-only loss/restart replay now covers firing, five natural life losses,
+four source-driven reloads, GAME OVER and a fresh game. PAL/NTSC keyboard and
+injected Gamepad runs span 1,676 Update calls, 76 independent image regions,
+40 new GPU comparisons and two native Web Audio shot comparisons. Total Zybex
+coverage is 214 GPU comparisons; see [full-game acceptance](docs/planet-zybex-game.md).
+Earlier packed backgrounds, score/startup, Channel, computed/wide Sprites, AMAL
+drop/missile/hunter and ship input/Anim fixtures remain required.
+
+Next establish an input-only level-1 completion/docking route, vertical level-2
+progression, independent whole-gameplay composites and the remaining enemy/audio
+paths. Later horizontal/vertical levels, victory and native captures remain open.
+Keep Roller II/Wonderland and the new Zybex loss/restart path as full-game regressions.
 
 ## Next implementation sequence: Introideen
 
