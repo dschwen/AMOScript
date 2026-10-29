@@ -11,6 +11,7 @@
     "check": "npm run check:generated && npm test",
     "check:generated": "node tools/build_demo.js --check",
     "build:demo": "node tools/build_demo.js",
+    "build:compiler-examples": "node tools/build_compiler_examples.js",
     "build:examples": "node tools/build_examples.js",
     "install:browser": "node tools/install_browser.js",
     "test:browser": "npm run check:generated && node test/browser-smoke.js"

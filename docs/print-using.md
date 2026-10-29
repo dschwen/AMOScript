@@ -1,6 +1,6 @@
 # Print Using fields
 
-Original Using `$04a6` now supports bounded integer and string fields in Print
+Original Using `$04a6` now supports bounded integer, string and portable fixed-decimal fields in Print
 and Print #. Syntax is `Using format$;value` at any item position. The semicolon
 between format and value is required and does not become an output separator.
 Each Using formats exactly one item; a following item needs its own Using.
@@ -29,12 +29,14 @@ source buffer scans.
 
 Formats must be byte strings shorter than 120 bytes, measured before NUL
 termination. Formatted strings are limited to 121 bytes; the original multi-piece
-long-string behavior is not implemented. Numeric formats containing `.`, `;` or
-`^` reject until decimal/exponent formatting is implemented. Static float fields
-reject during lowering; dynamically tagged float values reject at runtime,
-including mathematically integral floats. Val-derived integers remain supported.
-There is no conversion through JavaScript's float-to-string formatting for these
-fields. Full float/Str$/unformatted-number compatibility remains open.
+long-string behavior is not implemented. Fixed-decimal numeric fields now support
+one optional signed `#` field and up to nine fractional digits for integer/float
+operands, including dynamically tagged Val results. This is portable JavaScript
+decimal rounding, not verified native FFP formatting. Semicolon and exponent
+formats remain unsupported. Integer-only formatting remains the source-derived
+backwards digit scan below; full float/Str$/unformatted-number compatibility
+remains open. See [compiler examples](compiler-examples.md).
+
 
 ## Compiler and output contracts
 

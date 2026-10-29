@@ -52,11 +52,11 @@ test('Print Using: formats evaluate before values exactly once and bad format bo
   assert.throws(()=>program.formatUsing('\u0100',()=>{evaluated=true;return 1;},'integer'),/byte-string/);assert.strictEqual(evaluated,false);
 });
 
-test('Print Using: unsupported floats/decimal/exponent formats and invalid syntax fail with source context',()=>{
-  for(const f of ['###.##','###;##','^^^^^'])assert.throws(()=>execute(binary([print(f,n(1))])),/Decimal\/exponent.*line 1/);
-  assert.throws(()=>compile(binary([print('###',[w(0x46),dword(0x80000041)])])),/Floating-point Print Using.*line 1/);
+test('Print Using: unsupported exponent formats and invalid syntax fail with source context',()=>{
+  for(const f of ['###;##','^^^^^'])assert.throws(()=>execute(binary([print(f,n(1))])),/Decimal\/exponent.*line 1/);
+  assert.deepStrictEqual(execute(binary([print('###.##',[w(0x46),dword(0x80000041)]), print('###.##',n(12))])).logs,[['  1.00'],[' 12.00']]);
   const {create}=compile(binary([print('###',fn('Val',text('1.5')))])),p=create({setTimeout(){}});
-  assert.throws(()=>p.tick(100),/Floating-point Print Using.*line 1/);assert.strictEqual(p.state.halted,true);
+  p.tick(100);assert.strictEqual(p.state.halted,true);
   for(const line of [[t('Print'),using(n(1),n(1))],[t('Print'),t('Using'),text('##'),t(','),n(1)],
     [t('Print'),t('Using'),text('##'),t(';')],[w(0x4a6),text('##'),t(';'),n(1)]])assert.throws(()=>compile(binary([line])),/Using|Expected|Unsupported/);
 });

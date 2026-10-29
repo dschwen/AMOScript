@@ -733,8 +733,10 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.fill('#using-format','+##');await page.fill('#using-value','-7');await page.click('#using-render');
         assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'- 7');
         await page.fill('#using-format','###.##');await page.click('#using-render');
+        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'  7.00');
+        await page.fill('#using-format','###;##');await page.click('#using-render');
         assert.match(await page.locator('#using-status').textContent(),/Decimal\/exponent/);
-        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'- 7');
+        assert.strictEqual(await page.locator('#using-controls').getAttribute('data-output'),'  7.00');
       }
       if (scenario.id === 'fade') {
         await page.waitForFunction(() => document.getElementById('fade-controls').dataset.phase === 'ready');

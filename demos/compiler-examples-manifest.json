@@ -1,0 +1,137 @@
+{
+  "programs": [
+    {
+      "source": "3Dcube1.AMOS",
+      "file": "compiler-example-3dcube1.html",
+      "byteLength": 4480,
+      "sha256": "8d990835116443ee498574b34c96ba85bc15d53da5498867daf88948f4c75cf2",
+      "compiled": true
+    },
+    {
+      "source": "3Dcube2.AMOS",
+      "file": "compiler-example-3dcube2.html",
+      "byteLength": 6788,
+      "sha256": "8bc14cd6833c2c81fe00662af5fc7c431c8ccd0ac45658c30010ef10aaf7f20f",
+      "compiled": true
+    },
+    {
+      "source": "3Dcube3.AMOS",
+      "file": "compiler-example-3dcube3.html",
+      "byteLength": 8810,
+      "sha256": "2092293d99409c67603bc58f838d8d917553f71b44df0237faa7b194836b101b",
+      "compiled": true
+    },
+    {
+      "source": "BouncBobs.AMOS",
+      "file": "compiler-example-bouncbobs.html",
+      "byteLength": 4222,
+      "sha256": "cfb177ca5f877c7245d02229278dfb07f2cb3b46c6876bb704a31706697c2b87",
+      "compiled": true
+    },
+    {
+      "source": "Bump.AMOS",
+      "file": "compiler-example-bump.html",
+      "byteLength": 3660,
+      "sha256": "84d7cd6b0cfee9c3b2502250da2432905eb9668c58aea9785aa7c87a4ba688d5",
+      "compiled": true
+    },
+    {
+      "source": "DotBall1.AMOS",
+      "file": "compiler-example-dotball1.html",
+      "byteLength": 4244,
+      "sha256": "1b3ba2e6b924d8c458e2fe2719f9779e195c23b3dd715f92fff0fd977a35761b",
+      "compiled": true
+    },
+    {
+      "source": "DotBall2.AMOS",
+      "file": "compiler-example-dotball2.html",
+      "byteLength": 5024,
+      "sha256": "9938e2bdf1ef0673ca0b36549e54e8323ce48227012a0e5e01def9f1c23b64a3",
+      "compiled": true
+    },
+    {
+      "source": "Fractal1.AMOS",
+      "file": "compiler-example-fractal1.html",
+      "byteLength": 6000,
+      "sha256": "7e85f053d737914405e16088a1d574423637e051605d93cfa23f707020778f2d",
+      "compiled": true
+    },
+    {
+      "source": "Fractal2.AMOS",
+      "file": "compiler-example-fractal2.html",
+      "byteLength": 8480,
+      "sha256": "edf4dd89121d61e4626a277750d37050e3df5398d00fed954292b43776237c9f",
+      "compiled": true
+    },
+    {
+      "source": "Fractal3.AMOS",
+      "file": "compiler-example-fractal3.html",
+      "byteLength": 3806,
+      "sha256": "7919be04706435ee303ee05a961af182714a7d41c36cfa98c00553bab17e05e1",
+      "compiled": true
+    },
+    {
+      "source": "Galax/GALAX.AMOS",
+      "file": "compiler-example-galax-galax.html",
+      "byteLength": 34820,
+      "sha256": "94e2023ba81d020136ef4a20d1f2063d2444ba88a6adfc78e58ee37fb4b9b98c",
+      "compiled": true
+    },
+    {
+      "source": "Mapping.AMOS",
+      "file": "compiler-example-mapping.html",
+      "byteLength": 5532,
+      "sha256": "9cab5e7ad73063075fea1a8ddb79d909eee1ad8770d01246e2119f413c10b730",
+      "compiled": true
+    },
+    {
+      "source": "Plasma.AMOS",
+      "file": "compiler-example-plasma.html",
+      "byteLength": 2938,
+      "sha256": "5ea7af783edf73d0c225034fd3cba328983791e52db4b279494ab5a74bc82308",
+      "compiled": true
+    },
+    {
+      "source": "Snake.AMOS",
+      "file": "compiler-example-snake.html",
+      "byteLength": 3468,
+      "sha256": "0b4faf1f7c98b2aea2b364d917dfacd7dfec850aa06c701ef16d241b07ea738c",
+      "compiled": true
+    },
+    {
+      "source": "Splines.AMOS",
+      "file": "compiler-example-splines.html",
+      "byteLength": 4646,
+      "sha256": "133c4f810c0fe0dab8e11d40f85a891e8609b4d9a0dffddca3e9175ac0003d90",
+      "compiled": true
+    },
+    {
+      "source": "Stars1.AMOS",
+      "file": "compiler-example-stars1.html",
+      "byteLength": 2574,
+      "sha256": "9d66a6e40ccdf699ad7ca41857dea36ced9a0dfcd44364a1dc486179280d75a6",
+      "compiled": true
+    },
+    {
+      "source": "Stars2.AMOS",
+      "file": "compiler-example-stars2.html",
+      "byteLength": 3478,
+      "sha256": "02db334ac885369d4fe9bd90a5311babf099391e1e877f0a666e6e7b0d8e70fb",
+      "compiled": true
+    },
+    {
+      "source": "VectorBalls.AMOS",
+      "file": "compiler-example-vectorballs.html",
+      "byteLength": 8474,
+      "sha256": "99889ae7cb5fe6ef981b07f6f874944f37a488ca914616dc0a9a4a55085481be",
+      "compiled": true
+    },
+    {
+      "source": "Zoom.AMOS",
+      "file": "compiler-example-zoom.html",
+      "byteLength": 3686,
+      "sha256": "14d164e481dbaeb083bf86e7c9af546d76ca26745c0a43da3f07997fb0924c9d",
+      "compiled": true
+    }
+  ]
+}

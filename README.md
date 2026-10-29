@@ -30,6 +30,8 @@ individual-command and rendering checks remain available in a collapsed section
 for development. Every browser test has a self-contained demo and HTML Preview
 link. See [demo instructions](demos/README.md) for local use.
 
+[Original AMOS compiler examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.html): all 19 sources compile into individual debug pages. See [rebuild instructions and runtime limits](docs/compiler-examples.md).
+
 ## Quick start
 
 Requires Node.js; CI targets Node 22 and 24.

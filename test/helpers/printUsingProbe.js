@@ -37,7 +37,7 @@ module.exports=async function printUsingProbe(page){
     const previous=document.getElementById('using-controls');if(previous)previous.remove();
     const controls=document.createElement('section');controls.id='using-controls';
     const heading=document.createElement('h2');heading.textContent='Live integer field';
-    const help=document.createElement('p');help.textContent='The compiled program reads these inputs through its files adapter, then executes Print Using. # takes integer digits; + and - are sign fields. Overflow keeps the last digits. Decimal and exponent formatting are not implemented.';
+    const help=document.createElement('p');help.textContent='The compiled program reads these inputs through its files adapter, then executes Print Using. # takes integer digits; + and - are sign fields. Overflow keeps the last digits. Fixed-decimal fields use portable decimal rounding; exponent and semicolon formats remain unsupported.';
     const mask=document.createElement('input');mask.id='using-format';mask.value='######';mask.setAttribute('aria-label','Format');
     const number=document.createElement('input');number.id='using-value';number.value='123';number.setAttribute('aria-label','Signed 32-bit integer');
     const surface=document.createElement('canvas');surface.id='using-output';surface.style.cssText='width:640px;max-width:100%;image-rendering:pixelated';

@@ -55,6 +55,8 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
         '<details id="demo-checks"><summary>Browser checks and captured frames</summary>'+generated.slice(start,end)+'</details>'+script(`(${installDemo.toString()})({...${config},externalLauncher:true});`)+'</body>'));
     }
   }
+  const compilerExamples = require('./build_compiler_examples').buildCompilerExamples({ repository: true });
+  for (const [name, source] of compilerExamples.outputs) outputs.set(name, source);
   const rollerRoot = path.join(root, 'examples/Roller2/current');
   const debugPage = buildGamePage(fs.readFileSync(path.join(rollerRoot, 'Roller II.AMOS')), {
     title: 'Roller II — Debug', debug: true, fire: ['ControlLeft', 'ControlRight'],
@@ -77,8 +79,9 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
   cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
   cards.push({ file: 'planet-zybex-game-debug.html', title: 'Planet Zybex — full game with debug enabled', description: 'The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.' });
+  cards.push({ file: 'compiler-examples.html', title: 'AMOS Compiler Examples — 19 original programs', description: 'Browse standalone builds of the original compiler examples, including cubes, fractals, stars and GALAX. Debug pages expose current runtime limits and missing Graphics assets.' });
   const games = ['wonderland-game.html', 'roller2-game.html', 'planet-zybex-game.html'];
-  const showcases = ['bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
+  const showcases = ['compiler-examples.html', 'bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
     'bob-test.html': { title: 'BobTest — 64 bouncing objects', description: 'Run the original BobTest program with WebGL, pause/resume, restart and fullscreen. Press a key to start its 500-frame run.' },
     'planet-zybex.html': { title: 'Planet Zybex — development previews', description: 'Explore all seven level backgrounds, ship controls, animation, enemies and allocation fixtures. The full game has its own Play Game page above.' },

@@ -22,7 +22,7 @@ test('bank memory: original Start/Peek/Poke bytes read unsigned values and write
   assert.strictEqual(result.program.state.input.keySpeed.intervalMs, 40);
   // Exercise the address-space boundary without allocating gigabytes of bytes.
   const memory = require('../lib/amos/bankMemory')(new Map([
-    [4, { number: 4, type: 'data', data: { length: 0x7ffffff0 - 65536 } }],
+    [4, { number: 4, type: 'data', data: { length: 0x3ffffff0 - 65536 } }],
     [5, { number: 5, type: 'data', data: new Uint8Array(0) }]
   ]));
   memory.start(4); assert.throws(() => memory.start(5), /address space exhausted/);

@@ -974,6 +974,19 @@
       const view = prepare(target), window = windows ? windows[index] : target.windowed ? {
         x: target.hardwareX, y: target.hardwareY, width: target.windowWidth, height: target.windowHeight,
         offsetX: target.offsetX, offsetY: target.offsetY } : null;
+      const dual = window && window.dual;
+      if (dual) {
+        const other = prepare(dual.target), width = window.width, height = window.height;
+        if (dual.offsetX + width > dual.target.width || dual.offsetY + height > dual.target.height) throw Error('Dual Playfield window exceeds secondary bitmap');
+        // Separate bitmap planes feed alternating OCS playfields. The primary
+        // owns all 32 palette registers; PF2 uses registers 8..15.
+        const pointers = [];
+        for (let i = 0; i < view.depth; i++) {
+          pointers.push(view.pointers[i]);
+          if (i < other.depth) pointers.push(other.pointers[i] + (dual.offsetY - window.offsetY) * view.rowBytes + ((dual.offsetX >> 4) - (window.offsetX >> 4)) * 2);
+        }
+        view.pointers = pointers; view.depth += other.depth; view.dualPlayfield = true;
+      }
       if (!window) return view;
       const { offsetX, offsetY } = window;
       if (offsetX + window.width > target.width || offsetY + window.height > target.height) throw new Error('Screen window extends outside physical bitmap');
@@ -981,7 +994,7 @@
       const delay = fine ? (view.hires ? 8 - (fine >> 1) : 16 - fine) : 0;
       return { ...view, width: window.width, height: window.height, x: window.x, y: window.y,
         pointers: view.pointers.map(pointer => pointer + offsetY * view.rowBytes + (offsetX >> 4) * 2),
-        scroll: delay | (delay << 4), fetchAdvance: view.hires ? 4 : 8 };
+        scroll: delay | ((dual ? ((dual.offsetX & 15) ? 16 - (dual.offsetX & 15) : 0) : delay) << 4), fetchAdvance: view.hires ? 4 : 8 };
     });
     const originalViews = views;
     const bounds = windows ? display.windowGeometry(windows, geometry.standard) : null;
@@ -1781,6 +1794,71 @@
   const rainbows = new Map();
   let palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
 
+  // Virtual CPU-facing planar addresses are distinct from snapshot DMA memory.
+  const bitmapAllocations = new Map();
+  let nextBitmapAddress = 0x40000000;
+  function bitmapAllocation(target, pixels) {
+    let record = bitmapAllocations.get(pixels);
+    if (!record) {
+      const rowBytes = Math.ceil(target.width / 16) * 2, planeSize = rowBytes * target.height;
+      const capacity = planeSize * Math.log2(target.colours), base = nextBitmapAddress;
+      if (base + capacity > 0x80000000) throw Error('Bitmap address space exhausted');
+      nextBitmapAddress += capacity + 16;
+      record = { kind: 'display', base, capacity, rowBytes, planeSize, width: target.width,
+        height: target.height, pixels, padding: new Uint8Array(capacity) };
+      bitmapAllocations.set(pixels, record);
+    }
+    return record;
+  }
+  function planeBase(kind, plane) {
+    whole(plane); const target = screen();
+    if (plane < 0 || plane >= Math.log2(target.colours)) throw Error('Invalid bitmap plane');
+    const record = bitmapAllocation(target, kind === 'Logic' ? target.pixels : target.physicalPixels);
+    return record.base + plane * record.planeSize;
+  }
+  const bitmapMemory = {
+    resolve(address, length) {
+      for (const [pixels, record] of bitmapAllocations) {
+        if (![...screens.values()].some(target => target.pixels === pixels || target.physicalPixels === pixels)) { bitmapAllocations.delete(pixels); continue; }
+        if (address >= record.base && address <= record.base + record.capacity && length <= record.capacity - (address - record.base)) return { bank: null, region: record, offset: address - record.base };
+      }
+      throw Error('Bitmap memory address out of bounds or retired');
+    },
+    read(record, offset) {
+      const plane = Math.floor(offset / record.planeSize), at = offset % record.planeSize;
+      const y = Math.floor(at / record.rowBytes), x = (at % record.rowBytes) * 8;
+      let value = record.padding[offset];
+      for (let bit = 0; bit < 8 && x + bit < record.width; bit++) {
+        const mask = 128 >>> bit;
+        value = (value & ~mask) | ((record.pixels[y * record.width + x + bit] & (1 << plane)) ? mask : 0);
+      }
+      return value;
+    },
+    write(record, offset, value) {
+      const plane = Math.floor(offset / record.planeSize), at = offset % record.planeSize;
+      const y = Math.floor(at / record.rowBytes), x = (at % record.rowBytes) * 8, mask = 1 << plane;
+      record.padding[offset] = value & 255;
+      for (let bit = 0; bit < 8 && x + bit < record.width; bit++) {
+        const index = y * record.width + x + bit;
+        record.pixels[index] = (record.pixels[index] & ~mask) | ((value & (128 >>> bit)) ? mask : 0);
+      }
+    },
+    changed
+  };
+  function detachDual(target) {
+    if (!target) return;
+    if (target.dualPartner) target.dualPartner.dualOwner = null;
+    if (target.dualOwner) target.dualOwner.dualPartner = null;
+    target.dualPartner = target.dualOwner = null;
+  }
+  function dualPlayfield(first, second) {
+    const a = screen(whole(first)), b = screen(whole(second));
+    const da = Math.log2(a.colours), db = Math.log2(b.colours);
+    if (a === b || a.dualPartner || a.dualOwner || b.dualPartner || b.dualOwner || a.ham || b.ham ||
+        a.cloneOwner || b.cloneOwner || a.mode || b.mode || a.width !== b.width || da > 3 || db > 3 || (da !== db && da !== db + 1)) throw Error('Unsupported Dual Playfield pair');
+    a.dualPartner = b; b.dualOwner = a; b.hidden = true;
+    a.windowed = true; changed(true);
+  }
   function changed(viewChange = false) {
     version++;
     if (planarBridge) planarBridge.prune();
@@ -1839,6 +1917,7 @@
     };
     next.pixels.fill(paper);
     next.physicalPixels = next.pixels;
+    detachDual(screens.get(id));
     screens.set(id, next);
     priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
     current = id;
@@ -1863,6 +1942,7 @@
   function select(id) { if (screen(id).cloneOwner) throw new Error('Cannot select a cloned screen'); current = id; changed(true); }
   function close(id) {
     checkClones(screen(id));
+    detachDual(screen(id));
     screens.delete(id);
     priorityOrder = priorityOrder.filter(other => other !== id);
     if (current === id) { const next = Array.from(screens.values()).find(target => !target.cloneOwner); current = next ? next.id : null; }
@@ -1876,6 +1956,7 @@
       priorityOrder.map(id => screens.get(id)).filter(target => target && target.windowed && !target.hidden);
     presentedWindows = targets.length ? targets.map(target => ({ target, x: target.hardwareX, y: target.hardwareY,
       width: target.windowWidth, height: target.windowHeight, offsetX: target.offsetX, offsetY: target.offsetY,
+      dual: target.dualPartner ? { target: target.dualPartner, offsetX: target.dualPartner.offsetX, offsetY: target.dualPartner.offsetY } : null,
       priority: priorityEnabled })) : null;
   }
   function screenToFront(id = current) {
@@ -1883,6 +1964,10 @@
     priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
     priorityEnabled = true;
     changed(true);
+  }
+  function screenToBack(id = current) {
+    screen(whole(id)); priorityOrder = [...priorityOrder.filter(other => other !== id), id];
+    priorityEnabled = true; changed(true);
   }
   function windowGeometry(windows = presentedWindows, standard = options.snapshotStandard) {
     const end = standard === 'NTSC' ? 260 : 310;
@@ -1900,7 +1985,7 @@
     whole(id);
     if (id < 0 || id > 7 || screens.has(id)) throw new Error('Invalid or already open clone screen');
     const owner = screen();
-    if (owner.doubleBuffered || owner.cloneOwner) throw new Error('Cloning double-buffered screens or clones is not implemented');
+    if (owner.doubleBuffered || owner.cloneOwner || owner.dualPartner || owner.dualOwner) throw new Error('Cloning double-buffered screens or clones is not implemented');
     // Static bitmap aliases, with independent display state/palette. A clone is
     // not selectable; drawing continues on the original owner.
     const target = { ...owner, id, cloneOwner: owner, palette: owner.palette.slice(), zones: null };
@@ -2335,6 +2420,16 @@
     target.gx = x2; target.gy = y2;
     changed();
   }
+  function polyline(points) {
+    const target = screen();
+    if (!Array.isArray(points) || points.length < 2 || points.length > 256) throw new Error('Invalid Polyline points');
+    const checked = points.map(pair => {
+      if (!Array.isArray(pair) || pair.length !== 2) throw new Error('Invalid Polyline point');
+      return coordinates(target, pair);
+    });
+    for (let i = 1; i < checked.length; i++) line(target, ...checked[i - 1], ...checked[i], target.ink);
+    [target.gx, target.gy] = checked[checked.length - 1]; changed();
+  }
   function drawTo(x, y) { const target = screen(); draw(target.gx, target.gy, x, y); }
   function rectangle(target, x1, y1, x2, y2, colour, fill) {
     [x1, y1, x2, y2] = coordinates(target, [x1, y1, x2, y2]);
@@ -2514,6 +2609,7 @@
   }
   function scroll(target) {
     if (target.y < target.rows) return;
+    if (target.scrollEnabled === false) { target.y = target.rows - 1; return; }
     target.pixels.copyWithin(0, target.width * 8);
     target.pixels.fill(target.paper, (target.rows - 1) * 8 * target.width);
     target.y = target.rows - 1;
@@ -2591,6 +2687,7 @@
     write(value + '\n');
   }
   function info(name, ...args) {
+    if (name === 'Screen Colour') { const target = screen(); return target.ham ? 4096 : target.colours; }
     if (name === 'Screen Number') return current == null ? -1 : current;
     if (name === 'Colour Value') { const target = screen(); return target.palette[registerIndex(args[0])]; }
     const target = screen(args[0] == null ? current : args[0]);
@@ -2778,6 +2875,7 @@
   }
   open(0, 320, 200, 16, 0);
   return {
+    memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
@@ -2788,6 +2886,11 @@
     ink, grWriting, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
+    polyline(points) {
+      if (!Array.isArray(points) || points.length < 2 || points.length > 256) throw Error('Invalid Polyline points');
+      points.forEach(pair => { if (!Array.isArray(pair) || pair.length !== 2) throw Error('Invalid Polyline point'); validatePattern(pair); coordinates(screen(), pair); });
+      return drawing(polyline, [points]);
+    },
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
     drawTo: (...args) => { const target = screen(); validatePattern([target.gx, target.gy, ...args]); return drawing(drawTo, args); },
     box: (...args) => { validatePattern(args); return drawing(box, args); },
@@ -3023,9 +3126,10 @@
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
   const animations = new WeakMap();
+  const blocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
-  const bankMemory = bankMemoryFactory(banks, { beforeWrite(bank) {
+  const bankMemory = bankMemoryFactory(banks, { externalMemory: display.memory, beforeWrite(bank) {
     if (animations.has(bank)) throw new Error('Writing a Frame Load animation bank is not implemented');
     if (bank === musicBank) throw new Error('Writing an active Music bank is not implemented; Music Off first');
     if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
@@ -3245,6 +3349,7 @@
   }
   publishRandom();
   let joystickBinding = null;
+  let shifting = null;
   let fading = null;
   const flashes = [];
   let paletteWrites = null;
@@ -3282,6 +3387,7 @@
     return steps;
   }
   function flash(colour, pattern) {
+    if (shifting) throw Error('Flash with Shift Up is not implemented; Shift Off first');
     const target = display.screen();
     colour = integer(colour);
     if (colour < 0 || colour > 31) throw new Error('Unsupported Flash colour (expected 0..31)');
@@ -3319,14 +3425,41 @@
     }
     if (changed) publishFlash();
   }
+  function shiftUp(speed, first, last, rotate) {
+    if (!options.vblNow || !options.requestPaletteWake) throw Error('Shift Up requires the runtime VBL clock');
+    [speed, first, last, rotate] = [speed, first, last, rotate].map(integer);
+    first &= 31; last &= 31;
+    if (speed < 1 || speed > 32767 || first >= last || ![0,1].includes(rotate)) throw new Error('Unsupported Shift Up arguments');
+    advancePalette(options.vblNow());
+    if (flashes.length || fading) throw new Error('Shift Up cannot overlap active Flash/Fade jobs in this subset');
+    shifting = { target: display.screen(), speed, first, last, rotate, nextVbl: options.vblNow() + 1, location: state.location && {...state.location} };
+    if (options.requestPaletteWake) options.requestPaletteWake();
+  }
+  function shiftOff() { if (shifting && shifting.target === display.screen()) shifting = null; if (options.requestPaletteWake) options.requestPaletteWake(); }
+  function advanceShift(vbl) {
+    if (!shifting || vbl < shifting.nextVbl) return;
+    const job = shifting;
+    if (display.screens.get(job.target.id) !== job.target) { shifting = null; return; }
+    let count = 1 + Math.floor((vbl - job.nextVbl) / job.speed);
+    job.nextVbl += count * job.speed;
+    if (job.rotate) count %= job.last - job.first + 1;
+    else count = Math.min(count, job.last - job.first);
+    for (let step = 0; step < count; step++) {
+      const end = job.target.palette[job.last];
+      for (let i = job.last; i > job.first; i--) job.target.palette[i] = job.target.palette[i - 1];
+      if (job.rotate) job.target.palette[job.first] = end;
+    }
+    display.invalidate();
+  }
   function nextPaletteJob() {
-    return flashes.reduce((earliest, job) => !earliest || job.nextVbl <= earliest.nextVbl ? job : earliest, fading);
+    return [...flashes, ...(shifting ? [shifting] : [])].reduce((earliest, job) => !earliest || job.nextVbl <= earliest.nextVbl ? job : earliest, fading);
   }
   function advancePalette(vbl) {
     // Reduce bounded catch-up by last write time. On the same original field,
     // Flash precedes Fade; later Flash writes still win after Fade completes.
     const writes = new Map(); paletteWrites = writes;
     try {
+      advanceShift(vbl);
       advanceFlash(vbl);
       const location = fading && fading.location;
       try { advanceFade(vbl); } catch (error) { paletteError(error, location); }
@@ -3340,7 +3473,7 @@
     }
   }
   function cancelPaletteEffects() {
-    flashes.length = 0; publishFlash(false); cancelFade();
+    shifting = null; flashes.length = 0; publishFlash(false); cancelFade();
   }
   publishFlash(false);
   function publishFade(notify = true) {
@@ -3374,6 +3507,7 @@
     if (changed && !paletteWrites) display.invalidate();
   }
   function beginFade(speed, destination) {
+    if (shifting) throw Error('Fade with Shift Up is not implemented; Shift Off first');
     speed = integer(speed);
     if (speed < 1 || speed > 32767) throw new Error('Unsupported Fade speed (expected 1..32767)');
     if (!options.vblNow || !options.requestPaletteWake) throw new Error('Fade requires the runtime VBL clock');
@@ -3406,6 +3540,7 @@
   }
   publishFade(false);
   (display.subscribeScreens || display.subscribe).call(display, () => {
+    if (shifting && display.screens.get(shifting.target.id) !== shifting.target) { shifting = null; if (options.requestPaletteWake) options.requestPaletteWake(); }
     if (fading && display.screens.get(fading.target.id) !== fading.target) cancelFade();
     let removed = false;
     for (let i = flashes.length - 1; i >= 0; i--) if (display.screens.get(flashes[i].target.id) !== flashes[i].target) {
@@ -3440,6 +3575,17 @@
   }
   state.system = { amosLocked: false, amosFront: true, editorOpen: false };
   state.breakEnabled = true;
+  const dataRegisters = new Int32Array(8);
+  state.system.forbidDepth = 0; state.system.workbenchOpen = true;
+  function registerIndex(index) { index = integer(index); if (index < 0 || index > 7) throw new Error('Invalid Dreg index'); return index; }
+  function memoryFree(kind) { const value = options.memoryFree ? options.memoryFree(kind) : 0; if (!Number.isInteger(value) || value < 0 || value > 2147483647) throw new Error('Memory availability must be a nonnegative synchronous integer'); return value; }
+  function execall(offset) {
+    offset = integer(offset);
+    if (offset === -132) { if (state.system.forbidDepth === 32767) throw new Error('Forbid nesting overflow'); state.system.forbidDepth++; }
+    else if (offset === -138) { if (!state.system.forbidDepth) throw new Error('Permit without Forbid'); state.system.forbidDepth--; }
+    else throw new Error('Unsupported Execall vector');
+    return dataRegisters[0];
+  }
   function systemCommand(name) {
     if (options.system != null) {
       if (typeof options.system.command !== 'function') throw new Error('System host requires a synchronous command method');
@@ -3449,6 +3595,9 @@
     if (name === 'Amos Lock') { state.system.amosLocked = true; state.system.amosFront = true; }
     if (name === 'Close Editor') state.system.editorOpen = false;
     if (name === 'Break Off') state.breakEnabled = false;
+    if (name === 'Break On') state.breakEnabled = true;
+    if (name === 'Amos Unlock') state.system.amosLocked = false;
+    if (name === 'Close Workbench') state.system.workbenchOpen = false;
   }
 
   function spriteNumber(number) {
@@ -4033,7 +4182,7 @@
       if (masked) makeImageMask(image);
       else { image.masked = false; image.mask = null; }
     });
-    if (bankNumber === 1) imageBobsChanged();
+    if (bankNumber === 1) { imageBobsChanged(); spritesDirty = true; }
   }
   function pasteImage(bankNumber, x, y, number) {
     const image = bankImage(bankNumber, number);
@@ -4041,6 +4190,47 @@
     if (image.masked && !image.mask) makeImageMask(image);
     display.pasteGraphic(image, x, y, image.masked);
     if (bankNumber === 1) imageBobsChanged();
+  }
+  function getBlock(number, x, y, width, height) {
+    [number,x,y,width,height] = [number,x,y,width,height].map(integer);
+    const target = display.screen();
+    if (number < 1 || number > 65535 || width <= 0 || height <= 0 || x < 0 || y < 0 || x + width > target.width || y + height > target.height) throw new Error('Invalid Get Block rectangle/number');
+    if (width % 16) throw new Error('Get Block requires a word-aligned width in this subset');
+    const saved = display.capture(x, y, width, height);
+    blocks.set(number, { x, y, image: { width, height, depth: Math.log2(target.colours), pixels: saved.pixels, masked: false, mask: null } });
+  }
+  function putBlock(number, x = null, y = null) {
+    number = integer(number); const block = blocks.get(number);
+    if (!block) throw new Error('Block not defined');
+    display.pasteGraphic(block.image, x == null ? block.x : integer(x), y == null ? block.y : integer(y), false);
+  }
+  function delBlock(number = null) { if (number == null) blocks.clear(); else { number = integer(number); if (number < 1 || number > 65535) throw new Error('Invalid block number'); blocks.delete(number); } }
+  function delSprite(number) {
+    number = integer(number); const bank = banks.get(1);
+    if (!bank || bank.type !== 'sprites' || number < 1 || number > bank.images.length) throw new Error('Sprite image not defined');
+    bankMemory.release(bank); bank.images.splice(number - 1, 1); imageBobsChanged(); spritesDirty = true;
+  }
+  function spriteCollision(number, first = 0, last = 63) {
+    [number,first,last] = [number,first,last].map(integer);
+    if (number < 0 || number > 63 || first < 0 || last > 63 || first > last) throw new Error('Invalid Sprite collision range');
+    const shape = id => {
+      const sprite = sprites.get(id), bank = banks.get(1), image = sprite && bank && bank.images[(sprite.image & 0x3fff) - 1];
+      if (!image) return null;
+      const mask = (1 << Math.min(4, image.depth)) - 1;
+      const x = sprite.x - image.hotspotX, y = sprite.y - image.hotspotY;
+      return { image: { ...image, mask: Uint8Array.from(image.pixels, value => (value & mask) ? 1 : 0) }, x, y, right: x + image.width, bottom: y + image.height };
+    };
+    collisionHits.fill(0); const source = shape(number); if (!source) return 0; let hit = false;
+    for (let id = first; id <= last; id++) if (id !== number) { const target = shape(id); if (target && masksIntersect(source, target)) { collisionHits[id] = 1; hit = true; } }
+    return hit ? -1 : 0;
+  }
+  function unpackExisting(selector) {
+    selector = integer(selector); const bank = banks.get(selector), target = display.screen();
+    if (!bank || bank.type !== 'data') throw new Error('Unpack requires a packed-picture bank');
+    const image = packedPictureReader(Uint8Array.from(bank.data));
+    if (image.width > target.width || image.height > target.height) throw new Error('Unpack image exceeds current bitmap');
+    // Existing-screen unpack retains geometry/palette and uses ordinary Autoback.
+    display.pasteGraphic({ ...image, depth: Math.log2(image.colours), pixels: image.pixels }, 0, 0, false);
   }
   function captureImage(bankNumber, name, ...args) {
     if (args.length !== 5 && args.length !== 6) throw new Error(`Invalid ${name} argument count`);
@@ -4070,7 +4260,7 @@
       // when the explicit capture screen is different. Existing palettes stay.
       installBanks([{ number: bankNumber, type: bankNumber === 1 ? 'sprites' : 'icons', images, palette: display.screen().palette.slice() }]);
     }
-    if (bankNumber === 1) imageBobsChanged();
+    if (bankNumber === 1) { imageBobsChanged(); spritesDirty = true; }
   }
   let defaulting = false;
   function resetDefault() {
@@ -4081,7 +4271,7 @@
     audio.prepareDefault();
     defaulting = true;
     try {
-      cancelPaletteEffects(); amal.clear(); manualAmal=false; amalRegisters.fill(0); resetChannels();
+      blocks.clear(); cancelPaletteEffects(); amal.clear(); manualAmal=false; amalRegisters.fill(0); resetChannels();
       bobs.clear(); drawnBobs = []; bobsDirty = false;
       priorityScreen = null; reversePriority = false;
       // ActuMask=$7100 resets automatic BOB/Sprite UPDATE bits 5/6 to off.
@@ -4733,7 +4923,20 @@
       const chars = item.split('\0')[0]; let index = 0;
       return format.replace(/~/g, () => index < chars.length ? chars[index++] : ' ');
     }
-    if (type !== 'integer') throw new Error('Floating-point Print Using is not implemented');
+    if (type === 'float' || (type === 'integer' && /#+\.#+/.test(format))) {
+      if (!Number.isFinite(item) || /[;^]/.test(format)) throw new Error('Unsupported floating-point Print Using format');
+      const field = /[+-]?#+(?:\.#+)?/.exec(format);
+      if (!field || format.slice(field.index + field[0].length).includes('#')) throw new Error('Unsupported floating-point Print Using field');
+      const pattern = field[0], dot = pattern.indexOf('.'), decimals = dot < 0 ? 0 : pattern.length - dot - 1;
+      if (decimals > 9 || Math.abs(item) >= 1e21) throw new Error('Floating-point Print Using field out of bounds');
+      const parts = Math.abs(item).toFixed(decimals).split('.'), split = dot < 0 ? pattern.length : dot;
+      const positions = [...pattern.slice(0, split)].filter(c => c === '#').length;
+      let before = parts[0].slice(-positions).padStart(positions, ' ');
+      if (pattern[0] === '+') before = (item < 0 ? '-' : '+') + before;
+      else if (pattern[0] === '-') before = (item < 0 ? '-' : ' ') + before;
+      return format.slice(0, field.index) + before + (dot < 0 ? '' : '.' + parts[1]) + format.slice(field.index + pattern.length);
+    }
+    if (type !== 'integer') throw new Error('Unsupported Print Using value type');
     if (!Number.isInteger(item) || item < -2147483648 || item > 2147483647) throw new Error('Invalid Print Using integer');
     if (/[.;^]/.test(format)) throw new Error('Decimal/exponent Print Using formats are not implemented');
     // LongToAsc's positive prefix is a space; UsingC consumes digits backwards
@@ -4964,6 +5167,10 @@
     rnd, randomize,
     bload, bsave,
     limitMouse, limitMouseScreen,
+    dataRegister: index => dataRegisters[registerIndex(index)], setDataRegister: (index, value) => { dataRegisters[registerIndex(index)] = integer(value); }, memoryFree, execall,
+    amosUnlock: () => systemCommand('Amos Unlock'), breakOn: () => systemCommand('Break On'), closeWorkbench: () => systemCommand('Close Workbench'),
+    shiftUp, shiftOff,
+    ntsc: () => (options.displayOptions && options.displayOptions.snapshotStandard ? options.displayOptions.snapshotStandard === 'NTSC' : options.audioVblHz === 60) ? -1 : 0,
     flash, flashOff, advancePalette, cancelPaletteEffects,
     nextPaletteVbl: () => { const job = nextPaletteJob(); return job ? job.nextVbl : null; },
     paletteLocation: () => { const job = nextPaletteJob(); return job && job.location; },
@@ -5004,8 +5211,10 @@
     pasteIcon: (x, y, number) => pasteImage(2, x, y, number),
     spritePalette: (mask = -1) => display.bankPalette(imageBank(1).palette, mask),
     resetDefault,
+    getBlock, putBlock, delBlock, delSprite, spriteCollision, unpackExisting, amalFreeze: () => amal.freeze(),
     getIcon: (...args) => captureImage(2, 'Get Icon', ...args),
     getBob: (...args) => captureImage(1, 'Get Bob', ...args),
+    getSprite: (...args) => captureImage(1, 'Get Sprite', ...args),
     iconPalette: (mask = -1) => display.bankPalette(imageBank(2).palette, mask),
     imageFlags,
     makeMask: (number = null) => setImageMask(1, true, number),
@@ -5073,6 +5282,7 @@
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),
+    bell: () => { sampleDuringMusic(); audio.bell(); },
     boom: () => { sampleDuringMusic(); audio.boom(); },
     samPlay: number => { sampleDuringMusic(); audio.play(15, integer(number)); },
     samPlayVoices: (mask, number, frequency = null) => { sampleDuringMusic(); audio.play(integer(mask), integer(number), frequency == null ? null : integer(frequency)); },
@@ -5581,14 +5791,14 @@
     } finally { stepping=false; }
   }
   function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,animation:c.animation ? Object.freeze({index:c.animation.index,remaining:c.animation.counter,loops:c.animation.loops}) : null,locals:Object.freeze(Array.from(c.locals))}))); }
-  return { compile, install, control, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
+  return { compile, install, control, freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
   if (!['PAL', 'NTSC'].includes(standard)) throw new Error('Unsupported audio standard');
   const clock = standard === 'PAL' ? 3546895 : 3579545;
   const state = { bank: 5, loopMask: 0, filterEnabled: true };
-  let noise = null;
+  let noise = null, bellJob = null;
   function boomEngine() {
     if (!noise) {
       const factory = typeof boomFactory === 'function' ? boomFactory : globalThis.AMOS_BOOM;
@@ -5600,6 +5810,12 @@
   }
   const levels = [56, 56, 56, 56];
   function syncBoom() {
+    if (bellJob) {
+      const now = options.fieldTime ? options.fieldTime() : 0;
+      if (!Number.isFinite(now) || now < 0) throw new Error('Invalid Bell field clock');
+      const field = Math.floor(now) - bellJob.started;
+      for (let voice = 0; voice < 4; voice++) if (bellJob.mask & (1 << voice)) levels[voice] = field < 1 ? bellJob.initial[voice] : bellJob.volumes[Math.min(30, field)];
+    }
     if (!noise) return;
     const step = noise.advance();
     for (let voice = 0; voice < 4; voice++) if (step.mask & (1 << voice)) levels[voice] = step.volume;
@@ -5616,6 +5832,7 @@
   }
   function command(event, origin = 'tracker') {
     syncBoom();
+    if (bellJob && (event.type === 'stop' || event.type === 'play' && event.effect !== 'bell')) bellJob.mask &= ~(event.mask & 15);
     if (event.type === 'stop' && (event.mask & 15) === 15) effectGeneration++;
     if (event.type === 'play' && event.effect === 'boom') boomEngine().activate(event.mask);
     if ((event.type === 'play' && event.effect !== 'boom') || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
@@ -5625,7 +5842,7 @@
     if (event.type === 'play') {
       const mask = event.mask & 15;
       activeMask |= mask;
-      effectMask = (effectMask & ~mask) | (event.effect === 'boom' ? mask : 0);
+      effectMask = (effectMask & ~mask) | (event.effect ? mask : 0);
       trackerMask = (trackerMask & ~mask) | (origin === 'tracker' ? mask : 0);
     }
     try { notify(event); }
@@ -5688,6 +5905,32 @@
       state.bank = 5; state.loopMask = 0;
       stop(15); levels.fill(56); engine.reset();
       loop(false, 15);
+    },
+    bell() {
+      syncBoom();
+      const hz = options.vblHz == null ? 50 : options.vblHz, rate = 44100;
+      const now = options.fieldTime ? options.fieldTime() : 0;
+      if (!Number.isFinite(hz) || hz <= 0 || hz > 1000 || !Number.isFinite(now) || now < 0) throw new Error('Unsupported Bell timing');
+      const phase = now - Math.floor(now), volumes = [0]; let fixed = 0;
+      // Music.s: default square wave 1, Bell note 70, EnvBell 1/64,4/40,25/0.
+      for (const [steps, goal] of [[1,64],[4,40],[25,0]]) {
+        const delta = Math.trunc((((56 * goal) >> 6) - (fixed >> 16)) * 256 / steps) * 256;
+        for (let i = 0; i < steps; i++) { fixed += delta; volumes.push(fixed >> 16); }
+        fixed &= 0xffff0000;
+      }
+      const initial = levels.slice(), period = Math.max(124, Math.floor(clock / (8 * 1760)));
+      bellJob = { started: Math.floor(now), initial, volumes, mask: 15 };
+      const generation = ++effectGeneration;
+      for (let voice = 3; voice >= 0; voice--) {
+        if (generation !== effectGeneration) break;
+        const length = Math.ceil((31 - phase) * rate / hz), data = new Float32Array(length);
+        for (let i = 0; i < length; i++) {
+          const field = Math.floor(phase + i * hz / rate), sample = Math.floor(i * clock / (rate * period)) & 7;
+          data[i] = (sample < 4 ? 127 : -127) / 128 * (field === 0 ? initial[voice] : volumes[Math.min(30, field)]) / 64;
+        }
+        command({ type: 'play', effect: 'bell', mask: 1 << voice, period, nativeRate: clock / period, rate, volume: 64, loopMask: 0, filterEnabled: state.filterEnabled,
+          sample: { bank: 0, number: 0, name: 'Bell    ', frequency: rate, length, data, format: 'float32' } }, 'effect');
+      }
     },
     boom() {
       const engine = boomEngine();
@@ -6037,7 +6280,7 @@
   let next = 65536;
   function allocate(capacity) {
     const base = Math.ceil(next / 16) * 16;
-    if (!Number.isSafeInteger(capacity) || capacity < 0 || base > 0x7fffffff || base + capacity > 0x80000000) throw new Error('Bank address space exhausted');
+    if (!Number.isSafeInteger(capacity) || capacity < 0 || base >= 0x40000000 || base + capacity > 0x40000000) throw new Error('Bank address space exhausted');
     next = base + Math.max(1, capacity) + 16;
     return { base, capacity };
   }
@@ -6084,6 +6327,7 @@
   function resolve(address, length = 1) {
     if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
     if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid bank memory range');
+    if (address >= 0x40000000 && options.externalMemory) return options.externalMemory.resolve(address, length);
     prune();
     for (const [bank, allocation] of allocations) for (const region of allocation.regions || [allocation]) {
       if (address >= region.base && address <= region.base + region.capacity) {
@@ -6103,10 +6347,12 @@
   }
   function writable(access, length) {
     if (length && (access.region.kind === 'table' || (access.region.kind === 'image' && access.offset < 10))) throw new Error('Raw icon table/header writes are not implemented');
+    if (access.region.kind === 'display') return;
     if (length && options.beforeWrite) options.beforeWrite(access.bank);
   }
   function byteAt(access, relative) {
     const { bank, region } = access, offset = access.offset + relative;
+    if (region.kind === 'display') return options.externalMemory.read(region, offset);
     if (!region.kind) return bank.data[offset];
     if (region.kind === 'table') {
       if (offset < 2) return (region.images.length >>> ((1 - offset) * 8)) & 255;
@@ -6131,11 +6377,15 @@
   }
   function putByte(access, relative, value) {
     const { bank, region } = access, offset = access.offset + relative;
+    if (region.kind === 'display') { options.externalMemory.write(region, offset, value); return; }
     if (!region.kind) { bank.data[offset] = value & 255; return; }
     if (offset >= region.requested) { region.padding[offset - region.requested] = value & 255; return; }
     const at = offset - 10, plane = Math.floor(at / region.planeSize), first = (at % region.planeSize) * 8, mask = 1 << plane;
     for (let bit = 0; bit < 8; bit++) region.image.pixels[first + bit] = (region.image.pixels[first + bit] & ~mask) | ((value & (128 >>> bit)) ? mask : 0);
     // Native raw writes do not regenerate the separately owned image mask.
+  }
+  function finishWrite(access, length) {
+    if (length && access.region.kind === 'display') options.externalMemory.changed();
   }
   function readNumber(address, length) {
     const access = resolve(address, length); readable(access, length);
@@ -6146,6 +6396,7 @@
   function writeNumber(address, value, length) {
     const access = resolve(address, length); writable(access, length);
     for (let index = 0; index < length; index++) putByte(access, index, value >>> ((length - index - 1) * 8));
+    finishWrite(access, length);
   }
   return { start, locate: (address, length = 0) => resolve(address, length),
     deek: address => readNumber(address, 2),
@@ -6166,6 +6417,7 @@
       const access = resolve(address, bytes.length); writable(access, bytes.length);
       if (!access.region.kind) { access.bank.data.set(bytes, access.offset); return; }
       for (let index = 0; index < bytes.length; index++) putByte(access, index, bytes[index]);
+      finishWrite(access, bytes.length);
     },
     fill(address, end, pattern) {
       const length = end - address;
@@ -6176,6 +6428,7 @@
       if (length >= 16 && address % 2) throw new Error('Odd Fill block addresses are not implemented');
       const access = resolve(address, length); writable(access, length);
       for (let index = 0; index < length; index++) putByte(access, index, pattern >>> (24 - (index & 3) * 8));
+      finishWrite(access, length);
     },
     copy(address, end, destination) {
       const length = end - address;
@@ -6188,6 +6441,7 @@
       } else {
         const bytes = Uint8Array.from({ length }, (_, index) => byteAt(source, index));
         for (let index = 0; index < length; index++) putByte(target, index, bytes[index]);
+        finishWrite(target, length);
       }
     },
     peek: address => readNumber(address, 1),
@@ -6245,6 +6499,50 @@
   let musicWake = null;
   let sleepRemaining = 0;
   let pendingEdit = null;
+  let errorHandler = null, errorFrame = null, resumeTarget = null;
+  let inputRequest = null, inputText = '';
+  function recoverError(error) {
+    if (!errorHandler || errorFrame) return false;
+    errorFrame = { ip: state.ip, stack: state.stack.slice(), frames: state.frames.slice(), locals: state.locals, data: { ...state.data } };
+    state.error = Object.freeze({ message: error.message, location: state.location && Object.freeze({...state.location}) });
+    inputRequest = null; inputText = '';
+    cancelScheduled(); state.halted = false; state.waiting = null;
+    if (errorHandler.procedure) {
+      state.frames.push({ ip: state.ip, locals: state.locals, data: state.data, stackDepth: state.stack.length, errorProcedure: true });
+      state.locals = Object.assign(Object.create(null), errorHandler.defaults); state.data = { entries: errorHandler.data || [], index: 0 };
+    } else {
+      const root = state.frames[0];
+      state.locals = root ? root.locals : state.locals; state.data = root ? root.data : state.data;
+      state.stack = []; state.frames = [];
+    }
+    state.ip = errorHandler.target; return true;
+  }
+  function consumeInput(key) {
+    if (!inputRequest) return;
+    if (key === '\r' || key === '\n') {
+      const fields = inputText.split(',');
+      let values;
+      try {
+        if (fields.length !== inputRequest.types.length) throw Error('Input field count');
+        values = fields.map((text, index) => {
+          if (inputRequest.types[index] === 'string') return text.trim().replace(/^"(.*)"$/, '$1');
+          text = text.trim();
+          if (!/^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$/.test(text)) throw Error('Input numeric field');
+          const parsed = operations.val(text);
+          return inputRequest.types[index] === 'integer' ? operations.integer(parsed) : operations.float(parsed);
+        });
+      } catch (_) { operations.display.write('\n?Redo from start\n' + inputRequest.prompt); inputText = ''; return; }
+      const request = inputRequest; inputRequest = null; inputText = ''; request.commit(values);
+      operations.display.write('\n'); state.waiting = null; if (!state.stopped) scheduleNext(0); return;
+    }
+    if (key === '\b') {
+      if (!inputText.length) return;
+      inputText = inputText.slice(0, -1); const s = operations.display.screen();
+      const x = s.x ? s.x - 1 : s.columns - 1, y = s.x ? s.y : Math.max(0, s.y - 1);
+      operations.display.locate(x, y); operations.display.write(' '); operations.display.locate(x, y); return;
+    }
+    if (key.length === 1 && key.charCodeAt(0) >= 32 && key.charCodeAt(0) <= 255 && inputText.length < 255) { inputText += key; operations.display.write(key); }
+  }
   const keys = state.input.keys;
   const inputResetListeners = new Set();
   function clearScanCodes() {
@@ -6291,6 +6589,7 @@
     }
   }
   function failPalette(error, location) {
+    inputRequest = null; inputText = '';
     state.halted = true; state.waiting = null;
     try { cancelScheduled(); } catch (_) { /* Keep the original asynchronous failure. */ }
     cancelPaletteWake(); operations.cancelPaletteEffects();
@@ -6401,12 +6700,23 @@
     try {
       res = fn(state) || {};
     } catch (error) {
-      state.halted = true;
-      cancelScheduled();
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
-      throw error;
+      if (recoverError(error)) { state.ticks++; return { done: false }; }
+      state.halted = true; cancelScheduled(); throw error;
     }
     state.ticks++;
+    if (Object.prototype.hasOwnProperty.call(res, 'onError')) errorHandler = res.onError;
+    if (Object.prototype.hasOwnProperty.call(res, 'resumeLabel')) {
+      if (!errorFrame) {
+        if (res.resumeLabel == null) throw Error('Resume Label without error or target');
+        resumeTarget = res.resumeLabel;
+      } else {
+        const target = res.resumeLabel == null ? resumeTarget : res.resumeLabel;
+        if (target == null) throw Error('Resume Label needs a target');
+        state.stack = errorFrame.stack; state.frames = errorFrame.frames; state.locals = errorFrame.locals; state.data = errorFrame.data;
+        errorFrame = null; state.ip = target; return { done: false };
+      }
+    }
     if (res.edit) {
       state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });
       pendingEdit = state.editRequest;
@@ -6433,6 +6743,7 @@
     }
     if (res.procReturn) {
       const frame = state.frames.pop();
+      if (frame && frame.errorProcedure) throw Error('Error procedure must Resume Label');
       if (frame && res.discardGosubs && state.stack.length >= frame.stackDepth) state.stack.length = frame.stackDepth;
       if (!frame || frame.stackDepth !== state.stack.length) { state.halted = true; throw new Error('Invalid procedure return'); }
       state.locals = frame.locals;
@@ -6451,6 +6762,12 @@
       if (!Number.isFinite(delay) || delay < 0) { state.halted = true; throw new Error('Invalid wait duration'); }
       state.waiting = 'sleep';
       scheduleNext(delay);
+      return { yielded: true };
+    }
+    if (res.input) {
+      inputRequest = res.input; inputText = ''; operations.display.write(inputRequest.prompt);
+      state.waiting = 'input';
+      while (inputRequest && keys.length) { const next = keys.shift(); consumeInput(typeof next === 'string' ? next : next.key); }
       return { yielded: true };
     }
     if (res.waitKey) {
@@ -6483,6 +6800,7 @@
         }
         out = step();
       } catch (error) {
+        if (recoverError(error)) { steps++; continue; }
         state.halted = true;
         state.waiting = null;
         cancelScheduled();
@@ -6497,7 +6815,7 @@
     }
     try {
       operations.flushBobs();
-      if (state.halted) { operations.cancelAmal(); cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); operations.closePorts(); }
+      if (state.halted) { inputRequest = null; inputText = ''; operations.cancelAmal(); cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); operations.closePorts(); }
     } catch (error) {
       pendingEdit = null;
       state.halted = true;
@@ -6551,6 +6869,7 @@
     catch (error) { failPalette(error, operations.trackerLocation()); }
     try { operations.resumeMusic(); requestMusicWake(); }
     catch (error) { failPalette(error, operations.musicLocation()); }
+    if (state.waiting === 'input') { while (inputRequest && keys.length) { const next = keys.shift(); consumeInput(typeof next === 'string' ? next : next.key); } }
     if (state.waiting === 'sleep') scheduleNext(sleepRemaining);
     else if (!state.waiting) scheduleNext(0);
   }
@@ -6559,6 +6878,7 @@
     if (typeof key !== 'string') throw new Error('Keyboard input must be a string');
     if (scanCode != null && (!Number.isInteger(scanCode) || scanCode < 0 || scanCode > 127 || key.length !== 1 || key.charCodeAt(0) > 255)) throw new Error('Invalid raw keyboard input');
     if (state.halted) return;
+    if (inputRequest && !state.stopped) { try { consumeInput(key); } catch (error) { failPalette(error, state.location); } return; }
     if (state.waiting === 'key') {
       state.waiting = null;
       if (!state.stopped) scheduleNext(0);

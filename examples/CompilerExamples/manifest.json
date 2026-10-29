@@ -1,0 +1,151 @@
+{
+  "programs": [
+    {
+      "path": "3Dcube1.AMOS",
+      "sha256": "8d990835116443ee498574b34c96ba85bc15d53da5498867daf88948f4c75cf2",
+      "byteLength": 4480
+    },
+    {
+      "path": "3Dcube2.AMOS",
+      "sha256": "8bc14cd6833c2c81fe00662af5fc7c431c8ccd0ac45658c30010ef10aaf7f20f",
+      "byteLength": 6788
+    },
+    {
+      "path": "3Dcube3.AMOS",
+      "sha256": "2092293d99409c67603bc58f838d8d917553f71b44df0237faa7b194836b101b",
+      "byteLength": 8810
+    },
+    {
+      "path": "BouncBobs.AMOS",
+      "sha256": "cfb177ca5f877c7245d02229278dfb07f2cb3b46c6876bb704a31706697c2b87",
+      "byteLength": 4222
+    },
+    {
+      "path": "Bump.AMOS",
+      "sha256": "84d7cd6b0cfee9c3b2502250da2432905eb9668c58aea9785aa7c87a4ba688d5",
+      "byteLength": 3660
+    },
+    {
+      "path": "DotBall1.AMOS",
+      "sha256": "1b3ba2e6b924d8c458e2fe2719f9779e195c23b3dd715f92fff0fd977a35761b",
+      "byteLength": 4244
+    },
+    {
+      "path": "DotBall2.AMOS",
+      "sha256": "9938e2bdf1ef0673ca0b36549e54e8323ce48227012a0e5e01def9f1c23b64a3",
+      "byteLength": 5024
+    },
+    {
+      "path": "Fractal1.AMOS",
+      "sha256": "7e85f053d737914405e16088a1d574423637e051605d93cfa23f707020778f2d",
+      "byteLength": 6000
+    },
+    {
+      "path": "Fractal2.AMOS",
+      "sha256": "edf4dd89121d61e4626a277750d37050e3df5398d00fed954292b43776237c9f",
+      "byteLength": 8480
+    },
+    {
+      "path": "Fractal3.AMOS",
+      "sha256": "7919be04706435ee303ee05a961af182714a7d41c36cfa98c00553bab17e05e1",
+      "byteLength": 3806
+    },
+    {
+      "path": "Galax/GALAX.AMOS",
+      "sha256": "94e2023ba81d020136ef4a20d1f2063d2444ba88a6adfc78e58ee37fb4b9b98c",
+      "byteLength": 34820
+    },
+    {
+      "path": "Mapping.AMOS",
+      "sha256": "9cab5e7ad73063075fea1a8ddb79d909eee1ad8770d01246e2119f413c10b730",
+      "byteLength": 5532
+    },
+    {
+      "path": "Plasma.AMOS",
+      "sha256": "5ea7af783edf73d0c225034fd3cba328983791e52db4b279494ab5a74bc82308",
+      "byteLength": 2938
+    },
+    {
+      "path": "Snake.AMOS",
+      "sha256": "0b4faf1f7c98b2aea2b364d917dfacd7dfec850aa06c701ef16d241b07ea738c",
+      "byteLength": 3468
+    },
+    {
+      "path": "Splines.AMOS",
+      "sha256": "133c4f810c0fe0dab8e11d40f85a891e8609b4d9a0dffddca3e9175ac0003d90",
+      "byteLength": 4646
+    },
+    {
+      "path": "Stars1.AMOS",
+      "sha256": "9d66a6e40ccdf699ad7ca41857dea36ced9a0dfcd44364a1dc486179280d75a6",
+      "byteLength": 2574
+    },
+    {
+      "path": "Stars2.AMOS",
+      "sha256": "02db334ac885369d4fe9bd90a5311babf099391e1e877f0a666e6e7b0d8e70fb",
+      "byteLength": 3478
+    },
+    {
+      "path": "VectorBalls.AMOS",
+      "sha256": "99889ae7cb5fe6ef981b07f6f874944f37a488ca914616dc0a9a4a55085481be",
+      "byteLength": 8474
+    },
+    {
+      "path": "Zoom.AMOS",
+      "sha256": "14d164e481dbaeb083bf86e7c9af546d76ca26745c0a43da3f07997fb0924c9d",
+      "byteLength": 3686
+    }
+  ],
+  "files": {
+    "Galax/Mapping.Abk": {
+      "path": "Galax/Mapping.Abk",
+      "sha256": "2f52d3df705a7660fdf1bc3a09e68f149c13a002dec12f0f13d48a20238e763d",
+      "byteLength": 6220
+    },
+    "Galax/Moves.Abk": {
+      "path": "Galax/Moves.Abk",
+      "sha256": "4ce355bc91198e34f002ca85c26ca924f133423779b1d108ec70b6bc4d2f5634",
+      "byteLength": 9396
+    },
+    "Galax/Music.Abk": {
+      "path": "Galax/Music.Abk",
+      "sha256": "74e5a609d9e73a1579b89e6924d05e740298d762abe5c907246d51707ae05125",
+      "byteLength": 46378
+    },
+    "Galax/PicAst1.Abk": {
+      "path": "Galax/PicAst1.Abk",
+      "sha256": "50a769db67e24bf65d765ddde21b433b30da2a32cc6e04d7a1856ec06fee0191",
+      "byteLength": 2268
+    },
+    "Galax/PicAst2.Abk": {
+      "path": "Galax/PicAst2.Abk",
+      "sha256": "530280f545bfecbae5c5d4237323a002ea0c533f59b2fc1e1c3152886108daa9",
+      "byteLength": 10102
+    },
+    "Galax/PicMenu.Abk": {
+      "path": "Galax/PicMenu.Abk",
+      "sha256": "b2a43f1cff9e69a6f9a6085131536ac1834320aee472f9fe29c9afcd1ae00d87",
+      "byteLength": 1742
+    },
+    "Galax/PicPres.Abk": {
+      "path": "Galax/PicPres.Abk",
+      "sha256": "22e5066180b6d9b78d4d0fee570ecf626cdaa32c8ef2d45f735068382cdb35cd",
+      "byteLength": 21446
+    },
+    "Galax/Puzzle.Abk": {
+      "path": "Galax/Puzzle.Abk",
+      "sha256": "41e2d2f801eab0e8cacfceded5287786c65f6ac1875454d1257121fb873bf2fd",
+      "byteLength": 40630
+    },
+    "Galax/Samples.Abk": {
+      "path": "Galax/Samples.Abk",
+      "sha256": "85d0ce63562b96673b2beb4e430b6d20397b9cd5b3eb8e420439ede7eb08c34c",
+      "byteLength": 13246
+    },
+    "Galax/Sprites.Abk": {
+      "path": "Galax/Sprites.Abk",
+      "sha256": "4cb41fb229b39d5c360c2da4319161c0e0e5891012cf3e5aa24cea6e7ceb058f",
+      "byteLength": 12564
+    }
+  }
+}

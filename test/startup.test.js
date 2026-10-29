@@ -47,7 +47,7 @@ test('startup: original host commands update isolated state and call synchronous
   const a = make(create, { system: { command: name => { calls.push(name); } } }), b = make(create);
   a.program.tick(100);
   assert.deepStrictEqual(calls, ['Amos Lock', 'Close Editor']);
-  assert.deepStrictEqual({ ...a.program.state.system }, { amosLocked: true, amosFront: true, editorOpen: false });
+  assert.deepStrictEqual({ ...a.program.state.system }, { amosLocked: true, amosFront: true, editorOpen: false, forbidDepth: 0, workbenchOpen: true });
   assert.strictEqual(b.program.state.system.amosLocked, false);
   b.program.tick(100); assert.strictEqual(b.program.state.system.amosLocked, true);
   for (const system of [{}, { command: () => ({ then() {} }) }, { command() { throw new Error('host failure'); } }]) {

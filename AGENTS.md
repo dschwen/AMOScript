@@ -818,3 +818,24 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   editable Fastball files compile; _C native wrappers remain unsupported. The
   prepared-font browser demo checks 192,000 independent pixels/three GPU frames.
   See docs/fastball.md for format, source evidence and runtime asset blockers.
+
+- All 19 pinned examples/CompilerExamples sources compile; hashes and supplied
+  GALAX banks are in its manifest. build_compiler_examples.js rebuilds user-local
+  compiler_examples/build by default; build:demo uses pinned copies and emits a
+  catalogue plus debug pages. Keep compilation distinct from missing Graphics,
+  horizontal placement/raster gates and complete interactive execution.
+  See docs/compiler-examples.md for bounded contracts/native references.
+- Logbase/Phybase are selected-bitmap plane addresses in the 0x40000000 namespace,
+  separate from bank and snapshot DMA addresses. Route complete ranges through
+  bankMemory's external display adapter; preserve canonical indexed pixels,
+  other planes, buffer/alias identity, owned padding and retirement. Raw writes
+  bypass Bob/Autoback. Dual Playfield uses interleaved real pointers and DPF,
+  primary palette ownership and captured independent View offsets; raw playfield
+  snapshots stay single-bitmap. Preserve lowres/equal-width/depth bounds.
+- Input captures prompt/targets once and suspends the VM, validates fields before
+  stores and retries invalid input. Main On Error handlers and Resume Label use
+  ordinary call/local/DATA state; recursive errors remain fatal. Multi Wait is a
+  one-field wait. Shift Up shares palette wakes, with bounded catch-up and no
+  simultaneous Flash/Fade. Fixed-decimal Using is explicitly portable rounding;
+  exact FFP and exponent formats remain open. Dreg/Forbid/Permit model owned
+  state only, never arbitrary native calls or host multitasking suspension.
