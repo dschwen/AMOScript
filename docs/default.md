@@ -2,14 +2,15 @@
 
 `Default` (`$0cee`) now performs a display/animation/audio reset in the standalone
 runtime. It continues at the next instruction. The unchanged Planet Zybex source
-now stops at **Set Sprite Buffer, original line 93, byte 6506**, with eleven
-unsupported encodings remaining.
+now also executes Set Sprite Buffer; the current whole-program blocker is
+**Amal Off, original line 179, byte 8844**, with ten unsupported encodings.
 
 Select **Default startup (fixture)** on the
 [Planet Zybex preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html).
 The fixture executes original line 90, pauses at a declared Wait Key guard, then
-executes original lines 91–92 (Screen Close 0 and Close Editor) and pauses again.
-Advance fixture supplies a key to these guards. No Set Sprite Buffer, AMAL,
+executes original lines 91–93 (Screen Close 0, Close Editor and the 48-line
+Set Sprite Buffer) and pauses again.
+Advance fixture supplies a key to these guards. No AMAL,
 manual Synchro/Update or gameplay executes. The original embedded image/sample
 banks remain intact. The whole game still does not compile or play.
 
@@ -21,7 +22,7 @@ banks remain intact. The whole game still does not compile or play.
 | Presentation | Discard committed/staged windows and priority order, enable Auto View, and present the new screen even if Auto View was previously off. Old exported snapshots retain owned bytes. |
 | Bitmap/text state | Fresh single buffer, no zones, offsets or writing/escape state; normal pen/paper/ink, solid line, text cursor at 0,0, visible-cursor intent and window TAB 4. |
 | Bobs | Remove all objects and saved backgrounds; restore normal numeric priority. |
-| Sprites | Turn off all logical/presented images, preserving remembered x/y positions. Native computed sprite-buffer allocation remains a separate feature. |
+| Sprites | Turn off all logical/presented images, preserving remembered x/y positions. Restore the 128-line configured pool through the [buffer manager](sprite-buffer.md); computed/wide allocation remains separate. |
 | Automatic updates | Reset Bob/Sprite automatic UPDATE to off, from native ActuMask `$7100`; explicit updates and subsequent Update On commands remain meaningful. |
 | Break flag | Restore `state.breakEnabled=true`; host Stop remains available throughout. |
 | AMAL | Clear all 26 global signed-word registers. Programs, channel bindings and automatic synchronization remain unsupported until their interpreter is implemented. |
@@ -59,7 +60,7 @@ to the separate dialogue machinery, which is not implemented here.
 User interpreter preference files are not loaded. The font, cursor artwork and
 noise beam/seed choices remain the existing portable profiles, not Topaz or an
 Amiga hardware capture. Unsupported menus/dialogues, blocks, fonts, windows,
-computed sprite buffers and extensions do not acquire placeholder execution from
+computed/wide sprite allocation and extensions do not acquire placeholder execution from
 Default. Exact intermediate copper rebuilds, native teardown/beam timing,
 noise interrupt tails and full custom-configuration parity remain open. Within
 the implemented raster subset, reset uses normal fresh-screen drawing state.
@@ -98,8 +99,8 @@ unit/integration groups cover original bytes/source, clone/staging/buffer/Bob
 retirement, snapshot/bank ownership, all flash steps, scope/input/files retention,
 mouse/update/Break defaults, live Music/Tracker/sample reset and noise/host
 failure behavior. The browser scenario adds two PAL/NTSC default-screen GPU
-comparisons and two original close/clear checks, bringing Planet Zybex to **41 GPU
-comparisons**. Its live fixture selector/advance/return/fullscreen/disposal paths
+comparisons and two original close/clear checks, contributing to Planet Zybex’s current **51 GPU
+comparisons** (including the later direct-sprite buffer matrix). Its live fixture selector/advance/return/fullscreen/disposal paths
 are checked alongside the previous background and score previews.
 
 Regenerate with `python3 tools/reference/defaults.py` and `npm run build:demo`;

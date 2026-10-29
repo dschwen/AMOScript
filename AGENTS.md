@@ -603,3 +603,16 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   computed buffers, custom preferences and native teardown/timing remain open.
   See docs/default.md. Factories without Default retain existing Screen Open/startup defaults; after
   Default, subsequent Screen Open inherits the restored native DefPal.
+- Set Sprite Buffer ($1986) owns three native-format direct-sprite stream buffers
+  in lib/amos/spriteBuffer.js, embedded in standalone factories. For 16..4094,
+  allocate (n+2)*96 bytes before replacing state; equal stored size is a no-op.
+  Resize clears logical image assignments/presentation, preserves x/y and shape,
+  and shows the pointer. Default restores n=128; factory HsInit starts at 128
+  stored rows. Sprite Update rotates physical/logical/intermediate slots, and the
+  structured writer consumes actual POS/CTL/DATA/DATB words. Preserve low-four-
+  plane attachment, odd-channel consumption, frozen records and pointer ownership.
+  Native HsDm height+1 >= (storedRows-2) ignores a new image, retaining prior output.
+  CPU-owned stream bytes are separate from bank/chip addresses; no fake Start or
+  RGBA overlay. Computed/wide sprites, wrapped/OOM fallback and exact DMA timing
+  remain gated. Original Zybex 90–93 now runs; full source stops at Amal Off 179.
+  Ten matrix GPU frames bring Zybex to 51; see docs/sprite-buffer.md.

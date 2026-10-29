@@ -29,8 +29,8 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   function update() {
     if (!program || disposed) return;
     if (select.value === 'default') {
-      host.render(); root.dataset.level = 'default'; root.dataset.scroll = '0'; root.dataset.stage = String(program.display.screens.size); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
-      status.textContent = program.display.screens.size ? 'Original Default: shipped screen and palette restored. Advance to run the original Screen Close and Close Editor statements.' : 'Original startup closed the display. This fixture stops before Set Sprite Buffer; gameplay is not running.';
+      host.render(); root.dataset.level = 'default'; root.dataset.scroll = '0'; root.dataset.stage = String(program.display.screens.size); root.dataset.bufferBytes = String(program.state.spriteBuffer.allocationBytes); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
+      status.textContent = program.display.screens.size ? 'Original Default: shipped screen and palette restored. Advance to run the original Screen Close and Close Editor statements.' : 'Original startup closed the display and allocated the 48-line Sprite buffer (4,800 bytes). AMAL and gameplay are not running.';
       next.disabled = program.state.halted; fullscreen.refresh(); return;
     }
     if (select.value === 'score') {

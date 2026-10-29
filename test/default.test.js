@@ -4,7 +4,7 @@ const {binary,token:t,word:w,dword,integer:n,identifier:id,text,execute,compile}
 const expected=require('./fixtures/defaults.json'),hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const idle=options=>execute(binary([[t('Wait Key')]]),1000,options);
 
-test('Default: independent opcode and original Zybex prefix restore shipped screen/palette/flash, then close it before the buffer guard',()=>{
+test('Default: independent opcode and original Zybex prefix restore shipped screen/palette/flash, then close it and run the original Sprite-buffer allocation',()=>{
   for(const standard of ['PAL','NTSC']){const calls=[],{program:p,timers:c}=execute(require('./helpers/planetZybexDefault')(),1000,{vblHz:standard==='PAL'?50:60,displayOptions:{snapshotStandard:standard},system:{command:name=>calls.push(name)}});
     assert.strictEqual(p.state.waiting,'key');assert.deepStrictEqual(Array.from(p.display.screen().palette),expected.palette);assert.strictEqual(hash(p.display.canvasFrame().rgba),expected.initialSha256);assert.strictEqual(p.banks.get(1).images.length,47);assert.strictEqual(p.banks.get(5).name,'Samples ');assert.deepStrictEqual([p.mouseVisible(),p.mouseShape()],[true,1]);assert.strictEqual(p.state.flashes.length,1);
     p.sendKey('continue');c.tick(0);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.display.screens.size,0);assert.strictEqual(p.display.canvasFrame(),null);assert.deepStrictEqual(calls,['Close Editor']);assert.strictEqual(c.pending(),0);p.sendKey('finish');c.tick(0);assert.strictEqual(p.state.halted,true);

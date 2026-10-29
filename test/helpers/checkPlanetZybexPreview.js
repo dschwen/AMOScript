@@ -23,7 +23,7 @@ module.exports = async function checkPlanetZybexPreview(page) {
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
   assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='0');
-  assert.strictEqual(await page.locator('#zybex-preview-input').evaluate(c=>c.width),0);
+  assert.strictEqual(await page.locator('#zybex-preview-input').evaluate(c=>c.width),0);assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-buffer-bytes'),'4800');
   await page.selectOption('#zybex-level', '1');assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),false); await page.click('#zybex-fullscreen');
   await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'planet-zybex-preview');
   await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.fullscreenElement);

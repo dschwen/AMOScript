@@ -1,0 +1,44 @@
+{
+  "frames": [
+    {
+      "stage": 0,
+      "left": 10,
+      "sha256": "d4bc6747dd3dbb023d00395e941caa0ce646810a306e79745474bfb385654a17",
+      "lineLimit": 48,
+      "allocationBytes": 4800,
+      "mouseVisible": false
+    },
+    {
+      "stage": 1,
+      "left": 10,
+      "sha256": "d4bc6747dd3dbb023d00395e941caa0ce646810a306e79745474bfb385654a17",
+      "lineLimit": 48,
+      "allocationBytes": 4800,
+      "mouseVisible": false
+    },
+    {
+      "stage": 2,
+      "left": null,
+      "sha256": "846f860302bb0486601324e073c35fb69c413b5c9237cf1152bf151a055d3f90",
+      "lineLimit": 64,
+      "allocationBytes": 6336,
+      "mouseVisible": true
+    },
+    {
+      "stage": 3,
+      "left": 20,
+      "sha256": "3bef87d5d9f28d3e5f08fedf6a9ab0f83aa3cef4404924ca12937970f15a6f02",
+      "lineLimit": 64,
+      "allocationBytes": 6336,
+      "mouseVisible": false
+    },
+    {
+      "stage": 4,
+      "left": null,
+      "sha256": "846f860302bb0486601324e073c35fb69c413b5c9237cf1152bf151a055d3f90",
+      "lineLimit": 128,
+      "allocationBytes": 12480,
+      "mouseVisible": true
+    }
+  ]
+}

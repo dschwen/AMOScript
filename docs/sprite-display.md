@@ -144,3 +144,13 @@ Five/six-plane bank images now use the same first four hardware planes, keeping
 all indexed bits in the original bank. Independent literal banks verify high-bit
 transparency and identical physical words; the connected original Roller II
 ball/fade/border fixture adds six GPU frames. See [initial ball](roller2-ball.md).
+
+## Owned AMOS Sprite buffers
+
+[Set Sprite Buffer](sprite-buffer.md) now owns three native-format stream buffers
+for the existing direct-sprite path. The structured row publisher reads the
+physical buffer’s control/data words before the shared CPU/GPU resolver consumes
+`lineSprites`. Allocation/rotation, pointer reservation, resize clearing, native
+height admission and Default restoration have independent checks. Stream bytes
+are CPU-owned and separate from bank addresses; native chip-pointer/bus timing
+and computed/wide allocation remain gated.
