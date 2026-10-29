@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 'use strict';
 // Original packed-background inspector. This is explicitly not a game launcher.
-function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource, defaultSource, gameOverSource }) {
+function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource, defaultSource, gameOverSource, channelsSource, channelsOracle }) {
   const root = document.getElementById('planet-zybex-preview'), make = source => new Function(`return (${source});`)();
   const introduction = document.createElement('p'); introduction.textContent = 'Planet Zybex is the next game target. Preview its original level backgrounds and a prepared score-display fixture below. Player controls, enemies and bullets still require AMAL and sprite support.';
   const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar';
@@ -10,13 +10,18 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   select.add(new Option('Score display (fixture)', 'score'));
   select.add(new Option('Default startup (fixture)', 'default'));
   select.add(new Option('Game-over text (fixture)', 'game-over'));
+  select.add(new Option('Channel routing (fixture)', 'channels'));
   const next = document.createElement('button'); next.id = 'zybex-next'; next.type = 'button'; next.textContent = 'Advance fixture'; next.hidden = true;
   const scroll = document.createElement('input'); scroll.id = 'zybex-scroll'; scroll.type = 'range'; scroll.min = '0'; scroll.step = '1'; scroll.value = '0'; scroll.setAttribute('aria-label', 'Scroll through level background');
   const fullButton = document.createElement('button'); fullButton.type = 'button'; fullButton.id = 'zybex-fullscreen'; fullButton.textContent = 'Fullscreen';
   toolbar.append(select, scroll, next, fullButton);
   const slot = document.createElement('div'), status = document.createElement('p'); status.id = 'zybex-preview-status'; status.className = 'amos-fullscreen-messages'; status.setAttribute('role', 'status');
   let canvas = document.createElement('canvas'); canvas.id = 'zybex-preview-input'; canvas.width = 320; canvas.height = 160; canvas.tabIndex = 0; canvas.setAttribute('aria-label', 'Planet Zybex background preview'); canvas.style.cssText = 'display:block;width:640px;max-width:100%;image-rendering:pixelated;background:black';
-  slot.append(canvas); root.append(introduction, toolbar, slot, status);
+  const bindingTable = document.createElement('table'); bindingTable.id = 'zybex-channels'; bindingTable.hidden = true;
+  const heading = document.createElement('thead'), headingRow = document.createElement('tr');
+  for (const label of ['Channel', 'Target']) { const cell = document.createElement('th'); cell.textContent = label; headingRow.append(cell); }
+  heading.append(headingRow); const bindings = document.createElement('tbody'); bindingTable.append(heading, bindings);
+  slot.append(canvas); root.append(introduction, toolbar, slot, status, bindingTable);
   let program = null, host = null, gpu = null, disposed = false;
   try {
     const model = make(gpuSources.model)(), sprites = make(gpuSources.sprites)();
@@ -39,6 +44,22 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
       status.textContent = ['Original GAME OVER: transparent text preserves the blue outline.', 'Harness comparison: opaque text overwrites the preceding outline.', 'Original transparent mode restored.'][program.state.variables.int_stage] + ' Advance or press a key in the canvas. This is a text fixture; gameplay is not running.';
       next.disabled = program.state.halted; fullscreen.refresh(); return;
     }
+    if (select.value === 'channels') {
+      host.render(); const stage = program.state.variables.int_stage;
+      if (root.dataset.channelStage !== String(stage)) {
+        bindings.replaceChildren();
+        for (let channel = 0; channel < 64; channel++) {
+          const binding = program.channelBinding(channel);
+          if (binding.type === 'sprite' && channel !== 15) continue;
+          const row = document.createElement('tr');
+          for (const value of [String(channel), `${binding.type === 'bob' ? 'Bob' : 'Sprite'} ${binding.number}`]) { const cell = document.createElement('td'); cell.textContent = value; row.append(cell); }
+          bindings.append(row);
+        }
+      }
+      root.dataset.level = 'channels'; root.dataset.channelStage = String(stage); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
+      status.textContent = channelsOracle.frames[stage].label + '. Original Channel statements change routing only. The excerpts are joined by key guards; AMAL and gameplay are not running. ' + (program.state.halted ? 'Select another view to restart.' : 'Advance or press a key in the canvas.');
+      next.disabled = program.state.halted; fullscreen.refresh(); return;
+    }
     if (select.value === 'score') {
       host.render(); root.dataset.level = 'score'; root.dataset.scroll = '0'; root.dataset.score = String(program.state.variables.int_score); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
       status.textContent = `Prepared score ${program.state.variables.int_score}, lives ${program.state.variables.int_lives}. Original hires score strip below a lowres level-1 playfield. ${program.state.halted ? 'Fixture finished; select again to restart.' : 'Press a key in the canvas to advance or finish the fixture.'} Gameplay is not running.`;
@@ -53,15 +74,15 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   function choose() {
     if (disposed) return;
     if (host) host.detach(); if (program) program.stop(); if (gpu) gpu.clear();
-    const module = { exports: {} }; new Function('module', select.value === 'game-over' ? gameOverSource : select.value === 'default' ? defaultSource : select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
+    const module = { exports: {} }; new Function('module', select.value === 'channels' ? channelsSource : select.value === 'game-over' ? gameOverSource : select.value === 'default' ? defaultSource : select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
     program = module.exports({ files }); host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu }); host.attach(program);
     try {
-      program.tick(1000); next.hidden = !['default','game-over'].includes(select.value); next.disabled = false; scroll.disabled = ['score','default','game-over'].includes(select.value); const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
+      program.tick(1000); bindingTable.hidden = select.value !== 'channels'; next.hidden = !['default','game-over','channels'].includes(select.value); next.disabled = false; scroll.disabled = ['score','default','game-over','channels'].includes(select.value); const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
     } catch (error) { program.stop(); root.dataset.phase = 'error'; status.textContent = error.message; }
   }
-  next.onclick = () => { if (program && !disposed && ['default','game-over'].includes(select.value)) { program.sendKey('next'); update(); } };
+  next.onclick = () => { if (program && !disposed && ['default','game-over','channels'].includes(select.value)) { program.sendKey('next'); update(); } };
   select.onchange = choose; scroll.oninput = update;
-  const monitor = setInterval(() => { if (['score','default','game-over'].includes(select.value)) update(); }, 50);
+  const monitor = setInterval(() => { if (['score','default','game-over','channels'].includes(select.value)) update(); }, 50);
   function dispose() {
     if (disposed) return; disposed = true; clearInterval(monitor); if (host) host.detach(); if (program) program.stop(); fullscreen.dispose();
     if (gpu) { const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }

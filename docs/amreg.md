@@ -8,8 +8,10 @@ and failures retain their line/byte locations. Register values remain inspectabl
 after End; no interpreter, wake or channel is created by a register access.
 
 This storage is intended to be shared by the forthcoming AMAL controller. It must
-not acquire a separate shadow set of globals. Channel-local Amreg overloads,
-channel lifetime and AMAL program execution remain unsupported.
+not acquire a separate shadow set of globals.
+[Channel routing](channels.md) now has separate checked selector storage.
+Channel-local register access, installed-program lifetimes and AMAL execution
+remain unsupported.
 
 Planet Zybex's original `clear_amal` now executes in a declared fixture retaining
 its Global/array setup and complete procedure. With inputs RJ=1234 and RU=4, it

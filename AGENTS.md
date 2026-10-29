@@ -626,3 +626,15 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   comparisons; six PAL/NTSC Canvas/GPU frames bring Zybex to 57. Full source still
   stops at Amal Off 179; nine encodings remain. See docs/gr-writing.md for native
   mode/cursor/font/raster gates and the fixture's omitted finish-message paths.
+- Channel ($1f94) stores per-factory native type/number selectors, initially
+  channel n -> Sprite n for all 64 pairs. Support Bob/Sprite numbers 0..63,
+  independent of object/image/screen existence and configured Bob count. Validate
+  channel before evaluating target once via a compiler thunk; write only after
+  both bounds pass. Do not create/move/render objects or schedule AMAL. Default
+  restores identity routes; Stop/Resume retains them. channelBinding returns a
+  frozen independent snapshot. Future AMAL installation must capture/resolve the
+  pair, not retarget active programs through this table. All 27 original Zybex
+  statements compile; declared original enemy/player/bullet loops check 192 routes
+  while preserving independent world pixels. 58 Zybex GPU comparisons; eight
+  encodings remain, full source still stops at Amal Off 179. See docs/channels.md
+  for omitted AMAL/manual update behavior and unsupported target forms.

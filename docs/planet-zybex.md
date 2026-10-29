@@ -12,7 +12,8 @@ the original hires score strip below a lowres level-1 playfield; a key advances
 between two declared score/lives inputs. **Default startup (fixture)** exposes
 the original reset/close/48-line Sprite allocation prefix. **Game-over text (fixture)**
 shows the original transparent outline, an explicit opaque comparison and restoration.
-All options are marked as previews.
+**Channel routing (fixture)** exposes original enemy/player/bullet mappings on
+the still level-1 background. All options are marked as previews.
 **The full game does not compile or play yet.** No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
@@ -28,7 +29,7 @@ source hash, complete bounded token audit, strings, embedded-bank metadata and
 first compilation failure. It found 15 unsupported **encodings**, not an estimate
 of development time. Recognized tokens can still expose runtime gaps.
 
-Six of those encodings are now implemented:
+Seven of those encodings are now implemented:
 
 - Slot 2 `$0056`, `Unpack bank To screen`, decodes the original packed backgrounds.
   Full indexed bitmaps/palettes match an independent Python decoder; 35 scrolled
@@ -60,15 +61,19 @@ Six of those encodings are now implemented:
   text passes preserve their outline; Print/Writing keep their own mode. See
   [graphics writing](gr-writing.md) for the supported profile and native gates.
 
+- `$1f94`, `Channel ... To Bob/Sprite`, now stores 64 checked routing pairs.
+  All 27 original statements compile, including logical Sprite 15, without
+  creating objects or claiming computed-sprite support. Original enemy/bullet
+  loops run in a declared routing-table preview. See [channel routing](channels.md).
+
 The whole-program compiler now stops at **Amal Off, line 179, byte 8844**.
-There are 9 remaining unsupported encodings:
+There are 8 remaining unsupported encodings:
 
 | Encoding | Command | Current uses |
 | --- | --- | --- |
 | `$1fd2` / `$1fe2` | Amal Off, all / one channel | 1 / 2 |
 | `$1fbc` | Amal On, all channels | 2 |
 | `$2012` | Amal channel,string | 33 |
-| `$1f94` | Channel ... To Bob/Sprite | 27 |
 | `$205a` / `$206c` | Synchro Off / Synchro | 7 / 7 |
 | `$207a` / `$20ae` | Update Off / Update | 7 / 9 |
 
@@ -92,7 +97,8 @@ historical counts after each compiler addition.
    Set Sprite Buffer now passes its owned-pool/direct-sprite checks and original
    startup allocation. Gr Writing 0/1 now passes original GAME OVER text and
    explicit comparison/restoration checks; this is not gameplay acceptance.
-3. **AMAL execution and manual frame control.** Add checked Channel bindings,
+3. **AMAL execution and manual frame control.** Checked Bob/Sprite Channel
+   bindings now pass their storage/reset/evaluation contracts. Add
    owned compiled AMAL strings, local registers, the existing 26 global words,
    on/off lifetimes and explicit Synchro/Update behavior. The source deliberately
    disables automatic synchronization/update and calls them after Wait Vbl.
@@ -121,8 +127,9 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slice is **AMAL bindings**, followed by program execution and manual
-synchronization/update. Default and Set Sprite
+The next slice is **AMAL program installation/execution**, followed by manual
+synchronization/update. Channel routing storage is implemented; installed-program
+object ownership/lifetimes remain to be built. Default and Set Sprite
 Buffer now have implemented reset/allocation contracts; native computed/wide
 sprite allocation and custom interpreter preferences remain open. Different
 COLOR00 values across score/playfield (the later thunder effect) still require
@@ -168,6 +175,14 @@ rasterizer with pinned public-domain font bytes produces three indexed/RGBA
 expectations and PNGs. Six PAL/NTSC Canvas/GPU frames bring the total to **57 GPU
 comparisons**. These are portable font/raster checks, not a native Topaz capture.
 
+The channel fixture joins original level-1 Load/Unpack 245–247, enemy routing
+loops 383–385/460–462 and player/bullet routes 991/1029–1031 with declared stage
+variables/key guards. It creates no objects and executes no AMAL/gameplay.
+Literal mapping lists check all 64 routes at three stages; the independent world
+pixels remain unchanged. One additional GPU comparison brings the total to
+**58 GPU comparisons**. All 27 original Channel statements also compile in unit
+fixtures with declared inputs where their loops are omitted.
+
 Live-host checks cover level replacement, scroll limits, score fixture
-selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, fullscreen and owned input/GPU disposal. Existing
+selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, fullscreen and owned input/GPU disposal. Existing
 Roller II/Wonderland launch, gameplay, audio and editor regressions remain required.

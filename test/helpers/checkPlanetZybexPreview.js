@@ -27,12 +27,24 @@ module.exports = async function checkPlanetZybexPreview(page) {
     assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),true);
   }
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-game-over.png'),fullPage:true});
+  await page.selectOption('#zybex-level','channels');
+  for(let stage=0;stage<3;stage++) {
+    if(stage===1)await page.click('#zybex-next');
+    if(stage===2){await page.locator('#zybex-preview-input').focus();await page.keyboard.press('a');}
+    await page.waitForFunction(stage=>document.getElementById('planet-zybex-preview').dataset.channelStage===String(stage),stage);
+    assert.strictEqual(await page.locator('#zybex-channels').isVisible(),true);
+    assert.strictEqual(await page.locator('#zybex-channels tbody tr').count(),[5,21,29][stage]);
+    assert.ok((await page.locator('#zybex-channels').textContent()).includes('Sprite 15'));
+    assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),true);
+  }
+  assert.ok((await page.locator('#zybex-channels').textContent()).includes('Bob 8'));
+  await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-channels.png'),fullPage:true});
   await page.selectOption('#zybex-level','default');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
   assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='0');
   assert.strictEqual(await page.locator('#zybex-preview-input').evaluate(c=>c.width),0);assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-buffer-bytes'),'4800');
-  await page.selectOption('#zybex-level', '1');assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),false); await page.click('#zybex-fullscreen');
+  await page.selectOption('#zybex-level', '1');assert.strictEqual(await page.locator('#zybex-channels').isVisible(),false);assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),false); await page.click('#zybex-fullscreen');
   await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'planet-zybex-preview');
   await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.fullscreenElement);
   await page.screenshot({ path: path.join(__dirname, '../artifacts/planet-zybex-preview.png'), fullPage: true });
