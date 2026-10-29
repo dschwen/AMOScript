@@ -843,3 +843,13 @@ unmapped modified text. The declared zero-score-table replay earns a real score,
 types a name, confirms with Enter, verifies exact Highscores writeback and reaches
 the menu/fresh game through ordinary input. Original shipped-score qualification
 and all-level completion remain separate acceptance work.
+
+### Configurable browser pacing
+
+- Implemented: page-builder `--slowdown`, live Speed selector and emitted-runtime
+  `sleepScale()` / `setSleepScale()`; Zybex starts at half speed. Wait-based pacing
+  leaves Timer/music/audio/automatic AMAL clocks unchanged. Half-speed PAL/NTSC
+  progression retains both docks and level-3 entry with five lives.
+- Open: optional instruction-rate limiting for source loops with no waits;
+  native CPU/timing calibration and any unified simulation-time scaling require
+  separate design and evidence. Cooperative instruction budgets are not a speed dial.

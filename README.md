@@ -20,7 +20,7 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 include all seven backgrounds, ship controls and individual enemy programs.
 See the [showcase milestone](docs/planet-zybex.md) for progress and remaining coverage.
 
-[Build your own complete game page](docs/game-webpage-tutorial.md): compilation, assets, Play/sound/fullscreen buttons, touch controls and optional `--debug` file downloads.
+[Build your own complete game page](docs/game-webpage-tutorial.md): compilation, assets, Play/sound/fullscreen buttons, touch controls, adjustable game speed (`--slowdown`) and optional `--debug` file downloads.
 
 The game pages have a large red **Play Game** button for sound, fullscreen and direct launch.
 

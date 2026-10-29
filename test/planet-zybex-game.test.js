@@ -22,9 +22,9 @@ test('Planet Zybex full game: input-only PAL/NTSC movement/fire, five life losse
 test('Planet Zybex progression: frozen joystick presses dock level 1, dock level 2, replace three world banks and enter level 3 with five lives and independent raster strips',()=>{
   const inputs=require('./fixtures/planet-zybex/progression-input.json'),expected=require('./fixtures/planet-zybex/progression.json'),run=require('./helpers/planetZybexProgression');
   const bytes=fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex/current/Zybex.AMOS'));assert.strictEqual(hash(bytes),inputs.sourceSha256);assert.strictEqual(hash(bytes),expected.sourceSha256);const{create}=compile(bytes);
-  for(const standard of ['PAL','NTSC']){
+  for(const standard of ['PAL','NTSC'])for(const sleepScale of [1,2]){
     const clock=require('./helpers/fakeTimers').createFakeTimers(1),reads=[];let captures=0;
-    const result=run(create,clock,{read:name=>{reads.push(name);return fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1');}},p=>{let mask=0;const off=p.setJoystickReader(()=>mask);return{set(v){mask=v;p.setJoystick(1,v);},dispose(){mask=0;off();}};},inputs,(name,p,meta)=>{
+    const result=run(options=>create({...options,sleepScale}),clock,{read:name=>{reads.push(name);return fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1');}},p=>{let mask=0;const off=p.setJoystickReader(()=>mask);return{set(v){mask=v;p.setJoystick(1,v);},dispose(){mask=0;off();}};},inputs,(name,p,meta)=>{
       const f=expected.frames[captures++];assert.strictEqual(name,f.name);assert.deepStrictEqual(meta,{frame:f.frame,vertical:f.vertical,third:f.third,lives:5,score:f.score});assert.deepStrictEqual(['X Sprite','Y Sprite','I Sprite'].map(key=>p.spriteInfo(key,15)),f.sprite);
       const frame=p.display.canvasFrame();for(const r of f.regions)assert.strictEqual(hash(crop(frame,r)),r.sha256,name);
     },null,standard);

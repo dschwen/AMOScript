@@ -772,3 +772,12 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   span 6,480 Updates/188 independent regions/152 GPU comparisons; total Zybex 326
   GPU comparisons. Level-3 completion/later progression/victory and wider native
   captures remain open. See docs/planet-zybex-level2.md for bounds/provenance.
+
+- Emitted factories expose `sleepScale()` / `setSleepScale(number)` for the existing
+  nonnegative wait multiplier. Changes apply to future Wait/Wait Vbl instructions;
+  pending deadlines and Stop/Resume remaining waits are retained. Never scale Timer,
+  palette/audio/automatic AMAL clocks or pitch through this setting. Page-builder
+  `--slowdown` accepts finite numbers >=1, defaults to 1 and supplies a live Speed
+  selector retained across Restart. Zybex's live page defaults to 2; fixed source
+  replays remain unscaled, with PAL/NTSC headless progression also checked at 2.
+  Busy-loop CPU limiting remains separate. See docs/game-webpage-tutorial.md.

@@ -18,7 +18,7 @@ function replayPlanetZybexProgression(create,clock,files,makeInput,inputs,captur
   try{
     set(route[0]);p.tick(10000);
     while(third<10){
-      check(++steps<40000,'Progression replay exceeded its time budget');
+      check(++steps<80000,'Progression replay exceeded its time budget');
       const level=p.state.variables.int_level;
       set(level===1?route[Math.min(frames,route.length-1)]:level===2?(vertical<5?16:vertical<10?17:vertical<15?20:vertical<25?16:verticalRoute[Math.min(vertical-25,verticalRoute.length-1)]):third<5?16:24);
       clock.tick(1);check(!p.state.halted&&p.amreg(24)!==99&&p.state.variables.int_lives===5,'Progression lost the ship');

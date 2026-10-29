@@ -156,6 +156,44 @@ a later Escape reaches the game. On teardown, detach input, stop the VM, dispose
 GPU resources and close the owned audio/fullscreen sessions. The example exposes
 `AMOS_GAME_PAGE.dispose()` for application unmounts and also handles `pagehide`.
 
+### Adjust game speed
+
+The page toolbar offers **Speed: 100%, 50%, 33%, 25%**. Choose a slower setting
+before Play or while running. The setting survives Restart and Stop/Resume within
+the page session. To choose a default when building:
+
+```sh
+node tools/build_game_page.js path/to/MyGame.AMOS /tmp/my-game.html --slowdown 2
+```
+
+`--slowdown 2` doubles the durations of `Wait` and `Wait Vbl` (half speed), while
+`3` triples them. The default is `1`; finite fractional values of at least 1 are
+accepted and added to the selector. Planet Zybex's live page defaults to `2`.
+Its gameplay loops already use Wait Vbl: nominally 50 updates/s under PAL, or
+25 with the half-speed setting, plus execution and browser scheduling overhead.
+This is a playability setting, not measured native CPU timing.
+
+Standalone JavaScript factories expose the same embedded-runtime control:
+
+```js
+const program = create({ sleepScale: 2, /* files, audio and other adapters */ });
+program.setSleepScale(3); // Future waits use this multiplier.
+console.log(program.sleepScale()); // 3
+```
+
+An outstanding wait keeps its original deadline when the setting changes;
+Stop/Resume retains its remaining time. The runtime's existing nonnegative
+`sleepScale` API also accepts zero for controlled tests; the page offers only
+multipliers of at least 1. No AMOS source modification is required.
+
+The multiplier does not change Timer's real VBL counter, fades, automatic AMAL,
+tracker/music clocks or sample pitch. Zybex uses manual AMAL advancement inside
+its paced game loop, so that animation follows the slowed loop. Timed source
+logic can therefore behave differently from a global slow-motion simulation.
+Loops without waits still run at ordinary cooperative VM speed; instruction-rate
+limiting is a separate future feature. Rendering frame rate and `tick()` budgets
+are not gameplay-speed controls.
+
 ## 5. Enable the touch joystick in your own harness
 
 Touch controls are a browser-host option, not a compiler command:

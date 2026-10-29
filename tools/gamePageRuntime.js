@@ -4,7 +4,7 @@
 // startup keys: each game retains its own intro, menu and joystick behavior.
 function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
-  const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch');
+  const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   const key = name => name.replace(/\\/g, '/').toLowerCase();
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])));
@@ -35,7 +35,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
       const fallback = canvas.cloneNode(); canvas.replaceWith(fallback); canvas = fallback;
     }
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
-    live = createProgram({ files, audio: sound.bind(), now: () => performance.now(),
+    live = createProgram({ sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
       joysticks: [{ port, keyboard: { fire: fireKeys }, gamepad: true }],
@@ -59,6 +59,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   byId('game-restart').onclick = () => { launch++; play.disabled = false; try { start(); } catch (error) { fail(error); } };
   byId('game-stop').onclick = () => { launch++; play.disabled = false; if (live) live.stop(); update(); };
   byId('game-resume').onclick = () => { if (live && !failure) live.resume(); if (host) host.focus(); update(); };
+  speed.onchange = () => { if (live) live.setSleepScale(Number(speed.value)); if (host) host.focus(); };
   touchMode.onchange = () => { if (host) { host.setVirtualJoystickVisibility(touchMode.value); host.focus(); } };
   const monitor = setInterval(update, 100);
   function dispose() {
@@ -69,7 +70,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   }
   window.addEventListener('pagehide', dispose);
   // The embedding page may call this when unmounting an application view.
-  globalThis.AMOS_GAME_PAGE = { dispose, files: memory, joystickStatus: () => host ? host.pollJoysticks() : [] };
+  globalThis.AMOS_GAME_PAGE = { dispose, files: memory, sleepScale: () => live ? live.sleepScale() : Number(speed.value), joystickStatus: () => host ? host.pollJoysticks() : [] };
   update();
 }
 module.exports = installGamePage;

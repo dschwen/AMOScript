@@ -32,7 +32,16 @@ module.exports = async function gamePageDebugProbe(page) {
     }
     const menu = doc.querySelector('.game-debug'); check(menu && !menu.open, 'Debug menu should start closed');
     check(!menu.querySelector('a'), 'Unchanged assets offered for download');
+    const speed = doc.getElementById('game-speed');
+    check(win.AMOS_GAME_PAGE.sleepScale() === 2.5 && frames[0].contentWindow.AMOS_GAME_PAGE.sleepScale() === 1, 'Builder speed defaults differ');
+    speed.value = '3'; speed.dispatchEvent(new win.Event('change'));
+    check(win.AMOS_GAME_PAGE.sleepScale() === 3, 'Pre-start speed selection was lost');
     doc.getElementById('game-restart').click();
+    check(win.AMOS_GAME_PAGE.sleepScale() === 3, 'Start ignored selected speed');
+    speed.value = '4'; speed.dispatchEvent(new win.Event('change'));
+    check(win.AMOS_GAME_PAGE.sleepScale() === 4, 'Running VM ignored speed change');
+    doc.getElementById('game-stop').click(); doc.getElementById('game-resume').click();
+    check(win.AMOS_GAME_PAGE.sleepScale() === 4, 'Stop/Resume lost speed');
     check(doc.getElementById('game-viewport').dataset.phase === 'running', 'Save fixture failed');
     menu.open = true; await new Promise(resolve => setTimeout(resolve, 0)); doc.querySelector('[data-debug-refresh]').click();
     const links = [...menu.querySelectorAll('a')]; check(links.length === 2, 'Expected only new and modified files');
@@ -46,6 +55,7 @@ module.exports = async function gamePageDebugProbe(page) {
     check(menu.querySelectorAll('a').length === 1 && menu.querySelector('a').download === 'new.dat', 'Reverted file remains modified');
     doc.getElementById('game-restart').click(); doc.querySelector('[data-debug-refresh]').click();
     check(menu.querySelectorAll('a').length === 2, 'Restart lost session files');
+    check(win.AMOS_GAME_PAGE.sleepScale() === 4, 'Restart lost selected speed');
     for (const frame of frames) {
       const d = frame.contentDocument;
       if (frame === frames[0]) d.getElementById('game-restart').click();
@@ -62,6 +72,6 @@ module.exports = async function gamePageDebugProbe(page) {
     await frames[0].contentWindow.AMOS_GAME_PAGE.dispose();
     // Leave fresh runnable examples on the shared demo page after verification.
     for (const [i, source] of [normal, debug].entries()) { const loaded = new Promise(resolve => { frames[i].onload = resolve; }); frames[i].srcdoc = source; await loaded; }
-    return { modifiedFiles: 2, binaryBytes: [0, 128, 255, 10], compactErrors: 2, revokedUrls: 2, icons: 3 };
-  }, { normal: build(bytes, { title: 'File export example', assets }), debug: build(bytes, { title: 'File export example — debug', assets, debug: true }) });
+    return { modifiedFiles: 2, binaryBytes: [0, 128, 255, 10], compactErrors: 2, revokedUrls: 2, icons: 3, speedControl: true };
+  }, { normal: build(bytes, { title: 'File export example', assets }), debug: build(bytes, { title: 'File export example — debug', assets, debug: true, slowdown: 2.5 }) });
 };

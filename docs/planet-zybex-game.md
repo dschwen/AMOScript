@@ -126,3 +126,15 @@ The current expanded page totals are eight replays, 6,480 Updates, 188 independe
 regions and 152 GPU comparisons (326 Zybex GPU comparisons including fixtures).
 See [vertical completion](planet-zybex-level2.md) for source evidence, corrected
 row-480 snapshots, bank replacement and exact progression limits.
+
+## Browser game speed
+
+The live launcher now defaults to half speed (`sleepScale: 2`), selectable in its
+**Speed** toolbar control without restarting. The unscaled fixture replays retain
+their existing frame counts. Headless PAL/NTSC progression also checks the full
+route at the half-speed default, including both docks and level-3 entry.
+`Wait Vbl` at source lines 1251/1423 already limits the gameplay loops to nominally
+50 updates/s under PAL; the multiplier makes that 25 before host overhead.
+Music/sample playback and Timer retain their ordinary clocks. This is a user
+pacing preference, not an Amiga CPU timing claim. See the
+[page builder tutorial](game-webpage-tutorial.md#adjust-game-speed).

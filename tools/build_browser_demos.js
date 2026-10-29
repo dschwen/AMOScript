@@ -45,7 +45,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
       if(start<0||end<0)throw Error('Missing Zybex verification markup');
       const zybexRoot=path.join(root,'examples/PlanetZybex/current');
       const app=buildGamePage(fs.readFileSync(path.join(zybexRoot,'Zybex.AMOS')),{
-        title:'Planet Zybex',fire:['ControlLeft','ControlRight'],assets:loadAssets(path.join(zybexRoot,'manifest.json'))
+        title:'Planet Zybex',slowdown:2,fire:['ControlLeft','ControlRight'],assets:loadAssets(path.join(zybexRoot,'manifest.json'))
       });
       const navigation=`<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('planet-zybex.html')}">Development previews</a></nav>`;
       outputs.set(`${scenario.id}.html`,app.replace('<h1>','<style>nav a{color:#9bc9ff}#demo-checks{margin-top:2rem}#stage{overflow:auto;max-height:65vh}#stage canvas,#stage img{max-width:none;min-width:0}#results{white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}</style>'+navigation+'<h1>').replace('</body>',()=>
