@@ -2355,7 +2355,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: false,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
-      inkBackground: 0, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
+      // Preserve the legacy default until Gr Writing explicitly selects JAM1/2.
+      inkBackground: 0, graphicsBackground: paper, graphicsMode: null, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
       columns: Math.floor(width / 8), rows: Math.floor(height / 8), cursorVisible: true
     };
     next.pixels.fill(paper);
@@ -2697,8 +2698,13 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function ink(colour, background = null, border = null) {
     const target = screen();
     target.ink = colourIndex(colour, target);
-    if (background != null) target.inkBackground = colourIndex(background, target);
+    if (background != null) target.inkBackground = target.graphicsBackground = colourIndex(background, target);
     if (border != null) target.inkBorder = colourIndex(border, target);
+  }
+  function grWriting(mode) {
+    const target = screen(); whole(mode);
+    if (mode !== 0 && mode !== 1) throw new Error('Unsupported Gr Writing mode (expected 0 or 1)');
+    target.graphicsMode = mode;
   }
   function setLine(pattern) { screen().linePattern = whole(pattern) & 65535; }
   function plot(x, y, colour = null) {
@@ -2798,9 +2804,10 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
     let error = dx + dy, step = 0;
     // Preserve off-screen phase before clipping writes; signed-word endpoints
-    // bound the walk to 65,536 pixels. Pattern zero uses the opaque background.
+    // bound the walk to 65,536 pixels. JAM1 skips holes; JAM2 uses BPen.
     while (true) {
-      pixel(target, x1, y1, target.linePattern & (1 << ((phase - step) & 15)) ? colour : target.inkBackground);
+      if (target.linePattern & (1 << ((phase - step) & 15))) pixel(target, x1, y1, colour);
+      else if (target.graphicsMode !== 0) pixel(target, x1, y1, target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground);
       if (x1 === x2 && y1 === y2) break;
       const doubled = 2 * error;
       if (doubled >= dy) { error += dy; x1 += sx; }
@@ -3085,7 +3092,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
-    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink);
+    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
     changed();
   }
   function centre(value) {
@@ -3287,7 +3294,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, grWriting, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
@@ -8545,7 +8552,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: false,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
-      inkBackground: 0, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
+      // Preserve the legacy default until Gr Writing explicitly selects JAM1/2.
+      inkBackground: 0, graphicsBackground: paper, graphicsMode: null, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
       columns: Math.floor(width / 8), rows: Math.floor(height / 8), cursorVisible: true
     };
     next.pixels.fill(paper);
@@ -8887,8 +8895,13 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function ink(colour, background = null, border = null) {
     const target = screen();
     target.ink = colourIndex(colour, target);
-    if (background != null) target.inkBackground = colourIndex(background, target);
+    if (background != null) target.inkBackground = target.graphicsBackground = colourIndex(background, target);
     if (border != null) target.inkBorder = colourIndex(border, target);
+  }
+  function grWriting(mode) {
+    const target = screen(); whole(mode);
+    if (mode !== 0 && mode !== 1) throw new Error('Unsupported Gr Writing mode (expected 0 or 1)');
+    target.graphicsMode = mode;
   }
   function setLine(pattern) { screen().linePattern = whole(pattern) & 65535; }
   function plot(x, y, colour = null) {
@@ -8988,9 +9001,10 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
     let error = dx + dy, step = 0;
     // Preserve off-screen phase before clipping writes; signed-word endpoints
-    // bound the walk to 65,536 pixels. Pattern zero uses the opaque background.
+    // bound the walk to 65,536 pixels. JAM1 skips holes; JAM2 uses BPen.
     while (true) {
-      pixel(target, x1, y1, target.linePattern & (1 << ((phase - step) & 15)) ? colour : target.inkBackground);
+      if (target.linePattern & (1 << ((phase - step) & 15))) pixel(target, x1, y1, colour);
+      else if (target.graphicsMode !== 0) pixel(target, x1, y1, target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground);
       if (x1 === x2 && y1 === y2) break;
       const doubled = 2 * error;
       if (doubled >= dy) { error += dy; x1 += sx; }
@@ -9275,7 +9289,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
-    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink);
+    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
     changed();
   }
   function centre(value) {
@@ -9477,7 +9491,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, grWriting, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
@@ -14752,7 +14766,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: false,
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
-      inkBackground: 0, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
+      // Preserve the legacy default until Gr Writing explicitly selects JAM1/2.
+      inkBackground: 0, graphicsBackground: paper, graphicsMode: null, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
       columns: Math.floor(width / 8), rows: Math.floor(height / 8), cursorVisible: true
     };
     next.pixels.fill(paper);
@@ -15094,8 +15109,13 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   function ink(colour, background = null, border = null) {
     const target = screen();
     target.ink = colourIndex(colour, target);
-    if (background != null) target.inkBackground = colourIndex(background, target);
+    if (background != null) target.inkBackground = target.graphicsBackground = colourIndex(background, target);
     if (border != null) target.inkBorder = colourIndex(border, target);
+  }
+  function grWriting(mode) {
+    const target = screen(); whole(mode);
+    if (mode !== 0 && mode !== 1) throw new Error('Unsupported Gr Writing mode (expected 0 or 1)');
+    target.graphicsMode = mode;
   }
   function setLine(pattern) { screen().linePattern = whole(pattern) & 65535; }
   function plot(x, y, colour = null) {
@@ -15195,9 +15215,10 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const sx = x1 < x2 ? 1 : -1, sy = y1 < y2 ? 1 : -1;
     let error = dx + dy, step = 0;
     // Preserve off-screen phase before clipping writes; signed-word endpoints
-    // bound the walk to 65,536 pixels. Pattern zero uses the opaque background.
+    // bound the walk to 65,536 pixels. JAM1 skips holes; JAM2 uses BPen.
     while (true) {
-      pixel(target, x1, y1, target.linePattern & (1 << ((phase - step) & 15)) ? colour : target.inkBackground);
+      if (target.linePattern & (1 << ((phase - step) & 15))) pixel(target, x1, y1, colour);
+      else if (target.graphicsMode !== 0) pixel(target, x1, y1, target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground);
       if (x1 === x2 && y1 === y2) break;
       const doubled = 2 * error;
       if (doubled >= dy) { error += dy; x1 += sx; }
@@ -15482,7 +15503,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
-    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink);
+    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
     changed();
   }
   function centre(value) {
@@ -15684,7 +15705,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, grWriting, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },

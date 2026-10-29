@@ -25,7 +25,7 @@ screens' flags. Pen/Paper changes preserve activation. Separate program factorie
 own separate state. General multiple-window controls remain unsupported.
 
 Print and Centre use the window writer. Graphics Text, Draw/Box, Set Line and
-Cline keep their separate semantics; graphics `Gr Writing` remains unsupported.
+Cline keep their separate semantics; graphics [Gr Writing](gr-writing.md) has its own per-screen mode.
 Existing Autoback and Bob hooks restore/replay text against each buffer's own
 pixels, retain buffer/background ownership and advance the cursor only once.
 CPU and GPU consume the same physical snapshot, with no text-specific overlay.

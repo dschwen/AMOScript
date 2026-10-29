@@ -1,0 +1,25 @@
+{
+  "frames": [
+    {
+      "stage": 0,
+      "mode": 0,
+      "png": "game-over-0.png",
+      "indicesSha256": "331bf94e0c99dea2044c7f6933102ab36e3cf5fa91e6f5b5217d5559fe01a303",
+      "rgbaSha256": "1a073fff95fd58e388a5593908ae031b09db6e39af2710e79aa5d4411f79bbe3"
+    },
+    {
+      "stage": 1,
+      "mode": 1,
+      "png": "game-over-1.png",
+      "indicesSha256": "cdc95094fe2214e40b6c6a73ada6133f937030af214cd48bc1fc4507ee543310",
+      "rgbaSha256": "6b66808215483bc71841ce564e31666938a744115a59141bd89bc98d17fa3b2f"
+    },
+    {
+      "stage": 2,
+      "mode": 0,
+      "png": "game-over-2.png",
+      "indicesSha256": "331bf94e0c99dea2044c7f6933102ab36e3cf5fa91e6f5b5217d5559fe01a303",
+      "rgbaSha256": "1a073fff95fd58e388a5593908ae031b09db6e39af2710e79aa5d4411f79bbe3"
+    }
+  ]
+}

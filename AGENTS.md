@@ -616,3 +616,13 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   RGBA overlay. Computed/wide sprites, wrapped/OOM fallback and exact DMA timing
   remain gated. Original Zybex 90–93 now runs; full source stops at Amal Off 179.
   Ten matrix GPU frames bring Zybex to 51; see docs/sprite-buffer.md.
+- Gr Writing ($1066) supports per-screen modes 0/JAM1 and 1/JAM2. Text zero bits
+  and line-pattern holes preserve pixels in JAM1, use graphics BPen in JAM2.
+  Track initial BPen separately from window Paper; explicit Ink background updates
+  both graphics paths. Preserve legacy defaults until explicit Gr Writing, retain
+  Print/Writing and solid primitives, and reject other modes before mutation.
+  Keep indexed writes inside existing Bob/Autoback hooks and line preflight/phase.
+  Original Zybex 189–199 runs on a declared blank screen with opaque/restoration
+  comparisons; six PAL/NTSC Canvas/GPU frames bring Zybex to 57. Full source still
+  stops at Amal Off 179; nine encodings remain. See docs/gr-writing.md for native
+  mode/cursor/font/raster gates and the fixture's omitted finish-message paths.

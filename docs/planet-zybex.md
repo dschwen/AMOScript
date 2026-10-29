@@ -10,7 +10,9 @@ currently shows all seven original level backgrounds, with horizontal/vertical
 scrolling, WebGL2 and fullscreen. The **Score display (fixture)** option shows
 the original hires score strip below a lowres level-1 playfield; a key advances
 between two declared score/lives inputs. **Default startup (fixture)** exposes
-the original reset/close/48-line Sprite allocation prefix. All options are marked as previews.
+the original reset/close/48-line Sprite allocation prefix. **Game-over text (fixture)**
+shows the original transparent outline, an explicit opaque comparison and restoration.
+All options are marked as previews.
 **The full game does not compile or play yet.** No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
@@ -26,7 +28,7 @@ source hash, complete bounded token audit, strings, embedded-bank metadata and
 first compilation failure. It found 15 unsupported **encodings**, not an estimate
 of development time. Recognized tokens can still expose runtime gaps.
 
-Five of those encodings are now implemented:
+Six of those encodings are now implemented:
 
 - Slot 2 `$0056`, `Unpack bank To screen`, decodes the original packed backgrounds.
   Full indexed bitmaps/palettes match an independent Python decoder; 35 scrolled
@@ -53,8 +55,13 @@ Five of those encodings are now implemented:
   assignments and enforces the native height gate. Computed/wide sprites remain
   unsupported. See [Sprite buffers](sprite-buffer.md).
 
+- `$1066`, `Gr Writing`, selects transparent (0/JAM1) or opaque (1/JAM2)
+  graphics Text/patterned-line output per screen. The original five GAME OVER
+  text passes preserve their outline; Print/Writing keep their own mode. See
+  [graphics writing](gr-writing.md) for the supported profile and native gates.
+
 The whole-program compiler now stops at **Amal Off, line 179, byte 8844**.
-There are 10 remaining unsupported encodings:
+There are 9 remaining unsupported encodings:
 
 | Encoding | Command | Current uses |
 | --- | --- | --- |
@@ -64,7 +71,6 @@ There are 10 remaining unsupported encodings:
 | `$1f94` | Channel ... To Bob/Sprite | 27 |
 | `$205a` / `$206c` | Synchro Off / Synchro | 7 / 7 |
 | `$207a` / `$20ae` | Update Off / Update | 7 / 9 |
-| `$1066` | Gr Writing | 1 |
 
 Re-audit with `node tools/audit_program.js examples/PlanetZybex/Zybex.AMOS`.
 The JSON above remains the frozen baseline rather than silently changing its
@@ -84,7 +90,8 @@ historical counts after each compiler addition.
    mixed hires/lowres score layout now pass a declared presentation fixture.
    Default now passes its reset matrix and the original guarded startup prefix.
    Set Sprite Buffer now passes its owned-pool/direct-sprite checks and original
-   startup allocation. Gr Writing remains open; this is not gameplay acceptance.
+   startup allocation. Gr Writing 0/1 now passes original GAME OVER text and
+   explicit comparison/restoration checks; this is not gameplay acceptance.
 3. **AMAL execution and manual frame control.** Add checked Channel bindings,
    owned compiled AMAL strings, local registers, the existing 26 global words,
    on/off lifetimes and explicit Synchro/Update behavior. The source deliberately
@@ -114,8 +121,8 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next presentation slice is **Gr Writing 0**, followed by AMAL bindings,
-program execution and manual synchronization/update. Default and Set Sprite
+The next slice is **AMAL bindings**, followed by program execution and manual
+synchronization/update. Default and Set Sprite
 Buffer now have implemented reset/allocation contracts; native computed/wide
 sprite allocation and custom interpreter preferences remain open. Different
 COLOR00 values across score/playfield (the later thunder effect) still require
@@ -153,6 +160,14 @@ restoration, bringing the total to **51 GPU comparisons**. Its image is a litera
 two-row test bank, not a Zybex player replacement. The rest of startup and
 gameplay still do not execute.
 
+The GAME OVER fixture retains original lines 189–199 on a declared blank screen
+2, then replays 193–199 with explicit opaque and restored transparent modes.
+Synthetic inputs/key guards replace the surrounding finish routine; its AMAL,
+audio, fades, manual Update and score paths do not execute. An independent Python
+rasterizer with pinned public-domain font bytes produces three indexed/RGBA
+expectations and PNGs. Six PAL/NTSC Canvas/GPU frames bring the total to **57 GPU
+comparisons**. These are portable font/raster checks, not a native Topaz capture.
+
 Live-host checks cover level replacement, scroll limits, score fixture
-selection/real key advancement, startup-reset/close guards, fullscreen and owned input/GPU disposal. Existing
+selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, fullscreen and owned input/GPU disposal. Existing
 Roller II/Wonderland launch, gameplay, audio and editor regressions remain required.

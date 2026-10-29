@@ -19,6 +19,14 @@ module.exports = async function checkPlanetZybexPreview(page) {
   await page.locator('#zybex-preview-input').focus();await page.keyboard.press('a');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.score==='9876');
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-score.png'),fullPage:true});
+  await page.selectOption('#zybex-level','game-over');
+  for (let stage=0;stage<3;stage++) {
+    if(stage){await page.locator('#zybex-preview-input').focus();await page.keyboard.press(stage===1?'a':'b');}
+    await page.waitForFunction(stage=>document.getElementById('planet-zybex-preview').dataset.graphicsStage===String(stage),stage);
+    assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-graphics-mode'),stage===1?'1':'0');
+    assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),true);
+  }
+  await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-game-over.png'),fullPage:true});
   await page.selectOption('#zybex-level','default');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
   assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');
