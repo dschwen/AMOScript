@@ -1,11 +1,12 @@
 {
-  "sourceSha256": "fdcd685b871cadc7473e103d80cf78293402c839a5dd71922ffcef0213371145",
+  "sourceSha256": "63580705979485ad554d05ea25f8e6f45565c81fddfa381f7d985340d40350d4",
   "frames": [
     {
       "name": "Departure",
       "level": 1,
       "frame": 1,
       "vertical": 0,
+      "third": 0,
       "score": 0,
       "sprite": [
         176,
@@ -27,6 +28,7 @@
       "level": 1,
       "frame": 300,
       "vertical": 0,
+      "third": 0,
       "score": 80,
       "sprite": [
         176,
@@ -48,6 +50,7 @@
       "level": 1,
       "frame": 600,
       "vertical": 0,
+      "third": 0,
       "score": 450,
       "sprite": [
         336,
@@ -69,6 +72,7 @@
       "level": 1,
       "frame": 640,
       "vertical": 0,
+      "third": 0,
       "score": 460,
       "sprite": [
         336,
@@ -90,6 +94,7 @@
       "level": 1,
       "frame": 701,
       "vertical": 0,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -111,6 +116,7 @@
       "level": 1,
       "frame": 702,
       "vertical": 0,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -132,6 +138,7 @@
       "level": 1,
       "frame": 703,
       "vertical": 0,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -153,6 +160,7 @@
       "level": 1,
       "frame": 704,
       "vertical": 0,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -174,6 +182,7 @@
       "level": 1,
       "frame": 705,
       "vertical": 0,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -195,6 +204,7 @@
       "level": 2,
       "frame": 706,
       "vertical": 1,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -216,6 +226,7 @@
       "level": 2,
       "frame": 711,
       "vertical": 6,
+      "third": 0,
       "score": 470,
       "sprite": [
         336,
@@ -237,6 +248,7 @@
       "level": 2,
       "frame": 716,
       "vertical": 11,
+      "third": 0,
       "score": 470,
       "sprite": [
         331,
@@ -258,6 +270,7 @@
       "level": 2,
       "frame": 721,
       "vertical": 16,
+      "third": 0,
       "score": 470,
       "sprite": [
         311,
@@ -279,6 +292,7 @@
       "level": 2,
       "frame": 730,
       "vertical": 25,
+      "third": 0,
       "score": 470,
       "sprite": [
         311,
@@ -292,6 +306,314 @@
           "width": 640,
           "height": 32,
           "sha256": "478bb543336faa938f231b4567c062747bae455a3bdc9c03c329ceeb53794e46"
+        }
+      ]
+    },
+    {
+      "name": "Vertical corridor 100",
+      "level": 2,
+      "frame": 805,
+      "vertical": 100,
+      "third": 0,
+      "score": 470,
+      "sprite": [
+        311,
+        149,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "3d87c177c5580c40e008d2961409236d321c2d750277fa1564476634dbc34fc6"
+        }
+      ]
+    },
+    {
+      "name": "Vertical corridor 200",
+      "level": 2,
+      "frame": 905,
+      "vertical": 200,
+      "third": 0,
+      "score": 610,
+      "sprite": [
+        371,
+        134,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "545921d653a2308e7173e2c52fa465300829fe944c4b19f546987bb8883d11bb"
+        }
+      ]
+    },
+    {
+      "name": "Vertical corridor 300",
+      "level": 2,
+      "frame": 1005,
+      "vertical": 300,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        286,
+        144,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "535b099e20acba9bcc7492eeb91a7c1b8f987a9cac4474078434b176f1d2dab1"
+        }
+      ]
+    },
+    {
+      "name": "Vertical corridor 400",
+      "level": 2,
+      "frame": 1105,
+      "vertical": 400,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        311,
+        149,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "473c423eb15cf39a5c0f53d5fa5e59a17e1b8a543fc4199f2ec0f8b8f80dd1a2"
+        }
+      ]
+    },
+    {
+      "name": "Vertical scroll limit",
+      "level": 2,
+      "frame": 1185,
+      "vertical": 480,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "473c423eb15cf39a5c0f53d5fa5e59a17e1b8a543fc4199f2ec0f8b8f80dd1a2"
+        }
+      ]
+    },
+    {
+      "name": "Vertical dock reached",
+      "level": 2,
+      "frame": 1186,
+      "vertical": 481,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "53699f8341710369029a68bc2438c2aa03a1c293c0e8db71345b28798ef2c69a"
+        }
+      ]
+    },
+    {
+      "name": "Vertical dock hold",
+      "level": 2,
+      "frame": 1187,
+      "vertical": 482,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "53699f8341710369029a68bc2438c2aa03a1c293c0e8db71345b28798ef2c69a"
+        }
+      ]
+    },
+    {
+      "name": "Vertical dock image 22",
+      "level": 2,
+      "frame": 1188,
+      "vertical": 483,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "53699f8341710369029a68bc2438c2aa03a1c293c0e8db71345b28798ef2c69a"
+        }
+      ]
+    },
+    {
+      "name": "Vertical dock image 21",
+      "level": 2,
+      "frame": 1189,
+      "vertical": 484,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        21
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "53699f8341710369029a68bc2438c2aa03a1c293c0e8db71345b28798ef2c69a"
+        }
+      ]
+    },
+    {
+      "name": "Vertical dock image 20",
+      "level": 2,
+      "frame": 1190,
+      "vertical": 485,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        20
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "53699f8341710369029a68bc2438c2aa03a1c293c0e8db71345b28798ef2c69a"
+        }
+      ]
+    },
+    {
+      "name": "Vertical dock release",
+      "level": 2,
+      "frame": 1191,
+      "vertical": 486,
+      "third": 0,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        2
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 32,
+          "sha256": "53699f8341710369029a68bc2438c2aa03a1c293c0e8db71345b28798ef2c69a"
+        }
+      ]
+    },
+    {
+      "name": "Level 3 entry",
+      "level": 3,
+      "frame": 1192,
+      "vertical": 486,
+      "third": 1,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        3
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "17f27ba26b00b05f507cb8c330f7a398a8237355cabdce031a205f47bd30f2e7"
+        }
+      ]
+    },
+    {
+      "name": "Level 3 hold",
+      "level": 3,
+      "frame": 1196,
+      "vertical": 486,
+      "third": 5,
+      "score": 820,
+      "sprite": [
+        256,
+        174,
+        3
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "3939001b5a72bd936916654615fb0e33be734339f10c53bcf246d1e16b94ec0c"
+        }
+      ]
+    },
+    {
+      "name": "Level 3 movement",
+      "level": 3,
+      "frame": 1201,
+      "vertical": 486,
+      "third": 10,
+      "score": 820,
+      "sprite": [
+        281,
+        174,
+        2
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "7fe251bd4b5882dc13427b5ec5172abb99013d97acf248df46f9732cd294365b"
         }
       ]
     }

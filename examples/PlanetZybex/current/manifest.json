@@ -1,0 +1,56 @@
+{
+  "source": {
+    "path": "Zybex.AMOS",
+    "byteLength": 126082,
+    "sha256": "63580705979485ad554d05ea25f8e6f45565c81fddfa381f7d985340d40350d4"
+  },
+  "upstream": {
+    "path": "../Zybex.AMOS",
+    "sha256": "fdcd685b871cadc7473e103d80cf78293402c839a5dd71922ffcef0213371145"
+  },
+  "sourceFix": {
+    "lines": [
+      1494,
+      1499,
+      1506
+    ],
+    "description": "Use the vertical source viewport (0,lop)-(320,lop+160) during docking; preserve upstream in the parent directory."
+  },
+  "files": {
+    "level1_screen.abk": {
+      "path": "../level1_screen.abk",
+      "byteLength": 17284,
+      "sha256": "079b723929a5de5d23a1907b2546158406b87ba4ccf7452e9f8d4af3591f12a3"
+    },
+    "level2_screen.abk": {
+      "path": "../level2_screen.abk",
+      "byteLength": 32526,
+      "sha256": "17adc1377c63258294a9dbffc787820063d7e3a4c3516c2fdd87e54585a239b4"
+    },
+    "level3_screen.abk": {
+      "path": "../level3_screen.abk",
+      "byteLength": 31556,
+      "sha256": "18c15e91a959ac596ef9175709848cc88399670027ab02f15eed4d830b028687"
+    },
+    "level4_screen.abk": {
+      "path": "../level4_screen.abk",
+      "byteLength": 33850,
+      "sha256": "18daa374fa4a2b969250f2c6ff321109ffc61ac232eb6bd91be8bbe3d5723615"
+    },
+    "level5_screen.abk": {
+      "path": "../level5_screen.abk",
+      "byteLength": 18810,
+      "sha256": "2f4c0f2e829481261a58491443bed1862d9bb702ddbb309876012c92e8c06e9d"
+    },
+    "level6_screen.abk": {
+      "path": "../level6_screen.abk",
+      "byteLength": 24074,
+      "sha256": "5b54f4eae7fbc7b84cc948513c14827100aa073cf17a0c62d9e8e75da7ba0ec9"
+    },
+    "level7_screen.abk": {
+      "path": "../level7_screen.abk",
+      "byteLength": 25900,
+      "sha256": "aca3962446b78d71aac9ec4abaabe9bdbe3960507513d3a0c6f5c60091940a6a"
+    }
+  }
+}

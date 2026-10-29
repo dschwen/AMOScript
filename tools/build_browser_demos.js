@@ -43,7 +43,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
     if(scenario.id==='planet-zybex-game'){
       const generated=outputs.get(`${scenario.id}.html`),start=generated.indexOf(`<p>${escape(scenario.description)}</p>`),end=generated.indexOf('<script>',start);
       if(start<0||end<0)throw Error('Missing Zybex verification markup');
-      const zybexRoot=path.join(root,'examples/PlanetZybex');
+      const zybexRoot=path.join(root,'examples/PlanetZybex/current');
       const app=buildGamePage(fs.readFileSync(path.join(zybexRoot,'Zybex.AMOS')),{
         title:'Planet Zybex',fire:['ControlLeft','ControlRight'],assets:loadAssets(path.join(zybexRoot,'manifest.json'))
       });
@@ -78,7 +78,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const featured = {
     'bob-test.html': { title: 'BobTest — 64 bouncing objects', description: 'Run the original BobTest program with WebGL, pause/resume, restart and fullscreen. Press a key to start its 500-frame run.' },
     'planet-zybex.html': { title: 'Planet Zybex — development previews', description: 'Explore all seven level backgrounds, ship controls, animation, enemies and allocation fixtures. The full game has its own Play Game page above.' },
-    'planet-zybex-game.html': {title:'Planet Zybex',description:'Play the original shooter with sound, fullscreen, keyboard/Gamepad and optional touch controls. Tested through level-1 docking, vertical level-2 entry, five life losses, GAME OVER and a fresh game. Level-2 completion and later levels remain in development.'},
+    'planet-zybex-game.html': {title:'Planet Zybex',description:'Play the shooter with sound, fullscreen, keyboard/Gamepad and optional touch controls. Three AMOS docking copy fixes preserve the vertical viewport. Tested through both docking sequences, level-3 entry, GAME OVER and a fresh game; later progression remains in development.'},
     'screen-slide.html': { title: 'Roller II sliding-screen intro', description: 'Play both original RolIntrIdee2 intros live, with fullscreen, pause/resume and optional sample sound. Watch the screens slide in from above and below.' },
     'anim5.html': { title: 'Logoanim sphere intro', description: 'Watch the original sphere animation and logo sequence play live. Choose either original version, pause, resume, restart or enter fullscreen.' },
     'wonderland-game.html': { title: 'Dithell’s Wonderland', description: 'Play the original game with keyboard or Gamepad controls, fullscreen and optional sound. Switch between WebGL2 and Canvas presentation.' },

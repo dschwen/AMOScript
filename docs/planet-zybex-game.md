@@ -1,7 +1,7 @@
 # Planet Zybex: full-game page and loss/restart replay
 
 [Play Planet Zybex](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html).
-The page embeds the complete unchanged `Zybex.AMOS` and all seven supplied level
+The page embeds the complete current `Zybex.AMOS` (three vertical docking copy corrections) and all seven supplied level
 banks. Play Game activates sound/fullscreen and starts the original first level
 without injected startup input. Arrows move, Ctrl fires; standard Gamepads and
 optional touch controls use the shared browser host. Stop, Resume and Restart
@@ -11,7 +11,7 @@ replaces it. The development fixtures remain on the
 
 ## Tested path
 
-`test/helpers/planetZybexReplay.js` executes the original source, using only host
+`test/helpers/planetZybexReplay.js` executes the current source, using only host
 input, clock advancement, observation hooks and Stop/Resume. It does not change
 VM variables, IPs, AMAL strings, banks or screen pixels.
 
@@ -75,8 +75,8 @@ It does not claim an independent full-mix recording or thunder/sample-2 playback
 The gallery calls the public page builder directly:
 
 ```sh
-node tools/build_game_page.js examples/PlanetZybex/Zybex.AMOS /tmp/planet-zybex.html \
-  --assets examples/PlanetZybex/manifest.json \
+node tools/build_game_page.js examples/PlanetZybex/current/Zybex.AMOS /tmp/planet-zybex.html \
+  --assets examples/PlanetZybex/current/manifest.json \
   --fire ControlLeft,ControlRight --title "Planet Zybex"
 ```
 
@@ -112,8 +112,17 @@ The complete page now has eight runs, 4,596 Updates, 132 independent regions and
 
 This establishes first-level firing, natural death, life reloads, GAME OVER and
 fresh-game entry, level-1 docking and the first 25 vertical level-2 fields. It
-does not establish level-2 completion, later levels, victory, every enemy or sample, a full independent gameplay
+now also establishes level-2 docking and ten level-3 fields through the
+[current-source update](planet-zybex-level2.md). It does not establish level-3
+completion, later levels, victory, every enemy or sample, a full independent gameplay
 composite, or native Amiga display/audio/timing parity. All supplied maps remain
 independently decoded and scrollable in the preview. The next gameplay work is
-an input-only route to level-2 completion and later progression, retaining
+an input-only route to level-3 completion and later progression, retaining
 these loss/restart and existing Roller II/Wonderland regressions.
+
+The current source changes only lines 1494/1499/1506 to copy the vertical viewport
+during docking; the frozen upstream file and all asset bytes remain unchanged.
+The current expanded page totals are eight replays, 6,480 Updates, 188 independent
+regions and 152 GPU comparisons (326 Zybex GPU comparisons including fixtures).
+See [vertical completion](planet-zybex-level2.md) for source evidence, corrected
+row-480 snapshots, bank replacement and exact progression limits.

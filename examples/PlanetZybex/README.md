@@ -37,3 +37,10 @@ The [progression replay](../../docs/planet-zybex-progression.md) now completes
 level-1 docking and runs the first 25 vertical level-2 fields with all five lives.
 It also verifies the shared AMAL/Basic Y-coordinate correction. Level-2 completion
 and later levels/victory remain next; the source and manifest bytes stay unchanged.
+
+The gallery now launches [current/Zybex.AMOS](current/Zybex.AMOS), a separate copy
+with only three vertical docking viewport statements corrected. The parent source
+and all seven assets remain frozen. The current replay completes level-2 docking
+and runs ten level-3 fields with five lives; see
+[current-source notes](current/README.md) and
+[vertical docking acceptance](../../docs/planet-zybex-level2.md).

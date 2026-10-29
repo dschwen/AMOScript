@@ -295,12 +295,12 @@ exercise real AMOS Bsave writes, binary downloads, error reporting and cleanup.
 ## Planet Zybex example
 
 [Planet Zybex](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
-now uses this builder directly, with its complete unchanged source and the asset
-manifest under `examples/PlanetZybex`. It needs no volume prefix:
+now uses this builder directly, with its complete current source (three AMOS vertical docking copy corrections) and
+the checked manifest under `examples/PlanetZybex/current`. It needs no volume prefix:
 
 ```sh
-node tools/build_game_page.js examples/PlanetZybex/Zybex.AMOS /tmp/zybex.html \
-  --assets examples/PlanetZybex/manifest.json \
+node tools/build_game_page.js examples/PlanetZybex/current/Zybex.AMOS /tmp/zybex.html \
+  --assets examples/PlanetZybex/current/manifest.json \
   --fire ControlLeft,ControlRight --title "Planet Zybex"
 ```
 

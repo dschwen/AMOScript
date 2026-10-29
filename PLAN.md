@@ -5,31 +5,25 @@ Assessment updated: 2026-10-29.
 ## Current game priority: Planet Zybex
 
 [Planet Zybex](docs/planet-zybex.md) is the next full-game showcase target.
-Its unchanged source/assets are pinned; the complete program compiles to 1,122
-instructions with no unrecognized encodings. The new
-[full-game page](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
-uses the public page builder, prominent Play Game, sound/fullscreen, Ctrl fire,
-keyboard/Gamepad and optional touch controls. Development fixtures remain separate.
+Its frozen upstream source/assets remain pinned. The current playable source
+corrects three vertical docking copy statements at the AMOS level, preserving
+headers, line offsets and all banks. The compiler keeps ordinary clipping;
+see [level-2 acceptance](docs/planet-zybex-level2.md).
+The [full-game page](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
+uses the public builder, sound/fullscreen, Ctrl fire, keyboard/Gamepad and optional
+touch controls. Development fixtures remain separate on the original source.
 
-The input-only loss/restart replay now covers firing, five natural life losses,
-four source-driven reloads, GAME OVER and a fresh game. PAL/NTSC keyboard and
-injected Gamepad runs span 1,676 Update calls, 76 independent image regions,
-40 new GPU comparisons and two native Web Audio shot comparisons. Total Zybex
-coverage is 214 GPU comparisons; see [full-game acceptance](docs/planet-zybex-game.md).
-Earlier packed backgrounds, score/startup, Channel, computed/wide Sprites, AMAL
-drop/missile/hunter and ship input/Anim fixtures remain required.
+The current input-only route completes both docking sequences and runs ten
+horizontal level-3 fields with five lives/score 820. Loss/restart tests retain
+five natural deaths, GAME OVER and fresh-game entry. PAL/NTSC keyboard/Gamepad
+checks total eight runs, 6,480 Updates, 188 independent regions, 152 full-game GPU
+comparisons and two native Web Audio shot comparisons. Earlier fixtures remain
+required, bringing total Zybex GPU comparisons to 326. The shared AMAL/Basic
+coordinate fix and independently regenerated hunter references remain covered.
 
-The frozen joystick route now completes level-1 docking and moves/fires through
-25 vertical level-2 fields with five lives. A shared AMAL/Basic coordinate fix
-removes a fifty-row YS/YH error and regenerates the affected hunter references.
-Four progression runs add 56 independent strips/GPU comparisons: full-game checks
-now span 4,596 Updates and 96 GPU comparisons, total Zybex 270. See
-[progression acceptance](docs/planet-zybex-progression.md).
-
-Next establish level-2 completion/docking, later horizontal/vertical progression,
-independent whole moving composites and the remaining enemy/audio paths. Victory
-and native captures remain open.
-Keep Roller II/Wonderland and the new Zybex loss/restart path as full-game regressions.
+Next establish level-3 completion and later progression, independent whole moving
+composites and the remaining enemy/audio paths. Victory and native captures remain
+open. Keep Roller II/Wonderland and both Zybex paths as full-game regressions.
 
 ## Next implementation sequence: Introideen
 

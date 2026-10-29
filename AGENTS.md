@@ -755,3 +755,20 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   full-game checks span 4,596 Updates/132 regions/96 GPU comparisons, total Zybex
   270 GPU comparisons. Level-2 completion, later progression/victory and wider
   independent/native captures remain open. See docs/planet-zybex-progression.md.
+
+- Zybex current/Zybex.AMOS corrects only vertical docking copy statements on
+  physical lines 1494/1499/1506: use (0,LOP)-(320,LOP+160), preserving header,
+  line lengths/locations and embedded banks. Original parent source stays frozen;
+  current manifest shares all seven asset bytes. Native Sco4 and existing compiler
+  clipping already make upstream x=480 copies no-ops. The offline pinned-source
+  fix utility is never called by compiler/runtime; source/striped-buffer tests
+  prove exact changes, original no-op and corrected Logic-only row-480 copies.
+  Full-game launcher/verification now use current source; earlier bounded fixtures
+  use upstream. Fixed joystick routes complete both docks and ten level-3 fields
+  with five lives/score 820. Three world-bank identities, eighteen vertical and
+  twenty-five level-3 AMAL channels are checked. The final vertical release Update
+  immediately loads the next world, so capture it synchronously after Update,
+  without inserting a VM guard or Stop. Eight PAL/NTSC keyboard/Gamepad runs now
+  span 6,480 Updates/188 independent regions/152 GPU comparisons; total Zybex 326
+  GPU comparisons. Level-3 completion/later progression/victory and wider native
+  captures remain open. See docs/planet-zybex-level2.md for bounds/provenance.

@@ -91,3 +91,12 @@ Regenerate references with `python3 tools/reference/planet-zybex-amal.py` and
 `npm run build:demo` and verify with `npm run check` / `npm run test:browser`.
 Level-2 completion/docking, later levels/victory, wider independent moving-scene
 and audio coverage, and native Amiga timing/display/audio captures remain open.
+
+## Vertical-completion update
+
+The [current-source replay](planet-zybex-level2.md) now extends this route through
+level-2 docking and ten horizontal level-3 fields. Three AMOS docking statements
+are corrected in a separate current copy, preserving the upstream file and
+compiler behavior. The expanded page has eight runs/6,480 Updates/152 GPU
+comparisons; total Zybex GPU comparisons are 326. Earlier 25-field/270-GPU numbers
+above describe this retained entry milestone.

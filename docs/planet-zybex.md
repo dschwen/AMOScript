@@ -6,10 +6,12 @@ its original comments to **P.J. Hickman**. The unchanged source and seven extern
 level banks are pinned under [examples/PlanetZybex](../examples/PlanetZybex/README.md).
 
 [Play the full game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
-with the unchanged source, sound/fullscreen, Ctrl fire, keyboard/Gamepad and touch
+with the current source, sound/fullscreen, Ctrl fire, keyboard/Gamepad and touch
 controls. The current acceptance path covers real firing, five life losses,
 four reloads, GAME OVER, a fresh game, level-1 docking and 25 vertical level-2
-fields. Level-2 completion and later progression remain open;
+fields. The newer current-source route also completes level 2 and enters level 3;
+see [vertical docking/source corrections](planet-zybex-level2.md). Later
+progression remains open;
 see [full-game page and replay](planet-zybex-game.md).
 
 The [browser preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
@@ -143,7 +145,7 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slices are **level-2 completion/docking, later progression and wider
+The next slices are **level-3 completion, later progression and wider
 independent gameplay/audio coverage**. Ship input/Anim now pass their
 isolated fixture and a bounded full-source movement/firing/explosion replay. Autotest/Direct/eXit, For/Next and BC retain their
 first-enemy fixtures.
@@ -250,3 +252,10 @@ input-only route reaches level 2 with five lives and runs 25 vertical fields.
 Four additional replays add 56 independent raw-map strips and GPU comparisons,
 bringing Zybex to **270 GPU comparisons**. Level-2 completion and later stages
 remain unverified; earlier life-loss and full-game launcher checks remain required.
+
+The [vertical docking update](planet-zybex-level2.md) adds a current source copy
+with three AMOS rectangle corrections; the original remains frozen for earlier
+fixtures. The current full-game page now passes level-2 docking and ten level-3
+fields with five lives. Total Zybex coverage is **326 GPU comparisons**, including
+152 full-game comparisons and 188 independent regions over eight input replays.
+No compiler clipping exception or live source/bank patch is involved.
