@@ -689,3 +689,16 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   passes level setup and reaches computed player Sprite 15 at line 1129, byte
   53976. See docs/amal-random.md for cold/beam replay assumptions, lifecycle,
   source arithmetic, callback errors and remaining input/animation/allocator gates.
+
+- Computed Sprites 8–63 and wide word-aligned images use the existing triple
+  native-format pool, sorted by clamped top/number with rotating physical-channel
+  allocation, one-line reuse gaps and strict cumulative capacity. Reserve direct
+  strips/mouse first; attached strips require even pairs. Partial wide admission
+  preserves logical queries and drops remaining strips without a CPU/RGBA overlay.
+  Snapshot publication walks chained POS/CTL/DATA records; Canvas/WebGL share it.
+  AMAL captures computed intent identity, with ordinary Off/resize/Default retirement.
+  All thirteen original Zybex ship images and declared row reuse/contention/pointer
+  stages match 34 independent PAL/NTSC Canvas/GPU frames, total 142 Zybex GPU
+  comparisons. Full source now reaches the unsupported J1 ship AMAL function at
+  line 1142, byte 54290, character 37. See docs/computed-sprites.md for portable
+  reserved-pair handling, native source evidence and remaining timing/capture gaps.

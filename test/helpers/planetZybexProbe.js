@@ -1,13 +1,13 @@
 'use strict';
 module.exports = async function planetZybexProbe(page) {
-  return page.evaluate(async ({ sources, assets, oracle, gpuSources, registerSource, scoreSource, scoreOracle, clockSource, defaultSource, defaultOracle, spriteBufferSource, spriteBufferOracle, gameOverSource, gameOverOracle, channelsSource, channelsOracle, amalSource, amalOracle, wholeSource, missileSources, missileOracle, huntersSource, huntersOracle }) => {
+  return page.evaluate(async ({ sources, assets, oracle, gpuSources, registerSource, scoreSource, scoreOracle, clockSource, defaultSource, defaultOracle, spriteBufferSource, spriteBufferOracle, gameOverSource, gameOverOracle, channelsSource, channelsOracle, amalSource, amalOracle, wholeSource, missileSources, missileOracle, huntersSource, huntersOracle, spritesSource, spritesOracle }) => {
     const make = source => new Function(`return (${source});`)(), check = (value, message) => { if (!value) throw Error(message); };
     const hash = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), v => v.toString(16).padStart(2, '0')).join('');
     const model = make(gpuSources.model)(), sprites = make(gpuSources.sprites)(), canvas = document.createElement('canvas');
     const gpu = make(gpuSources.renderer)(model, sprites, make(gpuSources.resources)(model), make(gpuSources.shaders), make(gpuSources.layout))(document.createElement('canvas'));
     const host = AMOS_BROWSER.createCanvasHost(canvas, { requestAnimationFrame: () => 1, cancelAnimationFrame() {} });
     const gpuHost = AMOS_BROWSER.createCanvasHost(gpu.resources.context.canvas, { renderer: gpu, requestAnimationFrame: () => 1, cancelAnimationFrame() {} });
-    let program, windows = 0, gpuFrames = 0, scoreFrames = 0, startupFrames = 0, clearedDisplays = 0, spriteBufferFrames = 0, gameOverFrames = 0, channelStages = 0, channelBindings = 0, amalFrames = 0, missileFrames = 0, missileHits = 0, huntersFrames = 0;
+    let program, windows = 0, gpuFrames = 0, scoreFrames = 0, startupFrames = 0, clearedDisplays = 0, spriteBufferFrames = 0, gameOverFrames = 0, channelStages = 0, channelBindings = 0, amalFrames = 0, missileFrames = 0, missileHits = 0, huntersFrames = 0, computedSpriteFrames = 0;
     try {
       for (const level of oracle.levels) {
         const module = { exports: {} }; new Function('module', sources[level.level - 1])(module);
@@ -192,16 +192,33 @@ module.exports = async function planetZybexProbe(page) {
         for(const frame of captures){check(await hash(frame.rgba)===frame.expected.rgbaSha256,'Independent random hunter pixels differ');huntersFrames++;}
         host.detach();gpuHost.detach();program.stop();check(clock.pending()===0,'Random hunter preview retained wakes');
       }
+      for(const standard of ['PAL','NTSC']) {
+        const module={exports:{}};new Function('module',spritesSource)(module);const clock=make(clockSource)();
+        program=module.exports({displayOptions:{snapshotStandard:standard},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
+        host.attach(program);gpuHost.attach(program);program.tick(10000);
+        for(const expected of spritesOracle.frames){
+          if(expected.stage){program.sendKey('next');clock.tick(0);}
+          check(program.state.waiting==='key' && program.state.variables.int_stage===expected.stage,'Computed ship fixture missed its guard');
+          host.render();const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+          check(canvas.width===320 && canvas.height===160 && await hash(rgba)===expected.rgbaSha256,'Independent computed ship pixels differ');
+          const previous=program.display.canvasFrame;program.display.canvasFrame=()=>{throw Error('GPU used CPU presentation');};
+          try{gpuHost.render();}finally{program.display.canvasFrame=previous;}
+          const hardware=gpu.readPixels(),reference=program.display.renderDisplay();
+          check(gpu.stats.lastResult.backend==='gpu' && hardware.length===reference.length && hardware.every((v,i)=>v===reference[i]),'Computed ship GPU differs');gpuFrames++;computedSpriteFrames++;
+          if(globalThis.AMOS_DEMO_OBSERVE){globalThis.AMOS_DEMO_OBSERVE({name:`Canvas: ${standard} computed ship ${expected.stage}`,width:canvas.width,height:canvas.height,rgba});globalThis.AMOS_DEMO_OBSERVE({name:`WebGL: ${standard} computed ship ${expected.stage}`,width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba:hardware});}
+        }
+        host.detach();gpuHost.detach();program.stop();check(clock.pending()===0,'Computed ship fixture retained wakes');
+      }
       {
         const module={exports:{}};new Function('module',wholeSource)(module);const clock=make(clockSource)();
         program=module.exports({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
         let error;try{program.tick(10000);clock.tick(10000);}catch(value){error=value;}
-        check(error && error.message==='Computed Sprite allocation is not implemented at line 1129, byte 53976','Complete unchanged source did not reach its declared computed-Sprite gate');
+        check(error && error.message==='Expected AMAL register at AMAL character 37 at line 1142, byte 54290','Complete unchanged source did not reach its declared ship AMAL input gate');
         check(program.state.halted && program.amalSnapshot().length===0 && clock.pending()===0,'Full-source runtime gate retained owned work');program.stop();
       }
       const registers = { exports: {} }; new Function('module', registerSource)(registers); const r = registers.exports({}); r.tick(1000);
       check(r.state.halted && Array.from({ length: 26 }, (_, i) => r.amreg(i)).every((value, i) => value === (i === 9 ? 1234 : i === 20 ? 4 : i >= 1 && i <= 8 ? 100 : 0)), 'Original clear_amal register exchange differs'); r.stop();
-      return { registersVerified: true, levels: 7, windows, scoreFrames, startupFrames, clearedDisplays, spriteBufferFrames, gameOverFrames, channelStages, channelBindings, amalFrames, missileFrames, missileHits, huntersFrames, gpuFrames, fullGameCompiled: true, runtimeGate: 'computed Sprite 15', previewOnly: true };
+      return { registersVerified: true, levels: 7, windows, scoreFrames, startupFrames, clearedDisplays, spriteBufferFrames, gameOverFrames, channelStages, channelBindings, amalFrames, missileFrames, missileHits, huntersFrames, computedSpriteFrames, gpuFrames, fullGameCompiled: true, runtimeGate: 'ship AMAL input', previewOnly: true };
     } finally { host.detach(); gpuHost.detach(); if (program) program.stop(); const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   }, require('./planetZybexFixture')());
 };

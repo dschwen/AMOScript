@@ -68,7 +68,7 @@ test('Planet Zybex AMAL: original Bob 21 string executes all independent PAL/NTS
     p.tick(1000);assert.strictEqual(p.state.waiting,'key');p.sendKey('play');c.tick(1000);assert.strictEqual(count,14);assert.strictEqual(p.state.waiting,'key');p.sendKey('end');c.tick(0);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();}
 });
 
-test('Planet Zybex: the complete unchanged source now compiles, passes level setup and reaches the original computed-player Sprite gate',()=>{
+test('Planet Zybex: the complete unchanged source now compiles, passes level setup and reaches the original ship AMAL input gate',()=>{
   const raw=fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex/Zybex.AMOS'));assert.strictEqual(hash(raw),oracle.sourceSha256);const {create,transpiler}=compile(raw);assert.strictEqual(transpiler._ops.length,1122);const c=require('./helpers/fakeTimers').createFakeTimers(),p=create({now:c.now,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout,files:{read:name=>fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1')}});
-  assert.throws(()=>{p.tick(10000);c.tick(10000);},/Computed Sprite allocation is not implemented at line 1129, byte 53976/);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();
+  assert.throws(()=>{p.tick(10000);c.tick(10000);},/Expected AMAL register at AMAL character 37 at line 1142, byte 54290/);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();
 });

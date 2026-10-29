@@ -3657,7 +3657,6 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   let manualAmal = false;
   const amal = amalFactory({ globals:amalRegisters, readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
-    if (type === 'sprite' && number >= 8) throw new Error('Computed Sprite AMAL targets are not implemented');
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
     if (!object) {
@@ -3967,7 +3966,6 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function setSprite(number, x, y, image) {
     number = spriteNumber(number);
-    if (number >= 8) throw new Error('Computed Sprite allocation is not implemented');
     const old = sprites.get(number) || { number, x: 0, y: 0, image: 0 };
     // HsNxya cannot reuse a zero coordinate, even on an existing Sprite.
     if ((x == null && old.x === 0) || (y == null && old.y === 0)) throw new Error('Missing Sprite coordinate');
@@ -4006,13 +4004,13 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
-      if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
+      if (image.width < 16 || image.width % 16) throw new Error('Unsupported Sprite image width');
       // HsAd3/HsAd4 consumes the first four planes for attached hardware
       // sprites even when the original image contains five or six planes.
       if (image.depth < 1 || image.depth > 6) throw new Error('Unsupported Sprite image depth');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       // HsDm ignores an oversized new image, retaining an old presentation.
-      if (image.height + 1 >= lineLimit) {
+      if (number < 8 && image.height + 1 >= lineLimit) {
         if (previous && !previous.off) frames.set(number, previous);
         continue;
       }
@@ -4021,7 +4019,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
         width: image.width, height: image.height, depth: image.depth,
         x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
-        y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
+        y: Math.max(0, word(sprite.y - image.hotspotY)) });
     }
     spriteBuffer.update(frames); spriteFrames = frames; publishSpriteBuffer();
     spritesDirty = false;
@@ -5702,37 +5700,75 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const frameBytes = rows * 32, columnBytes = rows * 4;
     const base = slot * frameBytes;
     storage.fill(0, base, base + frameBytes);
-    for (let channel = 0; channel < 8; channel++) {
-      if (channel === 0 && pointerVisible) continue;
-      const sprite = published.get(channel);
-      if (!sprite) continue;
-      const attached = sprite.depth >= 4;
-      if (attached && (channel & 1)) channel++;
-      if (channel >= 8) break;
+    // HsPosition: a direct object (or mouse) reserves its entire channel.
+    const available = Array(8).fill(true), used = Array(8).fill(0), bottom = Array(8).fill(0);
+    if (pointerVisible) available[0] = false;
+    function append(channel, sprite, strip, part) {
+      const at = base + channel * columnBytes + used[channel] * 4;
+      // Native control-word addition advances each 16-pixel strip by eight
+      // horizontal words, carrying in the complete packed long.
       const end = (sprite.y + sprite.height) & 511;
       const pos = ((sprite.y & 255) << 8) | ((sprite.x >> 1) & 255);
       const ctl = ((end & 255) << 8) | ((sprite.y & 256) >> 6) | ((end & 256) >> 7) | (sprite.x & 1);
-      const count = attached ? 2 : 1;
-      for (let part = 0; part < count && channel + part < 8; part++) {
-        const at = base + (channel + part) * columnBytes;
-        writeWord(at, pos); writeWord(at + 2, ctl | (part ? 128 : 0));
-        for (let y = 0; y < sprite.height; y++) {
-          let a = 0, b = 0;
-          for (let x = 0; x < 16; x++) {
-            const bits = sprite.pixels[y * 16 + x] >> (part * 2);
-            a |= (bits & 1) << (15 - x); b |= ((bits >> 1) & 1) << (15 - x);
-          }
-          writeWord(at + 4 + y * 4, a); writeWord(at + 6 + y * 4, b);
+      const control = ((((pos << 16) | ctl) >>> 0) + strip * 0x80000) >>> 0;
+      writeWord(at, control >>> 16); writeWord(at + 2, (control & 65535) | (part ? 128 : 0));
+      for (let y = 0; y < sprite.height; y++) {
+        let a = 0, b = 0;
+        for (let x = 0; x < 16; x++) {
+          const bits = sprite.pixels[y * sprite.width + strip * 16 + x] >> (part * 2);
+          a |= (bits & 1) << (15 - x); b |= ((bits >> 1) & 1) << (15 - x);
         }
-        // The zero control terminator and right/unused space are owned padding.
+        writeWord(at + 4 + y * 4, a); writeWord(at + 6 + y * 4, b);
       }
-      if (attached) channel++;
+      used[channel] += sprite.height + 1;
+      bottom[channel] = sprite.y + sprite.height + 1;
+      // The next zero control long remains the terminator until reuse.
+    }
+    for (let channel = 0; channel < 8; channel++) {
+      if (!available[channel]) continue;
+      const sprite = published.get(channel);
+      if (!sprite) continue;
+      const count = sprite.depth >= 4 ? 2 : 1;
+      if (count === 2 && (channel & 1)) { available[channel++] = false; }
+      for (let strip = 0; strip < sprite.width / 16 && channel < 8; strip++) {
+        for (let part = 0; part < count && channel < 8; part++, channel++) {
+          available[channel] = false; append(channel, sprite, strip, part);
+        }
+      }
+      channel--;
+    }
+    if (!available.some(Boolean)) return;
+    // Hss20 sorts shared objects by unwrapped top, breaking ties by number.
+    const computed = [...published.values()].filter(s => s.number >= 8).sort((a,b) => a.y-b.y || a.number-b.number);
+    let cursor = available.indexOf(true);
+    function nextFree(start) {
+      for (let n = 0; n < 8; n++) { const c = (start+n)%8; if (available[c]) return c; }
+      return -1;
+    }
+    for (const sprite of computed) {
+      cursor = nextFree(cursor);
+      const count = sprite.depth >= 4 ? 2 : 1;
+      if (count === 2 && (cursor & 1)) cursor = (cursor+1)%8;
+      for (let strip = 0; strip < sprite.width / 16; strip++) {
+        let found = false;
+        for (let attempt = 0; attempt < 8/count; attempt++) {
+          const channels = Array.from({length:count}, (_,i)=>cursor+i);
+          if (channels.every(c => available[c] && sprite.y >= bottom[c] && used[c]+sprite.height+1 < rows-2)) {
+            for (let part = 0; part < count; part++) append(cursor+part, sprite, strip, part);
+            found = true; break;
+          }
+          if (attempt < 8/count-1) cursor = (cursor+count)%8;
+        }
+        if (!found) break; // HsA4a: drop the unallocated remainder, no spill.
+        if (count === 1 || strip === sprite.width/16-1) cursor = (cursor+count)%8;
+      }
     }
   }
+
   function update(frames) {
     for (const sprite of frames.values()) {
-      if (sprite.width !== 16 || !Number.isInteger(sprite.height) || sprite.height < 1 || sprite.height + 1 >= rows - 2 ||
-          !Number.isInteger(sprite.depth) || sprite.depth < 1 || sprite.depth > 6 || !sprite.pixels || Object.prototype.toString.call(sprite.pixels) !== '[object Uint8Array]' || sprite.pixels.length !== sprite.height * 16) throw new Error('Invalid direct Sprite buffer image');
+      if (!Number.isInteger(sprite.width) || sprite.width < 16 || sprite.width % 16 !== 0 || !Number.isInteger(sprite.height) || sprite.height < 1 || (sprite.number < 8 && sprite.height + 1 >= rows - 2) ||
+          !Number.isInteger(sprite.depth) || sprite.depth < 1 || sprite.depth > 6 || !sprite.pixels || Object.prototype.toString.call(sprite.pixels) !== '[object Uint8Array]' || sprite.pixels.length !== sprite.height * sprite.width) throw new Error('Invalid direct Sprite buffer image');
     }
     published = frames; pack(logic);
     const old = physical; physical = logic; logic = inter; inter = old;
@@ -5748,21 +5784,25 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const base = physical * rows * 32;
     for (let channel = 0; channel < 8; channel++) {
       const column = base + channel * rows * 4;
-      const pos = readWord(column), ctl = readWord(column + 2);
-      const x = ((pos & 255) << 1) | (ctl & 1);
-      const y = (pos >>> 8) | ((ctl & 4) << 6);
-      const end = (ctl >>> 8) | ((ctl & 2) << 7), height = (end - y + 512) & 511;
-      if (!height) continue;
-      const left = (x - frame.origin.x) * frame.samplesPerLowresPixel;
-      for (let line = 0; line < frame.lines; line++) {
-        const sourceY = frame.origin.y + line - y;
-        if (sourceY < 0 || sourceY >= height) continue;
-        const at = line * 32 + channel * 4;
-        frame.lineSprites[at] = left >>> 0;
-        frame.lineSprites[at + 1] = readWord(column + 4 + sourceY * 4);
-        frame.lineSprites[at + 2] = readWord(column + 6 + sourceY * 4);
-        frame.lineSprites[at + 3] = 0x80000000 | (ctl & 128 ? 1 : 0);
-        frame.lineRegs[line * 32 + 16] |= 4;
+      for (let row = 0; row < rows-1;) {
+        const record = column + row*4, pos = readWord(record), ctl = readWord(record+2);
+        if (pos === 0 && ctl === 0) break;
+        const x = ((pos & 255) << 1) | (ctl & 1);
+        const y = (pos >>> 8) | ((ctl & 4) << 6);
+        const end = (ctl >>> 8) | ((ctl & 2) << 7), height = (end-y+512)&511;
+        if (!height || row+height+1 >= rows) break;
+        const left = (x-frame.origin.x)*frame.samplesPerLowresPixel;
+        for (let line = 0; line < frame.lines; line++) {
+          const sourceY = frame.origin.y+line-y;
+          if (sourceY < 0 || sourceY >= height) continue;
+          const at = line*32+channel*4;
+          frame.lineSprites[at] = left >>> 0;
+          frame.lineSprites[at+1] = readWord(record+4+sourceY*4);
+          frame.lineSprites[at+2] = readWord(record+6+sourceY*4);
+          frame.lineSprites[at+3] = 0x80000000 | (ctl&128 ? 1 : 0);
+          frame.lineRegs[line*32+16] |= 4;
+        }
+        row += height+1;
       }
     }
   }
@@ -10172,7 +10212,6 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   let manualAmal = false;
   const amal = amalFactory({ globals:amalRegisters, readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
-    if (type === 'sprite' && number >= 8) throw new Error('Computed Sprite AMAL targets are not implemented');
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
     if (!object) {
@@ -10482,7 +10521,6 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function setSprite(number, x, y, image) {
     number = spriteNumber(number);
-    if (number >= 8) throw new Error('Computed Sprite allocation is not implemented');
     const old = sprites.get(number) || { number, x: 0, y: 0, image: 0 };
     // HsNxya cannot reuse a zero coordinate, even on an existing Sprite.
     if ((x == null && old.x === 0) || (y == null && old.y === 0)) throw new Error('Missing Sprite coordinate');
@@ -10521,13 +10559,13 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
-      if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
+      if (image.width < 16 || image.width % 16) throw new Error('Unsupported Sprite image width');
       // HsAd3/HsAd4 consumes the first four planes for attached hardware
       // sprites even when the original image contains five or six planes.
       if (image.depth < 1 || image.depth > 6) throw new Error('Unsupported Sprite image depth');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       // HsDm ignores an oversized new image, retaining an old presentation.
-      if (image.height + 1 >= lineLimit) {
+      if (number < 8 && image.height + 1 >= lineLimit) {
         if (previous && !previous.off) frames.set(number, previous);
         continue;
       }
@@ -10536,7 +10574,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
         width: image.width, height: image.height, depth: image.depth,
         x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
-        y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
+        y: Math.max(0, word(sprite.y - image.hotspotY)) });
     }
     spriteBuffer.update(frames); spriteFrames = frames; publishSpriteBuffer();
     spritesDirty = false;
@@ -12217,37 +12255,75 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const frameBytes = rows * 32, columnBytes = rows * 4;
     const base = slot * frameBytes;
     storage.fill(0, base, base + frameBytes);
-    for (let channel = 0; channel < 8; channel++) {
-      if (channel === 0 && pointerVisible) continue;
-      const sprite = published.get(channel);
-      if (!sprite) continue;
-      const attached = sprite.depth >= 4;
-      if (attached && (channel & 1)) channel++;
-      if (channel >= 8) break;
+    // HsPosition: a direct object (or mouse) reserves its entire channel.
+    const available = Array(8).fill(true), used = Array(8).fill(0), bottom = Array(8).fill(0);
+    if (pointerVisible) available[0] = false;
+    function append(channel, sprite, strip, part) {
+      const at = base + channel * columnBytes + used[channel] * 4;
+      // Native control-word addition advances each 16-pixel strip by eight
+      // horizontal words, carrying in the complete packed long.
       const end = (sprite.y + sprite.height) & 511;
       const pos = ((sprite.y & 255) << 8) | ((sprite.x >> 1) & 255);
       const ctl = ((end & 255) << 8) | ((sprite.y & 256) >> 6) | ((end & 256) >> 7) | (sprite.x & 1);
-      const count = attached ? 2 : 1;
-      for (let part = 0; part < count && channel + part < 8; part++) {
-        const at = base + (channel + part) * columnBytes;
-        writeWord(at, pos); writeWord(at + 2, ctl | (part ? 128 : 0));
-        for (let y = 0; y < sprite.height; y++) {
-          let a = 0, b = 0;
-          for (let x = 0; x < 16; x++) {
-            const bits = sprite.pixels[y * 16 + x] >> (part * 2);
-            a |= (bits & 1) << (15 - x); b |= ((bits >> 1) & 1) << (15 - x);
-          }
-          writeWord(at + 4 + y * 4, a); writeWord(at + 6 + y * 4, b);
+      const control = ((((pos << 16) | ctl) >>> 0) + strip * 0x80000) >>> 0;
+      writeWord(at, control >>> 16); writeWord(at + 2, (control & 65535) | (part ? 128 : 0));
+      for (let y = 0; y < sprite.height; y++) {
+        let a = 0, b = 0;
+        for (let x = 0; x < 16; x++) {
+          const bits = sprite.pixels[y * sprite.width + strip * 16 + x] >> (part * 2);
+          a |= (bits & 1) << (15 - x); b |= ((bits >> 1) & 1) << (15 - x);
         }
-        // The zero control terminator and right/unused space are owned padding.
+        writeWord(at + 4 + y * 4, a); writeWord(at + 6 + y * 4, b);
       }
-      if (attached) channel++;
+      used[channel] += sprite.height + 1;
+      bottom[channel] = sprite.y + sprite.height + 1;
+      // The next zero control long remains the terminator until reuse.
+    }
+    for (let channel = 0; channel < 8; channel++) {
+      if (!available[channel]) continue;
+      const sprite = published.get(channel);
+      if (!sprite) continue;
+      const count = sprite.depth >= 4 ? 2 : 1;
+      if (count === 2 && (channel & 1)) { available[channel++] = false; }
+      for (let strip = 0; strip < sprite.width / 16 && channel < 8; strip++) {
+        for (let part = 0; part < count && channel < 8; part++, channel++) {
+          available[channel] = false; append(channel, sprite, strip, part);
+        }
+      }
+      channel--;
+    }
+    if (!available.some(Boolean)) return;
+    // Hss20 sorts shared objects by unwrapped top, breaking ties by number.
+    const computed = [...published.values()].filter(s => s.number >= 8).sort((a,b) => a.y-b.y || a.number-b.number);
+    let cursor = available.indexOf(true);
+    function nextFree(start) {
+      for (let n = 0; n < 8; n++) { const c = (start+n)%8; if (available[c]) return c; }
+      return -1;
+    }
+    for (const sprite of computed) {
+      cursor = nextFree(cursor);
+      const count = sprite.depth >= 4 ? 2 : 1;
+      if (count === 2 && (cursor & 1)) cursor = (cursor+1)%8;
+      for (let strip = 0; strip < sprite.width / 16; strip++) {
+        let found = false;
+        for (let attempt = 0; attempt < 8/count; attempt++) {
+          const channels = Array.from({length:count}, (_,i)=>cursor+i);
+          if (channels.every(c => available[c] && sprite.y >= bottom[c] && used[c]+sprite.height+1 < rows-2)) {
+            for (let part = 0; part < count; part++) append(cursor+part, sprite, strip, part);
+            found = true; break;
+          }
+          if (attempt < 8/count-1) cursor = (cursor+count)%8;
+        }
+        if (!found) break; // HsA4a: drop the unallocated remainder, no spill.
+        if (count === 1 || strip === sprite.width/16-1) cursor = (cursor+count)%8;
+      }
     }
   }
+
   function update(frames) {
     for (const sprite of frames.values()) {
-      if (sprite.width !== 16 || !Number.isInteger(sprite.height) || sprite.height < 1 || sprite.height + 1 >= rows - 2 ||
-          !Number.isInteger(sprite.depth) || sprite.depth < 1 || sprite.depth > 6 || !sprite.pixels || Object.prototype.toString.call(sprite.pixels) !== '[object Uint8Array]' || sprite.pixels.length !== sprite.height * 16) throw new Error('Invalid direct Sprite buffer image');
+      if (!Number.isInteger(sprite.width) || sprite.width < 16 || sprite.width % 16 !== 0 || !Number.isInteger(sprite.height) || sprite.height < 1 || (sprite.number < 8 && sprite.height + 1 >= rows - 2) ||
+          !Number.isInteger(sprite.depth) || sprite.depth < 1 || sprite.depth > 6 || !sprite.pixels || Object.prototype.toString.call(sprite.pixels) !== '[object Uint8Array]' || sprite.pixels.length !== sprite.height * sprite.width) throw new Error('Invalid direct Sprite buffer image');
     }
     published = frames; pack(logic);
     const old = physical; physical = logic; logic = inter; inter = old;
@@ -12263,21 +12339,25 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const base = physical * rows * 32;
     for (let channel = 0; channel < 8; channel++) {
       const column = base + channel * rows * 4;
-      const pos = readWord(column), ctl = readWord(column + 2);
-      const x = ((pos & 255) << 1) | (ctl & 1);
-      const y = (pos >>> 8) | ((ctl & 4) << 6);
-      const end = (ctl >>> 8) | ((ctl & 2) << 7), height = (end - y + 512) & 511;
-      if (!height) continue;
-      const left = (x - frame.origin.x) * frame.samplesPerLowresPixel;
-      for (let line = 0; line < frame.lines; line++) {
-        const sourceY = frame.origin.y + line - y;
-        if (sourceY < 0 || sourceY >= height) continue;
-        const at = line * 32 + channel * 4;
-        frame.lineSprites[at] = left >>> 0;
-        frame.lineSprites[at + 1] = readWord(column + 4 + sourceY * 4);
-        frame.lineSprites[at + 2] = readWord(column + 6 + sourceY * 4);
-        frame.lineSprites[at + 3] = 0x80000000 | (ctl & 128 ? 1 : 0);
-        frame.lineRegs[line * 32 + 16] |= 4;
+      for (let row = 0; row < rows-1;) {
+        const record = column + row*4, pos = readWord(record), ctl = readWord(record+2);
+        if (pos === 0 && ctl === 0) break;
+        const x = ((pos & 255) << 1) | (ctl & 1);
+        const y = (pos >>> 8) | ((ctl & 4) << 6);
+        const end = (ctl >>> 8) | ((ctl & 2) << 7), height = (end-y+512)&511;
+        if (!height || row+height+1 >= rows) break;
+        const left = (x-frame.origin.x)*frame.samplesPerLowresPixel;
+        for (let line = 0; line < frame.lines; line++) {
+          const sourceY = frame.origin.y+line-y;
+          if (sourceY < 0 || sourceY >= height) continue;
+          const at = line*32+channel*4;
+          frame.lineSprites[at] = left >>> 0;
+          frame.lineSprites[at+1] = readWord(record+4+sourceY*4);
+          frame.lineSprites[at+2] = readWord(record+6+sourceY*4);
+          frame.lineSprites[at+3] = 0x80000000 | (ctl&128 ? 1 : 0);
+          frame.lineRegs[line*32+16] |= 4;
+        }
+        row += height+1;
       }
     }
   }
@@ -16704,7 +16784,6 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   let manualAmal = false;
   const amal = amalFactory({ globals:amalRegisters, readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
-    if (type === 'sprite' && number >= 8) throw new Error('Computed Sprite AMAL targets are not implemented');
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
     if (!object) {
@@ -17014,7 +17093,6 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   }
   function setSprite(number, x, y, image) {
     number = spriteNumber(number);
-    if (number >= 8) throw new Error('Computed Sprite allocation is not implemented');
     const old = sprites.get(number) || { number, x: 0, y: 0, image: 0 };
     // HsNxya cannot reuse a zero coordinate, even on an existing Sprite.
     if ((x == null && old.x === 0) || (y == null && old.y === 0)) throw new Error('Missing Sprite coordinate');
@@ -17053,13 +17131,13 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       const image = bank && bank.type === 'sprites' && bank.images[(sprite.image & 0x3fff) - 1];
       // HsAct leaves an existing presentation unchanged for an invalid image.
       if (!image) { if (previous && !previous.off && bank && bank.type === 'sprites') frames.set(number, previous); continue; }
-      if (image.width !== 16) throw new Error('Wide hardware Sprites are not implemented');
+      if (image.width < 16 || image.width % 16) throw new Error('Unsupported Sprite image width');
       // HsAd3/HsAd4 consumes the first four planes for attached hardware
       // sprites even when the original image contains five or six planes.
       if (image.depth < 1 || image.depth > 6) throw new Error('Unsupported Sprite image depth');
       if (image.height > 270) throw new Error('Unsupported Sprite height');
       // HsDm ignores an oversized new image, retaining an old presentation.
-      if (image.height + 1 >= lineLimit) {
+      if (number < 8 && image.height + 1 >= lineLimit) {
         if (previous && !previous.off) frames.set(number, previous);
         continue;
       }
@@ -17068,7 +17146,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         pixels: previous && !previous.off && previous.image === image ? previous.pixels : Uint8Array.from(image.pixels),
         width: image.width, height: image.height, depth: image.depth,
         x: Math.max(0, word(sprite.x - image.hotspotX)) & 511,
-        y: Math.max(0, word(sprite.y - image.hotspotY)) & 511 });
+        y: Math.max(0, word(sprite.y - image.hotspotY)) });
     }
     spriteBuffer.update(frames); spriteFrames = frames; publishSpriteBuffer();
     spritesDirty = false;
@@ -18749,37 +18827,75 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const frameBytes = rows * 32, columnBytes = rows * 4;
     const base = slot * frameBytes;
     storage.fill(0, base, base + frameBytes);
-    for (let channel = 0; channel < 8; channel++) {
-      if (channel === 0 && pointerVisible) continue;
-      const sprite = published.get(channel);
-      if (!sprite) continue;
-      const attached = sprite.depth >= 4;
-      if (attached && (channel & 1)) channel++;
-      if (channel >= 8) break;
+    // HsPosition: a direct object (or mouse) reserves its entire channel.
+    const available = Array(8).fill(true), used = Array(8).fill(0), bottom = Array(8).fill(0);
+    if (pointerVisible) available[0] = false;
+    function append(channel, sprite, strip, part) {
+      const at = base + channel * columnBytes + used[channel] * 4;
+      // Native control-word addition advances each 16-pixel strip by eight
+      // horizontal words, carrying in the complete packed long.
       const end = (sprite.y + sprite.height) & 511;
       const pos = ((sprite.y & 255) << 8) | ((sprite.x >> 1) & 255);
       const ctl = ((end & 255) << 8) | ((sprite.y & 256) >> 6) | ((end & 256) >> 7) | (sprite.x & 1);
-      const count = attached ? 2 : 1;
-      for (let part = 0; part < count && channel + part < 8; part++) {
-        const at = base + (channel + part) * columnBytes;
-        writeWord(at, pos); writeWord(at + 2, ctl | (part ? 128 : 0));
-        for (let y = 0; y < sprite.height; y++) {
-          let a = 0, b = 0;
-          for (let x = 0; x < 16; x++) {
-            const bits = sprite.pixels[y * 16 + x] >> (part * 2);
-            a |= (bits & 1) << (15 - x); b |= ((bits >> 1) & 1) << (15 - x);
-          }
-          writeWord(at + 4 + y * 4, a); writeWord(at + 6 + y * 4, b);
+      const control = ((((pos << 16) | ctl) >>> 0) + strip * 0x80000) >>> 0;
+      writeWord(at, control >>> 16); writeWord(at + 2, (control & 65535) | (part ? 128 : 0));
+      for (let y = 0; y < sprite.height; y++) {
+        let a = 0, b = 0;
+        for (let x = 0; x < 16; x++) {
+          const bits = sprite.pixels[y * sprite.width + strip * 16 + x] >> (part * 2);
+          a |= (bits & 1) << (15 - x); b |= ((bits >> 1) & 1) << (15 - x);
         }
-        // The zero control terminator and right/unused space are owned padding.
+        writeWord(at + 4 + y * 4, a); writeWord(at + 6 + y * 4, b);
       }
-      if (attached) channel++;
+      used[channel] += sprite.height + 1;
+      bottom[channel] = sprite.y + sprite.height + 1;
+      // The next zero control long remains the terminator until reuse.
+    }
+    for (let channel = 0; channel < 8; channel++) {
+      if (!available[channel]) continue;
+      const sprite = published.get(channel);
+      if (!sprite) continue;
+      const count = sprite.depth >= 4 ? 2 : 1;
+      if (count === 2 && (channel & 1)) { available[channel++] = false; }
+      for (let strip = 0; strip < sprite.width / 16 && channel < 8; strip++) {
+        for (let part = 0; part < count && channel < 8; part++, channel++) {
+          available[channel] = false; append(channel, sprite, strip, part);
+        }
+      }
+      channel--;
+    }
+    if (!available.some(Boolean)) return;
+    // Hss20 sorts shared objects by unwrapped top, breaking ties by number.
+    const computed = [...published.values()].filter(s => s.number >= 8).sort((a,b) => a.y-b.y || a.number-b.number);
+    let cursor = available.indexOf(true);
+    function nextFree(start) {
+      for (let n = 0; n < 8; n++) { const c = (start+n)%8; if (available[c]) return c; }
+      return -1;
+    }
+    for (const sprite of computed) {
+      cursor = nextFree(cursor);
+      const count = sprite.depth >= 4 ? 2 : 1;
+      if (count === 2 && (cursor & 1)) cursor = (cursor+1)%8;
+      for (let strip = 0; strip < sprite.width / 16; strip++) {
+        let found = false;
+        for (let attempt = 0; attempt < 8/count; attempt++) {
+          const channels = Array.from({length:count}, (_,i)=>cursor+i);
+          if (channels.every(c => available[c] && sprite.y >= bottom[c] && used[c]+sprite.height+1 < rows-2)) {
+            for (let part = 0; part < count; part++) append(cursor+part, sprite, strip, part);
+            found = true; break;
+          }
+          if (attempt < 8/count-1) cursor = (cursor+count)%8;
+        }
+        if (!found) break; // HsA4a: drop the unallocated remainder, no spill.
+        if (count === 1 || strip === sprite.width/16-1) cursor = (cursor+count)%8;
+      }
     }
   }
+
   function update(frames) {
     for (const sprite of frames.values()) {
-      if (sprite.width !== 16 || !Number.isInteger(sprite.height) || sprite.height < 1 || sprite.height + 1 >= rows - 2 ||
-          !Number.isInteger(sprite.depth) || sprite.depth < 1 || sprite.depth > 6 || !sprite.pixels || Object.prototype.toString.call(sprite.pixels) !== '[object Uint8Array]' || sprite.pixels.length !== sprite.height * 16) throw new Error('Invalid direct Sprite buffer image');
+      if (!Number.isInteger(sprite.width) || sprite.width < 16 || sprite.width % 16 !== 0 || !Number.isInteger(sprite.height) || sprite.height < 1 || (sprite.number < 8 && sprite.height + 1 >= rows - 2) ||
+          !Number.isInteger(sprite.depth) || sprite.depth < 1 || sprite.depth > 6 || !sprite.pixels || Object.prototype.toString.call(sprite.pixels) !== '[object Uint8Array]' || sprite.pixels.length !== sprite.height * sprite.width) throw new Error('Invalid direct Sprite buffer image');
     }
     published = frames; pack(logic);
     const old = physical; physical = logic; logic = inter; inter = old;
@@ -18795,21 +18911,25 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     const base = physical * rows * 32;
     for (let channel = 0; channel < 8; channel++) {
       const column = base + channel * rows * 4;
-      const pos = readWord(column), ctl = readWord(column + 2);
-      const x = ((pos & 255) << 1) | (ctl & 1);
-      const y = (pos >>> 8) | ((ctl & 4) << 6);
-      const end = (ctl >>> 8) | ((ctl & 2) << 7), height = (end - y + 512) & 511;
-      if (!height) continue;
-      const left = (x - frame.origin.x) * frame.samplesPerLowresPixel;
-      for (let line = 0; line < frame.lines; line++) {
-        const sourceY = frame.origin.y + line - y;
-        if (sourceY < 0 || sourceY >= height) continue;
-        const at = line * 32 + channel * 4;
-        frame.lineSprites[at] = left >>> 0;
-        frame.lineSprites[at + 1] = readWord(column + 4 + sourceY * 4);
-        frame.lineSprites[at + 2] = readWord(column + 6 + sourceY * 4);
-        frame.lineSprites[at + 3] = 0x80000000 | (ctl & 128 ? 1 : 0);
-        frame.lineRegs[line * 32 + 16] |= 4;
+      for (let row = 0; row < rows-1;) {
+        const record = column + row*4, pos = readWord(record), ctl = readWord(record+2);
+        if (pos === 0 && ctl === 0) break;
+        const x = ((pos & 255) << 1) | (ctl & 1);
+        const y = (pos >>> 8) | ((ctl & 4) << 6);
+        const end = (ctl >>> 8) | ((ctl & 2) << 7), height = (end-y+512)&511;
+        if (!height || row+height+1 >= rows) break;
+        const left = (x-frame.origin.x)*frame.samplesPerLowresPixel;
+        for (let line = 0; line < frame.lines; line++) {
+          const sourceY = frame.origin.y+line-y;
+          if (sourceY < 0 || sourceY >= height) continue;
+          const at = line*32+channel*4;
+          frame.lineSprites[at] = left >>> 0;
+          frame.lineSprites[at+1] = readWord(record+4+sourceY*4);
+          frame.lineSprites[at+2] = readWord(record+6+sourceY*4);
+          frame.lineSprites[at+3] = 0x80000000 | (ctl&128 ? 1 : 0);
+          frame.lineRegs[line*32+16] |= 4;
+        }
+        row += height+1;
       }
     }
   }

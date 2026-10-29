@@ -1,10 +1,10 @@
 # Set Sprite Buffer
 
 `Set Sprite Buffer lines` (`$1986`) now owns a real triple buffer for the existing
-direct-sprite path. Planet Zybex’s unchanged original line 93 requests 48 lines;
-this allocates **4,800 bytes** and executes without an open screen. The complete
-source now stops at **Amal Off, line 179, byte 8844**: ten unsupported encodings
-remain. This does not implement AMAL or computed/wide sprite allocation.
+direct/computed Sprite path. Planet Zybex’s unchanged original line 93 requests 48 lines;
+this allocates **4,800 bytes** and executes without an open screen. The complete source
+now reaches the ship AMAL input function at line 1142. Computed/wide packing
+is covered in [computed Sprites](computed-sprites.md).
 
 The [Planet Zybex preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
 includes this command in its guarded startup option. Its collapsed browser checks
@@ -40,9 +40,8 @@ logical image assignments and frozen presented streams, retains remembered x/y
 coordinates, and resets Hide/Show nesting to visible. The successful native path
 preserves the selected mouse shape; the default-shape fallback is a separate
 allocation-failure path outside this profile. Bob state, screen pixels/palettes,
-audio, input and asset banks/virtual addresses are unaffected. AMAL programs
-are not executable yet; retiring their Sprite-channel motions must join this
-path when those controllers are implemented.
+audio, input and asset banks/virtual addresses are unaffected. AMAL Sprite-channel programs
+are retired on a changed allocation.
 
 The initial factory pool follows `HsInit(128)`, with 128 stored rows/12,288 bytes.
 `Default` follows `SBufHs(128)`, producing 130 stored rows/12,480 bytes. Repeating
@@ -58,11 +57,11 @@ position intact, while logical I/X/Y Sprite queries retain the pending command.
 With no earlier image it stays invisible. A resize erases that earlier assignment.
 Increasing the allocation and reissuing Sprite can admit the image.
 
-The existing supported image width is 16 pixels, depths 1–6, maximum height 270.
+Supported images have word-aligned widths, depths 1–6 and maximum height 270.
 Three-plane images publish the low two planes; four through six planes publish
 the low four using an attached even/odd pair. Odd starting numbers consume a blank
-channel first. Unsupported width/depth/height and computed logical numbers stay
-explicit errors. This slice does not bypass those gates for Zybex’s Sprite 15.
+channel first. Unsupported width/depth/height stays explicit errors. Computed numbers 8–63
+and wide images use the shared pool; see [computed Sprites](computed-sprites.md).
 
 Packed words are big endian and MSB leftmost. Zero terminators and unused padding
 are initialized deterministically. Pointer reservation changes repack the three

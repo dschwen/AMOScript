@@ -131,13 +131,13 @@ test('sprites: original bytes, omitted zero coordinates and unsupported allocati
   assert.deepStrictEqual(execute(raw).logs, [[139], [0]]);
   assert.throws(() => execute(withBanks([sprite(1, null, null)])), /Missing Sprite coordinate/);
   assert.throws(() => execute(withBanks([sprite(1, 0), sprite(1, null)])), /Missing Sprite coordinate/);
-  assert.throws(() => execute(withBanks([sprite(8)])), /Computed Sprite allocation is not implemented/);
+  assert.strictEqual(execute(withBanks([sprite(8)])).program.spriteInfo('I Sprite',8),1);
   assert.throws(() => execute(withBanks([sprite(64)])), /Invalid Sprite number/);
   assert.throws(() => execute(withBanks([[t('Sprite Priority'), n(5)]])), /Invalid Sprite priority/);
   assert.throws(() => new Transpiler(binary([[t('Sprite'), text('1'), t(','), n(139), t(','), n(59), t(','), n(1)]])), /Expected numeric expression/);
   const { program } = execute(withBanks([]));
   const image = program.banks.get(1).images[0];
-  image.width = 32; image.pixels = new Uint8Array(64);
+  image.width = 17; image.pixels = new Uint8Array(34);
   program.setSprite(1, 139, 59, 1);
-  assert.throws(() => program.updateSprites(), /Wide hardware Sprites are not implemented/);
+  assert.throws(() => program.updateSprites(), /Unsupported Sprite image width/);
 });

@@ -74,8 +74,8 @@ browser tests cover **324 PAL/NTSC frames and 20 additional GPU comparisons**,
 bringing Zybex to **108 GPU comparisons**. Tests cover shared ordering, nested
 masks, carries, signed values, failure/cancellation, stream isolation and lifecycle.
 
-The complete original game now gets beyond level setup and reaches computed
-player Sprite 15 creation at **line 1129, byte 53976**. That allocation still
-rejects. Ship input/animation functions, wider AMAL behavior and computed/wide
-Sprites remain open; these hunter fixtures do not establish connected gameplay
-or native interrupt/beam capture parity.
+At this slice the full game reached computed Sprite 15 creation. That allocator
+is now implemented; the current gate is the ship AMAL input function at line
+1142, byte 54290, character 37. See [computed Sprites](computed-sprites.md).
+Ship input/animation and wider AMAL behavior remain open; these hunter fixtures
+do not establish connected gameplay or native interrupt/beam capture parity.

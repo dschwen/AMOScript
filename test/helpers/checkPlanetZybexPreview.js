@@ -64,6 +64,15 @@ module.exports = async function checkPlanetZybexPreview(page) {
     assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-hunters-seed'),mode==='hunters'?'12997':'35380');
   }
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-hunters.png'),fullPage:true});
+  await page.selectOption('#zybex-level','sprites');
+  for(let stage=0;stage<17;stage++){
+    if(stage)await page.click('#zybex-next');
+    await page.waitForFunction(stage=>document.getElementById('planet-zybex-preview').dataset.spriteStage===String(stage),stage);
+    assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),true);
+    assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-backend'),'webgl');
+    if(stage===13)await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-ships.png'),fullPage:true});
+  }
+  assert.strictEqual(await page.locator('#zybex-next').isDisabled(),true);
   await page.selectOption('#zybex-level','default');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
   assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');

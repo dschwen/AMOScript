@@ -10,7 +10,8 @@ errors and runtime bounds/host failures retain ordinary source locations.
 
 A binding is a selector for a later animation installation. It does not require
 an existing Bob, Sprite, image bank or screen. In particular, binding Sprite 15
-is valid while computed-Sprite rendering remains unsupported. The target limit
+is valid independently of whether that Sprite exists. Computed/wide rendering
+now uses the [shared hardware pool](computed-sprites.md). The target limit
 is 64 even if the host configures more Bob slots. Binding does not create,
 remove, move or render objects, swap buffers, change registers, or schedule an
 animation wake. Several channels may select the same object. Rebinding changes

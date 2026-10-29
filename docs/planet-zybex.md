@@ -17,9 +17,10 @@ the still level-1 background. **AMAL enemy drop (slow preview)** plays the origi
 Bob 21 program with declared trigger inputs and slower frame waits. The missile
 loop/collision previews also run the complete first enemy program with a declared
 optional stationary bullet. Two random-hunter views now run the original three
-hunter programs with portable/controlled beam inputs.
+hunter programs with portable/controlled beam inputs. **Computed ship sprites**
+now displays all thirteen ship images, row reuse, contention and pointer reservation.
 **The complete source compiles; full gameplay remains blocked by AMAL runtime
-features and computed/wide Sprites.** All options remain marked as previews. No AMAL commands are replaced by
+features.** All options remain marked as previews. No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
 ## Source and dependency audit
@@ -58,8 +59,7 @@ Seven foundational encodings have their bounded contracts implemented:
 - `$1986`, `Set Sprite Buffer`, now allocates and owns the triple stream pool.
   Original line 93 sets 48 lines (4,800 bytes). Direct-sprite publication consumes
   the pool’s control/data words; same-size requests preserve state, resize clears
-  assignments and enforces the native height gate. Computed/wide sprites remain
-  unsupported. See [Sprite buffers](sprite-buffer.md).
+  assignments and enforces the native height gate. Computed/wide sprites now share the pool; see [computed Sprites](computed-sprites.md). See [Sprite buffers](sprite-buffer.md).
 
 - `$1066`, `Gr Writing`, selects transparent (0/JAM1) or opaque (1/JAM2)
   graphics Text/patterned-line output per screen. The original five GAME OVER
@@ -68,15 +68,15 @@ Seven foundational encodings have their bounded contracts implemented:
 
 - `$1f94`, `Channel ... To Bob/Sprite`, now stores 64 checked routing pairs.
   All 27 original statements compile, including logical Sprite 15, without
-  creating objects or claiming computed-sprite support. Original enemy/bullet
+  creating objects. Computed Sprite allocation is covered separately. Original enemy/bullet
   loops run in a declared routing-table preview. See [channel routing](channels.md).
 
 The remaining eight original encodings now decode and lower through the manual
 AMAL subset: Amal string, On/Off, Synchro Off/Synchro and Update Off/Update.
 The complete original source compiles to **1,122 instructions**, with **zero
 unrecognized token encodings**. This is not full runtime compatibility. Running
-it unchanged passes level setup and reaches unsupported computed player Sprite 15 creation
-at **line 1129, byte 53976**. AMAL Z is now implemented; see
+it unchanged passes level setup and computed player Sprite 15 creation, then reaches
+the unsupported ship AMAL input function at **line 1142, byte 54290, character 37**. AMAL Z is now implemented; see
 [AMAL random words](amal-random.md). See [manual AMAL](amal.md)
 for installation, native word/jump/movement behavior and the remaining grammar,
 automatic synchronization and animation-lane gates.
@@ -115,9 +115,9 @@ historical counts after each compiler addition.
    Exit/Direct, random Z, Joy1, BC collisions and screen-coordinate functions.
    Derive label abbreviation, signed-word arithmetic, animation/movement timing,
    collision-trigger interruption and bounds from the original interpreter.
-   Logical Sprite 15 uses images up to 48 pixels wide; the current direct 16-pixel
-   sprite path cannot render it. Add computed/wide allocation through physical
-   sprite channels and shared copper snapshots, not an RGBA overlay. Other images
+   Logical Sprite 15 uses images up to 48 pixels wide; computed/wide allocation
+   now publishes it through physical sprite channels and shared copper snapshots.
+   The image/allocation preview is covered by [computed Sprites](computed-sprites.md). Other images
    up to 80 pixels wide are Bobs, not evidence that all need hardware allocation.
 5. **Connected level 1.** Run the entire original source through native setup,
    scrolling, joystick movement, firing, enemy hits, landscape collisions,
@@ -133,13 +133,14 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slices are **ship input/animation functions and computed/wide Sprites**.
+The next slices are **ship input and independent animation lanes**.
 Z now runs the three original hunters; the first full-source runtime gate is
-player Sprite 15 allocation. Autotest/Direct/eXit, For/Next and BC retain their
+the ship AMAL string installation. Autotest/Direct/eXit, For/Next and BC retain their
 first-enemy fixtures.
 Default and Set Sprite
-Buffer now have implemented reset/allocation contracts; native computed/wide
-sprite allocation and custom interpreter preferences remain open. Different
+Buffer now have implemented reset/allocation contracts; computed/wide Sprite
+packing has bounded source-derived coverage. Exact native DMA timing/captures
+and custom interpreter preferences remain open. Different
 COLOR00 values across score/playfield (the later thunder effect) still require
 their own setup/capture verification.
 
@@ -197,7 +198,7 @@ RX=260/RN=0 and a thirteen-pass loop replace the player/game loop; the Bob draws
 on the original level-1 bitmap instead of the omitted screen-2 setup. Fourteen
 independent movement/composite frames in PAL/NTSC and ten GPU comparisons bring
 the total to **68 GPU comparisons**. The live preview slows waits by 5×. A separate
-full-source run checks the current computed-player Sprite gate and owned cleanup. See
+full-source run checks the current ship-AMAL input gate and owned cleanup. See
 [manual AMAL](amal.md); full gameplay is not inferred from successful compilation.
 
 The first missile fixture retains original Channel/Bob/string installation
@@ -214,9 +215,10 @@ hidden screen 2 for coordinate conversion, declared RN/RX/RW values and a world
 viewport at x=320. Beam words zero and 65535 are explicit controls. Shared seed,
 per-channel locals/positions and complete pixels match independent generator/
 raw-asset references for 324 PAL/NTSC frames. Twenty further GPU comparisons
-bring Zybex to **108 GPU comparisons**. The original full source now proceeds
-through level setup to computed Sprite 15 at line 1129; ship input, animation
-lanes and the computed/wide allocator still block connected gameplay.
+bring Zybex to **108 GPU comparisons**. The newer computed/wide Sprite slice adds seventeen original-image/allocation
+stages in PAL/NTSC, bringing Zybex to **142 GPU comparisons**. The full source
+now reaches the ship AMAL input function at line 1142. Ship input and animation
+lanes still block connected gameplay; see [computed Sprites](computed-sprites.md).
 
 Live-host checks cover level replacement, scroll limits, score fixture
 selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, timed AMAL playback, fullscreen and owned input/GPU disposal. Existing

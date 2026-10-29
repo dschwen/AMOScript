@@ -154,3 +154,10 @@ physical buffer’s control/data words before the shared CPU/GPU resolver consum
 height admission and Default restoration have independent checks. Stream bytes
 are CPU-owned and separate from bank addresses; native chip-pointer/bus timing
 and computed/wide allocation remain gated.
+
+## Computed/wide allocation update
+
+Logical 8–63 and wide word-aligned images now use the shared native-format Sprite
+pool. Earlier computed/width gates above describe the original direct-only slice.
+See [computed Sprites](computed-sprites.md) for allocation, independent ship
+frames, 34 added GPU comparisons and remaining native timing/capture limits.

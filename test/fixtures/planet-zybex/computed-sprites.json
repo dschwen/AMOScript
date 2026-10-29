@@ -1,0 +1,90 @@
+{
+  "sourceSha256": "fdcd685b871cadc7473e103d80cf78293402c839a5dd71922ffcef0213371145",
+  "frames": [
+    {
+      "stage": 0,
+      "rgbaSha256": "af14eecfcd70bbd9040a1c6a504ea7d499d1d8c7adb596b402f3ca936d4805b3",
+      "png": "computed-sprites-0.png"
+    },
+    {
+      "stage": 1,
+      "rgbaSha256": "2426af501a5ae65a87a76818a2e2673c23a2275198b91cd274f0f94d2fc99606",
+      "png": "computed-sprites-1.png"
+    },
+    {
+      "stage": 2,
+      "rgbaSha256": "bcb2f56370f275ee1847c81a2a3f68daba9cabbb0149edae7b842a2391c1cf76",
+      "png": "computed-sprites-2.png"
+    },
+    {
+      "stage": 3,
+      "rgbaSha256": "aeda48dcc6a36b9f93f26dd00be1dec950fbf97f016ead0aebffb8e6a6d47b60",
+      "png": "computed-sprites-3.png"
+    },
+    {
+      "stage": 4,
+      "rgbaSha256": "a3e77abedd207c5b32dcdec0d40878babd041df81a11d324149f539cac8b18e5",
+      "png": "computed-sprites-4.png"
+    },
+    {
+      "stage": 5,
+      "rgbaSha256": "03fbd63756c62006480e0d196b864215ffcd3a5f15419e17639d188f4b92b2ee",
+      "png": "computed-sprites-5.png"
+    },
+    {
+      "stage": 6,
+      "rgbaSha256": "2b6b27d398ec355bf3c82d5f97d047fc2b8fb4ad1d4f6995351a0b4a7367cba7",
+      "png": "computed-sprites-6.png"
+    },
+    {
+      "stage": 7,
+      "rgbaSha256": "b76001df197cfb43fe2aa0d8b5d430f7b7a03f83a7bfdc887b96c4e126eb538d",
+      "png": "computed-sprites-7.png"
+    },
+    {
+      "stage": 8,
+      "rgbaSha256": "800900b55005a797ab23ec0a4b8d988c43f8f08f489af9dbd6a7da103ea114d2",
+      "png": "computed-sprites-8.png"
+    },
+    {
+      "stage": 9,
+      "rgbaSha256": "b3f6d408a236067d043e4a6f3e1af6b5c6d895f2e4074f6720714537a2519465",
+      "png": "computed-sprites-9.png"
+    },
+    {
+      "stage": 10,
+      "rgbaSha256": "ef22ab97b44f32ed49f8e36581faf17c2d3d649d52e832865052d6629ccef709",
+      "png": "computed-sprites-10.png"
+    },
+    {
+      "stage": 11,
+      "rgbaSha256": "59e61c780cc7af23fb2af225d587561b10d190b2eebf1e011b14598fa0a08c96",
+      "png": "computed-sprites-11.png"
+    },
+    {
+      "stage": 12,
+      "rgbaSha256": "a4559f5a2f9e86e6c55376eacebaa17ba70df5979b019b9c374714abe950a60a",
+      "png": "computed-sprites-12.png"
+    },
+    {
+      "stage": 13,
+      "rgbaSha256": "fd62f6b2a7a693518d7e6a037e68516f2a5d4f07e7a9aa1af34690792d33e418",
+      "png": "computed-sprites-13.png"
+    },
+    {
+      "stage": 14,
+      "rgbaSha256": "47025070a5b0b756a72fd7014f59221dacdca90a7ec8e6c0a6c23e1ded6e3491",
+      "png": "computed-sprites-14.png"
+    },
+    {
+      "stage": 15,
+      "rgbaSha256": "af14eecfcd70bbd9040a1c6a504ea7d499d1d8c7adb596b402f3ca936d4805b3",
+      "png": "computed-sprites-15.png"
+    },
+    {
+      "stage": 16,
+      "rgbaSha256": "7df19dbd413c6d41145d5555d2c726e214aaea815f7323b7b136b34f6fe71720",
+      "png": "computed-sprites-16.png"
+    }
+  ]
+}

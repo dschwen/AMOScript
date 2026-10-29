@@ -207,3 +207,26 @@ for beam in (0,65535):
         records.append(record)
     hunters.append(dict(beam=beam,frames=records))
 (out/'amal-hunters.json').write_text(json.dumps(dict(cases=hunters,sourceSha256=sha(program)),indent=2)+'\n')
+
+# Wide/computed ship preview: independent raw-plane composites. All full ships
+# fit in six channels. Three disjoint rows reuse them; the contention case
+# explicitly admits only the first 16-pixel strip of image 12 after direct 0.
+sprite_records=[]
+for stage in range(17):
+    objects=[(stage+1,176,124,None)] if stage<13 else ([(1,176,70,None),(2,176,100,None),(3,176,130,None)] if stage==13 else [(1,176,70,None),(12,240,70,16)] if stage==14 else [(1,176,124,None)] if stage==15 else [])
+    indices=bytearray(v for y in range(160) for v in background[y*width:y*width+320])
+    for img,x,y,clip in objects:
+        iw,ih,hx,hy,pic=decoded[img]
+        for row in range(ih):
+            for col in range(iw if clip is None else clip):
+                value=pic[row*iw+col]&15;xx=x-128+col-hx;yy=y-50+row-hy
+                if value and 0<=xx<320 and 0<=yy<160:indices[yy*320+xx]=16+value
+    rgba=bytearray()
+    for value in indices:
+        c=palette[value];rgba.extend([(c>>8&15)*17,(c>>4&15)*17,(c&15)*17,255])
+    name=f'computed-sprites-{stage}.png'
+    record=dict(stage=stage,rgbaSha256=sha(rgba),png=name)
+    scan=b''.join(b'\0'+rgba[y*1280:(y+1)*1280]for y in range(160))
+    (out/name).write_bytes(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',320,160,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(scan,9))+chunk(b'IEND',b''))
+    sprite_records.append(record)
+(out/'computed-sprites.json').write_text(json.dumps(dict(sourceSha256=sha(program),frames=sprite_records),indent=2)+'\n')

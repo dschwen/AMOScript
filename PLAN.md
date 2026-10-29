@@ -8,13 +8,15 @@ Assessment updated: 2026-10-29.
 Its unchanged source/assets are pinned; all seven backgrounds, startup/score
 presentation and channel routing have declared browser previews. The complete
 source now compiles to 1,122 instructions with no unrecognized encodings. It
-passes level setup and reaches computed player Sprite 15 at original line 1129. The original
+passes level setup and Sprite 15 creation, reaching the ship AMAL input function
+at original line 1142. The original
 Bob 21 drop program executes through manual Synchro/Update with independent
 PAL/NTSC pixels and actual GPU checks. Autotest/Direct/eXit, For/Next and BC now
 run the original first missile program in declared idle/collision fixtures.
 AMAL Z now runs three original hunters with independent shared-stream/pixel checks. Next
-extend ship input/animation functions and implement
-computed/wide sprites and connect input-driven level-1 gameplay.
+extend ship input/animation functions and connect input-driven level-1 gameplay.
+Computed/wide Sprite packing now has an original-image preview and 34 additional
+GPU comparisons; see [computed Sprites](docs/computed-sprites.md).
 The milestone tracks horizontal/vertical progression and the eventual shared
 Play Game/debug pages. Keep Roller II/Wonderland as full-game regressions.
 A background inspector must remain explicitly labelled until gameplay works.
@@ -343,7 +345,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
   decoding, physical playfield snapshots and an OCS copper builder/interpreter
   are implemented, as are EHB screens, static scroll/DPF and explicit IFF fields.
   AMOS display/copper commands, superhires and live field timing,
-  sprite contention/computed allocation, general viewport/letterbox input routing and remaining
+  exact sprite contention/DMA timing, general viewport/letterbox input routing and remaining
   GPU modes remain open. Native non-HAM GPU decoding/resolution now passes 179
   local GPU/CPU frames; see [renderer contract](docs/webgl-renderer.md).
   WebGL2 resources, exact table readback, dirty uploads and context restoration
@@ -449,7 +451,7 @@ the same AST and backend, after the binary frontend and core semantics stabilize
 | Data and strings | Arrays, scoped DATA/READ/RESTORE, substring retrieval/assignment, common string functions | Remaining memory-dependent byte-string/length rules and edge cases |
 | Files | Sequential I/O, structured banks and checked raw Bload/Bsave through explicit memory/Node adapters | IndexedDB persistence, asynchronous modal Fsel$ integration, seek/random-file variants and remaining file operations |
 | Execution | Instruction budget, waits, key queue, timer cancellation, stop/resume, per-instance state | Regression coverage as new asynchronous hosts are added |
-| Browser graphics | Indexed drawing, Bobs/buffers/Autoback, Canvas/input/direct sprites; ABI/chip memory, physical planar export, basic CPU reference, normal ILBM, bounded copper/stack builder and WebGL2 probe | AMOS screen/copper commands, advanced modes, structured hardware sprites, remaining GPU modes, computed/wide sprites, exact timing and hardware coordinates |
+| Browser graphics | Indexed drawing, Bobs/buffers/Autoback, Canvas/input/direct sprites; ABI/chip memory, physical planar export, basic CPU reference, normal ILBM, bounded copper/stack builder and WebGL2 probe | AMOS screen/copper commands, advanced modes, remaining GPU modes, native mixed-allocation capture parity, exact timing and hardware coordinates |
 | Audio | Bounded Samples controller and optional Web Audio host, source-derived/offline checks | Remaining music/sample forms, full-game integration, native timing and reference captures |
 | ASCII frontend | No implementation | Lexer/parser producing the shared AST |
 
@@ -612,13 +614,15 @@ animated Bobs example is covered in fake-clock and Chromium tests. See
 [the Bob contract](docs/bobs.md) and [buffering contract](docs/buffering.md).
 Double buffering, Screen Swap and Autoback 0/1/2 now have pixel and browser
 coverage. Bob Col/Col and direct sprites now have unit and Chromium coverage;
-computed/wide sprites, sprite/cross-type collisions, hardware timing and advanced blitter edge
+Computed/wide packing now has bounded source-derived and GPU coverage;
+sprite/cross-type collisions, hardware timing and advanced blitter edge
 effects are still required.
 
 The shared snapshot/reference/WebGL2 workstream above supplies the target display
 architecture for this milestone. Direct sprites now publish structured physical line state to both
 Canvas and the CPU reference, sharing one priority resolver. The opaque Canvas
-RGBA callback has been retired. Finish computed allocation and DMA contention/timing
+RGBA callback has been retired. Computed/wide packing shares the owned stream
+pool; finish DMA contention/timing and native mixed-layout capture coverage
 before claiming the complete sprite-reference workstream. Canvas assertions alone do not establish
 WebGL2 availability or GPU parity; the separate integer readback probe now proves
 local WebGL2 capability. The native non-HAM GPU renderer now passes 179 local
@@ -764,8 +768,8 @@ are available; passing synthetic tests does not satisfy it.
   forms, and selected file variants, each
   delivered with binary execution fixtures.
 - Practical graphics: D0–D1 display foundations first, then D2–D6 with the full
-  reference/WebGL proposal gates. Complete computed/wide sprites and
-  sprite/cross-type collisions alongside the shared sprite-line model. Retain
+  reference/WebGL proposal gates. Extend native computed/wide sprite capture
+  coverage and sprite/cross-type collisions alongside the shared sprite-line model. Retain
   buffered Bob and external bank round-trip cases; add copper/mode captures.
 - Audio: choose one bank format and playback command set, implement a
   deterministic host first, then verify browser playback and lifecycle.
