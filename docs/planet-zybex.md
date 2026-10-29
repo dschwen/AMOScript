@@ -6,7 +6,7 @@ its original comments to **P.J. Hickman**. The unchanged source and seven extern
 level banks are pinned under [examples/PlanetZybex](../examples/PlanetZybex/README.md).
 
 [Play the full game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
-with the current source, sound/fullscreen, Ctrl fire, keyboard/Gamepad and touch
+with the current source, sound/fullscreen, Z fire with a visible keyboard Typing mode, keyboard/Gamepad and touch
 controls. The current acceptance path covers real firing, five life losses,
 four reloads, GAME OVER, a fresh game, level-1 docking and 25 vertical level-2
 fields. The newer current-source route also completes level 2 and enters level 3;
@@ -139,7 +139,7 @@ historical counts after each compiler addition.
 6. **Horizontal/vertical progression and full page.** Continue from level 1 into
    real level 2, then all seven maps, docking/win/game-over/finish-message returns,
    and source-driven replay. Publish the normal and debug application pages with
-   Play Game, gesture-activated sound/fullscreen, Ctrl fire, keyboard/Gamepad and
+   Play Game, gesture-activated sound/fullscreen, Z fire with a visible keyboard Typing mode, keyboard/Gamepad and
    optional touch controls, using the shared page harness. Preserve the original
    program's direct game startup; do not inject startup input or verification
    state. Keep checks/captures collapsed and mark the page playable only after

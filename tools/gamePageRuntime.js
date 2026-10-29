@@ -4,7 +4,7 @@
 // startup keys: each game retains its own intro, menu and joystick behavior.
 function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
-  const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed');
+  const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   const key = name => name.replace(/\\/g, '/').toLowerCase();
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])));
@@ -13,14 +13,16 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
+  const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys } : false, gamepad: true }];
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.requested ? 'Mute sound' : 'Enable sound';
     status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (!live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
+    viewport.dataset.keyboard = keyboardMode.value;
     viewport.dataset.sound = audio.state; viewport.dataset.backend = gpu ? 'webgl' : 'canvas';
     status.hidden = !!live && !failure && !live.state.halted && !live.state.stopped && !audio.error;
-    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, audio });
+    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, audio, keyboard: keyboardMode.value });
     fullscreen.refresh();
   }
   function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
@@ -38,7 +40,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
     live = createProgram({ sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
-      joysticks: [{ port, keyboard: { fire: fireKeys }, gamepad: true }],
+      joysticks: joystickOptions(),
       virtualJoystick: { container: viewport, port, visibility: touchMode.value },
       requestAnimationFrame: fn => requestAnimationFrame(guard(fn)), cancelAnimationFrame });
     host.attach(live); live.tick(1000); host.focus(); update();
@@ -59,6 +61,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   byId('game-restart').onclick = () => { launch++; play.disabled = false; try { start(); } catch (error) { fail(error); } };
   byId('game-stop').onclick = () => { launch++; play.disabled = false; if (live) live.stop(); update(); };
   byId('game-resume').onclick = () => { if (live && !failure) live.resume(); if (host) host.focus(); update(); };
+  keyboardMode.onchange = () => { if (host) { host.configureJoysticks(joystickOptions()); host.focus(); } update(); };
   speed.onchange = () => { if (live) live.setSleepScale(Number(speed.value)); if (host) host.focus(); };
   touchMode.onchange = () => { if (host) { host.setVirtualJoystickVisibility(touchMode.value); host.focus(); } };
   const monitor = setInterval(update, 100);

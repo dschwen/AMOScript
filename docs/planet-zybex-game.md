@@ -3,7 +3,7 @@
 [Play Planet Zybex](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html).
 The page embeds the complete current `Zybex.AMOS` (three vertical docking copy corrections) and all seven supplied level
 banks. Play Game activates sound/fullscreen and starts the original first level
-without injected startup input. Arrows move, Ctrl fires; standard Gamepads and
+without injected startup input. Arrows move, Z fires; standard Gamepads and
 optional touch controls use the shared browser host. Stop, Resume and Restart
 use the shared compact icon controls. Repeat Play retains the VM; Restart
 replaces it. The development fixtures remain on the
@@ -77,7 +77,7 @@ The gallery calls the public page builder directly:
 ```sh
 node tools/build_game_page.js examples/PlanetZybex/current/Zybex.AMOS /tmp/planet-zybex.html \
   --assets examples/PlanetZybex/current/manifest.json \
-  --fire ControlLeft,ControlRight --title "Planet Zybex"
+  --fire KeyZ --slowdown 2 --title "Planet Zybex"
 ```
 
 No volume prefix is needed: the source uses bare level-bank filenames. Manifest
@@ -88,7 +88,7 @@ verification replay or inject controls. Normal mode has no Debug menu or big
 source-error log. Add `--debug` for the generic Debug/export UI when building your
 own page; this game currently performs no session file writes.
 
-Live-page browser tests cover sound/fullscreen activation, keyboard/Ctrl input,
+Live-page browser tests cover sound/fullscreen activation, keyboard/Z input,
 compact icon controls, a frozen stopped frame, Resume, repeated Play retaining
 the canvas, Restart replacing it, mute/unmute, owned audio-context closure and
 fullscreen/input disposal. The page and checks need no network assets.
@@ -154,5 +154,15 @@ that page session. Reload clears session files and logs.
 ```sh
 node tools/build_game_page.js examples/PlanetZybex/current/Zybex.AMOS \
   /tmp/zybex-debug.html --assets examples/PlanetZybex/current/manifest.json \
-  --title "Planet Zybex — Debug" --fire ControlLeft,ControlRight --slowdown 2 --debug
+  --title "Planet Zybex — Debug" --fire KeyZ --slowdown 2 --debug
 ```
+
+## Keyboard joystick and text entry
+
+Both Zybex launchers use **Z** for fire. The visible **Keyboard** selector switches
+between Joystick and Typing mode. Choose Typing to enter names or other text;
+`z`, `Z`, spaces and Enter reach AMOS without keyboard joystick consumption.
+Gamepad and touch input remain enabled. Switching modes releases held keyboard
+joystick input, and Restart/Stop/Resume retain the selection. The independent
+[interactive keyboard example](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/keyboard-mode.html)
+checks actual AMOS Inkey$ text through its memory-file output.

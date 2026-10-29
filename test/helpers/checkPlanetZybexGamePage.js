@@ -11,9 +11,9 @@ module.exports=async function(page){
   assert.strictEqual(await page.evaluate(()=>document.fullscreenElement.id),'game-viewport');assert.strictEqual(await page.locator('#results').textContent(),'');
   assert.strictEqual(await page.evaluate(()=>document.body.dataset.status||'idle'),'idle');
   await page.locator('#game-input').evaluate(n=>n.dataset.originalCanvas='retained');
-  await page.keyboard.down('ArrowRight');await page.keyboard.down('ControlLeft');
+  await page.keyboard.down('ArrowRight');await page.keyboard.down('KeyZ');
   await page.waitForFunction(()=>AMOS_GAME_PAGE.joystickStatus().some(p=>p.port===1&&p.mask===24));
-  await page.keyboard.up('ControlLeft');await page.keyboard.up('ArrowRight');await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement);
+  await page.keyboard.up('KeyZ');await page.keyboard.up('ArrowRight');await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement);
   for(const action of ['stop','resume','restart'])assert.strictEqual(await page.locator(`#game-${action} svg`).count(),1);
   await page.click('#game-stop');await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='stopped');
   assert.ok(await page.evaluate(()=>AMOS_GAME_PAGE.joystickStatus().every(p=>p.mask===0)));

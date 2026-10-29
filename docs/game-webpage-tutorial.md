@@ -156,6 +156,22 @@ a later Escape reaches the game. On teardown, detach input, stop the VM, dispose
 GPU resources and close the owned audio/fullscreen sessions. The example exposes
 `AMOS_GAME_PAGE.dispose()` for application unmounts and also handles `pagehide`.
 
+### Switch between joystick and typing
+
+The visible **Keyboard: Joystick / Keyboard: Typing** selector controls whether
+keyboard presses feed the joystick or AMOS text input. Choose Typing for names,
+filenames or other prompts, then switch back to Joystick to play. The selection
+survives Stop/Resume and Restart in that page session. Changing modes releases
+held joystick keys; Gamepad and touch controls remain available in either mode.
+
+Planet Zybex uses **Z** for fire, leaving Enter for menus and text prompts. Z and
+Shift+Z produce ordinary `z` / `Z` in Typing mode. Other pages retain their
+configured fire keys; `--fire KeyZ` selects Z when building your own page.
+
+The harness uses `host.configureJoysticks([{ port, keyboard: false, gamepad: true }])`
+for Typing mode, and restores its configured keyboard mapping for Joystick mode.
+This is a browser input setting; no AMOS source or emitted instructions change.
+
 ### Adjust game speed
 
 The page toolbar offers **Speed: 100%, 50%, 33%, 25%**. Choose a slower setting
@@ -339,7 +355,7 @@ the checked manifest under `examples/PlanetZybex/current`. It needs no volume pr
 ```sh
 node tools/build_game_page.js examples/PlanetZybex/current/Zybex.AMOS /tmp/zybex.html \
   --assets examples/PlanetZybex/current/manifest.json \
-  --fire ControlLeft,ControlRight --title "Planet Zybex"
+  --fire KeyZ --slowdown 2 --title "Planet Zybex"
 ```
 
 The gallery adds navigation and collapsed checks around the generated application;

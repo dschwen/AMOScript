@@ -48,6 +48,8 @@ module.exports = async function browserGameHarnessProbe(page) {
       pointer('pointerdown', 'right', 3); pointer('pointerdown', 'right', 4); pointer('pointerup', 'right', 3); mask(8); pointer('lostpointercapture', 'right', 4); mask(0);
       key('keydown', 'ArrowLeft'); pointer('pointerdown', 'right', 5); mask(0); pointer('pointerup', 'right', 5); mask(4); key('keyup', 'ArrowLeft');
       pad = [{ connected: true, mapping: 'standard', axes: [-1, 0], buttons: [] }]; pointer('pointerdown', 'right', 6); mask(0); pad = []; mask(8);
+      host.configureJoysticks([{ port: 1, keyboard: false, gamepad: true }]); mask(0);
+      pointer('pointerdown', 'fire', 11); mask(16); pointer('pointerup', 'fire', 11); mask(0);
       host.configureJoysticks([{ port: 1, keyboard: true, gamepad: true }]); mask(0);
       pointer('pointerdown', 'fire', 7); p.stop(); mask(0); p.resume(); mask(0);
       pointer('pointerdown', 'fire', 8); canvas.dispatchEvent(new Event('blur')); mask(0); canvas.dispatchEvent(new Event('focus'));

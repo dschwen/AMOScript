@@ -786,3 +786,10 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   asset manifest, input bindings and slowdown default as the regular launcher,
   with `debug: true`. Keep its HTML Preview links on the regular page and game
   index card; detailed source errors and modified-file exports use the shared UI.
+
+- Page-builder pages expose Keyboard: Joystick / Typing. Typing reconfigures only
+  the keyboard joystick mapping to false while retaining Gamepad/touch ports;
+  reconfiguration releases held joystick input. Retain the DOM selection through
+  Restart/Stop/Resume. Current Zybex launchers use KeyZ fire; older injected replay
+  bindings remain independent. `keyboard-mode.html` verifies z/Z/space/Enter through
+  actual Inkey$ file output, Gamepad fire while typing and restart/release behavior.

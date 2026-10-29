@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Roller II — Debug</title>
 <style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:1.5rem auto;padding:0 1rem;background:#101721;color:#eef2f6}button,select{font:inherit;padding:.6rem;margin:.3rem}button{cursor:pointer}#play-game{display:block;background:#c71920;color:white;border:0;border-radius:.6rem;padding:1.1rem 2.5rem;font-size:2rem;font-weight:800}canvas{display:block;image-rendering:pixelated;max-width:100%;border:1px solid #888}#game-status{font-size:.9rem}h1{font-size:1.5rem}summary{cursor:pointer}body[data-playing=true] #play-game{font-size:1rem;padding:.7rem 1.3rem}#game-surface{background:#05080c;border-radius:8px;overflow:hidden}</style></head><body>
-<style>nav a{color:#9bc9ff}</style><nav><a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html">Regular Roller II</a></nav><h1>Roller II — Debug</h1><button id="play-game" type="button">Play Game</button><details class="game-help"><summary>Controls</summary><p>Follow the game's intro and menu prompts. Arrows move; Ctrl fires. Escape leaves fullscreen.</p></details>
-<section id="game-viewport"><div class="amos-fullscreen-toolbar"><button id="game-sound">Enable sound</button><button id="game-fullscreen">Fullscreen</button><span id="fullscreen-status" role="status"></span><button id="game-restart">Restart</button><button id="game-stop">Stop</button><button id="game-resume">Resume</button><select id="game-speed" aria-label="Game speed"><option value="1" selected>Speed: 100%</option><option value="2">Speed: 50%</option><option value="3">Speed: 33%</option><option value="4">Speed: 25%</option></select><select id="game-touch" aria-label="Touch joystick"><option value="auto">Touch: Auto</option><option value="always">Touch: On</option><option value="off">Touch: Off</option></select></div>
+<style>nav a{color:#9bc9ff}</style><nav><a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html">Regular Roller II</a></nav><h1>Roller II — Debug</h1><button id="play-game" type="button">Play Game</button><details class="game-help"><summary>Controls</summary><p>Follow the game's intro and menu prompts. Arrows move; Ctrl fires. Choose Keyboard: Typing to enter text; switch back to Keyboard: Joystick to play. Gamepad and touch controls work in both modes. Escape leaves fullscreen.</p></details>
+<section id="game-viewport"><div class="amos-fullscreen-toolbar"><button id="game-sound">Enable sound</button><button id="game-fullscreen">Fullscreen</button><span id="fullscreen-status" role="status"></span><button id="game-restart">Restart</button><button id="game-stop">Stop</button><button id="game-resume">Resume</button><select id="game-keyboard" aria-label="Keyboard mode"><option value="game">Keyboard: Joystick</option><option value="typing">Keyboard: Typing</option></select><select id="game-speed" aria-label="Game speed"><option value="1" selected>Speed: 100%</option><option value="2">Speed: 50%</option><option value="3">Speed: 33%</option><option value="4">Speed: 25%</option></select><select id="game-touch" aria-label="Touch joystick"><option value="auto">Touch: Auto</option><option value="always">Touch: On</option><option value="off">Touch: Off</option></select></div>
 <div id="game-surface"><canvas id="game-input" width="320" height="256" tabindex="0" aria-label="Game display"></canvas></div><p id="game-status" class="amos-fullscreen-messages" role="status"></p></section>
 <script>/* jshint esversion: 6 */
 'use strict';
@@ -11009,7 +11009,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
 }));
 (function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
-  const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed');
+  const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   const key = name => name.replace(/\\/g, '/').toLowerCase();
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])));
@@ -11018,14 +11018,16 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
+  const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys } : false, gamepad: true }];
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.requested ? 'Mute sound' : 'Enable sound';
     status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (!live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
+    viewport.dataset.keyboard = keyboardMode.value;
     viewport.dataset.sound = audio.state; viewport.dataset.backend = gpu ? 'webgl' : 'canvas';
     status.hidden = !!live && !failure && !live.state.halted && !live.state.stopped && !audio.error;
-    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, audio });
+    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, audio, keyboard: keyboardMode.value });
     fullscreen.refresh();
   }
   function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
@@ -11043,7 +11045,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     live = createProgram({ sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
-      joysticks: [{ port, keyboard: { fire: fireKeys }, gamepad: true }],
+      joysticks: joystickOptions(),
       virtualJoystick: { container: viewport, port, visibility: touchMode.value },
       requestAnimationFrame: fn => requestAnimationFrame(guard(fn)), cancelAnimationFrame });
     host.attach(live); live.tick(1000); host.focus(); update();
@@ -11064,6 +11066,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   byId('game-restart').onclick = () => { launch++; play.disabled = false; try { start(); } catch (error) { fail(error); } };
   byId('game-stop').onclick = () => { launch++; play.disabled = false; if (live) live.stop(); update(); };
   byId('game-resume').onclick = () => { if (live && !failure) live.resume(); if (host) host.focus(); update(); };
+  keyboardMode.onchange = () => { if (host) { host.configureJoysticks(joystickOptions()); host.focus(); } update(); };
   speed.onchange = () => { if (live) live.setSleepScale(Number(speed.value)); if (host) host.focus(); };
   touchMode.onchange = () => { if (host) { host.setVirtualJoystickVisibility(touchMode.value); host.focus(); } };
   const monitor = setInterval(update, 100);
