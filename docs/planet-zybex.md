@@ -19,8 +19,11 @@ loop/collision previews also run the complete first enemy program with a declare
 optional stationary bullet. Two random-hunter views now run the original three
 hunter programs with portable/controlled beam inputs. **Computed ship sprites**
 now displays all thirteen ship images, row reuse, contention and pointer reservation.
-**The complete source compiles; full gameplay remains blocked by AMAL runtime
-features.** All options remain marked as previews. No AMAL commands are replaced by
+**Ship controls and animation** runs the original ship procedure with keyboard/
+Gamepad input, a declared explosion trigger and a finite slowed frame loop.
+**The complete source now passes a bounded forty-field input replay per video
+standard, including movement, real firing and its first explosion.** Longer
+gameplay and full application-page acceptance remain open. All options remain marked as previews. No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
 ## Source and dependency audit
@@ -75,11 +78,12 @@ The remaining eight original encodings now decode and lower through the manual
 AMAL subset: Amal string, On/Off, Synchro Off/Synchro and Update Off/Update.
 The complete original source compiles to **1,122 instructions**, with **zero
 unrecognized token encodings**. This is not full runtime compatibility. Running
-it unchanged passes level setup and computed player Sprite 15 creation, then reaches
-the unsupported ship AMAL input function at **line 1142, byte 54290, character 37**. AMAL Z is now implemented; see
+it unchanged now passes the bounded connected forty-field replay without an
+unsupported-feature failure. The previous line-1142 J1/Anim gate is resolved; see
+[AMAL input/animation](amal-input-animation.md). AMAL Z is implemented; see
 [AMAL random words](amal-random.md). See [manual AMAL](amal.md)
 for installation, native word/jump/movement behavior and the remaining grammar,
-automatic synchronization and animation-lane gates.
+automatic synchronization and other remaining runtime gates.
 
 Re-audit with `node tools/audit_program.js examples/PlanetZybex/Zybex.AMOS`.
 The JSON above remains the frozen baseline rather than silently changing its
@@ -105,8 +109,8 @@ historical counts after each compiler addition.
    bindings pass their storage/reset/evaluation contracts. Owned compiled AMAL
    strings support locals/shared globals, On/Off and manual Synchro/Update.
    Autotest/Direct/eXit, For/Next and BC now run the original first enemy program
-   in declared no-bullet/collision fixtures. Wider grammar, independent animation lanes
-   and automatic synchronization remain open. The source deliberately
+   in declared no-bullet/collision fixtures. Independent Anim lanes and J0/J1
+   are now implemented; wider grammar and automatic synchronization remain open. The source deliberately
    disables automatic synchronization/update and calls them after Wait Vbl.
    Keep field scheduling separate from rendering and host requestAnimationFrame.
    Do not implement these commands as aliases that omit movement or swapping.
@@ -133,9 +137,9 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slices are **ship input and independent animation lanes**.
-Z now runs the three original hunters; the first full-source runtime gate is
-the ship AMAL string installation. Autotest/Direct/eXit, For/Next and BC retain their
+The next slices are **longer connected level-1 replay, independent gameplay
+pixels/audio and the full application launcher**. Ship input/Anim now pass their
+isolated fixture and a bounded full-source movement/firing/explosion replay. Autotest/Direct/eXit, For/Next and BC retain their
 first-enemy fixtures.
 Default and Set Sprite
 Buffer now have implemented reset/allocation contracts; computed/wide Sprite
@@ -217,8 +221,12 @@ per-channel locals/positions and complete pixels match independent generator/
 raw-asset references for 324 PAL/NTSC frames. Twenty further GPU comparisons
 bring Zybex to **108 GPU comparisons**. The newer computed/wide Sprite slice adds seventeen original-image/allocation
 stages in PAL/NTSC, bringing Zybex to **142 GPU comparisons**. The full source
-now reaches the ship AMAL input function at line 1142. Ship input and animation
-lanes still block connected gameplay; see [computed Sprites](computed-sprites.md).
+now passes a forty-field input replay per video standard. The original ship
+procedure matches 178 independent movement/input/animation/explosion frames, with
+24 further GPU comparisons. Eight GPU comparisons also cover the bounded full
+game, bringing Zybex to **174 GPU comparisons**. See
+[AMAL input/animation](amal-input-animation.md) for exact fixture omissions and
+remaining connected acceptance; no complete gameplay or native capture is claimed.
 
 Live-host checks cover level replacement, scroll limits, score fixture
 selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, timed AMAL playback, fullscreen and owned input/GPU disposal. Existing

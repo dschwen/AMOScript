@@ -11,7 +11,7 @@ function idle(source='Pause;') {
 test('AMAL: uppercase-initial scanner, single-letter labels, frozen owned IR and bounded unsupported syntax',()=>{
   const a=createAmal({globals:new Int16Array(26)}),code=a.compile('Begin: Let R0=2+3*4; Pause; Jump Begin');assert.ok(Object.isFrozen(code.ops[0].expr));assert.strictEqual(code.ops[2].destination,0);
   assert.strictEqual(a.compile('B:L R0=$FFFF;P;J B').ops[0].expr.value,-1);
-  for(const source of ['Begin: P; Banana: P','Jump Gone','Anim 0,(1,2)','Let R0=(1+2)','Let R0=-RX','Let R0=1+'.repeat(100),'x'.repeat(32767)])assert.throws(()=>a.compile(source),/AMAL/);
+  for(const source of ['Begin: P; Banana: P','Jump Gone','Wait','Let R0=(1+2)','Let R0=-RX','Let R0=1+'.repeat(100),'x'.repeat(32767)])assert.throws(()=>a.compile(source),/AMAL/);
   assert.strictEqual(a.compile('Let R0=1\0Unsupported').ops.length,2);
   assert.throws(()=>a.compile('Let R0='+Array(90).fill('1').join('+')),/depth 64/);
 });
@@ -43,11 +43,11 @@ test('AMAL: installation captures binding/object identity; remapping does not re
 });
 
 test('AMAL: malformed replacements preserve programs, target-resolution failures retire them, and unsupported automatic/bank forms reject with source context',()=>{
-  const {p}=idle();const before=plain(p.amalSnapshot());assert.throws(()=>p.installAmal(0,'Anim 0,(1,2)'),/Unsupported AMAL/);assert.deepStrictEqual(plain(p.amalSnapshot()),before);p.setChannel(0,'bob',()=>63);assert.throws(()=>p.installAmal(0,'Pause'),/target not defined/);assert.strictEqual(p.amalSnapshot().length,0);
+  const {p}=idle();const before=plain(p.amalSnapshot());assert.throws(()=>p.installAmal(0,'Wait'),/Unsupported AMAL/);assert.deepStrictEqual(plain(p.amalSnapshot()),before);p.setChannel(0,'bob',()=>63);assert.throws(()=>p.installAmal(0,'Pause'),/target not defined/);assert.strictEqual(p.amalSnapshot().length,0);
   for(const number of [-2,64]){assert.throws(()=>p.amalOn(number),/channel number/);assert.throws(()=>p.amalOff(number),/channel number/);}p.stop();
   assert.throws(()=>execute(binary([[t('Amal'),n(0),t(','),text('Pause')]])),/Automatic AMAL.*line 1/);
   assert.throws(()=>compile(binary([[t('Amal'),n(0),t(','),n(1)]])),/requires a string/);
-  assert.throws(()=>idle('Anim 0,(1,2)'),/AMAL character 0 at line 5/);
+  assert.throws(()=>idle('Wait'),/AMAL character 0 at line 5/);
 });
 
 test('AMAL: object/screen retirement, Sprite Off/resize and Default clear owned programs; Stop freezes manual steps and terminal errors cannot leave programs alive',()=>{
@@ -68,7 +68,12 @@ test('Planet Zybex AMAL: original Bob 21 string executes all independent PAL/NTS
     p.tick(1000);assert.strictEqual(p.state.waiting,'key');p.sendKey('play');c.tick(1000);assert.strictEqual(count,14);assert.strictEqual(p.state.waiting,'key');p.sendKey('end');c.tick(0);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();}
 });
 
-test('Planet Zybex: the complete unchanged source now compiles, passes level setup and reaches the original ship AMAL input gate',()=>{
-  const raw=fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex/Zybex.AMOS'));assert.strictEqual(hash(raw),oracle.sourceSha256);const {create,transpiler}=compile(raw);assert.strictEqual(transpiler._ops.length,1122);const c=require('./helpers/fakeTimers').createFakeTimers(),p=create({now:c.now,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout,files:{read:name=>fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1')}});
-  assert.throws(()=>{p.tick(10000);c.tick(10000);},/Expected AMAL register at AMAL character 37 at line 1142, byte 54290/);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();
+test('Planet Zybex: the complete unchanged source runs 40 input-only fields, real movement/firing/explosion and stops without a runtime gate',()=>{
+  const raw=fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex/Zybex.AMOS'));assert.strictEqual(hash(raw),oracle.sourceSha256);const {create,transpiler}=compile(raw);assert.strictEqual(transpiler._ops.length,1122);
+  for(const standard of ['PAL','NTSC']){
+    const c=require('./helpers/fakeTimers').createFakeTimers(),p=create({print(){},vblHz:standard==='PAL'?50:60,displayOptions:{snapshotStandard:standard},now:c.now,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout,files:{read:name=>fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1')}});
+    let frames=0;const update=p.update;p.setJoystickReader(port=>port===1?(frames<5?0:frames<15?8:frames<25?17:0):0);
+    p.update=()=>{update();frames++;if(frames<=25){assert.strictEqual(p.spriteInfo('X Sprite',15),176+5*Math.max(0,Math.min(10,frames-5)));assert.strictEqual(p.spriteInfo('Y Sprite',15),124-5*Math.max(0,Math.min(10,frames-15)));assert.strictEqual(p.spriteInfo('I Sprite',15),Math.floor((frames-1)/5)%2?2:3);assert.strictEqual(p.state.variables.int_lives,5);}if(frames===20){assert.strictEqual(p.amreg(0),1);assert.ok(p.bobInfo('Y Bob',1)>0);}if(frames===40){assert.strictEqual(p.spriteInfo('Y Sprite',15),0);assert.strictEqual(p.spriteInfo('I Sprite',15),11);p.stop();}};
+    p.tick(10000);c.tick(1000);assert.strictEqual(frames,40);assert.strictEqual(p.state.halted,false);assert.strictEqual(p.state.stopped,true);assert.strictEqual(p.amalSnapshot().length,17);assert.strictEqual(c.pending(),0);assert.deepStrictEqual(Array.from(p.state.input.joysticks),[0,0]);const old=p.display.renderDisplay();c.tick(1000);assert.strictEqual(frames,40);assert.deepStrictEqual(p.display.renderDisplay(),old);p.stop();
+  }
 });

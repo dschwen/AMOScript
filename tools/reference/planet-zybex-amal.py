@@ -230,3 +230,87 @@ for stage in range(17):
     (out/name).write_bytes(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',320,160,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(scan,9))+chunk(b'IEND',b''))
     sprite_records.append(record)
 (out/'computed-sprites.json').write_text(json.dumps(dict(sourceSha256=sha(program),frames=sprite_records),indent=2)+'\n')
+
+# Independently transcribed original horizontal ship AMAL. This is a small
+# instruction generator for the published source, not a parser/runtime import.
+ship_ops=[];ship_labels={}
+def emit(*op):ship_ops.append(op)
+def label(name):ship_labels[name]=len(ship_ops)
+def test_jump(predicate,dest):emit('if',predicate,dest)
+emit('jump','S');label('B');emit('joy');emit('rx');emit('rw')
+test_jump('explode','E')
+for condition,dest in [('leftbound','V'),('rightbound','Q'),('bottombound','N'),('topbound','K'),('withfire','T')]:test_jump(condition,dest)
+for mask,dest in [(1,'U'),(2,'D'),(4,'L'),(8,'R'),(5,'H'),(10,'O'),(9,'Y'),(6,'G')]:test_jump(mask,dest)
+label('C');emit('rx');emit('rw');test_jump('fire','F');emit('jump','B')
+label('T')
+for mask,dest in [(17,'U'),(18,'D'),(20,'L'),(24,'R'),(21,'H'),(26,'O'),(25,'Y'),(22,'G')]:test_jump(mask,dest)
+emit('jump','B')
+for dest,dx,dy in [('H',-5,-5),('O',5,5),('Y',5,-5),('G',-5,5),('U',0,-5),('D',0,5),('R',5,0),('L',-5,0)]:
+    label(dest);emit('move',dx,dy);emit('jump','C')
+label('S');emit('anim',0,[(3,5),(2,5)]);emit('jump','B')
+label('F');emit('fire');emit('jump','B')
+for dest,axis,value in [('V','x',130),('Q','x',418),('N','y',190),('K','y',60)]:
+    label(dest);emit('set',axis,value);emit('jump','C')
+label('E');emit('anim',1,[(n,1)for n in range(5,12)])
+for _ in range(8):emit('pause')
+emit('set','y',0);emit('pause');emit('dead');emit('end')
+st=dict(x=176,y=124,image=1,r0=0,rx=0,rw=0,fire=0,dead=0,collision=0,ended=False,remaining=0)
+ip=0;animation=None;ship_records=[]
+def ship_mask(frame):
+    return [0,8,10,1,20,25,2,4,0,16,16][min(10,(max(1,frame)-1)//8)]
+for frame in range(89):
+    reads=0
+    if frame:
+        if frame==73:st['collision']=1
+        jumps=10
+        while not st['ended']:
+            op=ship_ops[ip];kind=op[0]
+            if kind=='joy':st['r0']=ship_mask(frame);reads+=1;ip+=1
+            elif kind=='rx':st['rx']=st['x'];ip+=1
+            elif kind=='rw':st['rw']=st['y'];ip+=1
+            elif kind in ('jump','if'):
+                taken=True
+                if kind=='if':
+                    p=op[1]
+                    taken=(st['r0']==p)if isinstance(p,int)else {'explode':st['collision']==1,'leftbound':st['x']<130,'rightbound':st['x']>418,'bottombound':st['y']>190,'topbound':st['y']<60,'withfire':st['r0']>16,'fire':bool(st['r0']&16)}[p]
+                if taken:
+                    ip=ship_labels[op[-1]];jumps-=1
+                    if not jumps:break
+                else:ip+=1
+            elif kind=='move':
+                if st['remaining']:st['remaining']=0;ip+=1;continue
+                st['x']+=op[1];st['y']+=op[2];st['remaining']=1;break
+            elif kind=='anim':animation=dict(frames=op[2],loops=op[1],counter=1,index=0);ip+=1
+            elif kind=='fire':st['fire']=1;ip+=1
+            elif kind=='set':st[op[1]]=op[2];ip+=1
+            elif kind=='pause':ip+=1;break
+            elif kind=='dead':st['dead']=99;ip+=1
+            elif kind=='end':st['ended']=True
+        if animation:
+            animation['counter']=(animation['counter']-1)&65535
+            if not animation['counter']:
+                if animation['index']==len(animation['frames']):
+                    if animation['loops']:animation['loops']-=1;done=animation['loops']==0
+                    else:done=False
+                    if done:animation=None
+                    else:animation['index']=0
+                if animation:
+                    st['image'],animation['counter']=animation['frames'][animation['index']];animation['index']+=1
+    indices=bytearray(v for y in range(160)for v in background[y*width:y*width+320])
+    iw,ih,hx,hy,pic=decoded[st['image']]
+    for y in range(ih):
+        for x in range(iw):
+            value=pic[y*iw+x]&15;xx=max(0,st['x']-hx)-128+x;yy=max(0,st['y']-hy)-50+y
+            if value and 0<=xx<320 and 0<=yy<160:indices[yy*320+xx]=16+value
+    rgba=bytearray()
+    for value in indices:
+        c=palette[value];rgba.extend([(c>>8&15)*17,(c>>4&15)*17,(c&15)*17,255])
+    rec=dict(frame=frame,mask=ship_mask(frame)if frame else 0,reads=reads,**st,animation=None if not animation else dict(index=animation['index'],remaining=animation['counter'],loops=animation['loops']),rgbaSha256=sha(rgba))
+    if frame in (0,1,6,24,40,72,73,76,79,81,83,88):
+        name=f'amal-ship-{frame}.png';rec['png']=name
+        scan=b''.join(b'\0'+rgba[y*1280:(y+1)*1280]for y in range(160))
+        (out/name).write_bytes(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',320,160,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(scan,9))+chunk(b'IEND',b''))
+    ship_records.append(rec)
+assert ship_records[16]['x']==216 and ship_records[24]['y']==164 and ship_records[40]['fire']==1
+assert ship_records[-1]['ended'] and ship_records[-1]['dead']==99 and ship_records[-1]['animation']is None
+(out/'amal-ship.json').write_text(json.dumps(dict(sourceSha256=sha(program),frames=ship_records),indent=2)+'\n')

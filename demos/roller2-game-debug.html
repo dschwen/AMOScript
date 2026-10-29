@@ -3827,7 +3827,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (music) throw new Error('Sample/effect voice stealing during Music is not implemented; Music Off first');
   }
   let manualAmal = false;
-  const amal = amalFactory({ globals:amalRegisters, readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
+  const amal = amalFactory({ globals:amalRegisters, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
@@ -4106,13 +4106,17 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!Number.isInteger(mask) || mask < 0 || mask > 31) throw new Error('Invalid joystick mask');
     state.input.joysticks[port] = mask;
   }
-  function joystickInfo(name, port) {
-    port = joystickPort(integer(port));
+  function readJoystick(port, accept = null) {
     if (joystickBinding && joystickBinding.reader) {
-      const mask = joystickBinding.reader(port);
+      const binding=joystickBinding, mask = binding.reader(port);
+      if (accept && (binding!==joystickBinding || !accept())) throw new Error('AMAL changed during joystick read');
       if (mask != null) setJoystick(port, mask);
     }
-    const mask = state.input.joysticks[port];
+    return state.input.joysticks[port];
+  }
+  function joystickInfo(name, port) {
+    port = joystickPort(integer(port));
+    const mask = readJoystick(port);
     if (name === 'Joy') return mask;
     const bit = { Jup: 1, Jdown: 2, Jleft: 4, Jright: 8, Fire: 16 }[name];
     if (!bit) throw new Error('Unknown joystick query');
@@ -5985,6 +5989,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const word = value => (value << 16) >> 16;
   const channels = new Map();
   if(options.readBeam!=null && typeof options.readBeam!=='function') throw new Error('readAmalBeam must be a synchronous function');
+  if(options.readJoystick!=null && typeof options.readJoystick!=='function') throw new Error('AMAL joystick reader must be a synchronous function');
   // AMALInit is a cold-system initializer. ClrAMAL/Default do not reset it.
   let randomSeed=0x1234,stepping=false;
   function compile(source) {
@@ -6033,6 +6038,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         const name = chars[at++] + chars[at++]; expect('('); const screen = expression(depth+1); expect(','); const value = expression(depth+1); expect(')');
         return { kind:'coordinate', name, screen, value };
       }
+      if (peek() === 'J') { at++; const port=peek(); if(!['0','1'].includes(port)) error('Expected AMAL joystick 0 or 1'); at++; return {kind:'joystick',port:Number(port)}; }
       if (peek() === 'Z') { at++; expect('('); const mask=expression(depth+1); expect(')'); return {kind:'random',mask}; }
       return register();
     }
@@ -6067,6 +6073,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         at++; expect('(');
         if (peek() === ')') { at++; op={kind:'autoOff'}; }
         else { autoOpen=ops.length; op={kind:'autoOn',scope:0}; ops.push({...op,offset}); scope=1; continue; }
+      } else if (command === 'A') {
+        const repeats=expression(),frames=[]; expect(',');
+        do {
+          if(frames.length===256) error('AMAL Anim frame limit exceeded');
+          expect('('); const image=expression(); expect(','); const duration=expression(); expect(')');
+          frames.push({image,duration});
+        } while(peek()==='(');
+        op={kind:'anim',repeats,frames};
       } else if (command === ')') {
         if (!scope) error('Unexpected AMAL Autotest close');
         ops.push({kind:'exit',scope,offset}); ops[autoOpen].destination=ops.length;
@@ -6114,7 +6128,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const freeze = value => { if (value && typeof value === 'object') { for (const key of Object.keys(value)) freeze(value[key]); Object.freeze(value); } return value; };
     return freeze({ source, ops });
   }
+  function active(channel) { return channels.get(channel.number)===channel && channel.target.alive() && (!options.isRunning || options.isRunning()); }
   function evaluate(expr, channel) {
+    if(expr.kind==='joystick'){
+      const value=options.readJoystick ? options.readJoystick(expr.port,()=>active(channel)) : 0;
+      if(!Number.isInteger(value) || value<0 || value>31) throw new Error('Invalid AMAL joystick mask (expected synchronous 0..31)');
+      if(!active(channel)) throw new Error('AMAL changed during joystick read');
+      return value;
+    }
     if (expr.kind === 'random') {
       const mask=evaluate(expr.mask,channel),product=randomSeed*0x3171;
       const beam=options.readBeam ? options.readBeam() : 0;
@@ -6147,7 +6168,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const code = compile(source); // A syntax failure retains the old program.
     channels.delete(number); // Native replacement retires before target resolution.
     const target = options.resolve(binding);
-    channels.set(number,{ number, code, binding:Object.freeze({...binding}), target, location:location && {...location}, locals:new Int16Array(10), ip:0, enabled:false, ended:false, move:null, autoStart:null, bounds:new Map() });
+    channels.set(number,{ number, code, binding:Object.freeze({...binding}), target, location:location && {...location}, locals:new Int16Array(10), ip:0, enabled:false, ended:false, move:null, animation:null, autoStart:null, bounds:new Map() });
   }
   function control(number, enabled) {
     for (const [id, channel] of channels) if (number == null || id === number) {
@@ -6170,6 +6191,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       c.executingIp=ip;
       const op=c.code.ops[ip];
       if(op.kind==='let') { store(op.target,evaluate(op.expr,c),c); ip++; }
+      else if(op.kind==='anim') {
+        const repeats=evaluate(op.repeats,c)&65535;
+        c.animation={op,ip,loops:repeats,counter:1,index:0}; ip++;
+      }
       else if(op.kind==='autoOn') { c.autoStart=ip+1; ip=op.destination; }
       else if(op.kind==='autoOff') { c.autoStart=null; ip++; }
       else if(op.kind==='pause') { ip++; save(); return; }
@@ -6208,13 +6233,29 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
     throw new Error('AMAL execution budget exceeded');
   }
+  function stepAnimation(c) {
+    const animation=c.animation;
+    if(!animation) return;
+    c.executingIp=animation.ip;
+    animation.counter=(animation.counter-1)&65535;
+    if(animation.counter) return;
+    if(animation.index===animation.op.frames.length){
+      if(animation.loops && --animation.loops===0){c.animation=null;return;}
+      animation.index=0;
+    }
+    const frame=animation.op.frames[animation.index];
+    // Native AmDoAni writes A before evaluating the duration expression.
+    c.target.write('A',evaluate(frame.image,c)&65535);
+    animation.counter=evaluate(frame.duration,c)&65535;
+    animation.index++;
+  }
   function step() {
     if(stepping)throw new Error('Reentrant AMAL Synchro is not supported');
     stepping=true;
     try {
       retire();
-      for (const c of [...channels.values()].sort((a,b)=>a.number-b.number)) if (channels.get(c.number)===c && c.enabled && !c.ended) {
-        try { if(c.autoStart!=null)stepChannel(c,true); if(!c.ended)stepChannel(c); }
+      for (const c of [...channels.values()].sort((a,b)=>a.number-b.number)) if (channels.get(c.number)===c && c.enabled && (!c.ended || c.animation)) {
+        try { if(!c.ended && c.autoStart!=null)stepChannel(c,true); if(!c.ended)stepChannel(c); if(active(c))stepAnimation(c); }
         catch (error) {
           error.message += ` in AMAL channel ${c.number}, character ${c.code.ops[c.executingIp].offset}`;
           if (c.location && !error.message.includes(' at line ')) error.message += ` at line ${c.location.line}, byte ${c.location.offset}`;
@@ -6223,7 +6264,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       }
     } finally { stepping=false; }
   }
-  function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,locals:Object.freeze(Array.from(c.locals))}))); }
+  function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,animation:c.animation ? Object.freeze({index:c.animation.index,remaining:c.animation.counter,loops:c.animation.loops}) : null,locals:Object.freeze(Array.from(c.locals))}))); }
   return { compile, install, control, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
@@ -7109,7 +7150,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (state.stopped || state.waiting || state.halted) return { steps: 0, ip: state.ip, halted: state.halted };
     cancelScheduled();
     let steps = 0;
-    while (steps < maxSteps && !state.halted) {
+    while (steps < maxSteps && !state.halted && !state.stopped) {
       let out;
       try {
         const block = blocks && blocks[state.ip];

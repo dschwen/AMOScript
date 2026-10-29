@@ -64,6 +64,17 @@ module.exports = async function checkPlanetZybexPreview(page) {
     assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-hunters-seed'),mode==='hunters'?'12997':'35380');
   }
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-hunters.png'),fullPage:true});
+  await page.selectOption('#zybex-level','ship');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.shipFrame==='0');await page.click('#zybex-next');
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(()=>Number(document.getElementById('planet-zybex-preview').dataset.shipX)>176);await page.keyboard.up('ArrowRight');
+  const shipX=Number(await page.locator('#planet-zybex-preview').getAttribute('data-ship-x'));
+  await page.evaluate(()=>{globalThis.ZYBEX_GAMEPAD_RESTORE=Object.getOwnPropertyDescriptor(navigator,'getGamepads');Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',axes:[-1,-1],buttons:Array.from({length:16},(_,i)=>({pressed:i===0}))}]});});
+  await page.waitForFunction(x=>{const d=document.getElementById('planet-zybex-preview').dataset;return Number(d.shipX)<x && Number(d.shipY)<124 && d.shipFire==='1';},shipX);
+  await page.evaluate(()=>{if(globalThis.ZYBEX_GAMEPAD_RESTORE)Object.defineProperty(navigator,'getGamepads',globalThis.ZYBEX_GAMEPAD_RESTORE);else delete navigator.getGamepads;delete globalThis.ZYBEX_GAMEPAD_RESTORE;});
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.shipFrame==='89');
+  assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-ship-y'),'0');assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-ship-image'),'11');assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-ship-dead'),'99');
+  await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-ship.png'),fullPage:true});
   await page.selectOption('#zybex-level','sprites');
   for(let stage=0;stage<17;stage++){
     if(stage)await page.click('#zybex-next');

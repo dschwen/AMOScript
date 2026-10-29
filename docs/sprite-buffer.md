@@ -3,7 +3,8 @@
 `Set Sprite Buffer lines` (`$1986`) now owns a real triple buffer for the existing
 direct/computed Sprite path. Planet Zybex’s unchanged original line 93 requests 48 lines;
 this allocates **4,800 bytes** and executes without an open screen. The complete source
-now reaches the ship AMAL input function at line 1142. Computed/wide packing
+now passes a bounded movement/firing/explosion replay; see
+[AMAL input/animation](amal-input-animation.md). Computed/wide packing
 is covered in [computed Sprites](computed-sprites.md).
 
 The [Planet Zybex preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)

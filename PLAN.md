@@ -8,13 +8,18 @@ Assessment updated: 2026-10-29.
 Its unchanged source/assets are pinned; all seven backgrounds, startup/score
 presentation and channel routing have declared browser previews. The complete
 source now compiles to 1,122 instructions with no unrecognized encodings. It
-passes level setup and Sprite 15 creation, reaching the ship AMAL input function
-at original line 1142. The original
+now runs a bounded forty-field input replay in PAL and NTSC: movement, real
+bullet launch, first explosion and host Stop. No unsupported runtime feature
+is reached in that tested prefix. The original
 Bob 21 drop program executes through manual Synchro/Update with independent
 PAL/NTSC pixels and actual GPU checks. Autotest/Direct/eXit, For/Next and BC now
 run the original first missile program in declared idle/collision fixtures.
-AMAL Z now runs three original hunters with independent shared-stream/pixel checks. Next
-extend ship input/animation functions and connect input-driven level-1 gameplay.
+AMAL Z runs the original hunters. J0/J1 and independent Anim now run the original
+horizontal ship procedure with 178 independent PAL/NTSC input/animation/explosion
+frames and 32 additional GPU checks (including the bounded full game). See
+[AMAL input/animation](docs/amal-input-animation.md). Next extend the connected
+level-1 replay through natural life loss/restart, verify independent gameplay
+pixels and sample audio, then expose the shared full-game launcher.
 Computed/wide Sprite packing now has an original-image preview and 34 additional
 GPU comparisons; see [computed Sprites](docs/computed-sprites.md).
 The milestone tracks horizontal/vertical progression and the eventual shared

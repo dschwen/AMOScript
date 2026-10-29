@@ -1,12 +1,13 @@
 /* jshint esversion: 6 */
 'use strict';
 // Original packed-background inspector. This is explicitly not a game launcher.
-function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource, defaultSource, gameOverSource, channelsSource, channelsOracle, amalSource, missileSources, huntersSource, spritesSource }) {
+function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource, defaultSource, gameOverSource, channelsSource, channelsOracle, amalSource, missileSources, huntersSource, spritesSource, shipSource }) {
   const root = document.getElementById('planet-zybex-preview'), make = source => new Function(`return (${source});`)();
-  const introduction = document.createElement('p'); introduction.textContent = 'Planet Zybex is the next game target. Preview its original level backgrounds and a prepared score-display fixture below. Ship sprites and declared AMAL enemy previews are available; player controls, animation and connected gameplay remain in progress.';
+  const introduction = document.createElement('p'); introduction.textContent = 'Planet Zybex is the next game target. Preview its original level backgrounds and a prepared score-display fixture below. Ship controls/animation and AMAL enemy previews are available. The complete source also passes a bounded movement/firing/explosion replay; longer gameplay and a full launcher remain in progress.';
   const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar';
   const select = document.createElement('select'); select.id = 'zybex-level'; select.setAttribute('aria-label', 'Level background');
   for (const level of oracle.levels) select.add(new Option(`Level ${level.level}`, String(level.level)));
+  select.add(new Option('Ship controls and animation (arrows / Ctrl / gamepad)', 'ship'));
   select.add(new Option('Computed ship sprites (image/allocation preview)', 'sprites'));
   select.add(new Option('Score display (fixture)', 'score'));
   select.add(new Option('Default startup (fixture)', 'default'));
@@ -40,6 +41,12 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   const files = { read(name) { const value = assets[name.toLowerCase()]; if (!value) throw Error(`Missing level asset: ${name}`); return atob(value); } };
   function update() {
     if (!program || disposed) return;
+    if(select.value==='ship'){
+      host.render();const frame=program.state.variables.int_frame;
+      root.dataset.level='ship';root.dataset.shipFrame=String(frame);root.dataset.shipX=String(program.spriteInfo('X Sprite',15));root.dataset.shipY=String(program.spriteInfo('Y Sprite',15));root.dataset.shipImage=String(program.spriteInfo('I Sprite',15));root.dataset.shipFire=String(program.amreg(0));root.dataset.shipDead=String(program.amreg(24));root.dataset.backend=gpu?'webgl':'canvas';root.dataset.phase='preview';
+      status.textContent='Original ship program: arrows move; Ctrl or gamepad fire sets its fire flag (bullet-launch housekeeping omitted). Waits slowed by 3×. '+(frame===0?'Advance to play, then use the focused canvas.':frame>88?'Preview complete; select another view and return to replay.':frame>=73?'Declared landscape-collision trigger: playing the original explosion.':'Playing. A declared collision at field 73 triggers the explosion.');
+      next.disabled=frame!==0;fullscreen.refresh();return;
+    }
     if(select.value==='sprites'){
       host.render();const stage=program.state.variables.int_stage;
       root.dataset.level='sprites';root.dataset.spriteStage=String(stage);root.dataset.backend=gpu?'webgl':'canvas';root.dataset.phase='preview';
@@ -104,15 +111,15 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   function choose() {
     if (disposed) return;
     if (host) host.detach(); if (program) program.stop(); if (gpu) gpu.clear();
-    const module = { exports: {} }; new Function('module', select.value==='sprites' ? spritesSource : ['hunters','hunters-beam'].includes(select.value) ? huntersSource : ['missile','missile-hit'].includes(select.value) ? missileSources[select.value==='missile-hit'?1:0] : select.value === 'amal' ? amalSource : select.value === 'channels' ? channelsSource : select.value === 'game-over' ? gameOverSource : select.value === 'default' ? defaultSource : select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
-    program = module.exports({ files, readAmalBeam: select.value==='hunters-beam' ? ()=>65535 : undefined, sleepScale: ['missile','missile-hit','hunters','hunters-beam'].includes(select.value) ? 3 : select.value === 'amal' ? 5 : 1 }); host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu }); host.attach(program);
+    const module = { exports: {} }; new Function('module', select.value==='ship' ? shipSource : select.value==='sprites' ? spritesSource : ['hunters','hunters-beam'].includes(select.value) ? huntersSource : ['missile','missile-hit'].includes(select.value) ? missileSources[select.value==='missile-hit'?1:0] : select.value === 'amal' ? amalSource : select.value === 'channels' ? channelsSource : select.value === 'game-over' ? gameOverSource : select.value === 'default' ? defaultSource : select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
+    program = module.exports({ files, readAmalBeam: select.value==='hunters-beam' ? ()=>65535 : undefined, sleepScale: ['ship','missile','missile-hit','hunters','hunters-beam'].includes(select.value) ? 3 : select.value === 'amal' ? 5 : 1 }); host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, joysticks:select.value==='ship'?[{port:1,keyboard:{fire:['ControlLeft','ControlRight']},gamepad:true}]:[] }); host.attach(program);
     try {
-      program.tick(1000); bindingTable.hidden = select.value !== 'channels'; next.hidden = !['sprites','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value); next.disabled = false; scroll.disabled = ['sprites','score','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value); const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
+      program.tick(1000); bindingTable.hidden = select.value !== 'channels'; next.hidden = !['ship','sprites','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value); next.disabled = false; scroll.disabled = ['ship','sprites','score','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value); const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
     } catch (error) { program.stop(); root.dataset.phase = 'error'; status.textContent = error.message; }
   }
-  next.onclick = () => { if (program && !disposed && ['sprites','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value)) { program.sendKey('next'); update(); } };
+  next.onclick = () => { if (program && !disposed && ['ship','sprites','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value)) { program.sendKey('next'); if(select.value==='ship')host.focus(); update(); } };
   select.onchange = choose; scroll.oninput = update;
-  const monitor = setInterval(() => { if (['sprites','score','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value)) update(); }, 50);
+  const monitor = setInterval(() => { if (['ship','sprites','score','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value)) update(); }, 50);
   function dispose() {
     if (disposed) return; disposed = true; clearInterval(monitor); if (host) host.detach(); if (program) program.stop(); fullscreen.dispose();
     if (gpu) { const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }

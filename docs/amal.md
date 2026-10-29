@@ -1,10 +1,11 @@
 # Manual AMAL execution
 
 The complete unchanged Planet Zybex source now compiles to 1,122 instructions.
-Its first runtime gap is now the ship AMAL input function at original
-**line 1142, byte 54290, character 37**. Computed Sprite 15 creation now succeeds. Compilation does not imply playable
-Zybex. The separate Bob 21 drop program now executes unchanged in a declared
-preview, using real `Wait Vbl`, `Synchro` and `Update` statements.
+It now passes a bounded forty-field input replay per video standard, including
+movement, firing and the first explosion. The isolated original ship procedure
+also matches 178 independent PAL/NTSC frames. See [joystick input and animation
+lanes](amal-input-animation.md) for the new J0/J1 and Anim contracts. Compilation
+and this tested prefix do not imply complete gameplay compatibility.
 
 ## Supported profile
 
@@ -20,11 +21,13 @@ words, R0–R9. Supported AMAL forms are:
 | Jump / If expression Jump | Checked single-initial labels; ten taken jumps yield one synchronization call |
 | Pause / P | Resume at the next instruction on the next synchronization |
 | Move dx,dy,count | Native 8.8 slope calculation and half-pixel initial fractions |
-| End / end of string | Finish execution, disable Autotest and retain the installed record |
+| End / end of string | Finish normal execution/Autotest; retain animation and the installed record |
 | AUtotest / AU() | Activate a pre-pass test region / disable it |
 | Direct / eXit | Redirect normal execution / preserve its suspended position |
 | For / Next | Paired local/global registers, captured bound, +1 word increments; repeats yield |
 | BC(number,first,last) | Existing live Bob masks/owners/range and shared collision table |
+| J0 / J1 | Live synchronous Basic joystick masks, with Joy0/Joy1 initial forms |
+| Anim | Independent lazy frame/image countdown lane, finite or repeated |
 | Z(mask) | Separate shared AMAL word generator with source-derived multiply/word mixing |
 | XS, YS, XH, YH | Live screen/hardware coordinate conversion using the existing bounded screen geometry |
 
@@ -94,7 +97,8 @@ eXit, implicit closing-bracket exit and quota exhaustion preserve normal resumpt
 including an in-flight Move. Direct changes the normal resume point and clears
 the pending movement counter. The normal target then runs in that same Synchro
 call, as `Animeur` calls the test before its normal phase. No extra field is
-inserted. End in either phase disables the test and finishes the program.
+inserted. End in either phase disables the test and normal program; an installed Anim
+lane continues.
 AU() disables the test without stopping normal execution.
 
 Labels share one initial-letter namespace across the whole string. Ordinary
@@ -142,11 +146,11 @@ Next yields before repeating a loop, ordinary jumps retain their execution mode,
 and Bob collision tests require direct Synchro execution. Keep these boundaries
 when extending the current manual subset.
 
-Anim/animation lanes, Wait/On, joystick/mouse functions, Sprite collision
+Wait/On, mouse functions, Sprite collision
 and Col functions, local Amreg overloads, AMAL banks/raw-address targets,
 Freeze and automatic synchronization remain unsupported. The entire original
-program now compiles, but these AMAL runtime gaps still
-block the full game. The original source is not patched to bypass them.
+program now compiles and passes the bounded connected replay; those wider
+functions are not evidence of a blocker in its tested prefix. The original source is not patched to bypass them.
 
 ## Bob 21 preview
 
@@ -166,7 +170,7 @@ composites its transparent pixels. It generates fourteen full-bitmap/viewport
 hashes, five PNGs and six arithmetic movement vectors. Unit and browser checks
 cover all fourteen positions and images in PAL/NTSC, plus ten actual GPU frames.
 Together with earlier fixtures Zybex now has **68 GPU comparisons**. The full
-unchanged program also runs separately to its current ship-AMAL input error, with terminal
+unchanged program also runs separately to its bounded forty-field input replay, with terminal
 cleanup verified. Live checks exercise timed playback and renderer/input/disposal
 ownership; they do not claim connected gameplay or native timing parity.
 
@@ -191,8 +195,8 @@ its five-iteration delay without points. PAL/NTSC checks cover **324 frames and
 Stop/Resume retains an armed test and its flight/delay state without catch-up.
 These are declared isolated enemy fixtures, not connected gameplay or a native
 Amiga capture. The full unmodified program now passes Sprite 15 creation and
-reaches the ship AMAL input function at line 1142. Input/animation functions
-still block the game; see [computed Sprites](computed-sprites.md).
+runs movement, firing and the first explosion in a forty-field replay; see
+[AMAL input/animation](amal-input-animation.md).
 
 ## Random hunters
 
@@ -207,3 +211,8 @@ reentry/cancellation, zero-mask consumption and the exact fixture boundaries.
 The current ship Sprite slice adds 34 Canvas/GPU comparisons (142 Zybex GPU
 comparisons total); see [computed Sprites](computed-sprites.md) for its independent
 image/allocation matrix and remaining native capture limits.
+
+J0/J1 and independent Anim lanes add 178 isolated ship frames and a bounded
+80-field PAL/NTSC full-source replay. Thirty-two further GPU comparisons bring
+Zybex to 174. See [AMAL input/animation](amal-input-animation.md) for lazy frame
+expressions, word countdowns, End semantics, host Stop and remaining acceptance.

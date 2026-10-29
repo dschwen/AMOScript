@@ -1,13 +1,13 @@
 'use strict';
 module.exports = async function planetZybexProbe(page) {
-  return page.evaluate(async ({ sources, assets, oracle, gpuSources, registerSource, scoreSource, scoreOracle, clockSource, defaultSource, defaultOracle, spriteBufferSource, spriteBufferOracle, gameOverSource, gameOverOracle, channelsSource, channelsOracle, amalSource, amalOracle, wholeSource, missileSources, missileOracle, huntersSource, huntersOracle, spritesSource, spritesOracle }) => {
+  return page.evaluate(async ({ sources, assets, oracle, gpuSources, registerSource, scoreSource, scoreOracle, clockSource, defaultSource, defaultOracle, spriteBufferSource, spriteBufferOracle, gameOverSource, gameOverOracle, channelsSource, channelsOracle, amalSource, amalOracle, wholeSource, missileSources, missileOracle, huntersSource, huntersOracle, spritesSource, spritesOracle, shipSource, shipOracle }) => {
     const make = source => new Function(`return (${source});`)(), check = (value, message) => { if (!value) throw Error(message); };
     const hash = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), v => v.toString(16).padStart(2, '0')).join('');
     const model = make(gpuSources.model)(), sprites = make(gpuSources.sprites)(), canvas = document.createElement('canvas');
     const gpu = make(gpuSources.renderer)(model, sprites, make(gpuSources.resources)(model), make(gpuSources.shaders), make(gpuSources.layout))(document.createElement('canvas'));
     const host = AMOS_BROWSER.createCanvasHost(canvas, { requestAnimationFrame: () => 1, cancelAnimationFrame() {} });
     const gpuHost = AMOS_BROWSER.createCanvasHost(gpu.resources.context.canvas, { renderer: gpu, requestAnimationFrame: () => 1, cancelAnimationFrame() {} });
-    let program, windows = 0, gpuFrames = 0, scoreFrames = 0, startupFrames = 0, clearedDisplays = 0, spriteBufferFrames = 0, gameOverFrames = 0, channelStages = 0, channelBindings = 0, amalFrames = 0, missileFrames = 0, missileHits = 0, huntersFrames = 0, computedSpriteFrames = 0;
+    let program, windows = 0, gpuFrames = 0, scoreFrames = 0, startupFrames = 0, clearedDisplays = 0, spriteBufferFrames = 0, gameOverFrames = 0, channelStages = 0, channelBindings = 0, amalFrames = 0, missileFrames = 0, missileHits = 0, huntersFrames = 0, computedSpriteFrames = 0, shipFrames = 0, fullGameFrames = 0;
     try {
       for (const level of oracle.levels) {
         const module = { exports: {} }; new Function('module', sources[level.level - 1])(module);
@@ -209,16 +209,53 @@ module.exports = async function planetZybexProbe(page) {
         }
         host.detach();gpuHost.detach();program.stop();check(clock.pending()===0,'Computed ship fixture retained wakes');
       }
-      {
+      for(const standard of ['PAL','NTSC']){
+        const module={exports:{}};new Function('module',shipSource)(module);const clock=make(clockSource)(),captures=[];
+        program=module.exports({vblHz:standard==='PAL'?50:60,displayOptions:{snapshotStandard:standard},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
+        host.attach(program);gpuHost.attach(program);let reads=0;program.setJoystickReader(port=>{check(port===1,'Ship read wrong joystick port');reads++;return shipOracle.frames[captures.length].mask;});const update=program.update;
+        program.update=()=>{
+          update();const expected=shipOracle.frames[captures.length],channel=program.amalSnapshot().find(c=>c.number===15);
+          check(program.spriteInfo('X Sprite',15)===expected.x && program.spriteInfo('Y Sprite',15)===expected.y && program.spriteInfo('I Sprite',15)===expected.image && program.amreg(0)===expected.fire && program.amreg(23)===expected.rx && program.amreg(22)===expected.rw && program.amreg(24)===expected.dead && channel.ended===expected.ended && channel.remaining===expected.remaining && channel.locals[0]===expected.r0 && reads===expected.reads && JSON.stringify(channel.animation)===JSON.stringify(expected.animation),'Original ship AMAL trace differs');reads=0;
+          host.render();const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;captures.push({rgba,expected});
+          if(expected.png){
+            const previous=program.display.canvasFrame;program.display.canvasFrame=()=>{throw Error('GPU used CPU presentation');};
+            try{gpuHost.render();}finally{program.display.canvasFrame=previous;}
+            const hardware=gpu.readPixels(),reference=program.display.renderDisplay();
+            check(gpu.stats.lastResult.backend==='gpu' && hardware.length===reference.length && hardware.every((v,i)=>v===reference[i]),'Ship animation GPU differs');gpuFrames++;
+            if(globalThis.AMOS_DEMO_OBSERVE){globalThis.AMOS_DEMO_OBSERVE({name:`Canvas: ${standard} ship ${expected.frame}`,width:canvas.width,height:canvas.height,rgba});globalThis.AMOS_DEMO_OBSERVE({name:`WebGL: ${standard} ship ${expected.frame}`,width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba:hardware});}
+          }
+        };
+        program.tick(10000);check(program.amalSnapshot().length===9,'Original ship/bullet programs missing');program.sendKey('play');clock.tick(2000);
+        check(captures.length===89 && program.state.waiting==='key','Ship fixture missed final guard');
+        for(const capture of captures){check(await hash(capture.rgba)===capture.expected.rgbaSha256,'Independent ship image differs');shipFrames++;}
+        host.detach();gpuHost.detach();program.stop();check(clock.pending()===0,'Ship fixture retained wakes');
+      }
+      for(const standard of ['PAL','NTSC']){
         const module={exports:{}};new Function('module',wholeSource)(module);const clock=make(clockSource)();
-        program=module.exports({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
-        let error;try{program.tick(10000);clock.tick(10000);}catch(value){error=value;}
-        check(error && error.message==='Expected AMAL register at AMAL character 37 at line 1142, byte 54290','Complete unchanged source did not reach its declared ship AMAL input gate');
-        check(program.state.halted && program.amalSnapshot().length===0 && clock.pending()===0,'Full-source runtime gate retained owned work');program.stop();
+        program=module.exports({print(){},vblHz:standard==='PAL'?50:60,displayOptions:{snapshotStandard:standard},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
+        host.attach(program);gpuHost.attach(program);let frames=0;const update=program.update;
+        program.setJoystickReader(port=>port===1?(frames<5?0:frames<15?8:frames<25?17:0):0);
+        program.update=()=>{
+          update();frames++;fullGameFrames++;
+          if(frames<=25){check(program.spriteInfo('X Sprite',15)===176+5*Math.max(0,Math.min(10,frames-5)) && program.spriteInfo('Y Sprite',15)===124-5*Math.max(0,Math.min(10,frames-15)) && program.spriteInfo('I Sprite',15)===(Math.floor((frames-1)/5)%2?2:3),'Unchanged game movement/animation differs');}
+          if(frames===20)check(program.amreg(0)===1 && program.bobInfo('Y Bob',1)>0,'Unchanged game did not launch a real bullet');
+          if([1,6,15,25].includes(frames)){
+            host.render();const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+            const previous=program.display.canvasFrame;program.display.canvasFrame=()=>{throw Error('GPU used CPU presentation');};
+            try{gpuHost.render();}finally{program.display.canvasFrame=previous;}
+            const hardware=gpu.readPixels(),reference=program.display.renderDisplay();
+            check(gpu.stats.lastResult.backend==='gpu' && hardware.length===reference.length && hardware.every((v,i)=>v===reference[i]),'Unchanged game GPU differs');gpuFrames++;
+            if(globalThis.AMOS_DEMO_OBSERVE){globalThis.AMOS_DEMO_OBSERVE({name:`Canvas: ${standard} original game field ${frames}`,width:canvas.width,height:canvas.height,rgba});globalThis.AMOS_DEMO_OBSERVE({name:`WebGL: ${standard} original game field ${frames}`,width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba:hardware});}
+          }
+          if(frames===40){check(program.spriteInfo('Y Sprite',15)===0 && program.spriteInfo('I Sprite',15)===11,'Unchanged game did not complete its first explosion');program.stop();}
+        };
+        program.tick(10000);clock.tick(1000);
+        check(frames===40 && !program.state.halted && program.state.stopped && program.amalSnapshot().length===17 && clock.pending()===0,'Bounded full-source run retained owned work or stopped early');
+        host.detach();gpuHost.detach();program.stop();
       }
       const registers = { exports: {} }; new Function('module', registerSource)(registers); const r = registers.exports({}); r.tick(1000);
       check(r.state.halted && Array.from({ length: 26 }, (_, i) => r.amreg(i)).every((value, i) => value === (i === 9 ? 1234 : i === 20 ? 4 : i >= 1 && i <= 8 ? 100 : 0)), 'Original clear_amal register exchange differs'); r.stop();
-      return { registersVerified: true, levels: 7, windows, scoreFrames, startupFrames, clearedDisplays, spriteBufferFrames, gameOverFrames, channelStages, channelBindings, amalFrames, missileFrames, missileHits, huntersFrames, computedSpriteFrames, gpuFrames, fullGameCompiled: true, runtimeGate: 'ship AMAL input', previewOnly: true };
+      return { registersVerified: true, levels: 7, windows, scoreFrames, startupFrames, clearedDisplays, spriteBufferFrames, gameOverFrames, channelStages, channelBindings, amalFrames, missileFrames, missileHits, huntersFrames, computedSpriteFrames, shipFrames, fullGameFrames, gpuFrames, fullGameCompiled: true, runtimeGate: null, previewOnly: true };
     } finally { host.detach(); gpuHost.detach(); if (program) program.stop(); const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   }, require('./planetZybexFixture')());
 };

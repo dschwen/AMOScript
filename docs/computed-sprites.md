@@ -8,9 +8,9 @@ planes use single channels and the low two planes. Supported height remains
 1–270. These are Sprite streams, not Bobs or RGBA overlays.
 
 Planet Zybex's original `Sprite 15,176,124,1` now executes. The unchanged game
-next stops while compiling the ship AMAL string at **line 1142, byte 54290,
-character 37** (`Expected AMAL register` at its unsupported `J1` input function).
-Ship input and independent animation lanes remain necessary for connected play.
+previously stopped at the ship's J1/Anim installation on line 1142. That gate
+is now resolved by [AMAL input/animation](amal-input-animation.md); a bounded
+full-source replay covers movement, firing and the first explosion.
 
 Choose **Computed ship sprites (image/allocation preview)** in the
 [Zybex demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html).

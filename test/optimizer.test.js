@@ -119,3 +119,11 @@ test('optimizer: long runs split at the bounded block size without changing exec
   assert.strictEqual(runs[1].p.optimization.instructionsBatched, 70);
   runs.forEach(({ p }) => p.stop());
 });
+test('driver Stop: a host callback stops at the completed instruction before following plain or optimized assignments, and Resume continues once',()=>{
+  const bytes=binary([[t('Print'),text('pause')],[id('a'),t('='),n(1)],[id('b'),t('='),n(2)]]);
+  for(const optimize of [false,true]){
+    const clock=createFakeTimers();let p,calls=0;p=compile(bytes,optimize)({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,print(){calls++;p.stop();}});
+    p.tick(100);assert.strictEqual(p.state.stopped,true);assert.strictEqual(p.state.halted,false);assert.strictEqual(p.state.ip,1);assert.strictEqual(p.state.variables.int_a,0);assert.strictEqual(p.state.variables.int_b,0);assert.strictEqual(clock.pending(),0);
+    clock.tick(1000);assert.strictEqual(p.state.ip,1);p.resume();clock.tick(0);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.state.variables.int_a,1);assert.strictEqual(p.state.variables.int_b,2);assert.strictEqual(calls,1);assert.strictEqual(clock.pending(),0);
+  }
+});

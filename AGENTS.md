@@ -702,3 +702,23 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   comparisons. Full source now reaches the unsupported J1 ship AMAL function at
   line 1142, byte 54290, character 37. See docs/computed-sprites.md for portable
   reserved-pair handling, native source evidence and remaining timing/capture gaps.
+
+- AMAL J0/J1 (Joy0/Joy1 initial forms, no argument list) share the synchronous
+  Basic joystick reader; poll each expression occurrence left-to-right. Reject
+  malformed masks, recursion and stale/retired/stopped callbacks before assignment
+  or held-input relatch. Anim owns a separate per-channel lazy frame lane (up to
+  256 pairs); run it after Autotest/main, even after AMAL End. Image writes precede
+  duration evaluation; word zero durations wait 65536 passes and repeat zero is
+  infinite. Snapshot animation diagnostics are frozen copies. Off/replacement/
+  target retirement/VM termination clear lanes; Stop preserves them. Driver tick
+  checks Stop before the next instruction, including host frame callbacks.
+  Original horizontal_ship and eight complete inactive bullet programs now run
+  on a declared level-1/hidden-screen fixture with finite manual loop, keyboard/
+  Gamepad and RZ trigger at field 73. 178 independent PAL/NTSC ship frames and
+  24 GPU comparisons cover movement, fire intent and explosion. A separate full,
+  unchanged source replay uses only joystick input and host Stop for forty fields
+  per standard, real bullet launch and first explosion; eight GPU comparisons
+  bring Zybex to 174. No unsupported feature is reached in that prefix. Longer
+  life/restart/progression, independent whole-game pixels/audio, full launcher and
+  native captures remain open. See docs/amal-input-animation.md for source order,
+  native word timing, fixture bounds and host failure/Stop guarantees.
