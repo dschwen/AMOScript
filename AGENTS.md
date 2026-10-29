@@ -739,3 +739,19 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   context disposal pass. Level-1 completion/docking, vertical/later progression,
   other enemies/audio, full independent moving composites and native captures
   remain open. See docs/planet-zybex-game.md for exact source/clock/image boundaries.
+
+- AMAL XS/YS/XH/YH now delegate to the existing Basic display coordinate helper
+  after native low-three-bit screen alias/missing-target checks. AmYS/AmYH and
+  CXyScr/CXyHard use identical origins in the supported non-laced profile: remove
+  the erroneous extra +50/-50. Preserve selection, View and word/hires/offset
+  semantics. Native-derived hunter YS(2,130) is 80 at origin 50, so its independent
+  Move delta is -36; regenerated locals/pixels keep original strings/random traces.
+  The frozen progression-input mask/count route completes original level-1 docking
+  images 20/21/22 and runs 25 vertical level-2 fields with five lives/score 470.
+  Source/VM/IP/AMAL/bank pixels stay untouched; planning was read-only discovery,
+  while the committed replay sends fixed controls only. Different world-bank/
+  bitmap identities and eighteen level-2 AMAL channels are checked. Four PAL/NTSC
+  keyboard/Gamepad runs add 56 independent map strips and GPU comparisons; combined
+  full-game checks span 4,596 Updates/132 regions/96 GPU comparisons, total Zybex
+  270 GPU comparisons. Level-2 completion, later progression/victory and wider
+  independent/native captures remain open. See docs/planet-zybex-progression.md.

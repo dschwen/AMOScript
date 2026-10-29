@@ -160,12 +160,12 @@ for beam in (0,65535):
             if st['locals'][2]>0:
                 yield 'jump'
                 continue
-            st['autotest']=True;st['locals'][0]=410;st['locals'][1]=130
+            st['autotest']=True;st['locals'][0]=410;st['locals'][1]=80
             steps=random(10)+12
             def slope(n):
                 q=abs(n)*256//steps
                 return 0 if q>65535 else word(q if n>=0 else -q)*256
-            dx=slope(-170);dy=slope(14);fx=fy=32768
+            dx=slope(-170);dy=slope(-36);fx=fy=32768
             for step in range(1,steps+1):
                 vx=(st['x']%65536)*65536+fx+dx;vy=(st['y']%65536)*65536+fy+dy
                 st['x']=word(vx//65536);st['y']=word(vy//65536);fx=vx%65536;fy=vy%65536

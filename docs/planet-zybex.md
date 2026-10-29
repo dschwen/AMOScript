@@ -8,7 +8,8 @@ level banks are pinned under [examples/PlanetZybex](../examples/PlanetZybex/READ
 [Play the full game](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)
 with the unchanged source, sound/fullscreen, Ctrl fire, keyboard/Gamepad and touch
 controls. The current acceptance path covers real firing, five life losses,
-four reloads, GAME OVER and a fresh game. Later-level progression remains open;
+four reloads, GAME OVER, a fresh game, level-1 docking and 25 vertical level-2
+fields. Level-2 completion and later progression remain open;
 see [full-game page and replay](planet-zybex-game.md).
 
 The [browser preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
@@ -142,8 +143,8 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slices are **level-1 completion/docking, vertical level-2 progression
-and wider independent gameplay/audio coverage**. Ship input/Anim now pass their
+The next slices are **level-2 completion/docking, later progression and wider
+independent gameplay/audio coverage**. Ship input/Anim now pass their
 isolated fixture and a bounded full-source movement/firing/explosion replay. Autotest/Direct/eXit, For/Next and BC retain their
 first-enemy fixtures.
 Default and Set Sprite
@@ -242,3 +243,10 @@ keyboard/Gamepad runs, 76 independent regions, a full GAME OVER PNG, 40 GPU
 comparisons and two native Web Audio shot comparisons. Zybex now has **214 GPU
 comparisons**. The shared-builder Play Game page is featured in the Games index;
 all older bounded previews remain on this development page.
+
+The [docking/vertical-entry update](planet-zybex-progression.md) fixes an erroneous
+fifty-row AMAL YS/YH adjustment and shares Basic’s coordinate helper. Its frozen
+input-only route reaches level 2 with five lives and runs 25 vertical fields.
+Four additional replays add 56 independent raw-map strips and GPU comparisons,
+bringing Zybex to **270 GPU comparisons**. Level-2 completion and later stages
+remain unverified; earlier life-loss and full-game launcher checks remain required.

@@ -79,3 +79,8 @@ is now implemented; ship input/animation also pass isolated and bounded connecte
 replays. See [computed Sprites](computed-sprites.md) and
 [AMAL input/animation](amal-input-animation.md). These hunter fixtures
 do not establish connected gameplay or native interrupt/beam capture parity.
+
+The [coordinate correction](planet-zybex-progression.md) changes the prepared
+hunter target from Y=130 to the native YS(2,130)=80 on its origin-50 screen.
+The independent reference uses Move delta -36 and regenerates its pixels/locals;
+random draws, seeds, delays, scores and original source strings remain unchanged.

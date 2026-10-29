@@ -98,12 +98,22 @@ pages with `npm run build:demo`, then run `npm run check` and
 `npm run test:browser`. The separate [page tutorial](game-webpage-tutorial.md)
 explains the shared harness.
 
+## Docking and vertical-entry update
+
+The [progression replay](planet-zybex-progression.md) now completes level-1 docking
+and moves/fires through 25 vertical level-2 fields with all five lives. It also
+fixes AMAL YS/YH to share Basic’s source-derived coordinate conversion. Four new
+PAL/NTSC keyboard/Gamepad runs add 56 independent strips and 56 GPU comparisons.
+The complete page now has eight runs, 4,596 Updates, 132 independent regions and
+96 GPU comparisons; total Zybex coverage is 270 GPU comparisons. The earlier
+419-field/40-GPU figures above describe the retained loss/restart cases.
+
 ## Remaining acceptance
 
 This establishes first-level firing, natural death, life reloads, GAME OVER and
-fresh-game entry. It does not establish level-1 completion/docking, vertical level
-2, later levels, victory, every enemy or sample, a full independent gameplay
+fresh-game entry, level-1 docking and the first 25 vertical level-2 fields. It
+does not establish level-2 completion, later levels, victory, every enemy or sample, a full independent gameplay
 composite, or native Amiga display/audio/timing parity. All supplied maps remain
 independently decoded and scrollable in the preview. The next gameplay work is
-an input-only route to level-1 completion and vertical progression, retaining
+an input-only route to level-2 completion and later progression, retaining
 these loss/restart and existing Roller II/Wonderland regressions.

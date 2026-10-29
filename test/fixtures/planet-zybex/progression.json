@@ -1,0 +1,299 @@
+{
+  "sourceSha256": "fdcd685b871cadc7473e103d80cf78293402c839a5dd71922ffcef0213371145",
+  "frames": [
+    {
+      "name": "Departure",
+      "level": 1,
+      "frame": 1,
+      "vertical": 0,
+      "score": 0,
+      "sprite": [
+        176,
+        129,
+        3
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "b19af9e5a34841613e4d03d012052d567da0822de0a0b1495b664215ed87528c"
+        }
+      ]
+    },
+    {
+      "name": "Enemy corridor",
+      "level": 1,
+      "frame": 300,
+      "vertical": 0,
+      "score": 80,
+      "sprite": [
+        176,
+        134,
+        2
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "8760ada4f508b3d54a2a190c5f292fb261831c6570b68918c5321591018346ec"
+        }
+      ]
+    },
+    {
+      "name": "Dock approach",
+      "level": 1,
+      "frame": 600,
+      "vertical": 0,
+      "score": 450,
+      "sprite": [
+        336,
+        149,
+        2
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "eb0e8fabadd05c8a1c894ffd8867304a486d83b5deb4b92dcca012facdae7251"
+        }
+      ]
+    },
+    {
+      "name": "Scroll limit",
+      "level": 1,
+      "frame": 640,
+      "vertical": 0,
+      "score": 460,
+      "sprite": [
+        336,
+        134,
+        2
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "1aec2f6b8c6200e6c58f608baf29ecd9d9e3d588021fa8c6e91a31edf875f5d8"
+        }
+      ]
+    },
+    {
+      "name": "Dock reached",
+      "level": 1,
+      "frame": 701,
+      "vertical": 0,
+      "score": 470,
+      "sprite": [
+        336,
+        174,
+        3
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "32181fa5f0ca4cadb97882117bb0a834a7392e26471ee2446510311194be4b9a"
+        }
+      ]
+    },
+    {
+      "name": "Dock hold",
+      "level": 1,
+      "frame": 702,
+      "vertical": 0,
+      "score": 470,
+      "sprite": [
+        336,
+        174,
+        3
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "32181fa5f0ca4cadb97882117bb0a834a7392e26471ee2446510311194be4b9a"
+        }
+      ]
+    },
+    {
+      "name": "Dock image 20",
+      "level": 1,
+      "frame": 703,
+      "vertical": 0,
+      "score": 470,
+      "sprite": [
+        336,
+        174,
+        20
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "32181fa5f0ca4cadb97882117bb0a834a7392e26471ee2446510311194be4b9a"
+        }
+      ]
+    },
+    {
+      "name": "Dock image 21",
+      "level": 1,
+      "frame": 704,
+      "vertical": 0,
+      "score": 470,
+      "sprite": [
+        336,
+        174,
+        21
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "32181fa5f0ca4cadb97882117bb0a834a7392e26471ee2446510311194be4b9a"
+        }
+      ]
+    },
+    {
+      "name": "Dock image 22",
+      "level": 1,
+      "frame": 705,
+      "vertical": 0,
+      "score": 470,
+      "sprite": [
+        336,
+        174,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 64,
+          "height": 16,
+          "sha256": "32181fa5f0ca4cadb97882117bb0a834a7392e26471ee2446510311194be4b9a"
+        }
+      ]
+    },
+    {
+      "name": "Vertical entry",
+      "level": 2,
+      "frame": 706,
+      "vertical": 1,
+      "score": 470,
+      "sprite": [
+        336,
+        174,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 32,
+          "sha256": "9fab91e8f7287ce80014d7bf8d85c415abd3bf737c9218b4e4d65d563a773188"
+        }
+      ]
+    },
+    {
+      "name": "Vertical up",
+      "level": 2,
+      "frame": 711,
+      "vertical": 6,
+      "score": 470,
+      "sprite": [
+        336,
+        169,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 32,
+          "sha256": "49c443745a0ff3a9226d336174e8610b37da1473b8ba4bbfe27660e0a56a8d87"
+        }
+      ]
+    },
+    {
+      "name": "Vertical left",
+      "level": 2,
+      "frame": 716,
+      "vertical": 11,
+      "score": 470,
+      "sprite": [
+        331,
+        149,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 32,
+          "sha256": "4ead7159e873286c3fa0a2f369e0ce9d9410e2360261a9ac68d46939c617d2dd"
+        }
+      ]
+    },
+    {
+      "name": "Vertical hold",
+      "level": 2,
+      "frame": 721,
+      "vertical": 16,
+      "score": 470,
+      "sprite": [
+        311,
+        149,
+        23
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 32,
+          "sha256": "1fcac8988ce1f7b1566abf0ffbaa003a060826a7f76109a7c5cb6a3cbd438c72"
+        }
+      ]
+    },
+    {
+      "name": "Vertical scroll",
+      "level": 2,
+      "frame": 730,
+      "vertical": 25,
+      "score": 470,
+      "sprite": [
+        311,
+        149,
+        22
+      ],
+      "regions": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 640,
+          "height": 32,
+          "sha256": "478bb543336faa938f231b4567c062747bae455a3bdc9c03c329ceeb53794e46"
+        }
+      ]
+    }
+  ]
+}

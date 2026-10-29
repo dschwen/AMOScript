@@ -216,3 +216,13 @@ J0/J1 and independent Anim lanes add 178 isolated ship frames and a bounded
 80-field PAL/NTSC full-source replay. Thirty-two further GPU comparisons bring
 Zybex to 174. See [AMAL input/animation](amal-input-animation.md) for lazy frame
 expressions, word countdowns, End semantics, host Stop and remaining acceptance.
+
+## Shared coordinate correction
+
+AMAL YS/YH previously applied an extra +50/-50 compared with Basic. Native
+AmYS/AmYH and CXyScr/CXyHard use identical origins in the supported non-laced
+profile. All four AMAL conversions now delegate to the existing display helper,
+retaining screen aliasing and missing-screen behavior. The independent hunter
+reference now targets Y=80 for YS(2,130) on an origin-50 screen. See
+[Zybex docking/vertical entry](planet-zybex-progression.md) for source evidence,
+updated fixtures and the connected progression replay.

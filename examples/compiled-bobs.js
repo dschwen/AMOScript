@@ -3119,11 +3119,8 @@
   }, coordinate(name,screen,value) {
     const target=display.screens.get(screen & 7);
     if (!target) return -1;
-    const word=value=>(value<<16)>>16;
-    if(name==='XS') return word(word(word(value-target.hardwareX)*(target.mode===0x8000?2:1))+target.offsetX);
-    if(name==='YS') return word(value+50-target.hardwareY+target.offsetY);
-    if(name==='XH') return word((target.mode===0x8000 ? value>>1 : value)+target.hardwareX);
-    return word(value+target.hardwareY-50);
+    // Native AmXS/YS/XH/YH use the same origins as CXyScr/CXyHard.
+    return display.coordinate({XS:'X Screen',YS:'Y Screen',XH:'X Hard',YH:'Y Hard'}[name],screen & 7,value);
   }});
   function installAmal(channel,source) {
     channel=channelIndex(channel);

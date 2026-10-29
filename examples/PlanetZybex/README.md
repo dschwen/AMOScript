@@ -32,3 +32,8 @@ GAME OVER and a fresh game with keyboard/Gamepad, sound/fullscreen and lifecycle
 checks. Later-level completion/progression remains open; see
 [full-game acceptance](../../docs/planet-zybex-game.md). All seven supplied banks
 are embedded, with unchanged manifest hashes.
+
+The [progression replay](../../docs/planet-zybex-progression.md) now completes
+level-1 docking and runs the first 25 vertical level-2 fields with all five lives.
+It also verifies the shared AMAL/Basic Y-coordinate correction. Level-2 completion
+and later levels/victory remain next; the source and manifest bytes stay unchanged.

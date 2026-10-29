@@ -19,3 +19,15 @@ test('Planet Zybex full game: input-only PAL/NTSC movement/fire, five life losse
     for(const shot of shots){assert.deepStrictEqual([shot.mask,shot.period,shot.volume,shot.loopMask,shot.sample.length],[1,oracle.audio.periods[standard],56,0,4554]);assert.strictEqual(shot.rate,(standard==='PAL'?3546895:3579545)/shot.period);assert.strictEqual(hash(Uint8Array.from(shot.sample.data)),oracle.audio.sha256);for(let i=0;i<4554;i++)assert.strictEqual(((shot.sample.data[i]<<24)>>24)/128,expectedPcm.readFloatLE(i*4));}
   }
 });
+test('Planet Zybex progression: frozen joystick presses dock level 1, retire the world bank, preserve five lives and run 25 vertical fields with independent raster strips',()=>{
+  const inputs=require('./fixtures/planet-zybex/progression-input.json'),expected=require('./fixtures/planet-zybex/progression.json'),run=require('./helpers/planetZybexProgression');
+  const bytes=fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex/Zybex.AMOS'));assert.strictEqual(hash(bytes),inputs.sourceSha256);assert.strictEqual(hash(bytes),expected.sourceSha256);const{create}=compile(bytes);
+  for(const standard of ['PAL','NTSC']){
+    const clock=require('./helpers/fakeTimers').createFakeTimers(1),reads=[];let captures=0;
+    const result=run(create,clock,{read:name=>{reads.push(name);return fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1');}},p=>{let mask=0;const off=p.setJoystickReader(()=>mask);return{set(v){mask=v;p.setJoystick(1,v);},dispose(){mask=0;off();}};},inputs,(name,p,meta)=>{
+      const f=expected.frames[captures++];assert.strictEqual(name,f.name);assert.deepStrictEqual(meta,{frame:f.frame,vertical:f.vertical,lives:5,score:f.score});assert.deepStrictEqual(['X Sprite','Y Sprite','I Sprite'].map(key=>p.spriteInfo(key,15)),f.sprite);
+      const frame=p.display.canvasFrame();for(const r of f.regions)assert.strictEqual(hash(crop(frame,r)),r.sha256,name);
+    },null,standard);
+    assert.deepStrictEqual(result,{frames:730,verticalFrames:25,docking:[20,21,22],lives:5,level:2,score:470,stopResume:true});assert.strictEqual(captures,14);assert.deepStrictEqual(reads,['level1_screen.abk','level2_screen.abk']);assert.strictEqual(clock.pending(),0);
+  }
+});

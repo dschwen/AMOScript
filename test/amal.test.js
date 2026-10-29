@@ -34,7 +34,7 @@ test('AMAL: MOVE matches independent native 8.8 slope/half-pixel traces, includi
 });
 
 test('AMAL: coordinate functions use live hardware geometry/offsets and word screen selectors without changing selection or View',()=>{
-  const {p}=idle('Let RJ=XS(9,200);Let RK=YS(1,100);Let RL=XH(1,100);Let RM=YH(1,100)');const d=p.display;d.open(1,640,200,16,0x8000);d.screenDisplay(1,128,60,320,100);d.screenOffset(1,10,20);d.select(0);p.amalOn();p.synchro();assert.deepStrictEqual([p.amreg(9),p.amreg(10),p.amreg(11),p.amreg(12)],[154,110,178,110]);assert.strictEqual(d.current,0);p.stop();
+  const {p}=idle('Let RJ=XS(9,200);Let RK=YS(1,100);Let RL=XH(1,100);Let RM=YH(1,100)');const d=p.display;d.open(1,640,200,16,0x8000);d.screenDisplay(1,128,60,320,100);d.screenOffset(1,10,20);d.select(0);p.amalOn();p.synchro();assert.deepStrictEqual([p.amreg(9),p.amreg(10),p.amreg(11),p.amreg(12)],[154,60,178,160]);assert.strictEqual(d.current,0);p.stop();
 });
 
 test('AMAL: installation captures binding/object identity; remapping does not retarget it, Bob writes retain ownership and Off deletes locals',()=>{
@@ -75,5 +75,13 @@ test('Planet Zybex: the complete unchanged source runs 40 input-only fields, rea
     let frames=0;const update=p.update;p.setJoystickReader(port=>port===1?(frames<5?0:frames<15?8:frames<25?17:0):0);
     p.update=()=>{update();frames++;if(frames<=25){assert.strictEqual(p.spriteInfo('X Sprite',15),176+5*Math.max(0,Math.min(10,frames-5)));assert.strictEqual(p.spriteInfo('Y Sprite',15),124-5*Math.max(0,Math.min(10,frames-15)));assert.strictEqual(p.spriteInfo('I Sprite',15),Math.floor((frames-1)/5)%2?2:3);assert.strictEqual(p.state.variables.int_lives,5);}if(frames===20){assert.strictEqual(p.amreg(0),1);assert.ok(p.bobInfo('Y Bob',1)>0);}if(frames===40){assert.strictEqual(p.spriteInfo('Y Sprite',15),0);assert.strictEqual(p.spriteInfo('I Sprite',15),11);p.stop();}};
     p.tick(10000);c.tick(1000);assert.strictEqual(frames,40);assert.strictEqual(p.state.halted,false);assert.strictEqual(p.state.stopped,true);assert.strictEqual(p.amalSnapshot().length,17);assert.strictEqual(c.pending(),0);assert.deepStrictEqual(Array.from(p.state.input.joysticks),[0,0]);const old=p.display.renderDisplay();c.tick(1000);assert.strictEqual(frames,40);assert.deepStrictEqual(p.display.renderDisplay(),old);p.stop();
+  }
+});
+
+test('AMAL coordinates: native YS/YH and XS/XH agree with Basic conversions under offsets, hires, signed-word wrapping and screen aliases',()=>{
+  for(const mode of [0,0x8000])for(const value of [-32768,-1,0,100,32767]){
+    const {p}=idle(`Let RJ=XS(9,${value});Let RK=YS(9,${value});Let RL=XH(9,${value});Let RM=YH(9,${value});End`);
+    p.display.open(1,640,200,16,mode);p.display.screenDisplay(1,132,70,320,100);p.display.screenOffset(1,18,20);p.display.select(0);p.amalOn();p.synchro();
+    assert.deepStrictEqual([9,10,11,12].map(i=>p.amreg(i)),['X Screen','Y Screen','X Hard','Y Hard'].map(name=>p.display.coordinate(name,1,value)));assert.strictEqual(p.display.current,0);p.stop();
   }
 });

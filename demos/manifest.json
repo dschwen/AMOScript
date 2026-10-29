@@ -346,7 +346,7 @@
     {
       "file": "planet-zybex-game.html",
       "title": "Planet Zybex — full game",
-      "description": "The complete unchanged source and all seven supplied level banks. Keyboard and injected Gamepad replays cover movement, real firing, five natural life losses, four life restarts, GAME OVER and a fresh game in PAL/NTSC. Independent world/score regions and the complete GAME OVER image, 40 GPU comparisons and two native Web Audio sample comparisons. Stop/Resume, sound/fullscreen and shared application controls. Later-level progression and native Amiga capture remain open.",
+      "description": "The complete unchanged source and all seven supplied level banks. Keyboard and injected Gamepad replays cover movement, real firing, five natural life losses, four life restarts, GAME OVER and a fresh game in PAL/NTSC. A second frozen input route completes level-1 docking and moves/fires through the first 25 vertical fields with all five lives. Independent world/score regions and complete GAME OVER, 96 GPU comparisons and two native Web Audio sample comparisons. Stop/Resume, sound/fullscreen and shared application controls. Level-2 completion, later levels and native Amiga capture remain open.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html"
     },
     {
