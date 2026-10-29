@@ -47,6 +47,14 @@ module.exports = async function checkPlanetZybexPreview(page) {
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.amalEnded==='true');
   assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-amal-y'),'161');
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-amal.png'),fullPage:true});
+  for(const mode of ['missile','missile-hit']){
+    await page.selectOption('#zybex-level',mode);
+    await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.missileFrame==='0');
+    await page.click('#zybex-next');
+    await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.missileFrame==='81');
+    assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-missile-score'),mode==='missile-hit'?'20':'0');
+  }
+  await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-missile.png'),fullPage:true});
   await page.selectOption('#zybex-level','default');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
   assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');

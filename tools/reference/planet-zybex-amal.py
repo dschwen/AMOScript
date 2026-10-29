@@ -1,7 +1,7 @@
 """Independent native 8.8 MOVE slope traces and original Bob-21 composites.
 Decodes raw assets; imports no production JS and never uses rendered frames.
 """
-import base64,hashlib,json,struct,zlib
+import hashlib,json,struct,zlib
 from pathlib import Path
 root=Path(__file__).resolve().parents[2];folder=root/'examples/PlanetZybex'
 sha=lambda b:hashlib.sha256(b).hexdigest()
@@ -41,9 +41,12 @@ palette=struct.unpack_from('>32H',raw,26)
 program=(folder/'Zybex.AMOS').read_bytes();at=20+struct.unpack_from('>I',program,16)[0]
 assert program[at:at+4]==b'AmBs' and program[at+6:at+10]==b'AmSp';at+=10
 images=struct.unpack_from('>H',program,at)[0];at+=2
+decoded={}
 for image in range(1,images+1):
     words,h,planes,hx,hy=struct.unpack_from('>5H',program,at);at+=10
     count=words*2*h;data=program[at:at+count*planes];at+=count*planes
+    pic=bytes(sum(((data[p*count+y*words*2+x//8]>>(7-x%8))&1)<<p for p in range(planes))for y in range(h)for x in range(words*16))
+    decoded[image]=(words*16,h,(hx&16383)-16384 if hx&8192 else hx&16383,word(hy),pic)
     if image==27:
         iw=words*16;ih=h;hotx=(hx&16383)-16384 if hx&8192 else hx&16383;hoty=word(hy)
         icon=bytes(sum(((data[p*count+y*words*2+x//8]>>(7-x%8))&1)<<p for p in range(planes))for y in range(h)for x in range(iw))
@@ -67,3 +70,63 @@ for frame,y in enumerate([0]+[p[1]for p in vectors[0]['positions']]+[161]):
         (out/name).write_bytes(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',320,160,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(scan,9))+chunk(b'IEND',b''))
     frames.append(record)
 (out/'amal-drop.json').write_text(json.dumps(dict(vectors=vectors,frames=frames,imageSha256=sha(icon),sourceSha256=sha(program)),indent=2)+'\n')
+
+# Independent channel-20 state machine: generator suspension points represent
+# Pause and repeating Next, not a translation of the production AMAL IR.
+missiles=[]
+for with_bullet in (False,True):
+    st=dict(x=243,y=145,r0=0,r1=0,score=0,remaining=0,autotest=False)
+    def delay():
+        bound=st['r1'];st['r0']=1
+        while True:
+            yield # first P
+            yield # second P
+            st['r0']=word(st['r0']+1)
+            if st['r0']>bound:break
+            yield # repeating Next yields; last Next falls through
+    def flight():
+        while True:
+            st['autotest']=True;st['x']=243;st['y']=145
+            for step in range(1,25):
+                st['y']-=6;st['remaining']=25-step
+                yield
+            st['remaining']=0;st['r1']=5
+            yield from delay()
+    def finish():
+        st['x']=243;st['y']=145;st['remaining']=0;st['r1']=20;st['score']+=10
+        yield from delay()
+        yield from flight()
+    def collision():
+        if not with_bullet:return False
+        aw,ah,ax,ay,ap=decoded[16];bw,bh,bx,by,bp=decoded[25]
+        for yy in range(max(st['y']-ay,91-by),min(st['y']-ay+ah,91-by+bh)):
+            for xx in range(max(243-ax,243-bx),min(243-ax+aw,243-bx+bw)):
+                if ap[(yy-st['y']+ay)*aw+xx-243+ax] and bp[(yy-91+by)*bw+xx-243+bx]:return True
+        return False
+    body=flight();records=[]
+    for frame in range(81):
+        hit=frame>0 and st['autotest'] and collision()
+        if frame:
+            if hit:body=finish()
+            next(body)
+        pixels=bytearray(background)
+        objects=([(1,243,91,25)]if with_bullet else [])+[(20,st['x'],st['y'],16),(30,240,0,14),(31,240,144,15)]
+        for _,x,y,index in objects:
+            iw,ih,hx,hy,image=decoded[index]
+            for row in range(ih):
+                for col in range(iw):
+                    colour=image[row*iw+col];xx=x+col-hx;yy=y+row-hy
+                    if colour and 0<=xx<width and 0<=yy<height:pixels[yy*width+xx]=colour
+        rgba=bytearray()
+        for yy in range(160):
+            for xx in range(320):
+                c=palette[pixels[yy*width+xx]];rgba.extend([(c>>8&15)*17,(c>>4&15)*17,(c&15)*17,255])
+        record=dict(frame=frame,**st,collision=bool(hit),indicesSha256=sha(pixels),rgbaSha256=sha(rgba))
+        if frame in (0,5,6,39,70):
+            name=f'amal-missile-{int(with_bullet)}-{frame}.png';record['png']=name
+            scan=b''.join(b'\0'+rgba[yy*1280:(yy+1)*1280]for yy in range(160))
+            (out/name).write_bytes(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',320,160,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(scan,9))+chunk(b'IEND',b''))
+        records.append(record)
+    assert [r['frame']for r in records if r['collision']]==([6,70]if with_bullet else [])
+    missiles.append(dict(bullet=with_bullet,frames=records))
+(out/'amal-missile.json').write_text(json.dumps(dict(cases=missiles,sourceSha256=sha(program)),indent=2)+'\n')

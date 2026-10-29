@@ -14,12 +14,14 @@ module.exports = async function gamePageDebugProbe(page) {
     const check = (condition, message) => { if (!condition) throw Error(message); };
     const wait = async predicate => { for (let i = 0; i < 150; i++) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 20)); } throw Error('Game page did not reach expected phase'); };
     const area = document.createElement('section'); area.id = 'game-page-debug-examples';
+    // Moving an already mounted iframe ancestor reloads its browsing context.
+    document.body.append(area);
     const frames = [];
     for (const [name, source] of [['normal', normal], ['debug', debug]]) {
       const heading = document.createElement('h2'); heading.textContent = `${name === 'debug' ? 'Debug' : 'Normal'} application page`;
       const frame = document.createElement('iframe'); frame.id = `game-page-${name}`; frame.title = heading.textContent; frame.style.cssText = 'width:100%;height:580px;border:1px solid #888'; frame.allow = 'fullscreen *; autoplay *'; frame.allowFullscreen = true;
       const loaded = new Promise(resolve => { frame.onload = resolve; }); frame.srcdoc = source;
-      area.append(heading, frame); document.body.append(area); await loaded;
+      area.append(heading, frame); await loaded;
       frames.push(frame);
     }
     const plain = frames[0].contentDocument, doc = frames[1].contentDocument, win = frames[1].contentWindow;

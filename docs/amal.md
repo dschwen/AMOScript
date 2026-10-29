@@ -1,8 +1,8 @@
 # Manual AMAL execution
 
 The complete unchanged Planet Zybex source now compiles to 1,122 instructions.
-Its first runtime gap is `Autotest` inside the original channel-20 program:
-**line 276, byte 11614, AMAL character 11**. Compilation does not imply playable
+Its first runtime gap is now the random function `Z` inside the original
+channel-23 program: **line 307, byte 13240, AMAL character 135**. Compilation does not imply playable
 Zybex. The separate Bob 21 drop program now executes unchanged in a declared
 preview, using real `Wait Vbl`, `Synchro` and `Update` statements.
 
@@ -20,7 +20,11 @@ words, R0–R9. Supported AMAL forms are:
 | Jump / If expression Jump | Checked single-initial labels; ten taken jumps yield one synchronization call |
 | Pause / P | Resume at the next instruction on the next synchronization |
 | Move dx,dy,count | Native 8.8 slope calculation and half-pixel initial fractions |
-| End / end of string | Finish execution while retaining the installed record |
+| End / end of string | Finish execution, disable Autotest and retain the installed record |
+| AUtotest / AU() | Activate a pre-pass test region / disable it |
+| Direct / eXit | Redirect normal execution / preserve its suspended position |
+| For / Next | Paired local/global registers, captured bound, +1 word increments; repeats yield |
+| BC(number,first,last) | Existing live Bob masks/owners/range and shared collision table |
 | XS, YS, XH, YH | Live screen/hardware coordinate conversion using the existing bounded screen geometry |
 
 The source-derived scanner ignores lowercase/spacing; uppercase initials carry
@@ -33,7 +37,8 @@ parenthesized arithmetic and unary negation of registers remain rejected.
 
 The portable subset limits source to 32,766 byte characters, 4,096 explicit
 instructions, nested function parsing to 32 levels and the final expression tree
-to depth 64. Syntax failures include the original string character offset and
+to depth 64. Autotest has its own twenty-taken-jump quota; the normal pass retains ten.
+Syntax failures include the original string character offset and
 ordinary AMOS line/byte context. Unknown instructions reject; they never become
 movement or animation no-ops.
 
@@ -79,6 +84,44 @@ without catching up missed AMAL passes. Main End/Edit/failure clears owned AMAL
 programs. `program.amalSnapshot()` returns frozen independent inspection records;
 it exposes no controller or mutable register arrays.
 
+## Autotest, loops and collisions
+
+An AUtotest declaration activates its test region when normal execution first
+reaches it; the tests run before the normal pass on subsequent Synchro calls.
+The active region always starts at its entry, with a separate twenty-jump quota.
+eXit, implicit closing-bracket exit and quota exhaustion preserve normal resumption,
+including an in-flight Move. Direct changes the normal resume point and clears
+the pending movement counter. The normal target then runs in that same Synchro
+call, as `Animeur` calls the test before its normal phase. No extra field is
+inserted. End in either phase disables the test and finishes the program.
+AU() disables the test without stopping normal execution.
+
+Labels share one initial-letter namespace across the whole string. Ordinary
+Jump and If/Jump must retain main/Autotest mode; Direct must originate in Autotest
+and target main code. Nested Autotest, Direct/eXit outside tests, unclosed regions,
+duplicate or unresolved labels and cross-mode ordinary branches reject before
+installation. Move and For/Next inside tests reject. Pause inside tests remains
+an explicit unsupported profile; Wait/On are not implemented in either phase.
+
+For evaluates start and end before storing the start register, so its bound can
+read that register's old value. Its body executes at least once, including when
+start exceeds end. The captured bound belongs to that For instruction in that
+installation; later changes to the bound expression do not affect it. Next
+increments the counter as a signed word. A repeat stores the body resume point
+and yields; the final Next falls through in the same call. Signed counter wrap
+is preserved. Nesting and matching local/global register identities are checked
+at compile time. A branch to a Next before executing its For sees the native
+initial zero bound cell. The immutable IR is never modified to store loop bounds.
+
+BC evaluates its three operands left to right, passes their unsigned low words
+to the existing Bob collision resolver and publishes its shared Col table.
+Queries use current logical coordinates, actual screen ownership and existing
+stored masks/orientations. They do not draw, generate masks or apply pending
+image flips. This profile remains manual-only, matching the native collision
+function's synchronization requirement. Runtime failures identify the executing
+test instruction and installation location without duplicating the main source
+location on the driver error path.
+
 ## Evidence and remaining work
 
 The pinned native implementation is
@@ -94,12 +137,12 @@ portable behavior, not an Amiga capture or exact interrupt/blitter timing claim.
 The [AMOS Professional AMAL chapter](https://amospromanual.dev/07-06-amal.html)
 confirms uppercase-initial parsing, left-to-right word expressions, the ten-jump
 limit and Off deleting programs. It also specifies the next acceptance boundaries:
-Next yields before repeating a loop, Autotest branches remain within their block,
+Next yields before repeating a loop, ordinary jumps retain their execution mode,
 and Bob collision tests require direct Synchro execution. Keep these boundaries
 when extending the current manual subset.
 
-Autotest/Direct/Exit, For/Next, Anim/animation lanes, Wait, joystick/mouse/random/
-collision functions, local Amreg overloads, AMAL banks/raw-address targets,
+Anim/animation lanes, Wait/On, joystick/mouse/random functions, Sprite collision
+and Col functions, local Amreg overloads, AMAL banks/raw-address targets,
 Freeze and automatic synchronization remain unsupported. The entire original
 program now compiles, but these AMAL runtime gaps and computed/wide Sprites still
 block the full game. The original source is not patched to bypass them.
@@ -122,6 +165,30 @@ composites its transparent pixels. It generates fourteen full-bitmap/viewport
 hashes, five PNGs and six arithmetic movement vectors. Unit and browser checks
 cover all fourteen positions and images in PAL/NTSC, plus ten actual GPU frames.
 Together with earlier fixtures Zybex now has **68 GPU comparisons**. The full
-unchanged program also runs separately to its exact Autotest error, with terminal
+unchanged program also runs separately to its current random-function error, with terminal
 cleanup verified. Live checks exercise timed playback and renderer/input/disposal
 ownership; they do not claim connected gameplay or native timing parity.
+
+## Original missile preview
+
+The same [Zybex demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
+now offers **AMAL missile loop** and **AMAL missile collision**. Both run original
+Channel/Bob setup and the complete first enemy string, lines 263–276, on the
+level-1 background with original manual housekeeping. A declared eighty-pass
+loop/key guards replace the game loop. The collision variant adds one prepared,
+stationary Bob 1 at (243,91), using original bullet image 25. It does not simulate
+firing, run the ship controller or modify a running VM. Waits are slowed by 3×.
+
+`tools/reference/planet-zybex-amal.py` independently decodes images 14/15/16/25
+and the packed world, checks mask intersections and uses generator suspension
+points for the original two-Pause/Next delay. Both paths' 81 frames include full
+bitmap/viewport hashes and literal counter/score/movement states. Ten PNGs cover
+initial flight, pre-hit, same-pass reset and relaunch. The collision path hits
+at passes 6 and 70, adding 10 each time; the other path completes movement and
+its five-iteration delay without points. PAL/NTSC checks cover **324 frames and
+20 additional GPU comparisons**, bringing Zybex to **88 GPU comparisons**.
+Stop/Resume retains an armed test and its flight/delay state without catch-up.
+These are declared isolated enemy fixtures, not connected gameplay or a native
+Amiga capture. The full unmodified program now gets beyond the first two AMAL
+installations and rejects Z at line 307; wider functions/animation/computed
+sprites still block the game.

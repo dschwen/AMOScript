@@ -11,7 +11,7 @@ function idle(source='Pause;') {
 test('AMAL: uppercase-initial scanner, single-letter labels, frozen owned IR and bounded unsupported syntax',()=>{
   const a=createAmal({globals:new Int16Array(26)}),code=a.compile('Begin: Let R0=2+3*4; Pause; Jump Begin');assert.ok(Object.isFrozen(code.ops[0].expr));assert.strictEqual(code.ops[2].destination,0);
   assert.strictEqual(a.compile('B:L R0=$FFFF;P;J B').ops[0].expr.value,-1);
-  for(const source of ['Begin: P; Banana: P','Jump Gone','AUtotest(Exit)','Anim 0,(1,2)','For R0=1 To 2;Next R0','Let R0=(1+2)','Let R0=-RX','Let R0=1+'.repeat(100),'x'.repeat(32767)])assert.throws(()=>a.compile(source),/AMAL/);
+  for(const source of ['Begin: P; Banana: P','Jump Gone','Anim 0,(1,2)','Let R0=(1+2)','Let R0=-RX','Let R0=1+'.repeat(100),'x'.repeat(32767)])assert.throws(()=>a.compile(source),/AMAL/);
   assert.strictEqual(a.compile('Let R0=1\0Unsupported').ops.length,2);
   assert.throws(()=>a.compile('Let R0='+Array(90).fill('1').join('+')),/depth 64/);
 });
@@ -43,11 +43,11 @@ test('AMAL: installation captures binding/object identity; remapping does not re
 });
 
 test('AMAL: malformed replacements preserve programs, target-resolution failures retire them, and unsupported automatic/bank forms reject with source context',()=>{
-  const {p}=idle();const before=plain(p.amalSnapshot());assert.throws(()=>p.installAmal(0,'AUtotest(Exit)'),/Unsupported AMAL/);assert.deepStrictEqual(plain(p.amalSnapshot()),before);p.setChannel(0,'bob',()=>63);assert.throws(()=>p.installAmal(0,'Pause'),/target not defined/);assert.strictEqual(p.amalSnapshot().length,0);
+  const {p}=idle();const before=plain(p.amalSnapshot());assert.throws(()=>p.installAmal(0,'Anim 0,(1,2)'),/Unsupported AMAL/);assert.deepStrictEqual(plain(p.amalSnapshot()),before);p.setChannel(0,'bob',()=>63);assert.throws(()=>p.installAmal(0,'Pause'),/target not defined/);assert.strictEqual(p.amalSnapshot().length,0);
   for(const number of [-2,64]){assert.throws(()=>p.amalOn(number),/channel number/);assert.throws(()=>p.amalOff(number),/channel number/);}p.stop();
   assert.throws(()=>execute(binary([[t('Amal'),n(0),t(','),text('Pause')]])),/Automatic AMAL.*line 1/);
   assert.throws(()=>compile(binary([[t('Amal'),n(0),t(','),n(1)]])),/requires a string/);
-  assert.throws(()=>idle('AUtotest(Exit)'),/AMAL character 0 at line 5/);
+  assert.throws(()=>idle('Anim 0,(1,2)'),/AMAL character 0 at line 5/);
 });
 
 test('AMAL: object/screen retirement, Sprite Off/resize and Default clear owned programs; Stop freezes manual steps and terminal errors cannot leave programs alive',()=>{
@@ -68,7 +68,7 @@ test('Planet Zybex AMAL: original Bob 21 string executes all independent PAL/NTS
     p.tick(1000);assert.strictEqual(p.state.waiting,'key');p.sendKey('play');c.tick(1000);assert.strictEqual(count,14);assert.strictEqual(p.state.waiting,'key');p.sendKey('end');c.tick(0);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();}
 });
 
-test('Planet Zybex: the complete unchanged source now compiles, reaches the original first AMAL installation and honestly rejects Autotest',()=>{
+test('Planet Zybex: the complete unchanged source now compiles, passes the first two AMAL installations and honestly rejects the next random function',()=>{
   const raw=fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex/Zybex.AMOS'));assert.strictEqual(hash(raw),oracle.sourceSha256);const {create,transpiler}=compile(raw);assert.strictEqual(transpiler._ops.length,1122);const c=require('./helpers/fakeTimers').createFakeTimers(),p=create({now:c.now,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout,files:{read:name=>fs.readFileSync(path.join(__dirname,'../examples/PlanetZybex',name),'latin1')}});
-  assert.throws(()=>{p.tick(10000);c.tick(10000);},/Unsupported AMAL instruction at AMAL character 11 at line 276, byte 11614/);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();
+  assert.throws(()=>{p.tick(10000);c.tick(10000);},/Unsupported AMAL function Z at AMAL character 135 at line 307, byte 13240/);assert.strictEqual(p.state.halted,true);assert.strictEqual(p.amalSnapshot().length,0);assert.strictEqual(c.pending(),0);p.stop();
 });

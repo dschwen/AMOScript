@@ -658,3 +658,20 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   background. Twenty-eight independent PAL/NTSC frames/ten GPU comparisons bring
   Zybex to 68. See docs/amal.md for unsupported grammar/automatic/computed-sprite,
   source bounds, native timing/capture and connected-gameplay gates.
+- AMAL Autotest activates at its declaration, then runs before normal resumption
+  with a separate twenty-jump quota. eXit/closing/quota preserve Move state;
+  Direct resets movement and runs its main-mode destination in that same Synchro.
+  End clears tests; AU() disables them. Labels share one initial namespace, with
+  native main/Autotest mode checks; nested blocks, cross-mode Jump and misplaced
+  Direct/eXit reject. For/Next uses matching local/global registers, evaluates both
+  expressions before storing start, captures per-instruction bounds outside frozen
+  IR, executes body first and yields only on repeats. Preserve signed wrap and
+  zero bound cells on unentered For paths. BC reuses live Bob masks/owners and the
+  shared collision table via unsigned-word selectors; no drawing/mask generation.
+  Errors retain executing test/installation context once. The complete unchanged
+  Zybex now passes the first two installs and gates at Z: line 307, byte 13240,
+  character 135. Original 263–276 runs on a declared level-1 bitmap/eighty-pass
+  loop, with optional stationary original-image bullet. 324 independent PAL/NTSC
+  frames include collisions 6/70 and source +10 resets/delays; twenty GPU checks
+  bring Zybex to 88. See docs/amal.md for omitted gameplay and remaining function,
+  animation, automatic-sync, computed-sprite and native-capture boundaries.

@@ -14,7 +14,9 @@ the original reset/close/48-line Sprite allocation prefix. **Game-over text (fix
 shows the original transparent outline, an explicit opaque comparison and restoration.
 **Channel routing (fixture)** exposes original enemy/player/bullet mappings on
 the still level-1 background. **AMAL enemy drop (slow preview)** plays the original
-Bob 21 program with declared trigger inputs and slower frame waits.
+Bob 21 program with declared trigger inputs and slower frame waits. The missile
+loop/collision previews also run the complete first enemy program with a declared
+optional stationary bullet.
 **The complete source compiles; full gameplay remains blocked by AMAL runtime
 features and computed/wide Sprites.** All options remain marked as previews. No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
@@ -72,8 +74,8 @@ The remaining eight original encodings now decode and lower through the manual
 AMAL subset: Amal string, On/Off, Synchro Off/Synchro and Update Off/Update.
 The complete original source compiles to **1,122 instructions**, with **zero
 unrecognized token encodings**. This is not full runtime compatibility. Running
-it unchanged reaches the first AMAL installation and rejects unsupported
-**Autotest at line 276, byte 11614, AMAL character 11**. See [manual AMAL](amal.md)
+it unchanged gets beyond the first two AMAL installations and rejects unsupported
+**random Z at line 307, byte 13240, AMAL character 135**. See [manual AMAL](amal.md)
 for installation, native word/jump/movement behavior and the remaining grammar,
 automatic synchronization and animation-lane gates.
 
@@ -99,8 +101,9 @@ historical counts after each compiler addition.
    explicit comparison/restoration checks; this is not gameplay acceptance.
 3. **AMAL execution and manual frame control.** Checked Bob/Sprite Channel
    bindings pass their storage/reset/evaluation contracts. Owned compiled AMAL
-   strings now support locals/shared globals, On/Off and manual Synchro/Update
-   for the declared Bob 21 program. Wider grammar, independent animation lanes
+   strings support locals/shared globals, On/Off and manual Synchro/Update.
+   Autotest/Direct/eXit, For/Next and BC now run the original first enemy program
+   in declared no-bullet/collision fixtures. Wider grammar, independent animation lanes
    and automatic synchronization remain open. The source deliberately
    disables automatic synchronization/update and calls them after Wait Vbl.
    Keep field scheduling separate from rendering and host requestAnimationFrame.
@@ -128,9 +131,9 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slice is **AMAL grammar coverage**, starting with Autotest/Direct/Exit,
-For/Next and collision-triggered interruption for the first enemy program.
-Animation lanes, random/joystick functions and computed/wide Sprites follow.
+The next slice is **AMAL random and input functions**, starting with Z at the
+current whole-program runtime gate. Animation lanes and computed/wide Sprites
+follow; Autotest/Direct/eXit, For/Next and BC now pass the first enemy fixtures.
 Default and Set Sprite
 Buffer now have implemented reset/allocation contracts; native computed/wide
 sprite allocation and custom interpreter preferences remain open. Different
@@ -191,8 +194,17 @@ RX=260/RN=0 and a thirteen-pass loop replace the player/game loop; the Bob draws
 on the original level-1 bitmap instead of the omitted screen-2 setup. Fourteen
 independent movement/composite frames in PAL/NTSC and ten GPU comparisons bring
 the total to **68 GPU comparisons**. The live preview slows waits by 5×. A separate
-full-source run checks the exact Autotest gate and owned cleanup. See
+full-source run checks the current random-function gate and owned cleanup. See
 [manual AMAL](amal.md); full gameplay is not inferred from successful compilation.
+
+The first missile fixture retains original Channel/Bob/string installation
+263–276 and runs eighty manual passes on the level-1 bitmap. A second variant
+adds a prepared stationary original-image bullet. Independent mask/flight/delay
+and bitmap references cover 324 PAL/NTSC frames, including same-pass collision
+resets and the two real +10 events per collision case. Twenty GPU comparisons
+bring Zybex to **88 GPU comparisons**. Source variables/IPs/banks are not edited;
+ship input and connected gameplay remain omitted. The live views slow waits by
+3× and preserve the ordinary host lifecycle.
 
 Live-host checks cover level replacement, scroll limits, score fixture
 selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, timed AMAL playback, fullscreen and owned input/GPU disposal. Existing

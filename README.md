@@ -17,7 +17,7 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 
 The next game target is [Planet Zybex](docs/planet-zybex.md). Its
 [level background preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
-also includes score/startup fixtures and a playable original AMAL enemy drop.
+also includes score/startup fixtures and original AMAL enemy drop/missile previews.
 The whole source now compiles; full gameplay still needs wider AMAL grammar
 and computed/wide sprite support.
 

@@ -3100,7 +3100,7 @@
     if (music) throw new Error('Sample/effect voice stealing during Music is not implemented; Music Off first');
   }
   let manualAmal = false;
-  const amal = amalFactory({ globals:amalRegisters, resolve(binding) {
+  const amal = amalFactory({ globals:amalRegisters, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
     if (type === 'sprite' && number >= 8) throw new Error('Computed Sprite AMAL targets are not implemented');
     const objects = type === 'bob' ? bobs : sprites;
@@ -5228,7 +5228,8 @@
       // AniChr ignores lowercase letters/spacing, retaining uppercase initials.
       if ((code >= 33 && code <= 90) || code === 124 || code === 33) { chars.push(source[i]); offsets.push(i); }
     }
-    let at = 0;
+    let at = 0, scope = 0, autoOpen = null;
+    const forStack = [];
     const ops = [], labels = new Map();
     const peek = () => chars[at] || '';
     const error = message => { throw new Error(`${message} at AMAL character ${offsets[at] == null ? source.length : offsets[at]}`); };
@@ -5253,10 +5254,16 @@
         if (at === start) error('Expected AMAL integer literal');
         return { kind:'literal', value:word(sign * number) };
       }
+      if (peek() === 'B' && chars[at+1] === 'C') {
+        at += 2; expect('('); const args = [expression(depth+1)];
+        expect(','); args.push(expression(depth+1)); expect(','); args.push(expression(depth+1)); expect(')');
+        return {kind:'bobCollision',args};
+      }
       if (['X','Y'].includes(peek()) && ['S','H'].includes(chars[at+1])) {
         const name = chars[at++] + chars[at++]; expect('('); const screen = expression(depth+1); expect(','); const value = expression(depth+1); expect(')');
         return { kind:'coordinate', name, screen, value };
       }
+      if (peek() === 'Z') error('Unsupported AMAL function Z');
       return register();
     }
     function expression(depth = 0) {
@@ -5269,29 +5276,65 @@
       return expr;
     }
     function label() { const value = peek(); if (!/^[A-Z]$/.test(value)) error('Expected AMAL label'); at++; return value; }
+    function branch(command, offset) {
+      if (command === 'J') return {kind:'jump',label:label(),scope,offset};
+      if (scope !== 1) error('Direct/eXit require AMAL Autotest');
+      if (command === 'D') return {kind:'direct',label:label(),scope,offset};
+      if (command === 'X') return {kind:'exit',scope,offset};
+      error('Expected AMAL Jump, Direct or eXit');
+    }
     while (at < chars.length) {
       if (peek() === ';') { at++; continue; }
       const offset = offsets[at], command = chars[at++];
       if (peek() === ':') {
         at++; if (!/^[A-Z]$/.test(command) || labels.has(command)) error('Invalid or duplicate AMAL label');
-        labels.set(command,ops.length); continue;
+        labels.set(command,{index:ops.length,scope}); continue;
       }
       if (ops.length >= 4096) error('AMAL instruction limit exceeded');
       let op;
-      if (command === 'L') { const target = register(); expect('='); op = { kind:'let', target, expr:expression() }; }
-      else if (command === 'M') { const x = expression(); expect(','); const y = expression(); expect(','); op = { kind:'move', x, y, steps:expression() }; }
-      else if (command === 'J') op = { kind:'jump', label:label() };
-      else if (command === 'I') { const expr = expression(); expect('J'); op = { kind:'if', expr, label:label() }; }
-      else if (command === 'P' && peek() !== 'L') op = { kind:'pause' };
-      else if (command === 'E') op = { kind:'end' };
+      if (command === 'A' && peek() === 'U') {
+        if (scope) error('Nested AMAL Autotest is not allowed');
+        at++; expect('(');
+        if (peek() === ')') { at++; op={kind:'autoOff'}; }
+        else { autoOpen=ops.length; op={kind:'autoOn',scope:0}; ops.push({...op,offset}); scope=1; continue; }
+      } else if (command === ')') {
+        if (!scope) error('Unexpected AMAL Autotest close');
+        ops.push({kind:'exit',scope,offset}); ops[autoOpen].destination=ops.length;
+        scope=0; autoOpen=null; continue;
+      } else if (command === 'L') { const target=register(); expect('='); op={kind:'let',target,expr:expression()}; }
+      else if (command === 'M') {
+        if(scope) error('Move is not allowed in AMAL Autotest');
+        const x=expression(); expect(','); const y=expression(); expect(','); op={kind:'move',x,y,steps:expression()};
+      } else if (['J','D','X'].includes(command)) op=branch(command,offset);
+      else if (command === 'I') { const expr=expression(), action=chars[at++]; op={kind:'if',expr,action:branch(action,offset)}; }
+      else if (command === 'F') {
+        if(scope) error('For is not allowed in AMAL Autotest');
+        const target=register(); if(target.kind==='object') error('AMAL For requires a local/global register');
+        expect('='); const start=expression(); expect('T'); op={kind:'for',target,start,bound:expression()}; forStack.push(ops.length);
+      } else if (command === 'N') {
+        if(scope) error('Next is not allowed in AMAL Autotest');
+        const target=register(), begin=forStack.pop(), owner=ops[begin];
+        if(!owner || owner.target.kind!==target.kind || owner.target.index!==target.index) error('Mismatched AMAL For/Next');
+        op={kind:'next',begin};
+      } else if (command === 'P' && peek() !== 'L') {
+        if(scope) error('Pause in AMAL Autotest is not supported');
+        op={kind:'pause'};
+      } else if (command === 'E') op={kind:'end'};
       else { at--; error('Unsupported AMAL instruction'); }
-      ops.push({ ...op, offset });
+      ops.push({...op,scope,offset});
     }
-    ops.push({ kind:'end', offset:source.length });
-    for (const op of ops) if (op.label != null) {
-      if (!labels.has(op.label)) error(`Undefined AMAL label ${op.label}`);
-      op.destination = labels.get(op.label);
+    if(scope) error('Unclosed AMAL Autotest');
+    if(forStack.length) error('Unmatched AMAL For');
+    ops.push({kind:'end',scope:0,offset:source.length});
+    function resolveBranch(op) {
+      if(op.kind==='if') { resolveBranch(op.action); return; }
+      if(op.label==null) return;
+      const destination=labels.get(op.label);
+      if(!destination) error(`Undefined AMAL label ${op.label}`);
+      if(destination.scope !== (op.kind==='direct'?0:op.scope)) error('AMAL branch crosses Autotest boundary');
+      op.destination=destination.index;
     }
+    for(const op of ops) resolveBranch(op);
     const pending = ops.map(op=>[op,0]);
     while (pending.length) {
       const [value,depth] = pending.pop();
@@ -5302,6 +5345,7 @@
     return freeze({ source, ops });
   }
   function evaluate(expr, channel) {
+    if (expr.kind === 'bobCollision') return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'local') return channel.locals[expr.index];
     if (expr.kind === 'global') return options.globals[expr.index];
@@ -5322,7 +5366,7 @@
     const code = compile(source); // A syntax failure retains the old program.
     channels.delete(number); // Native replacement retires before target resolution.
     const target = options.resolve(binding);
-    channels.set(number,{ number, code, binding:Object.freeze({...binding}), target, location:location && {...location}, locals:new Int16Array(10), ip:0, enabled:false, ended:false, move:null });
+    channels.set(number,{ number, code, binding:Object.freeze({...binding}), target, location:location && {...location}, locals:new Int16Array(10), ip:0, enabled:false, ended:false, move:null, autoStart:null, bounds:new Map() });
   }
   function control(number, enabled) {
     for (const [id, channel] of channels) if (number == null || id === number) {
@@ -5332,35 +5376,53 @@
   }
   function retire() { for (const [id,c] of channels) if (!c.target.alive()) channels.delete(id); }
   function removeTarget(type, number = null) { for (const [id,c] of channels) if (c.binding.type === type && (number == null || c.binding.number === number)) channels.delete(id); }
-  function stepChannel(c) {
-    let jumps = 10;
-    for (let count = 0; count < 50000; count++) {
-      const op = c.code.ops[c.ip];
-      if (op.kind === 'let') {
-        const value = evaluate(op.expr,c), target = op.target;
-        if (target.kind === 'local') c.locals[target.index] = value;
-        else if (target.kind === 'global') options.globals[target.index] = value;
-        else c.target.write(target.name,value);
-        c.ip++;
-      } else if (op.kind === 'pause') { c.ip++; return; }
-      else if (op.kind === 'end') { c.ended = true; return; }
-      else if (op.kind === 'jump' || op.kind === 'if') {
-        if (op.kind === 'if' && !evaluate(op.expr,c)) { c.ip++; continue; }
-        c.ip = op.destination; if (--jumps === 0) return;
-      } else if (op.kind === 'move') {
-        if (c.move) {
-          if (--c.move.remaining === 0) { c.move = null; c.ip++; continue; }
+  function readRegister(target,c) { return target.kind==='local' ? c.locals[target.index] : options.globals[target.index]; }
+  function store(target,value,c) {
+    if(target.kind==='local') c.locals[target.index]=value;
+    else if(target.kind==='global') options.globals[target.index]=value;
+    else c.target.write(target.name,value);
+  }
+  function stepChannel(c,autotest=false) {
+    let jumps=autotest?20:10, ip=autotest?c.autoStart:c.ip;
+    const save=()=>{if(!autotest)c.ip=ip;};
+    for(let count=0;count<100000;count++) {
+      c.executingIp=ip;
+      const op=c.code.ops[ip];
+      if(op.kind==='let') { store(op.target,evaluate(op.expr,c),c); ip++; }
+      else if(op.kind==='autoOn') { c.autoStart=ip+1; ip=op.destination; }
+      else if(op.kind==='autoOff') { c.autoStart=null; ip++; }
+      else if(op.kind==='pause') { ip++; save(); return; }
+      else if(op.kind==='end') { c.ended=true; c.autoStart=null; save(); return; }
+      else if(['jump','direct','exit','if'].includes(op.kind)) {
+        if(op.kind==='if' && !evaluate(op.expr,c)) { ip++; continue; }
+        const action=op.kind==='if'?op.action:op;
+        if(action.kind==='exit') return;
+        if(action.kind==='direct') { c.ip=action.destination; c.move=null; return; }
+        ip=action.destination; if(--jumps===0) { save(); return; }
+      } else if(op.kind==='for') {
+        // Both expressions see the old register; the captured bound is owned
+        // by this compiled For instruction, not by a runtime loop stack.
+        const start=evaluate(op.start,c),bound=evaluate(op.bound,c);
+        store(op.target,start,c); c.bounds.set(ip,bound); ip++;
+      } else if(op.kind==='next') {
+        const owner=c.code.ops[op.begin],value=word(readRegister(owner.target,c)+1);
+        store(owner.target,value,c);
+        if(value <= (c.bounds.get(op.begin)||0)) { c.ip=op.begin+1; return; }
+        ip++;
+      } else if(op.kind==='move') {
+        if(c.move) {
+          if(--c.move.remaining===0) { c.move=null; ip++; continue; }
         } else {
-          const x = evaluate(op.x,c), y = evaluate(op.y,c), steps = Math.max(1,evaluate(op.steps,c));
-          const delta = value => { const q = Math.trunc(Math.abs(value)*256/steps); return q > 65535 ? 0 : word(value < 0 ? -q : q)*256; };
-          c.move = { remaining:steps, dx:delta(x), dy:delta(y), fx:32768, fy:32768 };
+          const x=evaluate(op.x,c),y=evaluate(op.y,c),steps=Math.max(1,evaluate(op.steps,c));
+          const delta=value=>{const q=Math.trunc(Math.abs(value)*256/steps);return q>65535?0:word(value<0?-q:q)*256;};
+          c.move={remaining:steps,dx:delta(x),dy:delta(y),fx:32768,fy:32768};
         }
-        for (const [axis,delta,fraction] of [['X','dx','fx'],['Y','dy','fy']]) {
-          const current = word(c.target.read(axis)), value = (((current & 65535)*65536+c.move[fraction])+c.move[delta])|0;
-          c.move[fraction] = value & 65535;
-          if ((value >> 16) !== current) c.target.write(axis,value >> 16);
+        for(const [axis,delta,fraction] of [['X','dx','fx'],['Y','dy','fy']]) {
+          const current=word(c.target.read(axis)),value=(((current&65535)*65536+c.move[fraction])+c.move[delta])|0;
+          c.move[fraction]=value&65535;
+          if((value>>16)!==current)c.target.write(axis,value>>16);
         }
-        return;
+        save(); return;
       }
     }
     throw new Error('AMAL execution budget exceeded');
@@ -5368,15 +5430,15 @@
   function step() {
     retire();
     for (const c of [...channels.values()].sort((a,b)=>a.number-b.number)) if (c.enabled && !c.ended) {
-      try { stepChannel(c); }
+      try { if(c.autoStart!=null)stepChannel(c,true); if(!c.ended)stepChannel(c); }
       catch (error) {
-        error.message += ` in AMAL channel ${c.number}, character ${c.code.ops[c.ip].offset}`;
+        error.message += ` in AMAL channel ${c.number}, character ${c.code.ops[c.executingIp].offset}`;
         if (c.location) error.message += ` at line ${c.location.line}, byte ${c.location.offset}`;
         throw error;
       }
     }
   }
-  function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,remaining:c.move ? c.move.remaining : 0,locals:Object.freeze(Array.from(c.locals))}))); }
+  function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,locals:Object.freeze(Array.from(c.locals))}))); }
   return { compile, install, control, step, retire, removeTarget, clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
@@ -6199,7 +6261,7 @@
     } catch (error) {
       state.halted = true;
       cancelScheduled();
-      if (state.location) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
+      if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       throw error;
     }
     state.ticks++;
