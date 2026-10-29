@@ -1,13 +1,13 @@
 'use strict';
 module.exports = async function planetZybexProbe(page) {
-  return page.evaluate(async ({ sources, assets, oracle, gpuSources, registerSource, scoreSource, scoreOracle, clockSource, defaultSource, defaultOracle, spriteBufferSource, spriteBufferOracle, gameOverSource, gameOverOracle, channelsSource, channelsOracle }) => {
+  return page.evaluate(async ({ sources, assets, oracle, gpuSources, registerSource, scoreSource, scoreOracle, clockSource, defaultSource, defaultOracle, spriteBufferSource, spriteBufferOracle, gameOverSource, gameOverOracle, channelsSource, channelsOracle, amalSource, amalOracle, wholeSource }) => {
     const make = source => new Function(`return (${source});`)(), check = (value, message) => { if (!value) throw Error(message); };
     const hash = async bytes => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), v => v.toString(16).padStart(2, '0')).join('');
     const model = make(gpuSources.model)(), sprites = make(gpuSources.sprites)(), canvas = document.createElement('canvas');
     const gpu = make(gpuSources.renderer)(model, sprites, make(gpuSources.resources)(model), make(gpuSources.shaders), make(gpuSources.layout))(document.createElement('canvas'));
     const host = AMOS_BROWSER.createCanvasHost(canvas, { requestAnimationFrame: () => 1, cancelAnimationFrame() {} });
     const gpuHost = AMOS_BROWSER.createCanvasHost(gpu.resources.context.canvas, { renderer: gpu, requestAnimationFrame: () => 1, cancelAnimationFrame() {} });
-    let program, windows = 0, gpuFrames = 0, scoreFrames = 0, startupFrames = 0, clearedDisplays = 0, spriteBufferFrames = 0, gameOverFrames = 0, channelStages = 0, channelBindings = 0;
+    let program, windows = 0, gpuFrames = 0, scoreFrames = 0, startupFrames = 0, clearedDisplays = 0, spriteBufferFrames = 0, gameOverFrames = 0, channelStages = 0, channelBindings = 0, amalFrames = 0;
     try {
       for (const level of oracle.levels) {
         const module = { exports: {} }; new Function('module', sources[level.level - 1])(module);
@@ -126,9 +126,38 @@ module.exports = async function planetZybexProbe(page) {
         if(globalThis.AMOS_DEMO_OBSERVE)globalThis.AMOS_DEMO_OBSERVE({name:'WebGL: original channel routing retains level background',width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba:hardware});
         host.detach();gpuHost.detach();program.stop();check(clock.pending()===0,'Channel routing retained wakes');
       }
+      for(const standard of ['PAL','NTSC']) {
+        const module={exports:{}};new Function('module',amalSource)(module);const clock=make(clockSource)(),captures=[];
+        program=module.exports({vblHz:standard==='PAL'?50:60,displayOptions:{snapshotStandard:standard},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
+        host.attach(program);gpuHost.attach(program);const update=program.update;
+        program.update=()=>{
+          update();const expected=amalOracle.frames[captures.length],channel=program.amalSnapshot()[0];
+          check(expected && program.bobInfo('X Bob',21)===expected.x && program.bobInfo('Y Bob',21)===expected.y && channel.remaining===expected.remaining && channel.ended===expected.ended,'Original AMAL MOVE trace differs');
+          host.render();const rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+          captures.push({rgba,expected});
+          if(expected.png){
+            const previous=program.display.canvasFrame;program.display.canvasFrame=()=>{throw Error('GPU used CPU presentation');};
+            try{gpuHost.render();}finally{program.display.canvasFrame=previous;}
+            const hardware=gpu.readPixels(),reference=program.display.renderDisplay();
+            check(gpu.stats.lastResult.backend==='gpu' && hardware.length===reference.length && hardware.every((v,i)=>v===reference[i]),'AMAL MOVE GPU differs');gpuFrames++;
+            if(globalThis.AMOS_DEMO_OBSERVE){globalThis.AMOS_DEMO_OBSERVE({name:`Canvas: ${standard} AMAL drop ${expected.frame}`,width:canvas.width,height:canvas.height,rgba});globalThis.AMOS_DEMO_OBSERVE({name:`WebGL: ${standard} AMAL drop ${expected.frame}`,width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba:hardware});}
+          }
+        };
+        program.tick(1000);program.sendKey('play');clock.tick(1000);
+        check(captures.length===14 && program.state.waiting==='key','AMAL preview did not complete its declared frame loop');
+        for(const frame of captures){check(await hash(frame.rgba)===frame.expected.rgbaSha256,'Independent AMAL drop pixels differ');amalFrames++;}
+        host.detach();gpuHost.detach();program.stop();check(clock.pending()===0,'AMAL preview retained wakes');
+      }
+      {
+        const module={exports:{}};new Function('module',wholeSource)(module);const clock=make(clockSource)();
+        program=module.exports({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,files:{read:name=>atob(assets[name.toLowerCase()])}});
+        let error;try{program.tick(10000);clock.tick(10000);}catch(value){error=value;}
+        check(error && error.message==='Unsupported AMAL instruction at AMAL character 11 at line 276, byte 11614','Complete unchanged source did not reach its declared Autotest gate');
+        check(program.state.halted && program.amalSnapshot().length===0 && clock.pending()===0,'Full-source runtime gate retained owned work');program.stop();
+      }
       const registers = { exports: {} }; new Function('module', registerSource)(registers); const r = registers.exports({}); r.tick(1000);
       check(r.state.halted && Array.from({ length: 26 }, (_, i) => r.amreg(i)).every((value, i) => value === (i === 9 ? 1234 : i === 20 ? 4 : i >= 1 && i <= 8 ? 100 : 0)), 'Original clear_amal register exchange differs'); r.stop();
-      return { registersVerified: true, levels: 7, windows, scoreFrames, startupFrames, clearedDisplays, spriteBufferFrames, gameOverFrames, channelStages, channelBindings, gpuFrames, fullGameCompiled: false, previewOnly: true };
+      return { registersVerified: true, levels: 7, windows, scoreFrames, startupFrames, clearedDisplays, spriteBufferFrames, gameOverFrames, channelStages, channelBindings, amalFrames, gpuFrames, fullGameCompiled: true, runtimeGate: 'AMAL Autotest', previewOnly: true };
     } finally { host.detach(); gpuHost.detach(); if (program) program.stop(); const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   }, require('./planetZybexFixture')());
 };

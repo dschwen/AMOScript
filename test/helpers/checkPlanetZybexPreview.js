@@ -39,6 +39,14 @@ module.exports = async function checkPlanetZybexPreview(page) {
   }
   assert.ok((await page.locator('#zybex-channels').textContent()).includes('Bob 8'));
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-channels.png'),fullPage:true});
+  await page.selectOption('#zybex-level','amal');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.amalY==='0');
+  assert.strictEqual(await page.locator('#zybex-channels').isVisible(),false);
+  await page.click('#zybex-next');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.amalY!=='0');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.amalEnded==='true');
+  assert.strictEqual(await page.locator('#planet-zybex-preview').getAttribute('data-amal-y'),'161');
+  await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-amal.png'),fullPage:true});
   await page.selectOption('#zybex-level','default');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
   assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');

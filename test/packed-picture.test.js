@@ -77,5 +77,4 @@ test('Planet Zybex backgrounds: original Load/Unpack excerpts match 35 independe
     for (const view of level.windows) { p.display.screenOffset(1, view.x, view.y); assert.strictEqual(hash(p.display.canvasFrame().rgba), view.sha256, `${level.level} ${view.x},${view.y}`); }
     p.stop();
   }
-  assert.throws(() => compile(fs.readFileSync(path.join(folder, 'Zybex.AMOS'))), /Unsupported token 0x1fd2 at line 179, byte 8844/);
 });

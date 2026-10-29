@@ -31,13 +31,13 @@ limits are both 64. `DefRun1` restores all Sprite identity pairs.
 [`+Lib.s`](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/533b4b1f5acd604814513f78e02c7b4796cb0531/%2BLib.s),
 `MvA3`/`InAMv0`, reads the pair when installing an AMAL/animation program;
 [`+W.s`](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/533b4b1f5acd604814513f78e02c7b4796cb0531/%2BW.s),
-`ResAMAL`, resolves that installation's actual object address. The future AMAL
-controller must capture/resolve the pair at installation, rather than treating
-this table as live pointers or automatically retargeting installed programs.
+`ResAMAL`, resolves that installation's actual object address. The [manual AMAL controller](amal.md) captures/resolves the pair at installation;
+this table does not contain live pointers or retarget installed programs.
 
-This slice implements routing storage only. AMAL strings/local registers,
-On/Off/Freeze, automatic/manual synchronization and Update remain unsupported.
-No no-op AMAL commands are emitted. Screen display/size/offset, Rainbow and raw
+Routing remains separate from [manual AMAL execution](amal.md), which now
+supports bounded strings/local registers, On/Off, manual Synchro and Update.
+Freeze, wider AMAL grammar and automatic synchronization remain unsupported.
+No no-op AMAL programs are emitted. Screen display/size/offset, Rainbow and raw
 address targets remain rejected; computed/wide Sprites and native captures are
 separate gates. Global Amreg continues to use the existing shared signed-word
 array, not a new set of animation globals.

@@ -7,11 +7,11 @@ retain the low word; reads sign-extend and have integer expression typing. Index
 and failures retain their line/byte locations. Register values remain inspectable
 after End; no interpreter, wake or channel is created by a register access.
 
-This storage is intended to be shared by the forthcoming AMAL controller. It must
-not acquire a separate shadow set of globals.
+The [manual AMAL controller](amal.md) shares this storage; it does not acquire
+a separate shadow set of globals.
 [Channel routing](channels.md) now has separate checked selector storage.
-Channel-local register access, installed-program lifetimes and AMAL execution
-remain unsupported.
+The two-argument Amreg overload remains unsupported. Installed AMAL programs
+now have private locals and bounded manual execution; see [AMAL](amal.md).
 
 Planet Zybex's original `clear_amal` now executes in a declared fixture retaining
 its Global/array setup and complete procedure. With inputs RJ=1234 and RU=4, it

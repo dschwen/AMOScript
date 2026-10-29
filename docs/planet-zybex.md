@@ -13,8 +13,10 @@ between two declared score/lives inputs. **Default startup (fixture)** exposes
 the original reset/close/48-line Sprite allocation prefix. **Game-over text (fixture)**
 shows the original transparent outline, an explicit opaque comparison and restoration.
 **Channel routing (fixture)** exposes original enemy/player/bullet mappings on
-the still level-1 background. All options are marked as previews.
-**The full game does not compile or play yet.** No AMAL commands are replaced by
+the still level-1 background. **AMAL enemy drop (slow preview)** plays the original
+Bob 21 program with declared trigger inputs and slower frame waits.
+**The complete source compiles; full gameplay remains blocked by AMAL runtime
+features and computed/wide Sprites.** All options remain marked as previews. No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
 ## Source and dependency audit
@@ -29,7 +31,7 @@ source hash, complete bounded token audit, strings, embedded-bank metadata and
 first compilation failure. It found 15 unsupported **encodings**, not an estimate
 of development time. Recognized tokens can still expose runtime gaps.
 
-Seven of those encodings are now implemented:
+Seven foundational encodings have their bounded contracts implemented:
 
 - Slot 2 `$0056`, `Unpack bank To screen`, decodes the original packed backgrounds.
   Full indexed bitmaps/palettes match an independent Python decoder; 35 scrolled
@@ -66,16 +68,14 @@ Seven of those encodings are now implemented:
   creating objects or claiming computed-sprite support. Original enemy/bullet
   loops run in a declared routing-table preview. See [channel routing](channels.md).
 
-The whole-program compiler now stops at **Amal Off, line 179, byte 8844**.
-There are 8 remaining unsupported encodings:
-
-| Encoding | Command | Current uses |
-| --- | --- | --- |
-| `$1fd2` / `$1fe2` | Amal Off, all / one channel | 1 / 2 |
-| `$1fbc` | Amal On, all channels | 2 |
-| `$2012` | Amal channel,string | 33 |
-| `$205a` / `$206c` | Synchro Off / Synchro | 7 / 7 |
-| `$207a` / `$20ae` | Update Off / Update | 7 / 9 |
+The remaining eight original encodings now decode and lower through the manual
+AMAL subset: Amal string, On/Off, Synchro Off/Synchro and Update Off/Update.
+The complete original source compiles to **1,122 instructions**, with **zero
+unrecognized token encodings**. This is not full runtime compatibility. Running
+it unchanged reaches the first AMAL installation and rejects unsupported
+**Autotest at line 276, byte 11614, AMAL character 11**. See [manual AMAL](amal.md)
+for installation, native word/jump/movement behavior and the remaining grammar,
+automatic synchronization and animation-lane gates.
 
 Re-audit with `node tools/audit_program.js examples/PlanetZybex/Zybex.AMOS`.
 The JSON above remains the frozen baseline rather than silently changing its
@@ -98,9 +98,10 @@ historical counts after each compiler addition.
    startup allocation. Gr Writing 0/1 now passes original GAME OVER text and
    explicit comparison/restoration checks; this is not gameplay acceptance.
 3. **AMAL execution and manual frame control.** Checked Bob/Sprite Channel
-   bindings now pass their storage/reset/evaluation contracts. Add
-   owned compiled AMAL strings, local registers, the existing 26 global words,
-   on/off lifetimes and explicit Synchro/Update behavior. The source deliberately
+   bindings pass their storage/reset/evaluation contracts. Owned compiled AMAL
+   strings now support locals/shared globals, On/Off and manual Synchro/Update
+   for the declared Bob 21 program. Wider grammar, independent animation lanes
+   and automatic synchronization remain open. The source deliberately
    disables automatic synchronization/update and calls them after Wait Vbl.
    Keep field scheduling separate from rendering and host requestAnimationFrame.
    Do not implement these commands as aliases that omit movement or swapping.
@@ -127,9 +128,10 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slice is **AMAL program installation/execution**, followed by manual
-synchronization/update. Channel routing storage is implemented; installed-program
-object ownership/lifetimes remain to be built. Default and Set Sprite
+The next slice is **AMAL grammar coverage**, starting with Autotest/Direct/Exit,
+For/Next and collision-triggered interruption for the first enemy program.
+Animation lanes, random/joystick functions and computed/wide Sprites follow.
+Default and Set Sprite
 Buffer now have implemented reset/allocation contracts; native computed/wide
 sprite allocation and custom interpreter preferences remain open. Different
 COLOR00 values across score/playfield (the later thunder effect) still require
@@ -183,6 +185,15 @@ pixels remain unchanged. One additional GPU comparison brings the total to
 **58 GPU comparisons**. All 27 original Channel statements also compile in unit
 fixtures with declared inputs where their loops are omitted.
 
+The AMAL drop fixture retains the complete original Bob 21 string and setup
+279–284, manual controls 257 and original housekeeping 255/1301–1302. Declared
+RX=260/RN=0 and a thirteen-pass loop replace the player/game loop; the Bob draws
+on the original level-1 bitmap instead of the omitted screen-2 setup. Fourteen
+independent movement/composite frames in PAL/NTSC and ten GPU comparisons bring
+the total to **68 GPU comparisons**. The live preview slows waits by 5×. A separate
+full-source run checks the exact Autotest gate and owned cleanup. See
+[manual AMAL](amal.md); full gameplay is not inferred from successful compilation.
+
 Live-host checks cover level replacement, scroll limits, score fixture
-selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, fullscreen and owned input/GPU disposal. Existing
+selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, timed AMAL playback, fullscreen and owned input/GPU disposal. Existing
 Roller II/Wonderland launch, gameplay, audio and editor regressions remain required.

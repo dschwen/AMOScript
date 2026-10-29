@@ -638,3 +638,23 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   while preserving independent world pixels. 58 Zybex GPU comparisons; eight
   encodings remain, full source still stops at Amal Off 179. See docs/channels.md
   for omitted AMAL/manual update behavior and unsupported target forms.
+- Manual AMAL in lib/amos/amal.js owns immutable parsed strings and ten local
+  words per installed program, sharing existing Amreg globals. Synchro Off is
+  required; automatic installation rejects. Support Let/X/Y/A/registers,
+  left-to-right word operators, checked initial labels, ten-jump yields,
+  Pause/End, Move's native 8.8 slopes/half-pixel fractions and XS/YS/XH/YH.
+  Compile before retiring an old program; resolve the captured Channel target
+  after retirement. Preserve Bob/Sprite identity across ordinary statements;
+  rebindings do not retarget installed programs. On enables; Off deletes.
+  Synchro changes intent only; Update Off disables both automatic publications,
+  Update restores/draws/swaps Bobs then publishes Sprites. No AMAL timer or RAF
+  stepping. Object/screen retirement and resized Sprite pools remove owned
+  programs; Default resets manual mode, main End/Edit/failure clears programs,
+  Stop/Resume retains their state. Snapshot records are frozen independent copies.
+  The complete unchanged Zybex source now compiles (1122 instructions, zero unknown
+  encodings) and reaches unsupported Autotest at line 276, byte 11614, character
+  11. Its separate unchanged Bob 21 program runs with prepared trigger inputs,
+  a declared thirteen-pass loop and original manual housekeeping on level-1
+  background. Twenty-eight independent PAL/NTSC frames/ten GPU comparisons bring
+  Zybex to 68. See docs/amal.md for unsupported grammar/automatic/computed-sprite,
+  source bounds, native timing/capture and connected-gameplay gates.

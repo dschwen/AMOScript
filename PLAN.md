@@ -1,16 +1,18 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-28.
+Assessment updated: 2026-10-29.
 
 ## Current game priority: Planet Zybex
 
 [Planet Zybex](docs/planet-zybex.md) is the next full-game showcase target.
-Its unchanged source/assets are pinned and all seven packed backgrounds now
-render in an interactive WebGL preview. Global Amreg signed-word access and the
-original clear_amal routine are covered. The full game still fails at Default;
-13 unsupported encodings remain, plus runtime work for computed/wide sprites,
-manual updates and mixed-resolution presentation. Next implement the startup
-contracts and AMAL/channel execution, then connect input-driven level-1 gameplay.
+Its unchanged source/assets are pinned; all seven backgrounds, startup/score
+presentation and channel routing have declared browser previews. The complete
+source now compiles to 1,122 instructions with no unrecognized encodings. It
+reaches the explicit AMAL Autotest runtime gate at original line 276. The original
+Bob 21 drop program executes through manual Synchro/Update with independent
+PAL/NTSC pixels and actual GPU checks. Next extend AMAL with Autotest/Direct/Exit,
+For/Next, animation lanes and input/random/collision functions, then implement
+computed/wide sprites and connect input-driven level-1 gameplay.
 The milestone tracks horizontal/vertical progression and the eventual shared
 Play Game/debug pages. Keep Roller II/Wonderland as full-game regressions.
 A background inspector must remain explicitly labelled until gameplay works.
