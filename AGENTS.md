@@ -588,3 +588,18 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Separate hires strips may accompany aligned equal-hardware-width lowres
   priority slices with shared COLOR00; overlaps retain lowres restrictions and real
   setup rows/budgets. No AMAL/manual-update or gameplay claim; see docs/at-text.md.
+- Default ($0cee) restores the pinned shipped 320x200/16-colour interpreter
+  profile, retires all screens/clones/committed windows, Bobs, rainbows and old
+  palette jobs; Auto View/Break become on and automatic Bob/Sprite UPDATE off.
+  Logical Sprite coordinates survive with image zero. Clear 26 AMAL words; show
+  built-in mouse 1, installing native default limits only for unset/zero minima.
+  Start the shipped 16-step colour-3 flash. MusDef stops owned Music/Tracker/
+  samples, loops and wakes, restores bank 5/volume 56, regenerates portable noise
+  from retained seed/phase and preserves LED/filter. Keep banks/addresses, files,
+  directory, variables/scopes/DATA, Timer, random and held/queued input intact.
+  Default reentry rejects; host errors retain source context and cancel wakes.
+  Original Zybex 90–92 now run with declared key guards in the preview, stopping
+  before Set Sprite Buffer 93. 41 Zybex GPU comparisons plus close/clear checks;
+  computed buffers, custom preferences and native teardown/timing remain open.
+  See docs/default.md. Factories without Default retain existing Screen Open/startup defaults; after
+  Default, subsequent Screen Open inherits the restored native DefPal.

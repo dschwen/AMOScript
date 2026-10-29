@@ -2,7 +2,7 @@
 module.exports = function planetZybexFixture() {
   const fs = require('fs'), path = require('path'), Transpiler = require('../../lib/Transpiler');
   const root = path.join(__dirname, '../../examples/PlanetZybex'), oracle = require('../fixtures/packed-picture.json');
-  return { scoreSource: new Transpiler(require('./planetZybexScore')()).toModule(), scoreOracle: require('../fixtures/planet-zybex/score.json'), clockSource: require('./fakeTimers').createFakeTimers.toString(), registerSource: new Transpiler(require('./planetZybexRegisters')()).toModule(), sources: oracle.levels.map(level => new Transpiler(require('./planetZybexLevel')(level.level)).toModule()),
+  return { defaultSource: new Transpiler(require('./planetZybexDefault')()).toModule(), defaultOracle: require('../fixtures/defaults.json'), scoreSource: new Transpiler(require('./planetZybexScore')()).toModule(), scoreOracle: require('../fixtures/planet-zybex/score.json'), clockSource: require('./fakeTimers').createFakeTimers.toString(), registerSource: new Transpiler(require('./planetZybexRegisters')()).toModule(), sources: oracle.levels.map(level => new Transpiler(require('./planetZybexLevel')(level.level)).toModule()),
     assets: Object.fromEntries(oracle.levels.map(level => [level.file, fs.readFileSync(path.join(root, level.file)).toString('base64')])),
     oracle, gpuSources: require('./webglHostSources')() };
 };

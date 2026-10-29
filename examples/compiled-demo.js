@@ -1746,7 +1746,7 @@
   let presentedWindows = null;
   let priorityOrder = [], priorityEnabled = false;
   const rainbows = new Map();
-  const palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
+  let palette = [0x000, 0xf80, 0xfff, 0x00f, 0xf00, 0x0f0, 0x080, 0xff0, 0x888, 0x444, 0xaaa, 0x666, 0x0ff, 0xf0f, 0x800, 0x008];
 
   function changed(viewChange = false) {
     version++;
@@ -1812,6 +1812,19 @@
     screenListeners.forEach(listener => listener());
     changed(true);
     return next;
+  }
+  function resetDefault() {
+    // DefRun1 retires the complete display, including clone owners together.
+    // Clear committed windows even when Auto View was off; old snapshots own
+    // their bytes, while subsequent snapshots must not retain retired screens.
+    screens.clear(); rainbows.clear(); priorityOrder = []; priorityEnabled = false;
+    presented = presentedHardware = presentedWindows = null; current = null;
+    autoView = true; writingMode = writingParts = 0;
+    // DefRun1 also restores DefPal, used by subsequent Screen Open calls.
+    // Pinned +Interpreter_Config.s profile; native window TAB is four cells.
+    palette = [0x000,0xa40,0xfff,0x000,0xf00,0x0f0,0x00f,0x666,
+      0x555,0x333,0x733,0x373,0x773,0x337,0x737,0x377, ...Array(16).fill(0)];
+    return open(0, 320, 200, 16, 0);
   }
   function select(id) { if (screen(id).cloneOwner) throw new Error('Cannot select a cloned screen'); current = id; changed(true); }
   function close(id) {
@@ -2712,7 +2725,7 @@
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, resetDefault, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -3960,6 +3973,35 @@
     }
     if (bankNumber === 1) imageBobsChanged();
   }
+  let defaulting = false;
+  function resetDefault() {
+    if (defaulting) throw new Error('Reentrant Default is not supported');
+    if (typeof display.resetDefault !== 'function') throw new Error('Display adapter does not support Default');
+    if (!options.vblNow || !options.requestPaletteWake) throw new Error('Default requires the runtime VBL clock');
+    // Validate the pure extension configuration before retiring display state.
+    audio.prepareDefault();
+    defaulting = true;
+    try {
+      cancelPaletteEffects(); amalRegisters.fill(0);
+      bobs.clear(); drawnBobs = []; bobsDirty = false;
+      priorityScreen = null; reversePriority = false;
+      // ActuMask=$7100 resets automatic BOB/Sprite UPDATE bits 5/6 to off.
+      automaticBobs = automaticSprites = false;
+      state.breakEnabled = true;
+      for (const sprite of sprites.values()) sprite.image = 0;
+      spriteFrames.clear(); spritesDirty = false;
+      display.resetDefault();
+      const limits = state.input.mouseLimits;
+      if (!limits || (limits.x1 === 0 && limits.y1 === 0)) state.input.mouseLimits = Object.freeze({ x1:129, y1:50, x2:448, y2:249 });
+      pointerShape = 1; setPointerCount(0);
+      flash(3, '(000,2)(440,2)(880,2)(bb0,2)(dd0,2)(ee0,2)(ff2,2)(ff8,2)(ffc,2)(fff,2)(aaf,2)(88c,2)(66a,2)(226,2)(004,2)(001,2)');
+      // MusDef stops owned controllers; it does not erase their banks or
+      // change the LED/filter bit, directory, Timer or language random seed.
+      trackStop(); state.tracker.loop = false; state.tracker.position = null;
+      cancelMusic(); state.music.bank = null; state.music.position = null; state.music.volume = 56;
+      audio.resetDefault();
+    } finally { defaulting = false; }
+  }
   function value(number) { return number && number.numericType ? number.value : number; }
 
   function numberFunction(name, operand, sourceType) {
@@ -4860,6 +4902,7 @@
     pasteBob: (x, y, number) => pasteImage(1, x, y, number),
     pasteIcon: (x, y, number) => pasteImage(2, x, y, number),
     spritePalette: (mask = -1) => display.bankPalette(imageBank(1).palette, mask),
+    resetDefault,
     getIcon: (...args) => captureImage(2, 'Get Icon', ...args),
     getBob: (...args) => captureImage(1, 'Get Bob', ...args),
     iconPalette: (mask = -1) => display.bankPalette(imageBank(2).palette, mask),
@@ -5011,7 +5054,12 @@
     mask=0;started=field;lastField=field;
     return events;
   }
-  return {begin,advance,cancel,activate(bits){mask|=bits&15;},snapshot(synchronize = true){if(synchronize)advance();return {seed,pointer,mask,started,lastField,wave:wave.slice(),volumes:volumes.slice(),beam};}};
+  function reset() {
+    // MusDef regenerates the noise wave from the current BSeed. PNoise is
+    // retained; stop its updater before replacing all owned wave bytes.
+    advance(); mask = 0; initialized = false; initialize();
+  }
+  return {begin,advance,cancel,reset,activate(bits){mask|=bits&15;},snapshot(synchronize = true){if(synchronize)advance();return {seed,pointer,mask,started,lastField,wave:wave.slice(),volumes:volumes.slice(),beam};}};
 };
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
@@ -5112,6 +5160,13 @@
     command({ type: 'stop', mask });
   }
   return { state, sample, selectBank, loop, filter, play, stop, command,
+    prepareDefault() { boomEngine(); },
+    resetDefault() {
+      const engine = boomEngine();
+      state.bank = 5; state.loopMask = 0;
+      stop(15); levels.fill(56); engine.reset();
+      loop(false, 15);
+    },
     boom() {
       const engine = boomEngine();
       syncBoom();

@@ -26,7 +26,9 @@ VBLs before the next colour, and the list repeats. A one-entry pattern still
 writes on each of its scheduled fields, so later Colour writes can be overwritten.
 Starting or cancelling a cycle does not immediately recolour pixels.
 
-**Screen Open's implicit colour-3 flashing is not implemented.** Existing screen
+**Screen Open's implicit colour-3 flashing is not implemented.**
+The explicit [Default reset](default.md) now starts the shipped colour-3 pattern
+on its fresh screen through this scheduler. Existing screen
 creation retains static default palettes. This subset handles explicit Flash jobs
 and safely executes Wonderland's Flash Off, without claiming complete original
 screen-initialization behavior. Palette shifts remain unsupported.

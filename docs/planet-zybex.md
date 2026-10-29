@@ -9,7 +9,8 @@ The [browser preview](https://htmlpreview.github.io/?https://github.com/dschwen/
 currently shows all seven original level backgrounds, with horizontal/vertical
 scrolling, WebGL2 and fullscreen. The **Score display (fixture)** option shows
 the original hires score strip below a lowres level-1 playfield; a key advances
-between two declared score/lives inputs. Both options are marked as previews.
+between two declared score/lives inputs. **Default startup (fixture)** exposes
+the original reset/close prefix. All options are marked as previews.
 **The full game does not compile or play yet.** No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
 
@@ -25,7 +26,7 @@ source hash, complete bounded token audit, strings, embedded-bank metadata and
 first compilation failure. It found 15 unsupported **encodings**, not an estimate
 of development time. Recognized tokens can still expose runtime gaps.
 
-Three of those encodings are now implemented:
+Four of those encodings are now implemented:
 
 - Slot 2 `$0056`, `Unpack bank To screen`, decodes the original packed backgrounds.
   Full indexed bitmaps/palettes match an independent Python decoder; 35 scrolled
@@ -41,12 +42,16 @@ Three of those encodings are now implemented:
   640×10 hires strip, alongside the 320×160 lowres playfield. Four independent
   PAL/NTSC frames match actual GPU output. See [At and score display](at-text.md).
 
-The current whole-program compiler still stops at **Default, line 90, byte 6482**.
-There are 12 remaining unsupported encodings:
+- `$0cee`, `Default`, restores the shipped display profile, clears display and
+  animation resources, resets owned audio and retains language/bank/filesystem
+  state. Original lines 90–92 now run through declared startup guards in the
+  preview. See [Default](default.md) for its profile and remaining native gates.
+
+The whole-program compiler now stops at **Set Sprite Buffer, line 93, byte 6506**.
+There are 11 remaining unsupported encodings:
 
 | Encoding | Command | Current uses |
 | --- | --- | --- |
-| `$0cee` | Default | 1 |
 | `$1986` | Set Sprite Buffer | 1 |
 | `$1fd2` / `$1fe2` | Amal Off, all / one channel | 1 / 2 |
 | `$1fbc` | Amal On, all channels | 2 |
@@ -72,8 +77,8 @@ historical counts after each compiler addition.
    the 320×160 lowres playfield. Preserve palette/setup budgets, double buffers,
    screen identity and original startup. At’s retained-y positioning and the
    mixed hires/lowres score layout now pass a declared presentation fixture.
-   Default, Set Sprite Buffer and Gr Writing remain open; this is not gameplay
-   acceptance.
+   Default now passes its reset matrix and the original guarded startup prefix.
+   Set Sprite Buffer and Gr Writing remain open; this is not gameplay acceptance.
 3. **AMAL execution and manual frame control.** Add checked Channel bindings,
    owned compiled AMAL strings, local registers, the existing 26 global words,
    on/off lifetimes and explicit Synchro/Update behavior. The source deliberately
@@ -103,15 +108,12 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next startup slice is **Default’s display and resource reset**. Native `InDefault` calls `DefRun1`, rebuilds copper, then `DefRun2`
-and rebuilds again. Acceptance must cover retirement of screens/clones, Bobs,
-rainbows and palette wakes; native default-screen/palette/tab/mouse restoration;
-and preservation of unrelated program variables and asset banks. Audit registered
-cleanup routines and sprite/AMAL reset ownership before choosing the portable
-profile. Follow with Set Sprite Buffer’s actual allocation/lifetime semantics,
-then AMAL bindings and manual scheduling. Different COLOR00 values across the
-score/playfield (the later thunder effect) are still outside the current priority
-snapshot contract and require their own setup/capture verification.
+The next startup slice is **Set Sprite Buffer’s allocation and lifetime contract**.
+Default’s implemented reset/profile is documented separately; native computed
+sprite-buffer allocation and custom interpreter preferences remain open. Then
+continue with Gr Writing and AMAL bindings/manual scheduling. Different COLOR00
+values across the score/playfield (the later thunder effect) still require their
+own setup/capture verification.
 
 Every slice must include compiler/runtime integration, source-located errors,
 independent expectations and a repository demo with an HTML Preview link. Native
@@ -136,8 +138,11 @@ updates 1310–1313/1482–1485. Synthetic inputs, one explicit buffer swap and 
 guards replace the missing game loop; it does not execute Synchro/Update or AMAL.
 Both PAL/NTSC outputs preserve the actual row-210 setup gap and y=211 hires
 placement. Four independent full-frame PNGs/score bitmaps and GPU comparisons
-extend the total to 39 GPU frames.
+extend the presentation checks to 39 GPU frames. Original Default/Screen Close/
+Close Editor lines 90–92 now add two PAL/NTSC GPU frames and two display-clear
+checks, bringing the total to 41. Their inserted key guards stop before Set
+Sprite Buffer; the rest of startup and gameplay still do not execute.
 
 Live-host checks cover level replacement, scroll limits, score fixture
-selection/real key advancement, fullscreen and owned input/GPU disposal. Existing
+selection/real key advancement, startup-reset/close guards, fullscreen and owned input/GPU disposal. Existing
 Roller II/Wonderland launch, gameplay, audio and editor regressions remain required.

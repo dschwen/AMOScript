@@ -19,6 +19,11 @@ module.exports = async function checkPlanetZybexPreview(page) {
   await page.locator('#zybex-preview-input').focus();await page.keyboard.press('a');
   await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.score==='9876');
   await page.screenshot({path:path.join(__dirname,'../artifacts/planet-zybex-score.png'),fullPage:true});
+  await page.selectOption('#zybex-level','default');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='1');
+  assert.strictEqual(await page.locator('#zybex-next').isVisible(),true);await page.click('#zybex-next');
+  await page.waitForFunction(()=>document.getElementById('planet-zybex-preview').dataset.stage==='0');
+  assert.strictEqual(await page.locator('#zybex-preview-input').evaluate(c=>c.width),0);
   await page.selectOption('#zybex-level', '1');assert.strictEqual(await page.locator('#zybex-scroll').isDisabled(),false); await page.click('#zybex-fullscreen');
   await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'planet-zybex-preview');
   await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.fullscreenElement);
