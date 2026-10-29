@@ -138,3 +138,21 @@ route at the half-speed default, including both docks and level-3 entry.
 Music/sample playback and Timer retain their ordinary clocks. This is a user
 pacing preference, not an Amiga CPU timing claim. See the
 [page builder tutorial](game-webpage-tutorial.md#adjust-game-speed).
+
+## Debug build
+
+[Play Planet Zybex with debug enabled](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html).
+The regular game page and its demo-index card link to this version. It embeds the
+same current AMOS source/assets and half-speed default, with the shared Debug menu
+for detailed runtime errors (including AMOS line/byte locations), runtime status
+and new/modified in-memory file downloads. On a crash, open **Debug** and copy the
+error/stack and the steps that led to it; Restart retains the error history for
+that page session. Reload clears session files and logs.
+
+`npm run build:demo` rebuilds both versions. To build a debug page separately:
+
+```sh
+node tools/build_game_page.js examples/PlanetZybex/current/Zybex.AMOS \
+  /tmp/zybex-debug.html --assets examples/PlanetZybex/current/manifest.json \
+  --title "Planet Zybex — Debug" --fire ControlLeft,ControlRight --slowdown 2 --debug
+```

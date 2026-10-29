@@ -438,6 +438,12 @@
       "title": "Roller II — full game with debug enabled",
       "description": "The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game-debug.html"
+    },
+    {
+      "file": "planet-zybex-game-debug.html",
+      "title": "Planet Zybex — full game with debug enabled",
+      "description": "The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html"
     }
   ]
 }

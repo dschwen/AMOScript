@@ -18,6 +18,7 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 
 [Planet Zybex development previews](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
 include all seven backgrounds, ship controls and individual enemy programs.
+[Planet Zybex debug build](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html) adds source error logs and modified-file downloads.
 See the [showcase milestone](docs/planet-zybex.md) for progress and remaining coverage.
 
 [Build your own complete game page](docs/game-webpage-tutorial.md): compilation, assets, Play/sound/fullscreen buttons, touch controls, adjustable game speed (`--slowdown`) and optional `--debug` file downloads.

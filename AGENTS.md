@@ -781,3 +781,8 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   selector retained across Restart. Zybex's live page defaults to 2; fixed source
   replays remain unscaled, with PAL/NTSC headless progression also checked at 2.
   Busy-loop CPU limiting remains separate. See docs/game-webpage-tutorial.md.
+
+- `planet-zybex-game-debug.html` is rebuilt with the same current Zybex source,
+  asset manifest, input bindings and slowdown default as the regular launcher,
+  with `debug: true`. Keep its HTML Preview links on the regular page and game
+  index card; detailed source errors and modified-file exports use the shared UI.

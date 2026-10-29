@@ -44,10 +44,13 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
       const generated=outputs.get(`${scenario.id}.html`),start=generated.indexOf(`<p>${escape(scenario.description)}</p>`),end=generated.indexOf('<script>',start);
       if(start<0||end<0)throw Error('Missing Zybex verification markup');
       const zybexRoot=path.join(root,'examples/PlanetZybex/current');
-      const app=buildGamePage(fs.readFileSync(path.join(zybexRoot,'Zybex.AMOS')),{
-        title:'Planet Zybex',slowdown:2,fire:['ControlLeft','ControlRight'],assets:loadAssets(path.join(zybexRoot,'manifest.json'))
-      });
-      const navigation=`<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('planet-zybex.html')}">Development previews</a></nav>`;
+      const zybexSource=fs.readFileSync(path.join(zybexRoot,'Zybex.AMOS'));
+      const zybexOptions={ title:'Planet Zybex',slowdown:2,fire:['ControlLeft','ControlRight'],assets:loadAssets(path.join(zybexRoot,'manifest.json')) };
+      const app=buildGamePage(zybexSource,zybexOptions);
+      const debug=buildGamePage(zybexSource,{...zybexOptions,title:'Planet Zybex — Debug',debug:true});
+      const debugNavigation=`<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('planet-zybex-game.html')}">Regular Planet Zybex</a></nav>`;
+      outputs.set('planet-zybex-game-debug.html',debug.replace('<h1>','<style>nav a{color:#9bc9ff}</style>'+debugNavigation+'<h1>'));
+      const navigation=`<nav><a href="${preview('index.html')}">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a> · <a href="${preview('planet-zybex.html')}">Development previews</a> · <a href="${preview('planet-zybex-game-debug.html')}">Play debug version</a></nav>`;
       outputs.set(`${scenario.id}.html`,app.replace('<h1>','<style>nav a{color:#9bc9ff}#demo-checks{margin-top:2rem}#stage{overflow:auto;max-height:65vh}#stage canvas,#stage img{max-width:none;min-width:0}#results{white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}</style>'+navigation+'<h1>').replace('</body>',()=>
         '<details id="demo-checks"><summary>Browser checks and captured frames</summary>'+generated.slice(start,end)+'</details>'+script(`(${installDemo.toString()})({...${config},externalLauncher:true});`)+'</body>'));
     }
@@ -73,6 +76,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
   cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
+  cards.push({ file: 'planet-zybex-game-debug.html', title: 'Planet Zybex — full game with debug enabled', description: 'The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.' });
   const games = ['wonderland-game.html', 'roller2-game.html', 'planet-zybex-game.html'];
   const showcases = ['bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
@@ -88,7 +92,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
     'roller2-music-vm.html': { title: 'Roller II end tunes', description: 'Play the original game-over and victory music, then run the original volume fade-out.' },
     'programs.html': { title: 'Interactive AMOS examples', description: 'Try compiled examples with graphics, image banks, moving objects, keyboard/mouse input and program switching.' }
   };
-  const card = entry => `<article><h3>${escape((featured[entry.file] || entry).title)}</h3><p>${escape((featured[entry.file] || entry).description)}</p><a class="play" href="${preview(entry.file)}">${games.includes(entry.file) ? 'Play game' : 'Run demo'} (HTML Preview)</a><p class="secondary">${entry.file === 'roller2-game.html' ? `<a href="${preview('roller2-game-debug.html')}">Debug version (HTML Preview)</a> · ` : ''}<a href="${entry.file}">Open locally</a> · <a href="https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}">Source</a></p></article>`;
+  const card = entry => `<article><h3>${escape((featured[entry.file] || entry).title)}</h3><p>${escape((featured[entry.file] || entry).description)}</p><a class="play" href="${preview(entry.file)}">${games.includes(entry.file) ? 'Play game' : 'Run demo'} (HTML Preview)</a><p class="secondary">${['roller2-game.html','planet-zybex-game.html'].includes(entry.file) ? `<a href="${preview(entry.file.replace('.html','-debug.html'))}">Debug version (HTML Preview)</a> · ` : ''}<a href="${entry.file}">Open locally</a> · <a href="https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}">Source</a></p></article>`;
   const group = files => files.map(file => cards.find(entry => entry.file === file)).filter(Boolean).map(card).join('\n');
   const technical = cards.filter(entry => !games.includes(entry.file) && !showcases.includes(entry.file));
   outputs.set('index.html', page('Browser demos', `<style>.demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,25rem),1fr));gap:1rem}.demo-grid article{margin:0}h3{margin-top:0}.play{display:inline-block;background:#07569c;color:white;padding:.65rem 1rem;text-decoration:none;border-radius:.25rem}.secondary{font-size:.9rem;margin-bottom:0}details{margin:2rem 0}summary{cursor:pointer;font-size:1.2rem;font-weight:600}section{margin:2rem 0}</style>
