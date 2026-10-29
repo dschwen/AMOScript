@@ -1,0 +1,946 @@
+{
+  "vectors": [
+    [
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 64757,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 36134,
+        "value": -9587
+      },
+      {
+        "mask": 1,
+        "beam": 0,
+        "seed": 37831,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 0,
+        "seed": 20952,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 0,
+        "seed": 30809,
+        "value": 8
+      },
+      {
+        "mask": 103,
+        "beam": 0,
+        "seed": 10314,
+        "value": 32
+      },
+      {
+        "mask": 104,
+        "beam": 0,
+        "seed": 62123,
+        "value": 96
+      },
+      {
+        "mask": 105,
+        "beam": 0,
+        "seed": 55420,
+        "value": 72
+      },
+      {
+        "mask": 255,
+        "beam": 0,
+        "seed": 19133,
+        "value": 74
+      },
+      {
+        "mask": 32767,
+        "beam": 0,
+        "seed": 10862,
+        "value": 28458
+      },
+      {
+        "mask": -32768,
+        "beam": 0,
+        "seed": 51343,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 58912,
+        "value": -17434
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 46113,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 54162,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 21875,
+        "value": -9131
+      },
+      {
+        "mask": 1,
+        "beam": 0,
+        "seed": 47812,
+        "value": 0
+      },
+      {
+        "mask": 2,
+        "beam": 0,
+        "seed": 62597,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 0,
+        "seed": 25526,
+        "value": 2
+      },
+      {
+        "mask": 103,
+        "beam": 0,
+        "seed": 55639,
+        "value": 65
+      },
+      {
+        "mask": 104,
+        "beam": 0,
+        "seed": 38504,
+        "value": 0
+      },
+      {
+        "mask": 105,
+        "beam": 0,
+        "seed": 19433,
+        "value": 73
+      },
+      {
+        "mask": 255,
+        "beam": 0,
+        "seed": 6874,
+        "value": 26
+      },
+      {
+        "mask": 32767,
+        "beam": 0,
+        "seed": 37947,
+        "value": 12180
+      },
+      {
+        "mask": -32768,
+        "beam": 0,
+        "seed": 47372,
+        "value": -32768
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 64077,
+        "value": -17158
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 14590,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 50719,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 25264,
+        "value": 17250
+      },
+      {
+        "mask": 1,
+        "beam": 0,
+        "seed": 16305,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 0,
+        "seed": 65058,
+        "value": 2
+      },
+      {
+        "mask": 10,
+        "beam": 0,
+        "seed": 44803,
+        "value": 10
+      },
+      {
+        "mask": 103,
+        "beam": 0,
+        "seed": 54100,
+        "value": 67
+      },
+      {
+        "mask": 104,
+        "beam": 0,
+        "seed": 23573,
+        "value": 72
+      },
+      {
+        "mask": 105,
+        "beam": 0,
+        "seed": 43590,
+        "value": 40
+      },
+      {
+        "mask": 255,
+        "beam": 0,
+        "seed": 36583,
+        "value": 142
+      },
+      {
+        "mask": 32767,
+        "beam": 0,
+        "seed": 19192,
+        "value": 6474
+      },
+      {
+        "mask": -32768,
+        "beam": 0,
+        "seed": 36729,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 32106,
+        "value": -19075
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 42443,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 2460,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 6621,
+        "value": -9447
+      },
+      {
+        "mask": 1,
+        "beam": 0,
+        "seed": 46990,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 0,
+        "seed": 13231,
+        "value": 2
+      },
+      {
+        "mask": 10,
+        "beam": 0,
+        "seed": 20288,
+        "value": 10
+      },
+      {
+        "mask": 103,
+        "beam": 0,
+        "seed": 15169,
+        "value": 35
+      },
+      {
+        "mask": 104,
+        "beam": 0,
+        "seed": 39090,
+        "value": 8
+      },
+      {
+        "mask": 105,
+        "beam": 0,
+        "seed": 30867,
+        "value": 104
+      },
+      {
+        "mask": 255,
+        "beam": 0,
+        "seed": 23524,
+        "value": 91
+      },
+      {
+        "mask": 32767,
+        "beam": 0,
+        "seed": 13221,
+        "value": 16179
+      },
+      {
+        "mask": -32768,
+        "beam": 0,
+        "seed": 24790,
+        "value": -32768
+      },
+      {
+        "mask": -1,
+        "beam": 0,
+        "seed": 46199,
+        "value": -19532
+      },
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 28552,
+        "value": 0
+      }
+    ],
+    [
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 64756,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 23476,
+        "value": -9637
+      },
+      {
+        "mask": 1,
+        "beam": 65535,
+        "seed": 61044,
+        "value": 0
+      },
+      {
+        "mask": 2,
+        "beam": 65535,
+        "seed": 30004,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 65535,
+        "seed": 45044,
+        "value": 10
+      },
+      {
+        "mask": 103,
+        "beam": 65535,
+        "seed": 24244,
+        "value": 70
+      },
+      {
+        "mask": 104,
+        "beam": 65535,
+        "seed": 16756,
+        "value": 64
+      },
+      {
+        "mask": 105,
+        "beam": 65535,
+        "seed": 6196,
+        "value": 8
+      },
+      {
+        "mask": 255,
+        "beam": 65535,
+        "seed": 41716,
+        "value": 162
+      },
+      {
+        "mask": 32767,
+        "beam": 65535,
+        "seed": 41396,
+        "value": 30881
+      },
+      {
+        "mask": -32768,
+        "beam": 65535,
+        "seed": 54388,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 64308,
+        "value": 2043
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 54772,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 9396,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 42868,
+        "value": 5799
+      },
+      {
+        "mask": 1,
+        "beam": 65535,
+        "seed": 7732,
+        "value": 0
+      },
+      {
+        "mask": 2,
+        "beam": 65535,
+        "seed": 18676,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 65535,
+        "seed": 59316,
+        "value": 2
+      },
+      {
+        "mask": 103,
+        "beam": 65535,
+        "seed": 47732,
+        "value": 34
+      },
+      {
+        "mask": 104,
+        "beam": 65535,
+        "seed": 33076,
+        "value": 0
+      },
+      {
+        "mask": 105,
+        "beam": 65535,
+        "seed": 64500,
+        "value": 105
+      },
+      {
+        "mask": 255,
+        "beam": 65535,
+        "seed": 60084,
+        "value": 234
+      },
+      {
+        "mask": 32767,
+        "beam": 65535,
+        "seed": 3444,
+        "value": 21517
+      },
+      {
+        "mask": -32768,
+        "beam": 65535,
+        "seed": 9268,
+        "value": -32768
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 61172,
+        "value": -530
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 11700,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 41076,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 1844,
+        "value": -761
+      },
+      {
+        "mask": 1,
+        "beam": 65535,
+        "seed": 8692,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 65535,
+        "seed": 45236,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 65535,
+        "seed": 29556,
+        "value": 2
+      },
+      {
+        "mask": 103,
+        "beam": 65535,
+        "seed": 10804,
+        "value": 34
+      },
+      {
+        "mask": 104,
+        "beam": 65535,
+        "seed": 38132,
+        "value": 0
+      },
+      {
+        "mask": 105,
+        "beam": 65535,
+        "seed": 29620,
+        "value": 97
+      },
+      {
+        "mask": 255,
+        "beam": 65535,
+        "seed": 34420,
+        "value": 134
+      },
+      {
+        "mask": 32767,
+        "beam": 65535,
+        "seed": 36148,
+        "value": 30605
+      },
+      {
+        "mask": -32768,
+        "beam": 65535,
+        "seed": 18420,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 30388,
+        "value": -6794
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 55668,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 12340,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 15092,
+        "value": 20282
+      },
+      {
+        "mask": 1,
+        "beam": 65535,
+        "seed": 47540,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 65535,
+        "seed": 27764,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 65535,
+        "seed": 4916,
+        "value": 2
+      },
+      {
+        "mask": 103,
+        "beam": 65535,
+        "seed": 28148,
+        "value": 101
+      },
+      {
+        "mask": 104,
+        "beam": 65535,
+        "seed": 15540,
+        "value": 40
+      },
+      {
+        "mask": 105,
+        "beam": 65535,
+        "seed": 16244,
+        "value": 41
+      },
+      {
+        "mask": 255,
+        "beam": 65535,
+        "seed": 13876,
+        "value": 54
+      },
+      {
+        "mask": 32767,
+        "beam": 65535,
+        "seed": 57588,
+        "value": 30688
+      },
+      {
+        "mask": -32768,
+        "beam": 65535,
+        "seed": 65460,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 65535,
+        "seed": 21108,
+        "value": 25170
+      },
+      {
+        "mask": 0,
+        "beam": 65535,
+        "seed": 39220,
+        "value": 0
+      }
+    ],
+    [
+      {
+        "mask": 0,
+        "beam": 0,
+        "seed": 64757,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 7919,
+        "seed": 44053,
+        "value": -9556
+      },
+      {
+        "mask": 1,
+        "beam": 15838,
+        "seed": 14372,
+        "value": 0
+      },
+      {
+        "mask": 2,
+        "beam": 23757,
+        "seed": 2226,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 31676,
+        "seed": 25679,
+        "value": 0
+      },
+      {
+        "mask": 103,
+        "beam": 39595,
+        "seed": 139,
+        "value": 0
+      },
+      {
+        "mask": 104,
+        "beam": 47514,
+        "seed": 37366,
+        "value": 0
+      },
+      {
+        "mask": 105,
+        "beam": 55433,
+        "seed": 23584,
+        "value": 72
+      },
+      {
+        "mask": 255,
+        "beam": 63352,
+        "seed": 49561,
+        "value": 193
+      },
+      {
+        "mask": 32767,
+        "beam": 5735,
+        "seed": 54257,
+        "value": 25555
+      },
+      {
+        "mask": -32768,
+        "beam": 13654,
+        "seed": 58296,
+        "value": -32768
+      },
+      {
+        "mask": -1,
+        "beam": 21573,
+        "seed": 4222,
+        "value": -1520
+      },
+      {
+        "mask": 0,
+        "beam": 29492,
+        "seed": 55507,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 37411,
+        "seed": 43591,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 45330,
+        "seed": 29034,
+        "value": -7567
+      },
+      {
+        "mask": 1,
+        "beam": 53249,
+        "seed": 10700,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 61168,
+        "seed": 28157,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 3551,
+        "seed": 1933,
+        "value": 2
+      },
+      {
+        "mask": 103,
+        "beam": 11470,
+        "seed": 32524,
+        "value": 103
+      },
+      {
+        "mask": 104,
+        "beam": 19389,
+        "seed": 44042,
+        "value": 40
+      },
+      {
+        "mask": 105,
+        "beam": 27308,
+        "seed": 17687,
+        "value": 65
+      },
+      {
+        "mask": 255,
+        "beam": 35227,
+        "seed": 28611,
+        "value": 111
+      },
+      {
+        "mask": 32767,
+        "beam": 43146,
+        "seed": 20638,
+        "value": 5456
+      },
+      {
+        "mask": -32768,
+        "beam": 51065,
+        "seed": 39736,
+        "value": -32768
+      },
+      {
+        "mask": -1,
+        "beam": 58984,
+        "seed": 8737,
+        "value": -1502
+      },
+      {
+        "mask": 0,
+        "beam": 1367,
+        "seed": 26345,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 9286,
+        "seed": 10784,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 17205,
+        "seed": 64342,
+        "value": 8955
+      },
+      {
+        "mask": 1,
+        "beam": 25124,
+        "seed": 51483,
+        "value": 1
+      },
+      {
+        "mask": 2,
+        "beam": 33043,
+        "seed": 28927,
+        "value": 0
+      },
+      {
+        "mask": 10,
+        "beam": 40962,
+        "seed": 20370,
+        "value": 10
+      },
+      {
+        "mask": 103,
+        "beam": 48881,
+        "seed": 53348,
+        "value": 64
+      },
+      {
+        "mask": 104,
+        "beam": 56800,
+        "seed": 65029,
+        "value": 104
+      },
+      {
+        "mask": 105,
+        "beam": 64719,
+        "seed": 4613,
+        "value": 0
+      },
+      {
+        "mask": 255,
+        "beam": 7102,
+        "seed": 1268,
+        "value": 4
+      },
+      {
+        "mask": 32767,
+        "beam": 15021,
+        "seed": 7778,
+        "value": 29726
+      },
+      {
+        "mask": -32768,
+        "beam": 22940,
+        "seed": 34015,
+        "value": -32768
+      },
+      {
+        "mask": -1,
+        "beam": 30859,
+        "seed": 52731,
+        "value": -22067
+      },
+      {
+        "mask": 0,
+        "beam": 38778,
+        "seed": 36422,
+        "value": 0
+      },
+      {
+        "mask": 0,
+        "beam": 46697,
+        "seed": 59728,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 54616,
+        "seed": 8617,
+        "value": 3873
+      },
+      {
+        "mask": 1,
+        "beam": 62535,
+        "seed": 10465,
+        "value": 0
+      },
+      {
+        "mask": 2,
+        "beam": 4918,
+        "seed": 12168,
+        "value": 2
+      },
+      {
+        "mask": 10,
+        "beam": 12837,
+        "seed": 13614,
+        "value": 0
+      },
+      {
+        "mask": 103,
+        "beam": 20756,
+        "seed": 39011,
+        "value": 0
+      },
+      {
+        "mask": 104,
+        "beam": 28675,
+        "seed": 42679,
+        "value": 32
+      },
+      {
+        "mask": 105,
+        "beam": 36594,
+        "seed": 11450,
+        "value": 40
+      },
+      {
+        "mask": 255,
+        "beam": 44513,
+        "seed": 1532,
+        "value": 5
+      },
+      {
+        "mask": 32767,
+        "beam": 52432,
+        "seed": 44301,
+        "value": 10157
+      },
+      {
+        "mask": -32768,
+        "beam": 60351,
+        "seed": 52093,
+        "value": 0
+      },
+      {
+        "mask": -1,
+        "beam": 2734,
+        "seed": 51676,
+        "value": 19657
+      },
+      {
+        "mask": 0,
+        "beam": 10653,
+        "seed": 24506,
+        "value": 0
+      }
+    ]
+  ]
+}

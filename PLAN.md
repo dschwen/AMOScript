@@ -8,11 +8,12 @@ Assessment updated: 2026-10-29.
 Its unchanged source/assets are pinned; all seven backgrounds, startup/score
 presentation and channel routing have declared browser previews. The complete
 source now compiles to 1,122 instructions with no unrecognized encodings. It
-reaches the AMAL Z random-function runtime gate at original line 307. The original
+passes level setup and reaches computed player Sprite 15 at original line 1129. The original
 Bob 21 drop program executes through manual Synchro/Update with independent
 PAL/NTSC pixels and actual GPU checks. Autotest/Direct/eXit, For/Next and BC now
-run the original first missile program in declared idle/collision fixtures. Next
-add random/input functions and animation lanes, then implement
+run the original first missile program in declared idle/collision fixtures.
+AMAL Z now runs three original hunters with independent shared-stream/pixel checks. Next
+extend ship input/animation functions and implement
 computed/wide sprites and connect input-driven level-1 gameplay.
 The milestone tracks horizontal/vertical progression and the eventual shared
 Play Game/debug pages. Keep Roller II/Wonderland as full-game regressions.

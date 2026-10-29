@@ -130,3 +130,80 @@ for with_bullet in (False,True):
     assert [r['frame']for r in records if r['collision']]==([6,70]if with_bullet else [])
     missiles.append(dict(bullet=with_bullet,frames=records))
 (out/'amal-missile.json').write_text(json.dumps(dict(cases=missiles,sourceSha256=sha(program)),indent=2)+'\n')
+
+# AMAL Z: unsigned MULU, two low-word additions with discarded carries, then
+# a logical long shift and a signed-word mask. It is separate from Basic Rnd.
+def z_draw(seed,mask,beam):
+    product=seed*0x3171
+    low=((product%65536)+beam+1)%65536
+    mixed=(product//65536)*65536+low
+    return low,word((mixed//256)&(mask%65536))
+z_vectors=[]
+masks=[0,-1,1,2,10,103,104,105,255,32767,-32768,-1,0]*4
+for beams in ([0]*len(masks),[65535]*len(masks),[(i*7919)%65536 for i in range(len(masks))]):
+    seed=0x1234;draws=[]
+    for mask,beam in zip(masks,beams):
+        seed,result=z_draw(seed,mask,beam);draws.append(dict(mask=mask,beam=beam,seed=seed,value=result))
+    z_vectors.append(draws)
+(out/'amal-random-vectors.json').write_text(json.dumps(dict(vectors=z_vectors),indent=2)+'\n')
+
+hunters=[]
+for beam in (0,65535):
+    rng=dict(seed=0x1234,calls=0);score=[0]
+    states=[dict(number=n,x=580,y=116,remaining=0,autotest=False,locals=[0]*10)for n in (23,24,25)]
+    def random(mask):
+        rng['seed'],value=z_draw(rng['seed'],mask,beam);rng['calls']+=1
+        return value
+    def hunter(st):
+        while True:
+            st['x']=580;st['y']=116;st['locals'][2]=random(80+st['number'])
+            if st['locals'][2]>0:
+                yield 'jump'
+                continue
+            st['autotest']=True;st['locals'][0]=410;st['locals'][1]=130
+            steps=random(10)+12
+            def slope(n):
+                q=abs(n)*256//steps
+                return 0 if q>65535 else word(q if n>=0 else -q)*256
+            dx=slope(-170);dy=slope(14);fx=fy=32768
+            for step in range(1,steps+1):
+                vx=(st['x']%65536)*65536+fx+dx;vy=(st['y']%65536)*65536+fy+dy
+                st['x']=word(vx//65536);st['y']=word(vy//65536);fx=vx%65536;fy=vy%65536
+                st['remaining']=steps+1-step
+                yield 'wait'
+            st['remaining']=0;st['x']=580;st['y']=116;bound=random(10)+5
+            for counter in range(1,bound+1):
+                st['locals'][3]=counter
+                yield 'wait' # P
+                st['locals'][3]=word(counter+1)
+                if counter<bound:yield 'wait' # repeating Next
+            score[0]+=10
+            yield 'jump' # RN=250 <570, so the original If jumps to Begin
+    bodies=[hunter(st)for st in states];records=[]
+    for frame in range(81):
+        if frame:
+            for body in bodies:
+                jumps=10
+                while True:
+                    if next(body)=='wait':break
+                    jumps-=1
+                    if not jumps:break
+        pixels=bytearray(background)
+        iw,ih,hx,hy,image=decoded[34]
+        for st in states:
+            for row in range(ih):
+                for col in range(iw):
+                    colour=image[row*iw+col];xx=st['x']+col-hx;yy=st['y']+row-hy
+                    if colour and 0<=xx<width and 0<=yy<height:pixels[yy*width+xx]=colour
+        rgba=bytearray()
+        for yy in range(160):
+            for xx in range(320,640):
+                c=palette[pixels[yy*width+xx]];rgba.extend([(c>>8&15)*17,(c>>4&15)*17,(c&15)*17,255])
+        record=dict(frame=frame,score=score[0],seed=rng['seed'],calls=rng['calls'],hunters=json.loads(json.dumps(states)),indicesSha256=sha(pixels),rgbaSha256=sha(rgba))
+        if frame in (0,1,10,30,60):
+            name=f'amal-hunters-{beam}-{frame}.png';record['png']=name
+            scan=b''.join(b'\0'+rgba[yy*1280:(yy+1)*1280]for yy in range(160))
+            (out/name).write_bytes(b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',320,160,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(scan,9))+chunk(b'IEND',b''))
+        records.append(record)
+    hunters.append(dict(beam=beam,frames=records))
+(out/'amal-hunters.json').write_text(json.dumps(dict(cases=hunters,sourceSha256=sha(program)),indent=2)+'\n')

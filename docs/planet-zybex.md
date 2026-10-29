@@ -16,7 +16,8 @@ shows the original transparent outline, an explicit opaque comparison and restor
 the still level-1 background. **AMAL enemy drop (slow preview)** plays the original
 Bob 21 program with declared trigger inputs and slower frame waits. The missile
 loop/collision previews also run the complete first enemy program with a declared
-optional stationary bullet.
+optional stationary bullet. Two random-hunter views now run the original three
+hunter programs with portable/controlled beam inputs.
 **The complete source compiles; full gameplay remains blocked by AMAL runtime
 features and computed/wide Sprites.** All options remain marked as previews. No AMAL commands are replaced by
 no-ops and no running game variables, IPs or assets are patched to make the preview work.
@@ -74,8 +75,9 @@ The remaining eight original encodings now decode and lower through the manual
 AMAL subset: Amal string, On/Off, Synchro Off/Synchro and Update Off/Update.
 The complete original source compiles to **1,122 instructions**, with **zero
 unrecognized token encodings**. This is not full runtime compatibility. Running
-it unchanged gets beyond the first two AMAL installations and rejects unsupported
-**random Z at line 307, byte 13240, AMAL character 135**. See [manual AMAL](amal.md)
+it unchanged passes level setup and reaches unsupported computed player Sprite 15 creation
+at **line 1129, byte 53976**. AMAL Z is now implemented; see
+[AMAL random words](amal-random.md). See [manual AMAL](amal.md)
 for installation, native word/jump/movement behavior and the remaining grammar,
 automatic synchronization and animation-lane gates.
 
@@ -131,9 +133,10 @@ historical counts after each compiler addition.
    state. Keep checks/captures collapsed and mark the page playable only after
    the connected game acceptance passes.
 
-The next slice is **AMAL random and input functions**, starting with Z at the
-current whole-program runtime gate. Animation lanes and computed/wide Sprites
-follow; Autotest/Direct/eXit, For/Next and BC now pass the first enemy fixtures.
+The next slices are **ship input/animation functions and computed/wide Sprites**.
+Z now runs the three original hunters; the first full-source runtime gate is
+player Sprite 15 allocation. Autotest/Direct/eXit, For/Next and BC retain their
+first-enemy fixtures.
 Default and Set Sprite
 Buffer now have implemented reset/allocation contracts; native computed/wide
 sprite allocation and custom interpreter preferences remain open. Different
@@ -194,7 +197,7 @@ RX=260/RN=0 and a thirteen-pass loop replace the player/game loop; the Bob draws
 on the original level-1 bitmap instead of the omitted screen-2 setup. Fourteen
 independent movement/composite frames in PAL/NTSC and ten GPU comparisons bring
 the total to **68 GPU comparisons**. The live preview slows waits by 5×. A separate
-full-source run checks the current random-function gate and owned cleanup. See
+full-source run checks the current computed-player Sprite gate and owned cleanup. See
 [manual AMAL](amal.md); full gameplay is not inferred from successful compilation.
 
 The first missile fixture retains original Channel/Bob/string installation
@@ -205,6 +208,15 @@ resets and the two real +10 events per collision case. Twenty GPU comparisons
 bring Zybex to **88 GPU comparisons**. Source variables/IPs/banks are not edited;
 ship input and connected gameplay remain omitted. The live views slow waits by
 3× and preserve the ordinary host lifecycle.
+
+The random-hunter fixture retains original 291–308 for channels 23–25, with a
+hidden screen 2 for coordinate conversion, declared RN/RX/RW values and a world
+viewport at x=320. Beam words zero and 65535 are explicit controls. Shared seed,
+per-channel locals/positions and complete pixels match independent generator/
+raw-asset references for 324 PAL/NTSC frames. Twenty further GPU comparisons
+bring Zybex to **108 GPU comparisons**. The original full source now proceeds
+through level setup to computed Sprite 15 at line 1129; ship input, animation
+lanes and the computed/wide allocator still block connected gameplay.
 
 Live-host checks cover level replacement, scroll limits, score fixture
 selection/real key advancement, startup-reset/close guards, real-key GAME OVER mode changes, routing-table key/button advancement, timed AMAL playback, fullscreen and owned input/GPU disposal. Existing

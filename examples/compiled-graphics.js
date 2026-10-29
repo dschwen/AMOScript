@@ -3100,7 +3100,7 @@
     if (music) throw new Error('Sample/effect voice stealing during Music is not implemented; Music Off first');
   }
   let manualAmal = false;
-  const amal = amalFactory({ globals:amalRegisters, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
+  const amal = amalFactory({ globals:amalRegisters, readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
     if (type === 'sprite' && number >= 8) throw new Error('Computed Sprite AMAL targets are not implemented');
     const objects = type === 'bob' ? bobs : sprites;
@@ -5019,7 +5019,7 @@
     amreg: index => amalRegisters[amregIndex(index)],
     setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
     setChannel, channelBinding, installAmal, amalOn, amalOff, synchro,
-    synchroOff:()=>{manualAmal=true;}, amalSnapshot:amal.snapshot, cancelAmal:amal.clear,
+    synchroOff:()=>{manualAmal=true;}, amalSnapshot:amal.snapshot, amalRandomState:amal.randomState, cancelAmal:amal.clear,
     updateOff:()=>{automaticBobs=automaticSprites=false;},
     update:()=>{updateBobs();updateSprites();},
     audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
@@ -5217,6 +5217,9 @@
   const amalFactory = function createAmal(options) {
   const word = value => (value << 16) >> 16;
   const channels = new Map();
+  if(options.readBeam!=null && typeof options.readBeam!=='function') throw new Error('readAmalBeam must be a synchronous function');
+  // AMALInit is a cold-system initializer. ClrAMAL/Default do not reset it.
+  let randomSeed=0x1234,stepping=false;
   function compile(source) {
     if (typeof source !== 'string' || source.length > 32766) throw new Error('Unsupported AMAL source (expected at most 32766 bytes)');
     const chars = [], offsets = [];
@@ -5263,7 +5266,7 @@
         const name = chars[at++] + chars[at++]; expect('('); const screen = expression(depth+1); expect(','); const value = expression(depth+1); expect(')');
         return { kind:'coordinate', name, screen, value };
       }
-      if (peek() === 'Z') error('Unsupported AMAL function Z');
+      if (peek() === 'Z') { at++; expect('('); const mask=expression(depth+1); expect(')'); return {kind:'random',mask}; }
       return register();
     }
     function expression(depth = 0) {
@@ -5345,6 +5348,17 @@
     return freeze({ source, ops });
   }
   function evaluate(expr, channel) {
+    if (expr.kind === 'random') {
+      const mask=evaluate(expr.mask,channel),product=randomSeed*0x3171;
+      const beam=options.readBeam ? options.readBeam() : 0;
+      if(!Number.isInteger(beam) || beam<0 || beam>65535) throw new Error('AMAL beam reader must return a 16-bit word synchronously');
+      if(channels.get(channel.number)!==channel || !channel.target.alive() || (options.isRunning && !options.isRunning())) throw new Error('AMAL changed during random beam read');
+      // Both additions are WORD operations: carry never reaches the product's
+      // high word. Shift the full mixed long before applying the word mask.
+      randomSeed=((product&65535)+beam+1)&65535;
+      const mixed=((product&0xffff0000)|randomSeed)>>>0;
+      return word((mixed>>>8)&mask);
+    }
     if (expr.kind === 'bobCollision') return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'local') return channel.locals[expr.index];
@@ -5428,18 +5442,22 @@
     throw new Error('AMAL execution budget exceeded');
   }
   function step() {
-    retire();
-    for (const c of [...channels.values()].sort((a,b)=>a.number-b.number)) if (c.enabled && !c.ended) {
-      try { if(c.autoStart!=null)stepChannel(c,true); if(!c.ended)stepChannel(c); }
-      catch (error) {
-        error.message += ` in AMAL channel ${c.number}, character ${c.code.ops[c.executingIp].offset}`;
-        if (c.location) error.message += ` at line ${c.location.line}, byte ${c.location.offset}`;
-        throw error;
+    if(stepping)throw new Error('Reentrant AMAL Synchro is not supported');
+    stepping=true;
+    try {
+      retire();
+      for (const c of [...channels.values()].sort((a,b)=>a.number-b.number)) if (channels.get(c.number)===c && c.enabled && !c.ended) {
+        try { if(c.autoStart!=null)stepChannel(c,true); if(!c.ended)stepChannel(c); }
+        catch (error) {
+          error.message += ` in AMAL channel ${c.number}, character ${c.code.ops[c.executingIp].offset}`;
+          if (c.location && !error.message.includes(' at line ')) error.message += ` at line ${c.location.line}, byte ${c.location.offset}`;
+          throw error;
+        }
       }
-    }
+    } finally { stepping=false; }
   }
   function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,locals:Object.freeze(Array.from(c.locals))}))); }
-  return { compile, install, control, step, retire, removeTarget, clear:()=>channels.clear(), snapshot };
+  return { compile, install, control, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';

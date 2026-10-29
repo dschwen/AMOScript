@@ -1,8 +1,8 @@
 # Manual AMAL execution
 
 The complete unchanged Planet Zybex source now compiles to 1,122 instructions.
-Its first runtime gap is now the random function `Z` inside the original
-channel-23 program: **line 307, byte 13240, AMAL character 135**. Compilation does not imply playable
+Its first runtime gap is now computed player Sprite 15 creation at original
+**line 1129, byte 53976**. AMAL Z now gets the program beyond level setup. Compilation does not imply playable
 Zybex. The separate Bob 21 drop program now executes unchanged in a declared
 preview, using real `Wait Vbl`, `Synchro` and `Update` statements.
 
@@ -25,6 +25,7 @@ words, R0–R9. Supported AMAL forms are:
 | Direct / eXit | Redirect normal execution / preserve its suspended position |
 | For / Next | Paired local/global registers, captured bound, +1 word increments; repeats yield |
 | BC(number,first,last) | Existing live Bob masks/owners/range and shared collision table |
+| Z(mask) | Separate shared AMAL word generator with source-derived multiply/word mixing |
 | XS, YS, XH, YH | Live screen/hardware coordinate conversion using the existing bounded screen geometry |
 
 The source-derived scanner ignores lowercase/spacing; uppercase initials carry
@@ -141,7 +142,7 @@ Next yields before repeating a loop, ordinary jumps retain their execution mode,
 and Bob collision tests require direct Synchro execution. Keep these boundaries
 when extending the current manual subset.
 
-Anim/animation lanes, Wait/On, joystick/mouse/random functions, Sprite collision
+Anim/animation lanes, Wait/On, joystick/mouse functions, Sprite collision
 and Col functions, local Amreg overloads, AMAL banks/raw-address targets,
 Freeze and automatic synchronization remain unsupported. The entire original
 program now compiles, but these AMAL runtime gaps and computed/wide Sprites still
@@ -165,7 +166,7 @@ composites its transparent pixels. It generates fourteen full-bitmap/viewport
 hashes, five PNGs and six arithmetic movement vectors. Unit and browser checks
 cover all fourteen positions and images in PAL/NTSC, plus ten actual GPU frames.
 Together with earlier fixtures Zybex now has **68 GPU comparisons**. The full
-unchanged program also runs separately to its current random-function error, with terminal
+unchanged program also runs separately to its current computed-player Sprite error, with terminal
 cleanup verified. Live checks exercise timed playback and renderer/input/disposal
 ownership; they do not claim connected gameplay or native timing parity.
 
@@ -189,6 +190,16 @@ its five-iteration delay without points. PAL/NTSC checks cover **324 frames and
 20 additional GPU comparisons**, bringing Zybex to **88 GPU comparisons**.
 Stop/Resume retains an armed test and its flight/delay state without catch-up.
 These are declared isolated enemy fixtures, not connected gameplay or a native
-Amiga capture. The full unmodified program now gets beyond the first two AMAL
-installations and rejects Z at line 307; wider functions/animation/computed
+Amiga capture. The full unmodified program now passes level setup and reaches computed player
+Sprite 15 creation at line 1129; input/animation functions and computed/wide
 sprites still block the game.
+
+## Random hunters
+
+[AMAL Z](amal-random.md) now has the source-derived shared $1234 seed, unsigned
+multiply/word-add/shift/mask recurrence and independent synchronous beam hook.
+Basic Rnd/Randomize and Default do not reset it. Original 291–308 runs three
+hunters with prepared coordinate/scroll inputs on the level-1 bitmap. Two beam
+choices add 324 independent PAL/NTSC frames and twenty GPU comparisons, bringing
+Zybex to **108 GPU comparisons**. See the random documentation for reader failure,
+reentry/cancellation, zero-mask consumption and the exact fixture boundaries.

@@ -675,3 +675,17 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   frames include collisions 6/70 and source +10 resets/delays; twenty GPU checks
   bring Zybex to 88. See docs/amal.md for omitted gameplay and remaining function,
   animation, automatic-sync, computed-sprite and native-capture boundaries.
+- AMAL Z(mask) owns a shared unsigned seed word initialized by cold factory
+  startup to $1234, separate from Basic Rnd/Randomize. Evaluate mask first, MULU
+  by $3171, add beam and 1 to the low word without carry, store that seed, shift
+  the full mixed long right 8 and mask/sign-extend its low word. Zero masks still
+  consume draws. Default/Off/replacement/Stop retain the stream. readAmalBeam is
+  an optional synchronous word reader (default zero); validate before committing
+  the draw, retain earlier nested draws and reject recursive stepping or pending
+  work on a retired/stopped target. amalRandomState returns frozen copies.
+  Original hunter 291–308 runs on a declared level-1 world/hidden-coordinate-screen
+  fixture with RN/RX/RW controls and two beam choices. 324 independent PAL/NTSC
+  frames/twenty GPU comparisons bring Zybex to 108. The unchanged full source
+  passes level setup and reaches computed player Sprite 15 at line 1129, byte
+  53976. See docs/amal-random.md for cold/beam replay assumptions, lifecycle,
+  source arithmetic, callback errors and remaining input/animation/allocator gates.

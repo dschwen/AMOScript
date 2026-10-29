@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 'use strict';
 // Original packed-background inspector. This is explicitly not a game launcher.
-function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource, defaultSource, gameOverSource, channelsSource, channelsOracle, amalSource, missileSources }) {
+function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreSource, defaultSource, gameOverSource, channelsSource, channelsOracle, amalSource, missileSources, huntersSource }) {
   const root = document.getElementById('planet-zybex-preview'), make = source => new Function(`return (${source});`)();
   const introduction = document.createElement('p'); introduction.textContent = 'Planet Zybex is the next game target. Preview its original level backgrounds and a prepared score-display fixture below. Player controls, enemies and bullets still require AMAL and sprite support.';
   const toolbar = document.createElement('div'); toolbar.className = 'amos-fullscreen-toolbar';
@@ -14,6 +14,8 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   select.add(new Option('AMAL enemy drop (slow preview)', 'amal'));
   select.add(new Option('AMAL missile loop (slow preview)', 'missile'));
   select.add(new Option('AMAL missile collision (prepared bullet)', 'missile-hit'));
+  select.add(new Option('AMAL random hunters (portable beam 0)', 'hunters'));
+  select.add(new Option('AMAL random hunters (controlled beam 65535)', 'hunters-beam'));
   const next = document.createElement('button'); next.id = 'zybex-next'; next.type = 'button'; next.textContent = 'Advance fixture'; next.hidden = true;
   const scroll = document.createElement('input'); scroll.id = 'zybex-scroll'; scroll.type = 'range'; scroll.min = '0'; scroll.step = '1'; scroll.value = '0'; scroll.setAttribute('aria-label', 'Scroll through level background');
   const fullButton = document.createElement('button'); fullButton.type = 'button'; fullButton.id = 'zybex-fullscreen'; fullButton.textContent = 'Fullscreen';
@@ -46,6 +48,12 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
       host.render(); root.dataset.level = 'game-over'; root.dataset.graphicsStage = String(program.state.variables.int_stage); root.dataset.graphicsMode = String(program.display.screen().graphicsMode); root.dataset.backend = gpu ? 'webgl' : 'canvas'; root.dataset.phase = 'preview';
       status.textContent = ['Original GAME OVER: transparent text preserves the blue outline.', 'Harness comparison: opaque text overwrites the preceding outline.', 'Original transparent mode restored.'][program.state.variables.int_stage] + ' Advance or press a key in the canvas. This is a text fixture; gameplay is not running.';
       next.disabled = program.state.halted; fullscreen.refresh(); return;
+    }
+    if (['hunters','hunters-beam'].includes(select.value)) {
+      host.render();const frame=program.state.variables.int_frame,score=program.amreg(9),seed=program.amalRandomState().seed,beam=select.value==='hunters-beam'?65535:0;
+      root.dataset.level=select.value;root.dataset.huntersFrame=String(frame);root.dataset.huntersScore=String(score);root.dataset.huntersSeed=String(seed);root.dataset.backend=gpu?'webgl':'canvas';root.dataset.phase='preview';
+      status.textContent=`Three original hunters share the AMAL random stream. Prepared player/scroll inputs, beam ${beam}; waits slowed by 3×. Score: ${score}. `+(frame>80?'Preview complete; select another view and return to replay.':frame===0?'Advance or press a key to play.':'Playing.');
+      next.disabled=program.state.halted || program.state.waiting!=='key';fullscreen.refresh();return;
     }
     if (['missile','missile-hit'].includes(select.value)) {
       host.render();const frame=program.state.variables.int_frame,score=program.amreg(9),complete=frame>80;
@@ -89,15 +97,15 @@ function installPlanetZybexPreview({ sources, assets, oracle, gpuSources, scoreS
   function choose() {
     if (disposed) return;
     if (host) host.detach(); if (program) program.stop(); if (gpu) gpu.clear();
-    const module = { exports: {} }; new Function('module', ['missile','missile-hit'].includes(select.value) ? missileSources[select.value==='missile-hit'?1:0] : select.value === 'amal' ? amalSource : select.value === 'channels' ? channelsSource : select.value === 'game-over' ? gameOverSource : select.value === 'default' ? defaultSource : select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
-    program = module.exports({ files, sleepScale: ['missile','missile-hit'].includes(select.value) ? 3 : select.value === 'amal' ? 5 : 1 }); host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu }); host.attach(program);
+    const module = { exports: {} }; new Function('module', ['hunters','hunters-beam'].includes(select.value) ? huntersSource : ['missile','missile-hit'].includes(select.value) ? missileSources[select.value==='missile-hit'?1:0] : select.value === 'amal' ? amalSource : select.value === 'channels' ? channelsSource : select.value === 'game-over' ? gameOverSource : select.value === 'default' ? defaultSource : select.value === 'score' ? scoreSource : sources[Number(select.value) - 1])(module);
+    program = module.exports({ files, readAmalBeam: select.value==='hunters-beam' ? ()=>65535 : undefined, sleepScale: ['missile','missile-hit','hunters','hunters-beam'].includes(select.value) ? 3 : select.value === 'amal' ? 5 : 1 }); host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu }); host.attach(program);
     try {
-      program.tick(1000); bindingTable.hidden = select.value !== 'channels'; next.hidden = !['default','game-over','channels','amal','missile','missile-hit'].includes(select.value); next.disabled = false; scroll.disabled = ['score','default','game-over','channels','amal','missile','missile-hit'].includes(select.value); const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
+      program.tick(1000); bindingTable.hidden = select.value !== 'channels'; next.hidden = !['default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value); next.disabled = false; scroll.disabled = ['score','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value); const level = oracle.levels[Number(select.value) - 1]; scroll.max = level ? String(Math.max(level.width - 320, level.height - 160)) : '0'; scroll.value = '0'; update();
     } catch (error) { program.stop(); root.dataset.phase = 'error'; status.textContent = error.message; }
   }
-  next.onclick = () => { if (program && !disposed && ['default','game-over','channels','amal','missile','missile-hit'].includes(select.value)) { program.sendKey('next'); update(); } };
+  next.onclick = () => { if (program && !disposed && ['default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value)) { program.sendKey('next'); update(); } };
   select.onchange = choose; scroll.oninput = update;
-  const monitor = setInterval(() => { if (['score','default','game-over','channels','amal','missile','missile-hit'].includes(select.value)) update(); }, 50);
+  const monitor = setInterval(() => { if (['score','default','game-over','channels','amal','missile','missile-hit','hunters','hunters-beam'].includes(select.value)) update(); }, 50);
   function dispose() {
     if (disposed) return; disposed = true; clearInterval(monitor); if (host) host.detach(); if (program) program.stop(); fullscreen.dispose();
     if (gpu) { const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }

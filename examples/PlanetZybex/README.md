@@ -6,9 +6,11 @@ external level banks by size/SHA-256; embedded sprites and Samples remain in the
 126,082-byte `Zybex.AMOS`. No source fixes have been applied.
 
 The complete original source now compiles to 1,122 instructions. Running it
-unchanged reaches unsupported AMAL random Z at original line 307, byte 13240.
+unchanged now passes level setup and reaches computed player Sprite 15 at original
+line 1129, byte 53976.
 Separate fixtures play the original Bob 21 and missile programs with manual
 Synchro/Update, including Autotest mask collisions and native delay loops.
+Three original random hunters also run with explicit beam/coordinate fixtures.
 Wider AMAL grammar and computed/wide sprites still block full gameplay. See [the showcase milestone](../../docs/planet-zybex.md).
 
 The [live level preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex.html)
