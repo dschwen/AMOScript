@@ -1734,6 +1734,36 @@
 })(frameStateModel, copperRegisters, spriteDmaFactory);
   const displayFactory = function createDisplay(options = {}) {
   const font = options.font || fontFactory();
+  // Portable, preloaded, monospaced bitmap fonts. Host disk/font APIs stay out
+  // of indexed rendering; enumeration snapshots owned bytes before selection.
+  let discFonts = null;
+  const graphicsFonts = new WeakMap();
+  function getDiscFonts() {
+    const provided = options.diskFonts;
+    const supplied = provided == null ? [] : provided;
+    if (!Array.isArray(supplied) || supplied.length > 128) throw new Error('Invalid disk font catalogue');
+    const next = Array.from({ length: supplied.length }, (_, index) => {
+      const entry = supplied[index];
+      if (!entry) throw new Error('Invalid disk font bitmap');
+      const { name, width, height, baseline, data } = entry;
+      if (typeof name !== 'string' || !name.length || name.length > 255 ||
+          !Number.isInteger(width) || width < 1 || width > 16 ||
+          !Number.isInteger(height) || height < 1 || height > 32 ||
+          !Number.isInteger(baseline) || baseline < 0 || baseline >= height ||
+          Object.prototype.toString.call(data) !== '[object Uint8Array]' ||
+          data.length !== 256 * height * Math.ceil(width / 8)) throw new Error('Invalid disk font bitmap');
+      return { name, width, height, baseline, rowBytes: Math.ceil(width / 8), data: new Uint8Array(data) };
+    });
+    discFonts = next;
+  }
+  function setFont(index) {
+    whole(index); const target = screen();
+    if (index < 0) throw new Error('Invalid font number');
+    if (index === 0) { graphicsFonts.delete(target); return; }
+    if (discFonts == null) throw new Error('Fonts not examined: use Get Disc Fonts first');
+    if (index > discFonts.length) throw new Error('Font not defined: provide a preloaded diskFonts bitmap catalogue');
+    graphicsFonts.set(target, discFonts[index - 1]);
+  }
   const screens = new Map();
   const listeners = new Set();
   const screenListeners = new Set();
@@ -1875,6 +1905,7 @@
     // not selectable; drawing continues on the original owner.
     const target = { ...owner, id, cloneOwner: owner, palette: owner.palette.slice(), zones: null };
     screens.set(id, target);
+    if (graphicsFonts.has(owner)) graphicsFonts.set(target, graphicsFonts.get(owner));
     priorityOrder = [id, ...priorityOrder.filter(other => other !== id)];
     screenListeners.forEach(listener => listener()); changed(true); return target;
   }
@@ -2540,7 +2571,19 @@
   }
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
-    for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
+    const selected = graphicsFonts.get(target);
+    if (!selected) {
+      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
+    } else {
+      for (let i = 0; i < value.length; i++) {
+        const code = value.charCodeAt(i) <= 255 ? value.charCodeAt(i) : 63;
+        for (let row = 0; row < selected.height; row++) for (let col = 0; col < selected.width; col++) {
+          const bits = selected.data[(code * selected.height + row) * selected.rowBytes + (col >> 3)];
+          if (bits & (0x80 >> (col & 7))) pixel(target, x + i * selected.width + col, baseline - selected.baseline + row, target.ink);
+          else if (target.graphicsMode === 1) pixel(target, x + i * selected.width + col, baseline - selected.baseline + row, target.graphicsBackground);
+        }
+      }
+    }
     changed();
   }
   function centre(value) {
@@ -2735,7 +2778,7 @@
   }
   open(0, 320, 200, 16, 0);
   return {
-    screens, screen, open, resetDefault, select, close, clone, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),

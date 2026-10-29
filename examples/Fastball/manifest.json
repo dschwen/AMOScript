@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "files": {
+    "FastballEditor.Bak": {
+      "path": "FastballEditor.Bak",
+      "byteLength": 8984,
+      "sha256": "54abe8a1a3513fcfd3e435a8136e563688bbd79291bfc6952282de7ae9f81d77",
+      "upstream": "fastball/elms/FastballEditor.Bak"
+    },
+    "Fastballfont.font": {
+      "path": "Fastballfont.font",
+      "byteLength": 264,
+      "sha256": "9276146687fbe330c7e6d34227d7a2db2a6a7342f339933bf78a3649f5e55f8f",
+      "upstream": "fastball/elms/Fastballfont.font"
+    },
+    "Fastballhigh.AMOS": {
+      "path": "Fastballhigh.AMOS",
+      "byteLength": 1638,
+      "sha256": "25c91b1be03859b27b8a0607cd25beb9c9a2dd6e46d6c3d83c81ceb09c46fc03",
+      "upstream": "fastball/elms/Fastballhigh.AMOS"
+    },
+    "Fastballintro.AMOS": {
+      "path": "Fastballintro.AMOS",
+      "byteLength": 6762,
+      "sha256": "c439a655fcf3eefbfdae2afbb77294c17e24931427ad6ae64408ef7e04597b0e",
+      "upstream": "fastball/elms/Fastballintro.AMOS"
+    }
+  },
+  "note": "Unmodified source regression inputs and font descriptor. Fastballfont/9 glyph data is absent; descriptor is not a bitmap font."
+}

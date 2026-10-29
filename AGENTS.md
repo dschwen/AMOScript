@@ -803,3 +803,18 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   speed replays capture 184 Canvas/GPU frames and 31,464 independent palette rows,
   retaining five lives through level-3 entry; total Zybex GPU comparisons are 510.
   No source/asset changes. See docs/planet-zybex-lightning.md.
+
+- Uncached AMOS 1.3 Cls colour/rectangle, Screen Hide/Show screen and
+  Logic/Physic(screen) use explicit DisplayTable family metadata and pure parser
+  normalization. Cached variants retain exact arities; runtime checks/operations
+  stay unchanged. Pinned unmodified Fastball inputs cover the three blocked sources.
+- Get Disc Fonts snapshots validated `displayOptions.diskFonts` records (at most
+  128 monospaced byte atlases, width 1..16, height 1..32, baseline within height).
+  Set Font selects a one-based record per selected screen; zero resets. Owned
+  MSB-first glyph bytes affect graphics Text only, preserving Print/Writing.
+  Default empty inventories and missing glyphs error explicitly on selection.
+  No native disk-font decoding, OS enumeration or silent font substitution.
+  Fastballfont.font is only a descriptor; Fastballfont/9 is missing. All eight
+  editable Fastball files compile; _C native wrappers remain unsupported. The
+  prepared-font browser demo checks 192,000 independent pixels/three GPU frames.
+  See docs/fastball.md for format, source evidence and runtime asset blockers.

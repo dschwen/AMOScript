@@ -863,3 +863,12 @@ observation covers both original lightning paths in PAL/NTSC at normal/half spee
 GPU coverage to 510. No source/assets/VM-state patches or relaxed capture budgets.
 Level-3 completion and other independently reported crashes remain next targets.
 See docs/planet-zybex-lightning.md.
+
+### Fastball compilation blockers
+
+All eight editable programs now compile through explicit uncached display/query
+families and Get Disc Fonts / Set Font support using preloaded bitmap atlases.
+The two _C files are native compiled wrappers; use editable counterparts. Remaining
+runtime work: locate/decode Fastballfont/9 glyph data, investigate the intro IFF's
+trailing BODY byte, then validate intro/editor interaction. No source/assets were
+rewritten or checks bypassed. See docs/fastball.md.

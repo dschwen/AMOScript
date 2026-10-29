@@ -227,3 +227,12 @@ original evaluator and have independent-byte source-analysis coverage.
 
 The full objective in PLAN.md remains active. The current work establishes the
 core compiler and portable runtime; the expansion milestones are still required.
+
+## Preloaded disk fonts and uncached display forms
+
+Get Disc Fonts / Set Font now support a checked, preloaded monospaced bitmap
+catalogue for graphics Text. Native Amiga disk-font decoding and OS enumeration
+remain open; missing glyphs are never replaced silently. Uncached AMOS 1.3 Cls,
+Screen Hide/Show and Logic/Physic operand forms normalize to existing checked
+operations. All eight editable Fastball programs now compile. See
+[Fastball and font bounds](fastball.md) for source evidence and remaining assets.
