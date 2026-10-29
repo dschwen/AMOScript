@@ -58,3 +58,18 @@ test('screen overlap: direct sprites survive setup rows with independently check
   front.palette = front.palette.map((value, i) => i >= 16 ? 0xfff : value);
   assert.throws(() => d.snapshotDisplay(), /Sprite palette changes.*capture budget/);
 });
+
+
+test('screen overlap: transparent armed sprite rows do not demand unused palette capture, while nonzero attached data stays guarded', () => {
+  const { d, front } = windows();
+  front.palette = front.palette.map((value, i) => i >= 16 ? 0xfff : value);
+  let data = 0;
+  d.setSpriteWriter(frame => {
+    const y = 239 - frame.origin.y;
+    frame.lineSprites.set([600, 0, 0, 0x80000000, 600, data, 0, 0x80000001], y * 32);
+    frame.lineRegs[y * 32 + 16] |= 4;
+  });
+  assert.strictEqual(d.snapshotDisplay().frame.overflowEvents.length, 0);
+  data = 1;
+  assert.throws(() => d.snapshotDisplay(), /Sprite palette changes.*capture budget/);
+});

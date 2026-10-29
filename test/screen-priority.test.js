@@ -44,7 +44,6 @@ test('screen priority: Auto View stages priority, visibility and ownership acros
 
 test('screen priority: bounded unsupported forms fail without CPU compositing',()=>{
   const d=createDisplay();d.open(0,320,250,16,0);d.open(1,320,32,16,0);d.screenDisplay(1,128,140,320,32);d.screenToFront(1);
-  d.setColour(0,0xfff);assert.throws(()=>d.snapshotDisplay(),/shared background/);d.setColour(0,0);
   d.screenOffset(1,1,0);assert.throws(()=>d.snapshotDisplay(),/outside physical bitmap/);d.screenOffset(1,0,0);
   d.screenDisplay(1,128,140,160,32);assert.throws(()=>d.snapshotDisplay(),/equal-width/);
 });
@@ -54,4 +53,18 @@ test('screen priority: the first explicit command retains prior open and replace
   d.screenToFront(0);d.hideScreen(0);assert.strictEqual(d.presentedScreen().id,1);
   d.hideScreen(1);assert.strictEqual(d.presentedScreen().id,2);
   d.showScreen(0);d.screenToFront(2);d.close(2);d.showScreen(1);assert.strictEqual(d.presentedScreen().id,0);
+});
+
+
+test('screen priority: per-owner COLOR00 colours zero pixels and setup rows before capture, including restoration after an overlap',()=>{
+  const d=createDisplay();d.open(0,320,250,16,0);d.clear(0);d.setColour(0,0x123);
+  d.open(1,320,32,16,0);d.clear(0);d.setColour(0,0xabc);d.screenDisplay(1,128,140,320,32);d.screenToFront(1);
+  const snapshot=d.snapshotDisplay(),frame=d.canvasFrame();
+  for(let y=0;y<250;y++){
+    const front=y>=89&&y<122,rgb=front?[170,187,204,255]:[17,34,51,255];
+    for(const x of [0,100,319])assert.deepStrictEqual(Array.from(frame.rgba.slice((y*320+x)*4,(y*320+x)*4+4)),rgb,`row ${y}`);
+  }
+  assert.strictEqual(snapshot.frame.overflowEvents.length,0);
+  for(const y of [89,122])assert.strictEqual(snapshot.frame.lineRegs[y*32+16]&2,0);
+  d.hideScreen(1);assert.deepStrictEqual(Array.from(d.canvasFrame().rgba.slice(89*1280,89*1280+4)),[17,34,51,255]);
 });

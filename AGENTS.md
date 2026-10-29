@@ -586,7 +586,7 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   hires strip/lowres playfield setup and both score statements to its preview;
   four independent PAL/NTSC Canvas/GPU frames pass, 39 GPU frames total.
   Separate hires strips may accompany aligned equal-hardware-width lowres
-  priority slices with shared COLOR00; overlaps retain lowres restrictions and real
+  priority slices with per-owner COLOR00; overlaps retain lowres restrictions and real
   setup rows/budgets. No AMAL/manual-update or gameplay claim; see docs/at-text.md.
 - Default ($0cee) restores the pinned shipped 320x200/16-colour interpreter
   profile, retires all screens/clones/committed windows, Bobs, rainbows and old
@@ -793,3 +793,13 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Restart/Stop/Resume. Current Zybex launchers use KeyZ fire; older injected replay
   bindings remain independent. `keyboard-mode.html` verifies z/Z/space/Enter through
   actual Inkey$ file output, Gamepad fire while typing and restart/release behavior.
+
+- Priority slices now allow per-owner COLOR00, written immediately after DMA off
+  before setup-row capture. Keep other geometry/capture guards. Transparent armed
+  sprite rows (both data words zero) require no sprite palette capture; nonzero
+  data in either attached half retains the guard. The original Zybex lightning
+  paths reproduce 1251/58398 and 1423/64474. Observe every host-clock advance so
+  flashes between frozen checkpoints cannot be missed. Four PAL/NTSC normal/half-
+  speed replays capture 184 Canvas/GPU frames and 31,464 independent palette rows,
+  retaining five lives through level-3 entry; total Zybex GPU comparisons are 510.
+  No source/asset changes. See docs/planet-zybex-lightning.md.

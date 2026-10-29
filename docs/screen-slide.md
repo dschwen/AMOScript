@@ -41,7 +41,7 @@ and explicit DMA enable/disable copper changes at their actual starts/ends.
 The native engine also uses a broad vertical aperture plus DMA control; the
 portable builder retains its existing DIW fields for ordinary windows. A later
 normal window re-enables DMA after an early-ending one. Setup rows keep their
-existing fetch/write budget, shared COLOR00 and palette restrictions. No RGBA
+existing fetch/write budget and palette-capture restrictions. No RGBA
 overlay or CPU fallback supplies the GPU output.
 
 Canvas, WebGL and hardware pointer coordinates use the same committed clipped

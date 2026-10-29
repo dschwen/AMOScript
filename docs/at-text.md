@@ -47,7 +47,7 @@ These are source-derived and portable-font expectations, not native captures.
 Planet Zybex uses a 640×10 hires, two-colour score screen at hardware y=211,
 below a 320×160 lowres playfield at y=50. The presentation bridge now accepts
 that separate hires strip alongside lowres priority slices on the same hardware
-width. Overlapping windows retain the existing lowres/equal-width/shared-COLOR00
+width. Overlapping windows retain the existing lowres/equal-width
 contract. The separate strip has its own palette but still shares COLOR00.
 Different backdrop colours (including future thunder transitions), HAM,
 fine-scroll and unequal hardware-width priority layouts remain rejected.

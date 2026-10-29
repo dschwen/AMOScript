@@ -120,7 +120,7 @@ border/sprite colours and final restoration writes remain. The original death
 fade now fits the two-row gap. See [the live-game contract](wonderland-game.md).
 
 Screen To Front and ordinary overlapping windows use bounded equal-width lowres priority slices
-with shared background colour and real DMA-disabled setup rows. Roller II’s
+with per-screen background colours and real DMA-disabled setup rows. Roller II’s
 connected board/ready prompt and full-source editor entry now render; wider overlays and native timing
 remain open. See [priority and ready-prompt contract](screen-priority.md).
 

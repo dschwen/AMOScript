@@ -1724,10 +1724,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const hardwareWidth = views.length ? views[0].width / (views[0].hires ? 2 : 1) : 0;
       if (views.some(view => {
         const neighbours = views.filter(other => other !== view && view.y < other.y + other.height && other.y < view.y + view.height);
-        return view.ham || view.scroll || view.x !== 128 || view.palette[0] !== views[0].palette[0] || view.width / (view.hires ? 2 : 1) !== hardwareWidth ||
-          neighbours.some(other => view.hires || other.hires || view.width !== other.width || view.palette[0] !== other.palette[0]);
+        return view.ham || view.scroll || view.x !== 128 || view.width / (view.hires ? 2 : 1) !== hardwareWidth ||
+          neighbours.some(other => view.hires || other.hires || view.width !== other.width);
       })) {
-        throw new Error('Screen priority requires equal-width lowres windows with shared background for overlaps, and aligned equal hardware widths with shared background');
+        throw new Error('Screen priority requires equal-width lowres windows for overlaps, and aligned equal hardware widths');
       }
       const boundaries = [...new Set(views.flatMap(view => [view.y, view.y + view.height]))].sort((a, b) => a - b);
       const slices = [];
@@ -1772,7 +1772,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (display.writeSprites) display.writeSprites(result.frame);
     for (const view of views.filter(view => view.blankSetup)) {
       const row = view.y - 1 - result.frame.origin.y;
-      const active = row >= 0 && row < result.frame.lines && result.frame.lineSprites.subarray(row * 32, (row + 1) * 32).some((value, index) => index % 4 === 3 && (value & 0x80000000));
+      const sprites = row >= 0 && row < result.frame.lines ? result.frame.lineSprites.subarray(row * 32, (row + 1) * 32) : [];
+      // An armed all-zero row is transparent, including either half of an
+      // attached pair. Only actual sprite data needs a captured palette.
+      const active = sprites.some((flags, index) => index % 4 === 3 && (flags & 0x80000000) && (sprites[index - 2] || sprites[index - 1]));
       if (active && !compiled.spriteSafeSetupRows.includes(view.y - 1)) throw new Error('Sprite palette changes exceed screen setup capture budget');
     }
     return snapshotModel.createSnapshot(result);
@@ -2102,13 +2105,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         if (view.blankSetup) {
           const line = y - 1;
           const pending = changesByLine.get(line);
-          if (line < previous.endY || (pending && [...pending].some(([reg, value]) => reg !== R.DMACON || value !== 0x100)) ||
-              palette[0] !== previous.setup.get(R.COLOR00)) fail('unsafe priority setup row');
-          // Complete sprite palette changes before the row snapshot. Later
-          // playfield-only writes remain invisible while bitplane DMA is off.
+          if (line < previous.endY || (pending && [...pending].some(([reg, value]) => reg !== R.DMACON || value !== 0x100))) fail('unsafe priority setup row');
+          // Native EcCopHo starts the palette with COLOR00 after DMA off.
+          // It colours the blank row too, so write it before capture alongside
+          // sprite colours. Later playfield-only writes remain invisible.
           const spriteColour = reg => reg >= R.COLOR00 + 32 && reg <= R.COLOR00 + 62;
-          const early = changes.filter(([reg]) => spriteColour(reg));
-          const late = changes.filter(([reg]) => !spriteColour(reg));
+          const early = changes.filter(([reg]) => reg === R.COLOR00 || spriteColour(reg));
+          const late = changes.filter(([reg]) => reg !== R.COLOR00 && !spriteColour(reg));
           if (2 + (1 + early.length) * 4 < captureStart &&
               !Array.from(paletteByLine.get(line) || []).some(([reg]) => spriteColour(reg))) spriteSafeSetupRows.push(line);
           changesByLine.set(line, new Map([[R.DMACON, 0x100], ...early, ...late]));

@@ -853,3 +853,13 @@ and all-level completion remain separate acceptance work.
 - Open: optional instruction-rate limiting for source loops with no waits;
   native CPU/timing calibration and any unified simulation-time scaling require
   separate design and evidence. Cooperative instruction budgets are not a speed dial.
+
+### Zybex lightning presentation
+
+Fixed the line-1251/58398 background-colour crash through per-screen COLOR00 copper
+setup, and a transparent armed sprite-row false rejection. Continuous palette-step
+observation covers both original lightning paths in PAL/NTSC at normal/half speed:
+184 Canvas/GPU comparisons and 31,464 independent palette-row checks, raising Zybex
+GPU coverage to 510. No source/assets/VM-state patches or relaxed capture budgets.
+Level-3 completion and other independently reported crashes remain next targets.
+See docs/planet-zybex-lightning.md.

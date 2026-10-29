@@ -166,3 +166,12 @@ Gamepad and touch input remain enabled. Switching modes releases held keyboard
 joystick input, and Restart/Stop/Resume retain the selection. The independent
 [interactive keyboard example](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/keyboard-mode.html)
 checks actual AMOS Inkey$ text through its memory-file output.
+
+## Lightning crash fixed
+
+The display no longer requires the playfield and score panel to share background
+colour. Original lightning fades at lines 1251/1423 now render each intermediate
+palette step in both gameplay modes. No AMOS source change was required. A new
+[lightning regression](planet-zybex-lightning.md) covers 184 Canvas/GPU frames at
+normal and half speed under PAL/NTSC, including the transparent armed sprite-row
+case and exact reported location 1251/58398.

@@ -41,10 +41,12 @@ test('Planet Zybex score: both original updates share lowres/hires copper output
     }p.stop();assert.strictEqual(timers.pending(),0);}
 });
 
-test('Mixed-resolution priority: hires strip preserves shared-backdrop, overlap and hardware-width gates',()=>{
+test('Mixed-resolution priority: hires strip preserves per-screen backgrounds and retains overlap/hardware-width gates',()=>{
   const p=idle(),d=p.display;d.close(0);d.open(2,320,160,16,0);d.clear(0);d.screenDisplay(2,128,50,320,160);d.open(5,640,10,2,0x8000);d.clear(0);d.setColour(0,0);d.screenDisplay(5,128,211,640,10);d.screenToFront(2);
   const frame=d.canvasFrame();assert.deepStrictEqual(Array.from(frame.rgba.subarray((170*640)*4,(170*640)*4+4)),[0,0,0,255]);
-  d.select(5);d.setColour(0,0x123);assert.throws(()=>d.snapshotDisplay(),/shared background/);d.setColour(0,0);
+  d.select(5);d.setColour(0,0x123);const coloured=d.canvasFrame();
+  for(const y of [160,161,170])assert.deepStrictEqual(Array.from(coloured.rgba.subarray(y*640*4,y*640*4+4)),[17,34,51,255]);
+  assert.deepStrictEqual(Array.from(coloured.rgba.subarray(0,4)),[0,0,0,255]);assert.strictEqual(d.snapshotDisplay().frame.overflowEvents.length,0);d.setColour(0,0);
   const retained=d.snapshotDisplay(),copy=retained.chip.slice();d.screenDisplay(5,128,200,640,10);assert.throws(()=>d.snapshotDisplay(),/lowres.*overlaps/);assert.deepStrictEqual(retained.chip,copy);
   d.screenDisplay(5,128,211,160,10);assert.throws(()=>d.snapshotDisplay(),/equal hardware widths/);d.screenDisplay(5,128,1000,320,10);d.screenDisplay(2,128,1000,320,160);assert.doesNotThrow(()=>d.snapshotDisplay());p.stop();
 });

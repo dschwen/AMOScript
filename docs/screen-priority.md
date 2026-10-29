@@ -50,7 +50,7 @@ writer runs. A transition that misses that deadline still rejects; no mid-line
 palette effects are discarded or silently composited.
 
 Current bounds: equal-width lowres windows at X=128, whole-word horizontal offsets,
-shared COLOR00, no HAM, at most eight resulting slices, and the existing OCS
+per-owner COLOR00 with early setup-row capture, no HAM, at most eight resulting slices, and the existing OCS
 geometry/palette budget limits. Vertical offsets and full bitmap ownership remain
 intact. Unequal-width overlays, arbitrary placement,
 unrepresentable slices, larger sprite/palette transitions, wrapped DMA and native
@@ -101,3 +101,16 @@ These are source-derived expectations and CPU/GPU parity, not Amiga captures.
 Saving/loading and wider editor actions remain unaccepted. See
 [field-edge clipping](screen-windows.md#field-edge-clipping-and-parked-panels) for
 the off-field panel animation and late DMA start rules.
+
+
+## Per-screen background colours
+
+Priority slices now retain independent COLOR00 values, including nonoverlapping
+mixed-resolution windows with equal hardware widths. Changed background colours
+are written before the setup-row snapshot; that row takes the incoming owner's
+colour. Resuming a lower screen restores its colour on its setup row. Armed
+sprite rows with both data words zero are transparent and need no sprite-palette
+capture; nonzero rows retain the existing guard. See
+[the original Zybex lightning regression](planet-zybex-lightning.md) for source
+evidence and continuous fade-step coverage. Other geometry/timing gates above
+remain in force.
