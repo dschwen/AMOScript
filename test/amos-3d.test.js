@@ -133,3 +133,19 @@ test('AMOS 3D: all twelve registered statements execute in standalone factories 
   assert.strictEqual(p.threeDSnapshot().height, 120); assert.strictEqual(p.threeDSnapshot().objects.length, 0); assert.strictEqual(p.threeDSnapshot().definitions.length, 0); p.stop();
   assert.throws(() => execute(binary([[ext(0x90), n(1)]])), /object instance not defined at line 1, byte 22/);
 });
+
+
+test('AMOS 3D showcase: added turntable rotates the hero through ordinary compiled commands and repeats without changing the original excerpt', () => {
+  const clock = createFakeTimers(), p = compile(require('./helpers/amos3DProgram')({ heroTurntable: true })).create({ now: clock.now, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout,
+    files: { read: file => assets[file.split('/').pop()] } });
+  p.tick(10000); for (let frame = 0; frame < 104; frame++) clock.tick(20);
+  assert.strictEqual(p.state.location.line, 34); assert.strictEqual(p.state.waiting, 'sleep');
+  const start = hash(p.display.screen().physicalPixels);
+  for (let frame = 0; frame < 32; frame++) clock.tick(20);
+  assert.strictEqual(p.threeDSnapshot().objects[0].angles[1], (64536 + 16384) & 65535);
+  assert.notStrictEqual(hash(p.display.screen().physicalPixels), start);
+  p.stop(); const frozen = hash(p.display.screen().physicalPixels); clock.tick(200); assert.strictEqual(hash(p.display.screen().physicalPixels), frozen);
+  p.resume(); for (let frame = 0; frame < 96; frame++) clock.tick(20);
+  assert.strictEqual(p.state.waiting, 'sleep'); assert.strictEqual(hash(p.display.screen().physicalPixels), start);
+  assert.deepStrictEqual(Array.from(p.threeDSnapshot().objects[0].position), [-22, 70, 2850]); p.stop();
+});

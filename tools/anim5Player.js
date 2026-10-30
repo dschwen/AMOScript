@@ -26,6 +26,7 @@ function installAnim5Player({ sources, assets, gpuSources, sourceNames = ['Logoa
     root.dataset.phase = disposed ? 'disposed' : failure ? 'error' : !program ? 'idle' : program.state.halted ? 'ended' : program.state.stopped ? 'paused' : 'running';
     if (soundButton) { soundButton.textContent = sound.status().requested ? 'Mute sound' : 'Enable sound'; root.dataset.sound = sound.status().state; root.dataset.plays = String(sound.status().plays); }
     root.dataset.waiting = program ? program.state.waiting || '' : '';
+    root.dataset.line = program && program.state.location ? String(program.state.location.line) : '';
     root.dataset.backend = gpu ? 'webgl' : 'canvas';
     root.dataset.frameAddress = program ? String(program.state.variables.int_f || 0) : '0';
     status.textContent = failure || (!program ? `Play the original ${subject}. ${finishHint}` : program.state.halted ? `${subject === 'intro' ? 'Intro' : 'Demo'} finished. Play again or choose another version.` : program.state.stopped ? 'Paused.' : `Playing the original ${subject}. ${finishHint}`);

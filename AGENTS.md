@@ -942,6 +942,9 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   blitter parity. Unsupported clipped surfaces reject before any pixel commit.
   The declared Gru1 Anim 1–5/36–55 excerpt, prepared screen and key guard run all
   104 source fields. Six independent Python ray/plane images (384,000 pixels),
-  six real GPU frames and live pause/fullscreen are covered. The full intro still
+  six real GPU frames and live pause/fullscreen are covered. The live demo defaults
+  to an explicitly added AMOS hero turntable after the original car sequence; the
+  unchanged excerpt with its static hero ending remains separately selectable.
+  Its verification still covers the original 104 fields. The full intro still
   stops at STOS Move Y line 19; other templates, queries/collisions/animations,
   connected sprite intro and native capture remain open. See docs/amos-3d.md.

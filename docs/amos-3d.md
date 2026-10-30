@@ -6,7 +6,12 @@ renderer, not complete AMOS 3D compatibility.
 
 [Play the 3D excerpt](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html)
 ([local page](../demos/amos-3d.html)). The page has live playback, pause/resume,
-restart and fullscreen above its collapsed browser checks.
+restart and fullscreen above its collapsed browser checks. The default mode adds
+an explicitly labelled AMOS turntable loop after the source's car sequence, so
+the hero keeps rotating. The original source ends immediately after drawing the
+hero once; choose **Original excerpt — static hero ending** to see that behavior.
+The added loop changes only the demo harness, not the original AMOS file or the
+compiler/runtime.
 
 ## References and token table
 
@@ -119,7 +124,7 @@ creates the hero. The preceding IFF scrolling and sprite sequence is excluded.
 `tools/reference/amos-3d.py` independently decodes the supplied geometry and
 computes six complete images with ray/plane intersections, rather than using the
 runtime triangle barycentric interpolation. All 384,000 indexed pixels match.
-Ten unit tests cover asset hashes, token signatures, bad data, atomic failures,
+Eleven unit tests cover asset hashes, token signatures, bad data, atomic failures,
 relative motion, camera translation, buffer/mask ownership and original execution.
 The browser scenario checks six real GPU frames against copper/CPU output,
 checks Canvas output, and offers live playback with lifecycle/fullscreen controls.

@@ -83,7 +83,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const games = ['wonderland-game.html', 'roller2-game.html', 'planet-zybex-game.html'];
   const showcases = ['amos-3d.html', 'compiler-examples.html', 'bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
-    'amos-3d.html': { title: 'AMOS 3D — car and hero', description: 'Play the original Gru1 3D excerpt with supplied car/hero models, surface details, pause/resume and fullscreen. The sprite intro is excluded; rendering uses a documented portable profile.' },
+    'amos-3d.html': { title: 'AMOS 3D — car and hero', description: 'Watch the car sequence and a rotating hero in an added demo loop, or select the original static hero ending. Includes pause/resume and fullscreen. The sprite intro is excluded; rendering uses a documented portable profile.' },
     'bob-test.html': { title: 'BobTest — 64 bouncing objects', description: 'Run the original BobTest program with WebGL, pause/resume, restart and fullscreen. Press a key to start its 500-frame run.' },
     'planet-zybex.html': { title: 'Planet Zybex — development previews', description: 'Explore all seven level backgrounds, ship controls, animation, enemies and allocation fixtures. The full game has its own Play Game page above.' },
     'planet-zybex-game.html': {title:'Planet Zybex',description:'Play the shooter with sound, fullscreen, keyboard/Gamepad and optional touch controls. Three AMOS docking copy fixes preserve the vertical viewport. Tested through both docking sequences, level-3 entry, GAME OVER and a fresh game; later progression remains in development.'},

@@ -1,11 +1,12 @@
 'use strict';
 module.exports = async function amos3DProbe(page) {
   const fs = require('fs'), path = require('path'), T = require('../../lib/Transpiler');
-  const source = new T(require('./amos3DProgram')()).toModule(), title = 'Gru1 Anim — 3D excerpt';
+  const source = new T(require('./amos3DProgram')()).toModule(), title = 'Original excerpt — static hero ending';
+  const rotatingTitle = 'Car + rotating hero — added demo loop', rotatingSource = new T(require('./amos3DProgram')({ heroTurntable: true })).toModule();
   const assets = Object.fromEntries(require('../../examples/Amos3D/manifest.json').assets.map(a => ['gru1:intr/' + a.name.toLowerCase(), fs.readFileSync(path.join(__dirname, '../../examples/Amos3D', a.name)).toString('base64')]));
-  return page.evaluate(async ({ sources, sourceNames, assets, oracle, clockSource, gpuSources }) => {
+  return page.evaluate(async ({ sources, sourceNames, verificationSource, assets, oracle, clockSource, gpuSources }) => {
     const make = text => new Function(`return (${text});`)(), module = { exports: {} };
-    new Function('module', sources[sourceNames[0]])(module);
+    new Function('module', verificationSource)(module);
     const clock = make(clockSource)(), reads = [], p = module.exports({ now: clock.now, setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout,
       files: { read(file) { reads.push(file); if (!assets[file.toLowerCase()]) throw Error('Missing model dependency ' + file); return atob(assets[file.toLowerCase()]); } } });
     const model = make(gpuSources.model)(), canvas = document.createElement('canvas');
@@ -42,6 +43,6 @@ module.exports = async function amos3DProbe(page) {
       p.sendKey('finish'); clock.tick(0); check(p.state.halted && clock.pending() === 0, 'Final key did not finish');
       return { sourceFrames: 104, definitions: 2, dependencies: 5, independentPixels, gpuFrames, ended: true, fullIntro: false };
     } finally { host.detach(); gpuHost.detach(); p.stop(); const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
-  }, { sources: { [title]: source }, sourceNames: [title], assets, oracle: require('../fixtures/amos-3d.json'), clockSource: require('./fakeTimers').createFakeTimers.toString(), gpuSources: require('./webglHostSources')(),
-    subject: '3D excerpt', finishHint: 'Prepared screen/palette; original car and hero animation only. Press a key after the hero appears to finish. The preceding sprite intro is excluded.' });
+  }, { sources: { [rotatingTitle]: rotatingSource, [title]: source }, sourceNames: [rotatingTitle, title], verificationSource: source, assets, oracle: require('../fixtures/amos-3d.json'), clockSource: require('./fakeTimers').createFakeTimers.toString(), gpuSources: require('./webglHostSources')(),
+    subject: '3D excerpt', finishHint: 'The rotating hero uses an added AMOS demo loop. Select the original excerpt to see its static hero ending, then press a key to finish. Prepared screen/palette; preceding sprite intro excluded.' });
 };
