@@ -1,7 +1,7 @@
 # Compatibility and implementation status
 
-Updated 2026-10-29. The current local baseline has **930 passing tests**, plus a
-passing real-Chromium rendering/input smoke test, 75 offline demo scenarios and
+Updated 2026-10-30. The current local baseline has **932 passing tests**, plus a
+passing real-Chromium rendering/input smoke test, 76 offline demo scenarios and
 WebGL2 capability probe.
 The later [compiler-examples milestone](compiler-examples.md) adds compilation
 of all 19 originals, bounded console Input/error handlers, planar memory and

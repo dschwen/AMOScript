@@ -157,3 +157,24 @@ Canvas frames and ten GPU comparisons are part of the live game demo. Synthetic
 PAL/NTSC row oracles separately cover late first windows, all-off-field backdrops,
 setup-only rows, buffer ownership, View and pointer bounds. These are portable and
 source-derived checks, not external Amiga captures.
+
+
+## Short default bitmaps
+
+Default, unwindowed Screen Open bitmaps also use the DMA-bounded copper path
+when their hardware bottom is before row 128. OCS DIWSTOP cannot directly encode
+that early end. The bridge uses an encodable display window and enables/disables
+bitplane DMA at the real bitmap rows, preserving the strict copper geometry and
+memory checks. Logical dimensions, physical-buffer identity, default Canvas crop,
+raw snapshotPlayfield and pointer coordinates stay unchanged. This extends the
+existing explicit short-window handling to default windows.
+
+The unchanged `3Dcube3.AMOS` opens 320×32 for its progress report. Previously its
+first browser render failed while the VM happened to be at line 95, byte 2984.
+It now renders that screen, completes precalculation, runs all 500 PAL animation
+frames and exits through both original prompts with Canvas keyboard input.
+The [short-screen demo](../demos/short-screens.html) has thirteen actual GPU
+comparisons, including eight synthetic PAL/NTSC cases and 124,800 independent
+pixels. Unit checks also inspect fetch flags before/after the bitmap over a
+larger raster crop, including 1-row screens and the 127/128 end boundary. These
+are portable/source checks, not native timing measurements or Amiga captures.

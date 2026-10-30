@@ -1543,7 +1543,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         }
         view.pointers = pointers; view.depth += other.depth; view.dualPlayfield = true;
       }
-      if (!window) return view;
+      // OCS DIWSTOP cannot directly encode an early vertical end. Default
+      // Screen Open bitmaps need the same DMA-bounded window as explicit crops.
+      if (!window) return view.y + view.height < 128 ? { ...view, dmaWindow: true } : view;
       const { offsetX, offsetY } = window;
       if (offsetX + window.width > target.width || offsetY + window.height > target.height) throw new Error('Screen window extends outside physical bitmap');
       const fine = offsetX & 15;
@@ -8510,7 +8512,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         }
         view.pointers = pointers; view.depth += other.depth; view.dualPlayfield = true;
       }
-      if (!window) return view;
+      // OCS DIWSTOP cannot directly encode an early vertical end. Default
+      // Screen Open bitmaps need the same DMA-bounded window as explicit crops.
+      if (!window) return view.y + view.height < 128 ? { ...view, dmaWindow: true } : view;
       const { offsetX, offsetY } = window;
       if (offsetX + window.width > target.width || offsetY + window.height > target.height) throw new Error('Screen window extends outside physical bitmap');
       const fine = offsetX & 15;
@@ -15494,7 +15498,9 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
         }
         view.pointers = pointers; view.depth += other.depth; view.dualPlayfield = true;
       }
-      if (!window) return view;
+      // OCS DIWSTOP cannot directly encode an early vertical end. Default
+      // Screen Open bitmaps need the same DMA-bounded window as explicit crops.
+      if (!window) return view.y + view.height < 128 ? { ...view, dmaWindow: true } : view;
       const { offsetX, offsetY } = window;
       if (offsetX + window.width > target.width || offsetY + window.height > target.height) throw new Error('Screen window extends outside physical bitmap');
       const fine = offsetX & 15;

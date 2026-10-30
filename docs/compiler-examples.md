@@ -107,6 +107,18 @@ including PF2 registers 8–15. Independent offsets are captured at View. Raw
 snapshotPlayfield remains a single bitmap. Closing/replacing either screen
 unlinks the pair. Hires, clones and arbitrary raster geometry remain gated.
 
+## 3Dcube3 progress screen and complete PAL run
+
+The default 320×32 progress screen now renders through bounded copper DMA.
+The former failure at line 95, byte 2984 came from a missing default-short-window
+path in the physical bridge. The source and copper geometry checks are unchanged.
+A complete input-only PAL run covers precalculation, all 500 animation frames and
+both prompts, with five GPU comparisons of the original program. Eight synthetic
+PAL/NTSC short-screen cases add eight GPU comparisons and 124,800 independent
+pixels. See [the demo](../demos/short-screens.html) and
+[window contract](screen-windows.md#short-default-bitmaps). NTSC's later oversized
+cube screen remains a separate open geometry limit.
+
 ## Verification and remaining startup gaps
 
 The shared [runtime browser demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples-runtime.html)

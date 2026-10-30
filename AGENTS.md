@@ -848,3 +848,12 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   remain intact. Do not strip/rewrite source assets or claim monitor timing parity.
   Original BouncBobs/Mapping run animation (seven active Bobs)/preview with 82,176 independent loaded
   image/Bob pixels and three additional GPU frames; full benchmark runs stay open.
+
+- Unwindowed short Screen Open bitmaps whose hardware bottom is before row 128
+  use the existing DMA-bounded physical bridge path, with an encodable DIW and
+  DMA enabled only over actual bitmap rows. Keep copper/memory gates, logical
+  dimensions, buffer identities and raw snapshotPlayfield unchanged. Original
+  3Dcube3 now renders startup 95/2984, completes precalculation, 500 PAL frames and
+  both input prompts. short-screens has 13 GPU comparisons and 124,800 independent
+  pixels; unit checks cover 1-row/boundary screens and out-of-bitmap DMA flags.
+  See docs/screen-windows.md. Later oversized NTSC cube geometry stays gated.

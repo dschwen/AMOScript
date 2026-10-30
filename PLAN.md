@@ -1,6 +1,6 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-29.
+Assessment updated: 2026-10-30.
 
 ## Compiler examples
 
@@ -9,7 +9,8 @@ All 19 supplied `compiler_examples/AMOS_versions` programs now compile.
 also feed the repository demo catalogue. Shared Input/error handling, palette
 shifting, bitplane memory, dual playfields and GALAX command forms are implemented
 with explicit bounds. Supplied Graphics assets now load into BouncBobs animation and Mapping preview.
-Next: horizontal Screen Display
+3Dcube3 now renders its short progress screen and completes all 500 PAL frames
+and both original prompts. Next: horizontal Screen Display
 placements, Bump Circle behavior and full input-only runs. See
 [contracts and evidence](docs/compiler-examples.md).
 
