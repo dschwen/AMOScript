@@ -49,6 +49,70 @@ existing output file. Run `node bin/amoscript --help` for usage.
 The compiler accepts tokenized `.AMOS` binaries. The `.Asc` files beside some
 examples are readable references; an ASCII input frontend is still planned.
 
+## Build a playable browser game
+
+Use the page builder to package a game with the browser harness used by our
+showcase pages: WebGL2 display, sound, fullscreen, keyboard/Gamepad input, optional
+touch controls and Play/Stop/Resume/Restart buttons.
+
+For a complete Roller II build, run these commands from the repository root:
+
+```sh
+npm ci
+mkdir -p build/roller2
+
+# Emit the standalone compiled JavaScript factory.
+node bin/amoscript "examples/Roller2/current/Roller II.AMOS" build/roller2/game.js
+
+# Compile and package the game, assets and browser harness into one HTML file.
+node tools/build_game_page.js "examples/Roller2/current/Roller II.AMOS" \
+  build/roller2/index.html \
+  --assets examples/Roller2/current/manifest.json --prefix RII: \
+  --title "Roller II" --port 1 --fire KeyZ
+```
+
+The resulting files serve different purposes:
+
+| Output | How to use it |
+| --- | --- |
+| `build/roller2/index.html` | Open in a browser and click **Play Game**. It contains the compiled JavaScript, runtime, browser adapters and all manifest assets; this single file is enough to publish on a static website. |
+| `build/roller2/game.js` | The same standalone program factory, for integration into your own host. It needs display/input/audio/file adapters to become a playable browser application. |
+
+The HTML builder compiles the AMOS source itself and embeds the result; it does
+not load the separately emitted `game.js`. You can omit the first compiler
+command when you only need a playable page. Both commands refuse to overwrite
+existing output files; remove the previous generated files before rebuilding.
+
+Play enables sound, requests fullscreen and starts the original intro. Follow the
+game's prompts to reach the menu and select a level. Arrows move and Z fires;
+choose **Keyboard: Typing** when entering a name, then switch back to
+**Keyboard: Joystick** to play. Gamepad and touch input work in either mode.
+
+For your own game, replace the AMOS input and supply a JSON asset manifest:
+
+```json
+{
+  "MYGAME:title.iff": "assets/title.iff",
+  "MYGAME:sprites.abk": "assets/sprites.abk",
+  "MYGAME:music.mod": "assets/music.mod"
+}
+```
+
+Keys are the complete filenames requested by the AMOS program, including any
+`Dir$` volume prefix. Local paths are relative to the manifest. With complete
+names like these, omit `--prefix`; Roller II's shipped manifest instead needs
+`--prefix RII:`. Omit `--assets` for programs whose banks are all embedded.
+
+Add `--debug` for source error logs and downloads of new/modified session files,
+`--slowdown 2` for longer Wait/Wait Vbl delays, or `--optimize` for optional
+instruction batching. Browser file writes survive Restart but are lost on page
+reload; IndexedDB persistence is planned.
+
+See the [complete webpage tutorial](docs/game-webpage-tutorial.md) for asset
+preparation, custom harness wiring, touch controls and publishing. To regenerate
+the repository's gallery pages, including the Roller II demo and its verification
+replays, use `npm run build:demo`.
+
 ## Use from JavaScript
 
 ```js
