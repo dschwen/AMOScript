@@ -32,6 +32,9 @@ link. See [demo instructions](demos/README.md) for local use.
 
 [Original AMOS compiler examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.html): all 19 sources compile into individual debug pages. See [rebuild instructions and runtime limits](docs/compiler-examples.md).
 
+Try the [AMOS 3D car/hero animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html),
+a portable rendering of the original Gru1 3D excerpt. [Supported profile and references](docs/amos-3d.md).
+
 ## Quick start
 
 Requires Node.js; CI targets Node 22 and 24.

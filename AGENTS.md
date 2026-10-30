@@ -924,7 +924,24 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Call/Doscall require synchronous native.call with validated register results;
   Screen Base is an opaque identity handle, not a fake native structure. No
   built-in 68000 executor or OS process launch is claimed. Slot-4 Gru1 animation
-  offsets match official AMOS 3D, recorded only as diagnostic metadata; real
-  .3DO/.3DT/.3DS decoding/scene rendering remains open. Six GPU scroll frames,
+  offsets match official AMOS 3D; its initial bounded implementation is described
+  below. Six GPU scroll frames,
   122,880 independent pixels and linked/bare browser Run pass; see
   docs/gru-programs.md and demos/gru-support.html.
+
+- `lib/amos/threeD.js` implements twelve official AMOS 3D slot-4 statements.
+  Synchronous .3DO/.3DT/.3DS loading validates offsets/references and rebuilds saved
+  pointers; commit definitions only after all dependencies pass. Directory roots
+  are captured before callbacks. The profile accepts sequential P8 six-quad blocks
+  and the supplied closed vector surface contours, not arbitrary modeller assets.
+  Td Redraw writes logical indexed pixels, with no Bob/Autoback hooks or RGBA
+  overlay. Respect existing bit-3 foreground masks, upper planes, buffer identity,
+  palettes and cursor/line phase; Td Cls clears only the first four top-region
+  planes. Use ordinary Swap/View/chip/copper/GPU publication. Portable floating
+  rotations, triangle fill and per-object depth are not native fixed-point/BSP/
+  blitter parity. Unsupported clipped surfaces reject before any pixel commit.
+  The declared Gru1 Anim 1–5/36–55 excerpt, prepared screen and key guard run all
+  104 source fields. Six independent Python ray/plane images (384,000 pixels),
+  six real GPU frames and live pause/fullscreen are covered. The full intro still
+  stops at STOS Move Y line 19; other templates, queries/collisions/animations,
+  connected sprite intro and native capture remain open. See docs/amos-3d.md.

@@ -15,10 +15,13 @@ checked virtual memory and synchronous native adapters, without claiming built-i
 
 Next: implement SpriteXpro's Clip and remaining sample/wave commands; determine
 the intended icon bank in the main map editor; adopt deliberate source fixes for
-the malformed backups where appropriate. Gru1 Anim's slot-4 calls match AMOS 3D.
-That is a separate milestone requiring `.3DO/.3DT/.3DS` decoding, a transformed
-scene/material renderer and real redraw tests. Diagnostic token identification
-alone does not enable it. Scroll_C's native wrapper requires its editable backup
+the malformed backups where appropriate. [AMOS 3D](docs/amos-3d.md) now has twelve
+slot-4 commands, checked object/template/vector-surface loading and a portable
+indexed renderer. Its declared original car/hero excerpt completes all 104 fields;
+six independent images and six GPU frames cover it. Next support the STOS sprite
+Move X/Y, Move On, Anim/Anim On commands in the preceding Gru1 intro and test the
+connected asset sequence. Other 3D templates, queries/collisions and native
+fixed-point/BSP/blitter parity remain open. Scroll_C's native wrapper requires its editable backup
 or a genuine native-execution host. Missing MSX assets/requesters and complete
 interactive runs remain separate acceptance work.
 

@@ -1,7 +1,7 @@
 # Compatibility and implementation status
 
-Updated 2026-10-30. The current local baseline has **961 passing tests**, plus a
-passing real-Chromium rendering/input smoke test, 80 offline demo scenarios and
+Updated 2026-10-30. The current local baseline has **971 passing tests**, plus a
+passing real-Chromium rendering/input smoke test, 81 offline demo scenarios and
 WebGL2 capability probe.
 The later [compiler-examples milestone](compiler-examples.md) adds compilation
 of all 19 originals, bounded console Input/error handlers, planar memory and
@@ -50,9 +50,10 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
-| Gru1/Gru2/progs1 | 32/39 original sources/backups compile | All nine progs1 AMOS files compile. Scroll matrices and linked browser Run are covered; native Call/Doscall require adapters. AMOS 3D, malformed sources, duplicate bank metadata and later SpriteXpro commands remain open. [Contract](gru-programs.md). |
+| Gru1/Gru2/progs1 | 32/39 original sources/backups compile | All nine progs1 AMOS files compile. Scroll matrices and linked browser Run are covered; native Call/Doscall require adapters. STOS sprite animation, malformed sources, duplicate bank metadata and later SpriteXpro commands remain open. [Contract](gru-programs.md). |
+| AMOS 3D | Twelve slot-4 statements; bounded portable renderer | Original car/hero .3DO/.3DT/.3DS loading, pose/redraw/clear and a 104-field declared excerpt. Six independent full images and six GPU frames. P8 templates/closed contours only; native fixed-point/BSP/blitter parity, other commands and the preceding STOS sprite intro remain open. [Contract](amos-3d.md). |
 | Def Scroll / Scroll | Implemented bounded translated copy | Ten factory-owned signed-word definitions, exclusive ends, clipping, overlap and ordinary Autoback. Exposed pixels retain their values. Six GPU comparisons and 122,880 independent pixels; wrapped destinations remain gated. [Contract](gru-programs.md#1-def-scroll--scroll). |
-| Run / Pload / native interfaces | Explicit runtime and host boundaries | Browser Run chains precompiled factories and retains session files. Pload decodes one unrelocated CODE hunk; Varptr exposes checked integer/string bytes. No built-in 68000 CPU, AmigaDOS process launcher or AMOS 3D renderer. [Contract](gru-programs.md). |
+| Run / Pload / native interfaces | Explicit runtime and host boundaries | Browser Run chains precompiled factories and retains session files. Pload decodes one unrelocated CODE hunk; Varptr exposes checked integer/string bytes. No built-in 68000 CPU or AmigaDOS process launcher. [Contract](gru-programs.md). |
 | Planet Zybex | New full-game milestone; background preview only | Seven original packed worlds and original Load/Unpack excerpts pass independent pixels, 35 GPU windows and live scrolling/fullscreen. Global register exchange passes; complete source still stops at Default and AMAL/player gameplay remain open. [Milestone](planet-zybex.md). |
 | Unpack bank To screen | Implemented slot-2 full packed-screen subset | Owned checked SCCode/BMCode decoder, native square/column traversal, palette/window metadata, replacement preflight and retained bank addresses. Other overloads, partial/raw-address forms and modes remain gated. [Contract](packed-pictures.md). |
 | Amreg globals | Implemented signed-word access | Per-factory RA–RZ, integer queries, low-word stores and checked indices. Original clear_amal runs in a declared fixture; channel-local registers/interpreter remain open. [Contract](amreg.md). |

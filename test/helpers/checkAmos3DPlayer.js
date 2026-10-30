@@ -1,0 +1,24 @@
+'use strict';
+module.exports = async function checkAmos3DPlayer(page) {
+  const assert = require('assert');
+  await page.click('#animation-play');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'running');
+  assert.strictEqual(await page.locator('#animation-player').getAttribute('data-backend'), 'webgl');
+  await page.click('#animation-stop');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'paused');
+  const paused = await page.locator('#animation-input').screenshot();
+  await page.waitForTimeout(100);
+  assert.deepStrictEqual(await page.locator('#animation-input').screenshot(), paused);
+  await page.click('#animation-resume');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.waiting === 'key');
+  await page.click('#animation-fullscreen');
+  await page.waitForFunction(() => document.fullscreenElement && document.fullscreenElement.id === 'animation-player');
+  await page.keyboard.press('Escape'); await page.waitForFunction(() => !document.fullscreenElement);
+  await page.locator('#animation-input').focus(); await page.keyboard.press('a');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'ended');
+  await page.click('#animation-restart');
+  await page.waitForFunction(() => document.getElementById('animation-player').dataset.phase === 'running');
+  await page.click('#animation-stop');
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  await page.locator('#demo-checks summary').click();
+};

@@ -1,0 +1,30 @@
+{
+  "description": "Original Gru1/Intr models, pinned unchanged. Original source is in examples/GruPrograms; the demo is a declared 3D-only excerpt.",
+  "assets": [
+    {
+      "name": "auto.3DO",
+      "byteLength": 1063,
+      "sha256": "c715a1dbf0136827e725ff0013574eced78c10c51d481d8621346f0379cdd81f"
+    },
+    {
+      "name": "hero.3DO",
+      "byteLength": 2038,
+      "sha256": "e721c98176b993cd9edfb5e355bfb8ca9198aa3c357e454306eaf20ff6571017"
+    },
+    {
+      "name": "p8.3DT",
+      "byteLength": 3424,
+      "sha256": "b0fc468de267f52624b3f1514f554e4b70c4e5a9dee023613b51258e917352fb"
+    },
+    {
+      "name": "pq236001.3DS",
+      "byteLength": 263,
+      "sha256": "94b6a549535ef4c2235bf6191cfc923d970e4fea7080c1211e9cfb1bdd7bb839"
+    },
+    {
+      "name": "pq236002.3DS",
+      "byteLength": 581,
+      "sha256": "299d08a2e8f5e203dad14701d8879d4164f65dc5589f3e39c8c5910997d85041"
+    }
+  ]
+}

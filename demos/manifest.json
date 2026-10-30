@@ -452,6 +452,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sqr.html"
     },
     {
+      "file": "amos-3d.html",
+      "title": "AMOS 3D: original car and hero models",
+      "description": "Twelve official slot-4 commands, original .3DO/.3DT/.3DS assets and a declared excerpt of Gru1 Anim lines 1–5 and 36–55 on a prepared screen/palette. All 104 source frames execute; six complete indexed images match an independent Python ray/plane rasterizer and six actual WebGL frames. Portable rotation/raster/depth profile, not native blitter/BSP or Amiga capture parity. The preceding STOS sprite intro remains unsupported.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html"
+    },
+    {
       "file": "trigonometry.html",
       "title": "Trigonometry and angle modes",
       "description": "Source-compiled Sin/Cos/Tan, degree/radian modes and matching Canvas/planar/copper pixels.",

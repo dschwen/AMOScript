@@ -477,6 +477,9 @@ const scenarios = [
     assert.strictEqual(result.ticks, 240132); assert.strictEqual(result.partialSphere, true);
     assert.strictEqual(result.gameRunning, false);
   } },
+  { id: 'amos-3d', title: 'AMOS 3D: original car and hero models', initialFrame: 'Canvas: hero frame 104', description: 'Twelve official slot-4 commands, original .3DO/.3DT/.3DS assets and a declared excerpt of Gru1 Anim lines 1–5 and 36–55 on a prepared screen/palette. All 104 source frames execute; six complete indexed images match an independent Python ray/plane rasterizer and six actual WebGL frames. Portable rotation/raster/depth profile, not native blitter/BSP or Amiga capture parity. The preceding STOS sprite intro remains unsupported.', run: require('./amos3DProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, { sourceFrames: 104, definitions: 2, dependencies: 5, independentPixels: 384000, gpuFrames: 6, ended: true, fullIntro: false });
+  } },
   { id: 'trigonometry', title: 'Trigonometry and angle modes', description: 'Source-compiled Sin/Cos/Tan, degree/radian modes and matching Canvas/planar/copper pixels.', run: trigonometry, check: checkTrigonometry },
   { id: 'ehb', title: 'Extra Half Brite', description: 'Six-bit pixel codes, masked palette registers and exact four-bit halving.', run: ehb, check: checkEhb },
   { id: 'ham', title: 'HAM6 colour history', description: 'Palette and component commands, row resets, independent factories and three matching output paths.', run: ham, check: checkHam },

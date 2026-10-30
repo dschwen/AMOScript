@@ -1,0 +1,138 @@
+{
+  "description": "Independent ray/plane oracle for the portable AMOS 3D profile.\nUses original model bytes and transcribed original Anim poses. This is not an\nAmiga capture or a claim about native blitter edge/BSP/fixed-point equivalence.\n",
+  "frames": [
+    {
+      "frame": 1,
+      "name": "auto",
+      "position": [
+        350,
+        70,
+        3400
+      ],
+      "angles": [
+        16000,
+        0,
+        7000
+      ],
+      "sha256": "360d2f77b7e0c908081132fce48a245a337b2745c34992423a121dfc5a9d3ec8",
+      "counts": {
+        "0": 62756,
+        "9": 41,
+        "10": 3,
+        "11": 1198,
+        "13": 2
+      }
+    },
+    {
+      "frame": 20,
+      "name": "auto",
+      "position": [
+        244,
+        70,
+        2680
+      ],
+      "angles": [
+        12400,
+        2700,
+        4120
+      ],
+      "sha256": "f67db29a54124ab9191d6a7121c11dec6a74df6c508be79064dc9c769dcf40bd",
+      "counts": {
+        "0": 62006,
+        "9": 297,
+        "10": 80,
+        "11": 1611,
+        "13": 6
+      }
+    },
+    {
+      "frame": 65,
+      "name": "auto",
+      "position": [
+        -17,
+        70,
+        880
+      ],
+      "angles": [
+        3400,
+        9450,
+        62456
+      ],
+      "sha256": "0220fe2d9d5919fa04fcab8965dd0bfb291e45e065528efbb3e721681e1828ac",
+      "counts": {
+        "0": 56563,
+        "9": 669,
+        "10": 4600,
+        "11": 530,
+        "12": 1631,
+        "13": 7
+      }
+    },
+    {
+      "frame": 66,
+      "name": "auto",
+      "position": [
+        -17,
+        70,
+        880
+      ],
+      "angles": [
+        3250,
+        9563,
+        62336
+      ],
+      "sha256": "c2729542bf036860d2757a6a5f12f7c03d1abb1c9436c965683bc0a2350798bf",
+      "counts": {
+        "0": 56649,
+        "9": 615,
+        "10": 4614,
+        "11": 421,
+        "12": 1694,
+        "13": 7
+      }
+    },
+    {
+      "frame": 80,
+      "name": "auto",
+      "position": [
+        -17,
+        70,
+        880
+      ],
+      "angles": [
+        3250,
+        13063,
+        62336
+      ],
+      "sha256": "eeaab4d708df2c302bbb6a3095399dbdceb80849d4ea24f4d9b5d7b14ea2b2c4",
+      "counts": {
+        "0": 57050,
+        "10": 4793,
+        "12": 2157
+      }
+    },
+    {
+      "frame": 104,
+      "name": "hero",
+      "position": [
+        -22,
+        70,
+        2850
+      ],
+      "angles": [
+        3250,
+        64536,
+        62336
+      ],
+      "sha256": "3b97ad29d037ba4141f25f9240e263e5235ef9ae3d6db5eb20c8e360c38fbaeb",
+      "counts": {
+        "0": 60920,
+        "8": 432,
+        "9": 325,
+        "10": 1506,
+        "11": 662,
+        "12": 155
+      }
+    }
+  ]
+}

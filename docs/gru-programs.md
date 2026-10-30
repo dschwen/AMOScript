@@ -145,21 +145,21 @@ The previously unknown slot-4 calls match the official AMOS 3D source table:
 | `$04d6` | Td Dir |
 | `$053c` | Td Cls |
 
-Diagnostic metadata is in `tools/reference/amos-3d-tokens.json`, derived from the
-MIT-licensed official +3d.s at revision
-`533b4b1f5acd604814513f78e02c7b4796cb0531`. Slots are configurable in AMOS, so
-slot 4 is not globally redefined as AMOS 3D. The corresponding `.3DO`, `.3DT` and
-`.3DS` assets are present under the user's Gru1/Intr directory. Implementing that
-program requires a real object/template/surface decoder, scene transformations,
-clipping/material rasterization and redraw integration. Its commands remain
-explicitly unsupported; identifying tokens does not count as implementing 3D.
+The full catalogue is in `tools/reference/amos-3d-tokens.json`, with official
+source and assembled-table verification. Twelve slot-4 commands now have a bounded
+implementation, including loading the supplied object/template/vector surfaces
+and rendering into indexed bitmaps. The [AMOS 3D contract](amos-3d.md) describes
+the portable profile, 104-frame original excerpt, live demo and native parity
+gates. The preceding STOS sprite sequence remains a separate compiler blocker;
+the full intro is not yet accepted.
 
 ## Remaining first blockers
 
 - Gru1/Amos/Map-Editor.AMOS has two complete embedded icon banks numbered 2.
   Choosing which bank to retain requires a source/asset correction, not relaxed
   bank validation.
-- Gru1/Intr/Anim.AMOS and Anim.Bak need AMOS 3D.
+- Gru1/Intr/Anim.AMOS and Anim.Bak next need STOS-compatible Move X/Y, Move On,
+  Anim and Anim On. Their 3D commands now compile; a declared 3D-only excerpt runs.
 - Gru1/Intr/Animplay.Bak contains the invalid hyphenated assignment noted above.
 - Gru1/Intr/Scroll_C.AMOS contains a native compiled wrapper rather than supported
   tokenized source; Scroll.Bak is its editable counterpart.
