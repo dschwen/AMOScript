@@ -228,6 +228,9 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id: 'galax-play', title: 'GALAX: automatic AMAL and playable startup', initialFrame: 'Canvas: Original GALAX game start', description: 'The unchanged game starts from its menu, moves and fires, runs its death sequence and starts the next life. All fifteen recorded enemy paths match 4,444 independent positions. Automatic VBL scheduling, original Sprite publication and 36 actual GPU comparisons are covered; later stages and native timing remain open.', run: require('./galaxPlayProbe'), check(result, assert) {
+    assert.deepStrictEqual(result, {gameFields:180,lives:4,channels:16,gpuFrames:36,positions:4444});
+  } },
   { id: 'roller2-highscore', title: 'Roller II Ctrl fire and Enter high-score confirmation', initialFrame: 'Typed high-score name', description: 'Complete original game execution with a declared zero-score input file so the natural 299-point run qualifies. Both Ctrl keys fire, Ctrl+arrows combine, and unmapped shortcuts stay outside AMOS. Real keyboard input types and confirms a name with Enter; the original code saves Highscores, returns to the menu and starts a fresh game. No VM variable/IP edits or native capture.', run: require('./roller2HighscoreProbe'), check(result, assert) {
     assert.ok(result.assertions >= 18); assert.deepStrictEqual({ ...result, assertions: 0 }, { assertions: 0, name: 'codex', score: 299, writes: 1, entered: true, returnedToMenu: true, freshGame: true });
   } },

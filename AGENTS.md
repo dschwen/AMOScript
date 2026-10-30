@@ -639,16 +639,17 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   encodings remain, full source still stops at Amal Off 179. See docs/channels.md
   for omitted AMAL/manual update behavior and unsupported target forms.
 - Manual AMAL in lib/amos/amal.js owns immutable parsed strings and ten local
-  words per installed program, sharing existing Amreg globals. Synchro Off is
-  required; automatic installation rejects. Support Let/X/Y/A/registers,
+  words per installed program, sharing existing Amreg globals. Synchro Off selects
+  manual stepping; default automatic mode uses a driver-owned VBL wake (see
+  docs/amal-automatic.md). Support Let/X/Y/A/registers,
   left-to-right word operators, checked initial labels, ten-jump yields,
   Pause/End, Move's native 8.8 slopes/half-pixel fractions and XS/YS/XH/YH.
   Compile before retiring an old program; resolve the captured Channel target
   after retirement. Preserve Bob/Sprite identity across ordinary statements;
   rebindings do not retarget installed programs. On enables; Off deletes.
   Synchro changes intent only; Update Off disables both automatic publications,
-  Update restores/draws/swaps Bobs then publishes Sprites. No AMAL timer or RAF
-  stepping. Object/screen retirement and resized Sprite pools remove owned
+  Update restores/draws/swaps Bobs then publishes Sprites. Manual mode has no
+  AMAL timer; RAF never steps it. Object/screen retirement and resized Sprite pools remove owned
   programs; Default resets manual mode, main End/Edit/failure clears programs,
   Stop/Resume retains their state. Snapshot records are frozen independent copies.
   The complete unchanged Zybex source now compiles (1122 instructions, zero unknown
@@ -656,7 +657,7 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   11. Its separate unchanged Bob 21 program runs with prepared trigger inputs,
   a declared thirteen-pass loop and original manual housekeeping on level-1
   background. Twenty-eight independent PAL/NTSC frames/ten GPU comparisons bring
-  Zybex to 68. See docs/amal.md for unsupported grammar/automatic/computed-sprite,
+  Zybex to 68. See docs/amal.md for unsupported grammar/computed-sprite,
   source bounds, native timing/capture and connected-gameplay gates.
 - AMAL Autotest activates at its declaration, then runs before normal resumption
   with a separate twenty-jump quota. eXit/closing/quota preserve Move state;
@@ -880,6 +881,23 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   ignoring unused viewport metadata and retaining destination palette/geometry.
   All five GALAX banks match independent Python full-pixel vectors; PicAst2's
   offset-420/full-height request remains invalid for new-screen Unpack. Actual
-  original startup reaches GALAX menu; gameplay/audio remain open. The combined
+  original startup reaches GALAX menu; wider gameplay/audio remain open. The combined
   horizontal-packed demo has 26 GPU comparisons and 962,072 independent pixels.
   See docs/horizontal-placement.md and tools/compiler_packed_vectors.py.
+- Automatic AMAL uses the driver VBL clock and an owned wake, never RAF. Default
+  mode supports channels 0–15; Synchro Off retains manual 0–63 and Synchro On
+  validates before switching. Reconcile fields before instructions and publish
+  through ordinary automatic Bob/Sprite updates, respecting Update Off. Stop
+  invalidates wakes, Resume rebases without catch-up, and Freeze/On retains state.
+  Off/replacement/retirement/Default/terminal cleanup cancel owned work; stale
+  callbacks are inert. Catch-up is bounded to 250 fields; BC remains manual-only.
+  PLay reads bounded forward recordings from Amal bank 4 with signed seven-bit
+  deltas, wait bytes, X-before-Y termination and separate Anim continuation.
+  Preflight stream terminators before writes, guard active raw bank writes and
+  detect replacement/erase/swap/shrink before the next movement step. Banked
+  strings, reverse playback and Autotest PLay remain gated. All fifteen GALAX
+  recordings match 4,444 independent Python positions. Original full-source
+  menu/game input replay moves/fires, loses one life and starts the next with
+  sixteen channels; 36 GPU comparisons pass. No source/VM/bank edits. Later
+  stages, editor, music and native captures remain open. See
+  docs/amal-automatic.md and tools/reference/galax-movement.py.

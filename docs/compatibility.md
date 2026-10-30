@@ -1,11 +1,14 @@
 # Compatibility and implementation status
 
-Updated 2026-10-30. The current local baseline has **943 passing tests**, plus a
-passing real-Chromium rendering/input smoke test, 78 offline demo scenarios and
+Updated 2026-10-30. The current local baseline has **950 passing tests**, plus a
+passing real-Chromium rendering/input smoke test, 79 offline demo scenarios and
 WebGL2 capability probe.
 The later [compiler-examples milestone](compiler-examples.md) adds compilation
 of all 19 originals, bounded console Input/error handlers, planar memory and
 lowres dual playfields; its standalone debug pages expose remaining runtime gaps.
+GALAX now starts gameplay through automatic AMAL and recorded PLay movement,
+including firing, a natural death and next-life restart; see
+[the automatic AMAL contract](amal-automatic.md) for the tested scope.
 
 This describes implemented behavior, not a claim of complete AMOS compatibility.
 The earlier 248-test baseline passed clean-install checks on Node 22 and 24.

@@ -42,17 +42,17 @@ test('AMAL: installation captures binding/object identity; remapping does not re
   p.setBob(0,100,null,null);p.synchro();assert.strictEqual(p.bobInfo('X Bob',0),101);const before=p.amalSnapshot();assert.ok(Object.isFrozen(before[0].locals));p.amalOff(0);assert.strictEqual(p.amalSnapshot().length,0);p.installAmal(0,'Pause');assert.deepStrictEqual(plain(p.amalSnapshot()[0].locals),Array(10).fill(0));assert.deepStrictEqual(plain(before[0].binding),{type:'bob',number:0});p.stop();
 });
 
-test('AMAL: malformed replacements preserve programs, target-resolution failures retire them, and unsupported automatic/bank forms reject with source context',()=>{
+test('AMAL: malformed replacements preserve programs, target-resolution failures retire them, and unsupported bank forms reject with source context',()=>{
   const {p}=idle();const before=plain(p.amalSnapshot());assert.throws(()=>p.installAmal(0,'Wait'),/Unsupported AMAL/);assert.deepStrictEqual(plain(p.amalSnapshot()),before);p.setChannel(0,'bob',()=>63);assert.throws(()=>p.installAmal(0,'Pause'),/target not defined/);assert.strictEqual(p.amalSnapshot().length,0);
   for(const number of [-2,64]){assert.throws(()=>p.amalOn(number),/channel number/);assert.throws(()=>p.amalOff(number),/channel number/);}p.stop();
-  assert.throws(()=>execute(binary([[t('Amal'),n(0),t(','),text('Pause')]])),/Automatic AMAL.*line 1/);
+  assert.throws(()=>execute(binary([[t('Amal'),n(16),t(','),text('Pause')]])),/Automatic AMAL.*line 1/);
   assert.throws(()=>compile(binary([[t('Amal'),n(0),t(','),n(1)]])),/requires a string/);
   assert.throws(()=>idle('Wait'),/AMAL character 0 at line 5/);
 });
 
 test('AMAL: object/screen retirement, Sprite Off/resize and Default clear owned programs; Stop freezes manual steps and terminal errors cannot leave programs alive',()=>{
   const {p,c}=idle('Let X=X+1;Pause;Let X=X+1');p.amalOn();p.stop();p.synchro();assert.strictEqual(p.bobInfo('X Bob',0),0);c.tick(1000);p.resume();p.synchro();assert.strictEqual(p.bobInfo('X Bob',0),1);p.bobOff(0);assert.strictEqual(p.amalSnapshot().length,0);
-  p.setBob(0,0,0,0);p.installAmal(0,'Pause');p.display.close(0);assert.strictEqual(p.amalSnapshot().length,0);p.setChannel(0,'sprite',()=>0);p.installAmal(0,'Let X=100');p.spriteOff(0);assert.strictEqual(p.amalSnapshot().length,0);p.installAmal(0,'Pause');p.setSpriteBuffer(48);assert.strictEqual(p.amalSnapshot().length,0);p.installAmal(0,'Pause');p.resetDefault();assert.strictEqual(p.amalSnapshot().length,0);assert.throws(()=>p.installAmal(0,'Pause'),/Automatic/);p.stop();assert.strictEqual(c.pending(),0);
+  p.setBob(0,0,0,0);p.installAmal(0,'Pause');p.display.close(0);assert.strictEqual(p.amalSnapshot().length,0);p.setChannel(0,'sprite',()=>0);p.installAmal(0,'Let X=100');p.spriteOff(0);assert.strictEqual(p.amalSnapshot().length,0);p.installAmal(0,'Pause');p.setSpriteBuffer(48);assert.strictEqual(p.amalSnapshot().length,0);p.installAmal(0,'Pause');p.resetDefault();assert.strictEqual(p.amalSnapshot().length,0);p.installAmal(0,'Pause');p.stop();assert.strictEqual(c.pending(),0);
   const q=idle().p;q.sendKey('end');q.tick(1000);assert.strictEqual(q.state.halted,true);assert.strictEqual(q.amalSnapshot().length,0);
 });
 

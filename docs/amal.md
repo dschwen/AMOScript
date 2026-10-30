@@ -1,4 +1,9 @@
-# Manual AMAL execution
+# AMAL execution
+
+The default automatic VBL mode and GALAX recorded PLay paths are now supported;
+see [automatic AMAL and GALAX](amal-automatic.md) for clock/lifecycle bounds and
+the complete-source gameplay-start acceptance. The manual profile below remains
+the basis of Planet Zybex's explicit Synchro/Update execution.
 
 The complete unchanged Planet Zybex source now compiles to 1,122 instructions.
 It now passes a bounded forty-field input replay per video standard, including
@@ -48,8 +53,8 @@ movement or animation no-ops.
 
 ## Installation, ownership and controls
 
-`Synchro Off` selects the supported manual mode. AMAL installation in automatic
-mode rejects explicitly. `Amal channel,string` compiles/owns its source, reads the
+`Synchro Off` selects manual mode; `Synchro On` restores automatic field stepping.
+`Amal channel,string` compiles/owns its source, reads the
 current [Channel routing](channels.md) pair and resolves the target at installation.
 Bobs must exist; Sprite targets (0–63) use their persistent coordinate/image
 intent. Computed/wide Sprites share the [hardware stream pool](computed-sprites.md). Subsequent Channel changes do not
@@ -70,7 +75,7 @@ channel order. It changes logical object intent only. `Update Off` disables both
 automatic Bob and Sprite publication. `Update` runs the existing Bob restoration,
 drawing and screen swap, then direct-Sprite publication. It does not invoke AMAL.
 Clocked `Wait Vbl` belongs to the ordinary VM; rendering/requestAnimationFrame
-does not drive AMAL and no AMAL timer is created by installation or On.
+does not drive AMAL. In manual mode, installation and On create no AMAL timer.
 
 MOVE takes its first step on entry, performs exactly count steps, and resumes
 following instructions on the next pass. Counts <=0 become 1. Each unsigned
@@ -148,7 +153,9 @@ when extending the current manual subset.
 
 Wait/On, mouse functions, Sprite collision
 and Col functions, local Amreg overloads, AMAL banks/raw-address targets,
-Freeze and automatic synchronization remain unsupported. The entire original
+reverse recorded movement and banked AMAL strings remain unsupported. Automatic
+synchronization and all-channel Freeze now use the shared controller and driver.
+The entire original
 program now compiles and passes the bounded connected replay; those wider
 functions are not evidence of a blocker in its tested prefix. The original source is not patched to bypass them.
 

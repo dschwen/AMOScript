@@ -109,7 +109,7 @@ Regenerate with `python3 tools/reference/planet-zybex-amal.py` and
 `npm run build:demo`; verify with `npm run check` and `npm run test:browser`.
 Longer life/restart and horizontal/vertical progression replays, audible sample
 verification, a full application launcher, remaining AMAL functions and native
-beam/interrupt captures remain open. Automatic synchronization is still gated;
+beam/interrupt captures remain open. [Automatic synchronization](amal-automatic.md) is now supported;
 Zybex explicitly uses Synchro Off and Update Off.
 
 ## Connected loss/restart update

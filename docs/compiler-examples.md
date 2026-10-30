@@ -154,7 +154,7 @@ Initial bounded startup inspection found these remaining issues:
 | Sources | Current startup limit |
 | --- | --- |
 | BouncBobs, Mapping | Supplied graphics now load; live animation/preview are checked. Full benchmark/completion replays remain open. |
-| GALAX | All five picture headers now decode; complete original startup reaches the scrolling menu. Gameplay and audio remain unverified in this route. |
+| GALAX | All five pictures decode. Automatic AMAL and recorded PLay now run original game selection, movement/firing, a natural death and next-life restart with 36 GPU checks. Later stages, victory, editor and music remain unverified. [Contract](amal-automatic.md). |
 | Fractal3, Plasma | Horizontal placement now works; both unchanged sources complete their tested input/animation routes. |
 | NTSC cube startup | Oversized default screen windows remain outside the current runtime subset. |
 | Bump | Idle coordinate polling now respects its positive mouse limits. The complete PAL radius-80 deformation and original exit prompt run; native raster/math/timing parity remains open. |

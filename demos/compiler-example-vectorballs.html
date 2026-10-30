@@ -3859,6 +3859,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const bankMemory = bankMemoryFactory(banks, { externalMemory: display.memory, beforeWrite(bank) {
+    if (amal.usesBank(bank)) throw new Error('Writing an active AMAL movement bank is not implemented; Amal Off first');
     if (animations.has(bank)) throw new Error('Writing a Frame Load animation bank is not implemented');
     if (bank === musicBank) throw new Error('Writing an active Music bank is not implemented; Music Off first');
     if (bank === trackerBank) throw new Error('Writing an active Tracker bank is not implemented; Track Stop first');
@@ -3978,8 +3979,26 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function sampleDuringMusic() {
     if (music) throw new Error('Sample/effect voice stealing during Music is not implemented; Music Off first');
   }
-  let manualAmal = false;
-  const amal = amalFactory({ globals:amalRegisters, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
+  let manualAmal = false, amalNext = null;
+  function movementBank() { const bank=banks.get(4); return bank && bank.type==='data' && bank.name==='Amal    ' ? bank : null; }
+  function movement(number) {
+    const bank=movementBank();
+    if(!bank) throw Error('AMAL PLay requires an Amal movement bank 4');
+    const data=bank.data;
+    const word=at=>{if(at<0 || at+2>data.length)throw Error('AMAL movement header out of bounds');return data[at]*256+data[at+1];};
+    const count=word(4);
+    if(count>1024 || 6+count*2>data.length) throw Error('AMAL movement table out of bounds');
+    if(!number || number>count) return null;
+    const offset=word(4+number*2);
+    if(!offset) return null;
+    if(offset>16383)throw Error('Unsupported AMAL movement offset');
+    const start=4+offset*2,speed=word(start),yOffset=word(start+2),y=start+yOffset+1,x=start+5;
+    if(speed<1 || speed>32767 || yOffset>32767 || start<6+count*2 || y<=x || y>=data.length) throw Error('Unsupported AMAL movement geometry/speed');
+    const end=(from,limit)=>{let at=from;while(at<limit && data[at])at++;if(at===limit)throw Error('Unterminated AMAL movement stream');return at;};
+    const ends={X:end(x,y),Y:end(y,data.length)},starts={X:x,Y:y};
+    return {bank,speed,alive:()=>banks.get(4)===bank && bank.data===data,read(axis,index){const at=starts[axis]+index;if(at>ends[axis])throw Error('AMAL movement stream out of bounds');return data[at];}};
+  }
+  const amal = amalFactory({ globals:amalRegisters, isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
@@ -4003,14 +4022,36 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }});
   function installAmal(channel,source) {
     channel=channelIndex(channel);
-    if (!manualAmal) throw new Error('Automatic AMAL synchronization is not implemented; Synchro Off first');
+    if (!manualAmal && channel>=16) throw new Error('Automatic AMAL requires a channel from 0 to 15');
     if (state.halted) throw new Error('Cannot install AMAL in a halted program');
     amal.install(channel,source,channelBinding(channel),state.location);
+    refreshAmal();
   }
   function amalSelector(number) { if(number==null || number===-1) return null; return channelIndex(number); }
-  function amalOn(number=null) { amal.control(amalSelector(number),true); }
-  function amalOff(number=null) { amal.control(amalSelector(number),false); }
+  function refreshAmal() {
+    if(manualAmal || !amal.running()) amalNext=null;
+    else if(amalNext==null) amalNext=options.vblNow()+1;
+    if(options.requestAmalWake) options.requestAmalWake();
+  }
+  function amalOn(number=null) { amal.control(amalSelector(number),true); refreshAmal(); }
+  function amalOff(number=null) { amal.control(amalSelector(number),false); refreshAmal(); }
   function synchro() { if(manualAmal && !state.stopped && !state.halted) amal.step(); }
+  function synchroOff() { manualAmal=true;refreshAmal(); }
+  function synchroOn() {
+    if(amal.snapshot().some(c=>c.number>=16))throw Error('Automatic AMAL requires channels from 0 to 15');
+    manualAmal=false;refreshAmal();
+  }
+  function nextAmalVbl() { if(manualAmal || !amal.running())amalNext=null;return amalNext; }
+  function advanceAmal(vbl) {
+    if(state.stopped || state.halted || nextAmalVbl()==null)return;
+    if(vbl-amalNext>=250)throw Error('AMAL field catch-up exceeds 250 fields');
+    while(amalNext!=null && amalNext<=vbl && !state.stopped && !state.halted) {
+      amalNext++;amal.step();flushBobs();
+      if(!amal.running())amalNext=null;
+    }
+  }
+  function cancelAmal() { amal.clear();amalNext=null;if(options.requestAmalWake)options.requestAmalWake(); }
+  function resumeAmal() { amalNext=null;refreshAmal(); }
   let bankOrder = Array.from(banks.keys()).reverse();
   const bobs = new Map();
   const sprites = new Map();
@@ -4355,6 +4396,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (sprite) sprite.image = 0;
     }
     amal.removeTarget('sprite',number);
+    refreshAmal();
     // Off explicitly clears the presented object at the next update.
     for (const [id, frame] of spriteFrames) if (number == null || id === number) frame.off = true;
     spritesDirty = true;
@@ -4362,6 +4404,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function setSpriteBuffer(lines) {
     if (!spriteBuffer.resize(integer(lines))) return;
     amal.removeTarget('sprite');
+    refreshAmal();
     for (const sprite of sprites.values()) sprite.image = 0;
     spriteFrames.clear(); spritesDirty = false;
     publishSpriteBuffer(); setPointerCount(0);
@@ -4406,6 +4449,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function pruneBobs() {
     for (const [id, bob] of bobs) if (display.screens.get(bob.screen.id) !== bob.screen) bobs.delete(id);
     amal.retire();
+    refreshAmal();
     drawnBobs = drawnBobs.filter(saved => display.screens.get(saved.screen.id) === saved.screen);
     if (priorityScreen && display.screens.get(priorityScreen.id) !== priorityScreen) priorityScreen = null;
   }
@@ -4522,6 +4566,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (number == null) bobs.clear();
     else bobs.delete(bobNumber(number));
     amal.removeTarget('bob',number);
+    refreshAmal();
     bobsDirty = true;
   }
   function clearBobs(target = null, bothBuffers = false) {
@@ -5004,7 +5049,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     audio.prepareDefault();
     defaulting = true;
     try {
-      blocks.clear(); cancelPaletteEffects(); amal.clear(); manualAmal=false; amalRegisters.fill(0); resetChannels();
+      blocks.clear(); cancelPaletteEffects(); cancelAmal(); manualAmal=false; amalRegisters.fill(0); resetChannels();
       bobs.clear(); drawnBobs = []; bobsDirty = false;
       priorityScreen = null; reversePriority = false;
       // ActuMask=$7100 resets automatic BOB/Sprite UPDATE bits 5/6 to off.
@@ -5954,7 +5999,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     pasteIcon: (x, y, number) => pasteImage(2, x, y, number),
     spritePalette: (mask = -1) => display.bankPalette(imageBank(1).palette, mask),
     resetDefault,
-    getBlock, putBlock, delBlock, delSprite, spriteCollision, unpackExisting, amalFreeze: () => amal.freeze(),
+    getBlock, putBlock, delBlock, delSprite, spriteCollision, unpackExisting, amalFreeze: () => { amal.freeze();refreshAmal(); },
     getIcon: (...args) => captureImage(2, 'Get Icon', ...args),
     getBob: (...args) => captureImage(1, 'Get Bob', ...args),
     getSprite: (...args) => captureImage(1, 'Get Sprite', ...args),
@@ -6016,7 +6061,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     amreg: index => amalRegisters[amregIndex(index)],
     setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
     setChannel, channelBinding, installAmal, amalOn, amalOff, synchro,
-    synchroOff:()=>{manualAmal=true;}, amalSnapshot:amal.snapshot, amalRandomState:amal.randomState, cancelAmal:amal.clear,
+    synchroOff, synchroOn, nextAmalVbl, advanceAmal, resumeAmal, amalSnapshot:amal.snapshot, amalRandomState:amal.randomState, cancelAmal,
     updateOff:()=>{automaticBobs=automaticSprites=false;},
     update:()=>{updateBobs();updateSprites();},
     audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
@@ -6369,7 +6414,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         const target=register(), begin=forStack.pop(), owner=ops[begin];
         if(!owner || owner.target.kind!==target.kind || owner.target.index!==target.index) error('Mismatched AMAL For/Next');
         op={kind:'next',begin};
-      } else if (command === 'P' && peek() !== 'L') {
+      } else if (command === 'P' && peek() === 'L') {
+        if(scope) error('PLay in AMAL Autotest is not supported');
+        at++; op={kind:'play',movement:expression()};
+      } else if (command === 'P') {
         if(scope) error('Pause in AMAL Autotest is not supported');
         op={kind:'pause'};
       } else if (command === 'E') op={kind:'end'};
@@ -6416,7 +6464,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const mixed=((product&0xffff0000)|randomSeed)>>>0;
       return word((mixed>>>8)&mask);
     }
-    if (expr.kind === 'bobCollision') return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
+    if (expr.kind === 'bobCollision') {
+      if(options.isManual && !options.isManual()) throw Error('AMAL BC requires Synchro Off');
+      return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
+    }
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'local') return channel.locals[expr.index];
     if (expr.kind === 'global') return options.globals[expr.index];
@@ -6435,6 +6486,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function install(number, source, binding, location) {
     const code = compile(source); // A syntax failure retains the old program.
+    if(code.ops.some(op=>op.kind==='play') && (!options.hasMovementBank || !options.hasMovementBank())) throw Error('AMAL PLay requires an Amal movement bank 4');
     channels.delete(number); // Native replacement retires before target resolution.
     const target = options.resolve(binding);
     channels.set(number,{ number, code, binding:Object.freeze({...binding}), target, location:location && {...location}, locals:new Int16Array(10), ip:0, enabled:false, ended:false, move:null, animation:null, autoStart:null, bounds:new Map() });
@@ -6472,7 +6524,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         if(op.kind==='if' && !evaluate(op.expr,c)) { ip++; continue; }
         const action=op.kind==='if'?op.action:op;
         if(action.kind==='exit') return;
-        if(action.kind==='direct') { c.ip=action.destination; c.move=null; return; }
+        if(action.kind==='direct') { c.ip=action.destination; c.move=null; c.play=null; return; }
         ip=action.destination; if(--jumps===0) { save(); return; }
       } else if(op.kind==='for') {
         // Both expressions see the old register; the captured bound is owned
@@ -6484,6 +6536,29 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         store(owner.target,value,c);
         if(value <= (c.bounds.get(op.begin)||0)) { c.ip=op.begin+1; return; }
         ip++;
+      } else if(op.kind==='play') {
+        if(!c.play) {
+          const movement=options.movement(evaluate(op.movement,c)&65535);
+          if(!movement) { ip++; continue; }
+          c.play={movement,counter:1,x:0,y:0,waitX:0,waitY:0};
+        }
+        const play=c.play;
+        if(!play.movement.alive()) throw Error('AMAL movement bank changed during PLay');
+        if(--play.counter) { save(); return; }
+        let finished=false;
+        for(const [axis,index,wait] of [['X','x','waitX'],['Y','y','waitY']]) {
+          const value=play.movement.read(axis,play[index]);
+          if(value===0) { finished=true; break; }
+          if(value&128) {
+            if(--play[wait]===0 || (play[wait]<0 && !(value&127))) play[index]++;
+            else if(play[wait]<0) play[wait]=value&127;
+          } else {
+            c.target.write(axis,word(c.target.read(axis)+((value<<25)>>25)));
+            play[index]++;
+          }
+        }
+        if(finished) { c.play=null; ip++; continue; }
+        play.counter=play.movement.speed; save(); return;
       } else if(op.kind==='move') {
         if(c.move) {
           if(--c.move.remaining===0) { c.move=null; ip++; continue; }
@@ -6534,7 +6609,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     } finally { stepping=false; }
   }
   function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,animation:c.animation ? Object.freeze({index:c.animation.index,remaining:c.animation.counter,loops:c.animation.loops}) : null,locals:Object.freeze(Array.from(c.locals))}))); }
-  return { compile, install, control, freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
+  function running() { retire(); return [...channels.values()].some(c=>c.enabled && (!c.ended || c.animation)); }
+  return { compile, install, control, running, usesBank:bank=>[...channels.values()].some(c=>c.play && c.play.movement.bank===bank), freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
@@ -7240,6 +7316,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   let paletteWake = null;
   let trackerWake = null;
   let musicWake = null;
+  let amalWake = null;
   let sleepRemaining = 0;
   let pendingEdit = null;
   let errorHandler = null, errorFrame = null, resumeTarget = null;
@@ -7309,7 +7386,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function silenceAfterFailure() {
     // A failing host must not replace the original source-context error.
-    cancelTrackerWake(); cancelMusicWake();
+    cancelTrackerWake(); cancelMusicWake(); cancelAmalWake();
     operations.cancelAmal();
     try { operations.cancelMusic(); } catch (_) { /* best-effort cleanup */ }
     try { operations.trackStop(); } catch (_) { /* best-effort cleanup */ }
@@ -7418,6 +7495,27 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }, Math.max(0, delayMs));
   }
 
+  function cancelAmalWake() {
+    const task=amalWake;amalWake=null;
+    if(task && timing.clearTimeout && task.id!=null) {
+      try { timing.clearTimeout.call(globalThis,task.id); } catch (_) { /* ownership invalidates late callbacks */ }
+    }
+  }
+  function requestAmalWake() {
+    cancelAmalWake();
+    if(state.halted || state.stopped)return;
+    const field=operations.nextAmalVbl();
+    if(field==null)return;
+    const task={id:null};amalWake=task;
+    task.id=timing.setTimeout.call(globalThis,()=>{
+      if(amalWake!==task)return;
+      amalWake=null;
+      if(state.halted || state.stopped)return;
+      try { operations.advanceAmal(vblCount());requestAmalWake(); }
+      catch(error) { failPalette(error,state.location); }
+    },Math.max(0.001,timerEpoch+field*1000/timing.vblHz-timing.now()));
+  }
+
   function step() {
     if (state.halted) return { done: true };
     const fn = cases[state.ip];
@@ -7439,6 +7537,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const location = operations.paletteLocation();
       try { operations.advancePalette(vblCount()); }
       catch (error) { failPalette(error, location); }
+    }
+    if (operations.nextAmalVbl() != null) {
+      try { operations.advanceAmal(vblCount()); }
+      catch(error) { failPalette(error,state.location); }
     }
     try {
       res = fn(state) || {};
@@ -7534,7 +7636,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         // asynchronous engine is active. Pure blocks cannot start those engines.
         if (block && block.length <= maxSteps - steps &&
           operations.nextTrackerVbl() == null && operations.nextMusicVbl() == null &&
-          operations.nextPaletteVbl() == null) {
+          operations.nextPaletteVbl() == null && operations.nextAmalVbl() == null) {
           block.run(state);
           steps += block.length;
           optimization.blocksExecuted++;
@@ -7558,6 +7660,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
     try {
       operations.flushBobs();
+      requestAmalWake();
       if (state.halted) { inputRequest = null; inputText = ''; operations.cancelAmal(); cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); operations.closePorts(); }
     } catch (error) {
       pendingEdit = null;
@@ -7596,6 +7699,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cancelPaletteWake();
     cancelTrackerWake(); operations.pauseTracker();
     cancelMusicWake(); operations.pauseMusic();
+    cancelAmalWake();
     resetInput();
     operations.audio.silence();
   }
@@ -7612,6 +7716,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     catch (error) { failPalette(error, operations.trackerLocation()); }
     try { operations.resumeMusic(); requestMusicWake(); }
     catch (error) { failPalette(error, operations.musicLocation()); }
+    try { operations.resumeAmal(); }
+    catch (error) { failPalette(error,state.location); }
     if (state.waiting === 'input') { while (inputRequest && keys.length) { const next = keys.shift(); consumeInput(typeof next === 'string' ? next : next.key); } }
     if (state.waiting === 'sleep') scheduleNext(sleepRemaining);
     else if (!state.waiting) scheduleNext(0);
@@ -7650,7 +7756,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount,
     audioFieldTime: () => (timing.now() - timerEpoch) * timing.vblHz / 1000, audioVblHz: timing.vblHz,
-    requestPaletteWake, requestTrackerWake, requestMusicWake }));
+    requestPaletteWake, requestTrackerWake, requestMusicWake, requestAmalWake }));
   return {
     ...(blocks ? { optimization: Object.freeze({
       get blocksExecuted() { return optimization.blocksExecuted; },
