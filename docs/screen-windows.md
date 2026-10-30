@@ -16,16 +16,18 @@ bounded by the bitmap. Width is in lowres hardware units, including hires mode;
 the stored viewport width is doubled for hires. Vertical placement and height
 use physical rows in the supported nonlaced subset.
 
-The current bounded implementation accepts aligned x=128, widths 128–320 lowres
+The current bounded implementation accepts word-rounded x=96–240, widths 128–320 lowres
 units and signed vertical positions -4095..28671, with Y+height at most 28671.
 Managed windows clip to the native nonlaced raster interval [26,310) in PAL or
 [26,260) in NTSC, advancing source pointers at the top. Small early-ending windows
 use explicit copper DMA control. Fully off-field windows fetch no pixels. See
 [the original sliding intros](screen-slide.md) for the source evidence and demo.
-Equal-width lowres overlaps use the [priority slice path](screen-priority.md),
+Shifted and different-width lowres overlaps use the [priority slice path](screen-priority.md),
 including ordinary window opens. A window and its offsets must fit within its
 physical bitmap at presentation; wrapped/out-of-bitmap DMA, lower signed clamp
-cases and general horizontal placement remain unsupported.
+cases and placement outside the supported hardware range remain unsupported.
+See [horizontal placement](horizontal-placement.md) for fetch/crop limits and
+local/hardware pointer coordinates.
 Hires offsets discard the low x bit, following the original scroll logic.
 HAM fine horizontal offsets reject pending fetched-prefix colour-history support.
 
@@ -119,7 +121,7 @@ gap writes may be omitted only when the next row overwrites the same register;
 border/sprite colours and final restoration writes remain. The original death
 fade now fits the two-row gap. See [the live-game contract](wonderland-game.md).
 
-Screen To Front and ordinary overlapping windows use bounded equal-width lowres priority slices
+Screen To Front and ordinary overlapping windows use bounded lowres priority slices
 with per-screen background colours and real DMA-disabled setup rows. Roller II’s
 connected board/ready prompt and full-source editor entry now render; wider overlays and native timing
 remain open. See [priority and ready-prompt contract](screen-priority.md).

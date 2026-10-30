@@ -23,8 +23,10 @@ is bounded independently. Unused native padding is not rendered.
 This subset requires a full bitmap with zero packed x/y origin, dimensions equal
 to the screen header, ordinary nonlaced lowres/hires modes and a matching colour
 count. HAM, dual playfield, lacing and partial packed rectangles reject. Screen
-metadata must fit the existing bounded x=128 window, width 128–320 hardware
-units, signed nonwrapping Y and in-bitmap source offsets. More screen modes and
+metadata retains raw x and requested width/height independently of bitmap
+payload bounds. Applying a new screen separately checks supported horizontal
+placement, width 128–320 hardware units, signed nonwrapping Y and the complete
+active bitmap range. Optional COLOR $0200 is retained as control metadata. More screen modes and
 native word-wrap behavior remain gated.
 
 Runtime Unpack resolves a reserved generic bank number, validates and decodes it
@@ -37,8 +39,12 @@ explicitly, but every later Unpack decodes/validates them again.
 The **To-screen** native extension creates a new screen and calls UnPack_Screen;
 it does not use the current-screen UPack Autoback path. Old Bob owners are retired
 through ordinary screen replacement; no synthetic paste or Bob replay is used.
-Current-screen/positioned Unpack overloads and raw-address selectors remain
-unsupported. Pack/Spack encoding is not implemented by this decoder slice.
+The one-argument current-screen form now copies into a checked matching-depth
+bitmap through ordinary Autoback, retaining its palette and viewport. Positioned
+overloads and raw-address selectors remain unsupported. Pack/Spack encoding is not implemented by this decoder slice.
+
+See [GALAX headers and horizontal placement](horizontal-placement.md) for five
+additional banks, independent vectors and complete original startup/menu checks.
 
 ## Evidence
 

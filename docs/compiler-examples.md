@@ -154,14 +154,16 @@ Initial bounded startup inspection found these remaining issues:
 | Sources | Current startup limit |
 | --- | --- |
 | BouncBobs, Mapping | Supplied graphics now load; live animation/preview are checked. Full benchmark/completion replays remain open. |
-| GALAX | Supplied banks are embedded; their packed headers use x=129 and additional control flags outside the current decoder subset. Geometry and complete gameplay remain unverified. |
-| Fractal3, Plasma; NTSC cube startup | Horizontal Screen Display placements and oversized default screen windows beyond the current runtime subset. |
+| GALAX | All five picture headers now decode; complete original startup reaches the scrolling menu. Gameplay and audio remain unverified in this route. |
+| Fractal3, Plasma | Horizontal placement now works; both unchanged sources complete their tested input/animation routes. |
+| NTSC cube startup | Oversized default screen windows remain outside the current runtime subset. |
 | Bump | Idle coordinate polling now respects its positive mouse limits. The complete PAL radius-80 deformation and original exit prompt run; native raster/math/timing parity remains open. |
 | DotBall1, Fractal1, Fractal2 | Reach real Input prompts; complete interactive runs remain unverified. |
 | Other examples | Compile and reach execution/precalculation/waits in bounded startup checks; completion and native timing remain unverified. |
 
-Next work should expand the actual screen-placement/raster and GALAX packed-header
-contracts, and add input-only completion replays for each example.
+Horizontal placement, mixed-width lowres priority and GALAX packed headers are
+covered in [the new milestone](horizontal-placement.md). Next work should expand
+remaining raster/mode bounds and add input-only gameplay/completion replays.
 Do not replace missing files with blank images or weaken runtime checks merely
 to make a page appear to run.
 

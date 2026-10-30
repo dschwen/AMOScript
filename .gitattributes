@@ -4,3 +4,6 @@ examples/Roller2/**/Roller_HELP binary
 
 # Preserve the bytes of the pinned public-domain font header used by conformance tests.
 test/fixtures/font/font8x8_ext_latin.h -text whitespace=-blank-at-eol
+
+# Indexed pixel reference fixtures contain raw palette indices.
+test/fixtures/compiler-examples/*.indices binary

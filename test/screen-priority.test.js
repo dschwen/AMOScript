@@ -45,7 +45,8 @@ test('screen priority: Auto View stages priority, visibility and ownership acros
 test('screen priority: bounded unsupported forms fail without CPU compositing',()=>{
   const d=createDisplay();d.open(0,320,250,16,0);d.open(1,320,32,16,0);d.screenDisplay(1,128,140,320,32);d.screenToFront(1);
   d.screenOffset(1,1,0);assert.throws(()=>d.snapshotDisplay(),/outside physical bitmap/);d.screenOffset(1,0,0);
-  d.screenDisplay(1,128,140,160,32);assert.throws(()=>d.snapshotDisplay(),/equal-width/);
+  d.screenDisplay(1,128,140,160,32);assert.strictEqual(d.snapshotDisplay().frame.outputWidth,640);
+  d.open(1,320,32,16,0x8000);d.screenDisplay(1,128,140,160,32);assert.throws(()=>d.snapshotDisplay(),/lowres/);
 });
 
 test('screen priority: the first explicit command retains prior open and replacement order',()=>{

@@ -18,7 +18,7 @@ test('screen windows: original offsets, optional arguments and integer typing ex
   assert.strictEqual(program.display.coordinate('X Hard',10),138);
   assert.deepStrictEqual(Array.from(program.display.pointerPosition(0,0,320,168)),[37,85]);
   assert.throws(() => execute(binary([command(0xa36, 7, 0, 0)])), /not open.*line 1/);
-  assert.throws(() => execute(binary([command(0xa18, 0, 160, 50, 320, 100)])), /horizontal placement.*line 1/);
+  assert.throws(() => execute(binary([command(0xa18, 0, 256, 50, 320, 100)])), /horizontal placement.*line 1/);
 });
 
 test('screen windows: all fine/coarse phases retain physical buffers, plane stride and immutable snapshots', () => {

@@ -10,8 +10,9 @@ also feed the repository demo catalogue. Shared Input/error handling, palette
 shifting, bitplane memory, dual playfields and GALAX command forms are implemented
 with explicit bounds. Supplied Graphics assets now load into BouncBobs animation and Mapping preview.
 3Dcube3 now renders its short progress screen and completes all 500 PAL frames
-and both original prompts. Next: horizontal Screen Display
-placements and broader input-only runs. Bump now starts without pointer motion
+and both original prompts. Horizontal Screen Display placement now runs Fractal3
+and Plasma, and all five GALAX picture banks decode through original title/menu
+startup. Next: remaining mode bounds and broader gameplay/completion replays. Bump now starts without pointer motion
 and completes its radius-80 deformation pass and exit prompt. See
 [contracts and evidence](docs/compiler-examples.md).
 

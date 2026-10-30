@@ -284,7 +284,7 @@
   Catch-up reduces writes by field, preserving Flash-before-Fade ties and later
   Flash writes after Fade completes. Jobs follow actual screen identity; see
   `docs/flash.md`. Implicit Screen Open flashing and wrapped speeds remain open.
-- Screen Display/Screen Offset manage bounded windows; equal-width lowres overlaps
+- Screen Display/Screen Offset manage bounded windows; supported lowres overlaps
   use priority slices even without an explicit Screen To Front. Original DIW
   geometry survives late background resumes; direct sprites require their changed
   palette registers before setup-row capture. The original Roller II editor entry,
@@ -823,7 +823,7 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   GALAX banks are in its manifest. build_compiler_examples.js rebuilds user-local
   compiler_examples/build by default; build:demo uses pinned copies and emits a
   catalogue plus debug pages. Keep compilation distinct from remaining asset-mode,
-  horizontal placement/raster gates and complete interactive execution.
+  remaining placement/raster gates and complete interactive execution.
   See docs/compiler-examples.md for bounded contracts/native references.
 - Logbase/Phybase are selected-bitmap plane addresses in the 0x40000000 namespace,
   separate from bank and snapshot DMA addresses. Route complete ranges through
@@ -867,3 +867,19 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   pointer input, renders 64,000 pixels and exits naturally. Circle's strict radius
   checks remain unchanged. bump-runtime covers 61,344 independent pixels and four
   GPU comparisons; native interrupt/raster/timing parity remains unclaimed.
+
+- Horizontal Screen Display folds unsigned words to 16-pixel x in 96..240;
+  move DDF start/stop with DIW and publish window-relative fetch offsets. Preserve
+  logical geometry/storage and clip physical right at lowres 464/hires 448, with
+  the existing 454 hardware crop bound. Pointer mapping shares the crop and keeps
+  local hires precision. Shifted/different-width lowres priority slices retain
+  setup/sprite budget gates; new screens join an existing windowed presentation.
+- Packed pictures retain raw control/window fields, accepting COLOR $0200 as
+  non-plane metadata. New-screen Unpack preflights applicable complete geometry
+  before replacement. Bitmap-only Unpack checks matching depth/capacity while
+  ignoring unused viewport metadata and retaining destination palette/geometry.
+  All five GALAX banks match independent Python full-pixel vectors; PicAst2's
+  offset-420/full-height request remains invalid for new-screen Unpack. Actual
+  original startup reaches GALAX menu; gameplay/audio remain open. The combined
+  horizontal-packed demo has 26 GPU comparisons and 962,072 independent pixels.
+  See docs/horizontal-placement.md and tools/compiler_packed_vectors.py.

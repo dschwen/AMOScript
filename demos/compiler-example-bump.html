@@ -1500,12 +1500,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const word = at => view.getUint16(at, false), long = at => view.getUint32(at, false);
   if (long(0) !== 0x12031990 || long(90) !== 0x06071963) fail('expected packed screen and bitmap signatures');
   const width = word(4), height = word(6), depth = word(24), control = word(20), colours = word(22);
-  const hires = !!(control & 0x8000), scale = hires ? 2 : 1;
+  const hires = !!(control & 0x8000);
   if (width < 16 || width > 1024 || width % 16 || height < 1 || height > 1023 || depth < 1 || depth > (hires ? 4 : 6) ||
-      colours !== 1 << depth || control !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
+      colours !== 1 << depth || (control & ~0x0200) !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
   const x = word(8), y = view.getInt16(10, false), windowWidth = word(12), windowHeight = word(14), offsetX = word(16), offsetY = word(18);
-  if (x !== 128 || y < -4095 || windowWidth < 128 || windowWidth > 320 || windowWidth % 16 || !windowHeight ||
-      windowWidth * scale + offsetX > width || windowHeight + offsetY > height || y + windowHeight > 28671 ||
+  if (y < -4095 || windowWidth < 128 || windowWidth > 320 || !windowHeight ||
+      offsetX >= width || offsetY >= height || y + windowHeight > 28671 ||
       (hires && offsetX % 2)) fail('unsupported screen window/offset');
   const palette = Array.from({ length: 32 }, (_, index) => word(26 + index * 2));
   if (palette.some(value => value > 0xfff)) fail('invalid palette word');
@@ -1536,7 +1536,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   for (let plane = 0; plane < depth; plane++) for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
     if (planar[plane * planeSize + y * columns + (x >> 3)] & (128 >> (x & 7))) pixels[y * width + x] |= 1 << plane;
   }
-  return { width, height, depth, colours, mode: hires ? 0x8000 : 0, palette, pixels,
+  return { width, height, depth, colours, control, mode: hires ? 0x8000 : 0, palette, pixels,
     window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
     consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
 };
@@ -1722,7 +1722,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (offsetX + window.width > target.width || offsetY + window.height > target.height) throw new Error('Screen window extends outside physical bitmap');
       const fine = offsetX & 15;
       const delay = fine ? (view.hires ? 8 - (fine >> 1) : 16 - fine) : 0;
-      return { ...view, width: window.width, height: window.height, x: window.x, y: window.y,
+      return { ...view, width: Math.min(window.width, ((view.hires ? 448 : 464) - window.x) * (view.hires ? 2 : 1)), height: window.height, x: window.x, y: window.y,
         pointers: view.pointers.map(pointer => pointer + offsetY * view.rowBytes + (offsetX >> 4) * 2),
         scroll: delay | ((dual ? ((dual.offsetX & 15) ? 16 - (dual.offsetX & 15) : 0) : delay) << 4), fetchAdvance: view.hires ? 4 : 8 };
     });
@@ -1737,13 +1737,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (windows && (windows.some(window => window.priority) || overlap || views.some(view => view.y > 255))) {
       // Native MkD/MkA chooses one screen for each horizontal slice. A switch
       // starts with DMA disabled on a setup row, never a software overlay.
-      const hardwareWidth = views.length ? views[0].width / (views[0].hires ? 2 : 1) : 0;
       if (views.some(view => {
         const neighbours = views.filter(other => other !== view && view.y < other.y + other.height && other.y < view.y + view.height);
-        return view.ham || view.scroll || view.x !== 128 || view.width / (view.hires ? 2 : 1) !== hardwareWidth ||
-          neighbours.some(other => view.hires || other.hires || view.width !== other.width);
+        return view.ham || neighbours.some(other => view.hires || other.hires);
       })) {
-        throw new Error('Screen priority requires equal-width lowres windows for overlaps, and aligned equal hardware widths');
+        throw new Error('Screen priority requires lowres non-HAM windows for overlaps');
       }
       const boundaries = [...new Set(views.flatMap(view => [view.y, view.y + view.height]))].sort((a, b) => a - b);
       const slices = [];
@@ -1773,8 +1771,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       windowEnd: options.snapshotStandard === 'NTSC' ? 261 : 311, blankSetup: index > 0 } :
       view.y > 255 ? { ...view, windowY: 255, blankSetup: index > 0 } : view);
     const top = bounds ? bounds.top : Math.min(...views.map(view => view.y));
-    const compiled = copperBuilder(views, { origin: { x: 128, y: top },
-      outputWidth: bounds ? (bounds.right - bounds.left) * 2 : Math.max(...views.map(view => view.width * (view.hires ? 1 : 2))),
+    const compiled = copperBuilder(views, { origin: { x: bounds ? bounds.left : Math.min(...originalViews.map(view => view.x)), y: top },
+      outputWidth: bounds ? (bounds.right - bounds.left) * 2 : Math.min(454, Math.max(...views.map(view => view.x + view.width / (view.hires ? 2 : 1)))) * 2 - Math.min(...originalViews.map(view => view.x)) * 2,
       lines: bounds ? bounds.bottom - top : Math.max(...views.map(view => view.y + view.height)) - top,
       backgroundPalette: originalViews[0].palette,
       standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
@@ -2014,8 +2012,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return ((stop - start) / step + (control & 0x8000 ? 2 : 1)) * 2;
   }
   function dataFetchPosition(control, value) { return value & (control & 0x8000 ? 0xfc : 0xf8); }
-  function fetchOffset(control, start) {
-    return ((control & 0x8000 ? 0x3c : 0x38) - dataFetchPosition(control, start)) * (control & 0x8000 ? 4 : 2);
+  function fetchOffset(control, start, windowX = 128) {
+    return ((control & 0x8000 ? 0x3c : 0x38) + (windowX - 128) / 2 - dataFetchPosition(control, start)) * (control & 0x8000 ? 4 : 2);
   }
   return { R, fetchBytes, dataFetchPosition, fetchOffset };
 })();
@@ -2067,7 +2065,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const windowEnd = view.windowEnd == null ? endY : view.windowEnd;
       if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 0 || (height === 0 && view.setupOnly !== true) ||
           !Number.isInteger(depth) || depth < 1 || depth > (hires ? 4 : 6) ||
-          x !== 128 || !Number.isInteger(y) || y < 0 || y >= (options.standard === 'NTSC' ? 262 : 312) ||
+          (!Number.isInteger(x) || x < 96 || x > 240 || x % 16) || !Number.isInteger(y) || y < 0 || y >= (options.standard === 'NTSC' ? 262 : 312) ||
           !Number.isInteger(windowY) || windowY < 0 || windowY > 255 || windowY > y || endX < 256 || endX > 511 ||
           !Number.isInteger(windowEnd) || windowEnd < 128 || windowEnd < endY ||
           windowEnd > (options.standard === 'NTSC' ? 262 : 312) ||
@@ -2082,7 +2080,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const fetchWords = hires ? Math.ceil(width / 32) * 2 : Math.ceil(width / 16);
       const advance = view.fetchAdvance == null ? 8 : view.fetchAdvance;
       if (![4, 8].includes(advance) || (!hires && advance !== 8)) fail('invalid fetch advance');
-      const normalStart = hires ? 0x3c : 0x38, ddfStart = normalStart - (scroll ? advance : 0);
+      const normalStart = (hires ? 0x3c : 0x38) + (x - 128) / 2, ddfStart = normalStart - (scroll ? advance : 0);
       const ddfStop = normalStart + (fetchWords - (hires ? 2 : 1)) * (hires ? 4 : 8);
       let fetchedBytes;
       try { fetchedBytes = fetchBytes(control, ddfStart, ddfStop); } catch (error) { fail(error.message); }
@@ -2168,7 +2166,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     let wrapped = false;
     for (const [y, changes] of Array.from(changesByLine).sort((a, b) => a[0] - b[0])) {
       const view = views.slice().reverse().find(view => view.y <= y) || views[0];
-      const fetchStart = !view ? 0x38 : (view.hires ? 0x3c : 0x38) - (view.scroll ? (view.fetchAdvance == null ? 8 : view.fetchAdvance) : 0);
+      const fetchStart = !view ? 0x38 : (view.hires ? 0x3c : 0x38) + (view.x - 128) / 2 - (view.scroll ? (view.fetchAdvance == null ? 8 : view.fetchAdvance) : 0);
       // DMA-disabled setup may use a whole blank row. All other writes retain
       // the existing capture/fetch deadline, including re-enabling next row.
       const deadline = dmaSetupRows.has(y) ? 227 : blankRow(y) ? captureStart : fetchStart;
@@ -2336,7 +2334,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const row = outputLine * 32;
       for (let plane = 0; plane < fetched.pointers.length; plane++) frame.lineRegs[row + plane] = fetched.pointers[plane];
       frame.lineRegs[row + 16] |= 2;
-      const offset = fetchOffset(fetched.control, fetched.start);
+      const offset = fetchOffset(fetched.control, fetched.start, get(R.DIWSTRT) & 255);
       frame.lineRegs[row + 15] = offset >>> 0;
       const start = frame.lineRegs[row + 13] | 0, stop = frame.lineRegs[row + 14] | 0;
       if (verticalWindow() && Math.min(width, stop) > Math.max(0, start)) {
@@ -2639,7 +2637,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       physicalPixels: null, doubleBuffered: false, autoback: 0,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
-      windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: false,
+      windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: Array.from(screens.values()).some(other => other.id !== id && other.windowed),
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
       // Preserve the legacy default until Gr Writing explicitly selects JAM1/2.
       inkBackground: 0, graphicsBackground: paper, graphicsMode: null, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
@@ -2703,7 +2701,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const end = standard === 'NTSC' ? 260 : 310;
     const visible = windows.filter(window => window.y < end && window.y + window.height > 26);
     const left = Math.min(...windows.map(window => window.x));
-    const right = Math.max(...windows.map(window => window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)));
+    const right = Math.min(454, Math.max(...windows.map(window => Math.min(window.target.mode === 0x8000 ? 448 : 464, window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)))));
     const top = visible.length ? Math.max(26, Math.min(...visible.map(window => window.y))) : 0;
     const bottom = visible.length ? Math.min(end, Math.max(...visible.map(window => window.y + window.height))) : end;
     return { left, top, right, bottom, end };
@@ -2725,11 +2723,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     screenListeners.forEach(listener => listener()); changed(true); return target;
   }
   function setAutoView(enabled) { autoView = enabled; if (enabled) view(); }
-  function screenDisplay(id, x = null, y = null, width = null, height = null) {
-    const target = screen(whole(id));
+  function checkedWindow(target, x = null, y = null, width = null, height = null) {
     [x, y, width, height].filter(value => value != null).forEach(whole);
-    // The current OCS builder supports aligned windows at x=128 only.
-    if (x != null && (x & 0xfffffff0) !== 128) throw new Error('Screen Display horizontal placement is not implemented');
+    const nextX = x == null ? target.hardwareX : x & 0xfff0;
+    if (nextX < 96 || nextX > 240) throw new Error('Unsupported Screen Display horizontal placement');
     if (y != null && (y < -4095 || y > 28671)) throw new Error('Unsupported Screen Display vertical placement');
     if ((width != null && (width < 0 || width > 65535)) || (height != null && (height < 0 || height > 65535))) throw new Error('Invalid Screen Display size');
     const hires = target.mode === 0x8000;
@@ -2737,10 +2734,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const nextHeight = height == null || height === 0 ? target.windowHeight : Math.min(height, target.height);
     const bottom = (y == null ? target.hardwareY : y) + nextHeight;
     if (nextWidth / (hires ? 2 : 1) < 128 || nextWidth / (hires ? 2 : 1) > 320 ||
-        bottom > 28671) throw new Error('Unsupported Screen Display window');
-    target.hardwareX = 128;
-    if (y != null) target.hardwareY = y;
-    target.windowWidth = nextWidth; target.windowHeight = nextHeight; target.windowed = true;
+        nextX + nextWidth / (hires ? 2 : 1) < 256 || bottom > 28671) throw new Error('Unsupported Screen Display window');
+    return { x: nextX, y: y == null ? target.hardwareY : y, width: nextWidth, height: nextHeight };
+  }
+  function screenDisplay(id, x = null, y = null, width = null, height = null) {
+    const target = screen(whole(id)), next = checkedWindow(target, x, y, width, height);
+    target.hardwareX = next.x; target.hardwareY = next.y;
+    target.windowWidth = next.width; target.windowHeight = next.height; target.windowed = true;
     changed(true);
   }
   function screenOffset(id, x = null, y = null) {
@@ -3597,15 +3597,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const target = presentedWindows ? screen() : presented || screen();
     if (!presentedWindows) return [Math.max(0, Math.min(target.width - 1, Math.floor(x * target.width / width))),
       Math.max(0, Math.min(target.height - 1, Math.floor(y * target.height / height)))];
-    const { top, bottom } = windowGeometry();
+    const { left, right, top, bottom } = windowGeometry();
     const view = presentedWindows.find(window => window.target === target);
-    const right = Math.max(...presentedWindows.map(window => window.width * (window.target.mode === 0x8000 ? 1 : 2)));
-    return [Math.floor(x * right / width / (target.mode === 0x8000 ? 1 : 2)) + (view ? view.offsetX : target.offsetX),
+    return [Math.floor(x * (right - left) * (target.mode === 0x8000 ? 2 : 1) / width) + (left - (view ? view.x : target.hardwareX)) * (target.mode === 0x8000 ? 2 : 1) + (view ? view.offsetX : target.offsetX),
       Math.floor(y * (bottom - top) / height + top - (view ? view.y : target.hardwareY)) + (view ? view.offsetY : target.offsetY)];
   }
   open(0, 320, 200, 16, 0);
   return {
-    memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
+    checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
@@ -4708,6 +4707,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
     if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
     const image = packedPictureReader(Uint8Array.from(bank.data));
+    const window = image.window;
+    const placement = display.checkedWindow({ width:image.width, height:image.height, mode:image.mode,
+      hardwareX:128, hardwareY:50, windowWidth:image.width, windowHeight:image.height }, window.x, window.y, window.width, window.height);
+    if (placement.width + window.offsetX > image.width || placement.height + window.offsetY > image.height) throw Error('Unpack window extends outside bitmap');
     // Decode/validate completely before screen replacement. New-screen Unpack
     // does not use the current-screen Autoback path in the native extension.
     const target = display.open(destination, image.width, image.height, image.colours, image.mode);
@@ -4958,7 +4961,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     selector = integer(selector); const bank = banks.get(selector), target = display.screen();
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a packed-picture bank');
     const image = packedPictureReader(Uint8Array.from(bank.data));
-    if (image.width > target.width || image.height > target.height) throw new Error('Unpack image exceeds current bitmap');
+    if (image.width > target.width || image.height > target.height || image.depth !== Math.log2(target.colours)) throw new Error('Unpack image does not fit current bitmap/planes');
     // Existing-screen unpack retains geometry/palette and uses ordinary Autoback.
     display.pasteGraphic({ ...image, depth: Math.log2(image.colours), pixels: image.pixels }, 0, 0, false);
   }

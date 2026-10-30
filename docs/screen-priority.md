@@ -49,10 +49,12 @@ strict deadline. The bridge checks active sprite rows after the structured sprit
 writer runs. A transition that misses that deadline still rejects; no mid-line
 palette effects are discarded or silently composited.
 
-Current bounds: equal-width lowres windows at X=128, whole-word horizontal offsets,
+Current bounds: lowres windows with supported rounded horizontal placements,
+variable widths and fine/coarse source offsets,
 per-owner COLOR00 with early setup-row capture, no HAM, at most eight resulting slices, and the existing OCS
 geometry/palette budget limits. Vertical offsets and full bitmap ownership remain
-intact. Unequal-width overlays, arbitrary placement,
+intact. See [horizontal placement](horizontal-placement.md) for crop/fetch bounds.
+Arbitrary off-field placement, mixed hires overlaps,
 unrepresentable slices, larger sprite/palette transitions, wrapped DMA and native
 capture parity remain open and reject explicitly. SnapshotPlayfield still exports
 the complete physical bitmap without priority cropping.
