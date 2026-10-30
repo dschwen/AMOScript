@@ -2,10 +2,11 @@
 'use strict';
 // Public example harness, embedded by build_game_page.js. No source-specific
 // startup keys: each game retains its own intro, menu and joystick behavior.
-function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI) {
+function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
+  let activeFactory=createProgram;
   const key = name => name.replace(/\\/g, '/').toLowerCase();
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])));
   const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes),
@@ -27,7 +28,8 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   }
   function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
   function releaseGpu() { if (!gpu) return; const gl = gpu.resources.context; gpu.dispose(); gpu = null; const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
-  function start() {
+  function start(factory=activeFactory) {
+    activeFactory=factory;
     revision++; const token = revision; failure = '';
     if (host) host.detach(); if (live) live.stop(); releaseGpu();
     const next = document.createElement('canvas'); next.id = 'game-input'; next.tabIndex = 0; next.width = 320; next.height = 256;
@@ -37,7 +39,14 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
       const fallback = canvas.cloneNode(); canvas.replaceWith(fallback); canvas = fallback;
     }
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
-    live = createProgram({ sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
+    live = factory({ sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
+      system:{command(name,request){
+        if(name!=='Run')return;
+        const nextFactory=request.filename==null?factory:Object.hasOwn(linkedPrograms,key(request.filename))?linkedPrograms[key(request.filename)]:null;
+        if(typeof nextFactory!=='function')throw Error('Run target not compiled into this page: '+request.filename);
+        const old=live;
+        setTimeout(guard(()=>{if(live===old && !old.state.stopped)start(nextFactory);}),0);
+      }},
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
       joysticks: joystickOptions(),

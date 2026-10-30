@@ -901,3 +901,30 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   sixteen channels; 36 GPU comparisons pass. No source/VM/bank edits. Later
   stages, editor, music and native captures remain open. See
   docs/amal-automatic.md and tools/reference/galax-movement.py.
+- Gru1/Gru2/progs1 originals are pinned under examples/GruPrograms with source
+  hashes. tools/build_gru_programs.js writes exclusive standalone modules and a
+  complete report; 32/39 currently compile, all nine progs1 AMOS files included.
+  Keep malformed sources, duplicate icon banks and native wrappers explicit.
+  Def Scroll stores ten signed-word definitions per factory; Scroll uses the
+  selected logical bitmap, exclusive ends, paired clipping, overlap protection
+  and unchanged exposed pixels through ordinary drawing/Autoback hooks. Do not
+  confuse it with window text scrolling. Text Base follows the graphics font.
+  Uncached Fsel$ normalizes 1–4 typed arguments, cached arities stay exact;
+  uncached Load/Save accept bank continuations. Only declared bare procedures
+  resolve; top-level Shared exposes named globals without changing parameters.
+  Run is terminal with one frozen request and post-cleanup system notification.
+  Builder --programs embeds a compile-time factory catalogue; queued host
+  transitions preserve session files/input/speed/audio/fullscreen and cancel by
+  revision on replacement/disposal. Pload validates one unrelocated CODE hunk
+  before replacing an Asm bank. Bgrab moves a real stopped parent's bank and
+  retires its old addresses; it requires explicit accessory context.
+  Varptr supports checked integer/string scalar/element bytes, captured owners
+  and local/string retirement in virtual $90000000..$9fffffff (signed pointers).
+  Bank/display address ranges remain unchanged. Areg 0–6 is independent of Dreg.
+  Call/Doscall require synchronous native.call with validated register results;
+  Screen Base is an opaque identity handle, not a fake native structure. No
+  built-in 68000 executor or OS process launch is claimed. Slot-4 Gru1 animation
+  offsets match official AMOS 3D, recorded only as diagnostic metadata; real
+  .3DO/.3DT/.3DS decoding/scene rendering remains open. Six GPU scroll frames,
+  122,880 independent pixels and linked/bare browser Run pass; see
+  docs/gru-programs.md and demos/gru-support.html.

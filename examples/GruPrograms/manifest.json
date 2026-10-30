@@ -1,0 +1,199 @@
+{
+  "sources": [
+    {
+      "path": "Gru1/Amos/Map-Editor.AMOS",
+      "byteLength": 30820,
+      "sha256": "bab7ddc6b0b2e1c10ee12e0c49a043f3a2832ff1223cbcfd9640cdd31a87221d"
+    },
+    {
+      "path": "Gru1/Amos/Map-Editor.Bak",
+      "byteLength": 5296,
+      "sha256": "50098fd31da98183557055935d8ece21091e4d2ca46b7da37c0df2ac99840aca"
+    },
+    {
+      "path": "Gru1/Amos/SplittingImage.AMOS",
+      "byteLength": 198,
+      "sha256": "03f8d8d1072a9e23e5afab7579856ee2cc8c06d7fd1ecda3e773012f16fafe25"
+    },
+    {
+      "path": "Gru1/Intr/Anim.AMOS",
+      "byteLength": 1710,
+      "sha256": "bd78cc524e3d6fd20ec6c5d4e5893c5500b60b32d0a48ab0d24d0ece30135526"
+    },
+    {
+      "path": "Gru1/Intr/Anim.Bak",
+      "byteLength": 1646,
+      "sha256": "2ecaec7af81bb3d951f8b6026914db3cbc4c0182b088539d3a9febeb558b9ba2"
+    },
+    {
+      "path": "Gru1/Intr/Animplay.AMOS",
+      "byteLength": 296,
+      "sha256": "5b0bd8d66b696c45cfda3ef1705d8fc43f7dfc0f3917b8a619c1d2281328fe77"
+    },
+    {
+      "path": "Gru1/Intr/Animplay.Bak",
+      "byteLength": 328,
+      "sha256": "51b5529a0bc6e9016fc1d744bf7f713c82279261ce10ac62aed166bdefbba1c5"
+    },
+    {
+      "path": "Gru1/Intr/Intro.AMOS",
+      "byteLength": 2278,
+      "sha256": "23f95fec57348e31ba7765210c933a02a33945346f554b2bad0c769f431b8cef"
+    },
+    {
+      "path": "Gru1/Intr/Intro.Bak",
+      "byteLength": 2282,
+      "sha256": "d22209ba3a88668d153312b624133516981268602efea0ab1d51f2b8eff1976a"
+    },
+    {
+      "path": "Gru1/Intr/Scroll.Bak",
+      "byteLength": 2016,
+      "sha256": "23f8e6354acd746d1b773a933ba35b750c1eed982bf4ad90becb3e6922e9a169"
+    },
+    {
+      "path": "Gru1/Intr/Scroll_C.AMOS",
+      "byteLength": 9742,
+      "sha256": "63b62bb82b61750fe1bc62277033180492c48c283d003619d773fd48af2c22e6"
+    },
+    {
+      "path": "Gru1/Intr/Zoomdemo.AMOS",
+      "byteLength": 1678,
+      "sha256": "29de14f8e30bf4ec158f0da0323aa5bce1f5a55d7d182e360fb3a1849d15feb1"
+    },
+    {
+      "path": "Gru1/Intr/Zoomdemo.Bak",
+      "byteLength": 260,
+      "sha256": "2e4ba8cd0fe0a5d4a80ea1eb171f54e306a1098dffabcf4e5fa7f985bc3f6598"
+    },
+    {
+      "path": "Gru1/Intr/dpf.AMOS",
+      "byteLength": 186,
+      "sha256": "04828267c854a0468e35fd328717a49188f729bbaa5ba92b9c2b4f1980db4253"
+    },
+    {
+      "path": "Gru1/Intr/dpf.Bak",
+      "byteLength": 196,
+      "sha256": "87d66bbf83a443f720914df4b1bdbc05c977419625b3b5d1c0cf0141fed6a285"
+    },
+    {
+      "path": "Gru2/Hypervox.AMOS",
+      "byteLength": 8956,
+      "sha256": "83c2063e63e7b806df86da4c7f54ad2c9719e173a1055cd9b6e3778143a90929"
+    },
+    {
+      "path": "Gru2/Hypervox.Bak",
+      "byteLength": 7462,
+      "sha256": "1adc89bcc6a534318bd529fad9450e2c433c73bf47f5806157cfbd9fddf52731"
+    },
+    {
+      "path": "Gru2/LabSyst.AMOS",
+      "byteLength": 6768,
+      "sha256": "35b04c9b3ec6d9fb2dcebd0bb7bca95f062ddad70524318e9a8a0b0d618710ac"
+    },
+    {
+      "path": "Gru2/LabSyst.Bak",
+      "byteLength": 6664,
+      "sha256": "f7eada8ae5e7390438932301876bd926c00fffd573dfec0179bc446590a17cd3"
+    },
+    {
+      "path": "Gru2/Pics/Intro.AMOS",
+      "byteLength": 740,
+      "sha256": "85ecc5fd53351a838fe6173bb1d53ebaace9762dcd20e948d59c8dce2f83e705"
+    },
+    {
+      "path": "Gru2/SpriteXpro.AMOS",
+      "byteLength": 88326,
+      "sha256": "1aef06ca80ff645ebe8126d81558f68202540d8d53d6465dc698e0dfdad5694f"
+    },
+    {
+      "path": "progs1/Amos progs/0.AMOS",
+      "byteLength": 11522,
+      "sha256": "cec2cf0e42a41e847d7e860102828701ad3c4d58510371e0bbb9b58e33df3697"
+    },
+    {
+      "path": "progs1/Amos progs/0.Bak",
+      "byteLength": 11542,
+      "sha256": "9af0d4f067de53495d0ccd089268c44edd95255d8cab48967e977a28fe0f93fa"
+    },
+    {
+      "path": "progs1/Amos progs/1.AMOS",
+      "byteLength": 6294,
+      "sha256": "c5ca057f2ddcf2277b6ac2b018507cd10953bdf2b16c7ee0bcc20d1b45e0ce5c"
+    },
+    {
+      "path": "progs1/Amos progs/1.Bak",
+      "byteLength": 7710,
+      "sha256": "2908f2bf760be8b646690320966455cf64e82be8373736d01e16f4a18d6b6b72"
+    },
+    {
+      "path": "progs1/Amos progs/2.AMOS",
+      "byteLength": 9912,
+      "sha256": "35ed915c3ea13dd27f4244f44bef3fbfe81165f06ed72abbd712f64f2caf964a"
+    },
+    {
+      "path": "progs1/Amos progs/2.Bak",
+      "byteLength": 9908,
+      "sha256": "127a52e84c359a52a813f557ad4c601d3bf5e2d913d2de00c604d84127ee1a99"
+    },
+    {
+      "path": "progs1/Amos progs/3D Effekt",
+      "byteLength": 820,
+      "sha256": "a934186b058e48d08a0f5c4f68e272a765dee77ac3714adb298920916f450eb5"
+    },
+    {
+      "path": "progs1/Amos progs/Grid.AMOS",
+      "byteLength": 2032,
+      "sha256": "b5aae9594ef0641f5ba4bf725440310bfbc49ccea6d05735f9d2859a94f8008f"
+    },
+    {
+      "path": "progs1/Amos progs/Grid.Bak",
+      "byteLength": 1696,
+      "sha256": "761c7d5276b1961a4fdb8ab723195d01e3070088ce03ef7a5cd55aedbbb78eb2"
+    },
+    {
+      "path": "progs1/Amos progs/Grudan Intro.AMOS",
+      "byteLength": 1562,
+      "sha256": "d6638d0f0e23f0e8a45a283c5d9f861223e6d030318ef67eb36a77d6ece2696c"
+    },
+    {
+      "path": "progs1/Amos progs/Grudan Intro.Bak",
+      "byteLength": 1526,
+      "sha256": "194ce7d7002d88a02ca915aa143d4ac3db314dd7c323ad18329756004f7d9409"
+    },
+    {
+      "path": "progs1/Amos progs/Grudan.AMOS",
+      "byteLength": 728,
+      "sha256": "8c8a5ac4df4a085bee1b9e38b9efa98e89263ea225f01fc1121f874ee5590245"
+    },
+    {
+      "path": "progs1/Amos progs/Grudan.Bak",
+      "byteLength": 728,
+      "sha256": "bffa10a0938244bbcc31a04293bbcf4f45f0bc41a4e681237fb3920003bcb3a9"
+    },
+    {
+      "path": "progs1/Amos progs/Mapeditor.AMOS",
+      "byteLength": 3878,
+      "sha256": "8103b6b95183c1d21fa1e2019013e7bbaeafd635c4db550cd301d60bcf98a27f"
+    },
+    {
+      "path": "progs1/Amos progs/Mapeditor.Bak",
+      "byteLength": 5726,
+      "sha256": "aa40767e13b5828fcc97b042e9715e6ee5927e27d04b0b55595285acda8423f9"
+    },
+    {
+      "path": "progs1/Amos progs/clibefrunner.AMOS",
+      "byteLength": 166,
+      "sha256": "ad3798378ed1be85d5b7ee2fcfdd0a4616afdcb55effe1753b4756e6cb1eb490"
+    },
+    {
+      "path": "progs1/Amos progs/ctmistamos",
+      "byteLength": 216,
+      "sha256": "f41c7b4903d44777db31c8ddd4d37f3f62789fedd2d04904a8e6238937e1063a"
+    },
+    {
+      "path": "progs1/Amos progs/cutem.AMOS",
+      "byteLength": 2136,
+      "sha256": "592ea94f8546584911449a3a94ceea0a793b3b16a07737e481a71e3d600e214f"
+    }
+  ]
+}

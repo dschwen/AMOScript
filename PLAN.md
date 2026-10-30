@@ -2,6 +2,26 @@
 
 Assessment updated: 2026-10-30.
 
+## Gru1, Gru2 and progs1
+
+The [39-source inventory](docs/gru-programs.md) now compiles 32 originals/backups,
+including all nine progs1 `.AMOS` files. Def Scroll/Scroll, uncached Fsel$/Load/Save,
+declared bare procedure calls, top-level Shared and Text Base are implemented.
+Bgrab has an explicit stopped-parent ownership boundary. Run supports terminal
+loader requests and precompiled browser chaining through `--programs`; Pload
+supports a bounded single CODE hunk. Varptr/Areg/Screen Base/Call/Doscall expose
+checked virtual memory and synchronous native adapters, without claiming built-in
+68000 execution. Keep bank/display memory ranges and source validation intact.
+
+Next: implement SpriteXpro's Clip and remaining sample/wave commands; determine
+the intended icon bank in the main map editor; adopt deliberate source fixes for
+the malformed backups where appropriate. Gru1 Anim's slot-4 calls match AMOS 3D.
+That is a separate milestone requiring `.3DO/.3DT/.3DS` decoding, a transformed
+scene/material renderer and real redraw tests. Diagnostic token identification
+alone does not enable it. Scroll_C's native wrapper requires its editable backup
+or a genuine native-execution host. Missing MSX assets/requesters and complete
+interactive runs remain separate acceptance work.
+
 ## Compiler examples
 
 All 19 supplied `compiler_examples/AMOS_versions` programs now compile.

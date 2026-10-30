@@ -228,6 +228,7 @@ function checkBanks(result, assert) {
 }
 
 const scenarios = [
+  { id:'gru-support',title:'Gru programs: scrolling and linked browser programs',description:'Six independent overlap/clipping matrices and actual GPU comparisons exercise Def Scroll. A complete generated application chains Run File to a compiled target, then bare Run restarts that target while retaining session-file writes.',run:require('./gruSupportProbe'),check(result,assert){assert.deepStrictEqual(result,{gpuFrames:6,independentPixels:122880,linkedRun:true,bareRun:true});} },
   { id: 'galax-play', title: 'GALAX: automatic AMAL and playable startup', initialFrame: 'Canvas: Original GALAX game start', description: 'The unchanged game starts from its menu, moves and fires, runs its death sequence and starts the next life. All fifteen recorded enemy paths match 4,444 independent positions. Automatic VBL scheduling, original Sprite publication and 36 actual GPU comparisons are covered; later stages and native timing remain open.', run: require('./galaxPlayProbe'), check(result, assert) {
     assert.deepStrictEqual(result, {gameFields:180,lives:4,channels:16,gpuFrames:36,positions:4444});
   } },

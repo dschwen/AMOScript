@@ -1,0 +1,339 @@
+{
+  "description": "Diagnostic metadata only; no compiler support implied. Offsets derived from the official MIT-licensed +3d.s token table.",
+  "source": "https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/533b4b1f5acd604814513f78e02c7b4796cb0531/AMOSPro%20Sources/%2B3d.s",
+  "sourceSha256": "ed375f71668e4576d4cebec0ade2bd637360995aafd7f5c118c56e681b40f876",
+  "tokens": {
+    "0000": {
+      "name": "\u0000",
+      "signature": ""
+    },
+    "0006": {
+      "name": "td debug",
+      "signature": "I0"
+    },
+    "0016": {
+      "name": "td load",
+      "signature": "I2"
+    },
+    "0024": {
+      "name": "td clear all",
+      "signature": "I"
+    },
+    "0036": {
+      "name": "td object",
+      "signature": "I0,2,0,0,0,0,0,0"
+    },
+    "0054": {
+      "name": "td screen height",
+      "signature": "I0"
+    },
+    "006c": {
+      "name": "td visible",
+      "signature": "00"
+    },
+    "007e": {
+      "name": "td range",
+      "signature": "00,0"
+    },
+    "0090": {
+      "name": "td kill",
+      "signature": "I0"
+    },
+    "009e": {
+      "name": "td move x",
+      "signature": "I0,2"
+    },
+    "00b0": {
+      "name": "td move y",
+      "signature": "I0,2"
+    },
+    "00c2": {
+      "name": "td move z",
+      "signature": "I0,2"
+    },
+    "00d4": {
+      "name": "td move rel",
+      "signature": "I0,0,0,0"
+    },
+    "00ec": {
+      "name": "td move",
+      "signature": "I0,0,0,0"
+    },
+    "0100": {
+      "name": "td forward",
+      "signature": "I0,0"
+    },
+    "0114": {
+      "name": "td position x",
+      "signature": "00"
+    },
+    "0128": {
+      "name": "td position y",
+      "signature": "00"
+    },
+    "013c": {
+      "name": "td position z",
+      "signature": "00"
+    },
+    "0150": {
+      "name": "td angle a",
+      "signature": "I0,2"
+    },
+    "0164": {
+      "name": "td angle b",
+      "signature": "I0,2"
+    },
+    "0178": {
+      "name": "td angle c",
+      "signature": "I0,2"
+    },
+    "018c": {
+      "name": "td angle rel",
+      "signature": "I0,0,0,0"
+    },
+    "01a6": {
+      "name": "td angle",
+      "signature": "I0,0,0,0"
+    },
+    "01bc": {
+      "name": "td attitude a",
+      "signature": "00"
+    },
+    "01d0": {
+      "name": "td attitude b",
+      "signature": "00"
+    },
+    "01e4": {
+      "name": "td attitude c",
+      "signature": "00"
+    },
+    "01f8": {
+      "name": "!td face",
+      "signature": "I0,0"
+    },
+    "020a": {
+      "name": "\u0000",
+      "signature": "I0,0,0,0"
+    },
+    "0218": {
+      "name": "!td bearing a",
+      "signature": "0"
+    },
+    "022c": {
+      "name": "\u0000",
+      "signature": "00,0"
+    },
+    "0236": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "0244": {
+      "name": "!td bearing b",
+      "signature": "0"
+    },
+    "0258": {
+      "name": "\u0000",
+      "signature": "00,0"
+    },
+    "0262": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "0270": {
+      "name": "!td bearing r",
+      "signature": "0"
+    },
+    "0284": {
+      "name": "\u0000",
+      "signature": "00,0"
+    },
+    "028e": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "029c": {
+      "name": "td anim rel",
+      "signature": "I0,0,0,0,0,0"
+    },
+    "02b8": {
+      "name": "td anim point x",
+      "signature": "00,0"
+    },
+    "02d0": {
+      "name": "td anim point y",
+      "signature": "00,0"
+    },
+    "02e8": {
+      "name": "td anim point z",
+      "signature": "00,0"
+    },
+    "0300": {
+      "name": "td anim",
+      "signature": "I0,0,0,0,0,0"
+    },
+    "0318": {
+      "name": "td redraw",
+      "signature": "I"
+    },
+    "0328": {
+      "name": "td set zone",
+      "signature": "I0,0,0,0,0,0"
+    },
+    "0344": {
+      "name": "!td collide",
+      "signature": "00"
+    },
+    "0356": {
+      "name": "\u0000",
+      "signature": "00,0"
+    },
+    "0360": {
+      "name": "td zone x",
+      "signature": "00,0"
+    },
+    "0372": {
+      "name": "td zone y",
+      "signature": "00,0"
+    },
+    "0384": {
+      "name": "td zone z",
+      "signature": "00,0"
+    },
+    "0396": {
+      "name": "td zone r",
+      "signature": "00,0"
+    },
+    "03a8": {
+      "name": "!td world x",
+      "signature": "0"
+    },
+    "03ba": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "03c8": {
+      "name": "!td world y",
+      "signature": "0"
+    },
+    "03da": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "03e8": {
+      "name": "!td world z",
+      "signature": "0"
+    },
+    "03fa": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "0408": {
+      "name": "!td view x",
+      "signature": "0"
+    },
+    "0418": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "0426": {
+      "name": "!td view y",
+      "signature": "0"
+    },
+    "0436": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "0444": {
+      "name": "!td view z",
+      "signature": "0"
+    },
+    "0454": {
+      "name": "\u0000",
+      "signature": "00,0,0,0"
+    },
+    "0462": {
+      "name": "!td screen x",
+      "signature": "0"
+    },
+    "0474": {
+      "name": "\u0000",
+      "signature": "00,0,0"
+    },
+    "0480": {
+      "name": "!td screen y",
+      "signature": "0"
+    },
+    "0492": {
+      "name": "\u0000",
+      "signature": "00,0,0"
+    },
+    "049e": {
+      "name": "!td background",
+      "signature": "I0,0,0,0,0t0,0"
+    },
+    "04c0": {
+      "name": "\u0000",
+      "signature": "I0,0,0,0,0t0,0,0"
+    },
+    "04d6": {
+      "name": "td dir",
+      "signature": "I2"
+    },
+    "04e4": {
+      "name": "td surface points off",
+      "signature": "I"
+    },
+    "0500": {
+      "name": "td surface points",
+      "signature": "I0,0,0,0"
+    },
+    "051e": {
+      "name": "td surface",
+      "signature": "I2,0,0t0,0,0,0"
+    },
+    "053c": {
+      "name": "td cls",
+      "signature": "I"
+    },
+    "0548": {
+      "name": "td keep on",
+      "signature": "I"
+    },
+    "0558": {
+      "name": "td keep off",
+      "signature": "I"
+    },
+    "056a": {
+      "name": "td advanced",
+      "signature": "00"
+    },
+    "057c": {
+      "name": "td quit",
+      "signature": "I"
+    },
+    "058a": {
+      "name": "td priority",
+      "signature": "I0,0"
+    },
+    "059e": {
+      "name": "td pragma status",
+      "signature": "00,0"
+    },
+    "05b8": {
+      "name": "td pragma",
+      "signature": "I0,0"
+    },
+    "05ca": {
+      "name": "td delete zone",
+      "signature": "I0,0"
+    },
+    "05e2": {
+      "name": "td set colour",
+      "signature": "I0,0,0"
+    },
+    "05fa": {
+      "name": "td rotate",
+      "signature": "I0,0,0,0"
+    }
+  }
+}

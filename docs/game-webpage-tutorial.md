@@ -285,6 +285,34 @@ All browser scenarios retain a runnable page and an HTML Preview link in
 
 ## 7. Publish and verify
 
+### Link several AMOS programs with Run
+
+For games split across `Run "filename.AMOS"` calls, create a second manifest
+mapping the requested AMOS names to source files, for example:
+
+```json
+{
+  "GAME:levels/1.amos": "sources/level1.AMOS",
+  "GAME:levels/2.amos": "sources/level2.AMOS"
+}
+```
+
+```sh
+node tools/build_game_page.js sources/menu.AMOS /tmp/game.html \
+  --assets assets.json --programs programs.json --title "My game"
+```
+
+The builder compiles and embeds those factories up front. Paths in `programs.json`
+are relative to that manifest, and keys must match Run's filename after Dir$
+resolution. A bare Run restarts the current factory. Each transition cleans up the
+old VM before starting the next; session files, speed, input settings and the
+fullscreen/sound session survive. Restart restarts the current factory too.
+Missing linked targets produce an explicit error. This does not compile uploaded
+or newly modified AMOS sources at runtime, and Pload machine-code files are a
+separate capability. See [the loader/native contract](gru-programs.md#4-run-and-pload).
+
+### Publish a page
+
 Host the generated HTML on any static site, or commit it and link through:
 
 ```text

@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "gru-support.html",
+      "title": "Gru programs: scrolling and linked browser programs",
+      "description": "Six independent overlap/clipping matrices and actual GPU comparisons exercise Def Scroll. A complete generated application chains Run File to a compiled target, then bare Run restarts that target while retaining session-file writes.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/gru-support.html"
+    },
+    {
       "file": "galax-play.html",
       "title": "GALAX: automatic AMAL and playable startup",
       "description": "The unchanged game starts from its menu, moves and fires, runs its death sequence and starts the next life. All fifteen recorded enemy paths match 4,444 independent positions. Automatic VBL scheduling, original Sprite publication and 36 actual GPU comparisons are covered; later stages and native timing remain open.",

@@ -26,7 +26,7 @@ test('procedures: Shared is scoped to one procedure and does not leak to another
     [call('local')], [t('Print'), t('Param'), t(','), id('a')]
   ]);
   assert.deepStrictEqual(execute(data).logs, [[11, 11], [0, 11]]);
-  assert.throws(() => new Transpiler(binary([[t('Shared'), id('a')]])), /Shared requires a procedure/);
+  assert.doesNotThrow(() => new Transpiler(binary([[t('Shared'), id('a')]])));
 });
 
 test('conditionals: Else If chains choose one branch and skip later alternatives', () => {

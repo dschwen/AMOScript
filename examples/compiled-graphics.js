@@ -1928,6 +1928,7 @@
     return next;
   }
   function resetDefault() {
+    scrollDefinitions.clear();
     // DefRun1 retires the complete display, including clone owners together.
     // Clear committed windows even when Auto View was off; old snapshots own
     // their bytes, while subsequent snapshots must not retain retired screens.
@@ -2235,6 +2236,22 @@
     }
     if (synchronise) drawingHooks.after(target);
     return result;
+  }
+  const scrollDefinitions = new Map();
+  function defineScroll(number,x1,y1,x2,y2,dx,dy) {
+    [number,x1,y1,x2,y2,dx,dy].forEach(whole);
+    if(number<1 || number>10)throw Error('Invalid scroll number (expected 1..10)');
+    const values=[x1,y1,x2,y2,dx,dy].map(value=>(value<<16)>>16);
+    if(values[5]===-32768)throw Error('Reserved undefined scroll displacement');
+    scrollDefinitions.set(number,Object.freeze(values));
+  }
+  function scroll(number) {
+    whole(number);if(number<1 || number>10)throw Error('Invalid scroll number (expected 1..10)');
+    const values=scrollDefinitions.get(number);if(!values)throw Error('Scroll not defined');
+    const [x,y,right,bottom,dx,dy]=values,tx=x+dx,ty=y+dy;
+    if(tx<-32768 || tx>32767 || ty<-32768 || ty>32767)throw Error('Wrapped scroll destination is not implemented');
+    const target=screen(),selector=bufferSelector('Logic',target.id);
+    return drawing(()=>copyScreenRectangle(selector,x,y,right,bottom,selector,tx,ty),[]);
   }
   function setColour(index, rgb) {
     const target = screen();
@@ -2610,7 +2627,7 @@
       }
     }
   }
-  function scroll(target) {
+  function scrollText(target) {
     if (target.y < target.rows) return;
     if (target.scrollEnabled === false) { target.y = target.rows - 1; return; }
     target.pixels.copyWithin(0, target.width * 8);
@@ -2638,7 +2655,7 @@
       }
       if (code === 27) { target.textEscape = 'command'; continue; }
       if (code === 13) { target.x = 0; continue; }
-      if (code === 10) { target.x = 0; target.y++; scroll(target); continue; }
+      if (code === 10) { target.x = 0; target.y++; scrollText(target); continue; }
       if (code === 8) { target.x = Math.max(0, target.x - 1); continue; }
       if (code === 9) {
         const spaces = target.tabSize - target.x % target.tabSize;
@@ -2647,7 +2664,7 @@
     }
     changed();
     function put(code) {
-      if (target.x >= target.columns) { target.x = 0; target.y++; scroll(target); }
+      if (target.x >= target.columns) { target.x = 0; target.y++; scrollText(target); }
       printGlyph(target, code, target.x * 8, target.y * 8);
       target.x++;
     }
@@ -2878,6 +2895,7 @@
   open(0, 320, 200, 16, 0);
   return {
     checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
+    defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
@@ -3131,7 +3149,35 @@
   const blocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
-  const bankMemory = bankMemoryFactory(banks, { externalMemory: display.memory, beforeWrite(bank) {
+  const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
+  function variableAddress(owner,key,type,read,write,alive=()=>true) {
+    for(const [base,r]of variableRegions)if(!r.alive() || (r.type==='string' && r.read()!==r.expected))variableRegions.delete(base);
+    if(!owner || typeof owner!=='object' || !['integer','string'].includes(type))throw Error('Unsupported Varptr target');
+    let entries=variableOwners.get(owner);if(!entries){entries=new Map();variableOwners.set(owner,entries);}
+    let region=entries.get(key),value=read();
+    if(region && variableRegions.has(region.base) && region.alive() && (type!=='string' || value===region.expected))return region.base|0;
+    if(region)variableRegions.delete(region.base);
+    if(type==='string' && (typeof value!=='string' || /[^\x00-\xff]/.test(value)))throw Error('Varptr requires byte strings');
+    const capacity=type==='string'?value.length:4,base=nextVariableAddress;
+    if(base+capacity>=0xa0000000)throw Error('Variable address space exhausted');
+    nextVariableAddress+=Math.max(4,capacity)+16;
+    region={kind:'variable',base,capacity,type,read,write,alive,expected:value};entries.set(key,region);variableRegions.set(base,region);return base|0;
+  }
+  const variableMemory={
+    resolve(address,length){
+      for(const [base,r]of variableRegions){
+        if(!r.alive() || (r.type==='string' && r.read()!==r.expected)){variableRegions.delete(base);continue;}
+        if(address>=base && address<=base+r.capacity && length<=r.capacity-(address-base))return{bank:null,region:r,offset:address-base};
+      }
+      throw Error('Variable memory address out of bounds or retired');
+    },
+    read(r,at){return r.type==='string'?r.read().charCodeAt(at):(r.read()>>>((3-at)*8))&255;},
+    write(r,at,value){
+      if(r.type==='string'){r.expected=r.read().slice(0,at)+String.fromCharCode(value&255)+r.read().slice(at+1);r.write(r.expected);}
+      else{const shift=(3-at)*8;r.write(((r.read()&~(255<<shift))|((value&255)<<shift))|0);}
+    }
+  };
+  const bankMemory = bankMemoryFactory(banks, { externalMemory: display.memory, variableMemory, beforeWrite(bank) {
     if (amal.usesBank(bank)) throw new Error('Writing an active AMAL movement bank is not implemented; Amal Off first');
     if (animations.has(bank)) throw new Error('Writing a Frame Load animation bank is not implemented');
     if (bank === musicBank) throw new Error('Writing an active Music bank is not implemented; Music Off first');
@@ -3619,6 +3665,24 @@
   state.system = { amosLocked: false, amosFront: true, editorOpen: false };
   state.breakEnabled = true;
   const dataRegisters = new Int32Array(8);
+  const addressRegisters = new Int32Array(7),screenHandles=new Map();let nextScreenHandle=-2147483648;
+  function addressRegisterIndex(index){index=integer(index);if(index<0 || index>6)throw Error('Invalid Areg index (expected 0..6)');return index;}
+  function screenAddress(){const target=display.screen();for(const [handle,screen]of screenHandles)if(screen===target)return handle;const handle=nextScreenHandle++;screenHandles.set(handle,target);return handle;}
+  function nativeInvoke(kind,value,args=[]) {
+    if(!options.native || typeof options.native.call!=='function')throw Error(`${kind} requires a synchronous native.call adapter; 68000 execution is not built in`);
+    const request=Object.freeze({kind,value,arguments:Object.freeze(args),dataRegisters:Object.freeze(Array.from(dataRegisters)),addressRegisters:Object.freeze(Array.from(addressRegisters)),
+      peek:address=>bankMemory.peek(integer(address)),poke:(address,byte)=>bankMemory.poke(integer(address),integer(byte)),
+      read:(address,length)=>bankMemory.read(integer(address),integer(length)),write:(address,bytes)=>bankMemory.write(integer(address),bytes),
+      screen:handle=>{const target=screenHandles.get(handle);if(!target || display.screens.get(target.id)!==target)throw Error('Retired Screen Base handle');return target;}});
+    const result=options.native.call(request);
+    if(!result || typeof result!=='object' || typeof result.then==='function')throw Error('Native call must return a synchronous register result');
+    for(const [name,count]of [['dataRegisters',8],['addressRegisters',7]])if(result[name]!=null && (!Array.isArray(result[name]) || result[name].length!==count || result[name].some(n=>!Number.isInteger(n) || n<-2147483648 || n>2147483647)))throw Error('Invalid native register result');
+    if(result.dataRegisters)dataRegisters.set(result.dataRegisters);
+    if(result.addressRegisters)addressRegisters.set(result.addressRegisters);
+    return dataRegisters[0];
+  }
+  function nativeCall(target,...args){const address=bankMemory.address(integer(target));bankMemory.checkRange(address,2);nativeInvoke('Call',address,args.map(integer));}
+  function doscall(offset){return nativeInvoke('Doscall',integer(offset));}
   state.system.forbidDepth = 0; state.system.workbenchOpen = true;
   function registerIndex(index) { index = integer(index); if (index < 0 || index > 7) throw new Error('Invalid Dreg index'); return index; }
   function memoryFree(kind) { const value = options.memoryFree ? options.memoryFree(kind) : 0; if (!Number.isInteger(value) || value < 0 || value > 2147483647) throw new Error('Memory availability must be a nonnegative synchronous integer'); return value; }
@@ -3990,6 +4054,30 @@
       return next;
     });
     installBanks(loaded, [], decoded.grouped);
+  }
+  function pload(filename,number){
+    number=integer(number);if(!number || Math.abs(number)>=65536)throw Error('Invalid Pload bank number');
+    if(!options.files || typeof options.files.read!=='function')throw Error('Pload requires a synchronous files.read adapter');
+    const contents=options.files.read(resolveFileName(filename));
+    if(typeof contents!=='string' || /[^\x00-\xff]/.test(contents) || contents.length>16*1024*1024)throw Error('Invalid Pload bytes');
+    const bytes=Uint8Array.from(contents,c=>c.charCodeAt(0));let at=0;
+    const long=()=>{if(at+4>bytes.length)throw Error('Truncated Pload hunk');const value=(bytes[at]*0x1000000+bytes[at+1]*65536+bytes[at+2]*256+bytes[at+3])>>>0;at+=4;return value;};
+    if(long()!==0x3f3 || long()!==0 || long()!==1 || long()!==0 || long()!==0)throw Error('Pload supports a single unnamed CODE hunk');
+    const allocation=long()&0x3fffffff;if(long()!==0x3e9)throw Error('Pload requires a CODE hunk');
+    const length=long()*4;if(!length || length>allocation*4 || length>bytes.length-at)throw Error('Pload CODE range out of bounds');
+    const data=bytes.slice(at,at+length);at+=length;
+    if(long()!==0x3f2 || at!==bytes.length)throw Error('Pload relocations/additional hunks are not implemented');
+    installBanks([{number:Math.abs(number),type:'data',memory:number<0?'chip':'fast',permanent:true,name:'Asm     ',data}]);
+  }
+  function takeBank(number){number=integer(number);if(!state.stopped && !state.halted)throw Error('Bank transfer requires a stopped parent program');const bank=banks.get(number);if(!bank)throw Error('Parent bank not reserved');installBanks([],[number]);return bank;}
+  function grabBank(number){
+    number=integer(number);if(number<1 || number>=65536)throw Error('Invalid Bgrab bank number');eraseBank(number);
+    const parent=options.parentProgram;if(!parent || typeof parent.takeBank!=='function')throw Error('Bgrab requires a parentProgram accessory context');
+    installBanks([parent.takeBank(number)]);
+  }
+  function runRequest(filename=null){
+    if(!options.system || typeof options.system.command!=='function')throw Error('Run requires a system.command program loader');
+    return Object.freeze({command:'Run',filename:filename==null?null:resolveFileName(filename),location:state.location?Object.freeze({...state.location}):null});
   }
 
   function trackLoad(filename, number) {
@@ -5229,6 +5317,8 @@
     bload, bsave,
     limitMouse, limitMouseScreen,
     dataRegister: index => dataRegisters[registerIndex(index)], setDataRegister: (index, value) => { dataRegisters[registerIndex(index)] = integer(value); }, memoryFree, execall,
+    addressRegister:index=>addressRegisters[addressRegisterIndex(index)],setAddressRegister:(index,value)=>{addressRegisters[addressRegisterIndex(index)]=integer(value);},
+    variableAddress, screenAddress, nativeCall, doscall, pload, grabBank, takeBank, runRequest,
     amosUnlock: () => systemCommand('Amos Unlock'), breakOn: () => systemCommand('Break On'), closeWorkbench: () => systemCommand('Close Workbench'),
     shiftUp, shiftOff,
     ntsc: () => (options.displayOptions && options.displayOptions.snapshotStandard ? options.displayOptions.snapshotStandard === 'NTSC' : options.audioVblHz === 60) ? -1 : 0,
@@ -6369,6 +6459,7 @@
 };
   const bankMemoryFactory = function createBankMemory(banks, options = {}) {
   const allocations = new Map();
+  const variablePointer=address=>options.variableMemory && Number.isInteger(address) && address>=-2147483648 && address<=0xffffffff && (address>>>0)>=0x90000000 && (address>>>0)<0xa0000000;
   let next = 65536;
   function allocate(capacity) {
     const base = Math.ceil(next / 16) * 16;
@@ -6417,6 +6508,10 @@
     return allocation.base;
   }
   function resolve(address, length = 1) {
+    if(variablePointer(address)){
+      if(!Number.isSafeInteger(length) || length<0)throw Error('Invalid variable memory range');
+      return options.variableMemory.resolve(address>>>0,length);
+    }
     if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
     if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid bank memory range');
     if (address >= 0x40000000 && options.externalMemory) return options.externalMemory.resolve(address, length);
@@ -6439,11 +6534,12 @@
   }
   function writable(access, length) {
     if (length && (access.region.kind === 'table' || (access.region.kind === 'image' && access.offset < 10))) throw new Error('Raw icon table/header writes are not implemented');
-    if (access.region.kind === 'display') return;
+    if (access.region.kind === 'display' || access.region.kind==='variable') return;
     if (length && options.beforeWrite) options.beforeWrite(access.bank);
   }
   function byteAt(access, relative) {
     const { bank, region } = access, offset = access.offset + relative;
+    if(region.kind==='variable')return options.variableMemory.read(region,offset);
     if (region.kind === 'display') return options.externalMemory.read(region, offset);
     if (!region.kind) return bank.data[offset];
     if (region.kind === 'table') {
@@ -6469,6 +6565,7 @@
   }
   function putByte(access, relative, value) {
     const { bank, region } = access, offset = access.offset + relative;
+    if(region.kind==='variable'){options.variableMemory.write(region,offset,value);return;}
     if (region.kind === 'display') { options.externalMemory.write(region, offset, value); return; }
     if (!region.kind) { bank.data[offset] = value & 255; return; }
     if (offset >= region.requested) { region.padding[offset - region.requested] = value & 255; return; }
@@ -6496,6 +6593,7 @@
     doke: (address, value) => writeNumber(address, value, 2),
     loke: (address, value) => writeNumber(address, value, 4),
     address(value) {
+      if(variablePointer(value)){resolve(value,0);return value>>>0;}
       const address = value < 1024 ? start(value) : value;
       resolve(address, 0); return address;
     },
@@ -6523,6 +6621,7 @@
       finishWrite(access, length);
     },
     copy(address, end, destination) {
+      if(variablePointer(address))address>>>=0;if(variablePointer(destination))destination>>>=0;
       const length = end - address;
       if (!Number.isSafeInteger(length) || length <= 0) throw new Error('Invalid Copy range (end must follow start)');
       const source = resolve(address, length), target = resolve(destination, length);
@@ -6580,6 +6679,7 @@
     waiting: null,
     location: null,
     editRequest: null,
+    runRequest: null,
     column: 0,
     input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
@@ -6835,9 +6935,9 @@
         errorFrame = null; state.ip = target; return { done: false };
       }
     }
-    if (res.edit) {
-      state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });
-      pendingEdit = state.editRequest;
+    if (res.edit || res.run) {
+      if(res.edit){state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });pendingEdit=state.editRequest;}
+      else{state.runRequest=res.run;pendingEdit=res.run;}
       state.halted = true;
       state.waiting = null;
       return { done: true };
@@ -6953,7 +7053,7 @@
     if (request && options.system != null) {
       try {
         if (typeof options.system.command !== 'function') throw new Error('System host requires a synchronous command method');
-        const result = options.system.command('Edit', request);
+        const result = options.system.command(request.command, request);
         if (result && typeof result.then === 'function') throw new Error('System host commands must complete synchronously');
       } catch (error) {
         const failure = error && typeof error.message === 'string' ? error : new Error(String(error));

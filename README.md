@@ -108,6 +108,9 @@ Add `--debug` for source error logs and downloads of new/modified session files,
 instruction batching. Browser file writes survive Restart but are lost on page
 reload; IndexedDB persistence is planned.
 
+For games split across several AMOS files, `--programs programs.json` precompiles
+linked `Run` targets into the page. See [program chaining](docs/game-webpage-tutorial.md#link-several-amos-programs-with-run).
+
 See the [complete webpage tutorial](docs/game-webpage-tutorial.md) for asset
 preparation, custom harness wiring, touch controls and publishing. To regenerate
 the repository's gallery pages, including the Roller II demo and its verification
