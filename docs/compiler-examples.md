@@ -119,6 +119,16 @@ pixels. See [the demo](../demos/short-screens.html) and
 [window contract](screen-windows.md#short-default-bitmaps). NTSC's later oversized
 cube screen remains a separate open geometry limit.
 
+## Bump input and deformation run
+
+Bump's former line 51/1502 Circle failure came from stale initial mouse coordinates,
+not an invalid Circle call in the supplied source. Coordinate polls now reconcile
+mouse limits without requiring pointer motion. The unchanged source starts at
+radius one, accepts radius 80 via pointer input, completes its 64,000-pixel pass
+and exits through the original prompt. The [browser regression](../demos/bump-runtime.html)
+checks four GPU frames and 61,344 independent pixels/axis vectors. Circle still
+rejects zero and negative radii. See [mouse polling](mouse.md#idle-coordinate-polling-and-bump).
+
 ## Verification and remaining startup gaps
 
 The shared [runtime browser demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples-runtime.html)
@@ -146,7 +156,7 @@ Initial bounded startup inspection found these remaining issues:
 | BouncBobs, Mapping | Supplied graphics now load; live animation/preview are checked. Full benchmark/completion replays remain open. |
 | GALAX | Supplied banks are embedded; their packed headers use x=129 and additional control flags outside the current decoder subset. Geometry and complete gameplay remain unverified. |
 | Fractal3, Plasma; NTSC cube startup | Horizontal Screen Display placements and oversized default screen windows beyond the current runtime subset. |
-| Bump | Original initial Circle call produces a radius rejected by the current checked raster. |
+| Bump | Idle coordinate polling now respects its positive mouse limits. The complete PAL radius-80 deformation and original exit prompt run; native raster/math/timing parity remains open. |
 | DotBall1, Fractal1, Fractal2 | Reach real Input prompts; complete interactive runs remain unverified. |
 | Other examples | Compile and reach execution/precalculation/waits in bounded startup checks; completion and native timing remain unverified. |
 

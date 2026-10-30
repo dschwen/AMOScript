@@ -857,3 +857,13 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   both input prompts. short-screens has 13 GPU comparisons and 124,800 independent
   pixels; unit checks cover 1-row/boundary screens and out-of-bitmap DMA flags.
   See docs/screen-windows.md. Later oversized NTSC cube geometry stays gated.
+
+- X Mouse/Y Mouse/Mouse Zone coordinate polls reconcile both axes against current
+  Limit Mouse bounds, matching native continuously clamped MousInt state at a
+  portable polling boundary. Installing bounds itself still does not reposition.
+  Preserve buttons/click history, keyboard state and display; no bounds leaves
+  coordinates unrestricted. Preflight Mouse Zone's screen before reconciliation.
+  Original Bump now starts without motion at radius one, selects radius 80 through
+  pointer input, renders 64,000 pixels and exits naturally. Circle's strict radius
+  checks remain unchanged. bump-runtime covers 61,344 independent pixels and four
+  GPU comparisons; native interrupt/raster/timing parity remains unclaimed.

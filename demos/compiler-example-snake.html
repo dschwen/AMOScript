@@ -5873,6 +5873,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       return typeof entry === 'string' ? entry : entry.key;
     }
     if (name === 'Scancode') { const code = state.input.scanCode; state.input.scanCode = 0; return code; }
+    if (name === 'Mouse Zone') display.screen();
+    if (name === 'X Mouse' || name === 'Y Mouse' || name === 'Mouse Zone') {
+      // Native MousInt clamps even without motion. Reconcile at the portable
+      // coordinate-poll boundary so an idle host cannot expose stale limits.
+      const limits = state.input.mouseLimits, mouse = state.input.mouse;
+      if (limits) {
+        mouse.x = Math.max(limits.x1, Math.min(limits.x2, mouse.x));
+        mouse.y = Math.max(limits.y1, Math.min(limits.y2, mouse.y));
+      }
+    }
     if (name === 'X Mouse') return state.input.mouse.x;
     if (name === 'Y Mouse') return state.input.mouse.y;
     if (name === 'Mouse Key') return state.input.mouse.buttons;

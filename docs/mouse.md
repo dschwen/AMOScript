@@ -14,7 +14,10 @@ original word operations, in order: take unsigned low words; cap upper x/y at
 endpoints. The resulting limits are inclusive. For example, `(900,900) To
 (999,999)` becomes `(458,312) To (900,900)` because normalization follows upper
 capping. Equal endpoints are valid. Defining limits does not immediately move the
-mouse; the next `setMouse`/host pointer update clamps its position.
+mouse. The next coordinate poll (`X Mouse`, `Y Mouse`, or `Mouse Zone`) or
+`setMouse`/host pointer update clamps both axes to the current limits. Coordinate
+polling preserves held buttons, click-query history and text/raw keyboard state;
+it never invents a click. Without limits, coordinates remain unrestricted.
 
 Bare Limit Mouse captures the current screen; the numbered form supports 0–7.
 It uses the full bitmap extent and hardware origin, halves hires width through
@@ -148,3 +151,23 @@ now runs and renders a bounded first-level loop for two nominal seconds; see
 [Change Mouse](change-mouse.md) now maps built-in shapes 1–3 to owned browser
 arrow/crosshair/wait cursors independently of Hide/Show nesting. Configured native
 artwork and sprite-bank pointer forms remain gated.
+
+
+## Idle coordinate polling and Bump
+
+The native `MLimA` routine only installs bounds, while `MousInt` clamps the stored
+position on every mouse interrupt, including fields without motion. The portable
+runtime reconciles limits at synchronous coordinate polls as well as host pointer
+updates. This avoids leaving the factory's initial `(0,0)` outside positive
+limits indefinitely while waiting for a browser event. Native interrupt phase and
+OS cursor warping remain outside this model. Mouse Zone checks that its screen
+exists before reconciling coordinates; a failed screen lookup does not move them.
+
+Original `Bump.AMOS` sets bounds 1–160 and immediately uses X Mouse as its Circle
+radius. Previously this read a stale zero and failed at line 51, byte 1502. It now
+starts at radius one without injected pointer motion. The source and Circle's
+positive-radius check remain unchanged. The [browser regression](../demos/bump-runtime.html)
+uses hardware-coordinate pointer events to select radius 80, completes the
+64,000-pixel deformation pass and exits with a real Canvas key event. Four actual
+GPU comparisons and 61,344 independent image-region/axis/startup pixel checks
+cover the route; full native raster, float and timing equivalence remain open.

@@ -11,7 +11,8 @@ shifting, bitplane memory, dual playfields and GALAX command forms are implement
 with explicit bounds. Supplied Graphics assets now load into BouncBobs animation and Mapping preview.
 3Dcube3 now renders its short progress screen and completes all 500 PAL frames
 and both original prompts. Next: horizontal Screen Display
-placements, Bump Circle behavior and full input-only runs. See
+placements and broader input-only runs. Bump now starts without pointer motion
+and completes its radius-80 deformation pass and exit prompt. See
 [contracts and evidence](docs/compiler-examples.md).
 
 ## Current game priority: Planet Zybex

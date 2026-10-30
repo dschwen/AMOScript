@@ -14,6 +14,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-help.html"
     },
     {
+      "file": "bump-runtime.html",
+      "title": "Bump: mouse radius and image deformation",
+      "description": "The unchanged Bump program starts without pointer motion, chooses radius 80 through hardware-coordinate pointer events, renders all 64,000 pixels and exits through its original prompt. Coordinate polls reconcile stale mouse limits without inventing button events. Independent IFF regions/axis vectors cover 61,344 pixels; four actual GPU comparisons check startup, radius selection, deformation and report. Circle keeps its positive-radius guard; native raster/timing parity remains open.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bump-runtime.html"
+    },
+    {
       "file": "short-screens.html",
       "title": "3Dcube3 and short default screens",
       "description": "The unchanged 3Dcube3 source renders its 32-row progress display, completes precalculation, runs all 500 PAL animation frames and exits through real Canvas keyboard input. Eight synthetic PAL/NTSC short-screen cases check 124,800 independent pixels and physical buffers. Thirteen actual GPU comparisons use bounded copper DMA; no native timing or Amiga capture is claimed.",
