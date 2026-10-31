@@ -21,8 +21,8 @@ below the editor.
 
 Original bytes and SHA-256 hashes are pinned in
 [examples/Joy/Source1/manifest.json](../examples/Joy/Source1/manifest.json), including
-the empty files. The supplied `asm_neu` directory has nonempty versions of the
-missing programs, but these are separate versions and have not been substituted
+the empty files. The supplied `asm_neu` directory now has a separate [ASM showcase milestone](asm.md)
+with nonempty versions of the missing programs, but these are separate versions and have not been substituted
 for the Joy Src1 inputs. The supplied ADFs were inspected read-only with amitools;
 no disk-image repair or source replacement was performed.
 

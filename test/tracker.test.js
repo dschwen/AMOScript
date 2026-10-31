@@ -100,3 +100,29 @@ test('tracker: original Roller II tune traverses 22 orders and preserves native 
   const loop = createTracker(m,{loop:true}); fields(loop,count); assert.strictEqual(loop.state.order,120); assert.strictEqual(loop.state.row,0);
   fields(loop,7*64*8); assert.strictEqual(loop.state.order,0);
 });
+
+test('tracker: native 1xx/2xx pitch slides run between rows, clamp periods and retain no zero-parameter memory', () => {
+  const m=fixture(),events=[];
+  m.patterns[0][0]={sample:1,period:120,effect:1,parameter:4};
+  m.patterns[0][1]={sample:1,period:850,effect:2,parameter:3};
+  m.patterns[0][4]={sample:0,period:0,effect:1,parameter:0};
+  m.patterns[0][5]={sample:0,period:0,effect:2,parameter:0};
+  const p=createTracker(m,{host:{command:e=>events.push(e)}}); fields(p,6);
+  const periods=[]; for(let i=0;i<6;i++){p.tick();periods.push([p.state.voices[0].period,p.state.voices[1].period]);}
+  assert.deepStrictEqual(periods,[[116,853],[113,856],[113,856],[113,856],[113,856],[113,856]]);
+  fields(p,5); assert.deepStrictEqual([p.state.voices[0].period,p.state.voices[1].period],[113,856]);
+  assert.strictEqual(events.filter(e=>e.type==='play').length,2);
+  assert.ok(events.some(e=>e.type==='voice'&&e.mask===1&&e.rate===3546895/116));
+});
+
+test('tracker: complete original ASM Zoom tune matches independent field-period and note-trigger traces',()=>{
+  const crypto=require('crypto'),expected=require('./fixtures/asm-zoom-tracker.json'),bytes=fs.readFileSync(require('path').join(__dirname,'../examples/ASM/intro/Zoom.Mus'));
+  const hash=b=>crypto.createHash('sha256').update(b).digest('hex');assert.strictEqual(hash(bytes),expected.sourceSha256);
+  for(const standard of ['PAL','NTSC']) {
+    const periods=[],triggers=[];
+    const p=createTracker(readMod(bytes),{standard,host:{command:e=>{if(e.type==='play'){const b=Buffer.alloc(8);b.writeUInt32BE(e.field);b[4]=e.mask;b[5]=e.sample.number;b.writeUInt16BE(e.period,6);triggers.push(b);assert.strictEqual(e.rate,(standard==='PAL'?3546895:3579545)/e.period);}}}});
+    for(let i=0;i<expected.fields;i++){p.tick();const b=Buffer.alloc(8);p.state.voices.forEach((v,c)=>b.writeUInt16BE(v.period,c*2));periods.push(b);}
+    assert.strictEqual(p.state.playing,false);assert.strictEqual(triggers.length,expected.notes);
+    assert.strictEqual(hash(Buffer.concat(periods)),expected.periodTraceSha256);assert.strictEqual(hash(Buffer.concat(triggers)),expected.triggerTraceSha256);
+  }
+});

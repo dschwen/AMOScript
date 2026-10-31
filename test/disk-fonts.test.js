@@ -44,3 +44,14 @@ test('disk fonts: missing enumeration/bitmap, invalid selection and malformed ca
   assert.throws(() => execute(raw), /Font not defined.*line 2/);
   const { program: p } = execute(raw, 10000, { displayOptions: { diskFonts: [atlas()] } }); assert.strictEqual(p.state.waiting, 'key'); p.stop();
 });
+
+test('disk fonts: Font$ exposes the owned native 38-character catalogue and proportional advances', () => {
+  const f=atlas(); f.name='ASM.Font'; f.advances=Array(256).fill(4);
+  const {program:p}=execute(binary([[t('Get Disc Fonts')],[t('Print'),t('Font$'),t('('),n(1),t(')')],[t('Wait Key')]]),1000,{displayOptions:{diskFonts:[f]}});
+  assert.strictEqual(p.display.fontName(1),'ASM.Font'.padEnd(30)+'9   Disc');
+  assert.strictEqual(p.display.fontName(0),''); assert.strictEqual(p.display.fontName(2),'');
+  f.name='changed'; f.advances.fill(0); p.display.setFont(1); p.display.clear(0); p.display.ink(1); p.display.text(0,6,'AA');
+  assert.strictEqual(p.display.point(13,0),1); assert.strictEqual(p.display.point(14,0),0); p.stop();
+  for(const advances of [[],Array(256).fill(-1),Array(256).fill(33),new Array(256)])assert.throws(()=>createDisplay({diskFonts:[{...atlas(),advances}]}).getDiscFonts(),/advances/);
+  assert.throws(()=>p.display.fontName(-1),/font number/);
+});

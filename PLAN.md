@@ -1,6 +1,21 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-30.
+Assessment updated: 2026-10-31.
+
+## ASM — Das Spiel
+
+[New showcase target and implementation order](docs/asm.md). Six of eight supplied
+`asm_neu` sources compile. The complete original intro now runs through menus,
+logo animation, MOD tunes, four title screens (including HAM and its supplied
+font), loading and terminal Run. Normal/debug showcase pages use Canvas explicitly;
+eight Canvas frames and seven non-HAM GPU comparisons cover the first milestone.
+Asset preparation retains originals, crops the authoring pictures to the source's
+320×256 screens, packs the three expected bank files and declares an empty score
+table. The main 1,868-line adventure still needs Resume, Cblocks, bit/array/text
+operations, minterm copy/Clip, host/file commands and Tempo. Next: compile the main
+source, pin the supplied disk-image room/dialogue assets, then connect Run through
+shared Ram:Level and exercise the first room. Do not label the intro preview a
+playable complete adventure. ZoneDefiner's text-control strings remain separate.
 
 ## Joy Src1
 
@@ -12,8 +27,8 @@ procedure passes all six bank-swap transitions. Both complete editors run throug
 painting, fill/clear, protected Pop exits and Escape/Edit, with twelve independent
 and GPU frames and a live page. Labyrinth startup reaches its line-70 map read
 before the bounds test at 71; correct that at the source level, preserving the
-upstream copy and strict bank checks, before accepting gameplay. Nonempty asm_neu
-variants remain a separate follow-up target, not substitutes for missing Src1 files.
+upstream copy and strict bank checks, before accepting gameplay. The nonempty asm_neu
+variants now have their own showcase milestone above; they remain separate inputs.
 
 ## Gru1, Gru2 and progs1
 

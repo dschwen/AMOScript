@@ -2,11 +2,13 @@
 'use strict';
 // Public example harness, embedded by build_game_page.js. No source-specific
 // startup keys: each game retains its own intro, menu and joystick behavior.
-function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}, initialMouse=null) {
+function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}, initialMouse=null, settings={}) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   let activeFactory=createProgram;
+  let unlinkedRun = '';
+  const diskFonts = (settings.diskFonts || []).map(font => ({ ...font, data: Uint8Array.from(font.data) }));
   const key = name => name.replace(/\\/g, '/').toLowerCase();
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])));
   const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes),
@@ -17,9 +19,10 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys } : false, gamepad: true }];
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.requested ? 'Mute sound' : 'Enable sound';
-    status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (!live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
+    status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
+    if (debug) viewport.dataset.line = live && live.state.location ? String(live.state.location.line) : '';
     viewport.dataset.keyboard = keyboardMode.value;
     viewport.dataset.sound = audio.state; viewport.dataset.backend = gpu ? 'webgl' : 'canvas';
     status.hidden = !!live && !failure && !live.state.halted && !live.state.stopped && !audio.error;
@@ -30,20 +33,23 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   function releaseGpu() { if (!gpu) return; const gl = gpu.resources.context; gpu.dispose(); gpu = null; const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   function start(factory=activeFactory) {
     activeFactory=factory;
-    revision++; const token = revision; failure = '';
+    revision++; const token = revision; failure = ''; unlinkedRun = '';
     if (host) host.detach(); if (live) live.stop(); releaseGpu();
     const next = document.createElement('canvas'); next.id = 'game-input'; next.tabIndex = 0; next.width = 320; next.height = 256;
     next.setAttribute('aria-label', 'Game display'); canvas.replaceWith(next); canvas = next;
-    if (createRenderer) try { gpu = createRenderer(canvas); } catch (_) {
+    if (settings.renderer !== 'canvas' && createRenderer) try { gpu = createRenderer(canvas); } catch (_) {
       const gl = canvas.getContext('webgl2'), ext = gl && gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext();
       const fallback = canvas.cloneNode(); canvas.replaceWith(fallback); canvas = fallback;
     }
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
-    live = factory({ sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
+    live = factory({ displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       system:{command(name,request){
         if(name!=='Run')return;
         const nextFactory=request.filename==null?factory:Object.hasOwn(linkedPrograms,key(request.filename))?linkedPrograms[key(request.filename)]:null;
-        if(typeof nextFactory!=='function')throw Error('Run target not compiled into this page: '+request.filename);
+        if(typeof nextFactory!=='function') {
+          if (settings.stopOnUnlinkedRun) { unlinkedRun = request.filename; update(); return; }
+          throw Error('Run target not compiled into this page: '+request.filename);
+        }
         const old=live;
         setTimeout(guard(()=>{if(live===old && !old.state.stopped)start(nextFactory);}),0);
       }},

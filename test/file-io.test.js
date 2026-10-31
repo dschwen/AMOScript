@@ -76,3 +76,28 @@ test('files: Node adapter uses real byte-preserving filesystem reads/writes', ()
     fs.rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test('files: Set Input selects a byte terminator and optional single-byte skip for Input# and Line Input#', () => {
+  const files=createMemoryFiles({'test.txt':'first,comma*Xsecond*Ythird*Z'});
+  const {program:p,logs}=run([open('Open In'),[t('Set Input'),n(42),t(','),n(0)],
+    [t('Line Input#'),n(1),t(','),id('a',6,2)],[t('Input#'),n(1),t(','),id('b',6,2)],
+    [t('Set Input'),n(42),t(','),n(-1)],[t('Line Input#'),n(1),t(','),id('c',6,2)],
+    [t('Print'),id('a',6,2),t(','),id('b',6,2),t(','),id('c',6,2)]],files);
+  assert.deepStrictEqual(logs,[['first,comma','second','third']]); assert.strictEqual(p.fileInfo('Pof',1),files.read('test.txt').length-1);
+  for(const first of [-1,256])assert.throws(()=>run([[t('Set Input'),n(first),t(','),n(-1)]],files),/first character/);
+  const other=run([open('Open In'),[t('Line Input#'),n(1),t(','),id('a',6,2)],[t('Print'),id('a',6,2)]],createMemoryFiles({'test.txt':'a\r\nb\n'}));
+  assert.deepStrictEqual(other.logs,[['a']]);
+});
+
+test('files: native Input# comma and Line Input# NUL delimiters take precedence over Set Input skip',()=>{
+  for(const [kind,first,contents]of [['Input#',44,'a,b,'],['Line Input#',0,'a\0b\0']]) {
+    const {logs}=run([open('Open In'),[t('Set Input'),n(first),t(','),n(0)],
+      [t(kind),n(1),t(','),id('a',6,2)],[t(kind),n(1),t(','),id('b',6,2)],
+      [t('Print'),id('a',6,2),t(','),id('b',6,2)]],createMemoryFiles({'test.txt':contents}));
+    assert.deepStrictEqual(logs,[['a','b']]);
+  }
+});
+
+test('files: Set Input required trailing skip byte reports EOF instead of silently accepting a truncated record',()=>{
+  assert.throws(()=>run([open('Open In'),[t('Set Input'),n(42),t(','),n(0)],[t('Line Input#'),n(1),t(','),id('a',6,2)]],createMemoryFiles({'test.txt':'a*'})),/End of file/);
+});

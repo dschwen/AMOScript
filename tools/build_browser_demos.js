@@ -75,13 +75,16 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   interactive = interactive.replace('  <pre id="output"', '  <pre id="input-state" aria-label="Live program and mouse state"></pre>\n  <pre id="output"');
   interactive = interactive.replace('</body>', script(`setInterval(() => { if (AMOS.state) document.getElementById('input-state').textContent = JSON.stringify({waiting:AMOS.state.waiting,stopped:AMOS.state.stopped,halted:AMOS.state.halted,mouse:AMOS.state.input.mouse},null,2); },100);`) + '</body>');
   outputs.set('programs.html', interactive);
+  for (const [name, content] of require('./build_asm').pages()) outputs.set(name, content);
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
   cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
   cards.push({ file: 'planet-zybex-game-debug.html', title: 'Planet Zybex — full game with debug enabled', description: 'The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.' });
   cards.push({ file: 'compiler-examples.html', title: 'AMOS Compiler Examples — 19 original programs', description: 'Browse standalone builds of the original compiler examples, including cubes, fractals, stars and GALAX. Supplied graphics and Galax banks are embedded; debug pages expose remaining runtime limits.' });
+  cards.push({ file: 'asm-intro.html', title: 'ASM — Das Spiel: original intro', description: 'Choose music and difficulty, watch the animated logo and original title sequence with MOD sound and a HAM picture. Canvas/fullscreen development preview; the main adventure is the next milestone.' });
+  cards.push({ file: 'asm-intro-debug.html', title: 'ASM intro — debug preview', description: 'The same complete original intro with source errors and modified session-file downloads. Stops cleanly at the uncompiled ASM.Main transition.' });
   const games = ['wonderland-game.html', 'roller2-game.html', 'planet-zybex-game.html'];
-  const showcases = ['amos-3d.html', 'compiler-examples.html', 'bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
+  const showcases = ['asm-intro.html', 'amos-3d.html', 'compiler-examples.html', 'bob-test.html', 'planet-zybex.html', 'screen-slide.html', 'anim5.html', 'tunnel.html', 'tracker.html', 'roller2-music-vm.html', 'programs.html'];
   const featured = {
     'amos-3d.html': { title: 'AMOS 3D — car and hero', description: 'Watch the car sequence and a rotating hero in an added demo loop, or select the original static hero ending. Includes pause/resume and fullscreen. The sprite intro is excluded; rendering uses a documented portable profile.' },
     'bob-test.html': { title: 'BobTest — 64 bouncing objects', description: 'Run the original BobTest program with WebGL, pause/resume, restart and fullscreen. Press a key to start its 500-frame run.' },

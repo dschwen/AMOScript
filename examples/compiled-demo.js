@@ -1006,13 +1006,19 @@
       return { ...view, y: top, height: bottom - top, dmaWindow: view.y < 26 || bottom < 128,
         pointers: view.pointers.map(pointer => pointer + (top - view.y) * view.rowBytes) };
     });
+    // A completely covered lower screen never supplies a raster slice. Its
+    // mode/palette must not gate the displayed owner (e.g. HAM title swapping).
+    // Compare hardware widths; retain partially exposed windows and all bounds.
+    if (windows) views = views.filter((view, index, all) => !all.slice(0, index).some(front =>
+      front.x <= view.x && front.x + front.width / (front.hires ? 2 : 1) >= view.x + view.width / (view.hires ? 2 : 1) &&
+      front.y <= view.y && front.y + front.height >= view.y + view.height));
     const overlap = views.some((view, index) => views.slice(index + 1).some(other => view.y < other.y + other.height && other.y < view.y + view.height));
     if (windows && (windows.some(window => window.priority) || overlap || views.some(view => view.y > 255))) {
       // Native MkD/MkA chooses one screen for each horizontal slice. A switch
       // starts with DMA disabled on a setup row, never a software overlay.
       if (views.some(view => {
         const neighbours = views.filter(other => other !== view && view.y < other.y + other.height && other.y < view.y + view.height);
-        return view.ham || neighbours.some(other => view.hires || other.hires);
+        return (view.ham && views.length > 1) || neighbours.some(other => view.hires || other.hires);
       })) {
         throw new Error('Screen priority requires lowres non-HAM windows for overlaps');
       }
@@ -1748,7 +1754,8 @@
 })(frameStateModel, copperRegisters, spriteDmaFactory);
   const displayFactory = function createDisplay(options = {}) {
   const font = options.font || fontFactory();
-  // Portable, preloaded, monospaced bitmap fonts. Host disk/font APIs stay out
+  // Portable, preloaded bitmap fonts, with optional per-character advances.
+  // Host disk/font APIs stay out
   // of indexed rendering; enumeration snapshots owned bytes before selection.
   let discFonts = null;
   const graphicsFonts = new WeakMap();
@@ -1766,7 +1773,10 @@
           !Number.isInteger(baseline) || baseline < 0 || baseline >= height ||
           Object.prototype.toString.call(data) !== '[object Uint8Array]' ||
           data.length !== 256 * height * Math.ceil(width / 8)) throw new Error('Invalid disk font bitmap');
-      return { name, width, height, baseline, rowBytes: Math.ceil(width / 8), data: new Uint8Array(data) };
+      const advances = entry.advances;
+      if (advances != null && (!Array.isArray(advances) || advances.length !== 256 ||
+          Array.from(advances).some(value => !Number.isInteger(value) || value < 0 || value > 32))) throw new Error('Invalid disk font advances');
+      return { name, width, height, baseline, rowBytes: Math.ceil(width / 8), data: new Uint8Array(data), advances: advances == null ? null : advances.slice() };
     });
     discFonts = next;
   }
@@ -1777,6 +1787,16 @@
     if (discFonts == null) throw new Error('Fonts not examined: use Get Disc Fonts first');
     if (index > discFonts.length) throw new Error('Font not defined: provide a preloaded diskFonts bitmap catalogue');
     graphicsFonts.set(target, discFonts[index - 1]);
+  }
+  function fontName(index) {
+    whole(index);
+    if (index < 0) throw new Error('Invalid font number');
+    if (discFonts == null) throw new Error('Fonts not examined: use Get Disc Fonts first');
+    const entry = discFonts[index - 1];
+    if (!entry) return '';
+    // Native FnFont returns 38 characters: name at 0, decimal size at 30,
+    // and the four-character source at 34. Enumeration owns the snapshot.
+    return entry.name.slice(0, 30).padEnd(30, ' ') + String(entry.height).padEnd(4, ' ') + 'Disc';
   }
   const screens = new Map();
   const listeners = new Set();
@@ -2691,13 +2711,15 @@
     if (!selected) {
       for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
     } else {
+      let cursor = x;
       for (let i = 0; i < value.length; i++) {
         const code = value.charCodeAt(i) <= 255 ? value.charCodeAt(i) : 63;
         for (let row = 0; row < selected.height; row++) for (let col = 0; col < selected.width; col++) {
           const bits = selected.data[(code * selected.height + row) * selected.rowBytes + (col >> 3)];
-          if (bits & (0x80 >> (col & 7))) pixel(target, x + i * selected.width + col, baseline - selected.baseline + row, target.ink);
-          else if (target.graphicsMode === 1) pixel(target, x + i * selected.width + col, baseline - selected.baseline + row, target.graphicsBackground);
+          if (bits & (0x80 >> (col & 7))) pixel(target, cursor + col, baseline - selected.baseline + row, target.ink);
+          else if (target.graphicsMode === 1) pixel(target, cursor + col, baseline - selected.baseline + row, target.graphicsBackground);
         }
+        cursor += selected.advances ? selected.advances[code] : selected.width;
       }
     }
     changed();
@@ -2896,7 +2918,7 @@
   return {
     checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
-    screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
+    screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
     autoViewOn: () => setAutoView(true), autoViewOff: () => setAutoView(false),
@@ -3332,7 +3354,7 @@
     const ends={X:end(x,y),Y:end(y,data.length)},starts={X:x,Y:y};
     return {bank,speed,alive:()=>banks.get(4)===bank && bank.data===data,read(axis,index){const at=starts[axis]+index;if(at>ends[axis])throw Error('AMAL movement stream out of bounds');return data[at];}};
   }
-  const amal = amalFactory({ globals:amalRegisters, isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
+  const amal = amalFactory({ globals:amalRegisters, readMouse:axis=>state.input.mouse[axis.toLowerCase()], isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
@@ -5108,6 +5130,12 @@
   }
 
   const channels = new Map();
+  let inputFormat = null;
+  function setInput(first, second) {
+    first = integer(first); second = integer(second);
+    if (first < 0 || first > 255) throw new Error('Set Input first character must be 0..255');
+    inputFormat = { first, skip: (second & 255) < 128 };
+  }
   let portsTerminated = false;
   function frameLoad(channel, number, count) {
     if (number < 1 || number >= 1024 || count < 1 || count > 32767) throw new Error('Unsupported Frame Load bank/count');
@@ -5233,10 +5261,20 @@
     const file = fileChannel(number, 'read');
     if (file.position >= file.contents.length) throw new Error('End of file');
     let end = file.position;
-    while (end < file.contents.length && file.contents[end] !== '\r' && file.contents[end] !== '\n' && (wholeLine || file.contents[end] !== ',')) end++;
+    while (end < file.contents.length && (inputFormat
+      ? file.contents.charCodeAt(end) !== inputFormat.first && (!wholeLine || file.contents.charCodeAt(end) !== 0)
+      : file.contents[end] !== '\r' && file.contents[end] !== '\n') && (wholeLine || file.contents[end] !== ',')) end++;
     const value = file.contents.slice(file.position, end);
     file.position = end;
-    if (file.contents[file.position] === ',') file.position++;
+    if (inputFormat) {
+      if (file.position < file.contents.length) {
+        const terminator = file.contents.charCodeAt(file.position++);
+        if (terminator !== (wholeLine ? 0 : 44) && terminator === inputFormat.first && inputFormat.skip) {
+          if (file.position >= file.contents.length) throw new Error('End of file');
+          file.position++;
+        }
+      }
+    } else if (file.contents[file.position] === ',') file.position++;
     else {
       if (file.contents[file.position] === '\r') file.position++;
       if (file.contents[file.position] === '\n') file.position++;
@@ -5381,7 +5419,7 @@
     pasteIcon: (x, y, number) => pasteImage(2, x, y, number),
     spritePalette: (mask = -1) => display.bankPalette(imageBank(1).palette, mask),
     resetDefault,
-    getBlock, putBlock, delBlock, delSprite, spriteCollision, unpackExisting, amalFreeze: () => { amal.freeze();refreshAmal(); },
+    getBlock, putBlock, delBlock, delSprite, spriteCollision, unpackExisting, amalFreeze: (number = null) => { amal.freeze(amalSelector(number));refreshAmal(); },
     getIcon: (...args) => captureImage(2, 'Get Icon', ...args),
     getBob: (...args) => captureImage(1, 'Get Bob', ...args),
     getSprite: (...args) => captureImage(1, 'Get Sprite', ...args),
@@ -5462,7 +5500,7 @@
     amosLock: () => systemCommand('Amos Lock'),
     breakOff: () => systemCommand('Break Off'),
     closeEditor: () => systemCommand('Close Editor'),
-    atString, stringFunction, replaceSubstring, formatUsing, fileOpen, fileClose, closePorts, filePrint, fileRead, fileInfo,
+    atString, stringFunction, replaceSubstring, formatUsing, fileOpen, fileClose, closePorts, filePrint, fileRead, fileInfo, setInput,
     min: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, false),
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
@@ -5980,6 +6018,9 @@
         const name = chars[at++] + chars[at++]; expect('('); const screen = expression(depth+1); expect(','); const value = expression(depth+1); expect(')');
         return { kind:'coordinate', name, screen, value };
       }
+      if (['X','Y'].includes(peek()) && chars[at+1] === 'M') {
+        const axis=chars[at++]; at++; return {kind:'mouse',axis};
+      }
       if (peek() === 'J') { at++; const port=peek(); if(!['0','1'].includes(port)) error('Expected AMAL joystick 0 or 1'); at++; return {kind:'joystick',port:Number(port)}; }
       if (peek() === 'Z') { at++; expect('('); const mask=expression(depth+1); expect(')'); return {kind:'random',mask}; }
       return register();
@@ -6096,6 +6137,7 @@
       if(options.isManual && !options.isManual()) throw Error('AMAL BC requires Synchro Off');
       return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
     }
+    if (expr.kind === 'mouse') return word(options.readMouse(expr.axis));
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'local') return channel.locals[expr.index];
     if (expr.kind === 'global') return options.globals[expr.index];
@@ -6437,7 +6479,7 @@
   // patterns. 000 is empty; 0xy arpeggio is deliberately not implemented yet.
   for (let p = 0; p < module.patterns.length; p++) for (let i = 0; i < 256; i++) {
     const c = module.patterns[p][i];
-    if (!([10, 12, 13, 14, 15].includes(c.effect) || c.effect === 0 && c.parameter === 0)) {
+    if (!([1, 2, 10, 12, 13, 14, 15].includes(c.effect) || c.effect === 0 && c.parameter === 0)) {
       throw new Error(`Tracker: unsupported effect ${c.effect.toString(16)} at pattern ${p}, row ${i >> 2}, channel ${i & 3}`);
     }
   }
@@ -6473,6 +6515,10 @@
         for (let v = 0; v < 4; v++) {
           const voice = voices[v];
           const event = { type: 'voice', mask: 1 << v };
+          // Native mt_portup/mt_portdown run only between note rows. 100/200
+          // have no parameter memory; clamp the signed-word result to $71/$358.
+          if (voice.effect === 1) voice.period = Math.max(0x71, ((voice.period - voice.parameter) << 16) >> 16);
+          if (voice.effect === 2) voice.period = Math.min(0x358, ((voice.period + voice.parameter) << 16) >> 16);
           if (voice.period) event.rate = clock / voice.period;
           if (voice.effect === 10) {
             const up = voice.parameter >> 4;

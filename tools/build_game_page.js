@@ -22,7 +22,11 @@ function loadAssets(filename, prefix = '') {
   }
   return assets;
 }
-function buildGamePage(source, { title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, slowdown = 1, initialMouse = null } = {}) {
+function buildGamePage(source, { title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, slowdown = 1, initialMouse = null, renderer = 'webgl', diskFonts = [], stopOnUnlinkedRun = false } = {}) {
+  if (!['webgl', 'canvas'].includes(renderer)) throw Error('renderer must be webgl or canvas');
+  if (typeof stopOnUnlinkedRun !== 'boolean') throw Error('stopOnUnlinkedRun must be a boolean');
+  require('../lib/amos/display')({ diskFonts }).getDiscFonts();
+  const fonts = diskFonts.map(font => ({ ...font, data: Array.from(font.data) }));
   if (initialMouse != null && (!Array.isArray(initialMouse) || initialMouse.length !== 3 || Array.from(initialMouse).some((v,i) => !Number.isInteger(v) || v < 0 || v > (i === 2 ? 7 : 65535)))) throw Error('initialMouse must be [hardwareX, hardwareY, buttons]');
   if (!Number.isFinite(slowdown) || slowdown < 1) throw new Error('slowdown must be a finite number of at least 1');
   if (typeof debug !== 'boolean') throw new Error('debug must be a boolean');
@@ -41,12 +45,12 @@ function buildGamePage(source, { title = 'AMOS game', assets = {}, programs = {}
   const model = require('../lib/display/model/frameState').createFrameStateModel;
   const sprites = require('../lib/display/reference/sprites').createSpriteModel;
   const resources = require('../lib/display/webgl/resources').createResourceFactory;
-  const renderer = require('../lib/display/webgl/renderer').createRendererFactory;
+  const rendererFactory = require('../lib/display/webgl/renderer').createRendererFactory;
   const shaders = require('../lib/display/webgl/shaders'), layout = require('../lib/display/presentation/layout');
   const runtime = `const create = (() => { const module = { exports: {} };\n${compiled}\nreturn module.exports; })();
 const model = (${model})(); const sprites = (${sprites})();
-const createRenderer = (${renderer})(model, sprites, (${resources})(model), (${shaders}), (${layout}));
-(${require('./gamePageRuntime')})(create, JSON.parse(${json(JSON.stringify(assets))}), createRenderer, ${port}, ${json(fire)}, ${debug}, (${require('./gamePageUI')}), Object.fromEntries([${linked}]), ${json(initialMouse)});`;
+const createRenderer = (${rendererFactory})(model, sprites, (${resources})(model), (${shaders}), (${layout}));
+(${require('./gamePageRuntime')})(create, JSON.parse(${json(JSON.stringify(assets))}), createRenderer, ${port}, ${json(fire)}, ${debug}, (${require('./gamePageUI')}), Object.fromEntries([${linked}]), ${json(initialMouse)}, ${json({ renderer, diskFonts: fonts, stopOnUnlinkedRun })});`;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${html(title)}</title>
 <style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:1.5rem auto;padding:0 1rem;background:#101721;color:#eef2f6}button,select{font:inherit;padding:.6rem;margin:.3rem}button{cursor:pointer}#play-game{display:block;background:#c71920;color:white;border:0;border-radius:.6rem;padding:1.1rem 2.5rem;font-size:2rem;font-weight:800}canvas{display:block;image-rendering:pixelated;max-width:100%;border:1px solid #888}#game-status{font-size:.9rem}h1{font-size:1.5rem}summary{cursor:pointer}body[data-playing=true] #play-game{font-size:1rem;padding:.7rem 1.3rem}#game-surface{background:#05080c;border-radius:8px;overflow:hidden}</style></head><body>

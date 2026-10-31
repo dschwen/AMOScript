@@ -11,7 +11,7 @@ const { buildBrowserDemos } = require('../tools/build_browser_demos');
 
 test('browser demos: catalogue covers every shared scenario with self-contained HTML and preview links', () => {
   const root = path.join(__dirname, '../demos'), manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json')));
-  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'compiler-examples.html']);
+  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'compiler-examples.html', 'asm-intro.html', 'asm-intro-debug.html']);
   const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.ok(index.indexOf('id="games"') < index.indexOf('id="technical-demos"'));
   assert.match(index, /<details id="technical-demos"><summary>Compiler and runtime checks/);

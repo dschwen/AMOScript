@@ -85,3 +85,12 @@ test('AMAL coordinates: native YS/YH and XS/XH agree with Basic conversions unde
     assert.deepStrictEqual([9,10,11,12].map(i=>p.amreg(i)),['X Screen','Y Screen','X Hard','Y Hard'].map(name=>p.display.coordinate(name,1,value)));assert.strictEqual(p.display.current,0);p.stop();
   }
 });
+
+test('AMAL: XM/YM read current hardware mouse words and numbered Freeze retains only that channel',()=>{
+  const {p}=idle('L: Let X=XM; Let Y=YM; Pause; Jump L');
+  p.installAmal(1,'L: Let R0=R0+1; Pause; Jump L');p.amalOn();
+  p.setMouse(301,209,0);p.synchro();assert.strictEqual(p.bobInfo('X Bob',0),301);assert.strictEqual(p.bobInfo('Y Bob',0),209);
+  p.amalFreeze(0);p.setMouse(400,230,0);p.synchro();assert.strictEqual(p.bobInfo('X Bob',0),301);
+  assert.strictEqual(p.amalSnapshot().find(c=>c.number===1).enabled,true);
+  p.amalOn(0);p.synchro();assert.strictEqual(p.bobInfo('X Bob',0),400);p.stop();
+});

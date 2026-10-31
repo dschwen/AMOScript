@@ -1,0 +1,8 @@
+{
+  "evidence": "Independent Python direct MOD parsing and native AMOS field/slide recurrence; not an Amiga audio capture",
+  "sourceSha256": "9e458458637f7d5bbc4307f16513b65c25c082fb8b8bf00b2e1b63af6fb16b3d",
+  "fields": 1020,
+  "notes": 4,
+  "periodTraceSha256": "807df6097c4b58a89aee2cf2b2a0d617900df1bd771944a61164291c6954df65",
+  "triggerTraceSha256": "844d31652c2431c923b79234aec34a889f832900414851ba191906a7eea0eefa"
+}

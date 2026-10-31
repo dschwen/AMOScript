@@ -53,3 +53,12 @@ test('game page: debug is an explicit boolean CLI/API option and the default pag
     assert.strictEqual(result.status, 0, result.stderr); assert.strictEqual(fs.readFileSync(output, 'utf8'), buildGamePage(bytes, { title: 'game', debug: true }));
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
 });
+
+test('game page: renderer and development Run policy are explicit, and font catalogues are validated before publication',()=>{
+  const bytes=binary([[t('End')]]);
+  assert.throws(()=>buildGamePage(bytes,{renderer:'automatic'}),/renderer/);
+  assert.throws(()=>buildGamePage(bytes,{stopOnUnlinkedRun:'true'}),/boolean/);
+  assert.throws(()=>buildGamePage(bytes,{diskFonts:[{}]}),/font bitmap/);
+  const page=buildGamePage(bytes,{renderer:'canvas',stopOnUnlinkedRun:true,diskFonts:[require('./helpers/diskFontFixture')()]});
+  assert.ok(page.includes('"renderer":"canvas"'));assert.ok(page.includes('"stopOnUnlinkedRun":true'));assert.ok(page.includes('Prepared test font'));
+});

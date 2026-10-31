@@ -47,6 +47,6 @@ test('Mixed-resolution priority: hires strip preserves per-screen backgrounds an
   d.select(5);d.setColour(0,0x123);const coloured=d.canvasFrame();
   for(const y of [160,161,170])assert.deepStrictEqual(Array.from(coloured.rgba.subarray(y*640*4,y*640*4+4)),[17,34,51,255]);
   assert.deepStrictEqual(Array.from(coloured.rgba.subarray(0,4)),[0,0,0,255]);assert.strictEqual(d.snapshotDisplay().frame.overflowEvents.length,0);d.setColour(0,0);
-  const retained=d.snapshotDisplay(),copy=retained.chip.slice();d.screenDisplay(5,128,200,640,10);assert.throws(()=>d.snapshotDisplay(),/lowres.*overlaps/);assert.deepStrictEqual(retained.chip,copy);
+  const retained=d.snapshotDisplay(),copy=retained.chip.slice();d.screenDisplay(5,128,205,640,10);assert.throws(()=>d.snapshotDisplay(),/lowres.*overlaps/);assert.deepStrictEqual(retained.chip,copy);
   d.screenDisplay(5,128,211,160,10);d.setColour(1,0xfff);d.clear(1);const narrow=d.canvasFrame();assert.deepStrictEqual([narrow.width,narrow.height],[640,171]);assert.deepStrictEqual(Array.from(narrow.rgba.subarray((170*640+100)*4,(170*640+100)*4+4)),[255,255,255,255]);assert.deepStrictEqual(Array.from(narrow.rgba.subarray((170*640+500)*4,(170*640+500)*4+4)),[0,0,0,255]);d.screenDisplay(5,128,1000,320,10);d.screenDisplay(2,128,1000,320,160);assert.doesNotThrow(()=>d.snapshotDisplay());p.stop();
 });

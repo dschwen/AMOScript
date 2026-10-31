@@ -477,6 +477,9 @@ const scenarios = [
     assert.strictEqual(result.ticks, 240132); assert.strictEqual(result.partialSphere, true);
     assert.strictEqual(result.gameRunning, false);
   } },
+  { id: 'asm-intro-checks', title: 'ASM — Das Spiel: original intro checks', initialFrame: 'Canvas: ASM animated logo', description: 'Complete original ASM_Intro.AMOS: sound choices, difficulty, animated logo, MOD music, all four title pages including HAM and custom fonts, then Ram:Level and the terminal Run request. Prepared 320×256 assets and an explicitly empty score table are declared in the ASM milestone. Eight Canvas frames, seven actual GPU comparisons; the HAM page uses Canvas. The main adventure remains a separate compilation milestone.', run: require('./asmIntroProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{frames:8,gpuFrames:7,picturePixels:327680,ham:true,levelFile:'1\r\n',runTarget:'ASM:ASM.Main',standalonePage:true});
+  } },
   { id: 'joy-source1', title: 'Joy Src1: Schokowahn labyrinth editors', initialFrame: 'Canvas: LabEdit.AMOS filled map', description: 'Both complete, unmodified LabEdit sources with a declared initial hardware pointer and the accompanying LAB icons. Fill, clear, marker protection through Pop, painting and Escape/Edit are exercised. Twelve independent grid and GPU frames. The four empty source files and Labyrinth backup runtime bounds error remain explicit in the build report; this is an editor showcase, not the complete adventure.', run: require('./joySource1Probe'), check(result, assert) {
     assert.deepStrictEqual(result, { editors: 2, frames: 12, gpuFrames: 12, independentPixels: 460800, protectedPopExits: 4, ended: true, standalonePage: true });
   } },

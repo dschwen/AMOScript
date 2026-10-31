@@ -452,6 +452,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sqr.html"
     },
     {
+      "file": "asm-intro-checks.html",
+      "title": "ASM — Das Spiel: original intro checks",
+      "description": "Complete original ASM_Intro.AMOS: sound choices, difficulty, animated logo, MOD music, all four title pages including HAM and custom fonts, then Ram:Level and the terminal Run request. Prepared 320×256 assets and an explicitly empty score table are declared in the ASM milestone. Eight Canvas frames, seven actual GPU comparisons; the HAM page uses Canvas. The main adventure remains a separate compilation milestone.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-checks.html"
+    },
+    {
       "file": "joy-source1.html",
       "title": "Joy Src1: Schokowahn labyrinth editors",
       "description": "Both complete, unmodified LabEdit sources with a declared initial hardware pointer and the accompanying LAB icons. Fill, clear, marker protection through Pop, painting and Escape/Edit are exercised. Twelve independent grid and GPU frames. The four empty source files and Labyrinth backup runtime bounds error remain explicit in the build report; this is an editor showcase, not the complete adventure.",
@@ -516,6 +522,18 @@
       "title": "AMOS Compiler Examples — 19 original programs",
       "description": "Browse standalone builds of the original compiler examples, including cubes, fractals, stars and GALAX. Supplied graphics and Galax banks are embedded; debug pages expose remaining runtime limits.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.html"
+    },
+    {
+      "file": "asm-intro.html",
+      "title": "ASM — Das Spiel: original intro",
+      "description": "Choose music and difficulty, watch the animated logo and original title sequence with MOD sound and a HAM picture. Canvas/fullscreen development preview; the main adventure is the next milestone.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro.html"
+    },
+    {
+      "file": "asm-intro-debug.html",
+      "title": "ASM intro — debug preview",
+      "description": "The same complete original intro with source errors and modified session-file downloads. Stops cleanly at the uncompiled ASM.Main transition.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-debug.html"
     }
   ]
 }

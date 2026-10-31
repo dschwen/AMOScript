@@ -810,11 +810,12 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   normalization. Cached variants retain exact arities; runtime checks/operations
   stay unchanged. Pinned unmodified Fastball inputs cover the three blocked sources.
 - Get Disc Fonts snapshots validated `displayOptions.diskFonts` records (at most
-  128 monospaced byte atlases, width 1..16, height 1..32, baseline within height).
+  128 byte atlases, width 1..16, height 1..32, baseline within height; optional
+  256-entry owned integer advances in 0..32).
   Set Font selects a one-based record per selected screen; zero resets. Owned
   MSB-first glyph bytes affect graphics Text only, preserving Print/Writing.
   Default empty inventories and missing glyphs error explicitly on selection.
-  No native disk-font decoding, OS enumeration or silent font substitution.
+  No general native disk-font loading or OS enumeration; no silent substitution.
   Fastballfont.font is only a descriptor; Fastballfont/9 is missing. All eight
   editable Fastball files compile; _C native wrappers remain unsupported. The
   prepared-font browser demo checks 192,000 independent pixels/three GPU frames.
@@ -968,3 +969,22 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   source failure and strict memory checks until a declared source correction.
   asm_neu is a different supplied version, not a replacement for empty inputs.
   See docs/joy-source1.md and demos/joy-source1.html.
+
+- ASM — Das Spiel is the asm_neu showcase target. All eight unchanged originals
+  and intro assets are pinned in examples/ASM; six compile. The complete intro
+  runs through terminal Run ASM:ASM.Main, writing Ram:Level. Build-time preparation
+  explicitly crops authoring IFFs to 320×256, emits the three expected packed banks,
+  decodes two pinned FontEd bitmap layouts and supplies an empty initial score table.
+  Do not claim the main adventure runs: eighteen token encodings plus runtime/assets
+  remain. Normal/debug pages share the game harness and explicitly choose Canvas
+  for the HAM title. stopOnUnlinkedRun is an opt-in host preview policy; ordinary
+  pages still reject missing linked factories. Eight Canvas/seven non-HAM GPU
+  frames cover the intro. See docs/asm.md and docs/asm-inventory.json.
+  Font$ returns the owned 38-character Disc catalogue description; unavailable
+  indices return empty. Set Input keeps per-factory byte terminator/skip settings;
+  Input# comma and Line Input# NUL take precedence, and a required missing skip byte
+  errors at EOF. Preserve existing default CRLF behavior. Numbered Amal Freeze
+  retains that channel; XM/YM read raw hardware mouse words without consuming input.
+  Tracker 1xx/2xx slide between rows with native $71/$358 bounds and no zero-parameter
+  memory. Fully covered committed lower windows contribute no raster slices and
+  cannot gate the sole HAM owner; partially exposed HAM/mixed-hires gates remain.

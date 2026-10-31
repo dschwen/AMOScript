@@ -17,6 +17,7 @@ module.exports = async function checkBrowserDemos(browser) {
     await gallery.screenshot({ path: path.join(__dirname, '../artifacts/demo-index.png'), fullPage: true });
     await gallery.locator('#technical-demos summary').click();
     assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), true);
+    assert.strictEqual(await gallery.locator('#showcases a[href="asm-intro.html"]').count(), 1);
     assert.strictEqual(await gallery.locator('#showcases a[href="tunnel.html"]').count(), 1);
     assert.strictEqual(await gallery.locator('#showcases a[href="anim5.html"]').count(), 1);
     assert.strictEqual(await gallery.locator('#showcases a[href="bob-test.html"]').count(), 1);

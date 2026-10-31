@@ -69,3 +69,13 @@ test('screen priority: per-owner COLOR00 colours zero pixels and setup rows befo
   for(const y of [89,122])assert.strictEqual(snapshot.frame.lineRegs[y*32+16]&2,0);
   d.hideScreen(1);assert.deepStrictEqual(Array.from(d.canvasFrame().rgba.slice(89*1280,89*1280+4)),[17,34,51,255]);
 });
+
+test('screen priority: fully covered modes do not gate a single HAM owner, while partial HAM overlaps remain bounded',()=>{
+  const d=createDisplay();d.open(0,320,256,64,0);d.clear(1);d.setColour(1,0xf00);
+  d.open(1,320,256,4096,0);d.clear(1);d.setColour(1,0x00f);d.screenToFront(1);
+  const blue=d.canvasFrame();assert.strictEqual(blue.width,320);assert.deepStrictEqual(Array.from(blue.rgba.slice(0,4)),[0,0,255,255]);
+  d.screenToFront(0);assert.deepStrictEqual(Array.from(d.canvasFrame().rgba.slice(0,4)),[255,0,0,255]);
+  d.screenToFront(1);assert.deepStrictEqual(d.canvasFrame().rgba,blue.rgba);
+  d.screenDisplay(1,128,60,320,240);assert.throws(()=>d.snapshotDisplay(),/non-HAM/);
+  d.hideScreen(1);assert.deepStrictEqual(Array.from(d.canvasFrame().rgba.slice(0,4)),[255,0,0,255]);
+});

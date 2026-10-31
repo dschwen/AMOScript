@@ -1,0 +1,95 @@
+{
+  "origin": "Supplied asm_neu directory; native font bodies from joy/Joy Src1/ASM/6 and ASM2/9",
+  "sources": [
+    "ASM.AMOS",
+    "ASM_Intro.AMOS",
+    "Krypto.amos",
+    "LabEdit.AMOS",
+    "LabEdit.Bak",
+    "Labyrinth.AMOS",
+    "Labyrinth.Bak",
+    "ZoneDefiner.AMOS"
+  ],
+  "pinned": {
+    "ASM.AMOS": {
+      "byteLength": 170214,
+      "sha256": "fb70fe71fc69469f4d2be0a54f8b70d6e80741df7d9fca155be3ef162109c90b"
+    },
+    "ASM_Intro.AMOS": {
+      "byteLength": 8316,
+      "sha256": "0561b0dcb669bec643104110d3460cd213ec946ba37e78d9f4373e47a157b3f3"
+    },
+    "Krypto.amos": {
+      "byteLength": 962,
+      "sha256": "fc5cf3d8c42e0b7feddbe1ab2ffec040bb2f498c507e99e739be9f3a37c9180b"
+    },
+    "LabEdit.AMOS": {
+      "byteLength": 7056,
+      "sha256": "5403316e1c959d3aef538d9ab2941c2d0dd8c1142e0b32cbe13067f716b7a743"
+    },
+    "LabEdit.Bak": {
+      "byteLength": 4158,
+      "sha256": "6475c23d31e01b94457fed1ddfe90c54c596c829040cfd1f32653f7c2c83fcd7"
+    },
+    "Labyrinth.AMOS": {
+      "byteLength": 7532,
+      "sha256": "d1d0dd8984a6a7648b0337a75f40b753c94970dd4e2c645c560b4211360ea557"
+    },
+    "Labyrinth.Bak": {
+      "byteLength": 14088,
+      "sha256": "805dc0dd6eef8b5e39617ebc5dc4341de696f64480fb77bdb48a95e120889c5e"
+    },
+    "ZoneDefiner.AMOS": {
+      "byteLength": 9138,
+      "sha256": "d80ab02589b15a7677deb185855b6e57e07a214f0310e025a76c1e06aa826c28"
+    },
+    "intro/ASMTit.Mus": {
+      "byteLength": 110902,
+      "sha256": "114971680c522ff3e91b1ee7c6b8f0913f38440205d31a22381b5bee84ac7a51"
+    },
+    "intro/Intro1.Pic": {
+      "byteLength": 20002,
+      "sha256": "45582a633663e4583d563e8da2893e878acd47a2769beb6b11e5c19052844c71"
+    },
+    "intro/Intro2.Pic": {
+      "byteLength": 25404,
+      "sha256": "69a2f5158fc9dd96d71f353f7e281d959f66dd7bd16b76096c640db95a6b6215"
+    },
+    "intro/Intro3.Pic": {
+      "byteLength": 35612,
+      "sha256": "39914b8b50257e63a7fa5b9661f548562bcfaf152f153c10815d4a8a7b6ab128"
+    },
+    "intro/Intro4.Pic": {
+      "byteLength": 14918,
+      "sha256": "77007d15440da65cbde3668d58155f5b846d28d6a43336dee1e2aae999661819"
+    },
+    "intro/Level.Pic": {
+      "byteLength": 8590,
+      "sha256": "a133b591fa472abffe9d7ae31ad4672743208abd82db5958dd52053108e78197"
+    },
+    "intro/Loading.Pic": {
+      "byteLength": 12366,
+      "sha256": "425e25c915c8989b34801f1cf4bd81af245e2c1d64a28a34d296714a85685623"
+    },
+    "intro/SoundAuswahl.Pic": {
+      "byteLength": 10668,
+      "sha256": "103ac30736aa84f04b9bc3a3263f8c66e75f6cd22ffb0bdcfcdc7ffaa2badb5c"
+    },
+    "intro/Tronic.Anim": {
+      "byteLength": 141810,
+      "sha256": "e54bc46e1cf25b6a7bee2a99dc068af987f2eec43ffdbaec60da1c3c6649cfab"
+    },
+    "intro/Zoom.Mus": {
+      "byteLength": 13902,
+      "sha256": "9e458458637f7d5bbc4307f16513b65c25c082fb8b8bf00b2e1b63af6fb16b3d"
+    },
+    "fonts/ASM-6": {
+      "byteLength": 2412,
+      "sha256": "ff8daaed999c46d1c94c06e9bc59dd99f781f8f9368220d22c1192dfe1f8f3ae"
+    },
+    "fonts/ASM2-9": {
+      "byteLength": 1316,
+      "sha256": "3fb97edc342b5d3c925a4c1e606af551bf5d5d42a35b2f79943660d83f9d99f5"
+    }
+  }
+}
