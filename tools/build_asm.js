@@ -22,7 +22,7 @@ function pages() {
       .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse to choose music and difficulty; click to advance the intro.').replace('<details class="game-help">','<p>Development preview of the complete original intro. Use the mouse to choose music and difficulty, then click through the logo and title screens; right click skips to loading. Canvas renders the HAM title image. The main adventure is the next milestone and is not included yet.</p><details class="game-help">');
     outputs.set(file,page);
   }
-  const main=fs.readFileSync(path.join(root,'ASM.AMOS'));
+  const main=fs.readFileSync(path.join(root,'ASM.current.AMOS'));
   const gameAssets={...assets,...require('./asmGameAssets').prepare()};
   for(const debug of [false,true]) {
     let page=buildGamePage(source,{title:'ASM — Das Spiel: first-room development build'+(debug?' (debug)':''),assets:gameAssets,diskFonts,
@@ -34,7 +34,7 @@ function pages() {
       .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse or touch to select commands and objects. Open ⌨ for text input; Enter and Backspace go directly to AMOS.');
     outputs.set(debug?'asm-game-debug.html':'asm-game.html',page);
   }
-  outputs.set('asm-room1.html',buildGamePage(main,{title:'ASM — Room 1 direct debug',assets:gameAssets,diskFonts,renderer:'canvas',debug:true,directories:['Df0:','Ram:'],entryFiles:{'Ram:Level':'2\r\n'}}).replace('<details class="game-help">','<p>Direct main-game launcher: skips the intro and selects the JOY edition. Click through the opening briefings and answer the requested letter of ASM. Zurück leads to room 2. Restart restores the startup session file.</p><details class="game-help">'));
+  outputs.set('asm-room1.html',buildGamePage(main,{title:'ASM — Room 1 direct debug (WebGL)',assets:gameAssets,diskFonts,renderer:'webgl',debug:true,directories:['Df0:','Ram:'],entryFiles:{'Ram:Level':'2\r\n'}}).replace('<details class="game-help">','<p>WebGL main-game launcher: skips the intro and selects the JOY edition. Click through the opening briefings and answer the requested letter of ASM. Zurück leads to room 2. Restart restores the startup session file.</p><details class="game-help">'));
   return outputs;
 }
 function build(outputDirectory) {

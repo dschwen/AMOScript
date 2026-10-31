@@ -154,6 +154,10 @@
     "game/Room2.Zones": {
       "byteLength": 158,
       "sha256": "5ac3da0b7ec6fa521f32f640e1c59ded442fc40520ffcdb9d6151fa3d9c84e3a"
+    },
+    "ASM.current.AMOS": {
+      "byteLength": 170224,
+      "sha256": "1c656922ba4c5b214370abadc92f4959a6d72e4d8446ea731d5e63cded2aca93"
     }
   },
   "gameAssetProfile": {
@@ -166,5 +170,10 @@
       "Befehle2.Pic is empty; disk data block 1422 is overwritten. Provisional conversation panel uses supplied Befehle4.Pic explicitly.",
       "Room2.Pic top 320x128 packed at hardware 128,80; its final zero is IFF padding, not BODY payload"
     ]
+  },
+  "currentSource": {
+    "file": "ASM.current.AMOS",
+    "original": "ASM.AMOS",
+    "change": "Line 886 brings screen 0 to front after replacement of artwork screen 2, restoring interactive zones."
   }
 }

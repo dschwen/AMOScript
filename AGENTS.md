@@ -1025,3 +1025,9 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   font enumeration. Rooms 1/2 are pinned; Zurück follows original source into room 2.
   Default graphics Text paints background ink; explicit Gr Writing 0 is transparent.
   Setup-row sprite palette changes remain timed copper events in Canvas and WebGL.
+
+- ASM live pages use pinned ASM.current.AMOS: line 886 restores screen 0 priority
+  after Unpack creates foreground artwork screen 2. Frozen original remains.
+  Replay opens/closes room 2 door after Zurück, 21 Canvas/GPU checkpoints.
+  Direct room entry uses WebGL; linked intro remains Canvas for HAM.
+  Proportional JAM2 text clears the full advance span before glyph foreground.

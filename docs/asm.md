@@ -221,3 +221,25 @@ Nineteen Canvas/WebGL checkpoint pairs pass. Room 2's supplied picture also coun
 a final zero alignment byte inside BODY; only prepared bytes correct that size.
 Room 2's picture, sprite bank, text and zones are pinned alongside room 1.
 Rooms 3 onward and longer adventure progression remain open.
+
+## Room input after Unpack and font spacing
+
+The live pages use `ASM.current.AMOS`; `ASM.AMOS` retains the frozen original.
+At line 886 the current source adds `Screen To Front 0` after `Get Palette 2`.
+Native `UnPack_Screen` calls `EcCree`, which brings the newly created artwork
+screen 2 to the front. The original `test_screen` only dispatches room objects
+when Scin returns screen 0, so the replacement artwork otherwise intercepts them.
+This is a source correction; Unpack and screen priority keep native semantics.
+The input-only replay now opens and closes room 2's door after Zurück, with 21
+Canvas/WebGL checkpoints. Other later rooms have not been exercised.
+
+The direct `asm-room1.html` page now requests WebGL. The intro-linked pages keep
+Canvas for the intro's HAM images. Browser checks verify a WebGL2 context on the
+direct application page, including entry and Restart.
+
+ASM-6 has intentionally proportional metrics: A advances 5 pixels, I and S 4,
+and M/W 6. Native pair kerning entries are zero. The loader preserves those
+advances; no browser font or CSS letter spacing is involved. The text renderer
+now clears the complete advance span before painting glyphs, fixing residual
+pixels in wide gaps and preventing overlapping cells from erasing prior ink.
+These are bitmap/metric checks, not a native Amiga text capture.

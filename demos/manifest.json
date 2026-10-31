@@ -549,7 +549,7 @@
     },
     {
       "file": "asm-room1.html",
-      "title": "ASM — direct room 1",
+      "title": "ASM — direct room 1 (WebGL)",
       "description": "Start the main game without the intro. JOY edition, debug menu, and room 2 via Zurück.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html"
     },

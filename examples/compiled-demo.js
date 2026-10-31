@@ -2735,13 +2735,17 @@
     if (!selected) {
       for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, background);
     } else {
+      // JAM2 erases the complete advance span, including proportional gaps.
+      // Paint the background first so overlapping glyph cells cannot erase ink.
+      const advanceWidth = textLength(value);
+      if (background != null) for (let row=0;row<selected.height;row++) for(let col=0;col<advanceWidth;col++)
+        pixel(target,x+col,baseline-selected.baseline+row,background);
       let cursor = x;
       for (let i = 0; i < value.length; i++) {
         const code = value.charCodeAt(i) <= 255 ? value.charCodeAt(i) : 63;
         for (let row = 0; row < selected.height; row++) for (let col = 0; col < selected.width; col++) {
           const bits = selected.data[(code * selected.height + row) * selected.rowBytes + (col >> 3)];
           if (bits & (0x80 >> (col & 7))) pixel(target, cursor + col, baseline - selected.baseline + row, target.ink);
-          else if (background != null) pixel(target, cursor + col, baseline - selected.baseline + row, background);
         }
         cursor += selected.advances ? selected.advances[code] : selected.width;
       }

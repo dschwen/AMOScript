@@ -4,9 +4,10 @@ Assessment updated: 2026-10-31.
 
 ## ASM — Das Spiel
 
-Command switching and opaque command-bar redraw now pass a nineteen-frame
+Command switching and opaque command-bar redraw now pass a twenty-one-frame
 Canvas/WebGL replay. A direct room 1 debug launcher skips the intro and restores
-its startup file on Restart. Zurück enters room 2 using pinned original assets;
+its startup file on Restart. Zurück enters room 2 using pinned original assets; opening/closing its door
+is now covered after a source-level screen-priority fix. The direct page uses WebGL;
 rooms 3 onward remain the next asset/progression work.
 
 

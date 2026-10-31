@@ -25,6 +25,9 @@ module.exports=function asmMainReplay(p,clock,capture,check,commands=false) {
     for(const [x,y] of [[140,220],[140,229],[140,238],[140,247],[140,256],[140,274],[140,283],[140,292],[195,220]]){click(x,y);capture('command '+p.state.variables.int_verb);}
     click(140,220);check(p.display.screen(1).pixels.slice(0,320*8).every((v,i)=>v===bar[i]),'Command bar retains old letters');capture('command bar restored');
     click(195,229);until(()=>p.state.variables.int_raum===2&&line()>=14&&line()<=58,'room 2 parser');advance(100);check(p.state.variables.int_raum===2,'Zurück did not enter room 2');capture('room 2');
+    check(p.display.screenIn(338,110)===0,'Artwork screen obscures interactive screen after Unpack');
+    click(140,229);click(340,125);until(()=>p.state.variables.array_int_flag.values.get(6)===1,'room 2 door opens');advance(100);capture('room 2 door open');
+    click(140,238);click(340,125);until(()=>p.state.variables.array_int_flag.values.get(6)===0,'room 2 door closes');advance(100);capture('room 2 door closed');
   }
   return {room:p.state.variables.int_raum,handle:p.state.variables.array_int_transport.values.get(2)};
 };

@@ -55,3 +55,12 @@ test('disk fonts: Font$ exposes the owned native 38-character catalogue and prop
   for(const advances of [[],Array(256).fill(-1),Array(256).fill(33),new Array(256)])assert.throws(()=>createDisplay({diskFonts:[{...atlas(),advances}]}).getDiscFonts(),/advances/);
   assert.throws(()=>p.display.fontName(-1),/font number/);
 });
+
+test('disk fonts: opaque proportional text clears advance gaps and preserves overlapping foreground strokes',()=>{
+  const font=atlas();font.advances=Array(256).fill(12);
+  const d=createDisplay({diskFonts:[font]});d.getDiscFonts();d.open(0,64,16,8,0);d.setFont(1);d.ink(1,2);d.grWriting(1);d.clear(7);d.text(0,6,'AA');
+  assert.strictEqual(d.textLength('AA'),24);
+  for(let y=0;y<9;y++)for(const x of [10,11,22,23])assert.strictEqual(d.point(x,y),2,'uncleared advance gap');
+  assert.strictEqual(d.point(24,0),7,'outside text advance');
+  const overlap={...font,advances:Array(256).fill(4)};const a=createDisplay({diskFonts:[overlap]});a.getDiscFonts();a.setFont(1);a.ink(1,2);a.grWriting(1);a.text(0,6,'AA');assert.strictEqual(a.point(9,0),1,'following cell erased preceding glyph ink');
+ });
