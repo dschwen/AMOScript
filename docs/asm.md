@@ -6,15 +6,19 @@
 
 The new target is **ASM — Das Spiel**, the adventure by Michael Kafke with
 Daniel Schwen's graphics. The complete, unchanged 104-line `ASM_Intro.AMOS` now
-runs its sound and difficulty menus, animated TRONIC logo, both MOD tunes, four
+runs its sound and edition menus, animated TRONIC logo, both MOD tunes, four
 title pages, custom high-score font and loading screen. It writes the selected
-level to `Ram:Level` and ends with the original `Run "ASM:ASM.Main"` request.
-The preview stops there with an explanatory status; the **main adventure is not
-yet compiled or playable**. This is the first showcase milestone.
+edition to `Ram:Level` and ends with the original `Run "ASM:ASM.Main"` request.
+The standalone intro preview stops there. The new
+[first-room build](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html)
+([debug build](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game-debug.html))
+now follows that Run request into the complete compiled main source. Its opening
+briefings, copy-protection prompt, poster inspection and handle pickup run with
+real input. **Later room assets and complete adventure progression remain open.**
 
 The page uses the common game harness: Play Game activates sound/fullscreen;
 Stop, Resume and Restart retain the usual lifecycle behavior. No startup input is
-injected. Use the mouse to choose music and difficulty. Click the animated logo,
+injected. Use the mouse to choose music and edition. Click the animated logo,
 then left click the title pages or right click to skip to loading. The source
 checks held buttons, so holding left click can advance multiple title pages.
 
@@ -28,7 +32,7 @@ first locations and counts for the remaining unsupported encodings.
 
 | Source | Lines | Result |
 | --- | ---: | --- |
-| ASM.AMOS | 1,868 | Main adventure: remaining compiler/runtime features below |
+| ASM.AMOS | 1,868 | Compiles to 5,903 instructions; first-room interactions checked |
 | ASM_Intro.AMOS | 104 | Compiles; intro checked through terminal Run |
 | Krypto.amos | 23 | Compiles |
 | LabEdit.AMOS | 61 | Compiles; same source as the existing Joy editor demo |
@@ -45,9 +49,9 @@ node tools/build_asm.js /tmp/asm-browser
 # Open /tmp/asm-browser/index.html
 ```
 
-The report preserves compile failures for the adventure and ZoneDefiner; the
-builder still emits the six compilable programs. `npm run build:demo` rebuilds
-the repository's two intro pages and the shared browser-check page.
+The report preserves ZoneDefiner's compile failure; seven supplied programs
+compile, including the unchanged complete adventure. `npm run build:demo` rebuilds
+the repository's normal/debug intro and first-room pages and browser checks.
 
 ## Asset preparation
 
@@ -108,38 +112,92 @@ Native evidence: original
 [`extensions/+Music.s`](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/extensions/%2BMusic.s)
 (`mt_portup`, `mt_portdown`).
 
-## Next: connect the adventure
+## Main-game implementation and asset profile
 
-1. **Compile the complete main source.** Add the named Resume encoding, compressed
-   screen blocks, Text Length, Bset/Bclr/Btst and Sort with checked lvalue/array
-   semantics. Implement the explicit Screen Copy minterm `$e0` and Clip rather
-   than ignoring their operands. Preserve source locations and atomic validation.
-2. **Complete host commands and file operations.** System/Request Wb need explicit
-   host boundaries. Add Kill, Dfree and Dir First$/Dir Next$ through synchronous
-   adapter capabilities; Set Input is now available. Keep browser session writes
-   honest and expose downloads through Debug. IndexedDB persistence is separate.
-3. **Load the supplied adventure data.** `joy/joysrc.adf` contains the room graphics,
-   sprites, zones and text; `joy/asm_neu.adf` also contains dialogue, event/object
-   text and labyrinth maps. Extract and pin these with the original ASM/ASM_1
-   path aliases, hashes and provenance; audit missing references before building.
-4. **Exercise startup and the first room.** Chain the compiled main factory with
-   the existing `programs` option, preserving the intro's Ram:Level session file.
-   The main source calls Font$ without its own Get Disc Fonts: establish the
-   native font-enumeration lifetime across Run and carry that session catalogue
-   deliberately, rather than substituting the system font. Check both difficulties,
-   parser text, object selection, inventory/Bank Swap, room transitions and dialogue
-   using real mouse/keyboard input.
-5. **Cover progression and saves.** Add the source's Tempo form, driving and other
-   minigames, score/save menus and clean menu/end transitions. Retain originals
-   when fixing source bugs. Add input-only browser replays and independent image
-   checks before promoting it beside the complete-game showcases.
-6. **Bring HAM to WebGL.** Until then keep this preview's Canvas renderer explicit.
-   Add the remaining Cdown$/Cup$/Cright$/Cleft$/Paper$ functions for ZoneDefiner
-   as a separate authoring-tool task.
+The eighteen formerly missing encodings are implemented: Resume, System,
+Get/Put/Del Cblock, Text Length, Screen Copy minterm, Bset/Bclr/Btst, Sort, Kill,
+Dfree, Dir First$/Dir Next$, Request Wb, Tempo and Clip. Colon-form block Else
+also accepts its immediately following statement, as the original source uses.
 
-Validation covers both music choices, both difficulties, the full title route,
+- Bit operations distinguish integer-variable longs from address-expression bytes,
+  including a parenthesized address variable. Negative bit selectors reject;
+  register/byte selectors wrap modulo 32/8. Checked bank-memory writes retain
+  ordinary stale-address, range and active-player guards.
+- Sort evaluates the selected array reference and sorts its complete owned
+  storage ascending, preserving identity and typed values. The bounded profile
+  limits it to 1,048,576 elements. Text Length uses the selected font's actual
+  character advances and does not draw or move text cursors.
+- Cblocks have separate numbering from ordinary blocks. Get truncates X/width to
+  byte boundaries; Put restores raw common planes into the logical bitmap without
+  Bob or Autoback replay. Native compressed bytes are not exposed by this API, so
+  the runtime keeps owned canonical pixels. Invalid rectangles validate before
+  replacement/writes. A negative Put axis restores that saved axis.
+- Clip is an exclusive per-screen graphics region. Plot/lines/boxes/bars, graphics
+  Text, fills, polygons and image drawing respect it; window Print and raw bitmap
+  transfers keep their existing paths. Blank Clip resets it. Native wrapped/clipped
+  coordinates and general drawing-mode/capture parity remain outside this profile.
+- Explicit Screen Copy uses the Boolean minterm inside the checked common-plane
+  rectangle. `$e0` is the source/destination OR used for the half-bright text panels;
+  `$c0` remains ordinary copying. Existing overlap-safe snapshot semantics remain.
+- Resume restores the captured error context and retries or branches to its checked
+  label. System is terminal, retaining frozen source metadata and notifying the
+  optional synchronous host after cleanup. Request Wb records requester destination
+  and optionally notifies the host; it does not invent an OS requester.
+- Tempo accepts 0–100 and updates the active Music controller. Inactive calls
+  do nothing; each Music command starts at the native tempo 17. Tracker tempo and sample playback are separate.
+- Kill/Dfree/directory enumeration use synchronous adapter capabilities. The memory
+  adapter exposes an explicit **16 MiB virtual session capacity**, not the browser's
+  disk quota. Writes enforce it and deletion frees bytes. The Node adapter queries
+  the host filesystem. Directory results snapshot owned metadata, sort directories
+  first with ASCII case folding, and return the portable 30-character name field
+  (leading space/file or star/directory) plus eight size characters. Directory paths
+  ending in `:` or `/` are supported; wildcard/filter and Set Dir forms remain open.
+
+The pinned `game/` assets come from `joy/Joy Src2`, the supplied Gesichter bank,
+and the text files on `joy/asm_neu.adf`. Room1 is prepared as its top 320×128 region;
+control panels use their top 320×90 regions and are packed for the original Load /
+Unpack commands. Original files and hashes remain unchanged. `Befehle.Pic` counts
+one final zero alignment byte in BODY; only the prepared copy corrects its size.
+`Befehle2.Pic` is an empty upload, and its disk-image block 1422 is overwritten.
+The first-room build **explicitly substitutes supplied Befehle4 artwork** for that
+conversation panel. Its reconstruction/recovery remains an asset task, not a
+compiler relaxation. The page shows this limitation before Play.
+
+The linked page carries the intro's font-enumeration state into the new main
+factory and preserves session files across Run. The main reads and deletes the
+original `Ram:Level`. Restart returns to the entry intro, avoiding a restart of
+the main without its consumed startup file. The ⌨ [device keyboard](mobile-keyboard.md)
+can answer the original letter-of-ASM prompt without joystick mapping conflicts.
+The intro's second selector is an edition selector: **IO Light** intentionally
+shows half the screen; **JOY** selects the complete view.
+
+Adjacent lowres windows now use the existing native setup-row slicing path even
+without an overlap/explicit priority command. This fixes the real-time main
+startup's copper pre-fetch budget failure; no CPU overlay or budget relaxation
+is used. The normal application retains Canvas for the intro's HAM image, while
+all eight main-game checkpoints also execute with actual WebGL.
+
+## Next milestones
+
+1. Pin and validate the remaining room, dialogue and minigame assets. Some supplied
+   room pictures are empty and several disk-image blocks are damaged; inventory
+   and recovery must stay explicit. Replace the provisional conversation panel.
+2. Exercise actual room transitions, inventory use and dialogue. Then cover save /
+   load menus, minigames, scores and clean game-over/completion paths. The source
+   compiles as a whole, but those paths are not established by first-room coverage.
+3. Keep IndexedDB persistence separate from the current session filesystem.
+4. Bring HAM to WebGL; the current intro retains an explicitly selected Canvas host.
+5. Add ZoneDefiner's remaining Cdown$/Cup$/Cright$/Cleft$/Paper$ authoring functions.
+
+Validation covers both music choices, both editions, the full title route,
 right-click Pop/skip, Ram:Level bytes, terminal Run cleanup and the actual packaged
 page's Play/Stop/Resume/Restart. Eight Canvas frames, seven GPU comparisons and
 327,680 pixel round-trip checks are portable browser evidence, not native captures.
 An independent Python oracle also checks the complete Zoom MOD pass: all 1,020
 fields and four sample triggers, under both PAL and NTSC clocks.
+
+The main replay adds eight Canvas/eight GPU frames and **81,920 independent
+room pixels**, decoded from the original ILBM and sprite bank by Python. It never
+edits VM variables, IP, banks or pixels. The actual linked page also verifies the
+intro handoff, font lifetime, RAM-file consumption, device-keyboard answer and
+Restart back to the intro. These are portable browser checks, not Amiga captures.

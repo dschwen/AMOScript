@@ -4,15 +4,14 @@ const {compile}=require('./helpers/program'),{createFakeTimers}=require('./helpe
 const {prepare,bitmap}=require('../tools/asmIntroAssets');
 const root=path.join(__dirname,'../examples/ASM');
 
-test('ASM: pinned source inventory has six compilable originals and two explicit remaining blockers',()=>{
+test('ASM: pinned source inventory has seven compilable originals and the remaining ZoneDefiner blocker',()=>{
   const manifest=require('../tools/build_asm').inputs();let compiled=0;
   for(const name of manifest.sources) {
     const bytes=fs.readFileSync(path.join(root,name));
-    if(name==='ASM.AMOS')assert.throws(()=>compile(bytes),/0x330.*line 27/);
-    else if(name==='ZoneDefiner.AMOS')assert.throws(()=>compile(bytes),/0x14f8.*line 25/);
+    if(name==='ZoneDefiner.AMOS')assert.throws(()=>compile(bytes),/0x14f8.*line 25/);
     else{compile(bytes);compiled++;}
   }
-  assert.strictEqual(compiled,6);
+  assert.strictEqual(compiled,7);
 });
 
 test('ASM: prepared packed pictures preserve the declared original top-left 320Ã—256 pixels and palette; font glyphs/advances are pinned',()=>{
@@ -25,7 +24,7 @@ test('ASM: prepared packed pictures preserve the declared original top-left 320Ã
   assert.deepStrictEqual([diskFonts[0].baseline,diskFonts[0].advances[49],diskFonts[0].advances[65]],[4,4,5]);
 });
 
-test('ASM: unmodified silent intro selects difficulty two and right-click skips titles through Pop, saving the level before Run',()=>{
+test('ASM: unmodified silent intro selects the full JOY edition and right-click skips titles through Pop, saving the level before Run',()=>{
   const prepared=prepare(),clock=createFakeTimers(4),files=Object.fromEntries(Object.entries(prepared.assets).map(([n,b])=>[n,Buffer.from(b,'base64').toString('latin1')])),commands=[],audio=[];
   const p=compile(fs.readFileSync(path.join(root,'ASM_Intro.AMOS'))).create({displayOptions:{diskFonts:prepared.diskFonts},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,print(){},audio:{command:e=>audio.push(e)},
     files:{read:n=>files[n.toLowerCase()],write:(n,b)=>{files[n.toLowerCase()]=b;},exists:n=>Object.keys(files).some(k=>k.startsWith(n.toLowerCase()))},system:{command:(n,r)=>commands.push([n,r])}});

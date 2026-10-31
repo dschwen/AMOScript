@@ -301,7 +301,7 @@
 - Two-operand Screen Copy resolves Logic/Physic integer selectors at execution
   and copies common bitmap planes without swapping identities or invoking
   Autoback/Bob hooks. Saved Bob backgrounds retain their existing owners. See
-  `docs/screen-copy.md`; explicit minterms and exact DMA timing remain open.
+  `docs/screen-copy.md`; the whole-copy $099c minterm and exact DMA timing remain open.
 - Zoom ($10d6) uses ten numeric operands, exclusive in-bitmap rectangles and
   ZooTab reduction/enlargement sampling. Resolve source then destination;
   preserve raw common planes and column/plane/row live alias feedback, bypassing
@@ -498,7 +498,8 @@ portable-font/rainbow expectations and original game-load scope.
 Rectangular Screen Copy `$09a8` has eight numeric operands and exclusive source
 ends. Pair source/destination clipping as native Sco0, snapshot overlap sources,
 copy common low planes and preserve raw logical/physical/Bob ownership. Signed
-word geometry is bounded; wrapped clipping and explicit minterms remain gated.
+word geometry is bounded; wrapped clipping remains gated. The nine-operand
+$09be minterm form now has the bounded ASM profile described below.
 The pinned original Tunneltest now uses its supplied external icon bank and
 original IFF background; 48 independent frame hashes and five GPU frames
 cover it. IFF uploads finish before VM execution. See docs/screen-copy.md.
@@ -971,12 +972,12 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   See docs/joy-source1.md and demos/joy-source1.html.
 
 - ASM — Das Spiel is the asm_neu showcase target. All eight unchanged originals
-  and intro assets are pinned in examples/ASM; six compile. The complete intro
+  and intro assets are pinned in examples/ASM; seven compile, including the main. The complete intro
   runs through terminal Run ASM:ASM.Main, writing Ram:Level. Build-time preparation
   explicitly crops authoring IFFs to 320×256, emits the three expected packed banks,
   decodes two pinned FontEd bitmap layouts and supplies an empty initial score table.
-  Do not claim the main adventure runs: eighteen token encodings plus runtime/assets
-  remain. Normal/debug pages share the game harness and explicitly choose Canvas
+  The separate main-game first-room milestone is implemented below; full adventure
+  progression and later assets remain open. Normal/debug pages share the game harness and explicitly choose Canvas
   for the HAM title. stopOnUnlinkedRun is an opt-in host preview policy; ordinary
   pages still reject missing linked factories. Eight Canvas/seven non-HAM GPU
   frames cover the intro. See docs/asm.md and docs/asm-inventory.json.
@@ -988,3 +989,34 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Tracker 1xx/2xx slide between rows with native $71/$358 bounds and no zero-parameter
   memory. Fully covered committed lower windows contribute no raster slices and
   cannot gate the sole HAM owner; partially exposed HAM/mixed-hires gates remain.
+
+- ASM main now compiles unchanged to 5903 instructions. Its bounded first-room
+  input replay covers briefing/copy-protection, poster inspection and pulling the
+  handle into inventory: eight Canvas/GPU frames and 81920 independent ILBM/AmSp
+  pixels. The linked page carries font enumeration and Ram:Level from the intro;
+  restartFromEntry returns Restart to the entry factory. The selector is editions,
+  not difficulty: IO Light intentionally displays half; JOY selects full width.
+  Original game assets stay pinned. Only prepared Befehle.Pic fixes a counted IFF
+  pad byte; empty Befehle2.Pic has an overwritten disk block and explicitly uses
+  provisional Befehle4 art. Later-room assets/progression remain open; see docs/asm.md.
+  New Resume/System controls keep source metadata, ordinary error frames and
+  terminal cleanup. Bset/Bclr/Btst distinguish variable longs from address bytes
+  (parenthesized variables are addresses), validate nonnegative selectors first,
+  then use modulo32/8 and checked bank memory. Sort retains complete array identity
+  and typed values. Cblocks own byte-rounded raw logical captures, separate from
+  blocks, without drawing/Bob replay. Clip uses exclusive graphics bounds, preserving
+  Print and raw transfer paths; Text Length uses actual font advances. Copy minterms
+  preserve common planes and existing snapshot alias semantics; main uses $e0 OR.
+  Tempo 0..100 affects active Music only; Music starts at native 17. Kill/Dfree and
+  Dir First$/Next$ require synchronous adapter metadata. Memory capacity is explicitly
+  16MiB/session, not browser quota; directory fields are 30+8 with preserved case,
+  ASCII sorting and directory-first order. Wildcards/Set Dir remain gated.
+  Adjacent lowres windows use the existing copper setup-row slicing even without
+  explicit priority. Never relax the pre-fetch budget to make startup render.
+- browser.js textInput optionally owns a real form field/button in a stable host
+  container. User focus opens the device keyboard; committed NFC Latin-1 text,
+  Enter/Backspace and mapped special keys go directly to sendKey, bypassing joystick
+  mappings and held-key state. IME commits once; window blur/visibility/Stop/detach
+  discard unfinished composition, while Key Speed preserves it. Keep Tab focus
+  navigation. Old DOM listeners cannot type into replacement programs. The common
+  harness and full Roller/Wonderland launchers enable it; see docs/mobile-keyboard.md.

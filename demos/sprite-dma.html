@@ -8,6 +8,9 @@ function createCanvasHost(canvas, options = {}) {
   const mouseCoordinates = options.mouseCoordinates == null ? 'screen' : options.mouseCoordinates;
   if (mouseCoordinates !== 'screen' && mouseCoordinates !== 'hardware') throw new Error('Invalid mouse coordinate mode');
   if (options.getGamepads != null && typeof options.getGamepads !== 'function') throw new Error('getGamepads must be a function');
+  let textOptions = null;
+  if(options.textInput!=null && options.textInput!==false){const c=options.textInput;if(!c||!c.container||typeof c.container.append!=='function'||(c.toolbar&&typeof c.toolbar.append!=='function'))throw Error('Invalid text input configuration');textOptions={...c};}
+  let textWidget = null;
   let touchOptions = null;
   if (options.virtualJoystick != null && options.virtualJoystick !== false) {
     const config = options.virtualJoystick;
@@ -222,6 +225,7 @@ function createCanvasHost(canvas, options = {}) {
   const events = { keydown, keyup, pointermove: pointer, pointerdown, pointerup: pointer, blur, focus };
 
   function detach() {
+    if(textWidget){textWidget.dispose();textWidget=null;}
     if (touch) { touch.dispose(); touch = null; }
     releaseKey(); releaseRawKeys();
     resetJoysticks();
@@ -250,7 +254,7 @@ function createCanvasHost(canvas, options = {}) {
     if (mouseCoordinates === 'hardware' && typeof next.display.pointerHardwarePosition !== 'function') throw new Error('Hardware mouse coordinates are unavailable');
     program = next;
     if (program.subscribeInputReset) unsubscribeInput = program.subscribeInputReset(reason => {
-      releaseKey(); if (reason !== 'key-speed') { releaseRawKeys(); resetJoysticks(); }
+      releaseKey(); if (reason !== 'key-speed') {if(textWidget)textWidget.close(); releaseRawKeys(); resetJoysticks(); }
     });
     bindJoysticks();
     if (canvas.style) previousCursor = canvas.style.cursor;
@@ -263,6 +267,7 @@ function createCanvasHost(canvas, options = {}) {
         canvas.ownerDocument.defaultView.addEventListener('focus', focus);
       }
     }
+    if(textOptions)textWidget=createTextInput(textOptions.container,{...textOptions,getProgram:()=>program,focusCanvas:()=>canvas.focus()});
     if (touchOptions) touch = createVirtualJoystick(touchOptions.container, { ...touchOptions,
       focus: () => canvas.focus(), onChange: pollJoysticks, isActive: () => program && focused() && !program.state.stopped && !program.state.halted });
     render();
@@ -337,6 +342,44 @@ function createJoystickInput(configurations) {
         return { port: config.port, mask, keyboard, gamepad, status };
       });
     } };
+}
+
+// A real form field opens the device keyboard. Text goes straight to AMOS's
+// character queue, independently of physical-key and joystick mappings.
+function createTextInput(container, { toolbar = container, getProgram, focusCanvas = () => {} } = {}) {
+  const doc=container.ownerDocument, win=doc.defaultView;
+  const button=doc.createElement('button'),form=doc.createElement('form'),input=doc.createElement('input'),enter=doc.createElement('button'),backspace=doc.createElement('button'),closeButton=doc.createElement('button'),status=doc.createElement('span');
+  button.type='button';button.textContent='⌨';button.title='Open device keyboard';button.setAttribute('aria-label','Open device keyboard');button.setAttribute('aria-expanded','false');button.className='amos-text-keyboard-toggle';
+  form.className='amos-text-keyboard amos-fullscreen-messages';form.hidden=true;form.setAttribute('aria-label','Device keyboard input');form.style.cssText='padding:.4rem;display:flex;flex-wrap:wrap;align-items:center;gap:.3rem';
+  // Author CSS must not override the HTML hidden attribute's display rule.
+  form.style.display='none';
+  input.type='text';input.autocomplete='off';input.setAttribute('autocapitalize','off');input.setAttribute('autocorrect','off');input.spellcheck=false;input.setAttribute('inputmode','text');input.setAttribute('enterkeyhint','enter');input.maxLength=1000;
+  input.setAttribute('aria-label','Text to send to AMOS');input.placeholder='Type to send text to the game';input.style.cssText='font:16px system-ui;min-width:8rem;flex:1;padding:.6rem';
+  enter.type='submit';enter.textContent='↵';enter.setAttribute('aria-label','Send Enter');
+  backspace.type='button';backspace.textContent='⌫';backspace.setAttribute('aria-label','Send Backspace');
+  closeButton.type='button';closeButton.textContent='×';closeButton.setAttribute('aria-label','Close device keyboard');status.setAttribute('role','status');
+  form.append(input,enter,backspace,closeButton,status);toolbar.append(button);container.append(form);
+  let composing=false,disposed=false;
+  const active=()=>{const p=getProgram();return !disposed&&!form.hidden&&p&&!p.state.stopped&&!p.state.halted?p:null;};
+  function send(text,scanCode=null){const p=active();if(!p)return;for(const char of text.normalize('NFC'))if(char.charCodeAt(0)<=255)p.sendKey(char,scanCode);else status.textContent='AMOS accepts Latin-1 text; an unsupported character was skipped.';}
+  function reset(){composing=false;input.value='';status.textContent='';}
+  function close(){reset();form.hidden=true;form.style.display='none';button.setAttribute('aria-expanded','false');if(doc.activeElement===input)input.blur();}
+  function open(){const p=getProgram();if(disposed||!p||p.state.stopped||p.state.halted)return;reset();form.hidden=false;form.style.display='flex';button.setAttribute('aria-expanded','true');input.focus();}
+  const toggle=()=>{if(form.hidden)open();else{close();focusCanvas();}};
+  const flush=event=>{if(composing||event.isComposing)return;const text=input.value;input.value='';send(text);};
+  const begin=()=>{composing=true;},end=()=>{composing=false;flush({});};
+  const before=event=>{
+    if(composing||event.isComposing)return;
+    if(['insertLineBreak','insertParagraph','deleteContentBackward'].includes(event.inputType)){event.preventDefault();send(event.inputType==='deleteContentBackward'?'\b':'\r',event.inputType==='deleteContentBackward'?0x41:0x44);input.value='';}
+  };
+  const key=event=>{if(event.isComposing||composing||event.ctrlKey||event.altKey||event.metaKey)return;const special={Enter:'\r',Backspace:'\b',Escape:'\x1b',ArrowUp:'\x1e',ArrowDown:'\x1f',ArrowRight:'\x1c',ArrowLeft:'\x1d',Delete:'\0'};if(Object.hasOwn(special,event.key)){event.preventDefault();send(special[event.key],amigaScanCode(event.key));}};
+  const submit=event=>{event.preventDefault();if(!composing){flush({});send('\r',0x44);input.focus();}};
+  const erase=()=>{send('\b',0x41);input.focus();};
+  const finish=()=>{close();focusCanvas();};
+  const visibility=()=>{if(doc.hidden)close();};
+  button.addEventListener('click',toggle);input.addEventListener('input',flush);input.addEventListener('beforeinput',before);input.addEventListener('compositionstart',begin);input.addEventListener('compositionend',end);input.addEventListener('keydown',key);form.addEventListener('submit',submit);backspace.addEventListener('click',erase);closeButton.addEventListener('click',finish);
+  win.addEventListener('blur',close);doc.addEventListener('visibilitychange',visibility);
+  return {open,close,dispose(){if(disposed)return;close();disposed=true;win.removeEventListener('blur',close);doc.removeEventListener('visibilitychange',visibility);button.removeEventListener('click',toggle);input.removeEventListener('input',flush);input.removeEventListener('beforeinput',before);input.removeEventListener('compositionstart',begin);input.removeEventListener('compositionend',end);input.removeEventListener('keydown',key);form.removeEventListener('submit',submit);backspace.removeEventListener('click',erase);closeButton.removeEventListener('click',finish);button.remove();form.remove();}};
 }
 
 // Optional pointer controller. It owns only its DOM, pointer holds and listeners;
@@ -425,8 +468,8 @@ const amigaKeyCodes = (() => {
 })();
 function amigaScanCode(code) { return Object.prototype.hasOwnProperty.call(amigaKeyCodes, code) ? amigaKeyCodes[code] : null; }
 
-if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost, createJoystickInput, createVirtualJoystick, amigaScanCode };
-else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, createVirtualJoystick, amigaScanCode };
+if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost, createJoystickInput, createVirtualJoystick, createTextInput, amigaScanCode };
+else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, createVirtualJoystick, createTextInput, amigaScanCode };
 </script><script>/* jshint esversion: 6 */
 'use strict';
 

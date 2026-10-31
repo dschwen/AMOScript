@@ -116,7 +116,7 @@ module.exports=async function wonderlandGameProbe(page){
       const surface=makeCanvas();let nextGpu=null,nextHost=null;
       try{
         if(backend.value==='webgl')nextGpu=createGpu(surface,{onStateChange:event=>{if(event.state==='error'&&gpu===nextGpu)fail(new Error(event.error||'GPU restoration failed'));}});
-        nextHost=AMOS_BROWSER.createCanvasHost(surface,{renderer:nextGpu,joysticks:configuration(),virtualJoystick:{container:viewport,port:1,visibility:touchMode.value},mouseCoordinates:'hardware',requestAnimationFrame:callback=>requestAnimationFrame(guard(callback)),cancelAnimationFrame});
+        nextHost=AMOS_BROWSER.createCanvasHost(surface,{renderer:nextGpu,joysticks:configuration(),textInput:{container:viewport,toolbar},virtualJoystick:{container:viewport,port:1,visibility:touchMode.value},mouseCoordinates:'hardware',requestAnimationFrame:callback=>requestAnimationFrame(guard(callback)),cancelAnimationFrame});
         nextHost.attach(live);
       }catch(error){if(nextHost)nextHost.detach();releaseGpu(nextGpu);throw error;}
       if(host)host.detach();releaseGpu(gpu);canvas.replaceWith(surface);canvas=surface;gpu=nextGpu;host=nextHost;

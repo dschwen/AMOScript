@@ -452,6 +452,18 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/sqr.html"
     },
     {
+      "file": "mobile-keyboard.html",
+      "title": "Device keyboard text input",
+      "description": "Open a real text field to use the phone or tablet keyboard. Text, Latin-1 umlauts, committed IME input, Enter and Backspace go directly to AMOS, bypassing joystick fire mappings. Stop, Resume, Key Speed and detach are checked. Run the checks, then try typing into the live program below; native keyboard appearance itself requires a real mobile device.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/mobile-keyboard.html"
+    },
+    {
+      "file": "asm-main-checks.html",
+      "title": "ASM — Das Spiel: first-room checks",
+      "description": "The complete unchanged main source reaches its opening briefings, the original third-letter prompt, the parser, poster inspection and handle pickup through real input. Both room bitmaps match independent Python ILBM/sprite expectations. The intro-to-main page retains fonts and RAM session files; the missing Befehle2 conversation panel is a declared temporary asset substitution. Later-room assets remain outside this build.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-main-checks.html"
+    },
+    {
       "file": "asm-intro-checks.html",
       "title": "ASM — Das Spiel: original intro checks",
       "description": "Complete original ASM_Intro.AMOS: sound choices, difficulty, animated logo, MOD music, all four title pages including HAM and custom fonts, then Ram:Level and the terminal Run request. Prepared 320×256 assets and an explicitly empty score table are declared in the ASM milestone. Eight Canvas frames, seven actual GPU comparisons; the HAM page uses Canvas. The main adventure remains a separate compilation milestone.",
@@ -534,6 +546,18 @@
       "title": "ASM intro — debug preview",
       "description": "The same complete original intro with source errors and modified session-file downloads. Stops cleanly at the uncompiled ASM.Main transition.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-debug.html"
+    },
+    {
+      "file": "asm-game.html",
+      "title": "ASM — Das Spiel: first-room build",
+      "description": "The original intro now launches the complete compiled main source. Explore the first room, inspect objects and take the door handle. Includes the device keyboard widget. Development build with provisional conversation artwork and later-room assets pending.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html"
+    },
+    {
+      "file": "asm-game-debug.html",
+      "title": "ASM main — debug build",
+      "description": "The first-room application with caught source errors and modified session-file downloads. Native intro, edition selection, font and RAM-file transfer into the main game.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game-debug.html"
     }
   ]
 }

@@ -7,191 +7,11 @@
       "sha256": "fb70fe71fc69469f4d2be0a54f8b70d6e80741df7d9fca155be3ef162109c90b",
       "physicalLines": 1868,
       "compiler": {
-        "ok": false,
-        "error": "Unsupported token 0x330 at line 27, byte 2338"
+        "ok": true,
+        "instructions": 5903,
+        "moduleBytes": 1731571
       },
-      "missing": [
-        {
-          "code": "0330",
-          "name": "resume",
-          "signature": "",
-          "count": 1,
-          "firstLocation": {
-            "line": 27,
-            "offset": 2338
-          }
-        },
-        {
-          "code": "10f4",
-          "name": "get cblock",
-          "signature": "I0,0,0,0,0",
-          "count": 7,
-          "firstLocation": {
-            "line": 31,
-            "offset": 2520
-          }
-        },
-        {
-          "code": "23c4",
-          "name": "system",
-          "signature": "I",
-          "count": 2,
-          "firstLocation": {
-            "line": 33,
-            "offset": 2620
-          }
-        },
-        {
-          "code": "1120",
-          "name": "put cblock",
-          "signature": "I0,0,0",
-          "count": 8,
-          "firstLocation": {
-            "line": 35,
-            "offset": 2692
-          }
-        },
-        {
-          "code": "0f16",
-          "name": "text length",
-          "signature": "02",
-          "count": 12,
-          "firstLocation": {
-            "line": 74,
-            "offset": 5234
-          }
-        },
-        {
-          "code": "09be",
-          "name": "screen copy",
-          "signature": "I0,0,0,0,0t0,0,0,0",
-          "count": 4,
-          "firstLocation": {
-            "line": 108,
-            "offset": 8748
-          }
-        },
-        {
-          "code": "1864",
-          "name": "dfree",
-          "signature": "0",
-          "count": 1,
-          "firstLocation": {
-            "line": 161,
-            "offset": 12678
-          }
-        },
-        {
-          "code": "1930",
-          "name": "kill",
-          "signature": "I2",
-          "count": 2,
-          "firstLocation": {
-            "line": 168,
-            "offset": 13476
-          }
-        },
-        {
-          "code": "172c",
-          "name": "dir first$",
-          "signature": "22",
-          "count": 1,
-          "firstLocation": {
-            "line": 215,
-            "offset": 16384
-          }
-        },
-        {
-          "code": "173e",
-          "name": "dir next$",
-          "signature": "2",
-          "count": 1,
-          "firstLocation": {
-            "line": 221,
-            "offset": 16648
-          }
-        },
-        {
-          "code": "220a",
-          "name": "bset",
-          "signature": "I0,0",
-          "count": 21,
-          "firstLocation": {
-            "line": 281,
-            "offset": 21168
-          }
-        },
-        {
-          "code": "2218",
-          "name": "bclr",
-          "signature": "I0,0",
-          "count": 5,
-          "firstLocation": {
-            "line": 281,
-            "offset": 21200
-          }
-        },
-        {
-          "code": "2234",
-          "name": "btst",
-          "signature": "00,0",
-          "count": 22,
-          "firstLocation": {
-            "line": 342,
-            "offset": 28880
-          }
-        },
-        {
-          "code": "004e:3:0028",
-          "name": "request wb",
-          "signature": "I",
-          "count": 1,
-          "firstLocation": {
-            "line": 1064,
-            "offset": 98670
-          }
-        },
-        {
-          "code": "004e:1:004c",
-          "name": "tempo",
-          "signature": "I0",
-          "count": 1,
-          "firstLocation": {
-            "line": 1225,
-            "offset": 111884
-          }
-        },
-        {
-          "code": "1084",
-          "name": "clip",
-          "signature": "I0,0t0,0",
-          "count": 1,
-          "firstLocation": {
-            "line": 1230,
-            "offset": 112544
-          }
-        },
-        {
-          "code": "113e",
-          "name": "del cblock",
-          "signature": "I0",
-          "count": 1,
-          "firstLocation": {
-            "line": 1399,
-            "offset": 132100
-          }
-        },
-        {
-          "code": "0658",
-          "name": "sort",
-          "signature": "I",
-          "count": 1,
-          "firstLocation": {
-            "line": 1573,
-            "offset": 148260
-          }
-        }
-      ]
+      "missing": []
     },
     {
       "source": "ASM_Intro.AMOS",
@@ -201,7 +21,7 @@
       "compiler": {
         "ok": true,
         "instructions": 270,
-        "moduleBytes": 485035
+        "moduleBytes": 493566
       },
       "missing": []
     },
@@ -213,7 +33,7 @@
       "compiler": {
         "ok": true,
         "instructions": 37,
-        "moduleBytes": 435615
+        "moduleBytes": 444146
       },
       "missing": []
     },
@@ -225,7 +45,7 @@
       "compiler": {
         "ok": true,
         "instructions": 178,
-        "moduleBytes": 470584
+        "moduleBytes": 479115
       },
       "missing": []
     },
@@ -237,7 +57,7 @@
       "compiler": {
         "ok": true,
         "instructions": 177,
-        "moduleBytes": 460608
+        "moduleBytes": 469139
       },
       "missing": []
     },
@@ -249,7 +69,7 @@
       "compiler": {
         "ok": true,
         "instructions": 255,
-        "moduleBytes": 478873
+        "moduleBytes": 487404
       },
       "missing": []
     },
@@ -261,7 +81,7 @@
       "compiler": {
         "ok": true,
         "instructions": 253,
-        "moduleBytes": 491761
+        "moduleBytes": 500292
       },
       "missing": []
     },

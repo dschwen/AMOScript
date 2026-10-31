@@ -90,6 +90,64 @@
     "fonts/ASM2-9": {
       "byteLength": 1316,
       "sha256": "3fb97edc342b5d3c925a4c1e606af551bf5d5d42a35b2f79943660d83f9d99f5"
+    },
+    "game/Befehle.Pic": {
+      "byteLength": 6592,
+      "sha256": "e3d383db0fc1956b0895deffc5e83ee9f499be2de4b6bf520e60b261233b5626"
+    },
+    "game/Befehle2.Pic": {
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "game/Befehle4.Pic": {
+      "byteLength": 4414,
+      "sha256": "d7b0c7221c5135df422abf6b14412cc538ce5fe765f1d0f80d8bf797ccf32f35"
+    },
+    "game/Ereignisse.Txt": {
+      "byteLength": 20383,
+      "sha256": "3e0f65145e5594e9f07ec21b0b75ade31a32404b623de81b1023a402a478bd1f"
+    },
+    "game/Gesichter.Abk": {
+      "byteLength": 12160,
+      "sha256": "30d770e00dde675d96e7086ccf5c630e28e81cce606ba038576c3acc5404db8c"
+    },
+    "game/Icons.Abk": {
+      "byteLength": 12872,
+      "sha256": "97b223d9bbc7dcbf1d5e2412a9767449211e62fbcd9485149c5a1a45ef2b2abf"
+    },
+    "game/Icons3.Abk": {
+      "byteLength": 20090,
+      "sha256": "6152878fbb6d462a9c2eceb69a40c44ed4e76ca8090af23c6310093022bd9043"
+    },
+    "game/Objekte.Txt": {
+      "byteLength": 20097,
+      "sha256": "49e934fe256f170425fb9479d375a4f73af3c13b68fd5407920e64227b2b45ae"
+    },
+    "game/Room1.Pic": {
+      "byteLength": 17404,
+      "sha256": "9a2aaf445c2ef0c560ca94fe5a4c6dc010d4214447e28fb369685f86ac6ac1e3"
+    },
+    "game/Room1.Sprites.Abk": {
+      "byteLength": 16956,
+      "sha256": "aba345174340ccdc6bbcbccf3321bbd5f8e09f802595b6262637639555028603"
+    },
+    "game/Room1.Txt": {
+      "byteLength": 211,
+      "sha256": "ad74fd1de2e557956b244d54861fb303c21021965da1a77d0ec54b9e9c0538c7"
+    },
+    "game/Room1.Zones": {
+      "byteLength": 166,
+      "sha256": "24902468b1f4a7b7e4c7bd14f8e798a6464deaa05838593b3022de78478366af"
     }
+  },
+  "gameAssetProfile": {
+    "origin": "joy/Joy Src2 room/control assets, asm_neu/Gesichter.Abk, joy/asm_neu.adf Texte files",
+    "scope": "first room, original text tables and menus; later-room assets are not yet embedded",
+    "preparation": [
+      "Room1.Pic top 320x128 packed at hardware 128,80",
+      "Control pictures top 320x90 packed at hardware 128,208",
+      "Befehle.Pic final zero is IFF padding, not BODY payload; only prepared bytes correct the size",
+      "Befehle2.Pic is empty; disk data block 1422 is overwritten. Provisional conversation panel uses supplied Befehle4.Pic explicitly."
+    ]
   }
 }

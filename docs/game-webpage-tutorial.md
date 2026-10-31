@@ -399,3 +399,19 @@ The JavaScript `buildGamePage` API also accepts an optional
 program starts. Joy's editor wrappers use `[133,50,0]` because the source queries
 the mouse before a browser pointer event arrives. This does not reposition the
 mouse when AMOS executes Limit Mouse, and is not enabled by default.
+
+## Phone and tablet keyboard
+
+The shared harness includes a **⌨** button. Tap it to open the device keyboard
+through a real focused text field. Text and Enter go directly to the AMOS
+character queue, even when those physical keys are mapped to joystick fire.
+The field also supports committed IME text and Latin-1 umlauts; Stop and Restart
+close it. It remains inside the fullscreen container. See
+[the reusable host option and browser demo](mobile-keyboard.md).
+
+For linked applications, `restartFromEntry: true` in the page-builder JavaScript
+API returns Restart to the entry program. The host carries an enumerated font
+catalogue across Run using its configured preloaded fonts. Optional `directories`
+can declare empty virtual volume paths such as `['Df0:', 'Ram:']`; the in-memory
+adapter supports directory metadata, deletion and a declared virtual capacity.
+These are session files, not IndexedDB persistence or browser disk-quota claims.

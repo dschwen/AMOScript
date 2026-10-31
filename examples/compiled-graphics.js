@@ -1013,7 +1013,9 @@
       front.x <= view.x && front.x + front.width / (front.hires ? 2 : 1) >= view.x + view.width / (view.hires ? 2 : 1) &&
       front.y <= view.y && front.y + front.height >= view.y + view.height));
     const overlap = views.some((view, index) => views.slice(index + 1).some(other => view.y < other.y + other.height && other.y < view.y + view.height));
-    if (windows && (windows.some(window => window.priority) || overlap || views.some(view => view.y > 255))) {
+    const touching = views.some((view, index) => !view.ham && !view.hires && views.slice(index + 1).some(other =>
+      !other.ham && !other.hires && (view.y + view.height === other.y || other.y + other.height === view.y)));
+    if (windows && (windows.some(window => window.priority) || overlap || touching || views.some(view => view.y > 255))) {
       // Native MkD/MkA chooses one screen for each horizontal slice. A switch
       // starts with DMA disabled on a setup row, never a software overlay.
       if (views.some(view => {
@@ -2176,7 +2178,8 @@
     }
     changed();
   }
-  function copyScreenRectangle(from, x1, y1, xEnd, yEnd, to, x2, y2) {
+  function copyScreenRectangle(from, x1, y1, xEnd, yEnd, to, x2, y2, minterm=0xc0) {
+    whole(minterm);if(minterm<0||minterm>255)throw Error('Invalid Screen Copy minterm');
     const destination = resolveBuffer(to), source = resolveBuffer(from);
     const coordinates = [x1, y1, xEnd, yEnd, x2, y2];
     coordinates.forEach(whole);
@@ -2193,7 +2196,7 @@
     const width = Math.min(xEnd, sw) - x1, height = Math.min(yEnd, sh) - y1;
     if (x1 >= sw || y1 >= sh || x2 >= dw || y2 >= dh || width <= 0 || height <= 0) return;
     const columns = Math.min(width, dw - x2), rows = Math.min(height, dh - y2);
-    if (source.pixels === destination.pixels && x1 === x2 && y1 === y2) return;
+    if (minterm===0xc0 && source.pixels === destination.pixels && x1 === x2 && y1 === y2) return;
     // Snapshot raw codes before any write, including aliased clone/self copies.
     // This gives overlap-safe copies without exposing traversal to the host.
     const captured = new Uint8Array(columns * rows);
@@ -2201,7 +2204,9 @@
     const planes = Math.min(source.target.colours - 1, destination.target.colours - 1);
     for (let y = 0; y < rows; y++) for (let x = 0; x < columns; x++) {
       const at = (y2 + y) * dw + x2 + x;
-      destination.pixels[at] = (destination.pixels[at] & ~planes) | (captured[y * columns + x] & planes);
+      const a=captured[y*columns+x],b=destination.pixels[at];
+      const result=(minterm&16?~a&~b:0)|(minterm&32?~a&b:0)|(minterm&64?a&~b:0)|(minterm&128?a&b:0);
+      destination.pixels[at]=(b&~planes)|(result&planes);
     }
     changed();
   }
@@ -2241,7 +2246,12 @@
     changed();
   }
 
+  let clippingGraphics=true;
   function drawing(painter, args) {
+    const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear].includes(painter);
+    try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;}
+  }
+  function drawOwned(painter,args) {
     const target = screen();
     const synchronise = target.autoback === 2 && drawingHooks;
     if (synchronise) drawingHooks.before(target);
@@ -2286,6 +2296,7 @@
     values.forEach((rgb, index) => { if (rgb != null && ((whole(rgb) << 16) >> 16) >= 0) setColour(index, rgb); });
   }
   function pixel(target, x, y, colour) {
+    const clip=clippingGraphics&&target.graphicsClip;if(clip&&(x<clip.left||y<clip.top||x>=clip.right||y>=clip.bottom))return;
     if (x >= 0 && y >= 0 && x < target.width && y < target.height) target.pixels[y * target.width + x] = colour;
   }
   function clear(colour = 0) {
@@ -2332,7 +2343,8 @@
     // BobCalc copies only min(image planes, screen planes); upper screen
     // planes remain intact. A mask still includes every source bitplane.
     const planeMask = Math.min((1 << image.depth) - 1, target.colours - 1) & (settings.planes == null ? -1 : settings.planes);
-    const clip = settings.limit || { left: 0, top: 0, right: target.width, bottom: target.height };
+    const base=settings.limit||{left:0,top:0,right:target.width,bottom:target.height},region=target.graphicsClip||base;
+    const clip={left:Math.max(base.left,region.left),top:Math.max(base.top,region.top),right:Math.min(base.right,region.right),bottom:Math.min(base.bottom,region.bottom)};
     const minterm = settings.minterm == null || settings.minterm === 0 ? 0xca : settings.minterm & 255;
     const left = Math.max(0, x, clip.left), top = Math.max(0, y, clip.top);
     const right = Math.min(target.width, x + image.width, clip.right), bottom = Math.min(target.height, y + image.height, clip.bottom);
@@ -2476,8 +2488,9 @@
     const left = Math.min(x1, x2), right = Math.max(x1, x2);
     const top = Math.min(y1, y2), bottom = Math.max(y1, y2);
     if (fill) {
-      for (let y = Math.max(0, top); y <= Math.min(target.height - 1, bottom); y++) {
-        if (left < target.width && right >= 0) target.pixels.fill(colour, y * target.width + Math.max(0, left), y * target.width + Math.min(target.width - 1, right) + 1);
+      const clip=clippingGraphics&&target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
+      for (let y = Math.max(0, top,clip.top); y <= Math.min(target.height - 1, bottom,clip.bottom-1); y++) {
+        if (left < clip.right && right >= clip.left) target.pixels.fill(colour, y * target.width + Math.max(0, left,clip.left), y * target.width + Math.min(target.width - 1, right,clip.right-1) + 1);
       }
     } else if (target.linePattern !== 65535) {
       // Original Box uses PolyDraw: down the first side, across the bottom,
@@ -2517,13 +2530,15 @@
   function paint(x, y, original) {
     const target = screen(); target.gx = x; target.gy = y;
     if (x < 0 || y < 0 || x >= target.width || y >= target.height) return;
+    const clip=target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
+    if(x<clip.left||y<clip.top||x>=clip.right||y>=clip.bottom)return;
     const seed = y * target.width + x, colour = target.ink;
     if (original === colour || target.pixels[seed] !== original) return;
     // Two-argument InPaint2 selects mode 1: four-connected seed-colour fill.
     // Mark on enqueue so each bitmap pixel occupies the bounded queue once.
     const queue = new Int32Array(target.pixels.length); let head = 0, tail = 1;
     queue[0] = seed; target.pixels[seed] = colour;
-    const add = at => { if (target.pixels[at] === original) { target.pixels[at] = colour; queue[tail++] = at; } };
+    const add = at => {const x=at%target.width,y=Math.floor(at/target.width);if(x<clip.left||x>=clip.right||y<clip.top||y>=clip.bottom)return; if (target.pixels[at] === original) { target.pixels[at] = colour; queue[tail++] = at; } };
     while (head < tail) {
       const at = queue[head++], column = at % target.width;
       if (column) add(at - 1);
@@ -2704,6 +2719,18 @@
       else if (code >= 32) put();
     }
     return column;
+  }
+  function textLength(value) {
+    const selected=graphicsFonts.get(screen());let length=0;
+    for(let i=0;i<value.length;i++){const code=value.charCodeAt(i)<=255?value.charCodeAt(i):63;length+=selected?(selected.advances?selected.advances[code]:selected.width):8;}return length;
+  }
+  function clip(left=null,top=null,right=null,bottom=null) {
+    const target=screen(),old=target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
+    if(!arguments.length){target.graphicsClip=null;return;}
+    const values=[left,top,right,bottom].map((v,i)=>v==null||v===-2147483648?[old.left,old.top,old.right,old.bottom][i]:v);values.forEach(whole);
+    [left,top,right,bottom]=values;
+    if(left<0||top<0||right>target.width||bottom>target.height||right<=left||bottom<=top)throw Error('Invalid Clip rectangle');
+    target.graphicsClip={left,top,right,bottom};
   }
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
@@ -2916,7 +2943,7 @@
   }
   open(0, 320, 200, 16, 0);
   return {
-    checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
+    clip, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
@@ -2944,6 +2971,7 @@
     setDrawingHooks(hooks) { drawingHooks = hooks; },
     setSpriteWriter(fn) { spriteWriter = fn; changed(); },
     invalidate: changed,
+    get fontsExamined() { return discFonts !== null; },
     get current() { return current; }, get version() { return version; },
     subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); },
     subscribeScreens(listener) { screenListeners.add(listener); return () => screenListeners.delete(listener); }
@@ -3183,7 +3211,7 @@
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
   const animations = new WeakMap();
-  const blocks = new Map();
+  const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
@@ -4367,6 +4395,46 @@
     display.pasteGraphic(image, x, y, image.masked);
     if (bankNumber === 1) imageBobsChanged();
   }
+  function getCblock(number, x, y, width, height) {
+    [number,x,y,width,height]=[number,x,y,width,height].map(integer);
+    const target=display.screen(); x=Math.floor(x/8)*8; width=Math.floor(width/8)*8;
+    if(number<1 || number>65535 || x<0 || y<0 || width<8 || height<1 || x+width>target.width || y+height>target.height) throw Error('Invalid Get Cblock rectangle/number');
+    const saved=display.capture(x,y,width,height);
+    cblocks.set(number,{x,y,width,height,depth:Math.log2(target.colours),pixels:saved.pixels});
+  }
+  function putCblock(number,x=-1,y=-1) {
+    [number,x,y]=[number,x,y].map(integer);
+    if(x < -32768 || x > 32767 || y < -32768 || y > 32767)throw Error('Put Cblock coordinates require signed words');
+    const block=cblocks.get(number); if(!block)throw Error('Cblock not defined');
+    const target=display.screen();x=x<0?block.x:Math.floor(x/8)*8;y=y<0?block.y:y;
+    if(x+block.width>target.width || y+block.height>target.height)throw Error('Put Cblock rectangle outside bitmap');
+    const mask=Math.min((1<<block.depth)-1,target.colours-1);
+    for(let row=0;row<block.height;row++)for(let col=0;col<block.width;col++){
+      const at=(y+row)*target.width+x+col;target.pixels[at]=(target.pixels[at]&~mask)|(block.pixels[row*block.width+col]&mask);
+    }
+    display.invalidate();
+  }
+  function delCblock(number=null) {
+    if(number==null){cblocks.clear();return;}number=integer(number);
+    if(number<1 || number>65535)throw Error('Invalid Cblock number');
+    if(!cblocks.delete(number))throw Error('Cblock not defined');
+  }
+  function bitIndex(bit) {bit=integer(bit);if(bit<0)throw Error('Bit number must be nonnegative');return bit;}
+  function changeBit(command,bit,current) {const mask=1<<(bit&31);return command==='Bset' ? current|mask : current&~mask;}
+  function modifyMemoryBit(command,bit,address) {
+    address=integer(address);const current=bankMemory.peek(address),mask=1<<(bit&7);
+    bankMemory.poke(address,command==='Bset'?current|mask:current&~mask);
+  }
+  function testBit(bit,read,address) {
+    bit=bitIndex(bit);const data=integer(read());
+    return ((address?bankMemory.peek(data):data)&(1<<(bit&(address?7:31)))) ? -1 : 0;
+  }
+  function sortArray(array) {
+    const size=array.dimensions.reduce((a,b)=>a*b,1);if(size>1048576)throw Error('Sort array exceeds portable limit');
+    const sorted=Array.from({length:size},(_,i)=>array.values.has(i)?array.values.get(i):array.defaultValue);
+    sorted.sort((a,b)=>{a=value(a);b=value(b);return a<b?-1:a>b?1:0;});
+    array.values.clear();sorted.forEach((v,i)=>{if(v!==array.defaultValue)array.values.set(i,v);});
+  }
   function getBlock(number, x, y, width, height) {
     [number,x,y,width,height] = [number,x,y,width,height].map(integer);
     const target = display.screen();
@@ -4447,7 +4515,7 @@
     audio.prepareDefault();
     defaulting = true;
     try {
-      blocks.clear(); cancelPaletteEffects(); cancelAmal(); manualAmal=false; amalRegisters.fill(0); resetChannels();
+      blocks.clear(); cblocks.clear(); cancelPaletteEffects(); cancelAmal(); manualAmal=false; amalRegisters.fill(0); resetChannels();
       bobs.clear(); drawnBobs = []; bobsDirty = false;
       priorityScreen = null; reversePriority = false;
       // ActuMask=$7100 resets automatic BOB/Sprite UPDATE bits 5/6 to off.
@@ -5257,6 +5325,33 @@
     if (failure) throw failure;
   }
 
+  function fileDelete(name) {
+    name=resolveFileName(name);
+    if(!options.files || typeof options.files.remove!=='function')throw Error('Kill requires a synchronous files.remove adapter');
+    const result=options.files.remove(name);if(result && typeof result.then==='function')throw Error('File removal must complete synchronously');
+  }
+  function diskFree() {
+    if(!options.files || typeof options.files.freeSpace!=='function')throw Error('Dfree requires a synchronous files.freeSpace adapter');
+    const result=options.files.freeSpace(directory);
+    if(!Number.isInteger(result) || result<0 || result>2147483647)throw Error('Invalid synchronous Dfree byte count');return result;
+  }
+  let directoryEntries=[],directoryPosition=0;
+  function directoryFirst(name) {
+    const resolved=resolveFileName(name);
+    if(!options.files || typeof options.files.list!=='function')throw Error('Dir First$ requires a synchronous files.list adapter');
+    if(!/[:/]$/.test(resolved))throw Error('Dir First$ currently requires a directory ending in : or /');
+    const supplied=options.files.list(resolved);
+    if(!Array.isArray(supplied) || supplied.length>4096)throw Error('Invalid synchronous directory listing');
+    const next=Array.from(supplied,entry=>{
+      if(!entry || typeof entry.name!=='string' || !entry.name || /[\x00-\x1f\/\\:]/.test(entry.name) || /[^\x00-\xff]/.test(entry.name) || typeof entry.directory!=='boolean' || !Number.isInteger(entry.size) || entry.size<0 || entry.size>2147483647)throw Error('Invalid directory entry');
+      return {name:entry.name,directory:entry.directory,size:entry.size};
+    });
+    const key=e=>(e.directory?'\x01':' ')+e.name.replace(/[a-z]/g,c=>String.fromCharCode(c.charCodeAt(0)-32));
+    next.sort((a,b)=>key(a)<key(b)?-1:key(a)>key(b)?1:0);
+    directoryEntries=next.map(e=>((e.directory?'*':' ')+e.name).slice(0,30).padEnd(30,' ')+(e.directory?'':String(e.size)).padEnd(8,' '));directoryPosition=0;
+    return directoryNext();
+  }
+  function directoryNext() {return directoryPosition<directoryEntries.length?directoryEntries[directoryPosition++]:'';}
   function fileRead(number, type, wholeLine = false) {
     const file = fileChannel(number, 'read');
     if (file.position >= file.contents.length) throw new Error('End of file');
@@ -5364,6 +5459,7 @@
     tdCls: td('cls'), tdRedraw: td('redraw'), threeDSnapshot: td('snapshot'),
     setDirectory, currentDirectory: () => directory, fileExists,
     trackPlay, trackStop, advanceTracker, pauseTracker, resumeTracker,
+    requestWorkbench(){systemCommand('Request Wb');state.system.requesterTarget='workbench';}, musicTempo(level){level=integer(level);if(level<0 || level>100)throw Error('Invalid Tempo (expected 0..100)');if(music)music.setTempo(level);},
     musicPlay, musicVolume, musicOff, cancelMusic, advanceMusic, pauseMusic, resumeMusic,
     nextMusicVbl: () => musicNext,
     musicLocation: () => musicLocation,
@@ -5419,6 +5515,7 @@
     pasteIcon: (x, y, number) => pasteImage(2, x, y, number),
     spritePalette: (mask = -1) => display.bankPalette(imageBank(1).palette, mask),
     resetDefault,
+    getCblock, putCblock, delCblock, bitIndex, changeBit, modifyMemoryBit, testBit, sortArray, fileDelete, diskFree, directoryFirst, directoryNext,
     getBlock, putBlock, delBlock, delSprite, spriteCollision, unpackExisting, amalFreeze: (number = null) => { amal.freeze(amalSelector(number));refreshAmal(); },
     getIcon: (...args) => captureImage(2, 'Get Icon', ...args),
     getBob: (...args) => captureImage(1, 'Get Bob', ...args),
@@ -6762,7 +6859,7 @@
     } catch (error) { try { stop(); } catch (_) { /* retain the source failure */ } throw error; }
   }
   try { emit({ type: 'stop', mask: 15 }); } catch (error) { state.playing = false; throw error; }
-  return { state, samples, tick, stop, setVolume,
+  return { state, samples, tick, stop, setVolume, setTempo(level){if(!Number.isInteger(level)||level<0||level>100)throw Error('Invalid Tempo');state.tempo=level;},
     advance(field) {
       if (!Number.isSafeInteger(field) || field < state.field || field - state.field > 100000) throw new Error('Invalid AMOS Music field catch-up');
       while (state.playing && state.field < field) tick();
@@ -6991,6 +7088,7 @@
     location: null,
     editRequest: null,
     runRequest: null,
+    systemRequest: null,
     column: 0,
     input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
   };
@@ -7246,9 +7344,16 @@
         errorFrame = null; state.ip = target; return { done: false };
       }
     }
-    if (res.edit || res.run) {
+    if (Object.prototype.hasOwnProperty.call(res, 'resume')) {
+      if (!errorFrame) throw Error('Resume without error');
+      const target = res.resume == null ? errorFrame.ip : res.resume;
+      state.stack=errorFrame.stack; state.frames=errorFrame.frames; state.locals=errorFrame.locals; state.data=errorFrame.data;
+      errorFrame=null; state.ip=target; return {done:false};
+    }
+    if (res.edit || res.run || res.system) {
       if(res.edit){state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });pendingEdit=state.editRequest;}
-      else{state.runRequest=res.run;pendingEdit=res.run;}
+      else if(res.run){state.runRequest=res.run;pendingEdit=res.run;}
+      else {state.systemRequest=Object.freeze({command:'System',location:state.location?Object.freeze({...state.location}):null});pendingEdit=state.systemRequest;}
       state.halted = true;
       state.waiting = null;
       return { done: true };

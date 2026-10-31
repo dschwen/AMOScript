@@ -10,8 +10,9 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   let unlinkedRun = '';
   const diskFonts = (settings.diskFonts || []).map(font => ({ ...font, data: Uint8Array.from(font.data) }));
   const key = name => name.replace(/\\/g, '/').toLowerCase();
-  const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])));
-  const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes),
+  const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])), [], (settings.directories || []).map(key));
+  const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes, name),
+    remove: name=>memory.remove(key(name)), list:name=>memory.list(key(name)), freeSpace:name=>memory.freeSpace(key(name)),
     exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(AMOS_WEB_AUDIO.createWebAudioHost);
@@ -22,16 +23,17 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
     status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
-    if (debug) viewport.dataset.line = live && live.state.location ? String(live.state.location.line) : '';
+    if (debug) {viewport.dataset.line = live && live.state.location ? String(live.state.location.line) : '';viewport.dataset.sourceError=live&&live.state.error?live.state.error.message:'';}
     viewport.dataset.keyboard = keyboardMode.value;
     viewport.dataset.sound = audio.state; viewport.dataset.backend = gpu ? 'webgl' : 'canvas';
     status.hidden = !!live && !failure && !live.state.halted && !live.state.stopped && !audio.error;
-    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, audio, keyboard: keyboardMode.value });
+    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, sourceError: live && live.state.error, audio, keyboard: keyboardMode.value });
     fullscreen.refresh();
   }
   function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
   function releaseGpu() { if (!gpu) return; const gl = gpu.resources.context; gpu.dispose(); gpu = null; const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
-  function start(factory=activeFactory) {
+  function start(factory=settings.restartFromEntry?createProgram:activeFactory) {
+    const inheritedFonts = live && live.display.fontsExamined;
     activeFactory=factory;
     revision++; const token = revision; failure = ''; unlinkedRun = '';
     if (host) host.detach(); if (live) live.stop(); releaseGpu();
@@ -54,9 +56,11 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
         setTimeout(guard(()=>{if(live===old && !old.state.stopped)start(nextFactory);}),0);
       }},
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
+    if (inheritedFonts) live.display.getDiscFonts();
     if (initialMouse) live.setMouse(...initialMouse);
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
       joysticks: joystickOptions(),
+      textInput:{container:viewport,toolbar:viewport.querySelector('.amos-fullscreen-toolbar')},
       virtualJoystick: { container: viewport, port, visibility: touchMode.value },
       requestAnimationFrame: fn => requestAnimationFrame(guard(fn)), cancelAnimationFrame });
     host.attach(live); live.tick(1000); host.focus(); update();

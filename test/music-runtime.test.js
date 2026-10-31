@@ -99,3 +99,11 @@ test('Music VM: End/Edit/failure cancel owned wakes; late callbacks are inert an
   p.tick(100); const stale = tasks[0]; p.stop(); stale(); assert.strictEqual(p.state.music.position.field, 0); p.resume();
   now = 10000; assert.throws(() => tasks.at(-1)(), /Music field catch-up.*line 2, byte/); assert.strictEqual(p.state.halted, true); assert.strictEqual(p.state.music.playing, false);
 });
+
+test('Music Tempo: active settings accept 0..100; inactive commands are no-ops and Music restarts at native 17',()=>{
+  const loaded=execute(binary([[t('Load'),text('music/Over.mus')],[ext(0x4c),n(42)],[ext(0x58),n(1)],[t('Wait Key')]]),1000,{files});
+  const p=loaded.program;assert.strictEqual(p.state.music.position.tempo,17);p.musicTempo(42);assert.strictEqual(p.state.music.position.tempo,42);p.musicTempo(0);assert.strictEqual(p.state.music.position.tempo,0);
+  const field=p.state.music.position.field;loaded.timers.tick(40);assert.ok(p.state.music.position.field>field);
+  p.musicTempo(100);assert.strictEqual(p.state.music.position.tempo,100);assert.throws(()=>p.musicTempo(101),/Tempo/);
+  p.musicOff();p.musicPlay(1);assert.strictEqual(p.state.music.position.tempo,17);p.stop();
+});

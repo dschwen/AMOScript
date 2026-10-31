@@ -105,7 +105,7 @@ module.exports = async function roller2GameProbe(page) {
       if (launcher) launcher.cancel();
       const token = ++revision; if (host) host.detach(); if (live) live.stop(); if (gpu) gpu.clear(); error = '';
       live = compiled.exports({ files, print() {}, audio: sound.bind(), now: () => performance.now(), clearTimeout, setTimeout(fn, delay) { return setTimeout(() => { if (!disposed && token === revision) { try { fn(); } catch (e) { fail(e); } } }, delay); } });
-      host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', virtualJoystick: { container: viewport, port: 1, visibility: touchMode.value }, joysticks: [{ port: 1, keyboard: { fire: ['ControlLeft', 'ControlRight'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
+      host = AMOS_BROWSER.createCanvasHost(surface, { renderer: gpu, mouseCoordinates: 'hardware', textInput:{container:viewport,toolbar}, virtualJoystick: { container: viewport, port: 1, visibility: touchMode.value }, joysticks: [{ port: 1, keyboard: { fire: ['ControlLeft', 'ControlRight'] }, gamepad: true }] }); host.attach(live); live.tick(1000); host.focus(); update();
     }
     for (const action of ['restart', 'stop', 'resume']) { const button = document.createElement('button'); button.id = `roller2-game-${action}`; button.textContent = action; toolbar.append(button); button.onclick = () => { try { if (action === 'restart') start(); else if (action === 'stop') { launcher.cancel(); live.stop(); } else if (!error) live.resume(); host.focus(); update(); } catch (e) { fail(e); } }; }
     ui = make(uiSource)({ container: viewport, toolbar, files, debug: !liveOnly });

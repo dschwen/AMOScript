@@ -5,8 +5,13 @@ bitmap origin (0,0). Operands are integers: ordinary screen numbers select logic
 buffers; `Logic`, `Physic`, `Logic(n)` and `Physic(n)` select current or numbered
 logical/physical buffers. The original two-operand token is `$0986`.
 The eight-operand rectangle token `$09a8` is also supported:
-`Screen Copy source,x1,y1,xEnd,yEnd To destination,x,y`. Explicit minterm
-variants `$099c` and `$09be` remain unsupported and fail explicitly.
+`Screen Copy source,x1,y1,xEnd,yEnd To destination,x,y`. The nine-operand
+rectangle token `$09be` adds a byte minterm after destination Y. Inside the checked
+rectangle it combines source/destination bits with the mask set, preserves higher
+destination planes and retains the same overlap-safe snapshot semantics. `$c0`
+is ordinary copying; `$e0` ORs source and destination (used by ASM's half-bright
+text panels). This is a portable Boolean rectangle profile, not native blitter
+edge/timing parity. The whole-screen minterm variant `$099c` remains unsupported.
 
 ## Selectors and ownership
 

@@ -477,6 +477,12 @@ const scenarios = [
     assert.strictEqual(result.ticks, 240132); assert.strictEqual(result.partialSphere, true);
     assert.strictEqual(result.gameRunning, false);
   } },
+  { id: 'mobile-keyboard', title: 'Device keyboard text input', description: 'Open a real text field to use the phone or tablet keyboard. Text, Latin-1 umlauts, committed IME input, Enter and Backspace go directly to AMOS, bypassing joystick fire mappings. Stop, Resume, Key Speed and detach are checked. Run the checks, then try typing into the live program below; native keyboard appearance itself requires a real mobile device.', run: require('./mobileKeyboardProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{text:'Zäü\r\bABZ!',compositionCommits:1,joystickFire:false,focus:true,lifecycle:true});
+  } },
+  { id: 'asm-main-checks', title: 'ASM — Das Spiel: first-room checks', initialFrame:'Canvas: ASM main handle in inventory', description: 'The complete unchanged main source reaches its opening briefings, the original third-letter prompt, the parser, poster inspection and handle pickup through real input. Both room bitmaps match independent Python ILBM/sprite expectations. The intro-to-main page retains fonts and RAM session files; the missing Befehle2 conversation panel is a declared temporary asset substitution. Later-room assets remain outside this build.', run: require('./asmMainProbe'), check(result, assert) {
+    assert.deepStrictEqual(result,{frames:8,gpuFrames:8,independentPixels:81920,room:1,handle:2,linkedPage:true,mobileText:true});
+  } },
   { id: 'asm-intro-checks', title: 'ASM — Das Spiel: original intro checks', initialFrame: 'Canvas: ASM animated logo', description: 'Complete original ASM_Intro.AMOS: sound choices, difficulty, animated logo, MOD music, all four title pages including HAM and custom fonts, then Ram:Level and the terminal Run request. Prepared 320×256 assets and an explicitly empty score table are declared in the ASM milestone. Eight Canvas frames, seven actual GPU comparisons; the HAM page uses Canvas. The main adventure remains a separate compilation milestone.', run: require('./asmIntroProbe'), check(result, assert) {
     assert.deepStrictEqual(result,{frames:8,gpuFrames:7,picturePixels:327680,ham:true,levelFile:'1\r\n',runTarget:'ASM:ASM.Main',standalonePage:true});
   } },

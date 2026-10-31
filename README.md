@@ -13,7 +13,7 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 | **[Dithell’s Wonderland](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-game.html)** | Original game with WebGL/Canvas, fullscreen, keyboard/Gamepad and optional sound. Replays cover lives, game over and restarting. |
 | **[Roller II](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-game.html)** | Game with its AMOS boundary bug fixed, current supplied assets and music. Tested through the level-3 warp, game over, restored scores, menu return and a fresh game. |
 | **[Planet Zybex](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game.html)** | Shooter with three AMOS vertical docking copy fixes, sound/fullscreen and keyboard/Gamepad/touch controls. Tested through level-2 docking, level-3 entry, GAME OVER and a fresh game; later progression remains open. |
-| **[ASM — Das Spiel intro](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro.html)** | Original sound/difficulty menus, animated logo, MOD music and HAM title sequence with Canvas/fullscreen. [Development preview and adventure plan](docs/asm.md); the main game is not included yet. |
+| **[ASM — Das Spiel](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html)** | Original intro launches the compiled adventure. First-room inspection and handle pickup are tested, with a mobile keyboard widget. [Development build](docs/asm.md): provisional conversation artwork; later-room assets remain pending. |
 | **[BobTest](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bob-test.html)** | Original 64-object bouncing demo with live WebGL, pause/restart and fullscreen. Press a key to start its 500-frame run. |
 | **[Tunnel animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tunnel.html)** | Original Tunneltest animation with its supplied icon bank and IFF background. Fullscreen, frame stepping and custom IFF upload. |
 
@@ -52,6 +52,10 @@ node -e "require('/tmp/program.js')({ setTimeout }).tick(1000)"
 Expected output: `Start → One → Two → Three → End` (one item per line).
 Omit the output path to write JavaScript to stdout. The CLI never overwrites an
 existing output file. Run `node bin/amoscript --help` for usage.
+
+Application pages offer **⌨** for the phone/tablet keyboard: typed text, Enter and
+Backspace reach AMOS directly, bypassing joystick key mappings.
+See [device keyboard input](docs/mobile-keyboard.md).
 
 The compiler accepts tokenized `.AMOS` binaries. The `.Asc` files beside some
 examples are readable references; an ASCII input frontend is still planned.

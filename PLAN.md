@@ -4,18 +4,28 @@ Assessment updated: 2026-10-31.
 
 ## ASM — Das Spiel
 
-[New showcase target and implementation order](docs/asm.md). Six of eight supplied
-`asm_neu` sources compile. The complete original intro now runs through menus,
-logo animation, MOD tunes, four title screens (including HAM and its supplied
-font), loading and terminal Run. Normal/debug showcase pages use Canvas explicitly;
-eight Canvas frames and seven non-HAM GPU comparisons cover the first milestone.
-Asset preparation retains originals, crops the authoring pictures to the source's
-320×256 screens, packs the three expected bank files and declares an empty score
-table. The main 1,868-line adventure still needs Resume, Cblocks, bit/array/text
-operations, minterm copy/Clip, host/file commands and Tempo. Next: compile the main
-source, pin the supplied disk-image room/dialogue assets, then connect Run through
-shared Ram:Level and exercise the first room. Do not label the intro preview a
-playable complete adventure. ZoneDefiner's text-control strings remain separate.
+[First-room showcase and implementation details](docs/asm.md). Seven of eight
+supplied asm_neu programs compile, including the unchanged complete 1,868-line
+adventure (5,903 instructions). All eighteen missing encodings now have bounded
+runtime implementations. The first-room replay answers the original ASM prompt,
+inspects a poster and pulls the handle into inventory; eight Canvas/eight actual
+GPU frames and 81,920 independent pixels cover it, including adjacent-window
+startup. The application chains the original intro into the main, preserving
+font enumeration and Ram:Level; Restart returns to the entry intro. Canvas remains
+explicit for the intro's HAM image. IO Light is the half-screen edition; JOY is full.
+
+First-room assets are pinned with preparation/provenance. Befehle.Pic's alignment
+byte is corrected only during preparation; Befehle2.Pic is empty and its disk block
+is overwritten, so its provisional Befehle4 conversation-panel substitution is
+visible on the page. Next: recover that panel, pin/validate later rooms/dialogue
+and minigame assets, then cover room progression and real save/load/end paths.
+Do not claim complete adventure execution. ZoneDefiner's text-control strings,
+IndexedDB persistence and WebGL HAM remain separate work.
+
+The shared harness now offers a [device-keyboard widget](docs/mobile-keyboard.md).
+A real focused input sends committed text, IME/Latin-1 characters and control keys
+to AMOS without joystick mappings or invented physical holds. Stop/Resume,
+Key Speed, visibility, detach and stale-event ownership are browser-tested.
 
 ## Joy Src1
 
@@ -41,7 +51,7 @@ supports a bounded single CODE hunk. Varptr/Areg/Screen Base/Call/Doscall expose
 checked virtual memory and synchronous native adapters, without claiming built-in
 68000 execution. Keep bank/display memory ranges and source validation intact.
 
-Next: implement SpriteXpro's Clip and remaining sample/wave commands; exercise
+Next: implement SpriteXpro's ScanShift and remaining sample/wave commands (Clip is now supported); exercise
 the main map editor with its external assets; adopt deliberate source fixes for
 the malformed backups where appropriate. [AMOS 3D](docs/amos-3d.md) now has twelve
 slot-4 commands, checked object/template/vector-surface loading and a portable

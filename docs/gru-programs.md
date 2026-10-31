@@ -66,8 +66,8 @@ or parent bank is an explicit error; there is no fabricated bank. Parent resumpt
 and returning accessory banks are host policy, not an implicit implementation of
 PRUN or a native editor. Native reference: Lib.s InBGrab.
 
-SpriteXpro now passes Bgrab decoding but next requires Clip at line 145. Its
-later sample/wave controls also need separate work. A standalone launch will
+SpriteXpro now passes Bgrab and Clip decoding; its next blocker is ScanShift ($1270)
+at line 185. Its sample/wave controls still need separate work. A standalone launch will
 require real accessory context and supplied resources.
 
 ## 4. Run and Pload
@@ -160,7 +160,7 @@ the full intro is not yet accepted.
 - Gru1/Intr/Animplay.Bak contains the invalid hyphenated assignment noted above.
 - Gru1/Intr/Scroll_C.AMOS contains a native compiled wrapper rather than supported
   tokenized source; Scroll.Bak is its editable counterpart.
-- Gru2/SpriteXpro.AMOS next needs Clip and later audio commands.
+- Gru2/SpriteXpro.AMOS now passes Clip; ScanShift ($1270) and later audio commands remain.
 - progs1/Amos progs/Grid.Bak calls undeclared `bxx`.
 
 The main map editor, unknown extension and malformed backups were not rewritten.

@@ -36,7 +36,7 @@ test('Screen Copy rectangle: tagged physical destinations bypass Autoback/Bob ho
   assert.strictEqual(s.pixels,logical);assert.strictEqual(s.physicalPixels,physical);assert.strictEqual(d.current,0);assert.deepStrictEqual(s.palette,palette);
   assert.strictEqual(physical[2*320+2],logical[321]);assert.strictEqual(physical[0],0);assert.deepStrictEqual(require('../lib/display/reference/render').render(snapshot.chip,snapshot.frame),old);
 });
-test('Screen Copy rectangle: typed arrays/DATA and expressions lower through the eight-operand signature; malformed/minterm/wrapped forms reject atomically with context', () => {
+test('Screen Copy rectangle: typed arrays/DATA and expressions lower through the eight-operand signature; malformed/wrapped forms reject atomically and explicit minterms require their operands', () => {
   const {program:p}=execute(binary([[t('Dim'),id('a'),t('('),n(0),t(')')],[t('Data'),w(0),n(4)],[t('Read'),id('a'),t('('),n(0),t(')')],
     [t('Ink'),n(2)],[t('Plot'),n(1),t(','),n(1)],copy([n(0),n(1),n(1),[id('a'),t('('),n(0),t(')')],[t('Val'),t('('),text('4'),t(')')],n(0),n(8),n(8)])]));
   assert.strictEqual(p.display.point(8,8),2);p.stop();
@@ -44,7 +44,7 @@ test('Screen Copy rectangle: typed arrays/DATA and expressions lower through the
   for(const value of [32768,-32769,0.1,NaN])assert.throws(()=>d.copyScreenRectangle(0,value,0,5,5,1,0,0));
   assert.throws(()=>d.copyScreenRectangle(0,-32768,0,5,5,1,32767,0),/Wrapped/);assert.deepStrictEqual(d.screen(1).pixels,before);
   assert.throws(()=>execute(binary([copy([n(0),text('x'),n(0),n(5),n(5),n(1),n(0),n(0)])])),/numeric.*line 1/);
-  assert.throws(()=>compile(binary([[w(0x9be)]])),/Unsupported token/);
+  assert.throws(()=>compile(binary([[w(0x9be)]])),/Expected expression/);
   assert.throws(()=>compile(binary([copy(Array(8).fill(n(0))).concat(t(','),n(0xcc))])),/end of statement/);
   assert.throws(()=>execute(binary([copy([n(7),n(0),n(0),n(5),n(5),n(6),n(0),n(0)])])),/Screen 6 is not open.*line 1/);
 });
