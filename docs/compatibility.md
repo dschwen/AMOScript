@@ -1,7 +1,7 @@
 # Compatibility and implementation status
 
-Updated 2026-10-30. The current local baseline has **971 passing tests**, plus a
-passing real-Chromium rendering/input smoke test, 81 offline demo scenarios and
+Updated 2026-10-31. The current local baseline has **982 passing tests**, plus a
+passing real-Chromium rendering/input smoke test, 82 offline demo scenarios and
 WebGL2 capability probe.
 The later [compiler-examples milestone](compiler-examples.md) adds compilation
 of all 19 originals, bounded console Input/error handlers, planar memory and
@@ -50,7 +50,8 @@ Enable/Mute controls. Editor files and all-level/win coverage remain open.
 
 | Area | Status | Evidence / limits |
 | --- | --- | --- |
-| Gru1/Gru2/progs1 | 32/39 original sources/backups compile | All nine progs1 AMOS files compile. Scroll matrices and linked browser Run are covered; native Call/Doscall require adapters. STOS sprite animation, malformed sources, duplicate bank metadata and later SpriteXpro commands remain open. [Contract](gru-programs.md). |
+| Gru1/Gru2/progs1 | 33/39 original sources/backups compile | All nine progs1 AMOS files compile. Scroll matrices and linked browser Run are covered; native Call/Doscall require adapters. STOS sprite animation, malformed sources and later SpriteXpro commands remain open. [Contract](gru-programs.md). |
+| Joy Src1 | 3/3 nonempty sources compile; four inputs are empty | Both original editors run with declared startup pointer and accompanying assets; twelve independent/GPU frames cover painting, fill/clear and Pop marker protection. Original ICONBANKING swaps preserve three bank identities. Labyrinth backup reaches its source read-before-bounds error at line 70. [Contract](joy-source1.md). |
 | AMOS 3D | Twelve slot-4 statements; bounded portable renderer | Original car/hero .3DO/.3DT/.3DS loading, pose/redraw/clear and a 104-field declared excerpt. Six independent full images and six GPU frames. P8 templates/closed contours only; native fixed-point/BSP/blitter parity, other commands and the preceding STOS sprite intro remain open. [Contract](amos-3d.md). |
 | Def Scroll / Scroll | Implemented bounded translated copy | Ten factory-owned signed-word definitions, exclusive ends, clipping, overlap and ordinary Autoback. Exposed pixels retain their values. Six GPU comparisons and 122,880 independent pixels; wrapped destinations remain gated. [Contract](gru-programs.md#1-def-scroll--scroll). |
 | Run / Pload / native interfaces | Explicit runtime and host boundaries | Browser Run chains precompiled factories and retains session files. Pload decodes one unrelocated CODE hunk; Varptr exposes checked integer/string bytes. No built-in 68000 CPU or AmigaDOS process launcher. [Contract](gru-programs.md). |

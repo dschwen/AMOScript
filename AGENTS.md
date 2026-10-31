@@ -903,8 +903,9 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   docs/amal-automatic.md and tools/reference/galax-movement.py.
 - Gru1/Gru2/progs1 originals are pinned under examples/GruPrograms with source
   hashes. tools/build_gru_programs.js writes exclusive standalone modules and a
-  complete report; 32/39 currently compile, all nine progs1 AMOS files included.
-  Keep malformed sources, duplicate icon banks and native wrappers explicit.
+  complete report; 33/39 currently compile, all nine progs1 AMOS files included.
+  Keep malformed sources and native wrappers explicit. Repeated serialized image
+  chunks are valid and use native last-entry-wins grouped loading.
   Def Scroll stores ten signed-word definitions per factory; Scroll uses the
   selected logical bitmap, exclusive ends, paired clipping, overlap protection
   and unchanged exposed pixels through ordinary drawing/Autoback hooks. Do not
@@ -948,3 +949,22 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Its verification still covers the original 104 fields. The full intro still
   stops at STOS Move Y line 19; other templates, queries/collisions/animations,
   connected sprite intro and native capture remain open. See docs/amos-3d.md.
+
+- Joy Src1 originals and declared accompanying assets are pinned under
+  examples/Joy/Source1. All three nonempty sources compile; four files are empty.
+  tools/build_joy_source1.js emits exclusive modules/debug pages/index/report.
+  Pop ($036c) discards one local Gosub frame without returning; guard procedure
+  stack depth and preserve the caller on failure. Uncached Limit Mouse and Ink
+  normalize their existing typed overloads; cached arities stay exact. AmBs
+  entries validate completely and replace earlier entries with the same number
+  in file order, including repeated AmIc/AmSp. Image chunks do not encode moved
+  slots: never guess 9/10; runtime Bank Swap retains actual identities. Original
+  ICONBANKING covers all six transitions in a declared three-bank fixture.
+  Both complete editors cover paint/fill/clear/protected Pop/Escape-Edit paths,
+  twelve independent grid/GPU frames and live controls. Their host explicitly
+  seeds mouse (133,50,0); the optional builder initialMouse API sets input before
+  execution, leaving Limit Mouse/query semantics unchanged. Labyrinth.Bak stops
+  at original 70/5450 because Peek precedes the bounds test at 71. Keep that
+  source failure and strict memory checks until a declared source correction.
+  asm_neu is a different supplied version, not a replacement for empty inputs.
+  See docs/joy-source1.md and demos/joy-source1.html.

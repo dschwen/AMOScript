@@ -82,7 +82,8 @@ test('banks: generic AmBk preserves bytes, bank zero defaults to five, and data/
   const short = Buffer.from(data); short.writeUInt32BE(7, 34);
   assert.throws(() => read(short), /Invalid bank length/);
   const duplicate = Buffer.concat([golden.subarray(0, 20), Buffer.from('416d42730002', 'hex'), trailer.subarray(6, 104), trailer.subarray(6, 104)]);
-  assert.throws(() => read(duplicate), /Duplicate bank number 1/);
+  assert.strictEqual(read(duplicate).length, 1); // native grouped loading replaces the earlier slot
+  assert.deepStrictEqual(read(duplicate)[0], read(golden)[0]);
 });
 
 test('banks: generated modules paste transparent Bobs and opaque Icons at top-left coordinates', () => {

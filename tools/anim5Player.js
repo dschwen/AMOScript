@@ -2,11 +2,11 @@
 'use strict';
 
 // Live original-program host, serialized into the ANIM-5 gallery page.
-function installAnim5Player({ sources, assets, gpuSources, sourceNames = ['Logoanim.amos', 'Logoanim.Bak'], finishHint = 'Click the animation to finish its final logo sequence.', audioSource = null, sessionSource = null, programOptions = {}, playLabel = 'Play Animation', subject = 'intro' }) {
+function installAnim5Player({ sources, assets, gpuSources, sourceNames = ['Logoanim.amos', 'Logoanim.Bak'], finishHint = 'Click the animation to finish its final logo sequence.', audioSource = null, sessionSource = null, programOptions = {}, playLabel = 'Play Animation', subject = 'intro', initialMouse = null }) {
   const root = document.getElementById('animation-player');
   const make = source => new Function(`return (${source});`)();
   const toolbar = document.createElement('div'), slot = document.createElement('div'), status = document.createElement('p');
-  const version = document.createElement('select'); version.id = 'animation-version'; version.setAttribute('aria-label', 'Original intro version');
+  const version = document.createElement('select'); version.id = 'animation-version'; version.setAttribute('aria-label', 'Program version');
   for (const name of sourceNames) version.add(new Option(name, name));
   toolbar.append(version);
   const buttons = {};
@@ -58,6 +58,7 @@ function installAnim5Player({ sources, assets, gpuSources, sourceNames = ['Logoa
       const module = { exports: {} }; new Function('module', sources[version.value])(module);
       program = module.exports({ ...programOptions, audio: sound ? sound.bind() : undefined, files: { read(name) { const value = assets[name.toLowerCase()]; if (!value) throw Error(`Missing asset: ${name}`); return atob(value); }, write() { throw Error('Intro does not write files'); } },
         now: () => performance.now(), clearTimeout, setTimeout(fn, delay) { return setTimeout(() => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } }, delay); } });
+      if (initialMouse) program.setMouse(...initialMouse); // Declared host input, before source execution.
       host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu }); host.attach(program); program.tick(10000); host.render(); host.focus(); update();
     } catch (error) { fail(error); }
   }

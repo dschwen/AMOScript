@@ -3744,17 +3744,18 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (this.ip === this.data.length) return []; // Code-only compiler fixtures.
     if (this.text(4) !== 'AmBs') this.error('Expected AmBs bank trailer');
     const count = this.word();
-    const banks = [];
-    const numbers = new Set();
+    const banks = new Map();
     for (let i = 0; i < count; i++) {
       this.context = `bank entry ${i + 1}`;
       const bank = this.entry();
-      if (numbers.has(bank.number)) this.error(`Duplicate bank number ${bank.number}`);
-      numbers.add(bank.number);
-      banks.push(bank);
+      // LB_Multiples loads each entry with EntNul (low word zero): later
+      // entries replace earlier ones, including repeated AmSp/AmIc chunks.
+      // Image chunks have no encoded relocated bank number; never invent one.
+      banks.delete(bank.number);
+      banks.set(bank.number, bank);
     }
     if (this.ip !== this.data.length) this.error('Unexpected data after bank trailer');
-    return banks;
+    return Array.from(banks.values());
   }
 };
   const bankWriterFactory = class BankWriter {
@@ -7943,6 +7944,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (retIp == null) { state.halted = true; throw new Error('Return without Gosub'); }
       state.ip = retIp;
     }
+    if (res.pop) {
+      const procedure = state.frames[state.frames.length - 1];
+      if (!state.stack.length || (procedure && state.stack.length <= procedure.stackDepth)) throw new Error('Pop without Gosub');
+      state.stack.pop();
+    }
     if (res.procCall != null) {
       state.frames.push({ ip: ipBefore + 1, locals: state.locals, data: state.data, stackDepth: state.stack.length });
       state.locals = Object.assign(Object.create(null), res.defaults);
@@ -9200,7 +9206,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     width, height, viewportWidth, viewportHeight, scale, integerScale: Number.isInteger(scale),
     pixelAspect: Object.freeze({ numerator, denominator }) });
 }));
-(function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}) {
+(function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}, initialMouse=null) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
@@ -9246,6 +9252,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         setTimeout(guard(()=>{if(live===old && !old.state.stopped)start(nextFactory);}),0);
       }},
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
+    if (initialMouse) live.setMouse(...initialMouse);
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
       joysticks: joystickOptions(),
       virtualJoystick: { container: viewport, port, visibility: touchMode.value },
@@ -9343,5 +9350,5 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   }
   window.addEventListener('pagehide', dispose);
   return { update, recordError, dispose };
-}), Object.fromEntries([]));</script>
+}), Object.fromEntries([]), null);</script>
 </body></html>

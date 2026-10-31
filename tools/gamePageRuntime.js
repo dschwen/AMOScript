@@ -2,7 +2,7 @@
 'use strict';
 // Public example harness, embedded by build_game_page.js. No source-specific
 // startup keys: each game retains its own intro, menu and joystick behavior.
-function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}) {
+function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}, initialMouse=null) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
@@ -48,6 +48,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
         setTimeout(guard(()=>{if(live===old && !old.state.stopped)start(nextFactory);}),0);
       }},
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
+    if (initialMouse) live.setMouse(...initialMouse);
     host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
       joysticks: joystickOptions(),
       virtualJoystick: { container: viewport, port, visibility: touchMode.value },

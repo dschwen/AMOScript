@@ -111,6 +111,7 @@ module.exports = async function checkBrowserDemos(browser) {
       if (scenario.id === 'planet-zybex') await require('./checkPlanetZybexPreview')(page);
       if (scenario.id === 'bob-test') await require('./checkBobTestPlayer')(page);
       if (scenario.id === 'screen-slide') await require('./checkScreenSlidePlayer')(page);
+      if (scenario.id === 'joy-source1') await require('./checkJoySource1Player')(page);
       if (scenario.id === 'amos-3d') await require('./checkAmos3DPlayer')(page);
       if (scenario.id === 'anim5') await require('./checkAnim5Player')(page);
       await page.click('#run-demo');

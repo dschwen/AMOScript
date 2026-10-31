@@ -33,6 +33,10 @@ test('browser demos: catalogue covers every shared scenario with self-contained 
       assert.match(html, /<details id="demo-checks"><summary>Browser checks and captured frames/);
       assert.doesNotMatch(html, /<details id="demo-checks"[^>]*\bopen\b/);
     }
+    if (entry.file === 'joy-source1.html') {
+      assert.ok(html.indexOf('id="animation-player"') < html.indexOf('id="demo-checks"'));
+      assert.match(html, /Open Editor/);
+    }
     if (entry.file === 'planet-zybex.html') {
       assert.ok(html.indexOf('id="planet-zybex-preview"') < html.indexOf('id="demo-checks"'));
       assert.doesNotMatch(html, /<button id="play-game"/);

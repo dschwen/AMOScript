@@ -2,7 +2,7 @@
 
 The 39 supplied source files/backups are pinned byte-for-byte under
 `examples/GruPrograms`, with lengths and SHA-256 hashes. They remain separate
-from the user's editable directories. **32 of 39 compile**, including all nine
+from the user's editable directories. **33 of 39 compile**, including all nine
 `.AMOS` files in progs1. Compilation is not a claim that their external files,
 native-code dependencies or complete interactive paths run in a browser.
 
@@ -155,9 +155,6 @@ the full intro is not yet accepted.
 
 ## Remaining first blockers
 
-- Gru1/Amos/Map-Editor.AMOS has two complete embedded icon banks numbered 2.
-  Choosing which bank to retain requires a source/asset correction, not relaxed
-  bank validation.
 - Gru1/Intr/Anim.AMOS and Anim.Bak next need STOS-compatible Move X/Y, Move On,
   Anim and Anim On. Their 3D commands now compile; a declared 3D-only excerpt runs.
 - Gru1/Intr/Animplay.Bak contains the invalid hyphenated assignment noted above.
@@ -170,3 +167,10 @@ The main map editor, unknown extension and malformed backups were not rewritten.
 Newly compiling applications can still encounter missing assets, requesters,
 native adapter requirements or later runtime limitations. No native timing or
 Amiga captures are claimed by the compilation or GPU tests.
+
+## Repeated image-bank chunks
+
+Gru1/Amos/Map-Editor.AMOS now compiles unchanged. Its repeated AmIc chunks use
+native last-entry-wins grouped loading; they are not malformed metadata.
+Runtime Bank Swap still retains bank identities at other slots. See the
+[Joy Src1 bank-loading correction](joy-source1.md#repeated-icon-banks-and-bank-swap).

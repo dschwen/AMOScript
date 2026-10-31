@@ -35,6 +35,9 @@ link. See [demo instructions](demos/README.md) for local use.
 Try the [AMOS 3D car/hero animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html),
 a portable rendering of the original Gru1 3D excerpt. [Supported profile and references](docs/amos-3d.md).
 
+The [Joy Src1 editors](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/joy-source1.html)
+run both original labyrinth editors. [Compilation results and rebuild instructions](docs/joy-source1.md) cover all seven supplied AMOS files.
+
 ## Quick start
 
 Requires Node.js; CI targets Node 22 and 24.

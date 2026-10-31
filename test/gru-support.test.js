@@ -5,11 +5,11 @@ const fn=(name,...args)=>[t(name),...(args.length?[t('('),...args.flatMap((a,i)=
 const assign=(name,value,flags=0)=>[id(name,6,flags),t('='),value];
 const strings=value=>Buffer.from(value).toString('latin1');
 
-test('Gru programs: all 39 original hashes are pinned; 32 compile without source changes and seven retain explicit blockers',()=>{
+test('Gru programs: all 39 original hashes are pinned; 33 compile without source changes and six retain explicit blockers',()=>{
   const root=path.join(__dirname,'../examples/GruPrograms'),manifest=require('../examples/GruPrograms/manifest.json');
-  const failures={'Gru1/Amos/Map-Editor.AMOS':/Duplicate bank number 2/,'Gru1/Intr/Anim.AMOS':/token 0x1ea6/,'Gru1/Intr/Anim.Bak':/token 0x1ea6/,'Gru1/Intr/Animplay.Bak':/Expected =; found -/,'Gru1/Intr/Scroll_C.AMOS':/Invalid AMOS line length/,'Gru2/SpriteXpro.AMOS':/token 0x1084/,'progs1/Amos progs/Grid.Bak':/Expected =; found EOL/};
+  const failures={'Gru1/Intr/Anim.AMOS':/token 0x1ea6/,'Gru1/Intr/Anim.Bak':/token 0x1ea6/,'Gru1/Intr/Animplay.Bak':/Expected =; found -/,'Gru1/Intr/Scroll_C.AMOS':/Invalid AMOS line length/,'Gru2/SpriteXpro.AMOS':/token 0x1084/,'progs1/Amos progs/Grid.Bak':/Expected =; found EOL/};
   let count=0;for(const entry of manifest.sources){const bytes=fs.readFileSync(path.join(root,entry.path));assert.strictEqual(bytes.length,entry.byteLength);assert.strictEqual(crypto.createHash('sha256').update(bytes).digest('hex'),entry.sha256);if(failures[entry.path])assert.throws(()=>compile(bytes),failures[entry.path]);else{compile(bytes);count++;}}
-  assert.strictEqual(count,32);
+  assert.strictEqual(count,33);
 });
 
 test('Def Scroll: exclusive rectangles, signed-word definitions, overlap, clipping and untouched exposed pixels match independent copies',()=>{

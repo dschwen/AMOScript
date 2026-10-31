@@ -22,7 +22,7 @@ and empty slots. Loading clears the X hotspot's upper flipping flags as AMOS doe
 Saved masks are absent from this format.
 
 Malformed lengths, invalid headers, truncated images/palettes, unknown bank
-types, duplicate bank numbers and leftover bytes are explicit errors with byte
+types and leftover bytes are explicit errors with byte
 and bank context. Nested multi-bank groups remain unsupported. Standalone ABK
 and grouped ABS loading use this same decoder at runtime. Generic banks are
 preserved as data; decoding their audio, packed
@@ -220,8 +220,11 @@ guards and a word byte-count shift that produce truncated output beyond these
 bounds. Emulating that corrupt output/raw-memory behavior is unfinished. Generic
 output retains the decoder's 28-bit name-inclusive length limit. Physical memory
 capacity and exact partial-write contents after disk failure are not modeled.
-Grouped files containing duplicate implicit image-bank numbers remain outside
-the decoder's supported subset.
+Grouped files may contain repeated bank numbers or repeated AmSp/AmIc chunks.
+The decoder validates every entry, then applies native file-order replacement:
+the last entry for a number wins. Image chunks do not encode relocated numbers;
+Bank Swap preserves distinct runtime image banks, but saving them as AmIc/AmSp
+cannot preserve their relocated slot numbers. See [Joy Src1](joy-source1.md).
 
 The format and order follow [Bnk.SaveAll/SaveA0/UnRev](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BLib.s)
 and [Lst.Cree](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/master/%2BB.s).

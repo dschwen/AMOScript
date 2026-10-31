@@ -477,6 +477,9 @@ const scenarios = [
     assert.strictEqual(result.ticks, 240132); assert.strictEqual(result.partialSphere, true);
     assert.strictEqual(result.gameRunning, false);
   } },
+  { id: 'joy-source1', title: 'Joy Src1: Schokowahn labyrinth editors', initialFrame: 'Canvas: LabEdit.AMOS filled map', description: 'Both complete, unmodified LabEdit sources with a declared initial hardware pointer and the accompanying LAB icons. Fill, clear, marker protection through Pop, painting and Escape/Edit are exercised. Twelve independent grid and GPU frames. The four empty source files and Labyrinth backup runtime bounds error remain explicit in the build report; this is an editor showcase, not the complete adventure.', run: require('./joySource1Probe'), check(result, assert) {
+    assert.deepStrictEqual(result, { editors: 2, frames: 12, gpuFrames: 12, independentPixels: 460800, protectedPopExits: 4, ended: true, standalonePage: true });
+  } },
   { id: 'amos-3d', title: 'AMOS 3D: original car and hero models', initialFrame: 'Canvas: hero frame 104', description: 'Live playback adds a labelled hero turntable; the original source ends on a static hero pose and remains selectable. Checks cover twelve official slot-4 commands, original .3DO/.3DT/.3DS assets and a declared excerpt of Gru1 Anim lines 1–5 and 36–55 on a prepared screen/palette. All 104 source frames execute; six complete indexed images match an independent Python ray/plane rasterizer and six actual WebGL frames. Portable rotation/raster/depth profile, not native blitter/BSP or Amiga capture parity. The preceding STOS sprite intro remains unsupported.', run: require('./amos3DProbe'), check(result, assert) {
     assert.deepStrictEqual(result, { sourceFrames: 104, definitions: 2, dependencies: 5, independentPixels: 384000, gpuFrames: 6, ended: true, fullIntro: false });
   } },

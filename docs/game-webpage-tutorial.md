@@ -391,3 +391,11 @@ Play Game remains owned by the sample harness and runs no verification input.
 See [the Zybex page notes](planet-zybex-game.md) for the tested loss/restart path,
 independent images/audio and remaining progression coverage. This is a second
 concrete source/manifest example for adapting the harness to your own game.
+
+
+The JavaScript `buildGamePage` API also accepts an optional
+`initialMouse: [hardwareX, hardwareY, buttons]` (unsigned-word coordinates and a
+0–7 button mask). The host injects that declared pointer input before each new
+program starts. Joy's editor wrappers use `[133,50,0]` because the source queries
+the mouse before a browser pointer event arrives. This does not reposition the
+mouse when AMOS executes Limit Mouse, and is not enabled by default.

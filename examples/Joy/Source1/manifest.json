@@ -1,0 +1,73 @@
+{
+  "description": "Unmodified Joy Src1 sources, including the supplied zero-byte files. Runtime assets are explicitly sourced from the accompanying JoyIII graphics and Source1 map.",
+  "sources": [
+    {
+      "path": "ASM.AMOS",
+      "origin": "joy/Joy Src1/ASM.AMOS",
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ASM_Intro.AMOS",
+      "origin": "joy/Joy Src1/ASM_Intro.AMOS",
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "LabEdit.AMOS",
+      "origin": "joy/Joy Src1/LabEdit.AMOS",
+      "byteLength": 7056,
+      "sha256": "5403316e1c959d3aef538d9ab2941c2d0dd8c1142e0b32cbe13067f716b7a743"
+    },
+    {
+      "path": "LabEdit.Bak",
+      "origin": "joy/Joy Src1/LabEdit.Bak",
+      "byteLength": 4158,
+      "sha256": "6475c23d31e01b94457fed1ddfe90c54c596c829040cfd1f32653f7c2c83fcd7"
+    },
+    {
+      "path": "Labyrinth.AMOS",
+      "origin": "joy/Joy Src1/Labyrinth.AMOS",
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Labyrinth.Bak",
+      "origin": "joy/Joy Src1/Labyrinth.Bak",
+      "byteLength": 14088,
+      "sha256": "805dc0dd6eef8b5e39617ebc5dc4341de696f64480fb77bdb48a95e120889c5e"
+    },
+    {
+      "path": "ZoneDefiner.AMOS",
+      "origin": "joy/Joy Src1/ZoneDefiner.AMOS",
+      "byteLength": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "files": {
+    "JoyII:Grafiken/LAB.Icons.Abk": {
+      "path": "assets/LAB.Icons.Abk",
+      "origin": "joy/joy3/grafiken/LAB.Icons",
+      "byteLength": 2490,
+      "sha256": "bd09e5f72b696c222a2fd330b80c4e6472b43c4d57329590b543272e3effd834"
+    },
+    "JoyII:Grafiken/Icons2.Abk": {
+      "path": "assets/Icons2.Abk",
+      "origin": "joy/joy3/grafiken/Icons2",
+      "byteLength": 3670,
+      "sha256": "72663f9baf05d73dd5a1efcfc10bd5e1ad9196202c2b199132ccc901f862c701"
+    },
+    "JoyII:Grafiken/Befehle3.Pic": {
+      "path": "assets/Befehle3.Pic",
+      "origin": "joy/joy3/grafiken/Befehle3.Pic",
+      "byteLength": 1050,
+      "sha256": "bd5cc7451ade0f4b493bb3dcbd7eb88ca1d58f5537535b761fa49dba13514b26"
+    },
+    "JoyII:Labyrinth/Labyrinth5": {
+      "path": "assets/Labyrinth5",
+      "origin": "joy/Joy Src1/labyrinth/Labyrinth5",
+      "byteLength": 404,
+      "sha256": "12d83e6bec95176801816dd2f4e30a19a5ce7043541cb803c9d3638b5c6ade33"
+    }
+  }
+}

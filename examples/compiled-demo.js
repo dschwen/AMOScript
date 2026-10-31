@@ -3017,17 +3017,18 @@
     if (this.ip === this.data.length) return []; // Code-only compiler fixtures.
     if (this.text(4) !== 'AmBs') this.error('Expected AmBs bank trailer');
     const count = this.word();
-    const banks = [];
-    const numbers = new Set();
+    const banks = new Map();
     for (let i = 0; i < count; i++) {
       this.context = `bank entry ${i + 1}`;
       const bank = this.entry();
-      if (numbers.has(bank.number)) this.error(`Duplicate bank number ${bank.number}`);
-      numbers.add(bank.number);
-      banks.push(bank);
+      // LB_Multiples loads each entry with EntNul (low word zero): later
+      // entries replace earlier ones, including repeated AmSp/AmIc chunks.
+      // Image chunks have no encoded relocated bank number; never invent one.
+      banks.delete(bank.number);
+      banks.set(bank.number, bank);
     }
     if (this.ip !== this.data.length) this.error('Unexpected data after bank trailer');
-    return banks;
+    return Array.from(banks.values());
   }
 };
   const bankWriterFactory = class BankWriter {
@@ -7215,6 +7216,11 @@
       const retIp = state.stack.pop();
       if (retIp == null) { state.halted = true; throw new Error('Return without Gosub'); }
       state.ip = retIp;
+    }
+    if (res.pop) {
+      const procedure = state.frames[state.frames.length - 1];
+      if (!state.stack.length || (procedure && state.stack.length <= procedure.stackDepth)) throw new Error('Pop without Gosub');
+      state.stack.pop();
     }
     if (res.procCall != null) {
       state.frames.push({ ip: ipBefore + 1, locals: state.locals, data: state.data, stackDepth: state.stack.length });

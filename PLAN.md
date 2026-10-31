@@ -2,9 +2,22 @@
 
 Assessment updated: 2026-10-30.
 
+## Joy Src1
+
+[All three nonempty originals compile](docs/joy-source1.md): LabEdit.AMOS,
+LabEdit.Bak and Labyrinth.Bak. The other four AMOS inputs are zero bytes. Pop and
+uncached Limit Mouse/Ink overloads are implemented. Repeated grouped icon/sprite
+chunks now follow native last-entry-wins loading, and the original ICONBANKING
+procedure passes all six bank-swap transitions. Both complete editors run through
+painting, fill/clear, protected Pop exits and Escape/Edit, with twelve independent
+and GPU frames and a live page. Labyrinth startup reaches its line-70 map read
+before the bounds test at 71; correct that at the source level, preserving the
+upstream copy and strict bank checks, before accepting gameplay. Nonempty asm_neu
+variants remain a separate follow-up target, not substitutes for missing Src1 files.
+
 ## Gru1, Gru2 and progs1
 
-The [39-source inventory](docs/gru-programs.md) now compiles 32 originals/backups,
+The [39-source inventory](docs/gru-programs.md) now compiles 33 originals/backups,
 including all nine progs1 `.AMOS` files. Def Scroll/Scroll, uncached Fsel$/Load/Save,
 declared bare procedure calls, top-level Shared and Text Base are implemented.
 Bgrab has an explicit stopped-parent ownership boundary. Run supports terminal
@@ -13,8 +26,8 @@ supports a bounded single CODE hunk. Varptr/Areg/Screen Base/Call/Doscall expose
 checked virtual memory and synchronous native adapters, without claiming built-in
 68000 execution. Keep bank/display memory ranges and source validation intact.
 
-Next: implement SpriteXpro's Clip and remaining sample/wave commands; determine
-the intended icon bank in the main map editor; adopt deliberate source fixes for
+Next: implement SpriteXpro's Clip and remaining sample/wave commands; exercise
+the main map editor with its external assets; adopt deliberate source fixes for
 the malformed backups where appropriate. [AMOS 3D](docs/amos-3d.md) now has twelve
 slot-4 commands, checked object/template/vector-surface loading and a portable
 indexed renderer. Its declared original car/hero excerpt completes all 104 fields;
