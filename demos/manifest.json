@@ -460,7 +460,7 @@
     {
       "file": "asm-main-checks.html",
       "title": "ASM — Das Spiel: first-room checks",
-      "description": "The complete unchanged main source reaches its opening briefings, the original third-letter prompt, the parser, poster inspection and handle pickup through real input. Both room bitmaps match independent Python ILBM/sprite expectations. The intro-to-main page retains fonts and RAM session files; the missing Befehle2 conversation panel is a declared temporary asset substitution. Later-room assets remain outside this build.",
+      "description": "The main source reaches its briefings, original third-letter prompt, poster inspection and handle pickup through real input. The replay opens the room 2 door, enters room 3 with Gehe, opens/closes a drawer and returns with Zurück. Five room bitmaps match independent Python ILBM/sprite expectations. The intro-to-main page retains fonts and RAM session files; the missing Befehle2 conversation panel is a declared temporary asset substitution. Later-room assets remain outside this build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-main-checks.html"
     },
     {
@@ -550,7 +550,7 @@
     {
       "file": "asm-room1.html",
       "title": "ASM — direct room 1 (WebGL)",
-      "description": "Start the main game without the intro. JOY edition, debug menu, and room 2 via Zurück.",
+      "description": "Start the main game without the intro. JOY edition, debug menu, room 2 via Zurück and room 3 through its door.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html"
     },
     {

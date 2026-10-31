@@ -243,3 +243,19 @@ advances; no browser font or CSS letter spacing is involved. The text renderer
 now clears the complete advance span before painting glyphs, fixing residual
 pixels in wide gaps and preventing overlapping cells from erasing prior ink.
 These are bitmap/metric checks, not a native Amiga text capture.
+
+## Room 3 door transition
+
+The browser manifest now embeds Room3.Pic, Room3.Sprites.Abk, Room3.Txt and
+Room3.Zones from the supplied Joy Src2 directory, with original hashes pinned.
+The entry failure was a missing-asset boundary in the demo, not an unsupported
+compiler token. Room3.Pic uses its original valid BODY header and the same
+explicit top-320×128 packed-picture preparation as the other room previews.
+
+To enter: select **Öffne**, click room 2's door, select **Gehe**, then click the
+door again. The expanded input-only replay enters room 3, opens and closes its
+upper drawer, then uses Zurück to return to room 2. All 26 checkpoints run on
+Canvas and actual WebGL. Independent Python decoding covers 204,800 bitmap
+pixels across the room 1 and room 3 states, including the drawer's five-plane
+Bob preserving the background's sixth plane. Source code and runtime semantics
+are unchanged by this asset addition. Rooms 4 onward remain outside the build.

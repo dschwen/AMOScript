@@ -28,6 +28,14 @@ module.exports=function asmMainReplay(p,clock,capture,check,commands=false) {
     check(p.display.screenIn(338,110)===0,'Artwork screen obscures interactive screen after Unpack');
     click(140,229);click(340,125);until(()=>p.state.variables.array_int_flag.values.get(6)===1,'room 2 door opens');advance(100);capture('room 2 door open');
     click(140,238);click(340,125);until(()=>p.state.variables.array_int_flag.values.get(6)===0,'room 2 door closes');advance(100);capture('room 2 door closed');
+    click(140,229);click(340,125);until(()=>p.state.variables.array_int_flag.values.get(6)===1,'room 2 door reopens');advance(100);capture('room 2 door reopened');
+    click(195,220);check(p.state.variables.int_verb===10,'Gehe command not selected');click(340,125);
+    until(()=>p.state.variables.int_raum===3&&line()>=14&&line()<=58,'room 3 parser');advance(100);capture('room 3 ready','room3Initial');
+    check(p.display.screenIn(276,159)===0,'Room 3 artwork obscures its clickable screen');
+    click(140,229);click(276,159);until(()=>p.state.variables.array_int_flag.values.get(11)===1,'room 3 drawer opens');advance(100);capture('room 3 drawer open','room3DrawerOpen');
+    click(140,238);click(276,159);until(()=>p.state.variables.array_int_flag.values.get(11)===0,'room 3 drawer closes');advance(100);capture('room 3 drawer closed','room3Initial');
+    click(195,229);until(()=>p.state.variables.int_raum===2&&line()>=14&&line()<=58,'room 2 return parser');advance(100);capture('returned to room 2');
+
   }
   return {room:p.state.variables.int_raum,handle:p.state.variables.array_int_transport.values.get(2)};
 };

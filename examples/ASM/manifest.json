@@ -158,17 +158,34 @@
     "ASM.current.AMOS": {
       "byteLength": 170224,
       "sha256": "1c656922ba4c5b214370abadc92f4959a6d72e4d8446ea731d5e63cded2aca93"
+    },
+    "game/Room3.Pic": {
+      "byteLength": 9886,
+      "sha256": "84e1983e3d3d36ac188d5f90799c77d450e5ebd4143db0f1671ddbddee1a1d88"
+    },
+    "game/Room3.Sprites.Abk": {
+      "byteLength": 4806,
+      "sha256": "8f81f2d22457335014a86cd33ac28822a77f2d679b237a1228406c0f97f6eecc"
+    },
+    "game/Room3.Txt": {
+      "byteLength": 174,
+      "sha256": "12ae40efa03510ccc1b01ae03a3d074c5eccdd2d3fe1e813e3e5ab4189365022"
+    },
+    "game/Room3.Zones": {
+      "byteLength": 142,
+      "sha256": "68dbb33275bb304d5e7fa9d3bbf81eb8538a2ca5b023a0673d6944015e9ebf82"
     }
   },
   "gameAssetProfile": {
     "origin": "joy/Joy Src2 room/control assets, asm_neu/Gesichter.Abk, joy/asm_neu.adf Texte files",
-    "scope": "rooms 1 and 2, original text tables and menus; rooms 3 onward not yet embedded",
+    "scope": "rooms 1 through 3, original text tables and menus; rooms 4 onward not yet embedded",
     "preparation": [
       "Room1.Pic top 320x128 packed at hardware 128,80",
       "Control pictures top 320x90 packed at hardware 128,208",
       "Befehle.Pic final zero is IFF padding, not BODY payload; only prepared bytes correct the size",
       "Befehle2.Pic is empty; disk data block 1422 is overwritten. Provisional conversation panel uses supplied Befehle4.Pic explicitly.",
-      "Room2.Pic top 320x128 packed at hardware 128,80; its final zero is IFF padding, not BODY payload"
+      "Room2.Pic top 320x128 packed at hardware 128,80; its final zero is IFF padding, not BODY payload",
+      "Room3.Pic top 320x128 packed at hardware 128,80"
     ]
   },
   "currentSource": {

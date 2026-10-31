@@ -1031,3 +1031,7 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   Replay opens/closes room 2 door after Zurück, 21 Canvas/GPU checkpoints.
   Direct room entry uses WebGL; linked intro remains Canvas for HAM.
   Proportional JAM2 text clears the full advance span before glyph foreground.
+
+- ASM room 3 assets are pinned and embedded. Replay opens room 2 door, uses Gehe
+  to enter room 3, opens/closes its upper drawer and returns with Zurück. Twenty-six
+  Canvas/GPU checkpoints and 204800 independent room 1/3 pixels; rooms 4+ remain open.

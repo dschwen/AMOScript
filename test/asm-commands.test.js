@@ -3,15 +3,15 @@ const assert=require('assert'),fs=require('fs'),path=require('path');
 const {compile}=require('./helpers/program'),{createFakeTimers}=require('./helpers/fakeTimers');
 const {prepare}=require('../tools/asmIntroAssets'),{createMemoryFiles}=require('../lib/amos/files');
 
-test('ASM main: commands redraw the bar, preserve sprite palette events and enter room 2 through Zurück',()=>{
+test('ASM main: commands redraw the bar, enter room 3 through the opened door, use its drawer and return to room 2',()=>{
   require('../tools/build_asm').inputs();const intro=prepare(),assets={...intro.assets,...require('../tools/asmGameAssets').prepare()},initial=Object.fromEntries(Object.entries(assets).map(([n,b])=>[n,Buffer.from(b,'base64').toString('latin1')]));initial['ram:level']='2\r\n';
   const memory=createMemoryFiles(initial,[],['df0:']),clock=createFakeTimers(4),requests=[];
   const files={read:n=>memory.read(n.toLowerCase()),write:(n,b)=>memory.write(n.toLowerCase(),b,n),remove:n=>memory.remove(n.toLowerCase()),exists:n=>memory.exists(n.toLowerCase()),isDirectory:n=>memory.isDirectory(n.toLowerCase()),list:n=>memory.list(n.toLowerCase()),freeSpace:n=>memory.freeSpace(n.toLowerCase())};
   const p=compile(fs.readFileSync(path.join(__dirname,'../examples/ASM/ASM.current.AMOS'))).create({files,displayOptions:{diskFonts:intro.diskFonts},now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,system:{command:(...args)=>requests.push(args)},print(){}});
   let frames=0,pixels=0;
   try{
-    const result=require('./helpers/asmMainReplay')(p,clock,(name,oracle)=>{frames++;if(oracle){const expected=Buffer.from(require('./fixtures/asm/room1.json')[oracle],'base64');assert.deepStrictEqual(Buffer.from(p.display.screen(2).pixels),expected,name);pixels+=expected.length;}p.display.canvasFrame();},assert.ok,true);
-    assert.deepStrictEqual(result,{room:2,handle:2});assert.strictEqual(frames,21);assert.strictEqual(pixels,81920);assert.strictEqual(p.state.error,undefined);
+    const result=require('./helpers/asmMainReplay')(p,clock,(name,oracle)=>{frames++;if(oracle){const expected=Buffer.from(({...require('./fixtures/asm/room1.json'),...require('./fixtures/asm/room3.json')})[oracle],'base64');assert.deepStrictEqual(Buffer.from(p.display.screen(2).pixels),expected,name);pixels+=expected.length;}p.display.canvasFrame();},assert.ok,true);
+    assert.deepStrictEqual(result,{room:2,handle:2});assert.strictEqual(frames,26);assert.strictEqual(pixels,204800);assert.strictEqual(p.state.error,undefined);
   }finally{p.stop();}
 });
 
