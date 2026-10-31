@@ -1,7 +1,7 @@
 'use strict';
 module.exports=async function asmMainProbe(page){
   const fs=require('fs'),T=require('../../lib/Transpiler'),intro=require('../../tools/asmIntroAssets').prepare();
-  return page.evaluate(async ({source,assets,fonts,oracle,replay,clockSource,gpuSources,linkedPage})=>{
+  return page.evaluate(async ({source,assets,fonts,oracle,replay,clockSource,gpuSources,linkedPage,directPage})=>{
     const make=t=>new Function(`return (${t});`)(),check=(v,m)=>{if(!v)throw Error(m);};
     const module={exports:{}};new Function('module',source)(module);const clock=make(clockSource)(4);
     const memory=Object.fromEntries(Object.entries(assets).map(([n,b])=>[n,atob(b)]));memory['ram:level']='2\r\n';
@@ -17,7 +17,7 @@ module.exports=async function asmMainProbe(page){
         host.render();const cpu=p.display.canvasFrame(),old=p.display.canvasFrame;p.display.canvasFrame=()=>{throw Error('Main game GPU used CPU presentation');};try{gpuHost.render();}finally{p.display.canvasFrame=old;}
         const rgba=gpu.readPixels(),reference=p.display.renderDisplay();check(gpu.stats.lastResult.backend==='gpu'&&rgba.length===reference.length&&rgba.every((v,i)=>v===reference[i]),'Main game GPU mismatch '+label);frames++;gpuFrames++;
         if(globalThis.AMOS_DEMO_OBSERVE){globalThis.AMOS_DEMO_OBSERVE({name:'Canvas: ASM main '+label,width:cpu.width,height:cpu.height,rgba:cpu.rgba});globalThis.AMOS_DEMO_OBSERVE({name:'WebGL: ASM main '+label,width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba});}
-      },check);
+      },check,true);
       check(!Object.hasOwn(memory,'ram:level'),'Main game did not consume the intro level file');
       const frame=document.createElement('iframe');frame.style.cssText='width:800px;height:700px';document.body.append(frame);const loaded=new Promise(r=>frame.onload=r);frame.srcdoc=linkedPage;await loaded;
       try{
@@ -34,7 +34,15 @@ module.exports=async function asmMainProbe(page){
         doc.getElementById('game-restart').click();await atLine([14]);check(viewport.dataset.phase==='running','Restart did not return to the entry intro');
         await win.AMOS_GAME_PAGE.dispose();
       }finally{frame.remove();}
+      const direct=document.createElement('iframe');document.body.append(direct);
+      try{
+        const loaded=new Promise(r=>direct.onload=r);direct.srcdoc=directPage;await loaded;
+        const doc=direct.contentDocument,win=direct.contentWindow,viewport=doc.getElementById('game-viewport');
+        const ready=async()=>{for(let i=0;i<600;i++){check(viewport.dataset.phase!=='error'&&!viewport.dataset.sourceError,'Direct room failed');if(Number(viewport.dataset.line)===1701)return;await new Promise(r=>setTimeout(r,30));}throw Error('Direct room startup timeout');};
+        doc.getElementById('play-game').click();await ready();check(!win.AMOS_GAME_PAGE.files.exists('ram:level'),'Direct entry did not consume level');
+        doc.getElementById('game-restart').click();await ready();check(!win.AMOS_GAME_PAGE.files.exists('ram:level'),'Direct Restart did not recreate and consume level');await win.AMOS_GAME_PAGE.dispose();
+      }finally{direct.remove();}
       return {frames,gpuFrames,independentPixels,...result,linkedPage:true,mobileText:true};
     }finally{host.detach();gpuHost.detach();p.stop();const gl=gpu.resources.context;gpu.dispose();const ext=gl.getExtension('WEBGL_lose_context');if(ext&&!gl.isContextLost())ext.loseContext();}
-  },{source:new T(fs.readFileSync(require('path').join(__dirname,'../../examples/ASM/ASM.AMOS'))).toModule(),assets:{...intro.assets,...require('../../tools/asmGameAssets').prepare()},fonts:intro.diskFonts.map(f=>({...f,data:Array.from(f.data)})),oracle:require('../fixtures/asm/room1.json'),replay:require('./asmMainReplay').toString(),clockSource:require('./fakeTimers').createFakeTimers.toString(),gpuSources:require('./webglHostSources')(),linkedPage:require('../../tools/build_asm').pages().get('asm-game-debug.html')});
+  },{source:new T(fs.readFileSync(require('path').join(__dirname,'../../examples/ASM/ASM.AMOS'))).toModule(),assets:{...intro.assets,...require('../../tools/asmGameAssets').prepare()},fonts:intro.diskFonts.map(f=>({...f,data:Array.from(f.data)})),oracle:require('../fixtures/asm/room1.json'),replay:require('./asmMainReplay').toString(),clockSource:require('./fakeTimers').createFakeTimers.toString(),gpuSources:require('./webglHostSources')(),linkedPage:require('../../tools/build_asm').pages().get('asm-game-debug.html'),directPage:require('../../tools/build_asm').pages().get('asm-room1.html')});
 };

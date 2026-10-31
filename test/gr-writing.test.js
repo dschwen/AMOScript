@@ -16,9 +16,9 @@ test('Gr Writing: Text JAM1 preserves background and JAM2 uses Ink background fo
   for(const mode of [0,1]){const d=createDisplay();d.open(0,16,8,8,0);d.clear(7);d.ink(3,2);d.grWriting(mode);d.grLocate(9,6);d.text(0,7,'A');const s=d.screen();for(let y=0;y<8;y++)for(let x=0;x<8;x++)assert.strictEqual(s.pixels[y*16+x],a[y]&(1<<x)?3:mode===0?7:2);assert.deepStrictEqual([s.gx,s.gy],[9,6]);assert.ok(s.pixels.filter((_,i)=>i%16>=8).every(v=>v===7));}
 });
 
-test('Gr Writing: native initial BPen is separate from window Paper and legacy defaults; Ink changes affect both graphics paths',()=>{
+test('Gr Writing: explicit JAM2 initial BPen stays separate from Paper; default text erases with the legacy background ink',()=>{
   const d=createDisplay();d.open(0,16,8,8,0);d.clear(7);d.paper(5);d.ink(3);d.grWriting(1);d.text(0,7,'A');assert.strictEqual(d.screen().pixels[0],1);d.ink(3,6);d.text(0,7,'A');assert.strictEqual(d.screen().pixels[0],6);
-  const legacy=createDisplay();legacy.open(0,16,8,8,0);legacy.clear(7);legacy.ink(3);legacy.text(0,7,'A');assert.strictEqual(legacy.screen().pixels[0],7);legacy.setLine(0);legacy.draw(0,0,15,0);assert.ok(legacy.screen().pixels.subarray(0,16).every(v=>v===0));
+  const legacy=createDisplay();legacy.open(0,16,8,8,0);legacy.clear(7);legacy.ink(3);legacy.text(0,7,'A');assert.strictEqual(legacy.screen().pixels[0],0);legacy.setLine(0);legacy.draw(0,0,15,0);assert.ok(legacy.screen().pixels.subarray(0,16).every(v=>v===0));
 });
 
 test('Gr Writing: patterned Draw/Draw To/Box retain traversal and phase while mode zero skips pattern holes',()=>{

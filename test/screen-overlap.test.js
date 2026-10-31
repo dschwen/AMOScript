@@ -56,11 +56,12 @@ test('screen overlap: direct sprites survive setup rows with independently check
   const setupOnly = d.canvasFrame(), offset = (297 - 42) * 1280 + 300 * 4;
   assert.deepStrictEqual(Array.from(setupOnly.rgba.slice(offset, offset + 4)), rgba(back.palette[17]));
   front.palette = front.palette.map((value, i) => i >= 16 ? 0xfff : value);
-  assert.throws(() => d.snapshotDisplay(), /Sprite palette changes.*capture budget/);
+  const late = d.canvasFrame();
+  assert.deepStrictEqual(Array.from(late.rgba.slice(((240-42)*320+300)*4,((240-42)*320+300)*4+4)),rgba(0xfff));
 });
 
 
-test('screen overlap: transparent armed sprite rows do not demand unused palette capture, while nonzero attached data stays guarded', () => {
+test('screen overlap: transparent and nonzero attached sprite rows preserve timed setup palette events', () => {
   const { d, front } = windows();
   front.palette = front.palette.map((value, i) => i >= 16 ? 0xfff : value);
   let data = 0;
@@ -71,5 +72,6 @@ test('screen overlap: transparent armed sprite rows do not demand unused palette
   });
   assert.strictEqual(d.snapshotDisplay().frame.overflowEvents.length, 0);
   data = 1;
-  assert.throws(() => d.snapshotDisplay(), /Sprite palette changes.*capture budget/);
+  const late=d.canvasFrame(),at=((239-42)*320+315)*4;
+  assert.deepStrictEqual(Array.from(late.rgba.slice(at,at+4)),rgba(0xfff));
 });

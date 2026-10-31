@@ -18,7 +18,7 @@ function pages() {
     let page=buildGamePage(source,{title:'ASM — Das Spiel: original intro'+(debug?' (debug)':''),assets,diskFonts,renderer:'canvas',stopOnUnlinkedRun:true,debug});
     const preview=n=>'https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+n;
     const other=debug?'asm-intro.html':'asm-intro-debug.html';
-    page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview(other)}">${debug?'Regular preview':'Debug preview'}</a> · <a href="${preview('asm-intro-checks.html')}">Browser checks</a></nav><h1>`)
+    page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular preview':'Debug preview'}</a> · <a href="${preview('asm-intro-checks.html')}">Browser checks</a></nav><h1>`)
       .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse to choose music and difficulty; click to advance the intro.').replace('<details class="game-help">','<p>Development preview of the complete original intro. Use the mouse to choose music and difficulty, then click through the logo and title screens; right click skips to loading. Canvas renders the HAM title image. The main adventure is the next milestone and is not included yet.</p><details class="game-help">');
     outputs.set(file,page);
   }
@@ -29,11 +29,12 @@ function pages() {
       programs:{'ASM:ASM.Main':main.toString('base64')},renderer:'canvas',debug,restartFromEntry:true,directories:['Df0:','Ram:']});
     const other=debug?'asm-game.html':'asm-game-debug.html';
     const preview=n=>'https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+n;
-    page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview(other)}">${debug?'Regular build':'Debug build'}</a> · <a href="${preview('asm-main-checks.html')}">Browser checks</a></nav><h1>`)
-      .replace('<details class="game-help">','<p>First-room development build: the original intro now launches the complete compiled main source. Choose JOY for the full view (IO Light intentionally shows half). Click through the opening messages, then use ⌨ to type the requested letter of ASM. The original conversation-panel file is missing; this build provisionally uses the supplied Befehle4 artwork. Later room assets are not embedded yet.</p><details class="game-help">')
+    page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular build':'Debug build'}</a> · <a href="${preview('asm-main-checks.html')}">Browser checks</a></nav><h1>`)
+      .replace('<details class="game-help">','<p>First-room development build: the original intro now launches the complete compiled main source. Choose JOY for the full view (IO Light intentionally shows half). Click through the opening messages, then use ⌨ to type the requested letter of ASM. The original conversation-panel file is missing; this build provisionally uses the supplied Befehle4 artwork. Room 2 is included through Zurück; rooms 3 onward are not embedded yet.</p><details class="game-help">')
       .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse or touch to select commands and objects. Open ⌨ for text input; Enter and Backspace go directly to AMOS.');
     outputs.set(debug?'asm-game-debug.html':'asm-game.html',page);
   }
+  outputs.set('asm-room1.html',buildGamePage(main,{title:'ASM — Room 1 direct debug',assets:gameAssets,diskFonts,renderer:'canvas',debug:true,directories:['Df0:','Ram:'],entryFiles:{'Ram:Level':'2\r\n'}}).replace('<details class="game-help">','<p>Direct main-game launcher: skips the intro and selects the JOY edition. Click through the opening briefings and answer the requested letter of ASM. Zurück leads to room 2. Restart restores the startup session file.</p><details class="game-help">'));
   return outputs;
 }
 function build(outputDirectory) {

@@ -1,6 +1,6 @@
 'use strict';
 // Shared, serialized input-only replay; reads state for assertions, never edits it.
-module.exports=function asmMainReplay(p,clock,capture,check) {
+module.exports=function asmMainReplay(p,clock,capture,check,commands=false) {
   const line=()=>p.state.location&&p.state.location.line;
   let startup=false;
   const advance=ms=>{clock.tick(ms);if(!startup&&line()===1076){startup=true;const snapshot=p.display.snapshotDisplay(),row=79-snapshot.frame.origin.y;check((snapshot.frame.lineRegs[row*32+16]&2)===0,'Adjacent windows did not reserve the real setup row');capture('adjacent startup windows');}if(p.state.error)throw Error('ASM source error: '+p.state.error.message);};
@@ -20,5 +20,11 @@ module.exports=function asmMainReplay(p,clock,capture,check) {
   check([...p.state.variables.array_int_inventar.values.values()].includes(2),'Picked-up handle missing from inventory');capture('handle in inventory','handleRemoved');
   check(startup,'Startup contact-window checkpoint was not reached');
   check(p.currentDirectory()==='','Source directory prefix changed');
+  if(commands){
+    click(140,220);const bar=p.display.screen(1).pixels.slice(0,320*8);
+    for(const [x,y] of [[140,220],[140,229],[140,238],[140,247],[140,256],[140,274],[140,283],[140,292],[195,220]]){click(x,y);capture('command '+p.state.variables.int_verb);}
+    click(140,220);check(p.display.screen(1).pixels.slice(0,320*8).every((v,i)=>v===bar[i]),'Command bar retains old letters');capture('command bar restored');
+    click(195,229);until(()=>p.state.variables.int_raum===2&&line()>=14&&line()<=58,'room 2 parser');advance(100);check(p.state.variables.int_raum===2,'Zurück did not enter room 2');capture('room 2');
+  }
   return {room:p.state.variables.int_raum,handle:p.state.variables.array_int_transport.values.get(2)};
 };

@@ -1065,14 +1065,8 @@
     const result = copperInterpreter(memory.bytes, { ...compiled.interpretOptions, initialRegisters: compiled.initialRegisters,
       address: copperAllocation.address, revision: ++revision }).snapshot;
     if (display.writeSprites) display.writeSprites(result.frame);
-    for (const view of views.filter(view => view.blankSetup)) {
-      const row = view.y - 1 - result.frame.origin.y;
-      const sprites = row >= 0 && row < result.frame.lines ? result.frame.lineSprites.subarray(row * 32, (row + 1) * 32) : [];
-      // An armed all-zero row is transparent, including either half of an
-      // attached pair. Only actual sprite data needs a captured palette.
-      const active = sprites.some((flags, index) => index % 4 === 3 && (flags & 0x80000000) && (sprites[index - 2] || sprites[index - 1]));
-      if (active && !compiled.spriteSafeSetupRows.includes(view.y - 1)) throw new Error('Sprite palette changes exceed screen setup capture budget');
-    }
+    // Palette writes after setup-row capture remain timed copper events.
+    // Both sprite resolvers consume them; they need not all precede capture.
     return snapshotModel.createSnapshot(result);
   }
   return { snapshot, snapshotDisplay, prune };
@@ -2735,8 +2729,11 @@
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
     const selected = graphicsFonts.get(target);
+    // Native default text drawing erases with the background pen (JAM2).
+    // Gr Writing 0 explicitly selects transparent JAM1.
+    const background = target.graphicsMode === 0 ? null : target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground;
     if (!selected) {
-      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, target.graphicsMode === 1 ? target.graphicsBackground : null);
+      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, background);
     } else {
       let cursor = x;
       for (let i = 0; i < value.length; i++) {
@@ -2744,7 +2741,7 @@
         for (let row = 0; row < selected.height; row++) for (let col = 0; col < selected.width; col++) {
           const bits = selected.data[(code * selected.height + row) * selected.rowBytes + (col >> 3)];
           if (bits & (0x80 >> (col & 7))) pixel(target, cursor + col, baseline - selected.baseline + row, target.ink);
-          else if (target.graphicsMode === 1) pixel(target, cursor + col, baseline - selected.baseline + row, target.graphicsBackground);
+          else if (background != null) pixel(target, cursor + col, baseline - selected.baseline + row, background);
         }
         cursor += selected.advances ? selected.advances[code] : selected.width;
       }

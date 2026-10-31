@@ -4,6 +4,12 @@ Assessment updated: 2026-10-31.
 
 ## ASM — Das Spiel
 
+Command switching and opaque command-bar redraw now pass a nineteen-frame
+Canvas/WebGL replay. A direct room 1 debug launcher skips the intro and restores
+its startup file on Restart. Zurück enters room 2 using pinned original assets;
+rooms 3 onward remain the next asset/progression work.
+
+
 [First-room showcase and implementation details](docs/asm.md). Seven of eight
 supplied asm_neu programs compile, including the unchanged complete 1,868-line
 adventure (5,903 instructions). All eighteen missing encodings now have bounded

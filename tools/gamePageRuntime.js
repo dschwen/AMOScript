@@ -33,7 +33,8 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
   function releaseGpu() { if (!gpu) return; const gl = gpu.resources.context; gpu.dispose(); gpu = null; const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   function start(factory=settings.restartFromEntry?createProgram:activeFactory) {
-    const inheritedFonts = live && live.display.fontsExamined;
+    const inheritedFonts = (live && live.display.fontsExamined) || diskFonts.length > 0;
+    if(factory===createProgram)for(const [name,bytes] of Object.entries(settings.entryFiles||{}))files.write(name,bytes);
     activeFactory=factory;
     revision++; const token = revision; failure = ''; unlinkedRun = '';
     if (host) host.detach(); if (live) live.stop(); releaseGpu();

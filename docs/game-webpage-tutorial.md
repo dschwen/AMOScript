@@ -415,3 +415,10 @@ catalogue across Run using its configured preloaded fonts. Optional `directories
 can declare empty virtual volume paths such as `['Df0:', 'Ram:']`; the in-memory
 adapter supports directory metadata, deletion and a declared virtual capacity.
 These are session files, not IndexedDB persistence or browser disk-quota claims.
+
+For a direct entry that consumes a startup file, the JavaScript builder accepts
+`entryFiles: { 'Ram:Level': '2\r\n' }`. These synchronous byte strings are
+restored whenever the entry factory starts, including Restart. Other session
+files retain their ordinary lifetime. A supplied bitmap font catalogue is
+enumerated before entry execution, including on a direct main-game page.
+The ASM direct-room page demonstrates this setup.

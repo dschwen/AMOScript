@@ -1020,3 +1020,8 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   discard unfinished composition, while Key Speed preserves it. Keep Tab focus
   navigation. Old DOM listeners cannot type into replacement programs. The common
   harness and full Roller/Wonderland launchers enable it; see docs/mobile-keyboard.md.
+
+- ASM direct room launcher uses explicit entryFiles on entry/Restart and preloaded
+  font enumeration. Rooms 1/2 are pinned; Zurück follows original source into room 2.
+  Default graphics Text paints background ink; explicit Gr Writing 0 is transparent.
+  Setup-row sprite palette changes remain timed copper events in Canvas and WebGL.

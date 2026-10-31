@@ -201,3 +201,23 @@ room pixels**, decoded from the original ILBM and sprite bank by Python. It neve
 edits VM variables, IP, banks or pixels. The actual linked page also verifies the
 intro handoff, font lifetime, RAM-file consumption, device-keyboard answer and
 Restart back to the intro. These are portable browser checks, not Amiga captures.
+
+## Command switching, direct start and room 2
+
+[Direct room 1 debug launcher](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html)
+starts the unchanged main source with an explicit JOY `Ram:Level` session file
+and preloaded font catalogue. Opening briefings and the letter prompt remain.
+Restart recreates that entry file before starting the main again.
+
+The default graphics text writer now paints the background ink, so the command
+sentence's trailing spaces erase the previous sentence. Explicit `Gr Writing 0`
+retains transparent drawing. On DMA-disabled screen setup rows, sprite palette
+writes after capture remain ordinary timed copper events; Canvas and WebGL consume
+the same events rather than rejecting a valid palette transition.
+
+The command replay switches nine commands, restores the original bar pixel for
+pixel, and selects Zurück to load room 2 through original source statements.
+Nineteen Canvas/WebGL checkpoint pairs pass. Room 2's supplied picture also counts
+a final zero alignment byte inside BODY; only prepared bytes correct that size.
+Room 2's picture, sprite bank, text and zones are pinned alongside room 1.
+Rooms 3 onward and longer adventure progression remain open.
