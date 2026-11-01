@@ -440,6 +440,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/save-iff.html"
     },
     {
+      "file": "interface-channels.html",
+      "title": "Interface dialogue channel preparation",
+      "description": "Unchanged Communication, Editing Zones and Sliders startup through their first Dialog Open, followed by a declared Wait Key guard. Four channel-inspector previews compare Canvas/WebGL, including a compiled Vdialog numeric/string transfer. Independent blank pixels verify opening does not draw. Dialog Run, controls and dialogue rendering remain unsupported.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/interface-channels.html"
+    },
+    {
       "file": "resource-screen.html",
       "title": "Interface resource screen settings",
       "description": "Original Graphics tutorial startup through Resource Screen Open and its first Wait Vbl, followed by a declared Wait Key guard. The official system resource metadata is checked separately. Four Canvas/GPU frames and independent palette pixels; the added indexed swatches are a preview, not dialogue execution or an Amiga capture.",

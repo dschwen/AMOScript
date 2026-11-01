@@ -48,8 +48,9 @@ The same shared browser scenario checks four actual Canvas/WebGL frames and
 labelled indexed swatches are an added palette preview. They are not dialogue
 execution or a native Amiga capture.
 
-All nine complete Interface tutorials now reach the next dialogue token:
-`Dialog Box` ($26e8), `Dialog Open` ($2720), or its four-argument form ($2742).
+[Dialog Open/Close](interface-channels.md) now prepare and release channels.
+Complete Interface tutorials next reach `Dialog Box` ($26e8), `Dialog Run`
+($276c), or `Array` ($25c0).
 Resource Unpack, resource messages, dialogue language/interaction and additional
 resource-consumer behavior remain separate work. Overall Tutorial compilation
 coverage remains 30/43 until these later commands are implemented.

@@ -408,6 +408,16 @@
   imports them; Grammar still imports RuleFunctions. Preserve them until their
   external compatibility/removal policy is settled.
 
+- Interface string channels use `lib/amos/interface.js` for bounded opening
+  verification and owned numeric/string slots. Dialog Open/Close, Vdialog/$ and
+  Edialog do not execute Interface drawing or install input wakes. Preserve
+  source offsets, native 17-value/1 KiB defaults, atomic failed opens and frozen
+  inspection snapshots. Stop/Resume retains channels; Default closes them.
+  Three original channel prefixes plus one compiled transfer have four Canvas/GPU
+  inspector frames; added preview text is not dialogue execution. Array references,
+  numeric resource programs, Dialog Run/Box and interactive zones remain gated.
+  See docs/interface-channels.md.
+
 ## Commands
 
 - `npm ci`: install locked dependencies.

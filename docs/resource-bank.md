@@ -27,7 +27,8 @@ checked for compilation diagnostics rather than claiming its startup ran.
 
 [Resource Screen Open](resource-screen.md) ($28ee) now consumes the selector and
 opens screens from checked resource metadata. All nine complete Interface
-tutorials next reach Dialog Box/Open. Resource graphics unpacking, dialogue
+tutorials now advance through [Dialog Open/Close](interface-channels.md) to
+Dialog Box/Run or Array. Resource graphics unpacking, dialogue
 execution and resource queries remain separate work; complete Interface
 programs are not playable yet.
 

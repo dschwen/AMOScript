@@ -9,4 +9,12 @@ function prefix(name='Graphics.AMOS'){
   const original=fs.readFileSync(path.join(folder,name)),reader=new BufferReader(original),guard=binary([[t('Wait Key')]]).subarray(20);
   const source=Buffer.concat([original.subarray(0,reader.lines[16]),guard]);source.writeUInt32BE(source.length-20,16);return source;
 }
-module.exports={prefix,folder,resource:()=>fs.readFileSync(path.join(folder,'Example_Resource.Abk'))};
+// Preserve each original script construction and its first Dialog Open. The
+// following execution/variable-access command is deliberately outside this fixture.
+function channelPrefix(name){
+  const lines={'Communication.AMOS':37,'Editing_Zones.AMOS':42,'Sliders.AMOS':50};
+  if(!lines[name])throw Error('No declared channel prefix for '+name);
+  const original=fs.readFileSync(path.join(folder,name)),reader=new BufferReader(original),guard=binary([[t('Wait Key')]]).subarray(20);
+  const source=Buffer.concat([original.subarray(0,reader.lines[lines[name]]),guard]);source.writeUInt32BE(source.length-20,16);return source;
+}
+module.exports={prefix,channelPrefix,folder,resource:()=>fs.readFileSync(path.join(folder,'Example_Resource.Abk'))};

@@ -1,6 +1,16 @@
 # AMOScript development plan
 
-Assessment updated: 2026-10-31.
+Assessment updated: 2026-11-01.
+
+## Tutorial Interface
+
+Resource Bank/Screen Open now lead into real string-based Dialog Open/Close
+channels, Vdialog numeric/string storage and Edialog diagnostics. Three original
+script-construction prefixes prepare channels without drawing; a fourth compiled
+transfer fixture shares the Canvas/WebGL inspector demo. Complete Tutorial
+compilation remains 30/43. Next: checked Array references for Sliders/Full_Example,
+then Interface execution and cooperative Dialog Run/Box, including resource
+artwork/messages and interactive zones. See [channel contract](docs/interface-channels.md).
 
 ## ASM — Das Spiel
 

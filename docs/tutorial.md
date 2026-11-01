@@ -57,7 +57,9 @@ source-located blockers. The remaining work groups are:
 selection before Load. [Resource Screen Open](resource-screen.md) ($28ee) now
 opens actual resource-defined screens, with eight original startup prefixes
 and a shared Canvas/WebGL palette preview. The nine complete Interface programs
-next stop at Dialog Box/Open ($26e8/$2720/$2742).
+now prepare channels with [Dialog Open/Close](interface-channels.md). Three
+original prefixes reach their first open; complete programs next stop at
+Dialog Box, Dialog Run or Array ($26e8/$276c/$25c0).
 
 The [menu implementation notes](menus.md) describe compiled Menu$ trees,
 indexed drawing, Choice polling, mouse/keyboard selection, native Menu banks,
