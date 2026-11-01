@@ -53,10 +53,11 @@ source-located blockers. The remaining work groups are:
    they cannot be implemented by pretending a standalone browser is the AMOS
    editor.
 
-`Resource Bank` ($28ca) now stores the native per-program selector, including
-selection before Load. The nine Interface programs next stop at `$28ee`,
-Resource Screen Open. See [Resource Bank](resource-bank.md) for tested startup
-prefixes and the remaining resource-consumer work.
+`Resource Bank` ($28ca) stores the native per-program selector, including
+selection before Load. [Resource Screen Open](resource-screen.md) ($28ee) now
+opens actual resource-defined screens, with eight original startup prefixes
+and a shared Canvas/WebGL palette preview. The nine complete Interface programs
+next stop at Dialog Box/Open ($26e8/$2720/$2742).
 
 The [menu implementation notes](menus.md) describe compiled Menu$ trees,
 indexed drawing, Choice polling, mouse/keyboard selection, native Menu banks,

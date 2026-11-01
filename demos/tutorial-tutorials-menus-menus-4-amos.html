@@ -1615,6 +1615,47 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
     consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
 };
+  const resourceScreenReader = function readResourceScreen(input=null) {
+  /* Default resource metadata notice:
+   * MIT License
+   * Copyright (c) 1992 Europress Software
+   * Copyright (c) 2020 Francois Lionet
+   * Permission is hereby granted, free of charge, to any person obtaining a copy
+   * of this software and associated documentation files (the "Software"), to deal
+   * in the Software without restriction, including without limitation the rights
+   * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   * copies of the Software, and to permit persons to whom the Software is
+   * furnished to do so, subject to the following conditions:
+   * The above copyright notice and this permission notice shall be included in all
+   * copies or substantial portions of the Software.
+   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   * SOFTWARE.
+   */
+  const fail=message=>{throw Error('Resource screen: '+message);};
+  // Screen metadata from the pinned AMOSPro_Default_Resource.Abk. Full system
+  // graphics/messages/programs are separate from this screen-only reader.
+  const system=()=>({colours:8,control:0xb200,mode:0x8000,source:'system',palette:[0,242,119,4095,3840,221,170,4083,1365,819,1843,883,1907,823,1847,887,0,3784,3168,3744,639,1181,1454,2783,3039,3311,4095,1032,2574,3598,3592,3822]});
+  if(input==null)return system();
+  if(!ArrayBuffer.isView(input)||Object.prototype.toString.call(input)!=='[object Uint8Array]'||input.length>1048576)fail('expected bounded Resource bank bytes');
+  const bytes=Uint8Array.from(input),view=new DataView(bytes.buffer);
+  const need=(at,size)=>{if(!Number.isInteger(at)||at<0||at%2||at+size>bytes.length)fail('truncated or unaligned resource table');};
+  const word=at=>{need(at,2);return view.getUint16(at,false);};
+  const sections=word(0);if(!sections)return system();
+  const headerEnd=2+Math.min(sections,3)*4;need(0,headerEnd);
+  const graphics=view.getUint32(2,false);if(!graphics)return system();
+  if(graphics<headerEnd)fail('graphics pointer overlaps resource header');
+  const count=word(graphics);if(count>4096)fail('unsupported image table size');
+  const metadata=graphics+2+count*4;need(metadata,68);
+  const colours=word(metadata),control=word(metadata+2),mode=control&0x8004;
+  if(![2,4,8,16,32,64,4096].includes(colours))fail('invalid colour count');
+  const palette=Array.from({length:32},(_,i)=>word(metadata+4+i*2)&0xfff);
+  return {colours,control,mode,palette,source:'bank'};
+};
   const animReaderFactory = (function createAnimReader(readIlbm) {
   return function readAnim(input, { position = 0, count = 32767 } = {}) {
     const fail = message => { throw new Error(`ANIM-5: ${message}`); };
@@ -4121,6 +4162,29 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   // the system resources; retain the full nonnegative longword selector.
   let resourceBankNumber=0;
   function setResourceBank(number){number=integer(number);if(number<0)throw Error('Resource Bank requires a nonnegative selector');resourceBankNumber=number;}
+  const defaultFlashPattern='(000,2)(440,2)(880,2)(bb0,2)(dd0,2)(ee0,2)(ff2,2)(ff8,2)(ffc,2)(fff,2)(aaf,2)(88c,2)(66a,2)(226,2)(004,2)(001,2)';
+  function resourceScreenOpen(id,width,height,cursor){
+    [id,width,height,cursor]=[id,width,height,cursor].map(integer);
+    const read=typeof resourceScreenReader==='function'?resourceScreenReader:globalThis.AMOS_RESOURCE_SCREEN;
+    if(typeof read!=='function')throw Error('Resource Screen Open requires lib/amos/resourceScreen.js');
+    let data=null;
+    if(resourceBankNumber){const bank=banks.get(resourceBankNumber);if(!bank)throw Error('Resource bank '+resourceBankNumber+' is not reserved');if(bank.type!=='data'||typeof bank.name!=='string'||!bank.name.startsWith('Reso'))throw Error('Resource Screen Open requires a Resource bank');data=bank.data;}
+    const metadata=read(data);
+    if(metadata.mode&4)throw Error('Resource Screen Open interlace is not implemented');
+    width=Math.floor(width/16)*16;
+    if(id<0||id>7||width<16||width>=1024||height<1||height>=1024)throw Error('Invalid Resource Screen Open screen number or dimensions');
+    const colours=metadata.colours===4096?64:metadata.colours;
+    if(cursor<0||cursor>=colours||cursor>31)throw Error('Invalid Resource Screen Open cursor colour');
+    if(cursor){
+      if(shifting)throw Error('Flash with Shift Up is not implemented; Shift Off first');
+      if(flashes.filter(job=>job.target!==display.screens.get(id)).length>=16)throw Error('Too many flashing colours');
+      if(!options.vblNow||!options.requestPaletteWake)throw Error('Resource Screen Open flashing requires the runtime VBL clock');
+    }
+    const target=display.open(id,width,height,metadata.colours,metadata.mode);
+    target.palette=metadata.palette.slice();target.cursorVisible=cursor!==0;target.cursorColour=cursor;
+    if(cursor)flash(cursor,defaultFlashPattern);
+    display.invalidate();
+  }
   let menus=null,menuLocation=null;const menuData=new WeakMap();
   function getMenus(){
     if(!menus){
@@ -5546,7 +5610,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const limits = state.input.mouseLimits;
       if (!limits || (limits.x1 === 0 && limits.y1 === 0)) state.input.mouseLimits = Object.freeze({ x1:129, y1:50, x2:448, y2:249 });
       pointerShape = 1; setPointerCount(0);
-      flash(3, '(000,2)(440,2)(880,2)(bb0,2)(dd0,2)(ee0,2)(ff2,2)(ff8,2)(ffc,2)(fff,2)(aaf,2)(88c,2)(66a,2)(226,2)(004,2)(001,2)');
+      flash(3, defaultFlashPattern);
       // MusDef stops owned controllers; it does not erase their banks or
       // change the LED/filter bit, directory, Timer or language random seed.
       trackStop(); state.tracker.loop = false; state.tracker.position = null;
@@ -6492,7 +6556,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   return {
-    setResourceBank,resourceBank:()=>resourceBankNumber,
+    setResourceBank,resourceBank:()=>resourceBankNumber,resourceScreenOpen,
     menuCommand,menuToBank,bankToMenu,menuBase:(x,y)=>menuCommand('Menu Base',[],[x,y]),menuChoice:index=>getMenus().choice(index==null?null:integer(index)),
     setMenuHandlers:targets=>getMenus().handlers(targets),menuActive:()=>!!menus&&menus.enabled(),menuService:field=>menus?menus.service(field):null,
     menuReturned:()=>{if(menus)menus.returned();},menuShortcut:(key,scan,shift)=>!!menus&&menus.shortcut(key,scan,shift),

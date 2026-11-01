@@ -25,10 +25,11 @@ bank and verify the original selection order, including Sliders. The ninth
 program, Full_Example, has earlier external music/sample dependencies and is
 checked for compilation diagnostics rather than claiming its startup ran.
 
-All nine complete Interface tutorials now reach unsupported token `$28ee`,
-Resource Screen Open. Resource graphics, default system-resource data, dialogue
-execution and resource queries remain separate work. This selector support
-does not make the Interface programs playable yet.
+[Resource Screen Open](resource-screen.md) ($28ee) now consumes the selector and
+opens screens from checked resource metadata. All nine complete Interface
+tutorials next reach Dialog Box/Open. Resource graphics unpacking, dialogue
+execution and resource queries remain separate work; complete Interface
+programs are not playable yet.
 
 Native references: `InResourceBank`, `Dia_WarmInit`, `Dia_GetPuzzle` and
 `Dia_GetDefault` in

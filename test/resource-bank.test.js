@@ -52,7 +52,7 @@ test('Resource Bank: eight original Interface startup prefixes load the supplied
   }
 });
 
-test('Resource Bank: all nine complete Interface tutorials advance to the genuine Resource Screen Open blocker',()=>{
+test('Resource Bank: all nine complete Interface tutorials now advance to the genuine dialogue blockers',()=>{
   const names=fs.readdirSync(root).filter(name=>/\.AMOS$/i.test(name));assert.strictEqual(names.length,9);
-  for(const name of names)assert.throws(()=>new Transpiler(fs.readFileSync(path.join(root,name))),/Unsupported token 0x28ee at line (13|20), byte/);
+  for(const name of names){const code=name==='Full_Example.AMOS'?'2742':['Communication.AMOS','Editing_Zones.AMOS','Sliders.AMOS'].includes(name)?'2720':'26e8';assert.throws(()=>new Transpiler(fs.readFileSync(path.join(root,name))),new RegExp('Unsupported token 0x'+code+' at line'));}
 });
