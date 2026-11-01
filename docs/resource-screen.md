@@ -50,7 +50,7 @@ execution or a native Amiga capture.
 
 [Dialog Open/Close](interface-channels.md) now prepare and release channels.
 Complete Interface tutorials next reach `Dialog Box` ($26e8), `Dialog Run`
-($276c), or `Array` ($25c0).
+($276c). [Array references](array-references.md) are implemented.
 Resource Unpack, resource messages, dialogue language/interaction and additional
 resource-consumer behavior remain separate work. Overall Tutorial compilation
 coverage remains 30/43 until these later commands are implemented.

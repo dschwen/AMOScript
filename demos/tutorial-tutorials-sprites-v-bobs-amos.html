@@ -1615,6 +1615,31 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
     consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
 };
+  const arrayReferencesFactory = function createArrayReferences() {
+  const entries=new Map(),arrays=new WeakMap();let next=0x1000;
+  function prune(){for(const [handle,entry]of entries)if(!entry.alive())entries.delete(handle);}
+  function reference(array,type,indices,alive){
+    if(!array||!Array.isArray(array.dimensions)||!array.dimensions.length||!(array.values instanceof Map))throw Error('Array not dimensioned');
+    if(!['integer','string','float'].includes(type))throw Error('Unsupported Array element type');
+    if(array.dimensions.length!==indices.length)throw Error('Wrong number of Array indices');
+    if(array.dimensions.some(size=>!Number.isInteger(size)||size<1||size>65536))throw Error('Invalid Array dimensions');
+    const dimensions=array.dimensions.slice(),valid=()=>alive()&&array.dimensions.length===dimensions.length&&array.dimensions.every((size,i)=>size===dimensions[i]);
+    if(!valid())throw Error('Array reference owner is retired');
+    for(const evaluate of indices){evaluate();if(!valid())throw Error('Array reference owner changed during subscript evaluation');}
+    prune();let entry=arrays.get(array);
+    if(entry&&entries.has(entry.handle))return entry.handle;
+    if(next>=0x10000)throw Error('Array reference space exhausted');
+    entry={handle:next,array,type,dimensions,alive:valid};next+=4;
+    arrays.set(array,entry);entries.set(entry.handle,entry);return entry.handle;
+  }
+  function resolve(handle){prune();const entry=entries.get(handle);if(!entry)throw Error('Array reference is invalid or retired');return entry;}
+  function vector(handle){const entry=resolve(handle);if(entry.dimensions.length!==1||entry.type==='float')throw Error('Interface arrays require one-dimensional integer or string storage');return entry;}
+  function size(handle){return handle===0?0:vector(handle).dimensions[0]-1;}
+  function value(handle,index){const entry=vector(handle);if(!Number.isInteger(index)||index<0||index>=entry.dimensions[0])throw Error('Array element index out of bounds');const value=entry.array.values.has(index)?entry.array.values.get(index):entry.array.defaultValue;if(entry.type==='string'?(typeof value!=='string'||value.length>65535||/[^\x00-\xff]/.test(value)):(!Number.isInteger(value)||value<-2147483648||value>2147483647))throw Error('Invalid Interface array value');return value;}
+  function read(handle,index){if(!Number.isInteger(index)||index<0||index>=size(handle))throw Error('Interface array index out of bounds');return value(handle,index);}
+  function info(handle){const entry=resolve(handle);return Object.freeze({handle,type:entry.type,dimensions:Object.freeze(entry.dimensions.slice())});}
+  return {reference,size,read,value,info};
+};
   const interfaceFactory = function createInterface() {
   const arities={EX:0,UN:3,LI:4,BO:5,SI:2,BA:2,PU:1,SV:2,IL:0,PR:4,PO:5,IN:3,SF:2,SW:1,SL:1,SP:2,BU:8,JP:1,RU:2,BR:1,ED:8,JS:1,RT:0,BC:2,KY:2,SA:1,DI:8,BL:1,LA:1,BQ:0,HS:9,VS:9,AL:10,ZC:2,UI:0,GB:4,GS:4,GL:4,IF:1,SZ:1,XY:4,NW:0,VT:4,VL:4,HT:10,CA:1,SM:0,GE:4,GP:3,SS:8};
   const functions=new Set('BX BY SX SY NE ME TW TH VA CX SW SH MI MA BP MZ XA YA XB YB AR ZP P1 P2 P3 P4 P5 P6 P7 P8 P9 ZV ZN TL AS'.split(' '));
@@ -4240,7 +4265,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   // InResourceBank only stores IDia_BankPuzzle. Lookup belongs to the later
   // resource consumer (Sliders selects bank16 before loading it). Zero selects
   // the system resources; retain the full nonnegative longword selector.
-  let resourceBankNumber=0,interfaceController;
+  let resourceBankNumber=0,interfaceController,arrayReferences;
+  function references(){if(!arrayReferences){const factory=typeof arrayReferencesFactory==='function'?arrayReferencesFactory:globalThis.AMOS_ARRAY_REFERENCES;if(typeof factory!=='function')throw Error('Array requires lib/amos/arrayReferences.js');arrayReferences=factory();}return arrayReferences;}
+
   function interfaces(){if(!interfaceController){const factory=typeof interfaceFactory==='function'?interfaceFactory:globalThis.AMOS_INTERFACE;if(typeof factory!=='function')throw Error('Dialog Open requires lib/amos/interface.js');interfaceController=factory();}return interfaceController;}
   function dialogOpen(id,source,nvar=16,bufferBytes=1024){
     [id,nvar,bufferBytes]=[id,nvar,bufferBytes].map(integer);
@@ -6647,6 +6674,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   return {
+    arrayReference:(array,type,indices,alive)=>references().reference(array,type,indices,alive),
+    arrayReferenceValue:(handle,index)=>references().value(integer(handle),integer(index)),
+    arrayReferenceInfo:handle=>references().info(integer(handle)),interfaceArraySize:handle=>references().size(integer(handle)),interfaceArrayRead:(handle,index)=>references().read(integer(handle),integer(index)),
     dialogOpen,dialogClose,dialogVariable,setDialogVariable,dialogChannels:()=>interfaces().inspect(),dialogErrorPosition:()=>interfaces().errorPosition(),
     setResourceBank,resourceBank:()=>resourceBankNumber,resourceScreenOpen,
     menuCommand,menuToBank,bankToMenu,menuBase:(x,y)=>menuCommand('Menu Base',[],[x,y]),menuChoice:index=>getMenus().choice(index==null?null:integer(index)),

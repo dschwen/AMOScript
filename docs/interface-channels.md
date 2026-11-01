@@ -53,8 +53,12 @@ uninitialised numeric slot as a string. Indices above 8191 reject instead of
 emulating native signed-word address wrapping. Values are isolated per channel
 and program; close releases them with the script.
 
+[Array references](array-references.md) now pass whole-array identities through
+numeric Vdialog slots, with checked ownership and live value reads. Interface
+AR/AS execution and selectors remain gated.
+
 Only string programs are accepted for now. Numeric resource-bank program
-selectors, resource artwork/messages, dialogue execution, Interface `VA` evaluation, AMOS array references and
+selectors, resource artwork/messages, dialogue execution, Interface `VA` evaluation and
 interactive zones remain unsupported. A selected nonzero Resource bank must
 exist when opening; opening records the selection and actual screen identity.
 It does not pretend to unpack graphics or run resource programs.
@@ -72,13 +76,14 @@ Declared prefix fixtures preserve original source through the first open:
 A synthetic Wait Key replaces everything after those lines. All three create
 channel 1 with the supplied Resource bank and leave the original bitmap black.
 The [repository demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/interface-channels.html)
-checks 512,000 independent blank pixels, channel ownership/close/Stop/Resume,
-a fourth compiled numeric/string transfer fixture, and four Canvas/WebGL frame
-comparisons. Its visible inspector text is added
+checks 640,000 independent blank pixels, channel ownership/close/Stop/Resume,
+a compiled numeric/string transfer fixture, and the original Sliders Array
+assignment with all 101 expected strings. Five Canvas/WebGL frame comparisons
+cover the combined fixtures. Its visible inspector text is added
 by the harness, not Interface execution or an Amiga capture.
 
 Complete Communication/Editing_Zones now stop at `Dialog Run` ($276c).
-Sliders/Full_Example stop at the array-reference function `Array` ($25c0); Full_Example's earlier external
+Sliders/Full_Example now also stop at `Dialog Run` ($276c); Full_Example's earlier external
 music/sample dependencies are not claimed as executed. The other five Interface
 programs still stop at `Dialog Box` ($26e8). Overall Tutorial compilation remains
 30/43; preparing a channel is not a completed or playable dialogue tutorial.

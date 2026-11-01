@@ -441,8 +441,8 @@
     },
     {
       "file": "interface-channels.html",
-      "title": "Interface dialogue channel preparation",
-      "description": "Unchanged Communication, Editing Zones and Sliders startup through their first Dialog Open, followed by a declared Wait Key guard. Four channel-inspector previews compare Canvas/WebGL, including a compiled Vdialog numeric/string transfer. Independent blank pixels verify opening does not draw. Dialog Run, controls and dialogue rendering remain unsupported.",
+      "title": "Interface channels and array references",
+      "description": "Unchanged Communication, Editing Zones and Sliders startup through their first Dialog Open, followed by a declared Wait Key guard. Five channel-inspector previews compare Canvas/WebGL, including a compiled Vdialog numeric/string transfer and all 101 original Sliders entries linked through Array. Independent blank pixels verify opening does not draw. Dialog Run, controls and dialogue rendering remain unsupported.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/interface-channels.html"
     },
     {

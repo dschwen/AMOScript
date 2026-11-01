@@ -8,8 +8,10 @@ Resource Bank/Screen Open now lead into real string-based Dialog Open/Close
 channels, Vdialog numeric/string storage and Edialog diagnostics. Three original
 script-construction prefixes prepare channels without drawing; a fourth compiled
 transfer fixture shares the Canvas/WebGL inspector demo. Complete Tutorial
-compilation remains 30/43. Next: checked Array references for Sliders/Full_Example,
-then Interface execution and cooperative Dialog Run/Box, including resource
+compilation remains 30/43. Checked [Array references](docs/array-references.md)
+now link all 101 original Sliders entries into its channel; subscript evaluation
+and scope retirement preserve the native header semantics. Next: Interface
+execution and cooperative Dialog Run/Box, including resource
 artwork/messages and interactive zones. See [channel contract](docs/interface-channels.md).
 
 ## ASM — Das Spiel

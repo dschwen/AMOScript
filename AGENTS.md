@@ -413,9 +413,14 @@
   Edialog do not execute Interface drawing or install input wakes. Preserve
   source offsets, native 17-value/1 KiB defaults, atomic failed opens and frozen
   inspection snapshots. Stop/Resume retains channels; Default closes them.
-  Three original channel prefixes plus one compiled transfer have four Canvas/GPU
-  inspector frames; added preview text is not dialogue execution. Array references,
-  numeric resource programs, Dialog Run/Box and interactive zones remain gated.
+  Three original channel prefixes, one compiled transfer and original Sliders Array
+  assignment have five Canvas/GPU inspector frames; added preview text is not
+  dialogue execution. Array evaluates subscripts once but returns the whole
+  array reference; registry ownership retires local/replaced identities and keeps
+  live element edits. Native AS returns the upper bound; AR excludes that bound.
+  The full-array inspector is separate. References expose no raw bytes.
+  See docs/array-references.md.
+  Numeric resource programs, Dialog Run/Box and interactive zones remain gated.
   See docs/interface-channels.md.
 
 ## Commands

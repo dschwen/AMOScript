@@ -17,4 +17,8 @@ function channelPrefix(name){
   const original=fs.readFileSync(path.join(folder,name)),reader=new BufferReader(original),guard=binary([[t('Wait Key')]]).subarray(20);
   const source=Buffer.concat([original.subarray(0,reader.lines[lines[name]]),guard]);source.writeUInt32BE(source.length-20,16);return source;
 }
-module.exports={prefix,channelPrefix,folder,resource:()=>fs.readFileSync(path.join(folder,'Example_Resource.Abk'))};
+function arrayPrefix(){
+  const original=fs.readFileSync(path.join(folder,'Sliders.AMOS')),reader=new BufferReader(original),guard=binary([[t('Wait Key')]]).subarray(20);
+  const source=Buffer.concat([original.subarray(0,reader.lines[51]),guard]);source.writeUInt32BE(source.length-20,16);return source;
+}
+module.exports={prefix,channelPrefix,arrayPrefix,folder,resource:()=>fs.readFileSync(path.join(folder,'Example_Resource.Abk'))};

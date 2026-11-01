@@ -20,7 +20,7 @@ async function run() {
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
     await runScenario('interface-channels',page);
-    console.log('Interface channel preparation passed: three original scripts, compiled variable transfer and four Canvas/GPU previews.');
+    console.log('Interface channel preparation passed: three original scripts, compiled variable transfer, 101 live array entries and five Canvas/GPU previews.');
     const edit=await runScenario('roller2-edit',page);assert.strictEqual(edit.gpuFrames,4);assert.strictEqual(edit.editRequests,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_EDIT_CLEANUP());
     console.log('Roller2 Edit passed: original turn/fallback branches, terminal cleanup/input ownership and four GPU frames.');
     const swap=await runScenario('roller2-swap',page);assert.strictEqual(swap.gpuFrames,3);await page.evaluate(()=>globalThis.AMOS_ROLLER2_SWAP_CLEANUP());
