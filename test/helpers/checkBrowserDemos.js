@@ -481,7 +481,7 @@ module.exports = async function checkBrowserDemos(browser) {
         await page.locator('#roller2-game-input').focus(); await page.keyboard.press('a');
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'scores');
         assert.strictEqual(await page.locator('#roller2-game-controls').getAttribute('data-sound-voices'), '0');
-        await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'menu');
+        await require('./waitForRoller2ScoresReturn')(page);
         await page.locator('#roller2-game-input').focus(); await page.keyboard.down('ControlLeft');
         try { await page.waitForFunction(() => { const n = Number(document.getElementById('roller2-game-controls').dataset.line); return n < 298 || n > 316; }); } finally { await page.keyboard.up('ControlLeft'); }
         await page.waitForFunction(() => document.getElementById('roller2-game-controls').dataset.phase === 'ready' && document.getElementById('roller2-game-controls').dataset.line === '154');
