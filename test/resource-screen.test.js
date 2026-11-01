@@ -32,7 +32,7 @@ test('Resource screen: table alignment, ranges, bounded counts and complete meta
 
 test('Resource Screen Open: exact four-argument token uses system resources, native width rounding, independent palettes and cursor-off intent',()=>{
   const {program:p}=execute(binary([[w(0x28ee),n(2),t(','),n(639),t(','),n(200),t(','),n(0)],[t('Wait Key')]]));
-  try{const s=p.display.screen();assert.deepStrictEqual([p.display.current,s.width,s.height,s.colours,s.mode,s.cursorVisible],[2,624,200,8,0x8000,false]);assert.deepStrictEqual(Array.from(s.palette),read().palette);assert.strictEqual(p.banks.size,0);assert.ok(s.pixels.every(v=>v===1));assert.ok(p.display.renderDisplay().length);assert.strictEqual(p.state.flashes.length,0);}finally{p.stop();}
+  try{const s=p.display.screen();assert.deepStrictEqual([p.display.current,s.width,s.height,s.colours,s.mode,s.cursorVisible,s.cursorColour],[2,624,200,8,0x8000,false,3]);assert.deepStrictEqual(Array.from(s.palette),read().palette);assert.strictEqual(p.banks.size,0);assert.ok(s.pixels.every(v=>v===1));assert.ok(p.display.renderDisplay().length);assert.strictEqual(p.state.flashes.length,0);}finally{p.stop();}
   assert.throws(()=>compile(binary([[t('Resource Screen Open'),n(0),t(','),text('640'),t(','),n(200),t(','),n(0)]])),/Expected numeric expression/);
   assert.throws(()=>compile(binary([[t('Resource Screen Open'),n(0),t(','),n(640),t(','),n(200)]])),/Expected ,/);
 });
@@ -41,7 +41,7 @@ test('Resource Screen Open: current bank bytes and bank swaps control subsequent
   const {p}=idle();try{
     p.setResourceBank(16);const address=p.bankStart(16);p.resourceScreenOpen(0,640,200,0);const old=p.display.screen(),pixels=old.pixels.slice();assert.deepStrictEqual(Array.from(old.palette),expected);
     p.doke(address+12,0x123);p.resourceScreenOpen(1,320,100,0);assert.strictEqual(p.display.screen().palette[0],0x123);assert.strictEqual(old.palette[0],0);assert.deepStrictEqual(old.pixels,pixels);assert.strictEqual(p.bankStart(16),address);
-    p.reserveData(17,76);const other=p.banks.get(17);other.name='ResoTest';other.data.set(Uint8Array.from(bank(null,4,0).data));p.swapBanks(16,17);p.resourceScreenOpen(2,320,120,0);assert.deepStrictEqual([p.display.screen().colours,p.display.screen().mode],[4,0]);
+    p.reserveData(17,76);const other=p.banks.get(17);other.name='ResoTest';other.data.set(Uint8Array.from(bank(null,2,0).data));p.swapBanks(16,17);p.resourceScreenOpen(2,320,120,0);assert.deepStrictEqual([p.display.screen().colours,p.display.screen().mode,p.display.screen().cursorColour],[2,0,1]);
     p.eraseBank(16);assert.throws(()=>p.resourceScreenOpen(2,320,120,0),/not reserved/);p.setResourceBank(0);p.resourceScreenOpen(3,640,200,0);assert.strictEqual(p.display.screen().colours,8);
   }finally{p.stop();}
 });

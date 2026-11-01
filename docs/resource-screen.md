@@ -25,7 +25,8 @@ The native `$8004` mode mask is retained; live interlace remains explicitly
 unsupported. Normal, EHB and HAM colour modes use the existing display path and
 its mode restrictions. Palette words use the hardware's low twelve bits.
 
-Cursor zero records cursor-off intent. Supported nonzero colours are below the
+Cursor zero records cursor-off intent, retaining the new window's default
+cursor colour (three, or one on a monochrome screen). Supported nonzero colours are below the
 screen colour count and at most31. They record visibility/colour intent and
 start the existing native default Flash pattern on the driver-owned VBL clock.
 Text-cursor rasterization remains outside the existing portable display model.

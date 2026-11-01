@@ -3379,7 +3379,7 @@
       if(!options.vblNow||!options.requestPaletteWake)throw Error('Resource Screen Open flashing requires the runtime VBL clock');
     }
     const target=display.open(id,width,height,metadata.colours,metadata.mode);
-    target.palette=metadata.palette.slice();target.cursorVisible=cursor!==0;target.cursorColour=cursor;
+    target.palette=metadata.palette.slice();target.cursorVisible=cursor!==0;target.cursorColour=cursor||(colours===2?1:3);
     if(cursor)flash(cursor,defaultFlashPattern);
     display.invalidate();
   }
