@@ -1035,3 +1035,12 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
 - ASM room 3 assets are pinned and embedded. Replay opens room 2 door, uses Gehe
   to enter room 3, opens/closes its upper drawer and returns with Zurück. Twenty-six
   Canvas/GPU checkpoints and 204800 independent room 1/3 pixels; rooms 4+ remain open.
+
+- ASM assets now cover all 23 rooms. Original-input replay visits 1–17 and 19
+  (49 Canvas/GPU checkpoints); hospital gate remains native. Separate prepared
+  entry fixture runs original setup/DATA/INITRAUM for all 23 without VM edits,
+  checks 942080 independent pixels and 23 GPU frames. Room gallery is not teleport.
+  asset-profile.json declares older-disk BMCode recovery, palette17/31 swaps,
+  exact paired palette checks and four matching surviving room references.
+  Recovered conversation panel replaces Befehle4 placeholder. All dialogues/maps
+  and special room panels are embedded; driving LandScape/full quest remain open.

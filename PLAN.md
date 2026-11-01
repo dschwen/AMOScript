@@ -4,12 +4,17 @@ Assessment updated: 2026-10-31.
 
 ## ASM — Das Spiel
 
-Command switching and command-bar redraw now pass a 26-frame Canvas/WebGL
-replay. The direct room 1 debug launcher uses WebGL, skips the intro, and
-restores its startup file on Restart. Zurück enters room 2; opening its door
-and choosing Gehe enters room 3, where drawer open/close and return to room 2
-are covered. Independent room 1/3 oracles check 204,800 pixels. Rooms 4 onward
-remain the next asset/progression work.
+All 23 room asset sets are bundled. The main input-only replay visits rooms
+1–17 and 19 through original puzzles (49 Canvas/WebGL checkpoints). Separate
+prepared entries check all 23 original initialization routines and 942,080
+independent bitmap/Bob pixels, with 23 more actual GPU comparisons. Recovered
+packed artwork restores the three missing room pictures, elevator, safe, ending
+and conversation panel. The direct entry uses WebGL; linked HAM intro uses Canvas.
+
+Next: satisfy the hospital story gate through original quest actions, exercise
+late conversations/labyrinth progression, recover the driving LandScape asset,
+and verify end-to-end quest completion. Prepared room previews are not a quest
+teleport or evidence of completed gameplay.
 
 
 [First-room showcase and implementation details](docs/asm.md). Seven of eight

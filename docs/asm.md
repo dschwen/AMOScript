@@ -1,5 +1,30 @@
 # ASM — Das Spiel showcase milestone
 
+## Current playable scope
+
+[Play directly with WebGL](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html)
+· [Intro-linked adventure](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html)
+· [All 23 room previews and checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-rooms.html)
+
+All 23 numbered rooms now have bundled pictures, sprite banks, zones and text.
+The original-input replay visits **18 distinct rooms** (1–17 and 19), solves the
+handle/key and darkroom-door puzzles, and returns to room 4. Its 49 Canvas/WebGL
+checkpoints include the recovered supermarket and bookshop. Room 18's hospital
+entrance retains its original story gate; rooms 18, 20–23 are verified through
+explicitly prepared entry fixtures rather than a completed quest.
+
+All 23 entry routines run original setup and DATA with a fixture file selecting
+the destination after startup; opening briefings are omitted in this fixture.
+The fixture does not edit VM variables, IP or banks. It acknowledges the original
+corridor briefing, then waits at a declared inspection guard. Full room bitmaps
+and initial Bobs match **942,080 independently decoded Python pixels**, with 23
+additional Canvas/WebGL comparisons. The gallery selector previews these prepared
+entries and links to the ordinary game; it is not an in-game teleport.
+
+The whole quest, driving minigame, and all late puzzle branches are not yet verified.
+The earlier sections below describe the incremental milestones; this scope
+supersedes their former first-room-only asset limits.
+
 [Play the original intro](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro.html)
 · [Debug preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-debug.html)
 · [Browser checks and captured frames](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-checks.html)
@@ -259,3 +284,34 @@ Canvas and actual WebGL. Independent Python decoding covers 204,800 bitmap
 pixels across the room 1 and room 3 states, including the drawer's five-plane
 Bob preserving the background's sixth plane. Source code and runtime semantics
 are unchanged by this asset addition. Rooms 4 onward remain outside the build.
+
+## Full room asset recovery
+
+`game/asset-profile.json` declares each fallback and its source disk/file. Original
+bytes, empty authoring files and truncated TRE.Pic remain pinned unchanged.
+Rooms 16/19/20, the elevator, safe, ending and conversation panel are recovered
+from readable packed banks on joy2.adf/joy3.adf. Other rooms use the supplied
+Joy Src2 authoring pictures. Runtime ILBM/packed-picture validation stays strict;
+all reconstruction happens in the build-time asset preparation.
+
+The older packed pictures store bitmap-only BMCode or complete SCCode records.
+A bounded screen header is supplied only to decode bitmap-only records; the
+prepared output uses the same explicit 320×128, hardware-128,80 room profile.
+Rooms 16/20, FAR and TRE swap registers 17 and 31, including their EHB partners;
+Room 19 and END retain their indices. Corresponding old/new sprite palettes
+match the declared permutation exactly. Four surviving earlier-room images
+(1, 4, 17 and 18) independently demonstrate exact pixel equivalence after that
+normalization. Missing authoring originals cannot themselves be compared, so
+these are documented recoveries rather than claims of a new native capture.
+
+The recovered Befehle2 bitmap uses the canonical command-panel palette and
+replaces the former unrelated Befehle4 placeholder. It restores the original
+panel layout; dialogue logic and late branches still need longer user play.
+All fourteen original conversation files parse through the original loader in the
+prepared-entry unit checks. Eight labyrinth maps, icons, phone,
+safe, elevator, ending and room 5/14 variant art are now preloaded. Room 14's
+352-wide authoring variants explicitly crop to the first 320 columns. Pinned
+BODY alignment repairs cover Befehle, rooms 2/5/21 and GOG only.
+
+The driving-scene LandScape file remains missing, so driving is not advertised
+as working. Asset presence or a prepared room entry is not full quest completion.

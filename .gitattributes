@@ -7,3 +7,8 @@ test/fixtures/font/font8x8_ext_latin.h -text whitespace=-blank-at-eol
 
 # Indexed pixel reference fixtures contain raw palette indices.
 test/fixtures/compiler-examples/*.indices binary
+
+# Pinned ASM dialogue/room text retains original line endings and trailing spaces.
+examples/ASM/game/*.Txt -text whitespace=-blank-at-eol
+examples/ASM/game/Unterhaltungen/* -text whitespace=-blank-at-eol
+examples/ASM/game/Labyrinth/* binary

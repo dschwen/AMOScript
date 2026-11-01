@@ -17,7 +17,7 @@ module.exports=async function asmMainProbe(page){
         host.render();const cpu=p.display.canvasFrame(),old=p.display.canvasFrame;p.display.canvasFrame=()=>{throw Error('Main game GPU used CPU presentation');};try{gpuHost.render();}finally{p.display.canvasFrame=old;}
         const rgba=gpu.readPixels(),reference=p.display.renderDisplay();check(gpu.stats.lastResult.backend==='gpu'&&rgba.length===reference.length&&rgba.every((v,i)=>v===reference[i]),'Main game GPU mismatch '+label);frames++;gpuFrames++;
         if(globalThis.AMOS_DEMO_OBSERVE){globalThis.AMOS_DEMO_OBSERVE({name:'Canvas: ASM main '+label,width:cpu.width,height:cpu.height,rgba:cpu.rgba});globalThis.AMOS_DEMO_OBSERVE({name:'WebGL: ASM main '+label,width:gpu.stats.lastResult.width,height:gpu.stats.lastResult.lines,rgba});}
-      },check,true);
+      },check,true,true);
       check(!Object.hasOwn(memory,'ram:level'),'Main game did not consume the intro level file');
       const frame=document.createElement('iframe');frame.style.cssText='width:800px;height:700px';document.body.append(frame);const loaded=new Promise(r=>frame.onload=r);frame.srcdoc=linkedPage;await loaded;
       try{
