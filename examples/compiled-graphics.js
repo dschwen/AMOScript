@@ -3314,6 +3314,11 @@
 };
   const operationsFactory = function createOperations(state, options) {
   const display = options.display || displayFactory(options.displayOptions);
+  // InResourceBank only stores IDia_BankPuzzle. Lookup belongs to the later
+  // resource consumer (Sliders selects bank16 before loading it). Zero selects
+  // the system resources; retain the full nonnegative longword selector.
+  let resourceBankNumber=0;
+  function setResourceBank(number){number=integer(number);if(number<0)throw Error('Resource Bank requires a nonnegative selector');resourceBankNumber=number;}
   let menus=null,menuLocation=null;const menuData=new WeakMap();
   function getMenus(){
     if(!menus){
@@ -5685,6 +5690,7 @@
   }
 
   return {
+    setResourceBank,resourceBank:()=>resourceBankNumber,
     menuCommand,menuToBank,bankToMenu,menuBase:(x,y)=>menuCommand('Menu Base',[],[x,y]),menuChoice:index=>getMenus().choice(index==null?null:integer(index)),
     setMenuHandlers:targets=>getMenus().handlers(targets),menuActive:()=>!!menus&&menus.enabled(),menuService:field=>menus?menus.service(field):null,
     menuReturned:()=>{if(menus)menus.returned();},menuShortcut:(key,scan,shift)=>!!menus&&menus.shortcut(key,scan,shift),

@@ -53,6 +53,11 @@ source-located blockers. The remaining work groups are:
    they cannot be implemented by pretending a standalone browser is the AMOS
    editor.
 
+`Resource Bank` ($28ca) now stores the native per-program selector, including
+selection before Load. The nine Interface programs next stop at `$28ee`,
+Resource Screen Open. See [Resource Bank](resource-bank.md) for tested startup
+prefixes and the remaining resource-consumer work.
+
 The [menu implementation notes](menus.md) describe compiled Menu$ trees,
 indexed drawing, Choice polling, mouse/keyboard selection, native Menu banks,
 On Menu handlers and graphical procedure callbacks. Input-only tests exercise

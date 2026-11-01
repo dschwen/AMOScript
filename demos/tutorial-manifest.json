@@ -141,7 +141,7 @@
       "byteLength": 1526,
       "sha256": "6e79dd4944d6ab9f0767aa7aa81a4b4a0005a8dab5e364051d24a28a282decf5",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Button_Types.AMOS",
@@ -149,7 +149,7 @@
       "byteLength": 10892,
       "sha256": "f5390f14c464d51bf94fb8703a761e702e94d1745f88e5f4eb43ec5c7718f7f3",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Communication.AMOS",
@@ -157,7 +157,7 @@
       "byteLength": 3316,
       "sha256": "052ca18ecebe7cd4059f319ebdfccea4373a19fe80beba2559d128dc50f34d1b",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Editing_Zones.AMOS",
@@ -165,7 +165,7 @@
       "byteLength": 2332,
       "sha256": "c01ea4267a99b9891f3cf64ec63dd4a62e057d171ad7c1d7a8f16a562519cdf9",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Full_Example.AMOS",
@@ -173,7 +173,7 @@
       "byteLength": 8860,
       "sha256": "dae997e6acd22a6ffd28dbca3472a0a2c02a0c076d1a822817da86375656ce13",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 15, byte 632"
+      "error": "Unsupported token 0x28ee at line 20, byte 906"
     },
     {
       "source": "Tutorials/Interface/Graphics.AMOS",
@@ -181,7 +181,7 @@
       "byteLength": 5426,
       "sha256": "031023006768dd6d18487c09fb8f6fabf147299cf7863391b6c7294f91bd3f06",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Simple_Requester.AMOS",
@@ -189,7 +189,7 @@
       "byteLength": 1164,
       "sha256": "696f369ffbe078be867c95cc02076e8a9a570ce5d5d1d2eb653909178e24900e",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Sliders.AMOS",
@@ -197,7 +197,7 @@
       "byteLength": 10120,
       "sha256": "8f6b5948732389e02c7c59daa6063f8ae14ecc00d7426aad597cdaa6e793379e",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 11, byte 444"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Interface/Working_Buttons.AMOS",
@@ -205,7 +205,7 @@
       "byteLength": 3520,
       "sha256": "28ce230a78fd533d0bcc54b575c5a63fc1ae197d62419b58180eda2e0cfcf054",
       "compiled": false,
-      "error": "Unsupported token 0x28ca at line 12, byte 512"
+      "error": "Unsupported token 0x28ee at line 13, byte 524"
     },
     {
       "source": "Tutorials/Menus/Menus_1.AMOS",
