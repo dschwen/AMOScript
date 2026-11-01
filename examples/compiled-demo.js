@@ -2352,7 +2352,7 @@
   }
   function ink(colour, background = null, border = null) {
     const target = screen();
-    target.ink = colourIndex(colour, target);
+    if(colour!=null)target.ink = colourIndex(colour, target);
     if (background != null) target.inkBackground = target.graphicsBackground = colourIndex(background, target);
     if (border != null) target.inkBorder = colourIndex(border, target);
   }
@@ -3314,6 +3314,22 @@
 };
   const operationsFactory = function createOperations(state, options) {
   const display = options.display || displayFactory(options.displayOptions);
+  let menus=null,menuLocation=null;const menuData=new WeakMap();
+  function getMenus(){
+    if(!menus){
+      const factory=typeof menusFactory==='function'?menusFactory:globalThis.AMOS_MENUS;
+      if(typeof factory!=='function')throw Error('Menu runtime is unavailable: load lib/amos/menuGraphics.js, menuLayout.js, menuBank.js and menus.js');
+      menus=factory({display,mouse:()=>state.input.mouse,image:bankImage,paste:pasteImage,pattern:setPattern,
+        procedure:name=>options.menuProcedures&&options.menuProcedures[name],
+        reserve(node,size){const data={value:'\0'.repeat(size)};menuData.set(node,data);data.address=variableAddress(data,'menu','string',()=>data.value,value=>{data.value=value;},()=>!!menus&&menus.owns(node)&&menuData.get(node)===data);return data.address;},
+        registers(request){dataRegisters[0]=request.x;dataRegisters[1]=request.y;dataRegisters[2]=request.measure?0:-1;dataRegisters[3]=request.selected?-1:0;dataRegisters[4]=request.first?-1:0;addressRegisters[0]=0;addressRegisters[1]=(menuData.get(request.node)||{}).address||request.data||0;},
+        dimensions:()=>({x:dataRegisters[0],y:dataRegisters[1]})});
+    }
+    return menus;
+  }
+  function menuCommand(name,path=[],args=[],depth=null){getMenus().command(name,path.map(integer),args.map(value=>value!=null&&typeof value!=='string'?integer(value):value),depth==null?null:integer(depth));menuLocation=state.location;if(options.requestMenuWake)options.requestMenuWake();}
+  function bankToMenu(number){number=integer(number);const bank=banks.get(number);if(!bank||bank.type!=='data'||bank.name!=='Menu    ')throw Error('Bank To Menu requires a Menu bank');getMenus().load(bank.data);menuLocation=state.location;}
+  function menuToBank(number){number=integer(number);if(number<1||number>=65536)throw Error('Invalid bank number');const data=getMenus().save();installBanks([{number,type:'data',memory:'fast',permanent:true,name:'Menu    ',data}]);}
   // Preserve the legacy script host: non-3D programs do not need this optional
   // runtime script, and hosts may load it after operations.js.
   let threeD = null;
@@ -5669,6 +5685,11 @@
   }
 
   return {
+    menuCommand,menuToBank,bankToMenu,menuBase:(x,y)=>menuCommand('Menu Base',[],[x,y]),menuChoice:index=>getMenus().choice(index==null?null:integer(index)),
+    setMenuHandlers:targets=>getMenus().handlers(targets),menuActive:()=>!!menus&&menus.enabled(),menuService:field=>menus?menus.service(field):null,
+    menuReturned:()=>{if(menus)menus.returned();},menuShortcut:(key,scan,shift)=>!!menus&&menus.shortcut(key,scan,shift),
+    cancelMenus:()=>{if(menus)menus.cancel();},menuLocation:()=>menuLocation,menuSnapshot:()=>getMenus().snapshot(),
+    resetMenuInput:()=>{if(menus)menus.resetInput();},
     tdDir: td('dir'), tdLoad: td('load'), tdClearAll: td('clearAll'),
     tdObject: td('object'), tdKill: td('kill'), tdScreenHeight: td('screenHeight'),
     tdMove: td('move'), tdMoveRel: td('moveRel'), tdAngle: td('angle'), tdAngleRel: td('angleRel'),
@@ -5828,6 +5849,366 @@
     min: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, false),
     max: (left, right, aType, bType) => minimumMaximum(left, right, aType, bType, true)
   };
+};
+  const menuBankFactory = function createMenuBankCodec() {
+  const lengths={8:2,12:2,16:2,20:1,24:2,28:1,32:1,36:2,40:1,44:1,48:1,56:1,60:1};
+  const fail=message=>{throw Error('Menu bank: '+message);};
+  function decode(input) {
+    if(!ArrayBuffer.isView(input) || Object.prototype.toString.call(input)!=='[object Uint8Array]' || input.length>1048576)fail('invalid bytes');
+    const bytes=Uint8Array.from(input),view=new DataView(bytes.buffer),seen=new Set(),objects=new Map();let commandsRead=0;
+    const need=(at,size)=>{if(!Number.isInteger(at) || at<0 || at%2 || size<0 || at+size>bytes.length)fail('pointer/range out of bounds');};
+    const u16=at=>{need(at,2);return view.getUint16(at,false);},s16=at=>{need(at,2);return view.getInt16(at,false);},u32=at=>{need(at,4);return view.getUint32(at,false);};
+    function object(at) {
+      if(!at)return null;if(objects.has(at))return objects.get(at);
+      const size=u16(at);if(size<4 || size%2)fail('invalid object size');need(at,size);
+      const end=at+size,commands=[];let cursor=at+2;
+      while(cursor<end){if(++commandsRead>262144)fail('drawing command budget exceeded');const code=u16(cursor);cursor+=2;if(!code){if(cursor!==end)fail('bytes after object terminator');objects.set(at,commands);return commands;}
+        if(code===4){const length=u16(cursor);cursor+=2;if(cursor+length+(length%2)>end)fail('truncated text');commands.push({code,text:Array.from(bytes.subarray(cursor,cursor+length),c=>String.fromCharCode(c)).join('')});cursor+=length+(length%2);}
+        else if(code===52){const length=u16(cursor);if(length<2 || length>=32 || length%2 || cursor+2+length>end)fail('invalid procedure record');commands.push({code,raw:bytes.slice(cursor,cursor+2+length)});cursor+=2+length;}
+        else {const count=lengths[code];if(!count || cursor+count*2>end)fail('unknown/truncated drawing command');const args=[];for(let i=0;i<count;i++){args.push(s16(cursor));cursor+=2;}commands.push({code,args});}
+      }
+      fail('missing object terminator');
+    }
+    function chain(offset,depth) {
+      if(depth>8)fail('tree exceeds eight levels');const result=[];
+      while(true){need(offset,70);if(seen.has(offset) || seen.size>=4096)fail('cyclic/oversized tree');seen.add(offset);
+        const number=u16(offset+12);if(number<1 || number>255 || result.some(node=>node.number===number))fail('invalid/duplicate item number');
+        const node={number,flags:u16(offset+14)>>>8,lowFlags:u16(offset+14)&255,x:s16(offset+16),y:s16(offset+18),width:u16(offset+20),height:u16(offset+22),key:{flags:bytes[offset+34],ascii:bytes[offset+35],scan:bytes[offset+36],shift:bytes[offset+37]},objects:[38,42,46,50].map(field=>object(u32(offset+field))),ink:Array.from(bytes.subarray(offset+64,offset+70)),children:[]};
+        const child=u32(offset+8);if(child)node.children=chain(child,depth+1);result.push(node);
+        const next=u32(offset+4);if(!next)break;offset=next;
+      }
+      return result;
+    }
+    return chain(0,1);
+  }
+  function encode(nodes) {
+    const bytes=[],seen=new Set();
+    const word=value=>{if(!Number.isInteger(value) || value < -32768 || value>65535)fail('invalid word');bytes.push(value>>>8&255,value&255);};
+    const patch=(at,value)=>{bytes[at]=value>>>24&255;bytes[at+1]=value>>>16&255;bytes[at+2]=value>>>8&255;bytes[at+3]=value&255;};
+    function object(commands) {
+      if(commands==null)return 0;if(!Array.isArray(commands) || commands.length>4096)fail('invalid drawing object');const start=bytes.length;word(0);
+      for(const command of commands){const code=command.code;word(code);
+        if(code===4){if(typeof command.text!=='string' || command.text.length>32766 || /[^\x00-\xff]/.test(command.text))fail('invalid byte text');word(command.text.length);for(let i=0;i<command.text.length;i++)bytes.push(command.text.charCodeAt(i));if(command.text.length%2)bytes.push(0);}
+        else if(code===52){
+          if(command.name!=null){
+            if(typeof command.name!=='string'||!/^[a-zA-Z_][a-zA-Z_0-9]{0,29}$/.test(command.name))fail('invalid procedure name');
+            const name=command.name.toLowerCase();word(name.length+(name.length%2));for(let i=0;i<name.length;i++)bytes.push(name.charCodeAt(i));if(name.length%2)bytes.push(0);
+          }else{
+            const raw=command.raw;
+            if(Object.prototype.toString.call(raw)!=='[object Uint8Array]'||raw.length<4||raw.length>32||raw.length%2||raw[0]*256+raw[1]!==raw.length-2)fail('unsupported procedure record');
+            bytes.push(...raw);
+          }
+        }
+        else {if(!lengths[code] || !Array.isArray(command.args) || command.args.length!==lengths[code])fail('invalid drawing command');for(const value of command.args)word(value);}
+        if(bytes.length-start>65532||bytes.length>1048572)fail('drawing object exceeds bank/word size');
+      }
+      word(0);const length=bytes.length-start;if(length>65534)fail('object exceeds word size');bytes[start]=length>>>8;bytes[start+1]=length&255;return start;
+    }
+    function chain(items,depth) {
+      if(!Array.isArray(items) || !items.length || depth>8)fail('invalid tree');const first=bytes.length,siblings=new Set();let previous=null;
+      for(const node of items){if(!node || seen.has(node) || siblings.has(node.number) || seen.size>=4096 || !Number.isInteger(node.number) || node.number<1 || node.number>255)fail('invalid/cyclic tree');seen.add(node);siblings.add(node.number);
+        // MnTb leaves native MnPrev pointers in saved files; MnTMn rebuilds
+        // them. Never export or interpret those stale host addresses.
+        const start=bytes.length;for(let i=0;i<70;i++)bytes.push(0);if(previous!=null)patch(previous+4,start);previous=start;
+        if([node.flags==null?0:node.flags,node.lowFlags==null?0:node.lowFlags].some(v=>!Number.isInteger(v)||v<0||v>255))fail('invalid flags');
+        const fields=[[12,node.number],[14,((node.flags||0)<<8)|(node.lowFlags||0)],...[16,18,20,22].map((offset,index)=>[offset,[node.x||0,node.y||0,node.width||0,node.height||0][index]])];
+        for(const [offset,value]of fields){if(!Number.isInteger(value) || value < -32768 || value>65535)fail('invalid item geometry');bytes[start+offset]=value>>>8&255;bytes[start+offset+1]=value&255;}
+        const key=node.key||{},keys=[key.flags||0,key.ascii||0,key.scan||0,key.shift||0],ink=node.ink||[2,1,2,1,2,2];
+        if(!Array.isArray(ink) || ink.length!==6 || [...keys,...ink].some(v=>!Number.isInteger(v)||v<0||v>255))fail('invalid key/ink metadata');keys.forEach((v,i)=>{bytes[start+34+i]=v;});ink.forEach((v,i)=>{bytes[start+64+i]=v;});
+        if(!Array.isArray(node.objects)||node.objects.length!==4)fail('invalid object slots');node.objects.forEach((commands,index)=>patch(start+38+index*4,object(commands)));
+        if(node.children && node.children.length)patch(start+8,chain(node.children,depth+1));
+        if(bytes.length>1048576)fail('bank exceeds 1 MiB');
+      }
+      return first;
+    }
+    chain(nodes,1);return Uint8Array.from(bytes);
+  }
+  return {decode,encode};
+};
+  const menuGraphicsFactory = function createMenuGraphics() {
+  const definitions={BA:[8,2],LI:[12,2],EL:[16,2],PA:[20,1],IN:[24,2],BO:[28,1],IC:[32,1],LO:[36,2],OU:[40,1],SL:[44,1],SF:[48,1],PR:[52,'name'],RE:[56,1],SS:[60,1]};
+  const fail=message=>{throw Error('Menu graphics: '+message);};
+  function parse(text) {
+    if(typeof text!=='string' || text.length>32766 || /[^\x00-\xff]/.test(text))fail('expected a bounded byte string');
+    const commands=[];let at=0;
+    while(at<text.length){
+      const open=text.indexOf('(',at),end=open<0?text.length:open;
+      if(end>at)commands.push({code:4,text:text.slice(at,end)});
+      if(open<0)break;
+      const close=text.indexOf(')',open+1);if(close<0)fail('unterminated command');
+      const group=text.slice(open+1,close).split(':');
+      for(const source of group){const word=/^\s*([a-zA-Z]{2,})\s*([\s\S]*)$/.exec(source);if(!word)fail('invalid command');const name=word[1].slice(0,2).toUpperCase(),definition=definitions[name];if(!definition)fail('unsupported command '+name);
+        if(definition[1]==='name'){const proc=word[2].trim();if(!/^[a-zA-Z_][a-zA-Z_0-9]{0,29}$/.test(proc))fail('invalid procedure name');commands.push({code:52,name:proc.toLowerCase()});}
+        else {const fields=word[2].split(',');if(fields.length!==definition[1])fail('wrong '+name+' arity');const args=fields.map(field=>{if(!/^\s*[+-]?\d+\s*$/.test(field))fail('expected integer operand');const value=Number(field);if(!Number.isInteger(value)||value < -32768 || value>65535)fail('operand exceeds word range');return value<<16>>16;});commands.push({code:definition[0],args});}
+      }
+      at=close+1;if(commands.length>4096)fail('command budget exceeded');
+    }
+    return commands;
+  }
+  function procedureName(command) {
+    if(command.name)return command.name;
+    const raw=command.raw;
+    if(!raw || raw.length<4)fail('invalid native procedure record');
+    const count=raw[0]*256+raw[1];
+    if(count<2 || count>=32 || count%2 || count+2!==raw.length)fail('invalid native procedure name size');
+    const name=Array.from(raw.subarray(2),c=>String.fromCharCode(c)).join('').replace(/\x00+$/,'');
+    if(!/^[a-zA-Z_][a-zA-Z_0-9]{0,29}$/.test(name))fail('unsupported native procedure name');
+    return name.toLowerCase();
+  }
+  function context(style={}) {return {x:0,y:0,maxX:0,maxY:0,ink:style.ink==null?2:style.ink,paper:style.paper==null?1:style.paper,border:style.border==null?2:style.border,pattern:0,line:65535,outline:false,font:0,textStyle:0,data:0};}
+  // A procedure suspends this stream. The VM executes its ordinary procedure
+  // call and returns D0/D1 before resuming at result.next; no JS recursion/Promise.
+  function run(commands,state,api={},start=0,measure=false) {
+    const touch=()=>{state.maxX=Math.max(state.maxX,state.x);state.maxY=Math.max(state.maxY,state.y);};
+    const style=()=>{if(!measure && api.style)api.style(state);};
+    for(let index=start;index<commands.length;index++){
+      const command=commands[index],a=command.args||[];
+      if(command.code===4){const width=api.textWidth?api.textWidth(command.text,state.font):command.text.length*8,height=api.fontHeight?api.fontHeight(state.font):8;style();if(!measure && api.text)api.text(state.x,state.y,command.text,state);state.x+=width;state.y+=height;}
+      else if(command.code===8){if(a[0]>state.x && a[1]>state.y){style();if(!measure&&api.bar)api.bar(state.x,state.y,a[0],a[1]);state.x=a[0]+1;state.y=a[1]+1;}}
+      else if(command.code===12){if(a[0]>=0&&a[1]>=0){style();if(!measure&&api.line)api.line(state.x,state.y,a[0],a[1]);state.x=a[0]+1;state.y=a[1]+1;}}
+      else if(command.code===16){if(a[0]>0&&a[1]>0){style();if(!measure&&api.ellipse)api.ellipse(state.x,state.y,a[0],a[1]);state.x+=a[0]+1;state.y+=a[1]+1;}}
+      else if(command.code===20)state.pattern=a[0];
+      else if(command.code===24){if(a[0]<1||a[0]>3)fail('invalid ink selector');state[['ink','paper','border'][a[0]-1]]=a[1];}
+      else if(command.code===28||command.code===32){const image=api.image?api.image(command.code===28?1:2,a[0]):null;if(!image)fail('image is not defined');style();if(!measure&&api.paste)api.paste(command.code===28?1:2,a[0],state.x,state.y);state.x+=image.width;state.y+=image.height;}
+      else if(command.code===36){if(a[0]>=0&&a[1]>=0){state.x=a[0];state.y=a[1];}}
+      else if(command.code===40)state.outline=!!a[0];
+      else if(command.code===44)state.line=a[0]&65535;
+      else if(command.code===48){state.font=a[0];if(state.font && !api.fontHeight)fail('font is not available');}
+      else if(command.code===52){return {procedure:procedureName(command),next:index+1,state,measure};}
+      else if(command.code===56){const size=a[0]&65535;if(measure && size){if(!api.reserve)fail('reserve adapter is not available');state.data=api.reserve(size);}}
+      else if(command.code===60){if(a[0]<0||a[0]>7)fail('unsupported text style');state.textStyle=a[0];}
+      else fail('unsupported drawing opcode '+command.code);
+      touch();
+    }
+    return {done:true,next:commands.length,state,measure};
+  }
+  function returned(state,x,y) {if(!Number.isInteger(x)||!Number.isInteger(y)||x < -32768||y < -32768||x>32767||y>32767)fail('procedure dimensions exceed word range');state.x=x;state.y=y;state.maxX=Math.max(state.maxX,x);state.maxY=Math.max(state.maxY,y);}
+  return {parse,procedureName,context,run,returned};
+};
+  const menuLayoutFactory = function createMenuLayout(graphics) {
+  const fail=message=>{throw Error('Menu layout: '+message);};
+  const coordinate=value=>{if(!Number.isInteger(value)||value < -32768||value>32767)fail('geometry exceeds signed-word bounds');return value;};
+  function* calculate(nodes,api={}) {
+    const records=new Map(),paths=new Map(),seen=new Set();
+    function* object(commands,node,path,origin) {
+      const state=graphics.context();
+      if(!commands)return state;
+      let next=0;
+      while(true){
+        const result=graphics.run(commands,state,{...api,reserve:size=>api.reserve?api.reserve(size,node):fail('reserve adapter is not available')},next,true);
+        if(result.done)return state;
+        const dimensions=yield {procedure:result.procedure,node,path:path.slice(),x:origin.x+state.x,y:origin.y+state.y,measure:true,first:true,data:state.data};
+        if(!dimensions)fail('procedure dimensions were not returned');
+        graphics.returned(state,coordinate(dimensions.x-origin.x),coordinate(dimensions.y-origin.y));
+        next=result.next;
+      }
+    }
+    function* branch(items,dx,dy,prefix) {
+      if(!Array.isArray(items)||prefix.length>=8)fail('invalid tree depth');
+      const siblings=new Set();
+      for(let i=0;i<items.length;i++){
+        const node=items[i];
+        if(!node||seen.has(node)||seen.size>=4096||!Number.isInteger(node.number)||node.number<1||node.number>255||siblings.has(node.number))fail('invalid/cyclic tree');
+        const path=[...prefix,node.number];
+        seen.add(node);siblings.add(node.number);
+        if(!Array.isArray(node.objects)||node.objects.length!==4||!Number.isInteger(node.flags)||node.flags<0||node.flags>255)fail('invalid item');
+        if((i===0||(node.flags&4))&&!node.objects[0]){dx+=2;dy+=2;}
+        const x=coordinate(node.flags&2?node.x:dx),y=coordinate(node.flags&2?node.y:dy);
+        const frame=yield* object(node.objects[0],node,path,{x:0,y:0});
+        const content=node.objects[0]&&(node.flags&16)&&node.objects[3]?node.objects[3]:node.objects[1];
+        const normal=yield* object(content,node,path,{x:frame.x,y:frame.y});
+        const record={node,path,x,y,width:coordinate(Math.max(frame.maxX,normal.maxX)),height:coordinate(Math.max(frame.maxY,normal.maxY)),contentX:frame.x,contentY:frame.y};
+        records.set(node,record);paths.set(path.join(','),record);
+        // Bar means vertical traversal; Line/Tline mean horizontal traversal.
+        if(node.children&&node.children.length)yield* branch(node.children,node.flags&8?normal.x:0,node.flags&8?0:normal.y,path);
+        dx=node.flags&8?0:normal.x;dy=node.flags&8?normal.y:0;
+      }
+    }
+    yield* branch(nodes,0,0,[]);
+    return {records,paths};
+  }
+  // Each sibling's position is relative to its predecessor, not to the parent.
+  // A Separate item starts a new framed group but retains that relative origin.
+  function place(layout,items,x=0,y=0) {
+    coordinate(x);coordinate(y);const groups=[];let group=null;
+    for(let i=0;i<items.length;i++){
+      const node=items[i],record=layout.records.get(node);if(!record)fail('item has not been measured');
+      x=coordinate(x+record.x);y=coordinate(y+record.y);
+      const placed={...record,left:x,top:y,right:coordinate(x+record.width),bottom:coordinate(y+record.height)};
+      if(i===0||(node.flags&4)){group={items:[],left:x,top:y,right:placed.right,bottom:placed.bottom,framed:!node.objects[0],total:!!(node.flags&32)&&!(node.flags&8)};groups.push(group);}
+      group.items.push(placed);group.left=Math.min(group.left,x);group.top=Math.min(group.top,y);group.right=Math.max(group.right,placed.right);group.bottom=Math.max(group.bottom,placed.bottom);
+    }
+    for(const group of groups)if(group.framed){group.left=coordinate(group.left-2);group.top=coordinate(group.top-2);group.right=coordinate(group.right+2);group.bottom=coordinate(group.bottom+2);}
+    return groups;
+  }
+  function hit(groups,x,y) {
+    for(const group of groups)for(const item of group.items)if(x>=item.left&&x<item.right&&y>=item.top&&y<item.bottom)return item;
+    return null;
+  }
+  return {calculate,place,hit};
+};
+  const menusFactory = function createMenus(options) {
+  const display=options.display,graphics=menuGraphicsFactory(),layoutEngine=menuLayoutFactory(graphics),codec=menuBankFactory();
+  const fail=message=>{throw Error('Menu: '+message);};
+  const integer=value=>{if(!Number.isInteger(value))fail('expected integer');return value;};
+  const word=value=>integer(value)<<16>>16;
+  let tree=[],owner=null,enabled=false,mouseMode=false,revision=0,measured=null,calculateRequested=false;
+  let defaults=[96,72,72,72,72,72,72,72],choices=new Int16Array(8),latch=0;
+  let handlers=[],events=false,pendingHandler=null;
+  let active=false,background=null,measurementBackground=null,openedSelection=null,selected=[],visible=[],hover=null,job=null,jobResult=null,inProcedure=false,jobRevision=0,lastField=-1,lastInput='',drag=null,translation={x:0,y:0},cancelSelection=false;
+  const savedFields=['ink','inkBackground','inkBorder','graphicsBackground','graphicsMode','fillPattern','paintBorder','textStyle','linePattern','linePhase','gx','gy'];
+  const pathKey=path=>path.join(',');
+  function checkedPath(path){if(!Array.isArray(path)||path.length<1||path.length>8)fail('expected a one to eight level item path');return path.map(v=>{integer(v);if(v<1||v>255)fail('item number must be 1..255');return v;});}
+  function find(path){let items=tree,node=null;for(const number of checkedPath(path)){node=items.find(n=>n.number===number);if(!node)fail('item is not defined');items=node.children;}return node;}
+  function live(){return owner&&display.screens.get(owner.id)===owner;}
+  function close(){
+    if(background)display.restore(background);
+    if(openedSelection!=null&&display.screens.has(openedSelection))display.select(openedSelection);
+    active=false;background=null;selected=[];visible=[];hover=null;drag=null;openedSelection=null;lastInput='';
+  }
+  function changed(){close();if(measurementBackground)display.restore(measurementBackground);measurementBackground=null;revision++;measured=null;job=null;jobResult=null;inProcedure=false;}
+  function bind(){const target=display.screen();if(owner&&owner!==target)fail('items must belong to one screen');if(target.doubleBuffered||target.cloneOwner||target.ham||target.dualPartner||target.dualOwner)fail('requires a single-buffered indexed screen');owner=target;}
+  function setItem(path,values){
+    path=checkedPath(path);if(!Array.isArray(values)||values.length<1||values.length>4)fail('expected one to four drawing strings');
+    const parsed=values.map(value=>value==null?null:graphics.parse(value));
+    let items=path.length===1?tree:find(path.slice(0,-1)).children;
+    bind();let node=items.find(n=>n.number===path.at(-1));
+    if(!node){node={number:path.at(-1),flags:defaults[path.length-1],lowFlags:0,x:0,y:0,width:0,height:0,key:{flags:0,ascii:0,scan:0,shift:0},ink:[owner.paper,owner.pen,owner.paper,owner.pen,owner.paper,owner.paper],objects:[null,null,null,null],children:[]};items.push(node);items.sort((a,b)=>a.number-b.number);items.forEach((item,index)=>{item.flags=(item.flags&~1)|(index===0?1:0);});}
+    node.ink=[owner.paper,owner.pen,owner.paper,owner.pen,owner.paper,owner.paper];
+    values.forEach((value,i)=>{if(value!=null)node.objects[[1,2,3,0][i]]=value.length?parsed[i]:null;});changed();
+  }
+  const styles={'Menu Bar':[8,true],'Menu Line':[40,false],'Menu Tline':[8,false,32], 'Menu Movable':[64,true],'Menu Static':[64,false],'Menu Item Movable':[128,true],'Menu Item Static':[128,false],'Menu Active':[16,false],'Menu Inactive':[16,true],'Menu Separate':[4,true],'Menu Link':[4,false]};
+  function command(name,path=[],args=[],depth=null){
+    if(name==='Menu$'){setItem(path,args);return;}
+    if(styles[name]){const [mask,on,extra=0]=styles[name];if(depth!=null){integer(depth);if(depth<1||depth>8)fail('depth must be 1..8');defaults[depth-1]=(on?defaults[depth-1]|mask:defaults[depth-1]&~mask)|extra;}else{const node=find(path);node.flags=(on?node.flags|mask:node.flags&~mask)|extra;}changed();return;}
+    if(name==='Set Menu'){const node=find(path),x=word(args[0]),y=word(args[1]);node.x=x;node.y=y;node.flags|=2;changed();return;}
+    if(name==='Menu Base'){if(!tree.length)fail('no items defined');const [x,y]=args.map(v=>v==null||v===-2147483648?null:word(v));if(x!=null)tree[0].x=x;if(y!=null)tree[0].y=y;if(x!=null||y!=null)tree[0].flags|=2;changed();return;}
+    if(name==='Menu Called'||name==='Menu Once'){find(path).lowFlags=name==='Menu Called'?255:0;changed();return;}
+    if(name==='Menu Del'){if(!path.length){tree=[];owner=null;enabled=false;choices.fill(0);latch=0;}else{const node=find(path),items=path.length===1?tree:find(path.slice(0,-1)).children;items.splice(items.indexOf(node),1);items.forEach((item,index)=>{item.flags=(item.flags&~1)|(index===0?1:0);});if(!tree.length){owner=null;enabled=false;}}changed();return;}
+    if(name==='Menu Key'){
+      const node=find(path);if(node.children.length)fail('shortcuts require a leaf item');let key={flags:0,ascii:0,scan:0,shift:0};
+      if(args.length){if(typeof args[0]==='string'){if(!args[0].length||args[0].charCodeAt(0)>255||args.length>1)fail('expected a nonempty byte string shortcut');key={...key,flags:1,ascii:args[0].charCodeAt(0)};}else{integer(args[0]);const shift=args[1]==null?0:integer(args[1]);if(args[0]<0||args[0]>127||shift<0||shift>255)fail('invalid shortcut scancode/qualifiers');key={...key,flags:255,scan:args[0],shift};}}
+      node.key=key;return;
+    }
+    if(name==='Menu On'){enabled=!!tree.length;return;}
+    if(name==='Menu Off'){enabled=false;close();job=null;inProcedure=false;return;}
+    if(name==='Menu Calc'){if(!tree.length)fail('no items defined');calculateRequested=true;measured=null;return;}
+    if(name==='Menu Mouse On'||name==='Menu Mouse Off'){mouseMode=name==='Menu Mouse On';return;}
+    if(name==='On Menu On'){events=true;return;}
+    if(name==='On Menu Off'){events=false;return;}
+    if(name==='On Menu Del'){events=false;handlers=[];pendingHandler=null;return;}
+    fail('unsupported command '+name);
+  }
+  function choose(path){
+    let items=tree;for(const number of path){const node=items.find(n=>n.number===number);if(!node||node.flags&16)return false;items=node.children;}
+    if(items.length)return false;
+    choices.fill(0);choices.set(path);latch=-1;
+    if(events&&handlers[path[0]-1]){events=false;pendingHandler={...handlers[path[0]-1],menuHandler:true,interrupt:true};}
+    return true;
+  }
+  function shortcut(key,scanCode=null,shift=0){
+    if(!enabled||!live()||active||inProcedure)return false;
+    function search(items,path){for(const node of items){if(node.flags&16)continue;const next=[...path,node.number];if(node.children.length){const found=search(node.children,next);if(found)return found;}else if((node.key.flags===1&&key.length&&key.charCodeAt(0)===node.key.ascii)||(node.key.flags===255&&scanCode===node.key.scan&&shift===node.key.shift))return next;}return null;}
+    const match=search(tree,[]);return match?choose(match):false;
+  }
+  function withStyle(fn){
+    const selectedId=display.info('Screen Number'),saved=Object.fromEntries(savedFields.map(key=>[key,{present:Object.hasOwn(owner,key),value:owner[key]}]));
+    display.select(owner.id);
+    try{return fn();}finally{for(const [key,entry]of Object.entries(saved))if(entry.present)owner[key]=entry.value;else delete owner[key];if(display.screens.has(selectedId))display.select(selectedId);}
+  }
+  const api={image:(bank,n)=>options.image(bank,n),reserve:size=>options.reserve(currentNode,size)};let currentNode=null;
+  function drawingApi(origin){
+    return {...api,style(s){if(s.font)fail('graphical menu disk fonts are not implemented');display.ink(s.ink&(owner.colours-1),s.paper&(owner.colours-1),s.border&(owner.colours-1));display.grWriting(1);display.setText(s.textStyle);display.setPaint(s.outline?1:0);options.pattern(s.pattern);display.setLine(s.line);},
+      text:(x,y,text)=>display.text(origin.x+x,origin.y+y+7,text),bar:(x,y,r,b)=>display.bar(origin.x+x,origin.y+y,origin.x+r,origin.y+b),
+      line:(x,y,r,b)=>display.draw(origin.x+x,origin.y+y,origin.x+r,origin.y+b),ellipse:(x,y,rx,ry)=>display.ellipse(origin.x+x,origin.y+y,rx,ry),
+      paste:(bank,n,x,y)=>options.paste(bank,origin.x+x,origin.y+y,n)};
+  }
+  function* drawObject(commands,node,path,origin,ink,selectedFlag,first){
+    const state=graphics.context(ink),adapter=drawingApi(origin);let next=0;
+    if(!commands)return state;
+    while(true){currentNode=node;const result=withStyle(()=>graphics.run(commands,state,adapter,next,false));if(result.done)return state;
+      const dimensions=yield {procedure:result.procedure,node,path,x:origin.x+state.x,y:origin.y+state.y,measure:false,selected:selectedFlag,first,data:state.data};
+      graphics.returned(state,dimensions.x-origin.x,dimensions.y-origin.y);next=result.next;
+    }
+  }
+  function* drawItem(item,first=true){
+    const node=item.node,selectedFlag=selected.includes(node)&&!(node.flags&16),a=node.ink;
+    const frame=yield* drawObject(node.objects[0],node,item.path,{x:item.left,y:item.top},{ink:a[1],paper:a[0],border:a[2]},false,first);
+    const inactive=!!(node.flags&16),custom=selectedFlag&&node.objects[2];
+    const commands=inactive&&node.objects[3]?node.objects[3]:custom||node.objects[1];
+    const index=selectedFlag&&!custom?3:0;
+    yield* drawObject(commands,node,item.path,{x:item.left+frame.x,y:item.top+frame.y},{ink:a[index],paper:a[index+1],border:a[index+2]},selectedFlag,first);
+  }
+  function* drawAll(){
+    display.restore(background);visible=[];let items=tree,x=translation.x,y=translation.y;
+    for(let depth=0;items.length&&depth<8;depth++){
+      const groups=layoutEngine.place(measured,items,x,y);visible.push(groups);
+      for(const group of groups){
+        const ink=group.items[0].node.ink;
+        if(group.framed)withStyle(()=>{display.setLine(65535);options.pattern(0);display.setPaint(0);display.ink(ink[1]&(owner.colours-1));display.bar(group.total?0:group.left,group.top,(group.total?owner.width:group.right)-1,group.bottom-1);display.ink(ink[2]&(owner.colours-1));display.box(group.total?0:group.left,group.top,(group.total?owner.width:group.right)-1,group.bottom-1);});
+        for(const item of group.items)yield* drawItem(item);
+      }
+      const next=selected[depth],placed=groups.flatMap(group=>group.items).find(item=>item.node===next);
+      if(!placed||!next.children.length)break;
+      items=next.children;x=placed.left;y=placed.top;
+    }
+  }
+  function* drawCalled(){for(const groups of visible)for(const group of groups)for(const item of group.items)if(item.node.lowFlags===255)yield* drawItem(item,false);}
+  function startJob(iterator){job=iterator;jobRevision=revision;jobResult=null;}
+  function advanceJob(){
+    while(job){
+      const result=job.next(jobResult);jobResult=null;
+      if(result.done){job=null;if(result.value&&result.value.records){measured=result.value;if(measurementBackground)display.restore(measurementBackground);measurementBackground=null;}return null;}
+      const request=result.value;currentNode=request.node;const target=options.procedure(request.procedure);
+      if(!target||target.parameters.length)fail('drawing procedure must exist and take no arguments: '+request.procedure);
+      options.registers(request);inProcedure=true;return {...target,menuDraw:true,interrupt:true};
+    }
+    return null;
+  }
+  function returned(){if(!inProcedure)return;inProcedure=false;if(job&&jobRevision===revision)jobResult=options.dimensions();}
+  function service(field){
+    if(inProcedure)return null;
+    if(owner&&!live()){close();enabled=false;owner=null;job=null;measured=null;calculateRequested=false;pendingHandler=null;}
+    if(job){const control=advanceJob();if(control)return control;}
+    if(pendingHandler){const result=pendingHandler;pendingHandler=null;return result;}
+    if(!live()||(!enabled&&!calculateRequested))return null;
+    const mouse=options.mouse(),x=display.coordinate('X Screen',owner.id,mouse.x),y=display.coordinate('Y Screen',owner.id,mouse.y),right=!!(mouse.buttons&2);
+    if(!measured&&(right||calculateRequested)){calculateRequested=false;measurementBackground=display.capture(0,0,owner.width,owner.height,owner.id);startJob(layoutEngine.calculate(tree,{...api,reserve:(size,node)=>options.reserve(node,size)}));const result=advanceJob();if(result)return result;}
+    if(!enabled)return null;
+    if(right&&!active){
+      openedSelection=display.info('Screen Number');background=display.capture(0,0,owner.width,owner.height,owner.id);active=true;cancelSelection=false;choices.fill(0);latch=0;selected=[];
+      translation=mouseMode?{x,y}:{x:0,y:0};lastInput='';startJob(drawAll());const result=advanceJob();if(result)return result;
+    }
+    if(!active)return null;
+    const signature=[x,y,mouse.buttons].join(','),changedInput=signature!==lastInput;
+    let hit=null;for(let i=visible.length-1;i>=0;i--){hit=layoutEngine.hit(visible[i],x,y);if(hit)break;}
+    if(hit&&(hit.node.flags&16))hit=null;
+    if(!right){close();if(!cancelSelection&&hit&&!hit.node.children.length)choose(hit.path);if(pendingHandler){const result=pendingHandler;pendingHandler=null;return result;}return null;}
+    if(mouse.buttons&1){
+      if(!drag&&hit&&(hit.node.flags&192)){
+        const groups=visible[hit.path.length-1],group=groups.find(group=>group.items.includes(hit)),individual=!!(hit.node.flags&128),item=individual?hit:group.items[0],all=groups.flatMap(group=>group.items),last=individual?hit:group.items.at(-1),next=all[all.indexOf(last)+1];
+        drag={node:item.node,x,y,baseX:measured.records.get(item.node).x,baseY:measured.records.get(item.node).y,next:next&&next.node,nextX:next&&next.x,nextY:next&&next.y};
+      }
+      if(drag&&(x!==drag.x||y!==drag.y)){
+        const dx=x-drag.x,dy=y-drag.y;drag.node.x=word(drag.baseX+dx);drag.node.y=word(drag.baseY+dy);drag.node.flags|=2;const record=measured.records.get(drag.node);record.x=drag.node.x;record.y=drag.node.y;
+        if(drag.next){drag.next.x=word(drag.nextX-dx);drag.next.y=word(drag.nextY-dy);drag.next.flags|=2;const next=measured.records.get(drag.next);next.x=drag.next.x;next.y=drag.next.y;}
+      }
+    }else drag=null;
+    let needsDraw=!!drag&&changedInput;
+    if(hit&&(!hover||pathKey(hit.path)!==pathKey(hover.path))){selected=hit.path.map((_,i)=>find(hit.path.slice(0,i+1)));needsDraw=true;}
+    hover=hit;lastInput=signature;
+    if(needsDraw)startJob(drawAll());else if(field!==lastField&&visible.some(groups=>groups.some(group=>group.items.some(item=>item.node.lowFlags===255))))startJob(drawCalled());
+    lastField=field;const result=advanceJob();return result||{menuWait:true};
+  }
+  function load(data){const decoded=codec.decode(data);changed();tree=decoded;owner=display.screen();enabled=false;choices.fill(0);latch=0;}
+  function cancel(){changed();enabled=false;pendingHandler=null;calculateRequested=false;}
+  return {command,service,returned,shortcut,cancel,enabled:()=>enabled||calculateRequested||!!job,
+    resetInput(){hover=null;drag=null;cancelSelection=true;},
+    owns(node){const visit=items=>items.some(item=>item===node||visit(item.children));return !!live()&&visit(tree);},
+    handlers:targets=>{handlers=targets;events=false;pendingHandler=null;},
+    choice(index=null){if(index==null){const value=latch;latch=0;return value;}integer(index);if(index<1||index>8)fail('Choice index must be 1..8');return choices[index-1];},
+    save:()=>codec.encode(tree),load,
+    snapshot:()=>({enabled,active,tree:tree.length?codec.decode(codec.encode(tree)):[],choices:Array.from(choices),visible:visible.map(groups=>groups.flatMap(g=>g.items).map(({path,left,top,right,bottom})=>({path,left,top,right,bottom})))})};
 };
   const boomFactory = function createBoom(options = {}) {
   const standard = options.standard || 'PAL', hz = options.vblHz == null ? 50 : options.vblHz;
@@ -7357,6 +7738,7 @@
   let trackerWake = null;
   let musicWake = null;
   let amalWake = null;
+  let menuWake=null,menuBusy=0,menuWaitContext=null,pendingMenuControl=null;const menuGosubs=new Set();
   let sleepRemaining = 0;
   let pendingEdit = null;
   let errorHandler = null, errorFrame = null, resumeTarget = null;
@@ -7418,6 +7800,7 @@
   function clearMouseButtons() {
     state.input.mouse.buttons = 0;
     state.input.mouseClick = 0;
+    operations.resetMenuInput();
   }
   function clearKeyStates() { state.input.rawKeys.fill(0); }
   function setKeyState(code, down) {
@@ -7425,6 +7808,8 @@
     state.input.rawKeys[code] = down ? 1 : 0;
   }
   function silenceAfterFailure() {
+    cancelMenuWake();menuWaitContext=null;pendingMenuControl=null;
+    try { operations.cancelMenus(); } catch (_) { /* preserve the original failure */ }
     // A failing host must not replace the original source-context error.
     cancelTrackerWake(); cancelMusicWake(); cancelAmalWake();
     operations.cancelAmal();
@@ -7556,6 +7941,29 @@
     },Math.max(0.001,timerEpoch+field*1000/timing.vblHz-timing.now()));
   }
 
+  function cancelMenuWake(){const task=menuWake;menuWake=null;if(task&&timing.clearTimeout&&task.id!=null){try{timing.clearTimeout.call(globalThis,task.id);}catch(_){/* owned token makes a late wake inert */}}}
+  function requestMenuWake(){
+    cancelMenuWake();if(state.halted||state.stopped||!operations.menuActive())return;
+    const field=vblCount()+1,task={id:null};menuWake=task;
+    task.id=timing.setTimeout.call(globalThis,()=>{
+      if(menuWake!==task)return;menuWake=null;if(state.halted||state.stopped)return;
+      try{
+        if(!menuBusy&&state.waiting){
+          const control=operations.menuService(vblCount());
+          if(control){menuWaitContext={kind:state.waiting,due:scheduled&&scheduled.due,inputRequest,inputText};if(state.waiting==='input'){inputRequest=null;inputText='';}cancelScheduled();state.waiting=null;pendingMenuControl=control;tick(lastMaxSteps);}
+        }else if(!state.waiting)tick(lastMaxSteps);
+        requestMenuWake();
+      }catch(error){failPalette(error,operations.menuLocation());}
+    },Math.max(0.001,timerEpoch+field*1000/timing.vblHz-timing.now()));
+  }
+  function restoreMenuWait(){
+    if(!menuWaitContext)return false;
+    const wait=menuWaitContext;menuWaitContext=null;
+    if(wait.kind==='sleep'){const remaining=Math.max(0,(wait.due==null?timing.now():wait.due)-timing.now());if(!remaining)return false;state.waiting='sleep';scheduleNext(remaining);}
+    else {state.waiting=wait.kind;if(wait.kind==='input'){inputRequest=wait.inputRequest;inputText=wait.inputText;while(inputRequest&&keys.length){const entry=keys.shift();consumeInput(typeof entry==='string'?entry:entry.key);}}}
+    return !!state.waiting;
+  }
+
   function step() {
     if (state.halted) return { done: true };
     const fn = cases[state.ip];
@@ -7583,7 +7991,12 @@
       catch(error) { failPalette(error,state.location); }
     }
     try {
-      res = fn(state) || {};
+      if(!menuBusy){
+        res=pendingMenuControl||operations.menuService(vblCount());pendingMenuControl=null;
+        if(res&&res.menuWait){scheduleNext(1000/timing.vblHz);return {yielded:true};}
+        if(!res&&restoreMenuWait())return {yielded:true};
+      }
+      if(!res)res = fn(state) || {};
     } catch (error) {
       if (state.location && !error.message.includes(' at line ')) error.message += ` at line ${state.location.line}, byte ${state.location.offset}`;
       if (recoverError(error)) { state.ticks++; return { done: false }; }
@@ -7620,10 +8033,12 @@
     }
 
     if (res.goto != null) state.ip = res.goto;
-    if (res.call != null) { state.stack.push(ipBefore + 1); state.ip = res.call; }
+    if (res.call != null) { state.stack.push(ipBefore + (res.interrupt?0:1));if(res.menuHandler){menuGosubs.add(state.stack.length);menuBusy++;}state.ip = res.call; }
+    if(res.menuHandler&&res.goto!=null)menuWaitContext=null;
     if (res.ret) {
       const procedure = state.frames[state.frames.length - 1];
       if (procedure && state.stack.length <= procedure.stackDepth) throw new Error('Return without Gosub in procedure');
+      if(menuGosubs.delete(state.stack.length))menuBusy--;
       const retIp = state.stack.pop();
       if (retIp == null) { state.halted = true; throw new Error('Return without Gosub'); }
       state.ip = retIp;
@@ -7634,7 +8049,8 @@
       state.stack.pop();
     }
     if (res.procCall != null) {
-      state.frames.push({ ip: ipBefore + 1, locals: state.locals, data: state.data, stackDepth: state.stack.length });
+      state.frames.push({ ip: ipBefore + (res.interrupt?0:1), locals: state.locals, data: state.data, stackDepth: state.stack.length,menuDraw:!!res.menuDraw,menuHandler:!!res.menuHandler });
+      if(res.menuDraw||res.menuHandler)menuBusy++;
       state.locals = Object.assign(Object.create(null), res.defaults);
       state.data = { entries: res.data || [], index: 0 };
       res.parameters.forEach((name, i) => { state.locals[name] = res.args[i]; });
@@ -7650,6 +8066,8 @@
       if (res.resultType === 'dynamic') state.param[res.result.numericType] = res.result.value;
       else if (res.resultType) state.param[res.resultType] = res.result;
       state.ip = frame.ip;
+      if(frame.menuDraw){operations.menuReturned();menuBusy--;}
+      else if(frame.menuHandler)menuBusy--;
     }
     // default fallthrough if case didn't change ip
     if (state.ip === ipBefore && res.goto == null && res.call == null && res.procCall == null && !res.procReturn && !res.ret && !res.halt) state.ip = ipBefore + 1;
@@ -7690,7 +8108,7 @@
         // asynchronous engine is active. Pure blocks cannot start those engines.
         if (block && block.length <= maxSteps - steps &&
           operations.nextTrackerVbl() == null && operations.nextMusicVbl() == null &&
-          operations.nextPaletteVbl() == null && operations.nextAmalVbl() == null) {
+          operations.nextPaletteVbl() == null && operations.nextAmalVbl() == null && !operations.menuActive()&&!menuBusy) {
           block.run(state);
           steps += block.length;
           optimization.blocksExecuted++;
@@ -7715,7 +8133,8 @@
     try {
       operations.flushBobs();
       requestAmalWake();
-      if (state.halted) { inputRequest = null; inputText = ''; operations.cancelAmal(); cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); operations.closePorts(); }
+      requestMenuWake();
+      if (state.halted) { inputRequest = null; inputText = ''; menuWaitContext=null;pendingMenuControl=null;cancelMenuWake();operations.cancelMenus();operations.cancelAmal(); cancelPaletteWake(); operations.cancelPaletteEffects(); operations.trackStop(); operations.cancelMusic(); resetInput(); operations.audio.silence(); operations.closePorts(); }
     } catch (error) {
       pendingEdit = null;
       state.halted = true;
@@ -7748,12 +8167,14 @@
 
   function stop() {
     if (state.waiting === 'sleep' && scheduled) sleepRemaining = Math.max(0, scheduled.due - timing.now());
+    if(menuWaitContext&&menuWaitContext.kind==='sleep'&&menuWaitContext.due!=null){menuWaitContext.remaining=Math.max(0,menuWaitContext.due-timing.now());menuWaitContext.due=null;}
     state.stopped = true;
     cancelScheduled();
     cancelPaletteWake();
     cancelTrackerWake(); operations.pauseTracker();
     cancelMusicWake(); operations.pauseMusic();
     cancelAmalWake();
+    cancelMenuWake();operations.resetMenuInput();
     resetInput();
     operations.audio.silence();
   }
@@ -7761,6 +8182,7 @@
   function resume() {
     if (!state.stopped || state.halted) return;
     state.stopped = false;
+    if(menuWaitContext&&menuWaitContext.kind==='sleep'&&menuWaitContext.remaining!=null){menuWaitContext.due=timing.now()+menuWaitContext.remaining;delete menuWaitContext.remaining;}
     const location = operations.paletteLocation();
     try {
       if (operations.nextPaletteVbl() != null) operations.advancePalette(vblCount());
@@ -7772,6 +8194,7 @@
     catch (error) { failPalette(error, operations.musicLocation()); }
     try { operations.resumeAmal(); }
     catch (error) { failPalette(error,state.location); }
+    requestMenuWake();
     if (state.waiting === 'input') { while (inputRequest && keys.length) { const next = keys.shift(); consumeInput(typeof next === 'string' ? next : next.key); } }
     if (state.waiting === 'sleep') scheduleNext(sleepRemaining);
     else if (!state.waiting) scheduleNext(0);
@@ -7781,6 +8204,7 @@
     if (typeof key !== 'string') throw new Error('Keyboard input must be a string');
     if (scanCode != null && (!Number.isInteger(scanCode) || scanCode < 0 || scanCode > 127 || key.length !== 1 || key.charCodeAt(0) > 255)) throw new Error('Invalid raw keyboard input');
     if (state.halted) return;
+    if(!state.stopped&&operations.menuShortcut(key,scanCode,state.input.rawKeys.subarray(96,104).reduce((mask,value,index)=>mask|(value?1<<index:0),0))){if(!state.waiting)scheduleNext(0);return;}
     if (inputRequest && !state.stopped) { try { consumeInput(key); } catch (error) { failPalette(error, state.location); } return; }
     if (state.waiting === 'key') {
       state.waiting = null;
@@ -7810,7 +8234,7 @@
 
   const operations = operationsFactory(state, Object.assign({}, options, { resetInput, vblNow: vblCount,
     audioFieldTime: () => (timing.now() - timerEpoch) * timing.vblHz / 1000, audioVblHz: timing.vblHz,
-    requestPaletteWake, requestTrackerWake, requestMusicWake, requestAmalWake }));
+    requestPaletteWake, requestTrackerWake, requestMusicWake, requestAmalWake, requestMenuWake }));
   return {
     ...(blocks ? { optimization: Object.freeze({
       get blocksExecuted() { return optimization.blocksExecuted; },
@@ -7858,7 +8282,8 @@
     cases[8] = function(state){ state.location = {"line":13,"offset":208}; program.print(["Three"], []); return {}; };
     cases[9] = function(state){ state.location = {"line":14,"offset":224}; return { ret: true }; };
     cases[10] = function(state){ state.location = {"line":15,"offset":230}; program.print(["Nope!"], []); return {}; };
-    const program = createProgram(cases, Object.assign({}, opts, { banks: [] }));
+    const menuProcedures=Object.fromEntries([].map(([name,target])=>[name,{...target,data:dataTables[name]}]));
+    const program = createProgram(cases, Object.assign({}, opts, { menuProcedures, banks: [] }));
     program.compilation = Object.freeze({ variableBufferBytes: null, stackEntries: null });
     program.state.data = { entries: dataTables["@main"], index: 0 };
     program.state.variables = Object.create(null);

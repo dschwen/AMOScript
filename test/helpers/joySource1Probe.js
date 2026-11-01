@@ -65,8 +65,17 @@ module.exports = async function joySource1Probe(page) {
       const loaded = new Promise(resolve => { frame.onload = resolve; }); frame.srcdoc = debugPage; await loaded;
       try {
         const doc = frame.contentDocument, win = frame.contentWindow;
+        const waitPhase=async expected=>{
+          const deadline=performance.now()+10000;
+          while(true){
+            const state=doc.getElementById('game-viewport').dataset;
+            if(state.phase===expected)return;
+            check(state.phase!=='error'&&performance.now()<deadline,'Standalone editor expected '+expected+': '+JSON.stringify({...state}));
+            await new Promise(resolve=>setTimeout(resolve,25));
+          }
+        };
         doc.getElementById('game-restart').click();
-        await new Promise(resolve => setTimeout(resolve, 160));
+        await waitPhase('running');
         check(doc.getElementById('game-viewport').dataset.phase === 'running', 'Standalone editor initial pointer failed');
         const input = doc.getElementById('game-input'); input.focus();
         for (const key of ['5', 'f', '6', 'f', '2', 'f', 'c']) {
@@ -75,10 +84,9 @@ module.exports = async function joySource1Probe(page) {
         }
         check(doc.getElementById('game-viewport').dataset.phase === 'running', 'Standalone editor controls failed');
         for (const type of ['keydown', 'keyup']) input.dispatchEvent(new win.KeyboardEvent(type, { code: 'Escape', key: 'Escape', bubbles: true }));
-        await new Promise(resolve => setTimeout(resolve, 120));
+        await waitPhase('ended');
         check(doc.getElementById('game-viewport').dataset.phase === 'ended', 'Standalone editor did not reach Edit');
-        await win.AMOS_GAME_PAGE.dispose();
-      } finally { frame.remove(); }
+      } finally { try{if(frame.contentWindow.AMOS_GAME_PAGE)await frame.contentWindow.AMOS_GAME_PAGE.dispose();}finally{frame.remove();} }
       return { editors: 2, frames, gpuFrames, independentPixels, protectedPopExits: 4, ended: true, standalonePage: true };
     } finally { host.detach(); gpuHost.detach(); if (p) p.stop(); const gl = gpu.resources.context; gpu.dispose(); const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   }, { sources, initialMaps, sourceNames: Object.keys(sources), assets: loadAssets(path.join(root, 'manifest.json')), gpuSources: require('./webglHostSources')(), clockSource: require('./fakeTimers').createFakeTimers.toString(),

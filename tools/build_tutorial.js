@@ -31,11 +31,12 @@ function buildTutorial({ source = path.join(root, 'examples/Tutorial'), modules 
     const name = relative.replace(/[^a-z0-9]+/gi,'-').toLowerCase();
     const file = `${repository ? 'tutorial-' : ''}${name}.html`;
     const item = {source:relative,file,byteLength:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')};
+    if(relative==='Tutorials/Menus/Menus_6.AMOS'&&item.sha256==='455be1772dc073fd67708235d821e50bcef49eb17b851a5ec8be87e4cce1ebf6')item.sourceCorrection='Line 179: six demo items branch to labels 1–6; the supplied unused seventh target had no label. Native source offsets are preserved. The original is retained in test/fixtures/tutorial/menus6-original.amos.';
     const nav = `<nav><a href="${repository ? preview('tutorial.html') : 'index.html'}">Tutorial catalogue</a> · <a href="${repository ? 'tutorial.html' : 'index.html'}">Local catalogue</a></nav>`;
     try {
       const module = new Transpiler(bytes).toModule({optimize:true});
       const page = buildGamePage(bytes,{title:relative,assets,debug:true,optimize:true});
-      outputs.set(file,page.replace('<h1>',nav+'<p>Original AMOS tutorial. Compilation does not guarantee completed execution; the Debug menu reports runtime limits. Select Keyboard: Typing for text prompts. Right mouse actions may require dismissing the browser context menu.</p><h1>'));
+      outputs.set(file,page.replace('<h1>',nav+'<p>AMOS tutorial. Compilation does not guarantee completed execution; the Debug menu reports runtime limits. Select Keyboard: Typing for text prompts. Hold the right mouse button to open AMOS menus, point to an item, then release to select.</p>'+(item.sourceCorrection?'<p><strong>Source correction:</strong> '+escape(item.sourceCorrection)+'</p>':'')+'<h1>'));
       if (modules) outputs.set(name+'.module.js',module);
       item.compiled = true;
     } catch (error) {

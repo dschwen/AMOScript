@@ -59,7 +59,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
       setTimeout: (fn, ms) => setTimeout(guard(fn), ms), clearTimeout, print() {} });
     if (inheritedFonts) live.display.getDiscFonts();
     if (initialMouse) live.setMouse(...initialMouse);
-    host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware',
+    host = AMOS_BROWSER.createCanvasHost(canvas, { renderer: gpu, mouseCoordinates: 'hardware', contextMenu:false,
       joysticks: joystickOptions(),
       textInput:{container:viewport,toolbar:viewport.querySelector('.amos-fullscreen-toolbar')},
       virtualJoystick: { container: viewport, port, visibility: touchMode.value },
@@ -94,7 +94,8 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   }
   window.addEventListener('pagehide', dispose);
   // The embedding page may call this when unmounting an application view.
-  globalThis.AMOS_GAME_PAGE = { dispose, files: memory, sleepScale: () => live ? live.sleepScale() : Number(speed.value), joystickStatus: () => host ? host.pollJoysticks() : [] };
+  globalThis.AMOS_GAME_PAGE = { dispose, files: memory, sleepScale: () => live ? live.sleepScale() : Number(speed.value), joystickStatus: () => host ? host.pollJoysticks() : [],
+    ...(debug?{menuStatus:()=>live?live.menuSnapshot():null}:{}) };
   update();
 }
 module.exports = installGamePage;

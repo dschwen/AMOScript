@@ -71,7 +71,7 @@ test('On: invalid selectors, missing labels and unsupported destinations fail wi
   assert.throws(()=>compile(binary([[on(n(0),'Gosub',['missing'])]])),/Unresolved label missing.*line 1/);
   assert.throws(()=>compile(binary([[w(0x316),w(0),w(0),n(1),t('Gosub')]])),/Expected labelRef.*line 1/);
   assert.throws(()=>compile(binary([[on(n(1)),t(',')],...subroutines])),/Expected labelRef.*line 1/);
-  assert.throws(()=>compile(binary([[w(0x316),w(0),w(0),n(1),t('Gosub'),n(100)]])),/Expected labelRef.*line 1/);
+  assert.throws(()=>compile(binary([[w(0x316),w(0),w(0),n(1),t('Gosub'),n(100)]])),/Unresolved label 100.*line 1/);
   assert.throws(()=>compile(binary([[w(0x316),w(0),w(0),n(1),t('Return')]])),/On requires Goto or Gosub.*line 1/);
   assert.throws(()=>compile(binary([[w(0x316)]])),/Truncated token.*line 1/);
   const {program}=execute(binary([[t('Dim'),id('a'),t('('),n(0),t(')')],[t('Wait Key')],

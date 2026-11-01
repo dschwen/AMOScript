@@ -9,7 +9,7 @@ const {createFakeTimers}=require('./helpers/fakeTimers');
 test('Tutorial: catalogue preserves all 43 originals, versioned backups, assets and explicit failure pages',()=>{
   const b=buildTutorial({repository:true});
   assert.strictEqual(b.programs.length,43);
-  assert.strictEqual(b.programs.filter(p=>p.compiled).length,21);
+  assert.strictEqual(b.programs.filter(p=>p.compiled).length,30);
   assert.strictEqual(new Set(b.programs.map(p=>p.file)).size,43);
   for(const p of b.programs){assert.ok(/^[0-9a-f]{64}$/.test(p.sha256));const page=b.outputs.get(p.file);assert.ok(page.includes('Tutorial catalogue'));assert.ok(b.outputs.get('tutorial.html').includes('https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+p.file));if(!p.compiled)assert.ok(page.includes('does not compile yet'));}
   assert.ok(b.assets['amospro_tutorial:objects/bobs.abk']);

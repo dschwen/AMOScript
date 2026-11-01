@@ -14,6 +14,6 @@ module.exports=async function waitForRoller2ScoresReturn(page){
     assert.strictEqual(state.phase,'menu','Roller II scores return failed: '+JSON.stringify(state));
   }catch(error){
     const state=await page.locator('#roller2-game-controls').evaluate(element=>({...element.dataset})).catch(()=>null);
-    error.message+='; Roller II scores return state: '+JSON.stringify(state);throw error;
+    throw new Error('Roller II scores return state: '+JSON.stringify(state)+'; '+error.message,{cause:error});
   }
 };

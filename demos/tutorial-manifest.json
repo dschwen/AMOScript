@@ -212,72 +212,64 @@
       "file": "tutorial-tutorials-menus-menus-1-amos.html",
       "byteLength": 4804,
       "sha256": "3fbf7362b1eb6002e2d335f2aed731a8ec9feb32e7b7095fb17c8e65fd696030",
-      "compiled": false,
-      "error": "Unsupported token 0x964 at line 81, byte 3102"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_2.AMOS",
       "file": "tutorial-tutorials-menus-menus-2-amos.html",
       "byteLength": 2956,
       "sha256": "b2a034139b1f6deff6db4a6b62f7ba8ac0a0d1d4c0cb4fb1eaaad4f2d8bb7302",
-      "compiled": false,
-      "error": "Unsupported token 0x964 at line 50, byte 1924"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_3.AMOS",
       "file": "tutorial-tutorials-menus-menus-3-amos.html",
       "byteLength": 5092,
       "sha256": "b3b35a9e875001a5992052b5e582a978e45cb65e29fdc0300bffabeb597a0dd4",
-      "compiled": false,
-      "error": "Unsupported token 0x964 at line 80, byte 3506"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_4.AMOS",
       "file": "tutorial-tutorials-menus-menus-4-amos.html",
       "byteLength": 5110,
       "sha256": "a2c5fcda795344e00362590c333784d1bb7010cb3c0a37567f99d40b66959740",
-      "compiled": false,
-      "error": "Unsupported token 0x964 at line 64, byte 2738"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_5.AMOS",
       "file": "tutorial-tutorials-menus-menus-5-amos.html",
       "byteLength": 6810,
       "sha256": "75d1bd9f2df0b6df4f85e4e7b4a00c59c3dc930dceb5ee10b0b38d24fa5aa17a",
-      "compiled": false,
-      "error": "Unsupported token 0x964 at line 117, byte 3372"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_6.AMOS",
       "file": "tutorial-tutorials-menus-menus-6-amos.html",
       "byteLength": 7604,
-      "sha256": "17987b0a13c3351b1e2199edfccdaa43d1a797b156d4e024bc07242225f012bd",
-      "compiled": false,
-      "error": "Unsupported token 0x910 at line 132, byte 5242"
+      "sha256": "455be1772dc073fd67708235d821e50bcef49eb17b851a5ec8be87e4cce1ebf6",
+      "sourceCorrection": "Line 179: six demo items branch to labels 1–6; the supplied unused seventh target had no label. Native source offsets are preserved. The original is retained in test/fixtures/tutorial/menus6-original.amos.",
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_7.AMOS",
       "file": "tutorial-tutorials-menus-menus-7-amos.html",
       "byteLength": 5538,
       "sha256": "f947f12817cd4a1eafdcb8a59655589325a3816f61f630487199f50a7b4d9640",
-      "compiled": false,
-      "error": "Unsupported token 0x8a8 at line 95, byte 3818"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_8.AMOS",
       "file": "tutorial-tutorials-menus-menus-8-amos.html",
       "byteLength": 7828,
       "sha256": "71ed1d5332e89e1498a2313896b5091b468305ccdac53c2ba6194a09578548b4",
-      "compiled": false,
-      "error": "Unsupported token 0x8a8 at line 74, byte 3008"
+      "compiled": true
     },
     {
       "source": "Tutorials/Menus/Menus_9.AMOS",
       "file": "tutorial-tutorials-menus-menus-9-amos.html",
       "byteLength": 7592,
       "sha256": "cf26152a37c642f15d9d0b5a728f3e518dc10590676d132e9ed1508c640132c1",
-      "compiled": false,
-      "error": "Unsupported token 0x7a4 at line 38, byte 1830"
+      "compiled": true
     },
     {
       "source": "Tutorials/Multi_Rainbows.AMOS",

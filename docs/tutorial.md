@@ -2,7 +2,7 @@
 
 [Open the Tutorial catalogue](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tutorial.html).
 
-The repository pins the original programs and their assets under
+The repository pins the supplied programs and their assets under
 `examples/Tutorial`. The uploaded `Tutorial` directory is left untouched.
 The catalogue includes all 43 native program files: 39 current tutorial programs,
 two Multi_Rainbows versions and two ReTokenise editor-accessory versions. Each
@@ -34,28 +34,29 @@ Playable development pages use the shared game-page harness with audio,
 fullscreen, keyboard modes and debug errors/downloads. Original asset paths such
 as `AMOSPro_Tutorial:Objects/bobs.abk` resolve to preloaded bytes. Writes are
 session-local. Original source programs are not rewritten to bypass commands.
-Compilation is separate from completing a tutorial's execution.
+Compilation is separate from completing a tutorial's execution. Menus_6 has one
+[documented source correction](menus.md#menus_6-source-correction); its original
+bytes remain in a test fixture and the uploaded `Tutorial` copy is untouched.
 
 ## Implementation status and next work
 
-All 21 core tutorial files currently compile. See the generated manifest for exact,
+All 21 core tutorial files and all nine menu tutorials currently compile (30/43).
+See the generated manifest for exact,
 source-located blockers. The remaining work groups are:
 
-1. Menus: `Menu$` trees, Choice polling, menu events, placement/shortcuts and
-   Menu bank serialization (nine programs).
-2. Interface: resource-bank graphics, the dialogue language, modal/cooperative
+1. Interface: resource-bank graphics, the dialogue language, modal/cooperative
    Dialog Box execution, editing/list/slider zones and variable communication
    (nine programs). Expressions must never receive a Promise or replay effects
    while waiting for a requester.
-3. User copper lists and checked Cop Logic memory (the two Multi_Rainbows files).
-4. ReTokenise: editor/accessory services require a genuine editor host boundary;
+2. User copper lists and checked Cop Logic memory (the two Multi_Rainbows files).
+3. ReTokenise: editor/accessory services require a genuine editor host boundary;
    they cannot be implemented by pretending a standalone browser is the AMOS
    editor.
 
-The [menu implementation notes](menus.md) describe the checked native bank
-codec, graphical command streams and relative layout now covered by unit tests.
-Compiler, driver and browser input integration remains necessary before any of
-the nine menu programs can be promoted from its diagnostic page.
+The [menu implementation notes](menus.md) describe compiled Menu$ trees,
+indexed drawing, Choice polling, mouse/keyboard selection, native Menu banks,
+On Menu handlers and graphical procedure callbacks. Input-only tests exercise
+all nine programs; completing every option and native pixel parity remain open.
 
 The first compatibility additions accept the supplied Basic v1.34 and spaced
 Pro v1.00 headers while preserving binary bounds validation; handle uncached
