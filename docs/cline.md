@@ -15,7 +15,10 @@ Native evidence is `lib_in_cline0` in `src/lib/windows.cpp` and `clear_line` in
 `src/w/windows.cpp`, pinned at `7f32e0abe1b6b415c9502b598cd3e4cb131018f8`. The native
 command sends control 26; this subset implements its direct statement effect.
 General literal control streams, alternate fonts/windows, writing masks/styles
-and counted `Cline n` (`$1596`) remain open. The counted token still rejects.
+remain open. Counted `Cline n` (`$1596`) now accepts 1–206 characters, clears
+from the current column through the bounded remainder of that row, and keeps
+the cursor unchanged. Old Basic 1.34 base-token forms such as `Cline (20)`
+select that overload; newer bare-token signatures retain their exact arity.
 
 ## Original game path
 

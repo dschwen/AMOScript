@@ -88,5 +88,5 @@ test('Fade To: source palette is captured, components move both directions and s
   p.fade(2, 1); d.screen(1).palette[1] = 0; d.close(1); c.tick(20);
   assert.strictEqual(d.screen(0).palette[1], 0xe42); c.tick(520); assert.strictEqual(d.screen(0).palette[1], 0x1f3);
   c.tick(40); assert.strictEqual(p.state.fade.active, false); p.stop();
-  assert.throws(() => execute(binary([[w(0xdfe), n(2), t('To'), n(-1)]])), /Unsupported Fade To screen.*line 1/);
+  assert.throws(() => execute(binary([[w(0xdfe), n(2), t('To'), n(-1)]])), /Fade To sprite palette requires bank 1.*line 1/);
 });

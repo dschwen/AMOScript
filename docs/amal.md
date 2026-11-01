@@ -151,9 +151,11 @@ Next yields before repeating a loop, ordinary jumps retain their execution mode,
 and Bob collision tests require direct Synchro execution. Keep these boundaries
 when extending the current manual subset.
 
-Wait/On, mouse functions, Sprite collision
-and Col functions, local Amreg overloads, AMAL banks/raw-address targets,
-reverse recorded movement and banked AMAL strings remain unsupported. Automatic
+Wait/On, Sprite collision and Col functions, AMAL banks/raw-address targets
+and banked AMAL strings remain unsupported. K1/K2 mouse-button functions,
+local Amreg access, Rainbow channels, Chanmv and Amplay speed/reverse controls
+now run the original [Tutorial examples](tutorial.md). Recorded PLay owns
+local R0 (speed) and R1 (direction), matching the native register layout. Automatic
 synchronization and all-channel Freeze now use the shared controller and driver.
 The entire original
 program now compiles and passes the bounded connected replay; those wider

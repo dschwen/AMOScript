@@ -1374,7 +1374,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const next = start + size + (size & 1);
       if (next > end) fail('truncated chunk/padding', position);
       if (['DEST', 'PCHG', 'SHAM', 'CTBL', 'CCRT'].includes(type)) fail(`unsupported ${type} semantics`, position);
-      if (type === 'DRNG') {
+      if (type === 'DRNG' && !options.ignoreCycles) {
         if (size < 8 || chunks.BODY || ranges.length >= 256) fail('invalid DRNG size/order', position);
         const low = bytes[start], high = bytes[start + 1], rate = view.getInt16(start + 2, false), flags = view.getUint16(start + 4, false);
         const trueCount = bytes[start + 6], registerCount = bytes[start + 7];
@@ -1390,7 +1390,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         }
         ranges.push(Object.freeze({ low, high, rate, flags, cells: Object.freeze(cells) }));
       }
-      if (type === 'CRNG') {
+      if (type === 'CRNG' && !options.ignoreCycles) {
         if (cycles.length >= 256) fail('too many CRNG records', position);
         if (chunks.BODY) fail('properties must precede BODY', position);
         if (size !== 8) fail('invalid CRNG size', position);
@@ -1637,7 +1637,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       for (let p = at + 12; p < formEnd;) {
         need(p, 8, formEnd); const name = tag(p), length = view.getUint32(p + 4, false), start = p + 8;
         need(start, length + (length & 1), formEnd);
-        if (chunks[name]) fail(`duplicate ${name}`);
+        if (chunks[name] && ['BMHD','CMAP','CAMG','ANHD','BODY','DLTA'].includes(name)) fail(`duplicate ${name}`);
         chunks[name] = { start, length }; p = start + length + (length & 1);
       }
       const header = chunks.ANHD; let delay = 0, interleave = 2;
@@ -1651,7 +1651,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       let planar, palette = null, offsets = [], values = [];
       if (!frames.length) {
         if (header && bytes[header.start] !== 0) fail('first frame must contain a full bitmap');
-        const loaded = readIlbm(bytes.subarray(at, formEnd)), image = loaded.image;
+        // Frame commands consume bitmap/palette data, not ILBM cycling jobs.
+        // Keep Load Iff strict; ANIM streams may carry unused editor CRNG data.
+        const loaded = readIlbm(bytes.subarray(at, formEnd), {ignoreCycles:true}), image = loaded.image;
         if (image.masking || image.hasAmosScreen || chunks.DLTA || (image.displayMode & 4)) fail('masks/interlace/AMSC are not supported');
         format = { width: image.width, height: image.height, depth: image.depth, rowBytes: image.rowBytes,
           mode: image.displayMode, paletteSize: image.paletteSize };
@@ -2884,8 +2886,30 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
     if (number < 0 || number > 3 || colour < 0 || (colour & 31) > 15 || length < 16 || length >= 32700) throw new Error('Invalid Set Rainbow arguments');
-    if ([red, green, blue].some(pattern => pattern !== '')) throw new Error('Rainbow pattern strings are not implemented');
-    const colours = new Uint16Array(length); colours.fill(start & 0xfff);
+    const parse = (text, initial) => {
+      if (typeof text !== 'string' || text.length>4096) throw Error('Invalid Rainbow pattern');
+      const moves=[];let rest=text;
+      while(rest.trim()) {
+        const match=/^\s*\(\s*(\d+)\s*,\s*([+-]?\d+)\s*,\s*(\d+)\s*\)/.exec(rest);
+        if(!match || moves.length>=128)throw Error('Invalid Rainbow pattern');
+        const [speed,step,count]=match.slice(1).map(Number);
+        if(speed<1 || speed>32767 || step < -32768 || step>32767 || count>32767)throw Error('Unsupported Rainbow pattern bounds');
+        moves.push({speed,step,count});rest=rest.slice(match[0].length);
+      }
+      return {value:initial,counter:1,speed:0,step:0,left:1,index:0,moves};
+    };
+    const channels=[parse(red,(start>>8)&15),parse(green,(start>>4)&15),parse(blue,start&15)];
+    const colours = new Uint16Array(length);
+    for(let row=0;row<length;row++) {
+      for(const c of channels) if(c.counter && --c.counter===0) {
+        c.counter=c.speed;c.value=(c.value+c.step)&15;
+        if(c.left && --c.left===0) {
+          const move=c.moves.length?c.moves[c.index++%c.moves.length]:{speed:0,step:0,count:0};
+          c.counter=c.speed=move.speed;c.step=move.step;c.left=move.count;
+        }
+      }
+      colours[row]=(channels[0].value<<8)|(channels[1].value<<4)|channels[2].value;
+    }
     rainbows.set(number, { colour: colour & 31, colours, base: 0, y: 28, height: 0 }); changed();
   }
   function rainbow(number, base = null, y = null, height = null) {
@@ -3415,10 +3439,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const target = screen();
     if ([x, y, radius].some(v => !Number.isInteger(v) || v < -32768 || v > 32767) || radius <= 0 ||
         x - radius < -32768 || x + radius > 32767 || y - radius < -32768 || y + radius > 32767) throw new Error('Circle requires bounded signed-word coordinates and positive radius');
-    if (target.mode & 0x8000 || target.linePattern !== 65535) throw new Error('Unsupported Circle hires or patterned outline');
+    if (target.linePattern !== 65535) throw new Error('Unsupported Circle patterned outline');
+    if(target.mode & 0x8000)checkEllipse(x,y,radius*2,radius);
   }
   function circle(cx, cy, radius) {
     const target = screen();
+    if(target.mode & 0x8000)return ellipse(cx,cy,radius*2,radius);
     // Portable midpoint outline. Native DrawEllipse edge ties remain unverified.
     let x = radius, y = 0, error = 1 - radius;
     while (x >= y) {
@@ -3578,11 +3604,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     target.pixels.fill(target.paper, (target.rows - 1) * 8 * target.width);
     target.y = target.rows - 1;
   }
-  function clearLine() {
+  function clearLine(count = null) {
     const target = screen();
     if (!target.columns || !target.rows) throw new Error('Screen is too small for text');
     const first = target.y * 8, end = Math.min(first + 8, target.height);
-    for (let y = first; y < end; y++) target.pixels.fill(target.paper, y * target.width, y * target.width + target.columns * 8);
+    const left = count == null ? 0 : target.x * 8, right = count == null ? target.columns * 8 : Math.min(target.columns, target.x + count) * 8;
+    for (let y = first; y < end; y++) target.pixels.fill(target.paper, y * target.width + left, y * target.width + right);
     changed();
   }
   function write(text) {
@@ -3681,7 +3708,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     changed();
   }
   function centre(value) {
-    locate(Math.max(0, Math.floor((screen().columns - value.length) / 2)), null);
+    const width = value.replace(/\x1b[\s\S][\s\S]/g, '').length;
+    locate(Math.max(0, Math.floor((screen().columns - width) / 2)), null);
     write(value + '\n');
   }
   function info(name, ...args) {
@@ -3895,6 +3923,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     circle: (...args) => { validateCircle(...args); return drawing(circle, args); },
     paint: (...args) => { validatePaint(...args); const original = point(...args); return drawing(paint, [...args, original]); },
     bar: (...args) => drawing(bar, args), write: (...args) => drawing(write, args), clearLine: () => drawing(clearLine, []),
+    clearCountedLine(count) { whole(count); if(count<1 || count>206)throw Error('Cline count must be 1..206');return drawing(clearLine,[count]); },
     text: (...args) => drawing(text, args), centre: (...args) => drawing(centre, args),
     pasteGraphic: (...args) => drawing(paste, args),
     setDrawingHooks(hooks) { drawingHooks = hooks; },
@@ -4123,15 +4152,15 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function setChannel(channel, type, readNumber) {
     channel = channelIndex(channel);
-    if (type !== 'sprite' && type !== 'bob') throw new Error('Unsupported Channel target (expected Bob or Sprite)');
+    if (!['sprite','bob','rainbow'].includes(type)) throw new Error('Unsupported Channel target (expected Bob, Sprite or Rainbow)');
     const number = integer(readNumber());
-    if (number < 0 || number >= 64) throw new Error('Invalid Channel target number');
-    amalBindings[channel * 2] = type === 'sprite' ? 0 : 1;
+    if (number < 0 || number >= (type === 'rainbow' ? 4 : 64)) throw new Error('Invalid Channel target number');
+    amalBindings[channel * 2] = {sprite:0,bob:1,rainbow:2}[type];
     amalBindings[channel * 2 + 1] = number;
   }
   function channelBinding(channel) {
     channel = channelIndex(channel);
-    return Object.freeze({ type: amalBindings[channel * 2] ? 'bob' : 'sprite', number: amalBindings[channel * 2 + 1] });
+    return Object.freeze({ type: ['sprite','bob','rainbow'][amalBindings[channel * 2]], number: amalBindings[channel * 2 + 1] });
   }
   function amregIndex(index) {
     index = integer(index);
@@ -4309,10 +4338,17 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if(speed<1 || speed>32767 || yOffset>32767 || start<6+count*2 || y<=x || y>=data.length) throw Error('Unsupported AMAL movement geometry/speed');
     const end=(from,limit)=>{let at=from;while(at<limit && data[at])at++;if(at===limit)throw Error('Unterminated AMAL movement stream');return at;};
     const ends={X:end(x,y),Y:end(y,data.length)},starts={X:x,Y:y};
-    return {bank,speed,alive:()=>banks.get(4)===bank && bank.data===data,read(axis,index){const at=starts[axis]+index;if(at>ends[axis])throw Error('AMAL movement stream out of bounds');return data[at];}};
+    return {bank,speed,alive:()=>banks.get(4)===bank && bank.data===data,read(axis,index){const at=starts[axis]+index;if(index===-1 && data[starts[axis]-1]===0)return 0;if(index<0 || at>ends[axis])throw Error('AMAL movement stream out of bounds');return data[at];}};
   }
-  const amal = amalFactory({ globals:amalRegisters, readMouse:axis=>state.input.mouse[axis.toLowerCase()], isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
+  const amal = amalFactory({ globals:amalRegisters, readMouseButton:button=>state.input.mouse.buttons&(1<<(button-1))?-1:0, readMouse:axis=>state.input.mouse[axis.toLowerCase()], isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
+    if (type === 'rainbow') {
+      const table = display.rainbows.get(number);
+      if (!table) throw Error('AMAL Rainbow target not defined');
+      return {alive:()=>display.rainbows.get(number)===table,
+        read:name=>table[{X:'base',Y:'y',A:'height'}[name]],
+        write(name,value) { display.rainbow(number, name==='X'?value:null, name==='Y'?value:null, name==='A'?value:null); }};
+    }
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
     if (!object) {
@@ -4601,14 +4637,21 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
     publishFade();
   }
-  function fade(speed, source = null) {
-    if (source != null) {
+  function fade(speed, source = null, mask = -1) {
+    mask = integer(mask);
+    let palette;
+    if (source == null) palette = Array(32).fill(0);
+    else {
       source = integer(source);
-      if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
-      display.screen(source);
+      if (source < 0) {
+        const bank = banks.get(1);
+        if (!bank || bank.type !== 'sprites') throw Error('Fade To sprite palette requires bank 1');
+        palette = bank.palette.slice();
+      } else palette = display.screen(source).palette.slice();
     }
-    beginFade(speed, () => source == null ? Array(32).fill(0) : display.screen(source).palette.slice());
+    beginFade(speed, () => palette.map((rgb,index) => mask & (1 << index) ? rgb : null));
   }
+
   function fadeColours(speed, colours) {
     if (!Array.isArray(colours) || !colours.length || colours.length > 32) throw new Error('Unsupported Fade colour count');
     // Original FDZ supplies all 32 registers. Preserve omitted/negative entries
@@ -5397,6 +5440,29 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     for (let id = first; id <= last; id++) if (id !== number) { const target = shape(id); if (target && masksIntersect(source, target)) { collisionHits[id] = 1; hit = true; } }
     return hit ? -1 : 0;
   }
+  function mixedCollision(kind, number, first = 0, last = null) {
+    number = integer(number);first=integer(first);last=last==null?(kind==='Bob'?63:10000):integer(last);
+    if(number<0 || number>(kind==='Bob'?10000:63) || first<0 || last>(kind==='Bob'?63:10000) || first>last)throw Error('Invalid mixed collision range');
+    const spriteShape = (id, screen) => {
+      if (screen.mode) throw Error('Mixed collisions require a lowres screen');
+      const sprite=sprites.get(id), bank=banks.get(1), image=sprite && bank && bank.images[(sprite.image&0x3fff)-1];
+      if (!image) return null;
+      const x=display.coordinate('X Screen',screen.id,sprite.x)-image.hotspotX;
+      const y=display.coordinate('Y Screen',screen.id,sprite.y)-image.hotspotY;
+      const mask=(1<<Math.min(4,image.depth))-1;
+      return {image:{...image,mask:Uint8Array.from(image.pixels,v=>(v&mask)?1:0)},x,y,right:x+image.width,bottom:y+image.height};
+    };
+    collisionHits.fill(0); let hit=false;
+    if (kind==='Bob') {
+      const bob=bobs.get(number), shape=collisionShape(bob);
+      if (!shape) return 0;
+      for(const sprite of sprites.values()) {if(sprite.number<first || sprite.number>last)continue;const other=spriteShape(sprite.number,bob.screen);if(other && masksIntersect(shape,other)){collisionHits[sprite.number]=1;hit=true;}}
+    } else {
+      if(number<0 || number>63)throw Error('Invalid mixed Sprite collision number');
+      for(const bob of bobs.values()) {if(bob.number<first || bob.number>last)continue;const shape=collisionShape(bob),other=spriteShape(number,bob.screen);if(shape && other && masksIntersect(shape,other)){collisionHits[bob.number]=1;hit=true;}}
+    }
+    return hit?-1:0;
+  }
   function unpackExisting(selector) {
     selector = integer(selector); const bank = banks.get(selector), target = display.screen();
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a packed-picture bank');
@@ -6145,7 +6211,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     installBanks([bank]); animations.set(bank, decoded); file.position = decoded.nextPosition;
     return decoded.frames.length;
   }
-  function framePlay(selector, count) {
+  function frameLength(channel, count) {
+    const file = fileChannel(integer(channel), 'read');
+    const decoded = animReaderFactory(Uint8Array.from(file.contents,c=>c.charCodeAt(0)), {position:file.position,count:integer(count)});
+    return decoded.raw.length;
+  }
+  let frameDelay = 0;
+  function framePlay(selector, count, screenNumber = null) {
     if (count < 0 || count >= 32768) throw new Error('Invalid Frame Play count');
     const address = bankMemory.address(selector), access = bankMemory.locate(address), decoded = animations.get(access.bank);
     if (!decoded || access.bank.data.length !== decoded.raw.length || !access.bank.data.every((v, i) => v === decoded.raw[i])) throw new Error('Frame Play requires an unchanged Frame Load bank');
@@ -6154,7 +6226,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (index < 0) throw new Error('Frame Play address is not a frame boundary');
     const selected = decoded.frames.slice(index, index + count);
     if (!selected.length) return address;
+    if (screenNumber != null) {
+      screenNumber = integer(screenNumber);
+      if (screenNumber < 0 || screenNumber > 7) throw Error('Invalid Frame Play screen');
+      if (index === 0) display.open(screenNumber, decoded.width, decoded.height, decoded.mode & 0x800 ? 4096 : 1 << decoded.depth, decoded.mode & 0x8000);
+      else display.select(screenNumber);
+    }
     display.playAnimationFrames(decoded, selected);
+    frameDelay = selected[selected.length-1].delay | 0;
     const next = index + selected.length;
     return bankMemory.start(access.bank.number) + (next < decoded.frames.length ? decoded.frames[next].offset : decoded.sentinel);
   }
@@ -6336,6 +6415,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function limitMouse(x1, y1, x2, y2) {
     display.screen();
+    const old = state.input.mouseLimits || {x1:0,y1:0,x2:458,y2:312};
+    x1=x1==null?old.x1:x1; y1=y1==null?old.y1:y1; x2=x2==null?old.x2:x2; y2=y2==null?old.y2:y2;
     x1 = integer(x1) & 65535; y1 = integer(y1) & 65535;
     x2 = Math.min(458, integer(x2) & 65535); y2 = Math.min(312, integer(y2) & 65535);
     if (x1 & 32768) x1 = 0;
@@ -6512,18 +6593,28 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
     amreg: index => amalRegisters[amregIndex(index)],
+    amregLocal: (channel,index) => amal.register(channelIndex(channel),integer(index)),
+    setAmregLocal: (channel,index,value) => amal.register(channelIndex(channel),integer(index),integer(value)),
     setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
-    setChannel, channelBinding, installAmal, amalOn, amalOff, synchro,
+    setChannel, channelBinding, installAmal, amalOn, amalOff, synchro, mixedCollision,
+    channelMoving: number => amal.moving(channelIndex(number)) ? -1 : 0,
+    amplay(speed = null, direction = null) {
+      if(speed != null) speed = integer(speed); if(direction != null)direction = integer(direction);
+      if(speed != null && (speed<1 || speed>32767))throw Error('Unsupported Amplay speed');
+      if(direction != null && (direction < -32768 || direction>32767))throw Error('Unsupported Amplay direction');
+      amal.playSettings(speed,direction);
+    },
     synchroOff, synchroOn, nextAmalVbl, advanceAmal, resumeAmal, amalSnapshot:amal.snapshot, amalRandomState:amal.randomState, cancelAmal,
     updateOff:()=>{automaticBobs=automaticSprites=false;},
     update:()=>{updateBobs();updateSprites();},
-    audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
+    audio, loadIff, unpackScreen, saveIff, frameLoad, frameLength, framePlay, frameParam:()=>frameDelay, trackLoad,
     trackLoopOn: () => { state.tracker.loop = true; },
     trackLoopOff: () => { state.tracker.loop = false; },
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),
-    bell: () => { sampleDuringMusic(); audio.bell(); },
+    bell: (note=70) => { sampleDuringMusic(); audio.bell(integer(note)); },
+    shoot: () => {sampleDuringMusic();audio.shoot();},
     boom: () => { sampleDuringMusic(); audio.boom(); },
     samPlay: number => { sampleDuringMusic(); audio.play(15, integer(number)); },
     samPlayVoices: (mask, number, frequency = null) => { sampleDuringMusic(); audio.play(integer(mask), integer(number), frequency == null ? null : integer(frequency)); },
@@ -6548,7 +6639,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   if (options.fieldTime != null && typeof options.fieldTime !== 'function') throw new Error('Boom fieldTime must be synchronous');
   const wave = new Uint8Array(510);
   let initialized = false, pointer = 0, mask = 0, started = 0, lastField = 0;
-  const volumes = [0];
+  let volumes = [0], duration = 61;
   // EnvBoom {1,64,10,50,50,0,0,0}, EnvDVol=56. Signed DIVS truncates.
   let fixed = 0;
   for (const [steps,goal] of [[1,64],[10,50],[50,0]]) {
@@ -6572,24 +6663,32 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const field = Math.floor(now);
     if (field < lastField) throw new Error('Boom clock moved backwards');
     const changed = field>lastField ? mask : 0;
-    const until = Math.min(field,started+61);
+    const until = Math.min(field,started+duration);
     if (mask) for(let next=lastField+1;next<=until;next++) {
-      if(next-started===61){mask=0;break;}
+      if(next-started===duration){mask=0;break;}
       for(let i=0;i<8;i++){seed=word(seed);write(wave,pointer,seed);pointer=pointer===0?508:pointer-2;}
     }
     lastField = field;
-    return {mask:changed,volume:volumes[Math.min(61,Math.max(0,field-started))]};
+    return {mask:changed,volume:volumes[Math.min(duration,Math.max(0,field-started))]};
   }
   function cancel(bits) { mask &= ~(bits&15); }
-  function begin(initialVolumes = [56,56,56,56]) {
+  function begin(initialVolumes = [56,56,56,56], effect = 'boom') {
+    if(!['boom','shoot'].includes(effect))throw Error('Unsupported noise effect');
     if(hz>1000)throw new Error('Unsupported Boom timing');
     const now=time();advance(now);initialize();
     const field=Math.floor(now), phase=now-field;
+    duration = effect === 'shoot' ? 11 : 61;
+    volumes = [0]; let fixed = 0;
+    for (const [steps,goal] of effect === 'shoot' ? [[1,64],[10,0]] : [[1,64],[10,50],[50,0]]) {
+      const delta = Math.trunc((((56*goal)>>6)-(fixed>>16))*256/steps)*256;
+      for(let i=0;i<steps;i++){fixed+=delta;volumes.push(fixed>>16);}fixed&=0xffff0000;
+    }
+
     const snapshots=[wave.slice()];let nextSeed=seed,nextPointer=pointer;
     // The slowest voice finishes its 510-byte initial fetch within about 24 PAL fields.
     // Build only the bounded future shared-noise states needed for these streams.
     // Shout notes 36..39 on voices 3..0; 2000*TNotes[note+2]/440.
-    const frequencies=[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
+    const frequencies=effect==='shoot'?[5340,5040,4754,4490]:[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
     const fieldCount=Math.ceil(phase+510/(clock/Math.max(...periods))*hz);
     for(let frame=1;frame<=fieldCount;frame++){
       const bytes=snapshots[frame-1].slice();
@@ -6604,8 +6703,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         const value=(snapshots[frame][index]<<24)>>24,volume=frame===0?initialVolumes[voice]:volumes[frame];
         data[at]=value/128*volume/64;
       }
-      events.push({type:'play',effect:'boom',mask:1<<voice,period:periods[voice],nativeRate,
-        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:'Boom    ',frequency:rate,length,data,format:'float32'}});
+      events.push({type:'play',effect,mask:1<<voice,period:periods[voice],nativeRate,
+        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:effect==='shoot'?'Shoot   ':'Boom    ',frequency:rate,length,data,format:'float32'}});
     }
     mask=0;started=field;lastField=field;
     return events;
@@ -7002,6 +7101,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const word = value => (value << 16) >> 16;
   const channels = new Map();
   if(options.readBeam!=null && typeof options.readBeam!=='function') throw new Error('readAmalBeam must be a synchronous function');
+  if(options.readMouseButton!=null && typeof options.readMouseButton!=='function')throw Error('readAmalMouseButton must be synchronous');
   if(options.readJoystick!=null && typeof options.readJoystick!=='function') throw new Error('AMAL joystick reader must be a synchronous function');
   // AMALInit is a cold-system initializer. ClrAMAL/Default do not reset it.
   let randomSeed=0x1234,stepping=false;
@@ -7054,6 +7154,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (['X','Y'].includes(peek()) && chars[at+1] === 'M') {
         const axis=chars[at++]; at++; return {kind:'mouse',axis};
       }
+      if (peek() === 'K') { at++;const button=peek();if(!['1','2'].includes(button))error('Expected AMAL mouse button 1 or 2');at++;return {kind:'mouseButton',button:Number(button)}; }
       if (peek() === 'J') { at++; const port=peek(); if(!['0','1'].includes(port)) error('Expected AMAL joystick 0 or 1'); at++; return {kind:'joystick',port:Number(port)}; }
       if (peek() === 'Z') { at++; expect('('); const mask=expression(depth+1); expect(')'); return {kind:'random',mask}; }
       return register();
@@ -7170,6 +7271,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if(options.isManual && !options.isManual()) throw Error('AMAL BC requires Synchro Off');
       return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
     }
+    if(expr.kind==='mouseButton') {const value=options.readMouseButton?options.readMouseButton(expr.button):0;if(value!==0 && value!==-1)throw Error('Invalid AMAL mouse button state');return value;}
     if (expr.kind === 'mouse') return word(options.readMouse(expr.axis));
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'local') return channel.locals[expr.index];
@@ -7243,25 +7345,28 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         if(!c.play) {
           const movement=options.movement(evaluate(op.movement,c)&65535);
           if(!movement) { ip++; continue; }
+          c.locals[0]=movement.speed;c.locals[1]=1;
           c.play={movement,counter:1,x:0,y:0,waitX:0,waitY:0};
         }
         const play=c.play;
         if(!play.movement.alive()) throw Error('AMAL movement bank changed during PLay');
         if(--play.counter) { save(); return; }
+        if(c.locals[1]<0){c.play=null;ip++;continue;}
         let finished=false;
         for(const [axis,index,wait] of [['X','x','waitX'],['Y','y','waitY']]) {
           const value=play.movement.read(axis,play[index]);
           if(value===0) { finished=true; break; }
           if(value&128) {
-            if(--play[wait]===0 || (play[wait]<0 && !(value&127))) play[index]++;
+            if(--play[wait]===0 || (play[wait]<0 && !(value&127))) play[index]+=c.locals[1]?1:-1;
             else if(play[wait]<0) play[wait]=value&127;
           } else {
-            c.target.write(axis,word(c.target.read(axis)+((value<<25)>>25)));
-            play[index]++;
+            c.target.write(axis,word(c.target.read(axis)+(c.locals[1]?1:-1)*((value<<25)>>25)));
+            play[index]+=c.locals[1]?1:-1;
           }
         }
         if(finished) { c.play=null; ip++; continue; }
-        play.counter=play.movement.speed; save(); return;
+        if(c.locals[0]<1)throw Error('Unsupported AMAL PLay speed');
+        play.counter=c.locals[0]; save(); return;
       } else if(op.kind==='move') {
         if(c.move) {
           if(--c.move.remaining===0) { c.move=null; ip++; continue; }
@@ -7313,7 +7418,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,animation:c.animation ? Object.freeze({index:c.animation.index,remaining:c.animation.counter,loops:c.animation.loops}) : null,locals:Object.freeze(Array.from(c.locals))}))); }
   function running() { retire(); return [...channels.values()].some(c=>c.enabled && (!c.ended || c.animation)); }
-  return { compile, install, control, running, usesBank:bank=>[...channels.values()].some(c=>c.play && c.play.movement.bank===bank), freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
+  return { compile, install, control, running,
+    register(number,index,value=null) {
+      if(index<0 || index>9)throw Error('Invalid AMAL local register');
+      const c=channels.get(number);if(!c)throw Error('AMAL channel not defined');
+      if(value!=null)c.locals[index]=word(value);return c.locals[index];
+    },
+    moving(number) { retire(); const c=channels.get(number); return !!(c && (c.move || c.play)); },
+    playSettings(speed,direction) { for(const c of channels.values()) {if(speed!=null)c.locals[0]=speed;if(direction!=null)c.locals[1]=direction;} }, usesBank:bank=>[...channels.values()].some(c=>c.play && c.play.movement.bank===bank), freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
@@ -7356,9 +7468,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     syncBoom();
     if (bellJob && (event.type === 'stop' || event.type === 'play' && event.effect !== 'bell')) bellJob.mask &= ~(event.mask & 15);
     if (event.type === 'stop' && (event.mask & 15) === 15) effectGeneration++;
-    if (event.type === 'play' && event.effect === 'boom') boomEngine().activate(event.mask);
-    if ((event.type === 'play' && event.effect !== 'boom') || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
-    if (event.effect !== 'boom' && event.volume != null) {
+    if (event.type === 'play' && ['boom','shoot'].includes(event.effect)) boomEngine().activate(event.mask);
+    if ((event.type === 'play' && !['boom','shoot'].includes(event.effect)) || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
+    if (!['boom','shoot'].includes(event.effect) && event.volume != null) {
       for (let voice = 0; voice < 4; voice++) if (event.mask & (1 << voice)) levels[voice] = event.volume;
     }
     if (event.type === 'play') {
@@ -7428,7 +7540,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       stop(15); levels.fill(56); engine.reset();
       loop(false, 15);
     },
-    bell() {
+    bell(note = 70) {
+      if(!Number.isInteger(note) || note<0 || note>96)throw Error('Bell note must be 0..96');
+      if(!note){stop(15);return;}
       syncBoom();
       const hz = options.vblHz == null ? 50 : options.vblHz, rate = 44100;
       const now = options.fieldTime ? options.fieldTime() : 0;
@@ -7440,15 +7554,17 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         for (let i = 0; i < steps; i++) { fixed += delta; volumes.push(fixed >> 16); }
         fixed &= 0xffff0000;
       }
-      const initial = levels.slice(), period = Math.max(124, Math.floor(clock / (8 * 1760)));
+      const notes = [0, 0, 0, 33, 35, 37, 39, 41, 44, 46, 49, 52, 55, 58, 62, 65, 69, 73, 78, 82, 87, 92, 98, 104, 110, 117, 123, 131, 139, 147, 156, 165, 175, 185, 196, 208, 220, 233, 247, 262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494, 523, 554, 587, 622, 659, 698, 740, 784, 830, 880, 932, 988, 1046, 1109, 1175, 1245, 1319, 1397, 1480, 1568, 1661, 1760, 1865, 1986, 2093, 2217, 2349, 2489, 2637, 2794, 2960, 3136, 3322, 3520, 3729, 3952, 4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6645, 7040, 7459, 7902, 8372];
+      const sampleLength=[256,256,128,64,32,16,8,4,4][Math.floor((note+2)/12)];
+      const initial = levels.slice(), period = Math.max(124, Math.floor(clock / (sampleLength * notes[note+2])));
       bellJob = { started: Math.floor(now), initial, volumes, mask: 15 };
       const generation = ++effectGeneration;
       for (let voice = 3; voice >= 0; voice--) {
         if (generation !== effectGeneration) break;
         const length = Math.ceil((31 - phase) * rate / hz), data = new Float32Array(length);
         for (let i = 0; i < length; i++) {
-          const field = Math.floor(phase + i * hz / rate), sample = Math.floor(i * clock / (rate * period)) & 7;
-          data[i] = (sample < 4 ? 127 : -127) / 128 * (field === 0 ? initial[voice] : volumes[Math.min(30, field)]) / 64;
+          const field = Math.floor(phase + i * hz / rate), sample = Math.floor(i * clock / (rate * period)) % sampleLength;
+          data[i] = (sample < sampleLength/2 ? 127 : -127) / 128 * (field === 0 ? initial[voice] : volumes[Math.min(30, field)]) / 64;
         }
         command({ type: 'play', effect: 'bell', mask: 1 << voice, period, nativeRate: clock / period, rate, volume: 64, loopMask: 0, filterEnabled: state.filterEnabled,
           sample: { bank: 0, number: 0, name: 'Bell    ', frequency: rate, length, data, format: 'float32' } }, 'effect');
@@ -7462,6 +7578,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         if (generation !== effectGeneration) break;
         command({ ...event, filterEnabled: state.filterEnabled }, 'effect');
       }
+    },
+    shoot() {
+      const engine = boomEngine(); syncBoom();
+      const generation = ++effectGeneration, events = engine.begin(levels, 'shoot');
+      for(const event of events) {if(generation!==effectGeneration)break;command({...event,filterEnabled:state.filterEnabled},'effect');}
     },
     noiseState() { const engine = boomEngine(); syncBoom(); return engine.snapshot(false); },
     silence() { if (activeMask) stop(15); } };
@@ -10309,7 +10430,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       const next = start + size + (size & 1);
       if (next > end) fail('truncated chunk/padding', position);
       if (['DEST', 'PCHG', 'SHAM', 'CTBL', 'CCRT'].includes(type)) fail(`unsupported ${type} semantics`, position);
-      if (type === 'DRNG') {
+      if (type === 'DRNG' && !options.ignoreCycles) {
         if (size < 8 || chunks.BODY || ranges.length >= 256) fail('invalid DRNG size/order', position);
         const low = bytes[start], high = bytes[start + 1], rate = view.getInt16(start + 2, false), flags = view.getUint16(start + 4, false);
         const trueCount = bytes[start + 6], registerCount = bytes[start + 7];
@@ -10325,7 +10446,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         }
         ranges.push(Object.freeze({ low, high, rate, flags, cells: Object.freeze(cells) }));
       }
-      if (type === 'CRNG') {
+      if (type === 'CRNG' && !options.ignoreCycles) {
         if (cycles.length >= 256) fail('too many CRNG records', position);
         if (chunks.BODY) fail('properties must precede BODY', position);
         if (size !== 8) fail('invalid CRNG size', position);
@@ -10572,7 +10693,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       for (let p = at + 12; p < formEnd;) {
         need(p, 8, formEnd); const name = tag(p), length = view.getUint32(p + 4, false), start = p + 8;
         need(start, length + (length & 1), formEnd);
-        if (chunks[name]) fail(`duplicate ${name}`);
+        if (chunks[name] && ['BMHD','CMAP','CAMG','ANHD','BODY','DLTA'].includes(name)) fail(`duplicate ${name}`);
         chunks[name] = { start, length }; p = start + length + (length & 1);
       }
       const header = chunks.ANHD; let delay = 0, interleave = 2;
@@ -10586,7 +10707,9 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       let planar, palette = null, offsets = [], values = [];
       if (!frames.length) {
         if (header && bytes[header.start] !== 0) fail('first frame must contain a full bitmap');
-        const loaded = readIlbm(bytes.subarray(at, formEnd)), image = loaded.image;
+        // Frame commands consume bitmap/palette data, not ILBM cycling jobs.
+        // Keep Load Iff strict; ANIM streams may carry unused editor CRNG data.
+        const loaded = readIlbm(bytes.subarray(at, formEnd), {ignoreCycles:true}), image = loaded.image;
         if (image.masking || image.hasAmosScreen || chunks.DLTA || (image.displayMode & 4)) fail('masks/interlace/AMSC are not supported');
         format = { width: image.width, height: image.height, depth: image.depth, rowBytes: image.rowBytes,
           mode: image.displayMode, paletteSize: image.paletteSize };
@@ -11819,8 +11942,30 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   function setRainbow(number, colour, length, red, green, blue, start = 0) {
     [number, colour, length, start].forEach(whole);
     if (number < 0 || number > 3 || colour < 0 || (colour & 31) > 15 || length < 16 || length >= 32700) throw new Error('Invalid Set Rainbow arguments');
-    if ([red, green, blue].some(pattern => pattern !== '')) throw new Error('Rainbow pattern strings are not implemented');
-    const colours = new Uint16Array(length); colours.fill(start & 0xfff);
+    const parse = (text, initial) => {
+      if (typeof text !== 'string' || text.length>4096) throw Error('Invalid Rainbow pattern');
+      const moves=[];let rest=text;
+      while(rest.trim()) {
+        const match=/^\s*\(\s*(\d+)\s*,\s*([+-]?\d+)\s*,\s*(\d+)\s*\)/.exec(rest);
+        if(!match || moves.length>=128)throw Error('Invalid Rainbow pattern');
+        const [speed,step,count]=match.slice(1).map(Number);
+        if(speed<1 || speed>32767 || step < -32768 || step>32767 || count>32767)throw Error('Unsupported Rainbow pattern bounds');
+        moves.push({speed,step,count});rest=rest.slice(match[0].length);
+      }
+      return {value:initial,counter:1,speed:0,step:0,left:1,index:0,moves};
+    };
+    const channels=[parse(red,(start>>8)&15),parse(green,(start>>4)&15),parse(blue,start&15)];
+    const colours = new Uint16Array(length);
+    for(let row=0;row<length;row++) {
+      for(const c of channels) if(c.counter && --c.counter===0) {
+        c.counter=c.speed;c.value=(c.value+c.step)&15;
+        if(c.left && --c.left===0) {
+          const move=c.moves.length?c.moves[c.index++%c.moves.length]:{speed:0,step:0,count:0};
+          c.counter=c.speed=move.speed;c.step=move.step;c.left=move.count;
+        }
+      }
+      colours[row]=(channels[0].value<<8)|(channels[1].value<<4)|channels[2].value;
+    }
     rainbows.set(number, { colour: colour & 31, colours, base: 0, y: 28, height: 0 }); changed();
   }
   function rainbow(number, base = null, y = null, height = null) {
@@ -12350,10 +12495,12 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     const target = screen();
     if ([x, y, radius].some(v => !Number.isInteger(v) || v < -32768 || v > 32767) || radius <= 0 ||
         x - radius < -32768 || x + radius > 32767 || y - radius < -32768 || y + radius > 32767) throw new Error('Circle requires bounded signed-word coordinates and positive radius');
-    if (target.mode & 0x8000 || target.linePattern !== 65535) throw new Error('Unsupported Circle hires or patterned outline');
+    if (target.linePattern !== 65535) throw new Error('Unsupported Circle patterned outline');
+    if(target.mode & 0x8000)checkEllipse(x,y,radius*2,radius);
   }
   function circle(cx, cy, radius) {
     const target = screen();
+    if(target.mode & 0x8000)return ellipse(cx,cy,radius*2,radius);
     // Portable midpoint outline. Native DrawEllipse edge ties remain unverified.
     let x = radius, y = 0, error = 1 - radius;
     while (x >= y) {
@@ -12513,11 +12660,12 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     target.pixels.fill(target.paper, (target.rows - 1) * 8 * target.width);
     target.y = target.rows - 1;
   }
-  function clearLine() {
+  function clearLine(count = null) {
     const target = screen();
     if (!target.columns || !target.rows) throw new Error('Screen is too small for text');
     const first = target.y * 8, end = Math.min(first + 8, target.height);
-    for (let y = first; y < end; y++) target.pixels.fill(target.paper, y * target.width, y * target.width + target.columns * 8);
+    const left = count == null ? 0 : target.x * 8, right = count == null ? target.columns * 8 : Math.min(target.columns, target.x + count) * 8;
+    for (let y = first; y < end; y++) target.pixels.fill(target.paper, y * target.width + left, y * target.width + right);
     changed();
   }
   function write(text) {
@@ -12616,7 +12764,8 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     changed();
   }
   function centre(value) {
-    locate(Math.max(0, Math.floor((screen().columns - value.length) / 2)), null);
+    const width = value.replace(/\x1b[\s\S][\s\S]/g, '').length;
+    locate(Math.max(0, Math.floor((screen().columns - width) / 2)), null);
     write(value + '\n');
   }
   function info(name, ...args) {
@@ -12830,6 +12979,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     circle: (...args) => { validateCircle(...args); return drawing(circle, args); },
     paint: (...args) => { validatePaint(...args); const original = point(...args); return drawing(paint, [...args, original]); },
     bar: (...args) => drawing(bar, args), write: (...args) => drawing(write, args), clearLine: () => drawing(clearLine, []),
+    clearCountedLine(count) { whole(count); if(count<1 || count>206)throw Error('Cline count must be 1..206');return drawing(clearLine,[count]); },
     text: (...args) => drawing(text, args), centre: (...args) => drawing(centre, args),
     pasteGraphic: (...args) => drawing(paste, args),
     setDrawingHooks(hooks) { drawingHooks = hooks; },
@@ -13058,15 +13208,15 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   }
   function setChannel(channel, type, readNumber) {
     channel = channelIndex(channel);
-    if (type !== 'sprite' && type !== 'bob') throw new Error('Unsupported Channel target (expected Bob or Sprite)');
+    if (!['sprite','bob','rainbow'].includes(type)) throw new Error('Unsupported Channel target (expected Bob, Sprite or Rainbow)');
     const number = integer(readNumber());
-    if (number < 0 || number >= 64) throw new Error('Invalid Channel target number');
-    amalBindings[channel * 2] = type === 'sprite' ? 0 : 1;
+    if (number < 0 || number >= (type === 'rainbow' ? 4 : 64)) throw new Error('Invalid Channel target number');
+    amalBindings[channel * 2] = {sprite:0,bob:1,rainbow:2}[type];
     amalBindings[channel * 2 + 1] = number;
   }
   function channelBinding(channel) {
     channel = channelIndex(channel);
-    return Object.freeze({ type: amalBindings[channel * 2] ? 'bob' : 'sprite', number: amalBindings[channel * 2 + 1] });
+    return Object.freeze({ type: ['sprite','bob','rainbow'][amalBindings[channel * 2]], number: amalBindings[channel * 2 + 1] });
   }
   function amregIndex(index) {
     index = integer(index);
@@ -13244,10 +13394,17 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     if(speed<1 || speed>32767 || yOffset>32767 || start<6+count*2 || y<=x || y>=data.length) throw Error('Unsupported AMAL movement geometry/speed');
     const end=(from,limit)=>{let at=from;while(at<limit && data[at])at++;if(at===limit)throw Error('Unterminated AMAL movement stream');return at;};
     const ends={X:end(x,y),Y:end(y,data.length)},starts={X:x,Y:y};
-    return {bank,speed,alive:()=>banks.get(4)===bank && bank.data===data,read(axis,index){const at=starts[axis]+index;if(at>ends[axis])throw Error('AMAL movement stream out of bounds');return data[at];}};
+    return {bank,speed,alive:()=>banks.get(4)===bank && bank.data===data,read(axis,index){const at=starts[axis]+index;if(index===-1 && data[starts[axis]-1]===0)return 0;if(index<0 || at>ends[axis])throw Error('AMAL movement stream out of bounds');return data[at];}};
   }
-  const amal = amalFactory({ globals:amalRegisters, readMouse:axis=>state.input.mouse[axis.toLowerCase()], isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
+  const amal = amalFactory({ globals:amalRegisters, readMouseButton:button=>state.input.mouse.buttons&(1<<(button-1))?-1:0, readMouse:axis=>state.input.mouse[axis.toLowerCase()], isManual:()=>manualAmal, hasMovementBank:()=>!!movementBank(), movement, readJoystick:(port,accept)=>readJoystick(port,accept), readBeam:options.readAmalBeam, isRunning:()=>!state.halted&&!state.stopped, bobCollision:(...values)=>bobCollision(...values.map(value=>value&65535)), resolve(binding) {
     const {type,number} = binding;
+    if (type === 'rainbow') {
+      const table = display.rainbows.get(number);
+      if (!table) throw Error('AMAL Rainbow target not defined');
+      return {alive:()=>display.rainbows.get(number)===table,
+        read:name=>table[{X:'base',Y:'y',A:'height'}[name]],
+        write(name,value) { display.rainbow(number, name==='X'?value:null, name==='Y'?value:null, name==='A'?value:null); }};
+    }
     const objects = type === 'bob' ? bobs : sprites;
     let object = objects.get(number);
     if (!object) {
@@ -13536,14 +13693,21 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     fading = entries.length ? { target, entries, speed, nextVbl: vbl + 1, location: state.location && { ...state.location } } : null;
     publishFade();
   }
-  function fade(speed, source = null) {
-    if (source != null) {
+  function fade(speed, source = null, mask = -1) {
+    mask = integer(mask);
+    let palette;
+    if (source == null) palette = Array(32).fill(0);
+    else {
       source = integer(source);
-      if (source < 0 || source > 7) throw new Error('Unsupported Fade To screen (expected 0..7)');
-      display.screen(source);
+      if (source < 0) {
+        const bank = banks.get(1);
+        if (!bank || bank.type !== 'sprites') throw Error('Fade To sprite palette requires bank 1');
+        palette = bank.palette.slice();
+      } else palette = display.screen(source).palette.slice();
     }
-    beginFade(speed, () => source == null ? Array(32).fill(0) : display.screen(source).palette.slice());
+    beginFade(speed, () => palette.map((rgb,index) => mask & (1 << index) ? rgb : null));
   }
+
   function fadeColours(speed, colours) {
     if (!Array.isArray(colours) || !colours.length || colours.length > 32) throw new Error('Unsupported Fade colour count');
     // Original FDZ supplies all 32 registers. Preserve omitted/negative entries
@@ -14332,6 +14496,29 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     for (let id = first; id <= last; id++) if (id !== number) { const target = shape(id); if (target && masksIntersect(source, target)) { collisionHits[id] = 1; hit = true; } }
     return hit ? -1 : 0;
   }
+  function mixedCollision(kind, number, first = 0, last = null) {
+    number = integer(number);first=integer(first);last=last==null?(kind==='Bob'?63:10000):integer(last);
+    if(number<0 || number>(kind==='Bob'?10000:63) || first<0 || last>(kind==='Bob'?63:10000) || first>last)throw Error('Invalid mixed collision range');
+    const spriteShape = (id, screen) => {
+      if (screen.mode) throw Error('Mixed collisions require a lowres screen');
+      const sprite=sprites.get(id), bank=banks.get(1), image=sprite && bank && bank.images[(sprite.image&0x3fff)-1];
+      if (!image) return null;
+      const x=display.coordinate('X Screen',screen.id,sprite.x)-image.hotspotX;
+      const y=display.coordinate('Y Screen',screen.id,sprite.y)-image.hotspotY;
+      const mask=(1<<Math.min(4,image.depth))-1;
+      return {image:{...image,mask:Uint8Array.from(image.pixels,v=>(v&mask)?1:0)},x,y,right:x+image.width,bottom:y+image.height};
+    };
+    collisionHits.fill(0); let hit=false;
+    if (kind==='Bob') {
+      const bob=bobs.get(number), shape=collisionShape(bob);
+      if (!shape) return 0;
+      for(const sprite of sprites.values()) {if(sprite.number<first || sprite.number>last)continue;const other=spriteShape(sprite.number,bob.screen);if(other && masksIntersect(shape,other)){collisionHits[sprite.number]=1;hit=true;}}
+    } else {
+      if(number<0 || number>63)throw Error('Invalid mixed Sprite collision number');
+      for(const bob of bobs.values()) {if(bob.number<first || bob.number>last)continue;const shape=collisionShape(bob),other=spriteShape(number,bob.screen);if(shape && other && masksIntersect(shape,other)){collisionHits[bob.number]=1;hit=true;}}
+    }
+    return hit?-1:0;
+  }
   function unpackExisting(selector) {
     selector = integer(selector); const bank = banks.get(selector), target = display.screen();
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a packed-picture bank');
@@ -15080,7 +15267,13 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     installBanks([bank]); animations.set(bank, decoded); file.position = decoded.nextPosition;
     return decoded.frames.length;
   }
-  function framePlay(selector, count) {
+  function frameLength(channel, count) {
+    const file = fileChannel(integer(channel), 'read');
+    const decoded = animReaderFactory(Uint8Array.from(file.contents,c=>c.charCodeAt(0)), {position:file.position,count:integer(count)});
+    return decoded.raw.length;
+  }
+  let frameDelay = 0;
+  function framePlay(selector, count, screenNumber = null) {
     if (count < 0 || count >= 32768) throw new Error('Invalid Frame Play count');
     const address = bankMemory.address(selector), access = bankMemory.locate(address), decoded = animations.get(access.bank);
     if (!decoded || access.bank.data.length !== decoded.raw.length || !access.bank.data.every((v, i) => v === decoded.raw[i])) throw new Error('Frame Play requires an unchanged Frame Load bank');
@@ -15089,7 +15282,14 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     if (index < 0) throw new Error('Frame Play address is not a frame boundary');
     const selected = decoded.frames.slice(index, index + count);
     if (!selected.length) return address;
+    if (screenNumber != null) {
+      screenNumber = integer(screenNumber);
+      if (screenNumber < 0 || screenNumber > 7) throw Error('Invalid Frame Play screen');
+      if (index === 0) display.open(screenNumber, decoded.width, decoded.height, decoded.mode & 0x800 ? 4096 : 1 << decoded.depth, decoded.mode & 0x8000);
+      else display.select(screenNumber);
+    }
     display.playAnimationFrames(decoded, selected);
+    frameDelay = selected[selected.length-1].delay | 0;
     const next = index + selected.length;
     return bankMemory.start(access.bank.number) + (next < decoded.frames.length ? decoded.frames[next].offset : decoded.sentinel);
   }
@@ -15271,6 +15471,8 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   }
   function limitMouse(x1, y1, x2, y2) {
     display.screen();
+    const old = state.input.mouseLimits || {x1:0,y1:0,x2:458,y2:312};
+    x1=x1==null?old.x1:x1; y1=y1==null?old.y1:y1; x2=x2==null?old.x2:x2; y2=y2==null?old.y2:y2;
     x1 = integer(x1) & 65535; y1 = integer(y1) & 65535;
     x2 = Math.min(458, integer(x2) & 65535); y2 = Math.min(312, integer(y2) & 65535);
     if (x1 & 32768) x1 = 0;
@@ -15447,18 +15649,28 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       return () => { if (joystickBinding === binding) joystickBinding = null; };
     },
     amreg: index => amalRegisters[amregIndex(index)],
+    amregLocal: (channel,index) => amal.register(channelIndex(channel),integer(index)),
+    setAmregLocal: (channel,index,value) => amal.register(channelIndex(channel),integer(index),integer(value)),
     setAmreg: (index, value) => { amalRegisters[amregIndex(index)] = integer(value); },
-    setChannel, channelBinding, installAmal, amalOn, amalOff, synchro,
+    setChannel, channelBinding, installAmal, amalOn, amalOff, synchro, mixedCollision,
+    channelMoving: number => amal.moving(channelIndex(number)) ? -1 : 0,
+    amplay(speed = null, direction = null) {
+      if(speed != null) speed = integer(speed); if(direction != null)direction = integer(direction);
+      if(speed != null && (speed<1 || speed>32767))throw Error('Unsupported Amplay speed');
+      if(direction != null && (direction < -32768 || direction>32767))throw Error('Unsupported Amplay direction');
+      amal.playSettings(speed,direction);
+    },
     synchroOff, synchroOn, nextAmalVbl, advanceAmal, resumeAmal, amalSnapshot:amal.snapshot, amalRandomState:amal.randomState, cancelAmal,
     updateOff:()=>{automaticBobs=automaticSprites=false;},
     update:()=>{updateBobs();updateSprites();},
-    audio, loadIff, unpackScreen, saveIff, frameLoad, framePlay, trackLoad,
+    audio, loadIff, unpackScreen, saveIff, frameLoad, frameLength, framePlay, frameParam:()=>frameDelay, trackLoad,
     trackLoopOn: () => { state.tracker.loop = true; },
     trackLoopOff: () => { state.tracker.loop = false; },
     samBank: number => audio.selectBank(integer(number)),
     samLoopOn: (mask = 15) => audio.loop(true, integer(mask)),
     samLoopOff: (mask = 15) => audio.loop(false, integer(mask)),
-    bell: () => { sampleDuringMusic(); audio.bell(); },
+    bell: (note=70) => { sampleDuringMusic(); audio.bell(integer(note)); },
+    shoot: () => {sampleDuringMusic();audio.shoot();},
     boom: () => { sampleDuringMusic(); audio.boom(); },
     samPlay: number => { sampleDuringMusic(); audio.play(15, integer(number)); },
     samPlayVoices: (mask, number, frequency = null) => { sampleDuringMusic(); audio.play(integer(mask), integer(number), frequency == null ? null : integer(frequency)); },
@@ -15483,7 +15695,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   if (options.fieldTime != null && typeof options.fieldTime !== 'function') throw new Error('Boom fieldTime must be synchronous');
   const wave = new Uint8Array(510);
   let initialized = false, pointer = 0, mask = 0, started = 0, lastField = 0;
-  const volumes = [0];
+  let volumes = [0], duration = 61;
   // EnvBoom {1,64,10,50,50,0,0,0}, EnvDVol=56. Signed DIVS truncates.
   let fixed = 0;
   for (const [steps,goal] of [[1,64],[10,50],[50,0]]) {
@@ -15507,24 +15719,32 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     const field = Math.floor(now);
     if (field < lastField) throw new Error('Boom clock moved backwards');
     const changed = field>lastField ? mask : 0;
-    const until = Math.min(field,started+61);
+    const until = Math.min(field,started+duration);
     if (mask) for(let next=lastField+1;next<=until;next++) {
-      if(next-started===61){mask=0;break;}
+      if(next-started===duration){mask=0;break;}
       for(let i=0;i<8;i++){seed=word(seed);write(wave,pointer,seed);pointer=pointer===0?508:pointer-2;}
     }
     lastField = field;
-    return {mask:changed,volume:volumes[Math.min(61,Math.max(0,field-started))]};
+    return {mask:changed,volume:volumes[Math.min(duration,Math.max(0,field-started))]};
   }
   function cancel(bits) { mask &= ~(bits&15); }
-  function begin(initialVolumes = [56,56,56,56]) {
+  function begin(initialVolumes = [56,56,56,56], effect = 'boom') {
+    if(!['boom','shoot'].includes(effect))throw Error('Unsupported noise effect');
     if(hz>1000)throw new Error('Unsupported Boom timing');
     const now=time();advance(now);initialize();
     const field=Math.floor(now), phase=now-field;
+    duration = effect === 'shoot' ? 11 : 61;
+    volumes = [0]; let fixed = 0;
+    for (const [steps,goal] of effect === 'shoot' ? [[1,64],[10,0]] : [[1,64],[10,50],[50,0]]) {
+      const delta = Math.trunc((((56*goal)>>6)-(fixed>>16))*256/steps)*256;
+      for(let i=0;i<steps;i++){fixed+=delta;volumes.push(fixed>>16);}fixed&=0xffff0000;
+    }
+
     const snapshots=[wave.slice()];let nextSeed=seed,nextPointer=pointer;
     // The slowest voice finishes its 510-byte initial fetch within about 24 PAL fields.
     // Build only the bounded future shared-noise states needed for these streams.
     // Shout notes 36..39 on voices 3..0; 2000*TNotes[note+2]/440.
-    const frequencies=[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
+    const frequencies=effect==='shoot'?[5340,5040,4754,4490]:[1336,1259,1190,1122],periods=frequencies.map(f=>Math.max(124,Math.floor(clock/f)));
     const fieldCount=Math.ceil(phase+510/(clock/Math.max(...periods))*hz);
     for(let frame=1;frame<=fieldCount;frame++){
       const bytes=snapshots[frame-1].slice();
@@ -15539,8 +15759,8 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         const value=(snapshots[frame][index]<<24)>>24,volume=frame===0?initialVolumes[voice]:volumes[frame];
         data[at]=value/128*volume/64;
       }
-      events.push({type:'play',effect:'boom',mask:1<<voice,period:periods[voice],nativeRate,
-        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:'Boom    ',frequency:rate,length,data,format:'float32'}});
+      events.push({type:'play',effect,mask:1<<voice,period:periods[voice],nativeRate,
+        rate,volume:64,loopMask:0,sample:{bank:0,number:0,name:effect==='shoot'?'Shoot   ':'Boom    ',frequency:rate,length,data,format:'float32'}});
     }
     mask=0;started=field;lastField=field;
     return events;
@@ -15937,6 +16157,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   const word = value => (value << 16) >> 16;
   const channels = new Map();
   if(options.readBeam!=null && typeof options.readBeam!=='function') throw new Error('readAmalBeam must be a synchronous function');
+  if(options.readMouseButton!=null && typeof options.readMouseButton!=='function')throw Error('readAmalMouseButton must be synchronous');
   if(options.readJoystick!=null && typeof options.readJoystick!=='function') throw new Error('AMAL joystick reader must be a synchronous function');
   // AMALInit is a cold-system initializer. ClrAMAL/Default do not reset it.
   let randomSeed=0x1234,stepping=false;
@@ -15989,6 +16210,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       if (['X','Y'].includes(peek()) && chars[at+1] === 'M') {
         const axis=chars[at++]; at++; return {kind:'mouse',axis};
       }
+      if (peek() === 'K') { at++;const button=peek();if(!['1','2'].includes(button))error('Expected AMAL mouse button 1 or 2');at++;return {kind:'mouseButton',button:Number(button)}; }
       if (peek() === 'J') { at++; const port=peek(); if(!['0','1'].includes(port)) error('Expected AMAL joystick 0 or 1'); at++; return {kind:'joystick',port:Number(port)}; }
       if (peek() === 'Z') { at++; expect('('); const mask=expression(depth+1); expect(')'); return {kind:'random',mask}; }
       return register();
@@ -16105,6 +16327,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       if(options.isManual && !options.isManual()) throw Error('AMAL BC requires Synchro Off');
       return word(options.bobCollision(...expr.args.map(value=>evaluate(value,channel))));
     }
+    if(expr.kind==='mouseButton') {const value=options.readMouseButton?options.readMouseButton(expr.button):0;if(value!==0 && value!==-1)throw Error('Invalid AMAL mouse button state');return value;}
     if (expr.kind === 'mouse') return word(options.readMouse(expr.axis));
     if (expr.kind === 'literal') return expr.value;
     if (expr.kind === 'local') return channel.locals[expr.index];
@@ -16178,25 +16401,28 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         if(!c.play) {
           const movement=options.movement(evaluate(op.movement,c)&65535);
           if(!movement) { ip++; continue; }
+          c.locals[0]=movement.speed;c.locals[1]=1;
           c.play={movement,counter:1,x:0,y:0,waitX:0,waitY:0};
         }
         const play=c.play;
         if(!play.movement.alive()) throw Error('AMAL movement bank changed during PLay');
         if(--play.counter) { save(); return; }
+        if(c.locals[1]<0){c.play=null;ip++;continue;}
         let finished=false;
         for(const [axis,index,wait] of [['X','x','waitX'],['Y','y','waitY']]) {
           const value=play.movement.read(axis,play[index]);
           if(value===0) { finished=true; break; }
           if(value&128) {
-            if(--play[wait]===0 || (play[wait]<0 && !(value&127))) play[index]++;
+            if(--play[wait]===0 || (play[wait]<0 && !(value&127))) play[index]+=c.locals[1]?1:-1;
             else if(play[wait]<0) play[wait]=value&127;
           } else {
-            c.target.write(axis,word(c.target.read(axis)+((value<<25)>>25)));
-            play[index]++;
+            c.target.write(axis,word(c.target.read(axis)+(c.locals[1]?1:-1)*((value<<25)>>25)));
+            play[index]+=c.locals[1]?1:-1;
           }
         }
         if(finished) { c.play=null; ip++; continue; }
-        play.counter=play.movement.speed; save(); return;
+        if(c.locals[0]<1)throw Error('Unsupported AMAL PLay speed');
+        play.counter=c.locals[0]; save(); return;
       } else if(op.kind==='move') {
         if(c.move) {
           if(--c.move.remaining===0) { c.move=null; ip++; continue; }
@@ -16248,7 +16474,14 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   }
   function snapshot() { return Object.freeze([...channels.values()].sort((a,b)=>a.number-b.number).map(c=>Object.freeze({number:c.number,binding:c.binding,source:c.code.source,enabled:c.enabled,ended:c.ended,ip:c.ip,autotest:c.autoStart!=null,remaining:c.move ? c.move.remaining : 0,animation:c.animation ? Object.freeze({index:c.animation.index,remaining:c.animation.counter,loops:c.animation.loops}) : null,locals:Object.freeze(Array.from(c.locals))}))); }
   function running() { retire(); return [...channels.values()].some(c=>c.enabled && (!c.ended || c.animation)); }
-  return { compile, install, control, running, usesBank:bank=>[...channels.values()].some(c=>c.play && c.play.movement.bank===bank), freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
+  return { compile, install, control, running,
+    register(number,index,value=null) {
+      if(index<0 || index>9)throw Error('Invalid AMAL local register');
+      const c=channels.get(number);if(!c)throw Error('AMAL channel not defined');
+      if(value!=null)c.locals[index]=word(value);return c.locals[index];
+    },
+    moving(number) { retire(); const c=channels.get(number); return !!(c && (c.move || c.play)); },
+    playSettings(speed,direction) { for(const c of channels.values()) {if(speed!=null)c.locals[0]=speed;if(direction!=null)c.locals[1]=direction;} }, usesBank:bank=>[...channels.values()].some(c=>c.play && c.play.movement.bank===bank), freeze(number = null) { for (const [id,c] of channels) if (number == null || id === number) c.enabled = false; }, step, retire, removeTarget, randomState:()=>Object.freeze({seed:randomSeed}), clear:()=>channels.clear(), snapshot };
 };
   const audioFactory = function createAudio(banks, options = {}) {
   const standard = options.standard || 'PAL';
@@ -16291,9 +16524,9 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     syncBoom();
     if (bellJob && (event.type === 'stop' || event.type === 'play' && event.effect !== 'bell')) bellJob.mask &= ~(event.mask & 15);
     if (event.type === 'stop' && (event.mask & 15) === 15) effectGeneration++;
-    if (event.type === 'play' && event.effect === 'boom') boomEngine().activate(event.mask);
-    if ((event.type === 'play' && event.effect !== 'boom') || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
-    if (event.effect !== 'boom' && event.volume != null) {
+    if (event.type === 'play' && ['boom','shoot'].includes(event.effect)) boomEngine().activate(event.mask);
+    if ((event.type === 'play' && !['boom','shoot'].includes(event.effect)) || event.type === 'stop') { if (noise) noise.cancel(event.mask); }
+    if (!['boom','shoot'].includes(event.effect) && event.volume != null) {
       for (let voice = 0; voice < 4; voice++) if (event.mask & (1 << voice)) levels[voice] = event.volume;
     }
     if (event.type === 'play') {
@@ -16363,7 +16596,9 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       stop(15); levels.fill(56); engine.reset();
       loop(false, 15);
     },
-    bell() {
+    bell(note = 70) {
+      if(!Number.isInteger(note) || note<0 || note>96)throw Error('Bell note must be 0..96');
+      if(!note){stop(15);return;}
       syncBoom();
       const hz = options.vblHz == null ? 50 : options.vblHz, rate = 44100;
       const now = options.fieldTime ? options.fieldTime() : 0;
@@ -16375,15 +16610,17 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         for (let i = 0; i < steps; i++) { fixed += delta; volumes.push(fixed >> 16); }
         fixed &= 0xffff0000;
       }
-      const initial = levels.slice(), period = Math.max(124, Math.floor(clock / (8 * 1760)));
+      const notes = [0, 0, 0, 33, 35, 37, 39, 41, 44, 46, 49, 52, 55, 58, 62, 65, 69, 73, 78, 82, 87, 92, 98, 104, 110, 117, 123, 131, 139, 147, 156, 165, 175, 185, 196, 208, 220, 233, 247, 262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494, 523, 554, 587, 622, 659, 698, 740, 784, 830, 880, 932, 988, 1046, 1109, 1175, 1245, 1319, 1397, 1480, 1568, 1661, 1760, 1865, 1986, 2093, 2217, 2349, 2489, 2637, 2794, 2960, 3136, 3322, 3520, 3729, 3952, 4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6645, 7040, 7459, 7902, 8372];
+      const sampleLength=[256,256,128,64,32,16,8,4,4][Math.floor((note+2)/12)];
+      const initial = levels.slice(), period = Math.max(124, Math.floor(clock / (sampleLength * notes[note+2])));
       bellJob = { started: Math.floor(now), initial, volumes, mask: 15 };
       const generation = ++effectGeneration;
       for (let voice = 3; voice >= 0; voice--) {
         if (generation !== effectGeneration) break;
         const length = Math.ceil((31 - phase) * rate / hz), data = new Float32Array(length);
         for (let i = 0; i < length; i++) {
-          const field = Math.floor(phase + i * hz / rate), sample = Math.floor(i * clock / (rate * period)) & 7;
-          data[i] = (sample < 4 ? 127 : -127) / 128 * (field === 0 ? initial[voice] : volumes[Math.min(30, field)]) / 64;
+          const field = Math.floor(phase + i * hz / rate), sample = Math.floor(i * clock / (rate * period)) % sampleLength;
+          data[i] = (sample < sampleLength/2 ? 127 : -127) / 128 * (field === 0 ? initial[voice] : volumes[Math.min(30, field)]) / 64;
         }
         command({ type: 'play', effect: 'bell', mask: 1 << voice, period, nativeRate: clock / period, rate, volume: 64, loopMask: 0, filterEnabled: state.filterEnabled,
           sample: { bank: 0, number: 0, name: 'Bell    ', frequency: rate, length, data, format: 'float32' } }, 'effect');
@@ -16397,6 +16634,11 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         if (generation !== effectGeneration) break;
         command({ ...event, filterEnabled: state.filterEnabled }, 'effect');
       }
+    },
+    shoot() {
+      const engine = boomEngine(); syncBoom();
+      const generation = ++effectGeneration, events = engine.begin(levels, 'shoot');
+      for(const event of events) {if(generation!==effectGeneration)break;command({...event,filterEnabled:state.filterEnabled},'effect');}
     },
     noiseState() { const engine = boomEngine(); syncBoom(); return engine.snapshot(false); },
     silence() { if (activeMask) stop(15); } };

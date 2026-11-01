@@ -10,10 +10,10 @@ test('Amreg: original global getter/setter is a signed word with integer express
   p.setAmreg(1,65536); assert.strictEqual(p.amreg(1),0);
   for(const i of [-1,26]) { assert.throws(()=>p.amreg(i),/global AMAL register/); assert.throws(()=>p.setAmreg(i,1),/global AMAL register/); }
 });
-test('Amreg: factories are isolated and unsupported channel forms/type errors retain compiler guards', () => {
+test('Amreg: factories are isolated and missing channels/type errors retain source guards', () => {
   const a=execute(binary([[query(3),t('='),n(99)]])).program,b=execute(binary([])).program;
   assert.strictEqual(a.amreg(3),99); assert.strictEqual(b.amreg(3),0);
-  assert.throws(()=>compile(binary([[t('Print'),w(0x1fb0),t('('),n(0),t(','),n(1),t(')')]])),/Unsupported token/);
+  assert.throws(()=>execute(binary([[t('Print'),w(0x1fb0),t('('),n(0),t(','),n(1),t(')')]])),/AMAL channel not defined.*line 1/);
   assert.throws(()=>compile(binary([[query(0),t('='),text('no')]])),/numeric expression/);
   assert.throws(()=>execute(binary([[query(26),t('='),n(1)]])),/global AMAL register at line 1, byte 22/);
 });

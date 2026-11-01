@@ -40,8 +40,10 @@ Implemented original tokens are Set Rainbow `$0d90`/`$0dae`, Rainbow `$0ddc`, an
 assignable/readable Rain `$0df0`. [Rainbow Del](rainbow-del.md) now removes
 specific/all tables through that same live palette-row selection, without changing
 bitmap pixels or committing staged geometry. Set Rainbow supports empty component strings,
-the form Wonderland uses before filling the table with Rain. Nonempty pattern
-strings reject; their generation grammar remains a reference-verification gate.
+the form Wonderland uses before filling the table with Rain. Nonempty component
+patterns now use bounded `(delay,step,count)` sequences with the native initial
+row, countdown, four-bit wrapping and repeating sequence behavior; see
+[Tutorial coverage](tutorial.md).
 
 There are four independently owned tables, numbered 0–3, with 16–32699 entries.
 The selected colour is masked to 0–31 and must lie in 0–15. Six-argument creation
@@ -103,6 +105,5 @@ The GPU gallery also compares that exact frame with the independent image and
 checks an active rainbow crossing PAL line 256. Including eight
 [screen-window patterns](screen-windows.md), coverage is now 179 native GPU/CPU frames. All browser cases remain in the shared demo catalogue.
 
-Remaining gates include whole-program menu/game integration, nonempty rainbow pattern
-strings, NTSC rainbow timing, remaining AMSC placement, runtime laced loads, full screen
+Remaining gates include whole-program menu/game integration, NTSC rainbow timing, remaining AMSC placement, runtime laced loads, full screen
 window/scroll integration and external Amiga captures. See [the milestone](wonderland.md).

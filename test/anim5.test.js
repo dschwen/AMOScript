@@ -111,7 +111,7 @@ test('Frame functions: unsupported overloads/types reject and two independent fa
   const { p: a } = make(), { p: b } = make(); a.frameLoad(1, 10, 18);
   assert.throws(() => b.framePlay(10, 1), /not reserved/);
   assert.throws(() => compile(binary([[t('Print'), w(0x25cc), t('('), n(1), t('To'), n(10), t(')')]])), /Unsupported token/);
-  assert.throws(() => compile(binary([[t('Print'), w(0x2600), t('('), n(10), t(','), n(1), t(','), n(0), t(')')]])), /Unsupported token/);
+  assert.ok(compile(binary([[t('Print'), w(0x2600), t('('), n(10), t(','), n(1), t(','), n(0), t(')')]])).create);
   assert.throws(() => compile(binary([[t('Print'), t('Frame Play'), t('('), text('10'), t(','), n(1), t(')')]])), /Wrong argument type/);
   a.stop(); b.stop();
 });

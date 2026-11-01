@@ -27,10 +27,26 @@ module.exports = async function checkTutorialDemos(browser) {
       await page.keyboard.press('Escape');
       await page.click('#game-stop');
       assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-phase'),'stopped',item.source);
+      if (item.source === 'Tutorials/Iff_Animation.AMOS') {
+        await page.click('#game-restart');
+        await page.waitForFunction(() => {
+          const data=document.getElementById('game-viewport').dataset;
+          return data.phase==='error' || Number(data.line)===141;
+        });
+        assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-source-error'),'');
+        const bounds=await page.locator('#game-input').boundingBox();
+        await page.mouse.move(bounds.x+20,bounds.y+20);await page.mouse.down();
+        await page.waitForFunction(()=>Number(document.getElementById('game-viewport').dataset.line)>=163);
+        await page.mouse.up();
+        await page.waitForFunction(()=>['error','ended'].includes(document.getElementById('game-viewport').dataset.phase));
+        assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-phase'),'ended');
+        assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-source-error'),'');
+        assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-line'),'182');
+      }
       await page.evaluate(() => AMOS_GAME_PAGE.dispose());
     }
     assert.deepStrictEqual(errors,[]);
     assert.deepStrictEqual(network,[]);
   } finally {await page.close();}
-  console.log(`Tutorial demos passed: ${programs.filter(item=>item.compiled).length} original pages start and stop with WebGL and bundled assets. Later interaction/completion is not asserted.`);
+  console.log(`Tutorial demos passed: ${programs.filter(item=>item.compiled).length} original pages start and stop with WebGL and bundled assets. The complete 97-frame Iff_Animation also reaches Edit; other later interactions/completion are not asserted.`);
 };

@@ -17,7 +17,7 @@ test('string branches: target expressions evaluate once, instruction zero and pr
 
 test('string branches: unknown, blank, oversized, non-ASCII and whitespace names halt with source context',()=>{
   for(const name of ['missing','constructor','','x'.repeat(32),'\xc9',' target '])assert.throws(()=>execute(binary([[t('Goto'),text(name)],[id('target',0xc),t('End')]])),/(?:Undefined|Unsupported) string label.*line 1/);
-  assert.throws(()=>compile(binary([[t('Goto'),n(1)]])),/numeric targets are not implemented/);
+  assert.throws(()=>execute(binary([[t('Goto'),n(1)]])),/Undefined string label 1.*line 1/);
   assert.throws(()=>compile(binary([[t('Procedure'),[0,0,0,0],w(0),0,0,id('p')],[t('Goto'),text('local')],[id('local',0xc)],[t('End Proc')]])),/inside procedures are not implemented/);
 });
 

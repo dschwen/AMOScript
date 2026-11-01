@@ -5,15 +5,17 @@ import hashlib
 import json
 from pathlib import Path
 import struct
+import sys
+tutorial = "--tutorial" in sys.argv
 root = Path(__file__).resolve().parents[2]
-folder = root / 'examples/Introideen'
-raw = (folder/'KugelAnim').read_bytes()
+folder = root / ('examples/Tutorial/Iff_Anim' if tutorial else 'examples/Introideen')
+raw = (folder/('AMOS.Anim' if tutorial else 'KugelAnim')).read_bytes()
 
 def chunks(data, start, end):
     result = {}
     while start < end:
         tag, size = struct.unpack_from('>4sI', data, start)
-        assert tag not in result and start+8+size <= end
+        assert (tag not in result or tag in [b'CRNG',b'DRNG']) and start+8+size <= end
         result[tag] = data[start+8:start+8+size]
         start += 8+size+(size&1)
     assert start == end
@@ -27,9 +29,9 @@ while position < len(raw):
     if not history:
         width, height = struct.unpack_from('>HH', c[b'BMHD'])
         depth = c[b'BMHD'][8]
-        assert (width,height,depth) == (320,200,4)
+        assert (width,height,depth) == ((320,256,3) if tutorial else (320,200,4))
         palette = [((r>>4)<<8) | ((g>>4)<<4) | (b>>4) for r,g,b in zip(c[b'CMAP'][::3],c[b'CMAP'][1::3],c[b'CMAP'][2::3])]
-        planes = [bytearray(8000) for _ in range(4)]
+        planes = [bytearray(40*height) for _ in range(depth)]
         body, p = c[b'BODY'], 0
         for y in range(height):
             for plane in range(depth):
@@ -66,15 +68,19 @@ while position < len(raw):
                         n = op&127
                         values = delta[p:p+n]; p+=n
                     for value in values:
-                        assert y < 200
+                        assert y < height
                         planes[plane][y*40+x] = value; y+=1
+    if b'CMAP' in c:
+        palette = [((r>>4)<<8) | ((g>>4)<<4) | (b>>4) for r,g,b in zip(c[b'CMAP'][::3],c[b'CMAP'][1::3],c[b'CMAP'][2::3])]
     history.append(planes)
     pixels = bytes(sum(((planes[plane][y*40+x//8]>>(7-x%8))&1)<<plane for plane in range(depth)) for y in range(height) for x in range(width))
     rgba = bytes(component for index in pixels for component in [(palette[index]>>8&15)*17,(palette[index]>>4&15)*17,(palette[index]&15)*17,255])
-    frames.append(dict(frame=len(frames)+1,offset=position-12,sourceOffset=position,sha256=hashlib.sha256(pixels).hexdigest(),rgbaSha256=hashlib.sha256(rgba).hexdigest()))
+    frames.append(dict(**({'delay':struct.unpack_from('>I',c[b'ANHD'],14)[0] if b'ANHD' in c else 0} if tutorial else {}),frame=len(frames)+1,offset=position-12,sourceOffset=position,sha256=hashlib.sha256(pixels).hexdigest(),rgbaSha256=hashlib.sha256(rgba).hexdigest()))
     position=end+(end&1)
-assert len(frames)==20 and frames[0]['sha256']==frames[18]['sha256'] and frames[1]['sha256']==frames[19]['sha256']
+assert len(frames)==(97 if tutorial else 20)
+if not tutorial:
+    assert frames[0]['sha256']==frames[18]['sha256'] and frames[1]['sha256']==frames[19]['sha256']
 result=dict(evidence='Independent Python ByteRun1/column-plane ANIM-5 extraction with two-frame history; not an Amiga capture.',
-            hashes={name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in ['KugelAnim','Logoanim.amos','Logoanim.Bak','introroller']},
+            hashes={name:hashlib.sha256((folder/name).read_bytes()).hexdigest() for name in (['AMOS.Anim'] if tutorial else ['KugelAnim','Logoanim.amos','Logoanim.Bak','introroller'])},
             width=width,height=height,depth=depth,palette=palette,frames=frames)
-(root/'test/fixtures/anim5.json').write_text(json.dumps(result,indent=2)+'\n')
+(root/('test/fixtures/tutorial/anim5.json' if tutorial else 'test/fixtures/anim5.json')).write_text(json.dumps(result,indent=2)+'\n')

@@ -28,32 +28,28 @@
       "file": "tutorial-tutorials-amal-amal-2-amos.html",
       "byteLength": 7654,
       "sha256": "14775cde0b8dc89b509afb5bc5ec51d63f705c5df7607cd724ea80d652b7608f",
-      "compiled": false,
-      "error": "Unsupported extension 1:0x7e at line 183, byte 7298"
+      "compiled": true
     },
     {
       "source": "Tutorials/AMAL/AMAL_3.AMOS",
       "file": "tutorial-tutorials-amal-amal-3-amos.html",
       "byteLength": 6412,
       "sha256": "50d9aa5629d84cc30df697e7830650a7e6b13c72fddcc3343ffc0642c4d4ea1e",
-      "compiled": false,
-      "error": "Expected end of statement; found ( at line 143, byte 5834"
+      "compiled": true
     },
     {
       "source": "Tutorials/AMAL/AMAL_4.AMOS",
       "file": "tutorial-tutorials-amal-amal-4-amos.html",
       "byteLength": 7076,
       "sha256": "73657aebbf595531cdb8980b1f75be5ac822d2d200ff29f6e5fdcd92ef15f230",
-      "compiled": false,
-      "error": "Unsupported Channel target (expected Bob or Sprite); found Rainbow at line 150, byte 6186"
+      "compiled": true
     },
     {
       "source": "Tutorials/AMAL/AMAL_5.AMOS",
       "file": "tutorial-tutorials-amal-amal-5-amos.html",
       "byteLength": 6544,
       "sha256": "0d579b8fb5cee1bab2d26020ec079289febd4557402ce17910c774c10f11ebb5",
-      "compiled": false,
-      "error": "Unsupported token 0x202c at line 129, byte 5536"
+      "compiled": true
     },
     {
       "source": "Tutorials/AMAL/AMAL_6.AMOS",
@@ -67,8 +63,7 @@
       "file": "tutorial-tutorials-amal-amal-7-amos.html",
       "byteLength": 11922,
       "sha256": "7dae2173079085eb2787e3a0f3c8ac8cc8d53c392b5af5a98f131a401fe9fa3a",
-      "compiled": false,
-      "error": "Unsupported token 0x1f86 at line 174, byte 7524"
+      "compiled": true
     },
     {
       "source": "Tutorials/Appear.AMOS",
@@ -96,8 +91,7 @@
       "file": "tutorial-tutorials-collision-detection-amos.html",
       "byteLength": 10776,
       "sha256": "ff4f8f8ba2e2e683a9f688026325093168a398a8ef5f20de3c13fa8bb67861fd",
-      "compiled": false,
-      "error": "Unsupported extension 1:0x7e at line 168, byte 7598"
+      "compiled": true
     },
     {
       "source": "Tutorials/Computed_Sprites.AMOS",
@@ -125,8 +119,7 @@
       "file": "tutorial-tutorials-fade-amos.html",
       "byteLength": 8970,
       "sha256": "009f6be592f6bf013e47e206e4a0fad565e2b54d54ba441954dae33c1c606a70",
-      "compiled": false,
-      "error": "Expected end of statement; found , at line 121, byte 4728"
+      "compiled": true
     },
     {
       "source": "Tutorials/Hardware_Sprites.AMOS",
@@ -140,8 +133,7 @@
       "file": "tutorial-tutorials-iff-animation-amos.html",
       "byteLength": 7622,
       "sha256": "1923e4156f1eb88a4efd26d705dd1093301d803bb39c9f2259f3d3079a544420",
-      "compiled": false,
-      "error": "Unsupported token 0x263e at line 134, byte 6248"
+      "compiled": true
     },
     {
       "source": "Tutorials/Interface/Autocentering.AMOS",

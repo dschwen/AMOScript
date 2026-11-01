@@ -10,8 +10,10 @@ after End; no interpreter, wake or channel is created by a register access.
 The [manual AMAL controller](amal.md) shares this storage; it does not acquire
 a separate shadow set of globals.
 [Channel routing](channels.md) now has separate checked selector storage.
-The two-argument Amreg overload remains unsupported. Installed AMAL programs
-now have private locals and bounded manual execution; see [AMAL](amal.md).
+The two-argument `Amreg(channel,index)` overload ($1fb0) now reads/writes
+local R0–R9 on an existing channel (0–63). It checks both indices and never
+creates a channel. Off/retirement/terminal cleanup removes these locals; Freeze
+and Stop preserve them. See [AMAL](amal.md) and [Tutorial coverage](tutorial.md).
 
 Planet Zybex's original `clear_amal` now executes in a declared fixture retaining
 its Global/array setup and complete procedure. With inputs RJ=1234 and RU=4, it
@@ -19,7 +21,7 @@ saves score/bullet count, zeroes all globals, marks RB–RI as 100, then restore
 RJ/RU. All 26 results are checked in unit and browser scenarios. This is an
 isolated communication test, not the game's main loop. Other tests cover signed
 word wrapping, integer division, factory isolation, type/bounds failures and the
-unsupported two-argument encoding.
+local-register encoding, bounds and missing-channel errors.
 
 The native implementation explicitly stores `move.w` and returns a sign-extended
 word in IAmR/FAmR/AmRR in

@@ -38,7 +38,7 @@ Compilation is separate from completing a tutorial's execution.
 
 ## Implementation status and next work
 
-Thirteen files currently compile. See the generated manifest for exact,
+All 21 core tutorial files currently compile. See the generated manifest for exact,
 source-located blockers. The remaining work groups are:
 
 1. Menus: `Menu$` trees, Choice polling, menu events, placement/shortcuts and
@@ -47,11 +47,8 @@ source-located blockers. The remaining work groups are:
    Dialog Box execution, editing/list/slider zones and variable communication
    (nine programs). Expressions must never receive a Promise or replay effects
    while waiting for a requester.
-3. AMAL/audio: Rainbow channels, recorded movement controls, mixed Bob/Sprite
-   collisions and Shoot/legacy note commands.
-4. ANIM overloads: Frame Length and screen-selecting Frame Play.
-5. Remaining display forms: counted Cline, masked Fade To and user copper lists.
-6. ReTokenise: editor/accessory services require a genuine editor host boundary;
+3. User copper lists and checked Cop Logic memory (the two Multi_Rainbows files).
+4. ReTokenise: editor/accessory services require a genuine editor host boundary;
    they cannot be implemented by pretending a standalone browser is the AMOS
    editor.
 
@@ -64,3 +61,24 @@ Patterns use the original mouse resource's 35 pattern records. Ellipse and text
 borders use portable rasterization; they are not claims of native pixel parity.
 Err$ reports the actual portable runtime diagnostic after Trap; the native
 AMOS numbered message catalogue is not yet supplied.
+
+## Core tutorial coverage
+
+The core builds include all seven AMAL examples, collision detection, Fade and
+Iff_Animation. Supported additions include local Amreg access, Chanmv, Amplay
+speed/direction through native local R0/R1, K1/K2 mouse buttons, Rainbow channels
+and pattern strings, ranged mixed collisions, counted Cline, masked Fade To,
+hires circles, Shoot and Bell note overloads.
+
+The complete Iff_Animation source runs all 97 supplied frames to its original
+Edit instruction using only mouse input and a VBL clock. Independent Python
+ByteRun1/delta decoding checks every indexed frame and delay. Frame Length is
+nondestructive and reports the owned raw-bank payload size (not an Amiga heap
+allocation measurement). Frame commands ignore unused cycling metadata; normal
+Load Iff retains its existing strict CRNG/DRNG checks.
+
+Shoot uses the shared noise engine with its own native notes and envelope.
+Independent Python/Fraction PAL, NTSC and fractional-onset vectors verify the
+finite PCM prefix. As with Boom, exact DMA/interrupt tails and Amiga captures
+remain open. Bell note playback follows the native octave sample lengths and
+period clamp.

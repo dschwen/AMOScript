@@ -51,7 +51,7 @@ test('rainbow: lower-numbered overlap wins; unsupported patterns, indices and NT
   assert.deepStrictEqual(Array.from(d.renderDisplay().slice(0, 4)), [255, 136, 0, 255]);
   assert.deepStrictEqual(Array.from(d.renderDisplay().slice(2 * 640 * 4, 2 * 640 * 4 + 4)), [255, 0, 0, 255]);
   for (const action of [() => d.setRainbow(4, 1, 16, '', '', ''), () => d.setRainbow(1, 16, 16, '', '', ''),
-    () => d.setRainbow(1, 1, 15, '', '', ''), () => d.setRainbow(1, 1, 16, '(1,1,1)', '', ''),
+    () => d.setRainbow(1, 1, 15, '', '', ''), () => d.setRainbow(1, 1, 16, '(0,1,1)', '', ''),
     () => d.setRain(1, 16, 0), () => d.rainbow(3, 0, 50, 1)]) assert.throws(action);
   const ntsc = createDisplay({ snapshotStandard: 'NTSC' }); ntsc.setRainbow(1, 1, 16, '', '', '');
   assert.throws(() => ntsc.rainbow(1, 0, 50, 1), /NTSC/);

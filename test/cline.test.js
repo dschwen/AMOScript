@@ -33,7 +33,7 @@ test('Cline: hidden selection and procedure calls use current screen; unsupporte
     [t('Screen Open'),n(1),t(','),n(32),t(','),n(24),t(','),n(16),t(','),t('Lowres')],[t('Screen Hide')],[t('Paper'),n(3)],
     [t('Procedure'),dword(0),w(0),0,0,id('clear')],[w(0x158a)],[t('End Proc')],[id('clear',0x12)],[t('Wait Key')]]));
   assert.strictEqual(p.display.screen(0).physicalPixels[0],5);assert.strictEqual(p.display.screen(1).physicalPixels[0],3);assert.strictEqual(p.display.screen(1).hidden,true);p.stop();
-  assert.throws(()=>compile(binary([[w(0x1596),n(1)]])),/Unsupported token 0x1596/);
+  assert.ok(compile(binary([[w(0x1596),n(1)],[t('Wait Key')]])).create);
   assert.throws(()=>compile(binary([[w(0x158a),n(1)]])),/end of statement/);
   assert.throws(()=>execute(binary([[t('Screen Close'),n(0)],[w(0x158a)]])),/not open.*line 2, byte/);
 });

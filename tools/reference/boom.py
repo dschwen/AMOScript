@@ -3,6 +3,9 @@ Pinned source efddf2c9a09bf61a45b7b096a9be84630853c2b1; no JS imports.
 Portable beam/fetch/resampling choices, not an Amiga execution capture.
 """
 import struct
+import sys
+shoot = "--shoot" in sys.argv
+effect = "shoot" if shoot else "boom"
 import hashlib
 import json
 from fractions import Fraction
@@ -12,7 +15,7 @@ out=root/'test/fixtures/audio'
 out.mkdir(exist_ok=True)
 volumes=[0]
 fixed=0
-for steps,goal in [(1,64),(10,50),(50,0)]:
+for steps,goal in ([(1,64),(10,0)] if shoot else [(1,64),(10,50),(50,0)]):
     numerator=((56*goal//64)-(fixed//65536))*256
     delta=(abs(numerator)//steps)*(-1 if numerator<0 else 1)*256
     for i in range(steps):
@@ -36,7 +39,7 @@ for name,clock,hz,seed,beam,phase in [('pal',3546895,50,0,257,Fraction(0)),('pha
             pointer=(pointer-2)%510
         snapshots.append(bytes(wave))
     voices=[]
-    for voice,note in [(3,247),(2,262),(1,277),(0,294)]:
+    for voice,note in ([(3,988),(2,1046),(1,1109),(0,1175)] if shoot else [(3,247),(2,262),(1,277),(0,294)]):
         frequency=2000*note//440
         period=clock//frequency
         duration=Fraction(510*period,clock)
@@ -51,8 +54,8 @@ for name,clock,hz,seed,beam,phase in [('pal',3546895,50,0,257,Fraction(0)),('pha
             volume=56 if field==0 else volumes[field]
             samples.append(value*volume/8192)
         pcm=b''.join(struct.pack('<f',value) for value in samples)
-        filename='boom-'+str(voice)+'.f32'
+        filename=effect+'-'+str(voice)+'.f32'
         if name=='pal':(out/filename).write_bytes(pcm)
         voices.append(dict(voice=voice,mask=1<<voice,frequency=frequency,period=period,length=count,sha256=hashlib.sha256(pcm).hexdigest(),file=filename if name=='pal' else None))
-    cases.append(dict(name=name,clock=clock,hz=hz,seed=0 if name!='phase' else 48879,beam=beam,phase=float(phase),initialSeed=initial_seed,initialWaveSha256=hashlib.sha256(snapshots[0]).hexdigest(),field1WaveSha256=hashlib.sha256(snapshots[1]).hexdigest(),field60WaveSha256=hashlib.sha256(snapshots[60]).hexdigest(),voices=voices))
-(out/'boom.json').write_text(json.dumps(dict(evidence=__doc__,volumes=volumes,cases=cases),indent=2)+'\n')
+    cases.append(dict(name=name,clock=clock,hz=hz,seed=0 if name!='phase' else 48879,beam=beam,phase=float(phase),initialSeed=initial_seed,initialWaveSha256=hashlib.sha256(snapshots[0]).hexdigest(),field1WaveSha256=hashlib.sha256(snapshots[1]).hexdigest(),**{('field10WaveSha256' if shoot else 'field60WaveSha256'):hashlib.sha256(snapshots[10 if shoot else 60]).hexdigest()},voices=voices))
+(out/(effect+'.json')).write_text(json.dumps(dict(evidence=(__doc__ if not shoot else __doc__.replace('EnvBoom','EnvShoot')),volumes=volumes,cases=cases),indent=2)+'\n')

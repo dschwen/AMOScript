@@ -10,14 +10,15 @@ No JavaScript evaluation or function-name lookup occurs.
 The native source (`src/interp/control.cpp`, GetLabel/GLb3 and
 `find_label_named`, revision `efddf2c9a09bf61a45b7b096a9be84630853c2b1`)
 looks up an evaluated string after ASCII case folding, with the same length
-bound. Its wider label-table visibility, non-ASCII bytes and numeric-expression
-forms are not implemented here. This bounded implementation accepts string
+bound. Its wider label-table visibility, non-ASCII bytes remain outside this profile. This bounded implementation accepts string
 branches only in the main program and exposes only main-program user labels.
-Procedure-local/cross-procedure string branches and numeric targets remain gated.
+Procedure-local/cross-procedure computed branches remain gated.
+Main-program numeric expressions now convert once to an AMOS integer and select
+the corresponding numeric label through the same checked main-label table.
 Static named branches retain their existing scoped resolution.
 
 The parser distinguishes a cached/static label reference or standalone integer
-identifier from an expression operand. Lowering validates string type and the
+identifier from an expression operand. Lowering validates the expression type and the
 supported scope, records user labels separately from internal control labels and
 emits `string_branch`. Each generated factory owns a frozen lookup built from
 entries, including safe own properties for names such as `__proto__`. All
