@@ -52,6 +52,11 @@ source-located blockers. The remaining work groups are:
    they cannot be implemented by pretending a standalone browser is the AMOS
    editor.
 
+The [menu implementation notes](menus.md) describe the checked native bank
+codec, graphical command streams and relative layout now covered by unit tests.
+Compiler, driver and browser input integration remains necessary before any of
+the nine menu programs can be promoted from its diagnostic page.
+
 The first compatibility additions accept the supplied Basic v1.34 and spaced
 Pro v1.00 headers while preserving binary bounds validation; handle uncached
 statement overloads, computed DATA Restore, On Proc, Trap/Error/Resume Next and
