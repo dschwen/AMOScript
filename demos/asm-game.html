@@ -1855,7 +1855,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const compiled = copperBuilder(views, { origin: { x: bounds ? bounds.left : Math.min(...originalViews.map(view => view.x)), y: top },
       outputWidth: bounds ? (bounds.right - bounds.left) * 2 : Math.min(454, Math.max(...views.map(view => view.x + view.width / (view.hires ? 2 : 1)))) * 2 - Math.min(...originalViews.map(view => view.x)) * 2,
       lines: bounds ? bounds.bottom - top : Math.max(...views.map(view => view.y + view.height)) - top,
-      backgroundPalette: originalViews[0].palette,
+      backgroundPalette: geometry.backdropColour == null ? originalViews[0].palette : [geometry.backdropColour, ...originalViews[0].palette.slice(1)],
       standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
       paletteRows: display.paletteRows ? display.paletteRows(views.length ? views : originalViews) : [],
       pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
@@ -2233,6 +2233,28 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         changesByLine.get(endY).set(R.DMACON, 0x100);
       }
       previous = { setup, endY, ddfStart, dmaWindow: view.dmaWindow };
+    }
+    // Colour Back owns blank vertical raster intervals, independently of
+    // every screen's COLOR00. Re-establish it after retiring a window, and
+    // restore the next screen even when its palette equals the previous one.
+    if (options.backdropColour != null) {
+      const colour = options.backdropColour;
+      if (!Number.isInteger(colour) || colour < 0 || colour > 0xfff) fail('invalid backdrop colour');
+      const change = (y, value) => {
+        if (!changesByLine.has(y)) changesByLine.set(y, new Map());
+        changesByLine.get(y).set(R.COLOR00, value);
+      };
+      if (!views.length || options.origin && options.origin.y < views[0].y) {
+        initialRegisters[R.COLOR00 / 2] = colour;
+        if (views.length) change(views[0].y, views[0].palette[0] || 0);
+      }
+      for (let index = 0; index < views.length; index++) {
+        const view = views[index], end = view.y + view.height, next = views[index+1];
+        if (!next || end < next.y) {
+          if (end < (options.standard === 'NTSC' ? 262 : 312)) change(end, colour);
+          if (next) change(next.y, next.palette[0] || 0);
+        }
+      }
     }
     for (const [y, palette] of paletteByLine) {
       if (!changesByLine.has(y)) changesByLine.set(y, new Map());
@@ -3042,14 +3064,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
 
   let clippingGraphics=true;
   function drawing(painter, args) {
-    const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear].includes(painter);
+    const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear,clearWindow].includes(painter);
     try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;}
   }
   function drawOwned(painter,args) {
     const target = screen();
     const synchronise = target.autoback === 2 && drawingHooks;
     if (synchronise) drawingHooks.before(target);
-    const fields = ['x', 'y', 'gx', 'gy', 'ink', 'linePhase', 'textEscape'];
+    const fields = ['x', 'y', 'gx', 'gy', 'ink', 'linePhase', 'textEscape', 'borderMark', 'zoneMark'];
     const before = fields.map(field => target[field]);
     const result = painter(...args);
     if (target.doubleBuffered && target.autoback !== 0) {
@@ -3114,6 +3136,92 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const target = screen(); whole(mode);
     if (mode !== 0 && mode !== 1) throw new Error('Unsupported Gr Writing mode (expected 0 or 1)');
     target.graphicsMode = mode;
+  }
+  /* AMOS pattern resource notice:
+   * MIT License
+   *
+   * Copyright (c) 1992 Europress Software
+   * Copyright (c) 2020 Francois Lionet
+   *
+   * Permission is hereby granted, free of charge, to any person obtaining a copy
+   * of this software and associated documentation files (the "Software"), to deal
+   * in the Software without restriction, including without limitation the rights
+   * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   * copies of the Software, and to permit persons to whom the Software is
+   * furnished to do so, subject to the following conditions:
+   *
+   * The above copyright notice and this permission notice shall be included in all
+   * copies or substantial portions of the Software.
+   *
+   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   * SOFTWARE.
+   */
+  // Original +AMOSPro_Mouse.abk: three cursor images and one palette record
+  // precede these 35 area patterns (see test/fixtures/tutorial/README.md).
+  const defaultPatterns=[{"height":16,"depth":1,"rows":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"height":16,"depth":1,"rows":[43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845]},{"height":16,"depth":1,"rows":[0,0,4112,10280,0,0,257,33410,0,0,4112,10280,0,0,257,33410]},{"height":16,"depth":1,"rows":[514,514,43690,20560,8224,8224,43690,1285,514,514,43690,20560,8224,8224,43690,1285]},{"height":16,"depth":1,"rows":[16448,32896,0,2056,1028,514,0,8224,16448,32896,0,2056,1028,514,0,8224]},{"height":16,"depth":1,"rows":[26118,50886,55512,6168,33153,36273,3123,24576,26118,50886,55512,6168,33153,36273,3123,24576]},{"height":16,"depth":1,"rows":[0,0,1024,0,16,0,32768,0,0,0,1024,0,16,0,32768,0]},{"height":16,"depth":1,"rows":[63736,27756,50886,36751,7967,13878,25443,61937,63736,27756,50886,36751,7967,13878,25443,61937]},{"height":16,"depth":1,"rows":[8640,16160,3100,33917,65095,1312,1760,560,560,536,524,65054,1019,3680,6264,4108]},{"height":16,"depth":1,"rows":[2056,0,43690,0,2056,0,34952,0,2056,0,43690,0,2056,0,34952,0]},{"height":16,"depth":1,"rows":[30583,39064,63736,63736,30583,35209,36751,36751,30583,39064,63736,63736,30583,35209,36751,36751]},{"height":16,"depth":1,"rows":[32896,32896,16705,15934,2056,2056,5140,58339,32896,32896,16705,15934,2056,2056,5140,58339]},{"height":16,"depth":1,"rows":[33153,16962,9252,6168,1542,257,32896,32896,33153,16962,9252,6168,1542,257,32896,32896]},{"height":16,"depth":1,"rows":[61680,61680,61680,61680,3855,3855,3855,3855,61680,61680,61680,61680,3855,3855,3855,3855]},{"height":16,"depth":1,"rows":[2056,7196,15934,32639,65535,32639,15934,7196,2056,7196,15934,32639,65535,32639,15934,7196]},{"height":16,"depth":1,"rows":[4369,8738,17476,65535,34952,17476,8738,65535,4369,8738,17476,65535,34952,17476,8738,65535]},{"height":16,"depth":1,"rows":[257,514,1028,2056,4112,8224,16448,32896,257,514,1028,2056,4112,8224,16448,32896]},{"height":16,"depth":1,"rows":[16962,33153,33153,16962,9252,6168,6168,9252,16962,33153,33153,16962,9252,6168,6168,9252]},{"height":16,"depth":1,"rows":[32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896]},{"height":16,"depth":1,"rows":[65535,0,0,0,0,0,0,0,65535,0,0,0,0,0,0,0]},{"height":16,"depth":1,"rows":[65535,32896,32896,32896,32896,32896,32896,32896,65535,32896,32896,32896,32896,32896,32896,32896]},{"height":16,"depth":1,"rows":[256,512,1024,2048,4096,8192,16384,32768,1,2,4,8,16,32,64,128]},{"height":16,"depth":1,"rows":[896,1792,3584,7168,14336,28672,57344,49153,32771,7,14,28,56,112,224,448]},{"height":16,"depth":1,"rows":[384,576,1056,2064,4104,8196,16386,32769,32769,16386,8196,4104,2064,1056,576,384]},{"height":16,"depth":1,"rows":[32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768]},{"height":16,"depth":1,"rows":[0,0,0,0,0,0,0,0,65535,0,0,0,0,0,0,0]},{"height":16,"depth":1,"rows":[65535,32896,32896,32896,32896,32896,32896,32896,65535,32896,32896,32896,32896,32896,32896,32896]},{"height":16,"depth":1,"rows":[0,17476,0,4369,0,17476,0,4369,0,17476,0,4369,0,17476,0,4369]},{"height":16,"depth":1,"rows":[0,21845,0,21845,0,21845,0,21845,0,21845,0,21845,0,21845,0,21845]},{"height":16,"depth":1,"rows":[34952,21845,8738,21845,34952,21845,8738,21845,34952,21845,8738,21845,34952,21845,8738,21845]},{"height":16,"depth":1,"rows":[43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845]},{"height":16,"depth":1,"rows":[43690,56797,43690,30583,43690,56797,43690,30583,43690,56797,43690,30583,43690,56797,43690,30583]},{"height":16,"depth":1,"rows":[43690,65535,43690,65535,43690,65535,43690,65535,43690,65535,43690,65535,43690,65535,43690,65535]},{"height":16,"depth":1,"rows":[61166,65535,48059,65535,61166,65535,48059,65535,61166,65535,48059,65535,61166,65535,48059,65535]},{"height":16,"depth":3,"rows":[0,128,0,0,0,0,128,8514,128,0,0,0,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}];
+  function setPattern(number,image=null){
+    whole(number);const target=screen();if(number===0){target.fillPattern=null;return;}
+    let pattern;
+    if(number>0){pattern=defaultPatterns[number-1];if(!pattern)throw Error('Invalid built-in pattern number');}
+    else {if(!image||image.width<16||image.height<2)throw Error('Pattern requires a sprite image at least 16 by 2');let height=1;while(height*2<=image.height&&height<128)height*=2;const rows=[];for(let p=0;p<image.depth;p++)for(let y=0;y<height;y++){let row=0;for(let x=0;x<16;x++)if(image.pixels[y*image.width+x]&(1<<p))row|=0x8000>>x;rows.push(row);}pattern={height,depth:image.depth,rows};}
+    target.fillPattern={height:pattern.height,depth:pattern.depth,rows:pattern.rows.slice()};
+  }
+  function setPaint(value){whole(value);screen().paintBorder=value!==0;}
+  function setText(value) {
+    whole(value);
+    if (value < 0 || value > 7) throw Error('Unsupported Set Text style');
+    const target = screen();
+    if (value && graphicsFonts.has(target)) throw Error('Set Text styles require the built-in font');
+    target.textStyle = value;
+  }
+  function cursorDown() {
+    const target = screen();
+    if (!target.columns || !target.rows) throw Error('Screen is too small for text');
+    target.y++; scrollText(target); changed();
+  }
+  function clearWindow(){const target=screen();target.pixels.fill(target.paper);target.x=target.y=0;changed();}
+  let backdropColour = null;
+  function colourBack(value) { whole(value); backdropColour = value & 0xfff; changed(); }
+  function checkEllipse(cx, cy, rx, ry) {
+    [cx, cy, rx, ry].forEach(whole);
+    if (rx <= 0 || ry <= 0 || rx > 32767 || ry > 32767 ||
+        cx-rx < -32768 || cy-ry < -32768 || cx+rx > 32767 || cy+ry > 32767)
+      throw Error('Ellipse requires signed-word bounds and positive radii');
+    if (screen().linePattern !== 65535) throw Error('Unsupported Ellipse patterned outline');
+  }
+  function ellipse(cx, cy, rx, ry) {
+    const target = screen();
+    if(!rx){line(target,cx,cy-ry,cx,cy+ry,target.ink);changed();return;}if(!ry){line(target,cx-rx,cy,cx+rx,cy,target.ink);changed();return;}
+    for(let y=-ry;y<=ry;y++){const x=Math.round(rx*Math.sqrt(Math.max(0,1-y*y/(ry*ry))));pixel(target,cx-x,cy+y,target.ink);pixel(target,cx+x,cy+y,target.ink);}
+    for(let x=-rx;x<=rx;x++){const y=Math.round(ry*Math.sqrt(Math.max(0,1-x*x/(rx*rx))));pixel(target,cx+x,cy-y,target.ink);pixel(target,cx+x,cy+y,target.ink);}
+    target.gx=cx;target.gy=cy;changed();
+  }
+  // Lib.s InAppear4 starts at pixel zero for each invocation. The third
+  // argument is a stride, not a pixel count; the fourth defaults to all pixels.
+  function appear(source, destination, stride, count = null) {
+    const a = screen(source), b = screen(destination);
+    whole(stride); if (stride <= 0) throw Error('Appear requires a positive stride');
+    if (a.width % 16 || b.width % 16) throw Error('Appear requires word-aligned bitmap widths');
+    const total = a.width * a.height;
+    count = count == null || count === 0 ? total : whole(count);
+    if (count < 1 || count > total) throw Error('Unsupported Appear pixel count');
+    const mask = Math.min(a.colours, b.colours) - 1;
+    let index = 0;
+    stride %= count;
+    for (let i = 0; i < count; i++) {
+      index = (index + stride) % total;
+      const x = index % a.width, y = Math.floor(index / a.width);
+      if (x < b.width && y < b.height) {
+        const at = y * b.width + x;
+        b.pixels[at] = (b.pixels[at] & ~mask) | (a.pixels[index] & mask);
+      }
+    }
+    changed();
   }
   function setLine(pattern) { screen().linePattern = whole(pattern) & 65535; }
   function plot(x, y, colour = null) {
@@ -3284,8 +3392,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (fill) {
       const clip=clippingGraphics&&target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
       for (let y = Math.max(0, top,clip.top); y <= Math.min(target.height - 1, bottom,clip.bottom-1); y++) {
-        if (left < clip.right && right >= clip.left) target.pixels.fill(colour, y * target.width + Math.max(0, left,clip.left), y * target.width + Math.min(target.width - 1, right,clip.right-1) + 1);
+        if (left < clip.right && right >= clip.left) {
+          if(!target.fillPattern)target.pixels.fill(colour, y*target.width+Math.max(0,left,clip.left), y*target.width+Math.min(target.width-1,right,clip.right-1)+1);
+          else for(let x=Math.max(0,left,clip.left);x<=Math.min(target.width-1,right,clip.right-1);x++){const pattern=target.fillPattern;let c=0;for(let p=0;p<pattern.depth;p++)if(pattern.rows[p*pattern.height+(y&(pattern.height-1))]&(0x8000>>(x&15)))c|=1<<p;pixel(target,x,y,pattern.depth===1?(c?colour:target.inkBackground):c&(target.colours-1));}
+        }
       }
+      if(target.paintBorder)rectangle(target,x1,y1,x2,y2,target.inkBorder,false);
     } else if (target.linePattern !== 65535) {
       // Original Box uses PolyDraw: down the first side, across the bottom,
       // back up, then across the top. Keep caller endpoint order and phase.
@@ -3422,12 +3534,15 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!Number.isInteger(size) || size < 1 || size > 255) throw new Error('Invalid tab size');
     screen().tabSize = size;
   }
-  function glyph(target, code, x, y, foreground, background = null) {
+  function glyph(target, code, x, y, foreground, background = null, style = 0) {
     if (code < 32 || (code > 127 && code < 160) || code > 255 || code * 8 + 7 >= font.length) code = 63;
     for (let row = 0; row < 8; row++) {
-      const bits = font[code * 8 + row];
+      let bits = font[code * 8 + row];
+      if (style & 1 && row === 7) bits = 255;
+      if (style & 2) bits |= bits << 1;
+      const shift = style & 4 ? (row < 4 ? 1 : 0) : 0;
       for (let col = 0; col < 8; col++) {
-        if (bits & (1 << col)) pixel(target, x + col, y + row, foreground);
+        if (bits & (1 << col)) pixel(target, x + col + shift, y + row, foreground);
         else if (background != null) pixel(target, x + col, y + row, background);
       }
     }
@@ -3479,10 +3594,23 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         const command = target.textEscape;
         target.textEscape = command === 'command' ? character : '';
         if (command === 'X' || command === 'Y') locate(command === 'X' ? code - 48 : null, command === 'Y' ? code - 48 : null);
+        else if(command==='E'||command==='Z'){
+          const name = command === 'E' ? 'borderMark' : 'zoneMark';
+          if (code === 48) target[name] = {x:target.x, y:target.y};
+          else {
+            const mark = target[name];
+            if (!mark) throw Error('Text border/zone has no start');
+            if (command === 'Z') setZone(code-48, mark.x*8, mark.y*8, target.x*8-1, target.y*8+7);
+            else rectangle(target, mark.x*8-2, mark.y*8-2, target.x*8+1, target.y*8+9, target.pen, false);
+            target[name] = null;
+          }
+        }
         else if (command !== 'command' && /[A-Z]/.test(command) && !'AFGHL'.includes(command)) throw new Error(`Unsupported text escape ${command}`);
         continue;
       }
       if (code === 27) { target.textEscape = 'command'; continue; }
+      if(code===25){clearWindow();continue;}
+      if(code===31){cursorDown();continue;}
       if (code === 13) { target.x = 0; continue; }
       if (code === 10) { target.x = 0; target.y++; scrollText(target); continue; }
       if (code === 8) { target.x = Math.max(0, target.x - 1); continue; }
@@ -3533,7 +3661,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     // Gr Writing 0 explicitly selects transparent JAM1.
     const background = target.graphicsMode === 0 ? null : target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground;
     if (!selected) {
-      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, background);
+      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, background, target.textStyle || 0);
     } else {
       // JAM2 erases the complete advance span, including proportional gaps.
       // Paint the background first so overlapping glyph cells cannot erase ink.
@@ -3706,7 +3834,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!copperBuilder || !copperInterpreter) throw new Error('Copper helpers are not loaded');
     const windows = ids == null ? presentedWindows : null;
     const targets = windows ? windows.map(window => window.target) : ids == null ? (presented ? [presented] : []) : (Array.isArray(ids) ? ids : [ids]).map(id => screen(id));
-    return getPlanarBridge().snapshotDisplay(targets, geometry, windows);
+    return getPlanarBridge().snapshotDisplay(targets, { ...(backdropColour == null ? {} : {backdropColour}), ...geometry }, windows);
   }
   function renderDisplay(ids = null, geometry = {}) {
     if (!referenceRenderer) throw new Error('Planar reference renderer is not loaded');
@@ -3753,7 +3881,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, grWriting, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, grWriting, setLine, setPattern, setPaint, setText, colourBack, cursorDown, clearWindow:()=>drawing(clearWindow,[]), ellipse:(...args)=>{checkEllipse(...args);return drawing(ellipse,args);}, appear, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     polyline(points) {
@@ -5944,6 +6072,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       }
       case 'Space$': return ' '.repeat(count(a));
       case 'String$': return a.length ? a[0].repeat(count(b)) : '';
+      case 'Err$':return integer(a)===trappedError?trappedMessage:'AMOS error '+integer(a);
+      case 'Border$':case 'Zone$':{const limit=name==='Border$'?16:207;if(integer(b)<=0||integer(b)>=limit)throw Error('Invalid text border/zone number');const command=name==='Border$'?'E':'Z';return '\x1b'+command+'0'+a+'\x1b'+command+String.fromCharCode(48+integer(b));}
       case 'Upper$': return a.replace(/[a-z]/g, value => value.toUpperCase());
       case 'Lower$': return a.replace(/[A-Z]/g, value => value.toLowerCase());
       case 'Str$': return (value(a) < 0 ? '' : ' ') + String(value(a));
@@ -6222,6 +6352,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     limitMouse(target.hardwareX, target.hardwareY,
       display.coordinate('X Hard', target.id, target.width - 1), display.coordinate('Y Hard', target.id, target.height - 1));
   }
+  let trappedError=0,trappedMessage='';
+  function raiseError(code){code=integer(code);if(code<1||code>255)throw Error('Error number must be 1..255');const error=Error('AMOS error '+code);error.amosErrorCode=code;throw error;}
+  function recordErrorTrap(error) { trappedError = error && error.amosErrorCode || 1; trappedMessage = String(error && error.message || error); }
+  function setPattern(number){number=integer(number);const bank=banks.get(1);display.setPattern(number,number<0&&bank&&bank.type==='sprites'?bank.images[-number-1]:null);}
   function inputValue(name) {
     if (name === 'Inkey$') {
       if (!state.input.keys.length) return '';
@@ -6282,6 +6416,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     fade, fadeColours, advanceFade, cancelFade,
     nextFadeVbl: () => fading ? fading.nextVbl : null,
     fadeLocation: () => fading && fading.location,
+    raiseError,recordErrorTrap,clearErrorTrap:()=>{trappedError=0;trappedMessage="";},errorTrap:()=>trappedError,setPattern,
     display, inputValue, setMouseAxis, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,
     eraseAll: () => installBanks([], [], true),
     reserveWork: (number, length) => reserveBank(number, length, false, 'fast'),
@@ -7888,6 +8023,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     waiting: null,
     location: null,
     editRequest: null,
+    directRequest: null,
     runRequest: null,
     systemRequest: null,
     column: 0,
@@ -8147,11 +8283,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
     if (Object.prototype.hasOwnProperty.call(res, 'resume')) {
       if (!errorFrame) throw Error('Resume without error');
-      const target = res.resume == null ? errorFrame.ip : res.resume;
+      const target = res.resume == null ? errorFrame.ip+(res.resumeNext?1:0) : res.resume;
       state.stack=errorFrame.stack; state.frames=errorFrame.frames; state.locals=errorFrame.locals; state.data=errorFrame.data;
       errorFrame=null; state.ip=target; return {done:false};
     }
-    if (res.edit || res.run || res.system) {
+    if (res.edit || res.direct || res.run || res.system) {
+      if (res.direct) { state.directRequest = Object.freeze({command: 'Direct', location: state.location ? Object.freeze({...state.location}) : null}); pendingEdit = state.directRequest; }
+      else
       if(res.edit){state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });pendingEdit=state.editRequest;}
       else if(res.run){state.runRequest=res.run;pendingEdit=res.run;}
       else {state.systemRequest=Object.freeze({command:'System',location:state.location?Object.freeze({...state.location}):null});pendingEdit=state.systemRequest;}
@@ -10652,7 +10790,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     const compiled = copperBuilder(views, { origin: { x: bounds ? bounds.left : Math.min(...originalViews.map(view => view.x)), y: top },
       outputWidth: bounds ? (bounds.right - bounds.left) * 2 : Math.min(454, Math.max(...views.map(view => view.x + view.width / (view.hires ? 2 : 1)))) * 2 - Math.min(...originalViews.map(view => view.x)) * 2,
       lines: bounds ? bounds.bottom - top : Math.max(...views.map(view => view.y + view.height)) - top,
-      backgroundPalette: originalViews[0].palette,
+      backgroundPalette: geometry.backdropColour == null ? originalViews[0].palette : [geometry.backdropColour, ...originalViews[0].palette.slice(1)],
       standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
       paletteRows: display.paletteRows ? display.paletteRows(views.length ? views : originalViews) : [],
       pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
@@ -11030,6 +11168,28 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         changesByLine.get(endY).set(R.DMACON, 0x100);
       }
       previous = { setup, endY, ddfStart, dmaWindow: view.dmaWindow };
+    }
+    // Colour Back owns blank vertical raster intervals, independently of
+    // every screen's COLOR00. Re-establish it after retiring a window, and
+    // restore the next screen even when its palette equals the previous one.
+    if (options.backdropColour != null) {
+      const colour = options.backdropColour;
+      if (!Number.isInteger(colour) || colour < 0 || colour > 0xfff) fail('invalid backdrop colour');
+      const change = (y, value) => {
+        if (!changesByLine.has(y)) changesByLine.set(y, new Map());
+        changesByLine.get(y).set(R.COLOR00, value);
+      };
+      if (!views.length || options.origin && options.origin.y < views[0].y) {
+        initialRegisters[R.COLOR00 / 2] = colour;
+        if (views.length) change(views[0].y, views[0].palette[0] || 0);
+      }
+      for (let index = 0; index < views.length; index++) {
+        const view = views[index], end = view.y + view.height, next = views[index+1];
+        if (!next || end < next.y) {
+          if (end < (options.standard === 'NTSC' ? 262 : 312)) change(end, colour);
+          if (next) change(next.y, next.palette[0] || 0);
+        }
+      }
     }
     for (const [y, palette] of paletteByLine) {
       if (!changesByLine.has(y)) changesByLine.set(y, new Map());
@@ -11839,14 +11999,14 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
 
   let clippingGraphics=true;
   function drawing(painter, args) {
-    const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear].includes(painter);
+    const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear,clearWindow].includes(painter);
     try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;}
   }
   function drawOwned(painter,args) {
     const target = screen();
     const synchronise = target.autoback === 2 && drawingHooks;
     if (synchronise) drawingHooks.before(target);
-    const fields = ['x', 'y', 'gx', 'gy', 'ink', 'linePhase', 'textEscape'];
+    const fields = ['x', 'y', 'gx', 'gy', 'ink', 'linePhase', 'textEscape', 'borderMark', 'zoneMark'];
     const before = fields.map(field => target[field]);
     const result = painter(...args);
     if (target.doubleBuffered && target.autoback !== 0) {
@@ -11911,6 +12071,92 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     const target = screen(); whole(mode);
     if (mode !== 0 && mode !== 1) throw new Error('Unsupported Gr Writing mode (expected 0 or 1)');
     target.graphicsMode = mode;
+  }
+  /* AMOS pattern resource notice:
+   * MIT License
+   *
+   * Copyright (c) 1992 Europress Software
+   * Copyright (c) 2020 Francois Lionet
+   *
+   * Permission is hereby granted, free of charge, to any person obtaining a copy
+   * of this software and associated documentation files (the "Software"), to deal
+   * in the Software without restriction, including without limitation the rights
+   * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   * copies of the Software, and to permit persons to whom the Software is
+   * furnished to do so, subject to the following conditions:
+   *
+   * The above copyright notice and this permission notice shall be included in all
+   * copies or substantial portions of the Software.
+   *
+   * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   * SOFTWARE.
+   */
+  // Original +AMOSPro_Mouse.abk: three cursor images and one palette record
+  // precede these 35 area patterns (see test/fixtures/tutorial/README.md).
+  const defaultPatterns=[{"height":16,"depth":1,"rows":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"height":16,"depth":1,"rows":[43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845]},{"height":16,"depth":1,"rows":[0,0,4112,10280,0,0,257,33410,0,0,4112,10280,0,0,257,33410]},{"height":16,"depth":1,"rows":[514,514,43690,20560,8224,8224,43690,1285,514,514,43690,20560,8224,8224,43690,1285]},{"height":16,"depth":1,"rows":[16448,32896,0,2056,1028,514,0,8224,16448,32896,0,2056,1028,514,0,8224]},{"height":16,"depth":1,"rows":[26118,50886,55512,6168,33153,36273,3123,24576,26118,50886,55512,6168,33153,36273,3123,24576]},{"height":16,"depth":1,"rows":[0,0,1024,0,16,0,32768,0,0,0,1024,0,16,0,32768,0]},{"height":16,"depth":1,"rows":[63736,27756,50886,36751,7967,13878,25443,61937,63736,27756,50886,36751,7967,13878,25443,61937]},{"height":16,"depth":1,"rows":[8640,16160,3100,33917,65095,1312,1760,560,560,536,524,65054,1019,3680,6264,4108]},{"height":16,"depth":1,"rows":[2056,0,43690,0,2056,0,34952,0,2056,0,43690,0,2056,0,34952,0]},{"height":16,"depth":1,"rows":[30583,39064,63736,63736,30583,35209,36751,36751,30583,39064,63736,63736,30583,35209,36751,36751]},{"height":16,"depth":1,"rows":[32896,32896,16705,15934,2056,2056,5140,58339,32896,32896,16705,15934,2056,2056,5140,58339]},{"height":16,"depth":1,"rows":[33153,16962,9252,6168,1542,257,32896,32896,33153,16962,9252,6168,1542,257,32896,32896]},{"height":16,"depth":1,"rows":[61680,61680,61680,61680,3855,3855,3855,3855,61680,61680,61680,61680,3855,3855,3855,3855]},{"height":16,"depth":1,"rows":[2056,7196,15934,32639,65535,32639,15934,7196,2056,7196,15934,32639,65535,32639,15934,7196]},{"height":16,"depth":1,"rows":[4369,8738,17476,65535,34952,17476,8738,65535,4369,8738,17476,65535,34952,17476,8738,65535]},{"height":16,"depth":1,"rows":[257,514,1028,2056,4112,8224,16448,32896,257,514,1028,2056,4112,8224,16448,32896]},{"height":16,"depth":1,"rows":[16962,33153,33153,16962,9252,6168,6168,9252,16962,33153,33153,16962,9252,6168,6168,9252]},{"height":16,"depth":1,"rows":[32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896,32896]},{"height":16,"depth":1,"rows":[65535,0,0,0,0,0,0,0,65535,0,0,0,0,0,0,0]},{"height":16,"depth":1,"rows":[65535,32896,32896,32896,32896,32896,32896,32896,65535,32896,32896,32896,32896,32896,32896,32896]},{"height":16,"depth":1,"rows":[256,512,1024,2048,4096,8192,16384,32768,1,2,4,8,16,32,64,128]},{"height":16,"depth":1,"rows":[896,1792,3584,7168,14336,28672,57344,49153,32771,7,14,28,56,112,224,448]},{"height":16,"depth":1,"rows":[384,576,1056,2064,4104,8196,16386,32769,32769,16386,8196,4104,2064,1056,576,384]},{"height":16,"depth":1,"rows":[32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768,32768]},{"height":16,"depth":1,"rows":[0,0,0,0,0,0,0,0,65535,0,0,0,0,0,0,0]},{"height":16,"depth":1,"rows":[65535,32896,32896,32896,32896,32896,32896,32896,65535,32896,32896,32896,32896,32896,32896,32896]},{"height":16,"depth":1,"rows":[0,17476,0,4369,0,17476,0,4369,0,17476,0,4369,0,17476,0,4369]},{"height":16,"depth":1,"rows":[0,21845,0,21845,0,21845,0,21845,0,21845,0,21845,0,21845,0,21845]},{"height":16,"depth":1,"rows":[34952,21845,8738,21845,34952,21845,8738,21845,34952,21845,8738,21845,34952,21845,8738,21845]},{"height":16,"depth":1,"rows":[43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845,43690,21845]},{"height":16,"depth":1,"rows":[43690,56797,43690,30583,43690,56797,43690,30583,43690,56797,43690,30583,43690,56797,43690,30583]},{"height":16,"depth":1,"rows":[43690,65535,43690,65535,43690,65535,43690,65535,43690,65535,43690,65535,43690,65535,43690,65535]},{"height":16,"depth":1,"rows":[61166,65535,48059,65535,61166,65535,48059,65535,61166,65535,48059,65535,61166,65535,48059,65535]},{"height":16,"depth":3,"rows":[0,128,0,0,0,0,128,8514,128,0,0,0,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}];
+  function setPattern(number,image=null){
+    whole(number);const target=screen();if(number===0){target.fillPattern=null;return;}
+    let pattern;
+    if(number>0){pattern=defaultPatterns[number-1];if(!pattern)throw Error('Invalid built-in pattern number');}
+    else {if(!image||image.width<16||image.height<2)throw Error('Pattern requires a sprite image at least 16 by 2');let height=1;while(height*2<=image.height&&height<128)height*=2;const rows=[];for(let p=0;p<image.depth;p++)for(let y=0;y<height;y++){let row=0;for(let x=0;x<16;x++)if(image.pixels[y*image.width+x]&(1<<p))row|=0x8000>>x;rows.push(row);}pattern={height,depth:image.depth,rows};}
+    target.fillPattern={height:pattern.height,depth:pattern.depth,rows:pattern.rows.slice()};
+  }
+  function setPaint(value){whole(value);screen().paintBorder=value!==0;}
+  function setText(value) {
+    whole(value);
+    if (value < 0 || value > 7) throw Error('Unsupported Set Text style');
+    const target = screen();
+    if (value && graphicsFonts.has(target)) throw Error('Set Text styles require the built-in font');
+    target.textStyle = value;
+  }
+  function cursorDown() {
+    const target = screen();
+    if (!target.columns || !target.rows) throw Error('Screen is too small for text');
+    target.y++; scrollText(target); changed();
+  }
+  function clearWindow(){const target=screen();target.pixels.fill(target.paper);target.x=target.y=0;changed();}
+  let backdropColour = null;
+  function colourBack(value) { whole(value); backdropColour = value & 0xfff; changed(); }
+  function checkEllipse(cx, cy, rx, ry) {
+    [cx, cy, rx, ry].forEach(whole);
+    if (rx <= 0 || ry <= 0 || rx > 32767 || ry > 32767 ||
+        cx-rx < -32768 || cy-ry < -32768 || cx+rx > 32767 || cy+ry > 32767)
+      throw Error('Ellipse requires signed-word bounds and positive radii');
+    if (screen().linePattern !== 65535) throw Error('Unsupported Ellipse patterned outline');
+  }
+  function ellipse(cx, cy, rx, ry) {
+    const target = screen();
+    if(!rx){line(target,cx,cy-ry,cx,cy+ry,target.ink);changed();return;}if(!ry){line(target,cx-rx,cy,cx+rx,cy,target.ink);changed();return;}
+    for(let y=-ry;y<=ry;y++){const x=Math.round(rx*Math.sqrt(Math.max(0,1-y*y/(ry*ry))));pixel(target,cx-x,cy+y,target.ink);pixel(target,cx+x,cy+y,target.ink);}
+    for(let x=-rx;x<=rx;x++){const y=Math.round(ry*Math.sqrt(Math.max(0,1-x*x/(rx*rx))));pixel(target,cx+x,cy-y,target.ink);pixel(target,cx+x,cy+y,target.ink);}
+    target.gx=cx;target.gy=cy;changed();
+  }
+  // Lib.s InAppear4 starts at pixel zero for each invocation. The third
+  // argument is a stride, not a pixel count; the fourth defaults to all pixels.
+  function appear(source, destination, stride, count = null) {
+    const a = screen(source), b = screen(destination);
+    whole(stride); if (stride <= 0) throw Error('Appear requires a positive stride');
+    if (a.width % 16 || b.width % 16) throw Error('Appear requires word-aligned bitmap widths');
+    const total = a.width * a.height;
+    count = count == null || count === 0 ? total : whole(count);
+    if (count < 1 || count > total) throw Error('Unsupported Appear pixel count');
+    const mask = Math.min(a.colours, b.colours) - 1;
+    let index = 0;
+    stride %= count;
+    for (let i = 0; i < count; i++) {
+      index = (index + stride) % total;
+      const x = index % a.width, y = Math.floor(index / a.width);
+      if (x < b.width && y < b.height) {
+        const at = y * b.width + x;
+        b.pixels[at] = (b.pixels[at] & ~mask) | (a.pixels[index] & mask);
+      }
+    }
+    changed();
   }
   function setLine(pattern) { screen().linePattern = whole(pattern) & 65535; }
   function plot(x, y, colour = null) {
@@ -12081,8 +12327,12 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     if (fill) {
       const clip=clippingGraphics&&target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
       for (let y = Math.max(0, top,clip.top); y <= Math.min(target.height - 1, bottom,clip.bottom-1); y++) {
-        if (left < clip.right && right >= clip.left) target.pixels.fill(colour, y * target.width + Math.max(0, left,clip.left), y * target.width + Math.min(target.width - 1, right,clip.right-1) + 1);
+        if (left < clip.right && right >= clip.left) {
+          if(!target.fillPattern)target.pixels.fill(colour, y*target.width+Math.max(0,left,clip.left), y*target.width+Math.min(target.width-1,right,clip.right-1)+1);
+          else for(let x=Math.max(0,left,clip.left);x<=Math.min(target.width-1,right,clip.right-1);x++){const pattern=target.fillPattern;let c=0;for(let p=0;p<pattern.depth;p++)if(pattern.rows[p*pattern.height+(y&(pattern.height-1))]&(0x8000>>(x&15)))c|=1<<p;pixel(target,x,y,pattern.depth===1?(c?colour:target.inkBackground):c&(target.colours-1));}
+        }
       }
+      if(target.paintBorder)rectangle(target,x1,y1,x2,y2,target.inkBorder,false);
     } else if (target.linePattern !== 65535) {
       // Original Box uses PolyDraw: down the first side, across the bottom,
       // back up, then across the top. Keep caller endpoint order and phase.
@@ -12219,12 +12469,15 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     if (!Number.isInteger(size) || size < 1 || size > 255) throw new Error('Invalid tab size');
     screen().tabSize = size;
   }
-  function glyph(target, code, x, y, foreground, background = null) {
+  function glyph(target, code, x, y, foreground, background = null, style = 0) {
     if (code < 32 || (code > 127 && code < 160) || code > 255 || code * 8 + 7 >= font.length) code = 63;
     for (let row = 0; row < 8; row++) {
-      const bits = font[code * 8 + row];
+      let bits = font[code * 8 + row];
+      if (style & 1 && row === 7) bits = 255;
+      if (style & 2) bits |= bits << 1;
+      const shift = style & 4 ? (row < 4 ? 1 : 0) : 0;
       for (let col = 0; col < 8; col++) {
-        if (bits & (1 << col)) pixel(target, x + col, y + row, foreground);
+        if (bits & (1 << col)) pixel(target, x + col + shift, y + row, foreground);
         else if (background != null) pixel(target, x + col, y + row, background);
       }
     }
@@ -12276,10 +12529,23 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         const command = target.textEscape;
         target.textEscape = command === 'command' ? character : '';
         if (command === 'X' || command === 'Y') locate(command === 'X' ? code - 48 : null, command === 'Y' ? code - 48 : null);
+        else if(command==='E'||command==='Z'){
+          const name = command === 'E' ? 'borderMark' : 'zoneMark';
+          if (code === 48) target[name] = {x:target.x, y:target.y};
+          else {
+            const mark = target[name];
+            if (!mark) throw Error('Text border/zone has no start');
+            if (command === 'Z') setZone(code-48, mark.x*8, mark.y*8, target.x*8-1, target.y*8+7);
+            else rectangle(target, mark.x*8-2, mark.y*8-2, target.x*8+1, target.y*8+9, target.pen, false);
+            target[name] = null;
+          }
+        }
         else if (command !== 'command' && /[A-Z]/.test(command) && !'AFGHL'.includes(command)) throw new Error(`Unsupported text escape ${command}`);
         continue;
       }
       if (code === 27) { target.textEscape = 'command'; continue; }
+      if(code===25){clearWindow();continue;}
+      if(code===31){cursorDown();continue;}
       if (code === 13) { target.x = 0; continue; }
       if (code === 10) { target.x = 0; target.y++; scrollText(target); continue; }
       if (code === 8) { target.x = Math.max(0, target.x - 1); continue; }
@@ -12330,7 +12596,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     // Gr Writing 0 explicitly selects transparent JAM1.
     const background = target.graphicsMode === 0 ? null : target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground;
     if (!selected) {
-      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, background);
+      for (let i = 0; i < value.length; i++) glyph(target, value.charCodeAt(i), x + i * 8, baseline - 7, target.ink, background, target.textStyle || 0);
     } else {
       // JAM2 erases the complete advance span, including proportional gaps.
       // Paint the background first so overlapping glyph cells cannot erase ink.
@@ -12503,7 +12769,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     if (!copperBuilder || !copperInterpreter) throw new Error('Copper helpers are not loaded');
     const windows = ids == null ? presentedWindows : null;
     const targets = windows ? windows.map(window => window.target) : ids == null ? (presented ? [presented] : []) : (Array.isArray(ids) ? ids : [ids]).map(id => screen(id));
-    return getPlanarBridge().snapshotDisplay(targets, geometry, windows);
+    return getPlanarBridge().snapshotDisplay(targets, { ...(backdropColour == null ? {} : {backdropColour}), ...geometry }, windows);
   }
   function renderDisplay(ids = null, geometry = {}) {
     if (!referenceRenderer) throw new Error('Planar reference renderer is not loaded');
@@ -12550,7 +12816,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     presentedScreen: () => presented,
     get autoView() { return autoView; },
     cursOff() { screen().cursorVisible = false; },
-    ink, grWriting, setLine, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
+    ink, grWriting, setLine, setPattern, setPaint, setText, colourBack, cursorDown, clearWindow:()=>drawing(clearWindow,[]), ellipse:(...args)=>{checkEllipse(...args);return drawing(ellipse,args);}, appear, writing, outputColumn, point, grLocate, locate, home, pen, paper, setTab, info, rgba, coordinate, polygon, playAnimationFrames, snapshotPlayfield, renderPlayfield, snapshotDisplay, renderDisplay,
     paste, bankPalette, capture, restore, doubleBuffer, swap, autoback, withPhysical, bufferSelector, copyScreen, copyScreenRectangle, zoom,
     clear: (...args) => drawing(clear, args), clearRect: (...args) => drawing(clearRect, args),
     polyline(points) {
@@ -14741,6 +15007,8 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       }
       case 'Space$': return ' '.repeat(count(a));
       case 'String$': return a.length ? a[0].repeat(count(b)) : '';
+      case 'Err$':return integer(a)===trappedError?trappedMessage:'AMOS error '+integer(a);
+      case 'Border$':case 'Zone$':{const limit=name==='Border$'?16:207;if(integer(b)<=0||integer(b)>=limit)throw Error('Invalid text border/zone number');const command=name==='Border$'?'E':'Z';return '\x1b'+command+'0'+a+'\x1b'+command+String.fromCharCode(48+integer(b));}
       case 'Upper$': return a.replace(/[a-z]/g, value => value.toUpperCase());
       case 'Lower$': return a.replace(/[A-Z]/g, value => value.toLowerCase());
       case 'Str$': return (value(a) < 0 ? '' : ' ') + String(value(a));
@@ -15019,6 +15287,10 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     limitMouse(target.hardwareX, target.hardwareY,
       display.coordinate('X Hard', target.id, target.width - 1), display.coordinate('Y Hard', target.id, target.height - 1));
   }
+  let trappedError=0,trappedMessage='';
+  function raiseError(code){code=integer(code);if(code<1||code>255)throw Error('Error number must be 1..255');const error=Error('AMOS error '+code);error.amosErrorCode=code;throw error;}
+  function recordErrorTrap(error) { trappedError = error && error.amosErrorCode || 1; trappedMessage = String(error && error.message || error); }
+  function setPattern(number){number=integer(number);const bank=banks.get(1);display.setPattern(number,number<0&&bank&&bank.type==='sprites'?bank.images[-number-1]:null);}
   function inputValue(name) {
     if (name === 'Inkey$') {
       if (!state.input.keys.length) return '';
@@ -15079,6 +15351,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     fade, fadeColours, advanceFade, cancelFade,
     nextFadeVbl: () => fading ? fading.nextVbl : null,
     fadeLocation: () => fading && fading.location,
+    raiseError,recordErrorTrap,clearErrorTrap:()=>{trappedError=0;trappedMessage="";},errorTrap:()=>trappedError,setPattern,
     display, inputValue, setMouseAxis, banks, loadBanks, saveBanks, eraseBank, eraseTemp, bankLength, swapBanks, shrinkBank,
     eraseAll: () => installBanks([], [], true),
     reserveWork: (number, length) => reserveBank(number, length, false, 'fast'),
@@ -16685,6 +16958,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     waiting: null,
     location: null,
     editRequest: null,
+    directRequest: null,
     runRequest: null,
     systemRequest: null,
     column: 0,
@@ -16944,11 +17218,13 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     }
     if (Object.prototype.hasOwnProperty.call(res, 'resume')) {
       if (!errorFrame) throw Error('Resume without error');
-      const target = res.resume == null ? errorFrame.ip : res.resume;
+      const target = res.resume == null ? errorFrame.ip+(res.resumeNext?1:0) : res.resume;
       state.stack=errorFrame.stack; state.frames=errorFrame.frames; state.locals=errorFrame.locals; state.data=errorFrame.data;
       errorFrame=null; state.ip=target; return {done:false};
     }
-    if (res.edit || res.run || res.system) {
+    if (res.edit || res.direct || res.run || res.system) {
+      if (res.direct) { state.directRequest = Object.freeze({command: 'Direct', location: state.location ? Object.freeze({...state.location}) : null}); pendingEdit = state.directRequest; }
+      else
       if(res.edit){state.editRequest = Object.freeze({ command: 'Edit', location: state.location ? Object.freeze({ ...state.location }) : null });pendingEdit=state.editRequest;}
       else if(res.run){state.runRequest=res.run;pendingEdit=res.run;}
       else {state.systemRequest=Object.freeze({command:'System',location:state.location?Object.freeze({...state.location}):null});pendingEdit=state.systemRequest;}

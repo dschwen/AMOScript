@@ -23,6 +23,7 @@ module.exports = async function checkBrowserDemos(browser) {
     assert.strictEqual(await gallery.locator('#showcases a[href="bob-test.html"]').count(), 1);
     assert.strictEqual(await gallery.locator('#showcases a[href="planet-zybex.html"]').count(), 1);
   } finally { await gallery.close(); }
+  await require('./checkTutorialDemos')(browser);
   const debug = await browser.newPage(), debugErrors = [], debugNetwork = [];
   debug.on('pageerror', error => debugErrors.push(error.message));
   await debug.route(/^https?:/, route => { debugNetwork.push(route.request().url()); return route.abort(); });

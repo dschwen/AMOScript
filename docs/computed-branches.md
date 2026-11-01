@@ -17,7 +17,7 @@ Targets are static named labels, scoped exactly like ordinary Goto/Gosub.
 Every target must resolve at compile time, including targets a particular selector
 will never choose. Selector values can come from typed variables, arrays, DATA,
 procedure results, Val or other numeric expressions. String selectors, empty or
-malformed lists, numeric/dynamic label destinations and On Proc remain unsupported
+malformed lists and numeric/dynamic label destinations remain unsupported
 and fail with source locations. On Error/Break/Menu are separate forms.
 
 The parser builds an On AST node. The lowerer validates selector typing and local
@@ -65,3 +65,9 @@ same named-target AST and scoped validation as label-reference tokens. This
 bounded native verifier form enables Roller II’s original input loop. Ordinary
 main-program [string branches](string-branches.md) are now supported separately;
 On lists, numeric targets and wider string-branch scopes remain gated. See [input source forms](roller2-input.md).
+
+`On expression Proc name1,name2,...` also supports static procedures without
+parameters. Every target is validated, including unselected entries. Selection
+uses the same integer conversion and fallthrough rules, then returns the ordinary
+procedure-call control with fresh locals and the procedure DATA scope. See the
+original Hardware_Sprites and Procedures_2 [Tutorial demos](tutorial.md).

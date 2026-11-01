@@ -1,0 +1,335 @@
+{
+  "programs": [
+    {
+      "source": "ReTokenise.AMOS",
+      "file": "tutorial-retokenise-amos.html",
+      "byteLength": 3298,
+      "sha256": "4f569c548d9fde49e375dd1f3c066264c3fa114727fb1d3e38cc3a5dc49c3bee",
+      "compiled": false,
+      "error": "Unsupported token 0x2578 at line 8, byte 452"
+    },
+    {
+      "source": "ReTokenise.V1_00",
+      "file": "tutorial-retokenise-v1-00.html",
+      "byteLength": 3298,
+      "sha256": "4f569c548d9fde49e375dd1f3c066264c3fa114727fb1d3e38cc3a5dc49c3bee",
+      "compiled": false,
+      "error": "Unsupported token 0x2578 at line 8, byte 452"
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_1.AMOS",
+      "file": "tutorial-tutorials-amal-amal-1-amos.html",
+      "byteLength": 7598,
+      "sha256": "213e65fefdad291e46ab0d0f393d73b7fc7f10c1e3bc8f9824fa70f4b0124a3d",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_2.AMOS",
+      "file": "tutorial-tutorials-amal-amal-2-amos.html",
+      "byteLength": 7654,
+      "sha256": "14775cde0b8dc89b509afb5bc5ec51d63f705c5df7607cd724ea80d652b7608f",
+      "compiled": false,
+      "error": "Unsupported extension 1:0x7e at line 183, byte 7298"
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_3.AMOS",
+      "file": "tutorial-tutorials-amal-amal-3-amos.html",
+      "byteLength": 6412,
+      "sha256": "50d9aa5629d84cc30df697e7830650a7e6b13c72fddcc3343ffc0642c4d4ea1e",
+      "compiled": false,
+      "error": "Expected end of statement; found ( at line 143, byte 5834"
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_4.AMOS",
+      "file": "tutorial-tutorials-amal-amal-4-amos.html",
+      "byteLength": 7076,
+      "sha256": "73657aebbf595531cdb8980b1f75be5ac822d2d200ff29f6e5fdcd92ef15f230",
+      "compiled": false,
+      "error": "Unsupported Channel target (expected Bob or Sprite); found Rainbow at line 150, byte 6186"
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_5.AMOS",
+      "file": "tutorial-tutorials-amal-amal-5-amos.html",
+      "byteLength": 6544,
+      "sha256": "0d579b8fb5cee1bab2d26020ec079289febd4557402ce17910c774c10f11ebb5",
+      "compiled": false,
+      "error": "Unsupported token 0x202c at line 129, byte 5536"
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_6.AMOS",
+      "file": "tutorial-tutorials-amal-amal-6-amos.html",
+      "byteLength": 5138,
+      "sha256": "217004047315900bf603cd308b43046fd1362bc78114eef572725aaf02b9c914",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/AMAL/AMAL_7.AMOS",
+      "file": "tutorial-tutorials-amal-amal-7-amos.html",
+      "byteLength": 11922,
+      "sha256": "7dae2173079085eb2787e3a0f3c8ac8cc8d53c392b5af5a98f131a401fe9fa3a",
+      "compiled": false,
+      "error": "Unsupported token 0x1f86 at line 174, byte 7524"
+    },
+    {
+      "source": "Tutorials/Appear.AMOS",
+      "file": "tutorial-tutorials-appear-amos.html",
+      "byteLength": 4062,
+      "sha256": "96d2a35263d95b92ba668a710c595aa5f8f2939a7312ce7db20252bef04a9bce",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Arrays.AMOS",
+      "file": "tutorial-tutorials-arrays-amos.html",
+      "byteLength": 4724,
+      "sha256": "0326f45f39500760896caccc89b02cb5f17e5aea7c7dc552171a3e1160ccbc29",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Autoback_&_Update.AMOS",
+      "file": "tutorial-tutorials-autoback-update-amos.html",
+      "byteLength": 8492,
+      "sha256": "3216e9aa1e8287a741a2f2c37d0ca23569887bd3dab16a3ece06db5d60161978",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Collision_Detection.AMOS",
+      "file": "tutorial-tutorials-collision-detection-amos.html",
+      "byteLength": 10776,
+      "sha256": "ff4f8f8ba2e2e683a9f688026325093168a398a8ef5f20de3c13fa8bb67861fd",
+      "compiled": false,
+      "error": "Unsupported extension 1:0x7e at line 168, byte 7598"
+    },
+    {
+      "source": "Tutorials/Computed_Sprites.AMOS",
+      "file": "tutorial-tutorials-computed-sprites-amos.html",
+      "byteLength": 7374,
+      "sha256": "9c372663bd67a714331d94c411f9c34a22dc744d1679ffee374a9f1201b88837",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Error_Handling_1.AMOS",
+      "file": "tutorial-tutorials-error-handling-1-amos.html",
+      "byteLength": 8810,
+      "sha256": "04ebd5940f8c7479c91c486371826be3e8e6ea046763effe42b43945b5b5f430",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Error_Handling_2.AMOS",
+      "file": "tutorial-tutorials-error-handling-2-amos.html",
+      "byteLength": 4304,
+      "sha256": "a81927c0128b6226be798780b47a1d9d321a8ff30968b31183839dff5c4d8ea1",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Fade.AMOS",
+      "file": "tutorial-tutorials-fade-amos.html",
+      "byteLength": 8970,
+      "sha256": "009f6be592f6bf013e47e206e4a0fad565e2b54d54ba441954dae33c1c606a70",
+      "compiled": false,
+      "error": "Expected end of statement; found , at line 121, byte 4728"
+    },
+    {
+      "source": "Tutorials/Hardware_Sprites.AMOS",
+      "file": "tutorial-tutorials-hardware-sprites-amos.html",
+      "byteLength": 16878,
+      "sha256": "df9e0ba4d0afce8ce23fd451fd5dc402ae38b89138e5fb2f733169c5412fbf7a",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Iff_Animation.AMOS",
+      "file": "tutorial-tutorials-iff-animation-amos.html",
+      "byteLength": 7622,
+      "sha256": "1923e4156f1eb88a4efd26d705dd1093301d803bb39c9f2259f3d3079a544420",
+      "compiled": false,
+      "error": "Unsupported token 0x263e at line 134, byte 6248"
+    },
+    {
+      "source": "Tutorials/Interface/Autocentering.AMOS",
+      "file": "tutorial-tutorials-interface-autocentering-amos.html",
+      "byteLength": 1526,
+      "sha256": "6e79dd4944d6ab9f0767aa7aa81a4b4a0005a8dab5e364051d24a28a282decf5",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Interface/Button_Types.AMOS",
+      "file": "tutorial-tutorials-interface-button-types-amos.html",
+      "byteLength": 10892,
+      "sha256": "f5390f14c464d51bf94fb8703a761e702e94d1745f88e5f4eb43ec5c7718f7f3",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Interface/Communication.AMOS",
+      "file": "tutorial-tutorials-interface-communication-amos.html",
+      "byteLength": 3316,
+      "sha256": "052ca18ecebe7cd4059f319ebdfccea4373a19fe80beba2559d128dc50f34d1b",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Interface/Editing_Zones.AMOS",
+      "file": "tutorial-tutorials-interface-editing-zones-amos.html",
+      "byteLength": 2332,
+      "sha256": "c01ea4267a99b9891f3cf64ec63dd4a62e057d171ad7c1d7a8f16a562519cdf9",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Interface/Full_Example.AMOS",
+      "file": "tutorial-tutorials-interface-full-example-amos.html",
+      "byteLength": 8860,
+      "sha256": "dae997e6acd22a6ffd28dbca3472a0a2c02a0c076d1a822817da86375656ce13",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 15, byte 632"
+    },
+    {
+      "source": "Tutorials/Interface/Graphics.AMOS",
+      "file": "tutorial-tutorials-interface-graphics-amos.html",
+      "byteLength": 5426,
+      "sha256": "031023006768dd6d18487c09fb8f6fabf147299cf7863391b6c7294f91bd3f06",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Interface/Simple_Requester.AMOS",
+      "file": "tutorial-tutorials-interface-simple-requester-amos.html",
+      "byteLength": 1164,
+      "sha256": "696f369ffbe078be867c95cc02076e8a9a570ce5d5d1d2eb653909178e24900e",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Interface/Sliders.AMOS",
+      "file": "tutorial-tutorials-interface-sliders-amos.html",
+      "byteLength": 10120,
+      "sha256": "8f6b5948732389e02c7c59daa6063f8ae14ecc00d7426aad597cdaa6e793379e",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 11, byte 444"
+    },
+    {
+      "source": "Tutorials/Interface/Working_Buttons.AMOS",
+      "file": "tutorial-tutorials-interface-working-buttons-amos.html",
+      "byteLength": 3520,
+      "sha256": "28ce230a78fd533d0bcc54b575c5a63fc1ae197d62419b58180eda2e0cfcf054",
+      "compiled": false,
+      "error": "Unsupported token 0x28ca at line 12, byte 512"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_1.AMOS",
+      "file": "tutorial-tutorials-menus-menus-1-amos.html",
+      "byteLength": 4804,
+      "sha256": "3fbf7362b1eb6002e2d335f2aed731a8ec9feb32e7b7095fb17c8e65fd696030",
+      "compiled": false,
+      "error": "Unsupported token 0x964 at line 81, byte 3102"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_2.AMOS",
+      "file": "tutorial-tutorials-menus-menus-2-amos.html",
+      "byteLength": 2956,
+      "sha256": "b2a034139b1f6deff6db4a6b62f7ba8ac0a0d1d4c0cb4fb1eaaad4f2d8bb7302",
+      "compiled": false,
+      "error": "Unsupported token 0x964 at line 50, byte 1924"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_3.AMOS",
+      "file": "tutorial-tutorials-menus-menus-3-amos.html",
+      "byteLength": 5092,
+      "sha256": "b3b35a9e875001a5992052b5e582a978e45cb65e29fdc0300bffabeb597a0dd4",
+      "compiled": false,
+      "error": "Unsupported token 0x964 at line 80, byte 3506"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_4.AMOS",
+      "file": "tutorial-tutorials-menus-menus-4-amos.html",
+      "byteLength": 5110,
+      "sha256": "a2c5fcda795344e00362590c333784d1bb7010cb3c0a37567f99d40b66959740",
+      "compiled": false,
+      "error": "Unsupported token 0x964 at line 64, byte 2738"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_5.AMOS",
+      "file": "tutorial-tutorials-menus-menus-5-amos.html",
+      "byteLength": 6810,
+      "sha256": "75d1bd9f2df0b6df4f85e4e7b4a00c59c3dc930dceb5ee10b0b38d24fa5aa17a",
+      "compiled": false,
+      "error": "Unsupported token 0x964 at line 117, byte 3372"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_6.AMOS",
+      "file": "tutorial-tutorials-menus-menus-6-amos.html",
+      "byteLength": 7604,
+      "sha256": "17987b0a13c3351b1e2199edfccdaa43d1a797b156d4e024bc07242225f012bd",
+      "compiled": false,
+      "error": "Unsupported token 0x910 at line 132, byte 5242"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_7.AMOS",
+      "file": "tutorial-tutorials-menus-menus-7-amos.html",
+      "byteLength": 5538,
+      "sha256": "f947f12817cd4a1eafdcb8a59655589325a3816f61f630487199f50a7b4d9640",
+      "compiled": false,
+      "error": "Unsupported token 0x8a8 at line 95, byte 3818"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_8.AMOS",
+      "file": "tutorial-tutorials-menus-menus-8-amos.html",
+      "byteLength": 7828,
+      "sha256": "71ed1d5332e89e1498a2313896b5091b468305ccdac53c2ba6194a09578548b4",
+      "compiled": false,
+      "error": "Unsupported token 0x8a8 at line 74, byte 3008"
+    },
+    {
+      "source": "Tutorials/Menus/Menus_9.AMOS",
+      "file": "tutorial-tutorials-menus-menus-9-amos.html",
+      "byteLength": 7592,
+      "sha256": "cf26152a37c642f15d9d0b5a728f3e518dc10590676d132e9ed1508c640132c1",
+      "compiled": false,
+      "error": "Unsupported token 0x7a4 at line 38, byte 1830"
+    },
+    {
+      "source": "Tutorials/Multi_Rainbows.AMOS",
+      "file": "tutorial-tutorials-multi-rainbows-amos.html",
+      "byteLength": 11958,
+      "sha256": "25b53a6cada88cfccdbc8cbe4dd60203d06be16f2dddcc0b7c5c8f89c1967c0c",
+      "compiled": false,
+      "error": "Unsupported token 0x22ae at line 43, byte 1450"
+    },
+    {
+      "source": "Tutorials/Multi_Rainbows.V1_00",
+      "file": "tutorial-tutorials-multi-rainbows-v1-00.html",
+      "byteLength": 11786,
+      "sha256": "ea45d6f3cddd711a5252556fb3c6a2772f24078d7781cd9c67cbf5df6e684c82",
+      "compiled": false,
+      "error": "Unsupported token 0x22ae at line 41, byte 1378"
+    },
+    {
+      "source": "Tutorials/Procedures_1.AMOS",
+      "file": "tutorial-tutorials-procedures-1-amos.html",
+      "byteLength": 6546,
+      "sha256": "9e4665430ac320cb1189af473e74d8d8c12792729480ef9f716742d209a2cd7e",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Procedures_2.AMOS",
+      "file": "tutorial-tutorials-procedures-2-amos.html",
+      "byteLength": 9564,
+      "sha256": "fb4958265d0a6013823d605a7f66913f899887d57276cc2f6363fa4e41694eb4",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Rainbows.AMOS",
+      "file": "tutorial-tutorials-rainbows-amos.html",
+      "byteLength": 9688,
+      "sha256": "a0934e69c1e9eaac2293994c22e0653f6bfec37bab2b17660fd29f78d2b6c05d",
+      "compiled": true
+    },
+    {
+      "source": "Tutorials/Sprites_v_Bobs.AMOS",
+      "file": "tutorial-tutorials-sprites-v-bobs-amos.html",
+      "byteLength": 11772,
+      "sha256": "e896fb90dfee81a4f68617e6b28c0234e79fce80511202e890acf06e5fbee9ec",
+      "compiled": true
+    }
+  ]
+}
