@@ -1060,7 +1060,8 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
 - ASM distribution is limited to rooms 1–5. Later room/minigame assets and
   preview bitmaps are removed from the current tree. Every generated ASM page
   uses the limited asset profile and the declared build-time source guard on
-  INITRAUM line 874, ending before excluded-room loads. Keep the pinned original
+  INITRAUM line 874, ending before excluded-room loads; GAME_OVER line 1132
+  ends before excluded end-screen artwork. Keep the pinned original
   AMOS source unchanged. The public replay visits five rooms (34 Canvas/GPU
   frames); the room gallery has five prepared entries and 204800 independent
   pixels. ASM is omitted from README and kept in the lower, collapsed Limited

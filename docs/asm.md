@@ -14,6 +14,8 @@ removed from the current checkout. Git history has not been rewritten.
 
 The distributed source variant inserts an explicit End guard on INITRAUM's
 existing physical line 874, before changing the current room or reading assets.
+Game over also ends at its existing entry line 1132 before loading excluded
+end-screen artwork.
 Entering a room outside 1–5 ends the demo cleanly; the page explains the boundary
 and offers Restart. This is a build-time demo restriction, not a compiler change.
 Pinned original AMOS source files remain unchanged.

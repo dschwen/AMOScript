@@ -12,5 +12,12 @@ module.exports=function limitedSource(raw){
   const body=[...raw.subarray(at+2,end-2),...tok('If'),0,0,...r,...tok('>'),...integer(5),...tok('Or'),...r,...tok('<'),...integer(1),...tok('Then'),...tok('End')];
   if(body.length+4>510)throw Error('ASM demo guard exceeds physical line capacity');
   const line=Buffer.from([(body.length+4)/2,raw[at+1],...body,0,0]),delta=line.length-(end-at),header=Buffer.from(raw.subarray(0,20));header.writeUInt32BE(reader.code_bytes+delta,16);
-  return Buffer.concat([header,raw.subarray(20,at),line,raw.subarray(end)]);
+  const guarded=Buffer.concat([header,raw.subarray(20,at),line,raw.subarray(end)]);
+  // Game-over artwork is outside this limited package: retain the final room
+  // and end cleanly rather than trying to load the excluded GOG/GOK panels.
+  const next=new Reader(guarded),over=new Tokens(next).read().find(t=>t.name==='label'&&t.value==='game_over');
+  if(!over||over.location.line!==1132)throw Error('ASM limited-demo game-over entry changed');
+  const start=next.lines[1131],stop=start+guarded[start]*2,body2=[...guarded.subarray(start+2,stop-2),...tok('End')],line2=Buffer.from([(body2.length+4)/2,guarded[start+1],...body2,0,0]);
+  const header2=Buffer.from(guarded.subarray(0,20));header2.writeUInt32BE(next.code_bytes+line2.length-(stop-start),16);
+  return Buffer.concat([header2,guarded.subarray(20,start),line2,guarded.subarray(stop)]);
 };
