@@ -157,7 +157,7 @@
       "byteLength": 3316,
       "sha256": "052ca18ecebe7cd4059f319ebdfccea4373a19fe80beba2559d128dc50f34d1b",
       "compiled": false,
-      "error": "Unsupported token 0x276c at line 38, byte 1976"
+      "error": "Unsupported token 0x2796 at line 46, byte 2664"
     },
     {
       "source": "Tutorials/Interface/Editing_Zones.AMOS",
@@ -165,7 +165,7 @@
       "byteLength": 2332,
       "sha256": "c01ea4267a99b9891f3cf64ec63dd4a62e057d171ad7c1d7a8f16a562519cdf9",
       "compiled": false,
-      "error": "Unsupported token 0x276c at line 43, byte 2080"
+      "error": "Unsupported token 0x27e6 at line 44, byte 2116"
     },
     {
       "source": "Tutorials/Interface/Full_Example.AMOS",
@@ -173,7 +173,7 @@
       "byteLength": 8860,
       "sha256": "dae997e6acd22a6ffd28dbca3472a0a2c02a0c076d1a822817da86375656ce13",
       "compiled": false,
-      "error": "Unsupported token 0x276c at line 119, byte 7970"
+      "error": "Unsupported token 0x2796 at line 121, byte 8004"
     },
     {
       "source": "Tutorials/Interface/Graphics.AMOS",
@@ -197,7 +197,7 @@
       "byteLength": 10120,
       "sha256": "8f6b5948732389e02c7c59daa6063f8ae14ecc00d7426aad597cdaa6e793379e",
       "compiled": false,
-      "error": "Unsupported token 0x276c at line 52, byte 2646"
+      "error": "Unsupported token 0x2796 at line 54, byte 2680"
     },
     {
       "source": "Tutorials/Interface/Working_Buttons.AMOS",

@@ -1,6 +1,6 @@
 # AMOScript development plan
 
-Assessment updated: 2026-11-01.
+Assessment updated: 2026-11-02.
 
 ## Tutorial Interface
 
@@ -10,9 +10,11 @@ script-construction prefixes prepare channels without drawing; a fourth compiled
 transfer fixture shares the Canvas/WebGL inspector demo. Complete Tutorial
 compilation remains 30/43. Checked [Array references](docs/array-references.md)
 now link all 101 original Sliders entries into its channel; subscript evaluation
-and scope retirement preserve the native header semantics. Next: Interface
-execution and cooperative Dialog Run/Box, including resource
-artwork/messages and interactive zones. See [channel contract](docs/interface-channels.md).
+and scope retirement preserve the native header semantics. Bounded [Dialog Run](docs/interface-run.md) now executes variables, expressions
+and solid indexed graphics. Original rectangle strings and an AR/AS list have
+three Canvas/GPU checks. Next: resource UN/LI/BO/PO drawing and background saves,
+then controls and cooperative RU/Dialog Box waits; complete sources also need
+Dialog/Rdialog$ status/value queries. See [channel contract](docs/interface-channels.md).
 
 ## ASM — Das Spiel
 

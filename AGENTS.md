@@ -410,7 +410,12 @@
 
 - Interface string channels use `lib/amos/interface.js` for bounded opening
   verification and owned numeric/string slots. Dialog Open/Close, Vdialog/$ and
-  Edialog do not execute Interface drawing or install input wakes. Preserve
+  Edialog do not execute Interface drawing or install input wakes. Bounded Dialog
+  Run now uses interfaceExecution.js for finite postfix/variable/solid-graphics
+  routines with explicit EX, source offsets and checked budgets. Direct indexed
+  drawing bypasses Autoback/Bob replay and preserves the AMOS graphics cursor.
+  Three Canvas/GPU frames cover original rectangle strings and executed AR/AS
+  text; no resource controls or asynchronous waits are claimed. See docs/interface-run.md. Preserve
   source offsets, native 17-value/1 KiB defaults, atomic failed opens and frozen
   inspection snapshots. Stop/Resume retains channels; Default closes them.
   Three original channel prefixes, one compiled transfer and original Sliders Array
@@ -420,7 +425,8 @@
   live element edits. Native AS returns the upper bound; AR excludes that bound.
   The full-array inspector is separate. References expose no raw bytes.
   See docs/array-references.md.
-  Numeric resource programs, Dialog Run/Box and interactive zones remain gated.
+  Numeric resource programs, resource drawing, Dialog Box, event waits and
+  interactive zones remain gated.
   See docs/interface-channels.md.
 
 ## Commands

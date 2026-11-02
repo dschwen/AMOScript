@@ -4,8 +4,8 @@
 array. `Vdialog(channel,index)=Array(A$(0))` can pass that reference into a
 prepared Interface channel. The original Sliders program now executes unchanged
 through line 51, including all 101 list entries and its Array/Vdialog assignment.
-Its next compile blocker is `Dialog Run`, at line 52. Full_Example also advances
-to `Dialog Run`, at line 119; its earlier music/sample dependencies remain outside
+Bounded [Dialog Run](interface-run.md) now executes AR/AS. Sliders and Full_Example
+next reach the Dialog status query ($2796); its earlier music/sample dependencies remain outside
 the executed fixture.
 
 ## Evaluation and lifetime
@@ -62,7 +62,7 @@ allows only indices 0–99. The checked Interface backing preserves this source
 behavior. `arrayReferenceValue` is a separate full-array inspector that can read
 entry 100; it is not an expanded AR implementation.
 
-These Interface backing helpers prepare checked AR/AS reads. Size of the null reference is zero, matching native AS;
+These helpers back the now-implemented bounded AR/AS execution. Size of the null reference is zero, matching native AS;
 reading through null, invalid indices, incompatible types or retired owners
 fails before exposing a value.
 
@@ -71,7 +71,8 @@ now includes the original Sliders Array assignment and all 101 independently
 expected strings, live edits and dialogue-close ownership. Five Canvas/WebGL
 inspector previews and 640,000 independent blank pixels cover the combined
 channel fixtures. All visible inspector/list text is added by the harness;
-Interface drawing, selectors and `Dialog Run/Box` are still unsupported.
+Resource-backed Interface drawing, selectors and Dialog Box are still unsupported;
+the separate [execution demo](interface-run.md) now draws through bounded Dialog Run.
 
 Source evidence: `InDim`, `FnArray` and `Saut_D0Param` in
 [official +ILib.s](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/533b4b1f5acd604814513f78e02c7b4796cb0531/%2BILib.s),

@@ -54,5 +54,5 @@ test('Resource Bank: eight original Interface startup prefixes load the supplied
 
 test('Resource Bank: all nine complete Interface tutorials now advance to the genuine dialogue blockers',()=>{
   const names=fs.readdirSync(root).filter(name=>/\.AMOS$/i.test(name));assert.strictEqual(names.length,9);
-  for(const name of names){const code=['Full_Example.AMOS','Sliders.AMOS','Communication.AMOS','Editing_Zones.AMOS'].includes(name)?'276c':'26e8';assert.throws(()=>new Transpiler(fs.readFileSync(path.join(root,name))),new RegExp('Unsupported token 0x'+code+' at line'));}
+  for(const name of names){const code=name==='Editing_Zones.AMOS'?'27e6':['Full_Example.AMOS','Sliders.AMOS','Communication.AMOS'].includes(name)?'2796':'26e8';assert.throws(()=>new Transpiler(fs.readFileSync(path.join(root,name))),new RegExp('Unsupported token 0x'+code+' at line'));}
 });

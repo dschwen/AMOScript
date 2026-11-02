@@ -19,6 +19,8 @@ async function run() {
     const errors = [];
     page.on('pageerror', error => { errors.push(error.message); console.error('Browser page error:', error.message); });
     await page.goto(pathToFileURL(path.join(__dirname, '../demos/programs.html')).href);
+    await runScenario('interface-run',page);
+    console.log('Interface execution passed: original rectangle strings, native postfix/array expressions and three Canvas/GPU frames.');
     await runScenario('interface-channels',page);
     console.log('Interface channel preparation passed: three original scripts, compiled variable transfer, 101 live array entries and five Canvas/GPU previews.');
     const edit=await runScenario('roller2-edit',page);assert.strictEqual(edit.gpuFrames,4);assert.strictEqual(edit.editRequests,2);await page.evaluate(()=>globalThis.AMOS_ROLLER2_EDIT_CLEANUP());

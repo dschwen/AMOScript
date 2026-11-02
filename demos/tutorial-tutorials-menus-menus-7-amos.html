@@ -1640,10 +1640,95 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function info(handle){const entry=resolve(handle);return Object.freeze({handle,type:entry.type,dimensions:Object.freeze(entry.dimensions.slice())});}
   return {reference,size,read,value,info};
 };
-  const interfaceFactory = function createInterface() {
+  const interfaceExecution = function executeInterface(channel,label,x,y,host) {
+  let position=0,retained=0;
+  const fail=message=>{const error=Error('Interface '+message+' at character '+position);error.interfacePosition=position;throw error;};
+  const number=value=>{if(!Number.isInteger(value)||value<-2147483648||value>2147483647)fail('requires an integer');return value;};
+  const word=value=>(number(value)<<16)>>16;
+  const string=value=>{if(typeof value!=='string'||value.length>255||/[^\x00-\xff]/.test(value))fail('requires a Latin-1 string of at most 255 bytes');return value;};
+  const index=value=>{value=number(value);if(value<0||value>channel.nvar||value>8191)fail('variable index out of bounds');return value;};
+  const live=()=>{if(!host.alive())fail('channel or VM retired during Dialog Run');};
+  const geometry=channel.geometry||(channel.geometry={BX:0,BY:0,SX:0,SY:0,XA:0,YA:0,XB:0,YB:0});
+  if(x!==null&&x!==-2147483648)geometry.BX=number(x);
+  if(y!==null&&y!==-2147483648)geometry.BY=number(y);
+  geometry.XA=geometry.YA=geometry.XB=geometry.YB=0;
+  let ip=0;
+  if(label>=0){if(!Object.hasOwn(channel.program.labels,label))fail('label is not defined');ip=channel.program.labels[label]+1;}
+  const available=channel.bufferBytes-4-6*(Object.keys(channel.program.labels).length+Object.keys(channel.program.definitions).length);
+  let temporary=0;
+  function materialize(value){value=string(value);temporary+=(6+value.length+1)&~1;if(retained+temporary+16>available)fail('string buffer exhausted');return value;}
+  function evaluate(tokens){
+    const stack=[];
+    const pop=()=>{if(!stack.length)fail('expression stack underflow');return stack.pop();};
+    const numeric=()=>number(pop());
+    for(const token of tokens){position=token.offset;live();
+      if(token.kind==='number')stack.push(token.value);
+      else if(token.kind==='string')stack.push(materialize(token.value));
+      else {
+        const op=token.value;
+        if(Object.hasOwn(geometry,op))stack.push(geometry[op]);
+        else if(op==='VA')stack.push(channel.variables[index(numeric())]);
+        else if(op==='SW'||op==='SH')stack.push(op==='SW'?channel.screen.width:channel.screen.height);
+        else if(op==='TH')stack.push(host.textHeight());
+        else if(op==='AR'){const at=numeric(),ref=numeric();stack.push(host.arrayRead(ref,at));}
+        else if(op==='AS')stack.push(host.arraySize(numeric()));
+        else if(op==='NE')stack.push((-numeric())|0);
+        else if(op==='#')stack.push(materialize(String(numeric())));
+        else if(op==='!'){const b=string(pop()),a=string(pop());stack.push(materialize(a+b));}
+        else if(op==='TL')stack.push(string(pop()).length);
+        else if(op==='TW'||op==='CX'){const width=host.textWidth(string(pop()));stack.push(op==='TW'?width:Math.max(0,(geometry.SX-width)|0)>>>1);}
+        else if(['+','-','*','/','=','\\','<','>','&','|','MI','MA'].includes(op)){
+          const b=numeric(),a=numeric();let value;
+          if(op==='+')value=(a+b)|0;else if(op==='-')value=(a-b)|0;
+          else if(op==='*')value=word(a)*word(b);
+          else if(op==='/'){if(!word(b))fail('division by zero');value=Math.trunc(word(a)/word(b));if(value<-32768||value>32767)fail('division overflow is not implemented');}
+          else if(op==='=')value=a===b?-1:0;else if(op==='\\')value=a!==b?-1:0;
+          else if(op==='<')value=a<b?-1:0;else if(op==='>')value=a>b?-1:0;
+          else if(op==='&')value=a&b;else if(op==='|')value=a|b;
+          else value=op==='MI'?Math.min(a,b):Math.max(a,b);
+          stack.push(value);
+        }else fail('unsupported expression function '+op);
+      }
+      if(stack.length>64||retained+temporary+stack.length*4+4>available)fail('expression buffer exhausted');
+      if(typeof stack[stack.length-1]==='string')string(stack[stack.length-1]);
+    }
+    if(stack.length!==1)fail('expression must produce exactly one value');return stack[0];
+  }
+  const bounds=values=>{values.forEach(value=>{number(value);if(value<-32768||value>32767)fail('drawing requires signed-word coordinates');});return values;};
+  function coords(args,base=true){bounds(args);return bounds(args.map((value,i)=>number(value)+(base?(i%2?geometry.BY:geometry.BX):0)));}
+  function remember(args){[geometry.XA,geometry.YA,geometry.XB,geometry.YB]=args.map(word);}
+  try{
+  live();host.begin();live();
+  for(let budget=0;budget<4096;budget++){
+    live();const node=channel.program.nodes[ip++];
+    if(!node)fail('program must finish with EX');position=node.offset;
+    if(node.kind!=='instruction')fail('control blocks and user instructions are not implemented');
+    if(node.name==='EX')return 0;
+    const supported=['LA','SV','SI','BA','XY','IN','SW','SL','GL','GB','GS','GP','PR'];
+    if(!supported.includes(node.name))fail('unsupported instruction '+node.name);
+    temporary=0;const args=node.args.map(evaluate);position=node.offset;live();
+    switch(node.name){
+      case 'LA':break;
+      case 'SV': {const at=index(args[0]),value=args[1];if(typeof value==='string')string(value);else number(value);retained+=temporary;channel.variables[at]=value;break;}
+      case 'SI':geometry.SX=((number(args[0])+15)|0)&~15;geometry.SY=number(args[1]);break;
+      case 'BA':geometry.BX=number(args[0])&~15;geometry.BY=number(args[1]);break;
+      case 'XY':remember(args);break;
+      case 'IN':host.ink(args.map(number));break;
+      case 'SW':if(number(args[0])>=0){if(args[0]!==0&&args[0]!==1)fail('writing mode is not implemented');host.writing(args[0]);}break;
+      case 'SL':if(number(args[0])>=0){if((args[0]&65535)!==65535)fail('patterned lines are not implemented');host.line(args[0]);}break;
+      case 'GL':case 'GB':case 'GS': {const points=coords(args);if(node.name==='GB'&&(points[2]<=points[0]||points[3]<=points[1]))fail('GB requires increasing endpoints');host.draw(node.name,points);remember(args);break;}
+      case 'GP': {const points=coords(args.slice(0,2),false);host.plot(points,number(args[2]));geometry.XA=geometry.YA=word(args[0]);geometry.XB=geometry.YB=word(number(args[1])+1);break;}
+      case 'PR': {const value=string(args[2]),ink=number(args[3]),points=coords(args.slice(0,2));bounds([points[0],points[1]+7]);const width=host.textWidth(value);host.print(points,value,ink);geometry.XA=word(args[0]);geometry.YA=word(args[1]);geometry.XB=word(number(args[0])+width);geometry.YB=word(number(args[1])+(value.length?8:0));break;}
+    }
+    live();
+  }
+  fail('execution exceeds the 4096-instruction noninteractive budget');
+  }catch(error){if(error.interfacePosition==null){error.interfacePosition=position;error.message+=' at Interface character '+position;}throw error;}
+};
+  const interfaceFactory = function createInterface(options={}) {
   const arities={EX:0,UN:3,LI:4,BO:5,SI:2,BA:2,PU:1,SV:2,IL:0,PR:4,PO:5,IN:3,SF:2,SW:1,SL:1,SP:2,BU:8,JP:1,RU:2,BR:1,ED:8,JS:1,RT:0,BC:2,KY:2,SA:1,DI:8,BL:1,LA:1,BQ:0,HS:9,VS:9,AL:10,ZC:2,UI:0,GB:4,GS:4,GL:4,IF:1,SZ:1,XY:4,NW:0,VT:4,VL:4,HT:10,CA:1,SM:0,GE:4,GP:3,SS:8};
   const functions=new Set('BX BY SX SY NE ME TW TH VA CX SW SH MI MA BP MZ XA YA XB YB AR ZP P1 P2 P3 P4 P5 P6 P7 P8 P9 ZV ZN TL AS'.split(' '));
-  const channels=new Map();let errorPosition=0;
+  const channels=new Map();let errorPosition=0,running=false;
   function parse(source,bufferBytes=1024) {
     if(typeof source!=='string'||!source.length||source.length>65535)throw Error('Interface requires a nonempty string of at most 65535 bytes');
     for(let i=0;i<source.length;i++)if(source.charCodeAt(i)>255)throw Error('Interface requires a Latin-1 string');
@@ -1659,7 +1744,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         if(c==='"'||c==="'"){pos++;const begin=pos;while(pos<source.length&&source[pos]!==c){if(source.charCodeAt(pos)<32)fail('unterminated string');pos++;}if(pos===source.length)fail('unterminated string');tokens.push(Object.freeze({kind:'string',value:source.slice(begin,pos++),offset:at}));}
         else if(/[0-9$%]/.test(c)){
           pos++;const radix=c==='$'?16:c==='%'?2:10;let digits=/[0-9]/.test(c)?c:'';
-          for(;;){skip();const digit=source[pos];if(digit===undefined||!(radix===16?/[0-9A-F]/:radix===2?/[01]/:/[0-9]/).test(digit))break;digits+=digit;pos++;}
+          for(;;){const digit=source[pos];if(digit===undefined||!(radix===16?/[0-9A-F]/:radix===2?/[01]/:/[0-9]/).test(digit))break;digits+=digit;pos++;}
           if(!digits.length)fail('expected digits');let value=0;for(const digit of digits)value=(value*radix+parseInt(digit,radix))|0;tokens.push(Object.freeze({kind:'number',value,offset:at}));
         }else if('+-*/#!=\\<>&|'.includes(c)){pos++;tokens.push(Object.freeze({kind:'function',value:c,offset:at}));}
         else if(/[A-Z]/.test(c)){const name=next()+next();if(!functions.has(name))fail('unknown expression token '+name);tokens.push(Object.freeze({kind:'function',value:name,offset:at}));}
@@ -1717,8 +1802,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function get(type,id,index){const value=variable(id,index)[index];if((typeof value==='string')!==(type==='string'))throw Error('Dialog variables do not reinterpret strings as memory addresses');return value;}
   function set(id,index,value){const values=variable(id,index);if(typeof value!=='string'&&!Number.isInteger(value))throw Error('Dialog variable requires an integer or string');if(typeof value==='string'&&(value.length>65535||Array.from(value).some(c=>c.charCodeAt(0)>255)))throw Error('Dialog variable requires a bounded Latin-1 string');values[index]=value;}
+  function run(id,label=-1,x=null,y=null){
+    if(!Number.isInteger(id)||id<=0||!Number.isInteger(label)||label>=65536)throw Error('Invalid Dialog Run channel or label');
+    const channel=channels.get(id);if(!channel)throw Error('Dialog channel '+id+' is not open');
+    if(running)throw Error('Reentrant Dialog Run is not supported');
+    if(typeof options.run!=='function')throw Error('Dialog Run requires the Interface execution adapter');
+    errorPosition=0;running=true;
+    try{const result=options.run(channel,label,x,y,()=>channels.get(id)===channel);if(!Number.isInteger(result))throw Error('Dialog Run requires a synchronous integer result');return result;}catch(error){errorPosition=error.interfacePosition||0;throw error;}finally{running=false;}
+  }
   function inspect(){return Object.freeze(Array.from(channels,([id,c])=>Object.freeze({id,nvar:c.nvar,variables:c.nvar+1,bufferBytes:c.bufferBytes,screen:c.screen.id,resourceBank:c.resourceBank,source:c.program.source,instructions:c.program.nodes.length,labels:Object.freeze({...c.program.labels})})));}
-  return {parse,open,close,get,set,inspect,errorPosition:()=>errorPosition};
+  return {parse,open,close,get,set,run,inspect,errorPosition:()=>errorPosition};
 };
   const resourceScreenReader = function readResourceScreen(input=null) {
   /* Default resource metadata notice:
@@ -3234,6 +3327,15 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     changed();
   }
 
+  function interfaceMeasure(value){if(graphicsFonts.has(screen())||screen().textStyle)throw Error('Interface text requires the portable default font without styles');return value.length*8;}
+  function interfaceDraw(kind,args){
+    const target=screen();
+    if(target.linePattern!==65535||target.fillPattern||target.paintBorder||target.graphicsClip)throw Error('Interface drawing requires solid, unclipped default graphics');
+    if(kind==='PR')interfaceMeasure(args[2]);
+    const painter={GL:draw,GB:bar,GS:box,GP:plot,PR:text}[kind];if(!painter)throw Error('Unsupported Interface drawing primitive');
+    const cursor=[target.gx,target.gy],old=clippingGraphics;clippingGraphics=true;
+    try{return painter(...args);}finally{[target.gx,target.gy]=cursor;clippingGraphics=old;}
+  }
   let clippingGraphics=true;
   function drawing(painter, args) {
     const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear,clearWindow].includes(painter);
@@ -4048,6 +4150,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   open(0, 320, 200, 16, 0);
   return {
+    interfaceDraw,interfaceMeasure,
     clip, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
@@ -4268,7 +4371,26 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   let resourceBankNumber=0,interfaceController,arrayReferences;
   function references(){if(!arrayReferences){const factory=typeof arrayReferencesFactory==='function'?arrayReferencesFactory:globalThis.AMOS_ARRAY_REFERENCES;if(typeof factory!=='function')throw Error('Array requires lib/amos/arrayReferences.js');arrayReferences=factory();}return arrayReferences;}
 
-  function interfaces(){if(!interfaceController){const factory=typeof interfaceFactory==='function'?interfaceFactory:globalThis.AMOS_INTERFACE;if(typeof factory!=='function')throw Error('Dialog Open requires lib/amos/interface.js');interfaceController=factory();}return interfaceController;}
+  function interfaces(){if(!interfaceController){const factory=typeof interfaceFactory==='function'?interfaceFactory:globalThis.AMOS_INTERFACE;if(typeof factory!=='function')throw Error('Dialog Open requires lib/amos/interface.js');interfaceController=factory({run:runInterface});}return interfaceController;}
+  function runInterface(channel,label,x,y,alive){
+    const execute=typeof interfaceExecution==='function'?interfaceExecution:globalThis.AMOS_INTERFACE_EXECUTION;
+    if(typeof execute!=='function')throw Error('Dialog Run requires lib/amos/interfaceExecution.js');
+    const target=channel.screen,previous=display.screen();let begun=false;
+    const live=()=>alive()&&!state.halted&&!state.stopped&&display.screens.get(target.id)===target;
+    if(!live())throw Error('Dialog Run screen or VM is retired');
+    try{
+      if(display.current!==target.id)display.select(target.id);
+      return execute(channel,label,x,y,{alive:live,begin:()=>{begun=true;state.input.keys.length=0;state.input.scanCode=0;display.grWriting(0);},
+        arrayRead:(ref,index)=>references().read(ref,index),arraySize:ref=>references().size(ref),
+        textWidth:value=>display.interfaceMeasure(value),textHeight:()=>{display.interfaceMeasure('');return 8;},
+        ink:values=>display.ink(...values.map(value=>value<0?null:value)),writing:mode=>display.grWriting(mode),line:value=>display.setLine(value),
+        draw:(kind,args)=>display.interfaceDraw(kind,args),
+        plot:(points,ink)=>{if(ink>=0)display.ink(ink);display.interfaceDraw('GP',points);},
+        print:(points,value,ink)=>{if(ink>=0)display.ink(ink);display.interfaceDraw('PR',[points[0],points[1]+7,value]);}
+      });
+    }finally{if(!state.stopped&&!state.halted){if(begun){state.input.keys.length=0;state.input.scanCode=0;}if(display.current!==previous.id&&display.screens.get(previous.id)===previous)display.select(previous.id);}}
+  }
+  function dialogRun(id,label=-1,x=null,y=null){return interfaces().run(integer(id),label===null?-1:integer(label),x===null?null:integer(x),y===null?null:integer(y));}
   function dialogOpen(id,source,nvar=16,bufferBytes=1024){
     [id,nvar,bufferBytes]=[id,nvar,bufferBytes].map(integer);
     if(resourceBankNumber){const bank=banks.get(resourceBankNumber);if(!bank||bank.type!=='data'||typeof bank.name!=='string'||!bank.name.startsWith('Reso'))throw Error('Dialog Open requires a reserved Resource bank');}
@@ -6677,7 +6799,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     arrayReference:(array,type,indices,alive)=>references().reference(array,type,indices,alive),
     arrayReferenceValue:(handle,index)=>references().value(integer(handle),integer(index)),
     arrayReferenceInfo:handle=>references().info(integer(handle)),interfaceArraySize:handle=>references().size(integer(handle)),interfaceArrayRead:(handle,index)=>references().read(integer(handle),integer(index)),
-    dialogOpen,dialogClose,dialogVariable,setDialogVariable,dialogChannels:()=>interfaces().inspect(),dialogErrorPosition:()=>interfaces().errorPosition(),
+    dialogRun,dialogOpen,dialogClose,dialogVariable,setDialogVariable,dialogChannels:()=>interfaces().inspect(),dialogErrorPosition:()=>interfaces().errorPosition(),
     setResourceBank,resourceBank:()=>resourceBankNumber,resourceScreenOpen,
     menuCommand,menuToBank,bankToMenu,menuBase:(x,y)=>menuCommand('Menu Base',[],[x,y]),menuChoice:index=>getMenus().choice(index==null?null:integer(index)),
     setMenuHandlers:targets=>getMenus().handlers(targets),menuActive:()=>!!menus&&menus.enabled(),menuService:field=>menus?menus.service(field):null,

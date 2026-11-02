@@ -49,8 +49,7 @@ labelled indexed swatches are an added palette preview. They are not dialogue
 execution or a native Amiga capture.
 
 [Dialog Open/Close](interface-channels.md) now prepare and release channels.
-Complete Interface tutorials next reach `Dialog Box` ($26e8), `Dialog Run`
-($276c). [Array references](array-references.md) are implemented.
+Complete Interface tutorials next reach `Dialog Box` ($26e8), `Dialog` ($2796), or `Rdialog$` ($27e6). [Array references](array-references.md) are implemented.
 Resource Unpack, resource messages, dialogue language/interaction and additional
 resource-consumer behavior remain separate work. Overall Tutorial compilation
 coverage remains 30/43 until these later commands are implemented.

@@ -3,7 +3,8 @@
 `Dialog Open` ($2720/$2736/$2742), `Dialog Close` ($2750/$2764), `Vdialog`
 ($27a4), `Vdialog$` ($27b6), and `Edialog` ($2804) now compile into the standalone runtime. Opening prepares a string
 program on the selected screen; it does not draw, execute `SetVar`, or activate
-buttons. Execution via `Dialog Run` and modal `Dialog Box` is the next stage.
+buttons. [Bounded Dialog Run execution](interface-run.md) is now implemented separately;
+modal `Dialog Box` and interactive controls remain open.
 
 The opening signatures are:
 
@@ -55,11 +56,12 @@ and program; close releases them with the script.
 
 [Array references](array-references.md) now pass whole-array identities through
 numeric Vdialog slots, with checked ownership and live value reads. Interface
-AR/AS execution and selectors remain gated.
+AR/AS execute in the bounded [Run profile](interface-run.md); selectors remain gated.
 
 Only string programs are accepted for now. Numeric resource-bank program
-selectors, resource artwork/messages, dialogue execution, Interface `VA` evaluation and
-interactive zones remain unsupported. A selected nonzero Resource bank must
+selectors, resource artwork/messages, resource-backed dialogue execution and
+interactive zones remain unsupported. Bounded variable/graphics execution and
+VA/AR/AS are covered by the [Run contract](interface-run.md). A selected nonzero Resource bank must
 exist when opening; opening records the selection and actual screen identity.
 It does not pretend to unpack graphics or run resource programs.
 
@@ -82,8 +84,8 @@ assignment with all 101 expected strings. Five Canvas/WebGL frame comparisons
 cover the combined fixtures. Its visible inspector text is added
 by the harness, not Interface execution or an Amiga capture.
 
-Complete Communication/Editing_Zones now stop at `Dialog Run` ($276c).
-Sliders/Full_Example now also stop at `Dialog Run` ($276c); Full_Example's earlier external
+Complete Communication/Sliders/Full_Example now stop at `Dialog` ($2796),
+and Editing_Zones at `Rdialog$` ($27e6); Full_Example's earlier external
 music/sample dependencies are not claimed as executed. The other five Interface
 programs still stop at `Dialog Box` ($26e8). Overall Tutorial compilation remains
 30/43; preparing a channel is not a completed or playable dialogue tutorial.

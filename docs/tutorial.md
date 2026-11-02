@@ -59,7 +59,7 @@ opens actual resource-defined screens, with eight original startup prefixes
 and a shared Canvas/WebGL palette preview. The nine complete Interface programs
 now prepare channels with [Dialog Open/Close](interface-channels.md). Three
 original prefixes reach their first open; complete programs next stop at
-Dialog Box or Dialog Run ($26e8/$276c). [Array references](array-references.md)
+Dialog Box, Dialog or Rdialog$ ($26e8/$2796/$27e6). [Array references](array-references.md)
 now link the original Sliders list into its channel.
 
 The [menu implementation notes](menus.md) describe compiled Menu$ trees,
