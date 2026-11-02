@@ -1,29 +1,30 @@
-# ASM — Das Spiel showcase milestone
+# ASM — Das Spiel limited demo
 
-## Current playable scope
+## Limited demo: rooms 1–5
 
-[Play directly with WebGL](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html)
-· [Intro-linked adventure](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html)
-· [All 23 room previews and checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-rooms.html)
+ASM — Das Spiel remains commercially distributed. This repository publishes only
+an explicitly labelled limited demo, with rooms 1–5. It is listed in the collapsed
+Limited demos section near the bottom of the gallery and is not featured in the
+README. Later room assets, minigame assets and their preview bitmaps have been
+removed from the current checkout. Git history has not been rewritten.
 
-All 23 numbered rooms now have bundled pictures, sprite banks, zones and text.
-The original-input replay visits **18 distinct rooms** (1–17 and 19), solves the
-handle/key and darkroom-door puzzles, and returns to room 4. Its 49 Canvas/WebGL
-checkpoints include the recovered supermarket and bookshop. Room 18's hospital
-entrance retains its original story gate; rooms 18, 20–23 are verified through
-explicitly prepared entry fixtures rather than a completed quest.
+[Play the limited demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html)
+· [Direct WebGL entry](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html)
+· [Five-room preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-rooms.html)
 
-All 23 entry routines run original setup and DATA with a fixture file selecting
-the destination after startup; opening briefings are omitted in this fixture.
-The fixture does not edit VM variables, IP or banks. It acknowledges the original
-corridor briefing, then waits at a declared inspection guard. Full room bitmaps
-and initial Bobs match **942,080 independently decoded Python pixels**, with 23
-additional Canvas/WebGL comparisons. The gallery selector previews these prepared
-entries and links to the ordinary game; it is not an in-game teleport.
+The distributed source variant inserts an explicit End guard on INITRAUM's
+existing physical line 874, before changing the current room or reading assets.
+Entering a room outside 1–5 ends the demo cleanly; the page explains the boundary
+and offers Restart. This is a build-time demo restriction, not a compiler change.
+Pinned original AMOS source files remain unchanged.
 
-The whole quest, driving minigame, and all late puzzle branches are not yet verified.
-The earlier sections below describe the incremental milestones; this scope
-supersedes their former first-room-only asset limits.
+The input-only replay visits rooms 1–5 through the original door/key puzzles,
+with 34 Canvas/WebGL checkpoints. Five prepared entries compare 204,800
+independent bitmap/Bob pixels and five additional GPU frames. Only first-five
+room assets and required shared assets are included in every generated game,
+debug, replay and room-gallery page. The room gallery is a prepared preview,
+not an in-game teleport. Earlier development notes below are historical and do
+not expand the current distribution beyond this limited demo.
 
 [Play the original intro](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro.html)
 · [Debug preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-debug.html)

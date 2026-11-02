@@ -18,18 +18,13 @@ Dialog/Rdialog$ status/value queries. See [channel contract](docs/interface-chan
 
 ## ASM — Das Spiel
 
-All 23 room asset sets are bundled. The main input-only replay visits rooms
-1–17 and 19 through original puzzles (49 Canvas/WebGL checkpoints). Separate
-prepared entries check all 23 original initialization routines and 942,080
-independent bitmap/Bob pixels, with 23 more actual GPU comparisons. Recovered
-packed artwork restores the three missing room pictures, elevator, safe, ending
-and conversation panel. The direct entry uses WebGL; linked HAM intro uses Canvas.
-
-Next: satisfy the hospital story gate through original quest actions, exercise
-late conversations/labyrinth progression, recover the driving LandScape asset,
-and verify end-to-end quest completion. Prepared room previews are not a quest
-teleport or evidence of completed gameplay.
-
+ASM is distributed only as a **limited demo of rooms 1–5**. Later-room and
+minigame assets and their preview data have been removed from the current tree.
+Every public game/debug/replay/gallery page uses the five-room asset set and a
+declared source-level End guard before entering any other room. The gallery
+places ASM in a lower, collapsed Limited demos section; the README does not
+feature it. See [limited-demo scope](docs/asm.md). Further full-game progression
+is outside the public demo target.
 
 [First-room showcase and implementation details](docs/asm.md). Seven of eight
 supplied asm_neu programs compile, including the unchanged complete 1,868-line

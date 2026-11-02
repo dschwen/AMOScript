@@ -477,20 +477,20 @@
     },
     {
       "file": "asm-rooms.html",
-      "title": "ASM — all 23 room entries",
-      "description": "Original room initialization on declared fresh game state, with the opening prompts omitted and room selection supplied by a fixture file. All 23 scenes match independent Python ILBM/compactor/Bob pixels and actual WebGL. Browse the prepared room previews below; puzzle progression is tested separately in the main-game replay.",
+      "title": "ASM — limited demo: five room entries",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-rooms.html"
     },
     {
       "file": "asm-main-checks.html",
-      "title": "ASM — Das Spiel: eighteen-room puzzle replay",
-      "description": "Full-source input-only replay visits eighteen rooms, including restored supermarket and bookshop art. It solves the original handle/key and darkroom door puzzles, preserves the hospital story gate, and returns to the corridor. Forty-nine Canvas/WebGL checkpoints and five independent room bitmaps. The intro-linked page and direct WebGL entry retain font, RAM-file, keyboard and Restart checks. All 23 prepared entries are covered separately by the room gallery; full quest completion remains open.",
+      "title": "ASM — limited demo: rooms 1–5 replay",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-main-checks.html"
     },
     {
       "file": "asm-intro-checks.html",
-      "title": "ASM — Das Spiel: original intro checks",
-      "description": "Complete original ASM_Intro.AMOS: sound choices, difficulty, animated logo, MOD music, all four title pages including HAM and custom fonts, then Ram:Level and the terminal Run request. Prepared 320×256 assets and an explicitly empty score table are declared in the ASM milestone. Eight Canvas frames, seven actual GPU comparisons; the HAM page uses Canvas. The main adventure remains a separate compilation milestone.",
+      "title": "ASM — limited demo: intro checks",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-checks.html"
     },
     {
@@ -567,32 +567,32 @@
     },
     {
       "file": "asm-intro.html",
-      "title": "ASM — Das Spiel: original intro",
-      "description": "Choose music and difficulty, watch the animated logo and original title sequence with MOD sound and a HAM picture. Canvas/fullscreen development preview; the main adventure is the next milestone.",
+      "title": "ASM — limited demo: Das Spiel: original intro",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro.html"
     },
     {
       "file": "asm-intro-debug.html",
-      "title": "ASM intro — debug preview",
-      "description": "The same complete original intro with source errors and modified session-file downloads. Stops cleanly at the uncompiled ASM.Main transition.",
+      "title": "ASM — limited demo: intro — debug preview",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-intro-debug.html"
     },
     {
       "file": "asm-room1.html",
-      "title": "ASM — direct room 1 (WebGL)",
-      "description": "Start the main game without the intro. JOY edition and debug menu. All 23 room assets included; 18 rooms exercised through original puzzle input.",
+      "title": "ASM — limited demo: direct room 1 (WebGL)",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-room1.html"
     },
     {
       "file": "asm-game.html",
-      "title": "ASM — Das Spiel: adventure build",
-      "description": "The original intro now launches the complete compiled main source. All 23 room assets are bundled, with recovered art from older disks. An input-only replay visits 18 rooms and solves the original door/key puzzles. Includes the device keyboard widget; full quest completion remains open.",
+      "title": "ASM — limited demo: Das Spiel: adventure build",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game.html"
     },
     {
       "file": "asm-game-debug.html",
-      "title": "ASM main — debug build",
-      "description": "The first-room application with caught source errors and modified session-file downloads. Native intro, edition selection, font and RAM-file transfer into the main game.",
+      "title": "ASM — limited demo: main — debug build",
+      "description": "Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets are excluded; play ends cleanly before entering another room. Intro and technical checks are included for this limited build.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/asm-game-debug.html"
     }
   ]

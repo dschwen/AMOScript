@@ -1057,11 +1057,11 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   to enter room 3, opens/closes its upper drawer and returns with Zurück. Twenty-six
   Canvas/GPU checkpoints and 204800 independent room 1/3 pixels; rooms 4+ remain open.
 
-- ASM assets now cover all 23 rooms. Original-input replay visits 1–17 and 19
-  (49 Canvas/GPU checkpoints); hospital gate remains native. Separate prepared
-  entry fixture runs original setup/DATA/INITRAUM for all 23 without VM edits,
-  checks 942080 independent pixels and 23 GPU frames. Room gallery is not teleport.
-  asset-profile.json declares older-disk BMCode recovery, palette17/31 swaps,
-  exact paired palette checks and four matching surviving room references.
-  Recovered conversation panel replaces Befehle4 placeholder. All dialogues/maps
-  and special room panels are embedded; driving LandScape/full quest remain open.
+- ASM distribution is limited to rooms 1–5. Later room/minigame assets and
+  preview bitmaps are removed from the current tree. Every generated ASM page
+  uses the limited asset profile and the declared build-time source guard on
+  INITRAUM line 874, ending before excluded-room loads. Keep the pinned original
+  AMOS source unchanged. The public replay visits five rooms (34 Canvas/GPU
+  frames); the room gallery has five prepared entries and 204800 independent
+  pixels. ASM is omitted from README and kept in the lower, collapsed Limited
+  demos gallery section. See docs/asm.md.

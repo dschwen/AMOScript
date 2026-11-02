@@ -4,76 +4,14 @@
     2,
     3,
     4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-    22,
-    23
+    5
   ],
   "paddingRepairs": [
     "Befehle.Pic",
     "Room2.Pic",
-    "Room5.Pic",
-    "Room21.Pic",
-    "GOG.Pic"
+    "Room5.Pic"
   ],
   "recovered": {
-    "Room16.Pic": {
-      "file": "recovered/Room16.Pic.abk",
-      "origin": "joy/joy3.adf:Grafiken/Raum16.Pic",
-      "swap17And31": true,
-      "palette": "Room16.Sprites.Abk",
-      "sourcePalette": "recovered/Room16.palette.abk"
-    },
-    "Room19.Pic": {
-      "file": "recovered/Room19.Pic.abk",
-      "origin": "joy/joy2.adf:Grafiken/Raum19.Pic",
-      "swap17And31": false,
-      "palette": "Room19.Sprites.Abk",
-      "sourcePalette": "recovered/Room19.palette.abk"
-    },
-    "Room20.Pic": {
-      "file": "recovered/Room20.Pic.abk",
-      "origin": "joy/joy3.adf:Grafiken/Raum20.Pic",
-      "swap17And31": true,
-      "palette": "Room20.Sprites.Abk",
-      "sourcePalette": "recovered/Room20.palette.abk"
-    },
-    "FAR.Pic": {
-      "file": "recovered/FAR.Pic.abk",
-      "origin": "joy/joy3.adf:Grafiken/FAR.Pic",
-      "swap17And31": true,
-      "palette": "FAR.Sprites.Abk",
-      "sourcePalette": "recovered/FAR.palette.abk"
-    },
-    "TRE.Pic": {
-      "file": "recovered/TRE.Pic.abk",
-      "origin": "joy/joy3.adf:Grafiken/TRE.Pic",
-      "swap17And31": true,
-      "palette": "TRE.Sprites.Abk",
-      "sourcePalette": "recovered/TRE.palette.abk"
-    },
-    "END.Pic": {
-      "file": "recovered/END.Pic.abk",
-      "origin": "joy/joy2.adf:Grafiken/END.Pic",
-      "swap17And31": false,
-      "palette": "END.Sprites.Abk",
-      "sourcePalette": "recovered/END.palette.abk"
-    },
     "Befehle2.Pic": {
       "file": "recovered/Befehle2.Pic.abk",
       "origin": "joy/joy2.adf:Grafiken/Befehle2.Pic",
@@ -92,18 +30,6 @@
       "room": 4,
       "file": "recovered/reference/Room4.Pic.abk",
       "origin": "joy/joy2.adf:Grafiken/Raum4.Pic",
-      "swap17And31": true
-    },
-    {
-      "room": 17,
-      "file": "recovered/reference/Room17.Pic.abk",
-      "origin": "joy/joy3.adf:Grafiken/Raum17.Pic",
-      "swap17And31": true
-    },
-    {
-      "room": 18,
-      "file": "recovered/reference/Room18.Pic.abk",
-      "origin": "joy/joy3.adf:Grafiken/Raum18.Pic",
       "swap17And31": true
     }
   ]

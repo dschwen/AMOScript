@@ -175,421 +175,53 @@
       "byteLength": 142,
       "sha256": "68dbb33275bb304d5e7fa9d3bbf81eb8538a2ca5b023a0673d6944015e9ebf82"
     },
-    "game/Room8.Txt": {
-      "byteLength": 279,
-      "sha256": "a484b94be594683e024f99e8377fb1f7a6eb48209a9e9b9e5046108101940b18"
-    },
-    "game/END.Pic": {
-      "byteLength": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    "game/FAR.Sprites.Abk": {
-      "byteLength": 4680,
-      "sha256": "6bede9ecc926b096785ead7ab725a8523c9db4890a00798db5fe14d09a885c41"
-    },
-    "game/Room23.Txt": {
-      "byteLength": 139,
-      "sha256": "746c0f94f7688e9684a0ffe9b4772adfbb4dc34b9a7e8091603edc1752d22eb0"
-    },
-    "game/Room14.Pic": {
-      "byteLength": 11906,
-      "sha256": "adcf34a5f9c6c37ba5cd64ec5e39136672e797c5626af04ae35b81ef0dbc1ea6"
-    },
-    "game/Room9.Txt": {
-      "byteLength": 153,
-      "sha256": "db847d6360033bfd862d01141228a6568699f32b648837042ca1cda727817442"
-    },
-    "game/Room7.Txt": {
-      "byteLength": 253,
-      "sha256": "7a05a2c6d1036126601de197c08f6a619134e0e4ffc686a8c976b0925b18812c"
-    },
     "game/Room5.Sprites.Abk": {
       "byteLength": 1220,
       "sha256": "37608a411fba86a12f346d586c2cff9793612dca6c4ee06ab02198ebbccc8911"
-    },
-    "game/Room19.Zones": {
-      "byteLength": 70,
-      "sha256": "db80f71578dab7def11df2591ab9bdf537a3e3688e35b5a0e753054358e59adb"
     },
     "game/Room4.Txt": {
       "byteLength": 127,
       "sha256": "49121204dbb3756492918cfb5f3b3d34ef2f8726d155cf28402d964ddbb85d0f"
     },
-    "game/TEL.Pic": {
-      "byteLength": 11658,
-      "sha256": "7ee23c4f027551738e508b2a941e78491556ccad9492ab7649725d02862aec12"
-    },
-    "game/Room20.Txt": {
-      "byteLength": 128,
-      "sha256": "533351324715e71c5c5bd37258f36faa727c80c59cda9d12f22e746e8ddabd24"
-    },
-    "game/Room16.Zones": {
-      "byteLength": 158,
-      "sha256": "7f9665675a946ff7111719cbbb49b61a9028c5ffcfe8a587996be796c91811cd"
-    },
-    "game/Room10.Zones": {
-      "byteLength": 46,
-      "sha256": "ca54c33ad04884d34ed42a6d61f8c20078726252696131d2b4ae95420600f0f0"
-    },
-    "game/Room10.Sprites.Abk": {
-      "byteLength": 170,
-      "sha256": "c3333390bc42c0d4b1d1135bae216cccae18a2a8feef7a3756defb4443698c5f"
-    },
-    "game/Room18.Txt": {
-      "byteLength": 176,
-      "sha256": "2c4976af5a9cf48d96e50df4663820a4c10ce3523ddd8c3927b3bbb266b6ade5"
-    },
-    "game/Room17.Sprites.Abk": {
-      "byteLength": 5340,
-      "sha256": "b8146c2459db6b61cd36b44a7807ce59597fd496d3f9114a6c5e144d5e893abb"
-    },
-    "game/Room18.Pic": {
-      "byteLength": 17288,
-      "sha256": "bc31596532be88bced16389f0e52de627cdcc266901d1a89c29e4c747952b7f4"
-    },
-    "game/Room13.Pic": {
-      "byteLength": 11288,
-      "sha256": "5d132f2bafe19df7b1ed3f72b23b586cf5af4654264135dc2ac5ae9b4fb51841"
-    },
     "game/Room4.Pic": {
       "byteLength": 10424,
       "sha256": "0422e50a02e806d8528cda893f3ea03de701c5cb4a391c5472837e5c633caa12"
-    },
-    "game/Room7.Zones": {
-      "byteLength": 54,
-      "sha256": "3fc1b6f1db46c3244f96c7daa7e7f4ea69c588c88be7d952a5535adb5340d4b4"
-    },
-    "game/Room14.Txt": {
-      "byteLength": 146,
-      "sha256": "7e54b6a693a74a01d1074d5cf264218325da985e7451cffbd27ab85fec7fa221"
-    },
-    "game/Room16.Txt": {
-      "byteLength": 196,
-      "sha256": "4a1250a5d359313f1a8789a33c37e08d571aea005ba355180c637b1e5b7e646d"
-    },
-    "game/Room10.Pic": {
-      "byteLength": 12948,
-      "sha256": "8aa9c941ca2ddc37ecb20df8047f96695dfeac0133980cc2c0ce9491befb05de"
     },
     "game/Room5.Txt": {
       "byteLength": 128,
       "sha256": "0a680037e76f2ff62595e1da5bceb54df42ba19626351f90f31e3c6857cae256"
     },
-    "game/Room22.Sprites.Abk": {
-      "byteLength": 300,
-      "sha256": "495717bf4153031b38a80ec7c225f152e98c33aea636ea803c97e509a1d8c279"
-    },
-    "game/Room16.Sprites.Abk": {
-      "byteLength": 230,
-      "sha256": "1da4d93962416bad9e3321e48a90977fdd51c07c886cb861e2d96f28adcf6451"
-    },
-    "game/Room20.Pic": {
-      "byteLength": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
     "game/asset-profile.json": {
-      "byteLength": 2586,
-      "sha256": "7b43e797c04502667ac1b31c2e1a48dcf06e8530b5a57fa83a97ca59a020beb1"
-    },
-    "game/Room9.Zones": {
-      "byteLength": 46,
-      "sha256": "6e55acda93020c602ea07af6d418eb6cdada544cee57ef6163fe596d795a537d"
+      "byteLength": 688,
+      "sha256": "4ea2b8703b9c6a57e1f0f98202edf3b185033822fc07e5c1438734bf75eb0c52"
     },
     "game/Room5.Pic": {
       "byteLength": 11290,
       "sha256": "4dfa68c95a83e7cd936550d4ce5b359b8e22a02efd9cce2f610724a131e73b37"
     },
-    "game/Room9.Sprites.Abk": {
-      "byteLength": 6490,
-      "sha256": "8756988d1f9bb77519c4d24c891e610b1d5bd50ed64429d8a6c60c06a9f11986"
-    },
-    "game/Room11.Zones": {
-      "byteLength": 38,
-      "sha256": "934a0f9ecd01ae2750ed2ef4a0514f40c98b99861ff690e377a0c0a2e13fe3b0"
-    },
-    "game/GOG.Sprites.Abk": {
-      "byteLength": 170,
-      "sha256": "8e8f1a5b855776ab9dd83c8de201c9bde12cc083a39ecd79b86a1df668d2c017"
-    },
-    "game/FAR.Pic": {
-      "byteLength": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    "game/Room17.Zones": {
-      "byteLength": 86,
-      "sha256": "e90fd978cd5ff38ba7925f9c5505dd8f7f393addff67d01f8f5a80b76c100427"
-    },
-    "game/Room12.Pic": {
-      "byteLength": 12682,
-      "sha256": "9691211400a4f0e602394f33fc7f1f9e34b1500931e4710a92a597a0fe00462d"
-    },
-    "game/Room18.Sprites.Abk": {
-      "byteLength": 3270,
-      "sha256": "4793344f53c6fa43c4990a2d05b95897c361fc54b93252b4508669b52ce7a725"
-    },
-    "game/Room21.Zones": {
-      "byteLength": 62,
-      "sha256": "e1b937928fff714e6dca626ad774acbef5e9c203b72771ce5a6b55ddf0fb68e1"
-    },
-    "game/Room8.Sprites.Abk": {
-      "byteLength": 4120,
-      "sha256": "d84cc0f255431ace48c271bf7dc766abf11620e0119467bd7453cb99d138b7c5"
-    },
-    "game/Room23.Sprites.Abk": {
-      "byteLength": 200,
-      "sha256": "b9f22df1cc7fc43932271ecd5ab5b881c8ddc4fd66c7490fb677eb5ba12e60a8"
-    },
     "game/Room4.Sprites.Abk": {
       "byteLength": 7876,
       "sha256": "3bbf0261da1c38ec84bb9b11beca1b2afebfe3f88e41cfef21e0315842501d0e"
-    },
-    "game/Room12.Zones": {
-      "byteLength": 102,
-      "sha256": "3feb24af293f74b6cfe7d087cf600c8d2c6bd564cc473ba7f191e03fd838d9c6"
-    },
-    "game/GOK.Sprites.Abk": {
-      "byteLength": 170,
-      "sha256": "5b77eba84af5d11473316beb1697d6b2aa242bc59c2b1f0828f8a518b26cf265"
-    },
-    "game/Room19.Txt": {
-      "byteLength": 240,
-      "sha256": "2469fd32c291bc732795c9a8f9a6bf9311ba913bfce6742fa2b9dda06f385f28"
     },
     "game/Room5.Zones": {
       "byteLength": 150,
       "sha256": "5ce39587d7004c3ce3c2e77561e6aaae711d5d085a746fc7e308ee60f6df3653"
     },
-    "game/Room14.Sprites.Abk": {
-      "byteLength": 4328,
-      "sha256": "b2536dba94bc223d2ffcd7af6cd5124d3ca8f3e7e2ab12eb7c9d8a2dd365aa73"
-    },
     "game/Icons2.Abk": {
       "byteLength": 3670,
       "sha256": "72663f9baf05d73dd5a1efcfc10bd5e1ad9196202c2b199132ccc901f862c701"
-    },
-    "game/Room14_1.Pic": {
-      "byteLength": 13718,
-      "sha256": "d9aedcfe62e776a5e1c2bc5fbfeaddda110f4ac203f76e1811e23b18b2e0b90d"
-    },
-    "game/Room21.Pic": {
-      "byteLength": 7230,
-      "sha256": "8cbb0805a803839a36ba82552915cffc1b3846ff102f41cfd9294764c48c990d"
-    },
-    "game/Room22.Txt": {
-      "byteLength": 586,
-      "sha256": "3fdeb4be7f89630e52ca662048a56c90d7f6a7f76a925aa8f974380b5c2858d8"
-    },
-    "game/Room13.Sprites.Abk": {
-      "byteLength": 3500,
-      "sha256": "f22678aedecf87dbeb22019abba6933fdcfd5a29d7c0c63ef5113a0ba1b8422e"
-    },
-    "game/Room15.Txt": {
-      "byteLength": 196,
-      "sha256": "4d3d9638ea3e1a2323eebaf11e07dd0dcfcd762c471a0d839e82d5782bf0bae1"
-    },
-    "game/Room22.Zones": {
-      "byteLength": 70,
-      "sha256": "f1c5b417d9a7d9b9d197fbd0570bb1a05fbf9406b928530b6f78e907b53301eb"
-    },
-    "game/GOG.Pic": {
-      "byteLength": 16708,
-      "sha256": "59c30b0acabff31c22abad9823ba46a112150e708b494e3a1ae39f1ac596b386"
-    },
-    "game/Room23.Pic": {
-      "byteLength": 8048,
-      "sha256": "b5cb68796cd43b630252fd393201409fd8cb7e154fad515ef5bb1270fc010cae"
-    },
-    "game/Room20.Sprites.Abk": {
-      "byteLength": 6150,
-      "sha256": "adfad18af473959b73cc4816895dea3d38bd61d500596a72c3e3117ff14de6aa"
-    },
-    "game/Room6.Sprites.Abk": {
-      "byteLength": 23834,
-      "sha256": "c7d289ae2821ec81b3b61d5ca02f1a8825e05cab44c7638b23591dd6259613d1"
-    },
-    "game/Room21.Txt": {
-      "byteLength": 171,
-      "sha256": "9df82429892930e9c458bd4450eac229fa4c975683edcae94a8792b58d9f3667"
-    },
-    "game/TEL.Sprites.Abk": {
-      "byteLength": 6290,
-      "sha256": "181ab60752b025b49adfd0eef01cb972a33c70e65dd6591131f8eecee9652a17"
-    },
-    "game/Room11.Sprites.Abk": {
-      "byteLength": 1764,
-      "sha256": "6050856800d3c85a9c70965ab1f05c4b926c5e022e42a75543be0c23ae82af7b"
-    },
-    "game/Room8.Zones": {
-      "byteLength": 134,
-      "sha256": "9eb52a6c4de6939caf8e5bb2630108ddaa9671d6f500093ad9235ec1fa8ecf70"
-    },
-    "game/Room7.Pic": {
-      "byteLength": 10688,
-      "sha256": "d6512c28caf29f9570e9c8f8417491c0b09a917aa97b20613442fd6f2121117b"
-    },
-    "game/Room22.Pic": {
-      "byteLength": 10908,
-      "sha256": "e27fbe8d742c7bc014b5d2008df1ab800e7b1e58cc9c07422423733fdec7e128"
-    },
-    "game/Room11.Pic": {
-      "byteLength": 14006,
-      "sha256": "55153d5587a619096b73329f243ba85902a1e7abc26c8f5b9e77541271d0991e"
-    },
-    "game/Room23.Zones": {
-      "byteLength": 94,
-      "sha256": "3158777ce4ece86e78966ff32be60b8a801fd2739ada02d9bfb96d0f2098422d"
-    },
-    "game/Room7.Sprites.Abk": {
-      "byteLength": 1798,
-      "sha256": "fe27b4fc804457b2678d354865cb44ec9c18d638e05f1e3ebb066d95a23d611e"
     },
     "game/Room5_1.Pic": {
       "byteLength": 17842,
       "sha256": "7ffbc5e47faff5e3f9e951a36d5bd17dc48273689cc103baa10a00e6866ddbe3"
     },
-    "game/Room19.Sprites.Abk": {
-      "byteLength": 7120,
-      "sha256": "f641cc2bebb5cc009fad769849231b79a45238e2f20a644b4f4d31fa2cb64e3e"
-    },
-    "game/Room13.Txt": {
-      "byteLength": 222,
-      "sha256": "b3256a16fd5d67ad83421bbcab13b66721f961ec8dd4bf07c0a7f77de8e87a79"
-    },
-    "game/Room6.Txt": {
-      "byteLength": 198,
-      "sha256": "09d699f497a772262e1a46264568864d7314118ee1a734690e38c04f48508332"
-    },
-    "game/END.Sprites.Abk": {
-      "byteLength": 170,
-      "sha256": "2acfdde41f758fbe2595b64669bd5bf8df2f73ff1dcc03151ea9cb8784f3ced5"
-    },
-    "game/Room16.Pic": {
-      "byteLength": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    "game/Room13.Zones": {
-      "byteLength": 46,
-      "sha256": "923de95917b1e850edcfdcfab79b49d1235a8c3b297e9a5b4912a4d444036bb8"
-    },
-    "game/Room12.Sprites.Abk": {
-      "byteLength": 560,
-      "sha256": "12a00c34da4a03ad92e73304c8771259f21f299e45b660d7eff32a206928d3bd"
-    },
-    "game/GOK.Pic": {
-      "byteLength": 10564,
-      "sha256": "2ecde1fcd9e6a08332d0a1f871c7ef9f1eab4500241c1a83bce3705a94cbdbe8"
-    },
-    "game/Room15.Sprites.Abk": {
-      "byteLength": 8730,
-      "sha256": "6f74b04050c824062d4378c891c7c73309d47f028a782d2218e54481f6c0e3f1"
-    },
-    "game/Room20.Zones": {
-      "byteLength": 102,
-      "sha256": "01c6936a132636a4f9c491817093cdda588356f0fd6579295775a491dc1fa37b"
-    },
-    "game/Room8.Pic": {
-      "byteLength": 20450,
-      "sha256": "1f5ba13a127b70af3a13b1d2fcfb7659dbd33c7bf9c63b83e3720dc887e17111"
-    },
-    "game/Room6.Pic": {
-      "byteLength": 14680,
-      "sha256": "f74c3b8d391fe5c90d80a6ba3ea877f75085defabadc1479e68fe57ec75fb075"
-    },
-    "game/Room17.Pic": {
-      "byteLength": 11270,
-      "sha256": "1b497aad60cf841bfaa47f570994f9e65648e4dd04ce9b7bbfa19c6e0f975899"
-    },
-    "game/Room17.Txt": {
-      "byteLength": 110,
-      "sha256": "3493bf8f193722b6d152ecfe3a667f70ae891f593f6fd84b5ea526bbc22eddc4"
-    },
-    "game/Room21.Sprites.Abk": {
-      "byteLength": 1650,
-      "sha256": "40731a8441cbc72246c7d028723c2db584aaec8d77cdf9ee06a593e9a21b4d7b"
-    },
-    "game/Room11.Txt": {
-      "byteLength": 135,
-      "sha256": "ad43f84d9c9a90b9684ad7de63df3038695f915411fd2a3af94957e3529928a7"
-    },
-    "game/Room19.Pic": {
-      "byteLength": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    "game/Room15.Pic": {
-      "byteLength": 14770,
-      "sha256": "110292dde3f44d593779a161848de2e004d3edcf00872d1f438ea91f27c48f9e"
-    },
-    "game/Room6.Zones": {
-      "byteLength": 150,
-      "sha256": "7de40b7e35016b3553e51c8ef534e94c41cc3912a6fab91b6bf27dbf43f00fa1"
-    },
-    "game/TEL.Zones": {
-      "byteLength": 118,
-      "sha256": "14ae0b7dd8ae27af0a0d23b097b60b040c764152a5e87e9f552cd0773c8d1178"
-    },
     "game/Room4.Zones": {
       "byteLength": 62,
       "sha256": "b13c185f3ff1cb22bf25a3b69809003365df7a8b69e106bed5d354eaf32a9e34"
     },
-    "game/Room12.Txt": {
-      "byteLength": 177,
-      "sha256": "078395504967f04fc632c4c32af585090c3f45195b149ceb1a77d9aae378ba93"
-    },
-    "game/TRE.Pic": {
-      "byteLength": 8192,
-      "sha256": "89634591d2567ec57eae8eb13aa2e618648094f8a473f36a3733d2da6eaacccd"
-    },
-    "game/Room9.Pic": {
-      "byteLength": 7184,
-      "sha256": "bf33be2335ac5975e656d3687951b875178bf7f2f7770722f705151d38bc047f"
-    },
-    "game/Room14.Zones": {
-      "byteLength": 46,
-      "sha256": "1b4ee20f1ebd4646ffb3854ad65bf37ed21d73f07634eab483f5f81c7bda8d38"
-    },
-    "game/Room10.Txt": {
-      "byteLength": 226,
-      "sha256": "a635c08e41111dbe7ac53c1eec79f3431feda5bce1697dba20867609e1794c21"
-    },
-    "game/LAB.Icons.Abk": {
-      "byteLength": 2490,
-      "sha256": "bd09e5f72b696c222a2fd330b80c4e6472b43c4d57329590b543272e3effd834"
-    },
-    "game/TRE.Sprites.Abk": {
-      "byteLength": 5940,
-      "sha256": "418ed4b7ebcd15eaec6aa78410b4205b524d43de2a5d1a10489d4bb6cf0969d5"
-    },
-    "game/Room15.Zones": {
-      "byteLength": 78,
-      "sha256": "ad7a4d810ab662069b23b1eeb146d4384ce4890e0d7dc880eb28692ead1818e2"
-    },
-    "game/Room18.Zones": {
-      "byteLength": 78,
-      "sha256": "4f8180501b67444da482ea45f7f9aed84d270860bdb8ca9225bd888056287b18"
-    },
-    "game/Room14_2.Pic": {
-      "byteLength": 15674,
-      "sha256": "263d7136c3087357d9747419c7a68173dfdc4e2a8ba0c8728234ec6138966aa8"
-    },
-    "game/Unterhaltungen/Unterhaltung_12": {
-      "byteLength": 703,
-      "sha256": "1942241ff89bd40dc784480f1eaf135403c7be55b95c83c22d72e24cd5acdda6"
-    },
     "game/Unterhaltungen/Unterhaltung_5": {
       "byteLength": 867,
       "sha256": "5eed943f276359355d23fbb4318b58fcfaee2cf23f445ec27d293c0a05631cf3"
-    },
-    "game/Unterhaltungen/Unterhaltung_14": {
-      "byteLength": 1297,
-      "sha256": "eb14c0940e2db343030213bfc4e694479e49ad3495f53acc1da96b42b7068602"
-    },
-    "game/Unterhaltungen/Unterhaltung_11": {
-      "byteLength": 482,
-      "sha256": "27cdf3e210dc49be905faf94474dec7896318f512fcf8ed145b53758c9d5127f"
-    },
-    "game/Unterhaltungen/Unterhaltung_4": {
-      "byteLength": 567,
-      "sha256": "059350f247a0de26878078a304872689ab08da40b27031b6971fdf44e255ce06"
     },
     "game/Unterhaltungen/Unterhaltung_2": {
       "byteLength": 295,
@@ -607,10 +239,6 @@
       "byteLength": 177,
       "sha256": "c1686ba5f318dea0bdbbb87dc5c9e15d46e2a08c8f71a16280d0119f67bd191b"
     },
-    "game/Unterhaltungen/Unterhaltung_13": {
-      "byteLength": 603,
-      "sha256": "4b663cc27a2c72d5d203883ff40689d3e712ad09988beefbf2d6b70555d295d3"
-    },
     "game/Unterhaltungen/Unterhaltung_10": {
       "byteLength": 242,
       "sha256": "22829867c0d71413a3a79f01636471e2573c23c525ce675b315fdd9b6f6a2cde"
@@ -627,97 +255,9 @@
       "byteLength": 857,
       "sha256": "ec0a845c7ba97413230fe8ab04b91c3c37b75bbfb976c5e67baa79193edc0bb0"
     },
-    "game/recovered/TRE.Pic.abk": {
-      "byteLength": 3514,
-      "sha256": "fe557c8c06070a9afa2bb9e7e8a385e664c7e3e267000ac65ba297701494222c"
-    },
-    "game/recovered/END.Pic.abk": {
-      "byteLength": 3884,
-      "sha256": "e9dde48eb2bc94fdb9fb3a00e9e4f1eb5d12abf621e3339b9c3197c8a65c4c5d"
-    },
     "game/recovered/Befehle2.Pic.abk": {
       "byteLength": 1362,
       "sha256": "d85fa9e96eef8baf8a1277c09fa1ed0b3e5145ce9b53273c69d53dd2b4064f82"
-    },
-    "game/recovered/Room16.Pic.abk": {
-      "byteLength": 5700,
-      "sha256": "251628fc13e553257e636dddd71dc938ff93777eb69ebdb496625fb38a93e1aa"
-    },
-    "game/recovered/FAR.Pic.abk": {
-      "byteLength": 4012,
-      "sha256": "185603155db54b47828c215e07f7aa67aae20e100ed4ef8d9bf3611db894cf05"
-    },
-    "game/recovered/Room19.Pic.abk": {
-      "byteLength": 5430,
-      "sha256": "77587e8e1a035b93bab10f9616c5842f801e7c217f42dc7164cf3ca17eb470a3"
-    },
-    "game/recovered/Room20.Pic.abk": {
-      "byteLength": 1744,
-      "sha256": "b78848b0c7511cf94e45cfdaefcd9ee1c9c1062c4b1b48aeaa34c1efbf974cca"
-    },
-    "game/Labyrinth/Labyrinth2": {
-      "byteLength": 404,
-      "sha256": "01c09442a5ab76938f6f7901c3c3ef3d600f7db451f6d5df60070b1969e4bca8"
-    },
-    "game/Labyrinth/Labyrinth5": {
-      "byteLength": 404,
-      "sha256": "12d83e6bec95176801816dd2f4e30a19a5ce7043541cb803c9d3638b5c6ade33"
-    },
-    "game/Labyrinth/Labyrinth1": {
-      "byteLength": 404,
-      "sha256": "1eda5642094fc7945b1066fbece976364c85957dcfe53291d9862cc5d8b92e01"
-    },
-    "game/Labyrinth/Labyrinth8": {
-      "byteLength": 404,
-      "sha256": "309e4c2f2cc799ee6fd5fad3597e9d23839dbdd13c42d45724b018372d8ca5fe"
-    },
-    "game/Labyrinth/Labyrinth7": {
-      "byteLength": 404,
-      "sha256": "9f1d4e80c3ba92e6649565aff9c2a60139d563a0c0ce6788a4728f5b9fe71a9a"
-    },
-    "game/Labyrinth/Labyrinth6": {
-      "byteLength": 404,
-      "sha256": "b082bcf5c73c439679ad5a8dadb1cde320db2b45d1c465677c8bb174611b6ad8"
-    },
-    "game/Labyrinth/Labyrinth3": {
-      "byteLength": 404,
-      "sha256": "3a3b83d9db3988aa509a4d2c1260fbc4b117a88c1f7617bbde6679f10a478427"
-    },
-    "game/Labyrinth/Labyrinth4": {
-      "byteLength": 404,
-      "sha256": "68391e064664471adf8ec47a80b787b5c8cbea369227030d0e4a73925f8f4a58"
-    },
-    "game/recovered/TRE.palette.abk": {
-      "byteLength": 5940,
-      "sha256": "c09d23f6f012cee21cc5961332d5a9d5dd8ea1b63e21e5181160c175af228b56"
-    },
-    "game/recovered/Room20.palette.abk": {
-      "byteLength": 17148,
-      "sha256": "dc5a6b23a07605dcc2b8e3a9bbbbde77b60ba6a455bc0ac8ab89aebd77b598cd"
-    },
-    "game/recovered/Room19.palette.abk": {
-      "byteLength": 24024,
-      "sha256": "1403e57ede156b0cf1ad79d4f658fc7da4713da673d03f23b53c59e010c8d2e4"
-    },
-    "game/recovered/END.palette.abk": {
-      "byteLength": 170,
-      "sha256": "2acfdde41f758fbe2595b64669bd5bf8df2f73ff1dcc03151ea9cb8784f3ced5"
-    },
-    "game/recovered/FAR.palette.abk": {
-      "byteLength": 4680,
-      "sha256": "b2ba26a1783bbdfb486b0b4b0f622b05979b70e5d389ddb20a3e5c107d3d36dd"
-    },
-    "game/recovered/Room16.palette.abk": {
-      "byteLength": 140,
-      "sha256": "787b944d7e81a7a10c3bf561cfb953c54d86f944be6e5c3c613d58fafb103243"
-    },
-    "game/recovered/reference/Room18.Pic.abk": {
-      "byteLength": 3984,
-      "sha256": "ec40707a4e81a30d2bb231a4c3991be70e26d7abfd03ee6c92973257405b22d2"
-    },
-    "game/recovered/reference/Room17.Pic.abk": {
-      "byteLength": 4492,
-      "sha256": "7cd6084d323d00e87dde384c6441dfb1f4a69b17dcaffcb5630dab097653188f"
     },
     "game/recovered/reference/Room4.Pic.abk": {
       "byteLength": 2178,

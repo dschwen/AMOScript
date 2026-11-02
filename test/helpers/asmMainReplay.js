@@ -52,16 +52,7 @@ module.exports=function asmMainReplay(p,clock,capture,check,commands=false,explo
     act(2,208,130);until(()=>line()===1701,'office door story');click();settle(1);capture('office door open');
     go(208,130,4,'room 4 corridor');
     act(2,238,130);go(238,130,5,'room 5 office');back(4);
-    act(2,251,140);go(251,140,6,'room 6 darkroom');
-    act(4,260,147);act(4,278,120);act(2,278,120);check(v.array_int_flag.values.get(24)===2&&v.array_int_flag.values.get(25)===1,'Darkroom door puzzle did not complete');capture('darkroom door mechanism');
-    go(278,120,10,'room 10 landing');go(400,200,13,'room 13 landing');act(2,330,130);go(330,130,12,'room 12 archive');back(13);go(400,200,15,'room 15 street');
-    go(180,160,19,'room 19 recovered bookshop');back(15);
-    act(2,253,140);go(253,140,17,'room 17 basement');back(15);
-    act(2,435,140);act(10,435,140);click(265,145);settle(16);capture('room 16 recovered supermarket');back(15);
-    act(10,435,140);click(300,145);settle(15);check(v.array_int_handlung.values.get(4)===0,'Expected original hospital story gate');capture('hospital story gate retained');
-    back(14);capture('room 14 courtyard');go(190,130,15);go(253,90,13);back(10);back(6);back(4);
-    act(2,296,140);go(296,140,7,'room 7 stairs');go(340,90,8,'room 8 attic office');act(2,260,120);go(260,120,9,'room 9 roof');back(8);back(7);go(338,190,11,'room 11 terrace');back(7);back(4);capture('returned to room 4');
-    check(visited.size===18,'Natural replay did not visit all eighteen expected rooms');
+    capture('limited demo rooms 1-5');check(visited.size===5,'Limited replay must visit exactly five rooms');
     return {room:v.int_raum,handle:v.array_int_transport.values.get(2),roomsVisited:visited.size};
   }
   return {room:p.state.variables.int_raum,handle:p.state.variables.array_int_transport.values.get(2)};

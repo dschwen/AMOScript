@@ -44,18 +44,22 @@ function readPicture(name,height,hardwareY){
   for(let p=0;p<6;p++)for(let x=0;x<40;x++)for(let y=0;y<height;y++){let value=0;for(let bit=0;bit<8;bit++)if(image.pixels[y*image.width+x*8+bit]&(1<<p))value|=128>>bit;data[pos++]=value;}
   return BankWriter.write([{type:'data',number:8,memory:'fast',permanent:true,name:'Pac.Pic.',data}]);
 }
-function prepare(){
+function prepare({roomLimit=5}={}){
+  if(roomLimit!==5)throw Error('ASM distribution is limited to rooms 1–5');
   const files=Object.create(null),add=(name,bytes)=>{files[name.toLowerCase()]=Buffer.from(bytes).toString('base64');};
   const raw=(prefix,name)=>add(prefix+name,fs.readFileSync(path.join(root,name)));
   for(const room of profile.rooms){
+    if(room<1||room>5)throw Error('ASM limited-demo profile contains an excluded room');
     for(const ext of ['Sprites.Abk','Txt','Zones'])raw('ASM_1:Rooms/','Room'+room+'.'+ext);
     add('ASM_1:Rooms/Room'+room+'.Pic',readPicture('Room'+room+'.Pic',128,80));
   }
-  for(const name of ['Room5_1.Pic','Room14_1.Pic','Room14_2.Pic','FAR.Pic','TEL.Pic','TRE.Pic','GOG.Pic','GOK.Pic','END.Pic'])add('ASM_1:Rooms/'+name,readPicture(name,128,80));
-  for(const name of ['Icons.Abk','Icons2.Abk','Icons3.Abk','LAB.Icons.Abk','FAR.Sprites.Abk','TEL.Sprites.Abk','TEL.Zones','TRE.Sprites.Abk','GOG.Sprites.Abk','GOK.Sprites.Abk','END.Sprites.Abk'])raw('ASM_1:Rooms/',name);
+  add('ASM_1:Rooms/Room5_1.Pic',readPicture('Room5_1.Pic',128,80));
+  for(const name of ['Icons.Abk','Icons2.Abk','Icons3.Abk'])raw('ASM_1:Rooms/',name);
   for(const name of ['Befehle.Pic','Befehle2.Pic','Befehle4.Pic'])add('ASM_1:'+name,readPicture(name,90,208));
   raw('ASM_1:','Gesichter.Abk');for(const name of ['Ereignisse.Txt','Objekte.Txt'])raw('ASM_1:Texte/',name);
-  for(const folder of ['Unterhaltungen','Labyrinth'])for(const name of fs.readdirSync(path.join(root,folder)))raw('ASM_1:',folder+'/'+name);
+  // Characters initially placed in the first five rooms, including the office.
+  for(const id of [1,2,3,5,6,7,8,9,10])raw('ASM_1:','Unterhaltungen/Unterhaltung_'+id);
   return files;
 }
+
 module.exports={prepare,readPicture,decodePicture};

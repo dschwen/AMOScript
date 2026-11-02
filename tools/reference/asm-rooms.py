@@ -72,7 +72,7 @@ calls={1:[(2,54,41,3),(5,305,34,5),(8,57,123,2)],2:[(13,205,19,2)],4:[(1,145,55,
  16:[(13,272,93,2)],17:[(1,53,72,5),(6,235,82,3),(7,261,105,2)],20:[(8,168,67,14),(4,118,41,3)],
  22:[(7,163,98,2),(8,215,46,2),(9,241,46,2)]}
 result={}
-for room in range(1,24):
+for room in range(1,6):
  pixels=bitmap(f'Room{room}.Pic');images=sprites(f'Room{room}.Sprites.Abk')
  # Original Priority Reverse On: descending Bob numbers, lower numbers on top.
  for number,x,y,index in sorted(calls.get(room,[]),reverse=True):
