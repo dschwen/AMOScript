@@ -518,6 +518,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/ehb.html"
     },
     {
+      "file": "project-builder.html",
+      "title": "Desktop project builder walkthrough",
+      "description": "Prepared browser walkthrough of directory-to-disk mapping, options, project save, preview and standalone HTML export. Uses the real desktop form and backend-produced sample pages; native dialogs and sandbox ownership are tested separately in Electron. Directory buttons select a declared sample, not your local folders.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/project-builder.html"
+    },
+    {
       "file": "webgl-ham.html",
       "title": "WebGL HAM6 colour carry",
       "description": "Native GPU masked-write prefix scans: independent HAM images, five/six planes, clipped history, scroll, row palettes, sprites, mixed modes, validation and context restoration. No CPU colour fallback.",

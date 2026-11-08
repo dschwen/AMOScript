@@ -1078,3 +1078,13 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   include Node/dependency notices, two samples and production tools only. Do not
   bundle full games, development fixtures or local uploads. Publication must follow
   reusable CI and the extracted-ZIP Windows smoke check; see docs/releases.md.
+
+- Desktop builder: tools/project.js validates version-1 projects and maps bounded
+  directory imports to case-insensitive NFC AMOS paths. GUI and build_project.js
+  share page generation. Preserve relative project paths, exclusive HTML outputs,
+  binary bytes, empty directories, aliases and symlink rejection. desktop/main.js
+  owns native dialogs and worker builds; its isolated preload exposes only named
+  project actions. Game previews have a separate ephemeral session, no Node/preload
+  or builder IPC, and no network/download access. Never grant a game host filesystem
+  privileges. Test source and packaged apps with test/desktop-smoke.js; installer
+  staging excludes games/dev fixtures. See docs/desktop-builder.md.

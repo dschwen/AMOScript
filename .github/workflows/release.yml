@@ -67,9 +67,66 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  desktop:
+    name: Desktop installer (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, ubuntu-24.04, macos-14]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            desktop/package-lock.json
+      - run: npm ci
+      - run: npm run desktop:install
+      - name: Install Linux GUI libraries
+        if: runner.os == 'Linux'
+        run: node node_modules/playwright/cli.js install-deps chromium
+      - name: Build native installer
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run desktop:dist
+      - name: Test packaged Linux app
+        if: runner.os == 'Linux'
+        env:
+          AMOSCRIPT_DESKTOP_EXECUTABLE: ${{ github.workspace }}/dist/desktop/linux-unpacked/amoscript-builder
+        run: xvfb-run -a npm run test:desktop
+      - name: Test packaged Windows app
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:AMOSCRIPT_DESKTOP_EXECUTABLE = (Resolve-Path 'dist/desktop/win-unpacked/AMOScript Builder.exe').Path
+          npm run test:desktop
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged app smoke failed' }
+      - name: Test packaged macOS app
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          executable=$(find dist/desktop -path '*/AMOScript Builder.app/Contents/MacOS/AMOScript Builder' -type f | head -n 1)
+          test -n "$executable"
+          AMOSCRIPT_DESKTOP_EXECUTABLE="$PWD/$executable" npm run test:desktop
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: desktop-release-${{ runner.os }}
+          path: |
+            dist/desktop/*.exe
+            dist/desktop/*.dmg
+            dist/desktop/*.AppImage
+          if-no-files-found: error
+          retention-days: 7
+
   publish:
     name: Publish tagged release
-    needs: [checks, windows]
+    needs: [checks, windows, desktop]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -81,7 +138,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
-        run: gh run download "$RUN_ID" --name windows-release --dir dist
+        run: |
+          gh run download "$RUN_ID" --name windows-release --dir dist
+          gh run download "$RUN_ID" --pattern 'desktop-release-*' --dir dist
       - name: Create release after successful packaging
         env:
           GH_TOKEN: ${{ github.token }}
@@ -90,4 +149,5 @@ jobs:
         run: |
           flags=()
           if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
-          gh release create "$RELEASE_TAG" dist/* --verify-tag --generate-notes "${flags[@]}"
+          mapfile -d '' assets < <(find dist -type f -print0)
+          gh release create "$RELEASE_TAG" "${assets[@]}" --verify-tag --generate-notes "${flags[@]}"

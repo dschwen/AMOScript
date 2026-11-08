@@ -42,6 +42,8 @@ run both original labyrinth editors. [Compilation results and rebuild instructio
 
 ## Quick start
 
+Prefer a graphical workflow? **[AMOScript Builder](docs/desktop-builder.md)** imports asset directories as Amiga disks, previews your program and exports one HTML file.
+
 Start with the **[Windows/macOS/Linux quick-start guide](docs/quick-start.md)** for Node installation, source ZIPs without Git, and the portable Windows release.
 
 Source installs need Node 24 (recommended) or 22 and npm; Python is not required.

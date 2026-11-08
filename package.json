@@ -15,7 +15,13 @@
     "build:compiler-examples": "node tools/build_compiler_examples.js",
     "build:examples": "node tools/build_examples.js",
     "install:browser": "node tools/install_browser.js",
-    "test:browser": "npm run check:generated && node test/browser-smoke.js"
+    "test:browser": "npm run check:generated && node test/browser-smoke.js",
+    "desktop": "npm --prefix desktop start",
+    "desktop:install": "npm --prefix desktop ci --ignore-scripts && node desktop/node_modules/electron/install.js",
+    "desktop:pack": "npm --prefix desktop run pack",
+    "desktop:dist": "npm --prefix desktop run dist",
+    "build:project": "node tools/build_project.js",
+    "test:desktop": "node test/desktop-smoke.js"
   },
   "repository": {
     "type": "git",

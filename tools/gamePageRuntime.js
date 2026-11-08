@@ -6,6 +6,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
+  touchMode.value = settings.touch || 'auto';
   let activeFactory=createProgram;
   let unlinkedRun = '';
   const diskFonts = (settings.diskFonts || []).map(font => ({ ...font, data: Uint8Array.from(font.data) }));

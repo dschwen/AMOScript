@@ -6,6 +6,9 @@ to compile an existing supported program. Readable `.Asc` listings are reference
 not accepted compiler input yet. Not every AMOS instruction or extension is
 implemented; unsupported features report a source location.
 
+For the graphical directory-import/project workflow, see
+[AMOScript Builder](https://github.com/dschwen/AMOScript/blob/master/docs/desktop-builder.md).
+
 ## What do I need?
 
 | Task | Requirements |
@@ -70,7 +73,7 @@ page builder, rather than the repository's full games/demo collection.
 
 **Before the first tagged release exists:** there will be no portable ZIP asset
 to download. Use the Windows source instructions below. New ZIPs are produced
-when maintainers push a matching version tag; see [release maintenance](releases.md).
+when maintainers push a matching version tag; see [release maintenance](https://github.com/dschwen/AMOScript/blob/master/docs/releases.md).
 Windows ARM64 users can use the source instructions with an ARM64 Node installer;
 the portable release currently targets x64 only.
 

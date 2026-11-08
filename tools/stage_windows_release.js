@@ -14,14 +14,14 @@ function stage(output,{tag,runtimeDirectory}={}){
   const copy=(from,to=from)=>{const target=path.join(destination,to);fs.mkdirSync(path.dirname(target),{recursive:true});fs.cpSync(path.join(root,from),target,{recursive:true});};
   try{
     for(const folder of ['lib','bin'])copy(folder);
-    for(const file of ['build_game_page.js','gamePageRuntime.js','gamePageUI.js'])copy('tools/'+file);
+    for(const file of ['build_game_page.js','gamePageRuntime.js','gamePageUI.js','project.js','build_project.js'])copy('tools/'+file);
     for(const file of ['Test21.AMOS','Graphics.AMOS'])copy('examples/'+file);
     copy('docs/quick-start.md');copy('LICENSE');copy('package.json');copy('package-lock.json');
     const dependency=path.dirname(require.resolve('binary-search-bounds/package.json'));
     fs.cpSync(dependency,path.join(destination,'node_modules/binary-search-bounds'),{recursive:true});
     fs.mkdirSync(path.join(destination,'runtime'));fs.copyFileSync(exe,path.join(destination,'runtime/node.exe'));fs.copyFileSync(license,path.join(destination,'runtime/LICENSE'));
     const batch=(name,script)=>fs.writeFileSync(path.join(destination,name),'@echo off\r\n"%~dp0runtime\\node.exe" '+(script?'"%~dp0'+script+'" ':'')+'%*\r\nexit /b %errorlevel%\r\n');
-    batch('amoscript.cmd','bin\\amoscript');batch('build-page.cmd','tools\\build_game_page.js');batch('node.cmd','');
+    batch('amoscript.cmd','bin\\amoscript');batch('build-page.cmd','tools\\build_game_page.js');batch('node.cmd','');batch('build-project.cmd','tools\\build_project.js');
     fs.writeFileSync(path.join(destination,'START-HERE.txt'),`AMOScript ${tag} - Windows x64 portable compiler\r\n\r\nExtract the entire ZIP before running. No Git, Node installation, npm install or Python is needed.\r\nOpen a terminal in this folder and run:\r\n  .\\amoscript.cmd examples\\Test21.AMOS program.js\r\n  .\\node.cmd -e "require('./program.js')({ setTimeout }).tick(1000)"\r\n  .\\build-page.cmd examples\\Graphics.AMOS graphics.html\r\nOpen graphics.html in a modern browser and click Play Game.\r\n\r\nSee docs/quick-start.md for instructions and troubleshooting.\r\nThis archive contains the tools and two samples; full games/development fixtures are not included.\r\nFull source and documentation: https://github.com/dschwen/AMOScript/tree/${tag}\r\nCompiler license: LICENSE. Bundled Node license/notices: runtime/LICENSE.\r\nProduction dependency license: node_modules/binary-search-bounds/LICENSE.\r\nNode ${version.stdout.trim()}: https://nodejs.org/dist/${version.stdout.trim()}/\r\n`);
     fs.writeFileSync(path.join(destination,'release.json'),JSON.stringify({tag,packageVersion:pkg.version,target:'windows-x64',nodeVersion:version.stdout.trim()},null,2)+'\n');
     return destination;

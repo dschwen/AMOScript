@@ -1,0 +1,57 @@
+{
+  "name": "amoscript-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AMOScript desktop project builder",
+  "main": "main.js",
+  "author": "Daniel Schwen",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "start": "electron .",
+    "pack": "node ../tools/stage_desktop_app.js && electron-builder --dir --publish never",
+    "dist": "node ../tools/stage_desktop_app.js && electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "org.amoscript.builder",
+    "productName": "AMOScript Builder",
+    "directories": {
+      "app": "../.cache/desktop-app",
+      "output": "../dist/desktop"
+    },
+    "files": [
+      "**/*"
+    ],
+    "asar": true,
+    "npmRebuild": false,
+    "artifactName": "AMOScript-Builder-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Development",
+      "maintainer": "Daniel Schwen",
+      "syncDesktopName": true
+    },
+    "icon": "icon.png"
+  }
+}
