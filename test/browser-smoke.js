@@ -228,6 +228,7 @@ async function run() {
     await page.click('#bobs');
     await page.click('#stop');
     assert.strictEqual(await page.evaluate(() => AMOS.state.stopped), true);
+    await require('./helpers/checkFullscreenControls')(browser);
     await require('./helpers/checkBrowserDemos')(browser);
     assert.deepStrictEqual(errors, []);
     console.log('Browser smoke passed: standalone bank load/save/reload/appending/reservation/swap/shrink/erasure, trigonometry/angle modes and pixels, Canvas shapes, direct sprite manual updates/movement/isolation/cursor restoration, bank images, flipping/masks, buffered Bobs with modes/limits and collisions, swaps, restoration, input, switching, and Stop.');

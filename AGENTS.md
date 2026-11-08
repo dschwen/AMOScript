@@ -246,7 +246,10 @@
   around the canvas without resizing its bitmap/GPU buffers; margins stay outside
   the pointer rectangle. Preserve the container across renderer switches/Restart.
   Escape exits fullscreen before reaching AMOS, and disposal exits only its own
-  container, including late requests. See `docs/fullscreen.md`.
+  container, including late requests. Fullscreen uses a borderless full-area
+  surface with overlay controls: hidden on desktop/landscape touch, revealed at
+  the top mouse edge or with Tab, always visible on portrait touch. Revealing
+  controls must not resize the game. See `docs/fullscreen.md`.
 - Key State is a nondestructive per-program raw held map, separate from text
   and Scancode. Canvas records mapped keydown/keyup before joystick consumption;
   lifecycle/blur/visibility/detach clear owned state, while Clear Key/Key Speed

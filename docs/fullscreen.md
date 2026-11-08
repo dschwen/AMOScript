@@ -9,7 +9,13 @@ return-to-title behavior.
 The fullscreen target is a stable container with controls and a display surface.
 It contains either a Canvas 2D or WebGL canvas. In the live game, switching
 renderers or restarting replaces the canvas while retaining that container, so
-fullscreen remains active. Game, audio and error status remain visible inside it.
+fullscreen remains active. Controls overlay the display in a compact panel. On
+desktop and landscape touch devices the panel starts hidden; moving the mouse to the top 12 pixels reveals
+it, and moving back over the game hides it. Tab reveals it for keyboard access.
+Touch portrait keeps the panel visible. The display surface uses the entire
+fullscreen area, without toolbar padding or viewport borders; aspect ratio is
+preserved, with black space only where the display and device shapes differ.
+Error status remains available inside the fullscreen container.
 
 `lib/amos/fullscreen.js` exports `createFullscreenHost(container, options)` via
 CommonJS and the `AMOS_FULLSCREEN` browser global. Options provide a button,
@@ -21,7 +27,8 @@ exits only this controller's fullscreen container, including a late request that
 resolves during disposal.
 
 The controller scales CSS dimensions to fit the available surface, preserving
-aspect and borders. Space around the display is black; there is no letterbox
+aspect ratio, with viewport and canvas borders removed. Space around the display
+is black; there is no letterbox
 inside the canvas. Canvas bitmap dimensions, WebGL buffers, AMOS screen geometry,
 VM clocks and sample playback stay unchanged. The existing host therefore maps
 pointer positions across the actual canvas content rectangle in either renderer.
@@ -40,7 +47,8 @@ pointer mapping; switching and Restart while fullscreen; Escape priority without
 leaving gameplay; GPU context loss/restoration; and cleanup while fullscreen.
 Four unit groups cover CSS/bitmap separation, unsupported/denied requests, surface
 replacement, listener ownership and late request disposal. The browser checks
-use the shared gallery and live-demo controls. The optional touch joystick now
+use the shared gallery and live-demo controls, with explicit top-edge reveal,
+Tab access, touch orientation changes and full-surface borderless sizing checks. The optional touch joystick now
 has additional 390×844 touch-enabled Chromium coverage, including native pointer
 input and fullscreen exit; this is not a physical phone/iOS or Amiga capture.
 See [touch input](joysticks.md#optional-fullscreen-touch-cross).

@@ -47,6 +47,20 @@ module.exports = async function checkBrowserDemos(browser) {
   } finally { await debug.close(); }
   for (const scenario of scenarios) {
     const page = await browser.newPage(), errors = [], network = [];
+    // Operate overlay controls through the same top-edge reveal used by a mouse.
+    for(const method of ['click','selectOption','hover']){
+      const original=page[method].bind(page);
+      page[method]=async(selector,...args)=>{
+        if(await page.locator(selector).count()&&await page.locator(selector).first().evaluate(node=>!!document.fullscreenElement&&!!node.closest('.amos-fullscreen-toolbar'))){
+          await page.waitForTimeout(150); // Allow the native fullscreen resize to settle.
+          await page.mouse.move(1,1);
+        }else if(await page.locator(selector).count()&&await page.locator(selector).first().evaluate(node=>!!document.fullscreenElement&&!!node.closest('.amos-fullscreen-surface'))){
+          const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight}));
+          await page.mouse.move(size.width/2,size.height-16);
+        }
+        return original(selector,...args);
+      };
+    }
     page.on('pageerror', error => errors.push(error.message));
     await page.route(/^https?:/, route => { network.push(route.request().url()); return route.abort(); });
     try {
