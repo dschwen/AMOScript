@@ -150,13 +150,14 @@ DMA advanced them. Modulos account for physical row stride versus fetched width.
 The interpreter supplies all per-line pointer/palette tables. The builder does
 not duplicate per-line rendering or pointer-advance semantics.
 
-The current builder supports x=128 OCS windows, lowres 1–6 planes, hires 1–4,
+The current builder supports bounded OCS windows at hardware x=96–240 in
+16-pixel steps (including x=128), lowres 1–6 planes and hires 1–4,
 word-padded rows and representable DIW end positions. Each transition must finish
 its changes before DDF start on visible rows or before snapshot capture on
 genuinely blank rows. DIW setup precedes pointer changes. Excessive palette/pointer
 setup still rejects. [The live-game contract](wonderland-game.md) documents the
-bounded gap-write elimination and independent budget tests. Arbitrary positioning,
-unequal-width overlays, wider transitions, ECS/AGA, sprite bus contention,
+bounded gap-write elimination and independent budget tests. General positioning,
+unrepresentable overlays, wider transitions, ECS/AGA extensions, sprite bus contention,
 interlace and user AMOS copper commands remain open. The interpreter records
 supported mode/scroll events but does not claim all mid-line register effects.
 Static scroll, EHB and dual-playfield views are now supported, including early

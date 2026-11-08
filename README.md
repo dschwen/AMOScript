@@ -159,6 +159,7 @@ writes currently stay in session memory; IndexedDB persistence is planned.
 - [Compatibility matrix](docs/compatibility.md): implemented behavior and explicit limits.
 - [Development plan](PLAN.md): current priorities and remaining work.
 - [Roller II milestone](docs/roller2.md) and [Wonderland milestone](docs/wonderland.md): original-program coverage.
+- [How WebGL rendering works](docs/webgl-rendering-guide.md): bitplanes, palettes, scrolling, dual playfields, mixed-resolution screens and Copper support.
 - [Display architecture](docs/display-architecture.md): shared CPU/WebGL snapshots and acceptance gates.
 - [File adapters and paths](docs/directories.md): path handling and links to related file operations.
 

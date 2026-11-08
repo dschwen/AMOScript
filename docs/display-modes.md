@@ -4,7 +4,8 @@ Status: these CPU mode/field paths are implemented in ABI v1. They extend
 [planar decoding](planar-display.md) and [the copper path](copper-display.md).
 [HAM6](ham-display.md) is also implemented. Full ECS superhires, HAM8,
 sprite contention/computed allocation, live interlace timing, DMA arbitration
-and GPU rendering remain open. Synthetic goldens establish behavior and migration
+and full mode/capture parity remain open. Bounded GPU decoding, including HAM6,
+is implemented; see the [rendering guide](webgl-rendering-guide.md). Synthetic goldens establish behavior and migration
 comparisons; no fixture here is an emulator or AMOS execution capture.
 
 ## Bitplane scroll and fetch alignment
@@ -97,10 +98,10 @@ selected playfield and final palette index in explainPixel. Sprite priority bits
 are now resolved against physical channels; see [sprite contract](sprite-display.md).
 
 Static frames and raw copper builder views accept dualPlayfield/pf2Priority
-flags. This is not yet the AMOS Dual Playfield/Dual Priority command pipeline:
-those commands must link screen identity, palettes and independent offsets using
-verified token/source semantics. The current Canvas host still presents one
-indexed screen. The
+flags. The AMOS facade now implements bounded lowres `Dual Playfield` pairing
+with shared owner palette registers and independent source offsets, consumed by
+both Canvas and WebGL snapshots. This does not imply a complete `Dual Priority`
+command surface. See the [pairing and rendering explanation](webgl-rendering-guide.md#6-dual-playfields-two-scrolling-pictures-from-interleaved-planes). The
 [dual-playfield summary](https://amigadev.grimore.org/Hardware_Manual_guide/node007d.html)
 and [priority definition](https://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node007B.html)
 inform the synthetic transparency/priority fixtures; captures remain separate.

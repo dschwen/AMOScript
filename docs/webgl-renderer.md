@@ -1,5 +1,8 @@
 # WebGL2 renderer
 
+For a conceptual introduction and detailed pipeline walkthrough, read
+[How the WebGL renderer works](webgl-rendering-guide.md).
+
 [renderer.js](../lib/display/webgl/renderer.js) implements actual GPU bitplane
 decode and colour/sprite resolve for the current CPU snapshot subset. Chromium
 passes 179 GPU/CPU frame comparisons, including Wonderland's executed original
@@ -19,7 +22,9 @@ test harness. Generated AMOS modules retain their headless CPU runtime; GPU code
 belongs to the browser adapter.
 
 `render(snapshot)` validates the immutable ABI v1 input, owns/uploads its bytes,
-and performs two fullscreen shader draws. Successful nonempty results report
+and performs two fullscreen shader draws for non-HAM output. Active HAM adds
+the prefix-scan passes described in [GPU HAM](webgl-ham.md). Successful non-HAM
+nonempty results report
 `{ backend: 'gpu', passes: 2, revision, width, lines }`. Empty fields report
 `gpu-empty` with no draws or logical pixels. `readPixels()` returns an owned
 Uint8ClampedArray of current-field RGBA in canonical top-left row order. It reads
@@ -95,7 +100,7 @@ Custom passes share the owner's GL state and are not a separate scheduler.
 
 During loss, rendering retains the latest valid snapshot and reports
 `backend: 'unavailable'`, with no CPU fallback counted as GPU execution.
-Restoration fully uploads owned data, recompiles both passes and rerenders the
+Restoration fully uploads owned data, recompiles registered passes and rerenders the
 latest field before reporting ready. Readback rejects lost/error/disposed state.
 Rendering errors throw and invalidate the output result; invalid input leaves
 the previous successful frame intact. `dispose()` releases all GPU/CPU resources.

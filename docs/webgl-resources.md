@@ -2,7 +2,7 @@
 
 [resources.js](../lib/display/webgl/resources.js) owns GPU storage and debug
 readback for ABI v1 snapshots. It is implemented and tested in Chromium/SwiftShader.
-The [non-HAM renderer](webgl-renderer.md) now uses it for actual GPU decode/resolve.
+The [renderer](webgl-renderer.md) now uses it for actual GPU decode/resolve.
 The renderer also draws its scale/aspect pass to the canvas. The resource owner
 itself does not replace the application host; backend switching, live diff and
 remaining mode/parity gates stay open.
@@ -38,6 +38,7 @@ It uploads these textures:
 | `overflowEvents` | RGBA32UI | Linear event records, at most 2048 per row |
 | `indexBuf` | R16UI | outputWidth × fieldLines, framebuffer target |
 | `colourBuf` | RGBA8 | outputWidth × fieldLines, framebuffer target |
+| `hamA`, `hamB` | R32UI | Optional HAM source-span × fieldLines scan targets |
 
 Linear tables pad their final physical row with zeros; debug readback removes
 that padding. An empty field allocates one zero storage row but returns zero
