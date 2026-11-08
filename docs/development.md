@@ -1,5 +1,10 @@
 # Development and CI
 
+For first-time installation on Windows, macOS or Linux, use the
+[quick-start guide](quick-start.md). Python is only needed to regenerate the
+independent reference fixtures, not to run the compiler or existing checks.
+Tagged Windows packaging and publication are described in [releases](releases.md).
+
 Use Node 22 or 24 with npm and the committed package lock. The GitHub Actions
 workflow targets those majors on Ubuntu 24.04; Chromium runs on Node 24. Node's
 [release policy](https://nodejs.org/en/about/previous-releases) describes its LTS
@@ -63,8 +68,8 @@ from production token tables.
 
 ## Workflow and evidence
 
-[The workflow](../.github/workflows/ci.yml) runs on pushes, pull requests and manual
-dispatch. Unit jobs cover both Node majors independently. The browser job installs
+[The workflow](../.github/workflows/ci.yml) runs on branch pushes, pull requests, manual
+dispatch and reusable-workflow calls from tagged releases. Unit jobs cover both Node majors independently. The browser job installs
 Chromium plus Linux libraries and uploads any PNG screenshots in `test/artifacts/`
 with seven-day retention. Actions are pinned to immutable commits, checkout does
 not persist credentials, and workflow permissions are read-only.

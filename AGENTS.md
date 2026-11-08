@@ -1071,3 +1071,10 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   frames); the room gallery has five prepared entries and 204800 independent
   pixels. ASM is omitted from README and kept in the lower, collapsed Limited
   demos gallery section. See docs/asm.md.
+
+- Installation: docs/quick-start.md separates production Node/npm from optional
+  Python reference generation and Playwright testing. Tagged Windows releases
+  use .github/workflows/release.yml and the allowlisted stage_windows_release.js;
+  include Node/dependency notices, two samples and production tools only. Do not
+  bundle full games, development fixtures or local uploads. Publication must follow
+  reusable CI and the extracted-ZIP Windows smoke check; see docs/releases.md.

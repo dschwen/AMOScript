@@ -1,0 +1,93 @@
+name: Windows release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    name: Compiler and browser checks
+    uses: ./.github/workflows/ci.yml
+
+  windows:
+    name: Build and test portable Windows x64 ZIP
+    runs-on: windows-2022
+    timeout-minutes: 15
+    outputs:
+      archive: ${{ steps.package.outputs.archive }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          architecture: x64
+          cache: npm
+      - run: npm ci --omit=dev --ignore-scripts
+      - name: Build the allowlisted distribution
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: pwsh
+        run: |
+          $runtime = Split-Path (Get-Command node.exe).Source
+          $folder = "AMOScript-$env:RELEASE_TAG-windows-x64"
+          node tools/stage_windows_release.js "$env:RUNNER_TEMP/$folder" "$runtime" "$env:RELEASE_TAG"
+          if ($LASTEXITCODE -ne 0) { throw 'Release assembly failed' }
+          node tools/check_windows_release.js "$env:RUNNER_TEMP/$folder"
+          if ($LASTEXITCODE -ne 0) { throw 'Release smoke failed' }
+      - name: ZIP, extract, test and checksum
+        id: package
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: pwsh
+        run: |
+          $folder = "AMOScript-$env:RELEASE_TAG-windows-x64"
+          $archive = "$folder.zip"
+          New-Item -ItemType Directory -Path dist | Out-Null
+          Compress-Archive -Path "$env:RUNNER_TEMP/$folder" -DestinationPath "dist/$archive"
+          $extracted = "$env:RUNNER_TEMP/extracted release"
+          Expand-Archive -Path "dist/$archive" -DestinationPath $extracted
+          node tools/check_windows_release.js "$extracted/$folder"
+          if ($LASTEXITCODE -ne 0) { throw 'Extracted ZIP smoke failed' }
+          $hash = (Get-FileHash "dist/$archive" -Algorithm SHA256).Hash.ToLowerInvariant()
+          [System.IO.File]::WriteAllText((Join-Path $PWD 'dist/SHA256SUMS.txt'), "$hash  $archive`n", [System.Text.Encoding]::ASCII)
+          "archive=$archive" >> $env:GITHUB_OUTPUT
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-release
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish tagged release
+    needs: [checks, windows]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Download tested ZIP and checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: gh run download "$RUN_ID" --name windows-release --dir dist
+      - name: Create release after successful packaging
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          flags=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$RELEASE_TAG" dist/* --verify-tag --generate-notes "${flags[@]}"

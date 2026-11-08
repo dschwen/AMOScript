@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "kitty:git/amoscript"
+    "url": "https://github.com/dschwen/AMOScript.git"
   },
   "keywords": [
     "AMOS",
@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "playwright": "1.59.1"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

@@ -42,12 +42,15 @@ run both original labyrinth editors. [Compilation results and rebuild instructio
 
 ## Quick start
 
-Requires Node.js; CI targets Node 22 and 24.
+Start with the **[Windows/macOS/Linux quick-start guide](docs/quick-start.md)** for Node installation, source ZIPs without Git, and the portable Windows release.
+
+Source installs need Node 24 (recommended) or 22 and npm; Python is not required.
+For compiler/page-builder use only:
 
 ```sh
-npm ci
-node bin/amoscript examples/Test21.AMOS /tmp/program.js
-node -e "require('/tmp/program.js')({ setTimeout }).tick(1000)"
+npm ci --omit=dev
+node bin/amoscript examples/Test21.AMOS program.js
+node -e "require('./program.js')({ setTimeout }).tick(1000)"
 ```
 
 Expected output: `Start → One → Two → Three → End` (one item per line).
