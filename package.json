@@ -1,6 +1,6 @@
 {
   "name": "amoscript",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Transpile tokenized AMOS basic programs into Javascript",
   "main": "lib/Transpiler.js",
   "bin": {
