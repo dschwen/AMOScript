@@ -353,10 +353,12 @@
   `docs/display-modes.md`, including source-backed Colour masks and Hires limits.
 - `lib/display/webgl/resources.js` owns WebGL2 ABI textures, dirty-row snapshot
   uploads, debug readback and context restoration/disposal. `webgl/renderer.js`
-  runs non-HAM decode/resolve/sprite shader passes on shared snapshots; see
+  runs decode/resolve/sprite shader passes on shared snapshots; bounded HAM6
+  uses masked-write GPU prefix scans with owned R32UI ping-pong targets. Keep
+  crop history, row resets and raw-index sprite priority; see docs/webgl-ham.md; see
   `docs/webgl-renderer.md`. Its presentation shader uses shared rational layout
   from `presentation/layout.js`. Bounded live host switching/input is implemented; arbitrary viewport/letterbox
-  input routing, HAM/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
+  input routing, HAM8/events and full mode/capture parity remain open. Never count a CPU fallback as GPU execution.
 - The live `roller2-game` scenario embeds the complete unchanged source and the
   current supplied asset manifest under `examples/Roller2/current`. The playable
   AMOS file has source-level edge-guard ordering fixes on lines 642/645 and a final
@@ -1001,10 +1003,10 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
   explicitly crops authoring IFFs to 320×256, emits the three expected packed banks,
   decodes two pinned FontEd bitmap layouts and supplies an empty initial score table.
   The separate main-game first-room milestone is implemented below; full adventure
-  progression and later assets remain open. Normal/debug pages share the game harness and explicitly choose Canvas
+  progression and later assets remain open. Normal/debug pages share the game harness and now choose WebGL
   for the HAM title. stopOnUnlinkedRun is an opt-in host preview policy; ordinary
-  pages still reject missing linked factories. Eight Canvas/seven non-HAM GPU
-  frames cover the intro. See docs/asm.md and docs/asm-inventory.json.
+  pages still reject missing linked factories. Eight Canvas/eight GPU frames
+  cover the intro, including HAM. See docs/asm.md and docs/asm-inventory.json.
   Font$ returns the owned 38-character Disc catalogue description; unavailable
   indices return empty. Set Input keeps per-factory byte terminator/skip settings;
   Input# comma and Line Input# NUL take precedence, and a required missing skip byte
@@ -1053,7 +1055,7 @@ high-score entry/writeback replay distinct from an unmodified saved-score captur
 - ASM live pages use pinned ASM.current.AMOS: line 886 restores screen 0 priority
   after Unpack creates foreground artwork screen 2. Frozen original remains.
   Replay opens/closes room 2 door after Zurück, 21 Canvas/GPU checkpoints.
-  Direct room entry uses WebGL; linked intro remains Canvas for HAM.
+  Direct room entry uses WebGL; linked intro also uses WebGL for HAM.
   Proportional JAM2 text clears the full advance span before glyph foreground.
 
 - ASM room 3 assets are pinned and embedded. Replay opens room 2 door, uses Gehe

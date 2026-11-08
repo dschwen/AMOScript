@@ -267,10 +267,10 @@ module.exports = async function webglRendererProbe(page, artifacts) {
       let rejected = false;
       try { gpu.render({ chip: new Uint8Array(524288), frame: invalid }); } catch (error) { rejected = /out of bounds/.test(error.message); }
       assert(rejected && gpu.stats.drawCalls === before, 'bounds reject before drawing');
-      for (const change of [f => { f.lineRegs[8] = 0x6800; }, f => { f.lineRegs[17] = 1; f.lineEvents[1] = 0x180; },
+      for (const change of [f => { f.lineRegs[8] = 0x4800; }, f => { f.lineRegs[17] = 1; f.lineEvents[1] = 0x180; },
         f => { f.chipset = 'AGA'; f.samplesPerLowresPixel = 4; }]) {
         const f = frame({ width: 17, height: 1, depth: 1, pointers: [0], rowBytes: 4, palette: [0] }); change(f);
-        rejected = false; try { gpu.render({ chip: new Uint8Array(524288), frame: f }); } catch (error) { rejected = /not implemented/.test(error.message); }
+        rejected = false; try { gpu.render({ chip: new Uint8Array(524288), frame: f }); } catch (error) { rejected = /not implemented|unsupported bitplane mode/.test(error.message); }
         assert(rejected && gpu.stats.drawCalls === before, 'unsupported mode rejects without fallback');
       }
       const readCanvas = () => {

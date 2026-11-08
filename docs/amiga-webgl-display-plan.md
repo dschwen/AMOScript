@@ -589,11 +589,17 @@ this milestone does not claim host fallback or complete mode support.
 ### Phase 8: GPU HAM
 
 **Work**
-- Backward-scan HAM resolve (§5.5).
-- Profiling on worst-case HAM images. Implement pointer jumping only if it exceeds budget.
+- Implemented: masked-write inclusive GPU prefix scan, replacing the planned
+  per-fragment backward scan. Two R32UI targets combine colour updates in
+  logarithmic passes; see [HAM GPU contract](webgl-ham.md).
+- Reference-device profiling on worst-case HAM images remains open.
 
 **Milestone M8**
-- [ ] Parity on all HAM fixtures (the GPU backward scan agrees with the reference forward scan).
+- [x] Parity on all current bounded HAM fixtures, including independent raw/ByteRun1
+  images, five-plane/laced fields, crop/scroll/row/sprite matrices and restoration.
+  The GPU prefix scan agrees with independent goldens and the forward reference;
+  58 GPU frame comparisons pass locally. This is not a native capture or a device
+  timing claim.
 - [ ] Worst-case HAM frame resolves in under 1 ms GPU time on the reference hardware set (an integrated GPU laptop and a mid-range phone).
 
 ### Phase 9: Mid-line copper events

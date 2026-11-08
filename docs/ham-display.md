@@ -1,8 +1,9 @@
-# HAM6 CPU display contract
+# HAM6 display contract
 
-HAM6 is implemented in the CPU reference, ILBM loader, indexed Canvas converter
-and standalone generated modules. It uses the existing ABI v1 BPLCON0 HAM bit;
-no wire-layout change or GPU renderer is involved.
+HAM6 is implemented in the CPU reference, ILBM loader, indexed Canvas converter,
+standalone generated modules and the [WebGL2 renderer](webgl-ham.md). It uses
+the existing ABI v1 BPLCON0 HAM bit;
+the GPU path shares this contract without a wire-layout change.
 
 `Screen Open n,w,h,4096,Lowres` selects six planes with 64 pixel commands and
 16 base palette colours. The internal screen records `ham: true` and
@@ -50,5 +51,5 @@ the [fixture README](../test/fixtures/display/README.md).
 
 These are synthetic references, not AMOS/emulator captures. HAM8, mid-line
 palette/mode events, arbitrary DMA/border latch behavior, live interlace timing
-and GPU HAM remain open. Fetch prefixes outside the display window are not
+remain open. Fetch prefixes outside the display window are not
 replayed as HAM history; that boundary still needs hardware/reference evidence.

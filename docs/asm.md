@@ -105,9 +105,9 @@ installation's exact geometry, fonts on other machines, or Amiga capture parity.
 not an IFF ANIM file. `Zoom.Mus` uses tracker pitch slides (`2xx`); the title tune
 uses the existing note/volume playback.
 
-The third title image requires HAM. The showcase deliberately selects **Canvas**;
-the WebGL renderer still rejects HAM. Seven non-HAM frames also execute through
-actual WebGL in the shared browser test. A fully covered lower screen no longer
+The third title image requires HAM. The showcase now selects **WebGL**;
+all eight captured intro frames, including that HAM title, execute through
+actual GPU decoding and composition in the shared browser test. A fully covered lower screen no longer
 gates the visible owner's mode; partially exposed HAM overlap remains bounded.
 
 ## Compiler and harness additions
@@ -202,7 +202,7 @@ shows half the screen; **JOY** selects the complete view.
 Adjacent lowres windows now use the existing native setup-row slicing path even
 without an overlap/explicit priority command. This fixes the real-time main
 startup's copper pre-fetch budget failure; no CPU overlay or budget relaxation
-is used. The normal application retains Canvas for the intro's HAM image, while
+is used. The normal application now uses WebGL for the intro's HAM image, while
 all eight main-game checkpoints also execute with actual WebGL.
 
 ## Next milestones
@@ -214,7 +214,8 @@ all eight main-game checkpoints also execute with actual WebGL.
    load menus, minigames, scores and clean game-over/completion paths. The source
    compiles as a whole, but those paths are not established by first-room coverage.
 3. Keep IndexedDB persistence separate from the current session filesystem.
-4. Bring HAM to WebGL; the current intro retains an explicitly selected Canvas host.
+4. WebGL HAM6 is implemented; retain CPU/GPU intro comparisons. HAM8 and
+   mid-line events remain separate work.
 5. Add ZoneDefiner's remaining Cdown$/Cup$/Cright$/Cleft$/Paper$ authoring functions.
 
 Validation covers both music choices, both editions, the full title route,
@@ -261,8 +262,8 @@ This is a source correction; Unpack and screen priority keep native semantics.
 The input-only replay now opens and closes room 2's door after Zurück, with 21
 Canvas/WebGL checkpoints. Other later rooms have not been exercised.
 
-The direct `asm-room1.html` page now requests WebGL. The intro-linked pages keep
-Canvas for the intro's HAM images. Browser checks verify a WebGL2 context on the
+The direct `asm-room1.html` page now requests WebGL. The intro-linked pages also use
+WebGL for the intro's HAM images. Browser checks verify a WebGL2 context on the
 direct application page, including entry and Restart.
 
 ASM-6 has intentionally proportional metrics: A advances 5 pixels, I and S 4,

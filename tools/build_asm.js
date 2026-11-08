@@ -15,18 +15,18 @@ function pages() {
   const outputs=new Map();
   for(const debug of [false,true]) {
     const file=debug?'asm-intro-debug.html':'asm-intro.html';
-    let page=buildGamePage(source,{title:'ASM — Das Spiel: limited demo intro'+(debug?' (debug)':''),assets,diskFonts,renderer:'canvas',stopOnUnlinkedRun:true,debug});
+    let page=buildGamePage(source,{title:'ASM — Das Spiel: limited demo intro'+(debug?' (debug)':''),assets,diskFonts,renderer:'webgl',stopOnUnlinkedRun:true,debug});
     const preview=n=>'https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+n;
     const other=debug?'asm-intro.html':'asm-intro-debug.html';
     page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular preview':'Debug preview'}</a> · <a href="${preview('asm-intro-checks.html')}">Browser checks</a></nav><h1>`)
-      .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse to choose music and edition; click to advance the intro.').replace('<details class="game-help">','<p>Development preview of the complete original intro. Use the mouse to choose music and edition, then click through the logo and title screens; right click skips to loading. Canvas renders the HAM title image. The main adventure is the next milestone and is not included yet.</p><details class="game-help">');
+      .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse to choose music and edition; click to advance the intro.').replace('<details class="game-help">','<p>Development preview of the complete original intro. Use the mouse to choose music and edition, then click through the logo and title screens; right click skips to loading. WebGL renders the HAM title image. The main adventure is the next milestone and is not included yet.</p><details class="game-help">');
     outputs.set(file,page);
   }
   const main=require('./asmLimitedSource')(fs.readFileSync(path.join(root,'ASM.current.AMOS')));
   const gameAssets={...assets,...require('./asmGameAssets').prepare()};
   for(const debug of [false,true]) {
     let page=buildGamePage(source,{title:'ASM — Das Spiel: limited demo (rooms 1–5)'+(debug?' (debug)':''),assets:gameAssets,diskFonts,
-      programs:{'ASM:ASM.Main':main.toString('base64')},renderer:'canvas',debug,restartFromEntry:true,directories:['Df0:','Ram:']});
+      programs:{'ASM:ASM.Main':main.toString('base64')},renderer:'webgl',debug,restartFromEntry:true,directories:['Df0:','Ram:']});
     const other=debug?'asm-game.html':'asm-game-debug.html';
     const preview=n=>'https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+n;
     page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular build':'Debug build'}</a> · <a href="${preview('asm-main-checks.html')}">Browser checks</a> · <a href="${preview('asm-rooms.html')}">Room gallery</a></nav><h1>`)

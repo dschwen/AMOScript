@@ -9722,10 +9722,11 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       if (frame.chipset === 'AGA') fail('AGA is not implemented');
       if (frame.outputWidth > Math.min(caps.maxTextureSize, caps.maxViewport[0]) ||
           Math.max(1, frame.lines) > Math.min(caps.maxTextureSize, caps.maxViewport[1])) fail('frame exceeds capabilities');
+      let hamWidth = 0;
       for (let line = 0; line < frame.lines; line++) {
         const row = line * 32, regs = frame.lineRegs, control = regs[row + 8], planes = (control >> 12) & 7;
-        if (control & 0x800) fail('HAM is not implemented', line);
-        if ((control & ~0xf604) || planes > (control & 0x8000 ? 4 : 6)) fail('unsupported bitplane mode', line);
+        if ((control & ~0xfe04) || planes > (control & 0x8000 ? 4 : 6) ||
+            ((control & 0x800) && (![5, 6].includes(planes) || (control & 0x8400)))) fail('unsupported bitplane mode', line);
         if (regs[row + 9] > 255 || regs[row + 10] > 127 || regs[row + 11] || regs[row + 12] ||
             Math.abs(regs[row + 15] | 0) > 65535) fail('extended registers are not implemented', line);
         if (regs[row + 17]) fail('mid-line events are not implemented', line);
@@ -9739,30 +9740,48 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         if ((regs[row + 16] & 3) !== 3 || Math.min(frame.outputWidth, stop) <= Math.max(0, start)) continue;
         const samples = frame.samplesPerLowresPixel / (control & 0x8000 ? 2 : 1);
         const last = Math.floor((Math.min(frame.outputWidth, stop) - 1 - start) / samples);
+        if (control & 0x800) {
+          if (last >= 4096) fail('HAM source span exceeds supported limit', line);
+          hamWidth = Math.max(hamWidth, last + 1);
+        }
         for (let plane = 0; plane < planes; plane++) {
           const delay = ((regs[row + 9] >> (plane % 2 ? 4 : 0)) & 15) * (control & 0x8000 ? 2 : 1);
           const bit = last + (regs[row + 15] | 0) - delay;
           if (bit >= 0 && regs[row + plane] + Math.floor(bit / 8) >= chip.length) fail(`bitplane ${plane + 1} fetch out of bounds`, line);
         }
       }
+      if (hamWidth > Math.min(caps.maxTextureSize, caps.maxViewport[0])) fail('HAM source span exceeds texture capabilities');
+      return hamWidth;
     }
     function draw() {
       if (!info) fail('no frame is loaded');
       lastError = null;
+      resources.prepareHam(info.hamWidth, Math.max(1, info.lines));
       if (info.lines) {
         resources.runPass('decode', 'indexBuf', { chip: 'chip', regs: 'lineRegs' }, { nativeSamples: info.samples });
-        resources.runPass('resolve', 'colourBuf', { indices: 'indexBuf', regs: 'lineRegs', palette: 'linePal', sprites: 'lineSprites' }, { nativeSamples: info.samples });
+        let history = 'indexBuf', hamPasses = 0;
+        if (info.hamWidth) {
+          resources.runPass('hamDecode', 'hamA', { chip: 'chip', regs: 'lineRegs', palette: 'linePal' }, { nativeSamples: info.samples, outputWidth: info.width });
+          history = 'hamA'; hamPasses++;
+          for (let distance = 1; distance < info.hamWidth; distance *= 2) {
+            const target = history === 'hamA' ? 'hamB' : 'hamA';
+            resources.runPass('hamScan', target, { history }, { scanStride: distance });
+            history = target; hamPasses++;
+          }
+        }
+        info.passes = 2 + hamPasses;
+        resources.runPass('resolve', 'colourBuf', { indices: 'indexBuf', regs: 'lineRegs', palette: 'linePal', sprites: 'lineSprites', hamHistory: history }, { nativeSamples: info.samples });
         frames++;
       }
-      lastResult = Object.freeze({ backend: info.lines ? 'gpu' : 'gpu-empty', passes: info.lines ? 2 : 0,
+      lastResult = Object.freeze({ backend: info.lines ? 'gpu' : 'gpu-empty', passes: info.lines ? info.passes : 0,
         revision: info.revision, width: info.width, lines: info.lines });
       return lastResult;
     }
     function render(snapshot) {
       if (resources.state === 'disposed') fail('renderer is disposed');
-      validate(snapshot);
+      const hamWidth = validate(snapshot);
       const { frame } = snapshot;
-      info = { revision: frame.revision, width: frame.outputWidth, lines: frame.lines, samples: frame.samplesPerLowresPixel,
+      info = { revision: frame.revision, width: frame.outputWidth, lines: frame.lines, samples: frame.samplesPerLowresPixel, hamWidth,
         pixelAspect: { ...frame.pixelAspect } };
       lastError = null;
       try {
@@ -9820,7 +9839,8 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       return lastPresentation;
     }
     try {
-      const sources = createShaderSources(); resources.addPass('decode', sources.decode); resources.addPass('resolve', sources.resolve); resources.addPass('present', sources.present);
+      const sources = createShaderSources();
+      for (const name of ['decode', 'hamDecode', 'hamScan', 'resolve', 'present']) resources.addPass(name, sources[name]);
     } catch (error) { resources.dispose(); throw error; }
     return { render, readPixels, present, clear, resources, dispose() { info = null; lastResult = null; presentationOptions = null; lastPresentation = null; resources.dispose(); },
       get state() { return lastError && resources.state === 'ready' ? 'error' : resources.state; },
@@ -10078,6 +10098,15 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     try { initialize(); }
     catch (error) { dispose(); throw error; }
     return { upload, readTexture, addPass, runPass, dispose, capabilities,
+      prepareHam(width, height) {
+        ready();
+        if (!Number.isInteger(width) || width < 0 || width > 4096 || !Number.isInteger(height) || height < 1) fail('invalid HAM target dimensions');
+        for (const name of ['hamA', 'hamB']) {
+          if (width) allocate(name, width, height, 'uint', 1, width * height, true);
+          else if (textures.has(name)) { removeTexture(textures.get(name)); textures.delete(name); }
+        }
+        check();
+      },
       get state() { return state; }, get context() { return gl; },
       getTexture(name) {
         ready(); const record = textures.get(name);
@@ -10096,18 +10125,10 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     uniform uint nativeSamples;
     uint reg(int column, int line) { return texelFetch(regs, ivec2(column, line), 0).r; }
   `;
-  const decode = `${header}
+  const fetchIndex = `
     uniform highp usampler2D chip;
-    layout(location = 0) out uint indexValue;
-    void main() {
-      int x = int(gl_FragCoord.x), line = int(gl_FragCoord.y);
-      uint control = reg(8, line), flags = reg(16, line);
-      int start = int(reg(13, line)), stop = int(reg(14, line));
-      if ((flags & 3u) != 3u || x < start || x >= stop) { indexValue = 256u; return; }
-      uint samples = (control & 32768u) != 0u ? nativeSamples / 2u : nativeSamples;
-      // Unsigned subtraction preserves a negative signed window origin.
-      uint sourceX = (uint(x) - uint(start)) / samples;
-      uint count = (control >> 12u) & 7u, value = 0u;
+    uint sourceIndex(uint sourceX, int line) {
+      uint control = reg(8, line), count = (control >> 12u) & 7u, value = 0u;
       for (uint plane = 0u; plane < 6u; plane++) {
         if (plane >= count) break;
         uint delay = (reg(9, line) >> ((plane & 1u) * 4u)) & 15u;
@@ -10118,13 +10139,68 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         uint byteValue = texelFetch(chip, ivec2(int(address & 2047u), int(address >> 11u)), 0).r;
         value |= ((byteValue >> (7u - (uint(sourceBit) & 7u))) & 1u) << plane;
       }
-      indexValue = value;
+      return value;
+    }
+  `;
+  const decode = `${header}
+    ${fetchIndex}
+    layout(location = 0) out uint indexValue;
+    void main() {
+      int x = int(gl_FragCoord.x), line = int(gl_FragCoord.y);
+      uint control = reg(8, line), flags = reg(16, line);
+      int start = int(reg(13, line)), stop = int(reg(14, line));
+      if ((flags & 3u) != 3u || x < start || x >= stop) { indexValue = 256u; return; }
+      uint samples = (control & 32768u) != 0u ? nativeSamples / 2u : nativeSamples;
+      // Unsigned subtraction preserves a negative signed window origin.
+      uint sourceX = (uint(x) - uint(start)) / samples;
+      indexValue = sourceIndex(sourceX, line);
+    }
+  `;
+  const hamDecode = `${header}
+    ${fetchIndex}
+    uniform highp sampler2D palette;
+    uniform uint outputWidth;
+    layout(location = 0) out uint updateValue;
+    void main() {
+      int x = int(gl_FragCoord.x), line = int(gl_FragCoord.y);
+      int start = int(reg(13, line)), stop = int(reg(14, line));
+      updateValue = 0u;
+      if ((reg(8, line) & 2048u) == 0u || (reg(16, line) & 3u) != 3u ||
+          stop <= max(0, start) || start >= int(outputWidth)) return;
+      int last = (min(int(outputWidth), stop) - 1 - start) / int(nativeSamples);
+      if (x > last) return;
+      uint code = sourceIndex(uint(x), line), operation = code >> 4u, value = code & 15u;
+      uint mask;
+      if (operation == 0u) {
+        uvec3 rgb = uvec3(round(texelFetch(palette, ivec2(int(value), line), 0).rgb * 15.0));
+        mask = 4095u; value = (rgb.r << 8u) | (rgb.g << 4u) | rgb.b;
+      } else {
+        uint shift = operation == 1u ? 0u : operation == 2u ? 8u : 4u;
+        mask = 15u << shift; value <<= shift;
+      }
+      updateValue = (mask << 12u) | value;
+    }
+  `;
+  const hamScan = `#version 300 es
+    precision highp float; precision highp int;
+    uniform highp usampler2D history;
+    uniform uint scanStride;
+    layout(location = 0) out uint updateValue;
+    void main() {
+      ivec2 at = ivec2(gl_FragCoord.xy);
+      uint later = texelFetch(history, at, 0).r;
+      updateValue = later;
+      if (uint(at.x) < scanStride) return;
+      uint earlier = texelFetch(history, at - ivec2(int(scanStride), 0), 0).r;
+      uint mask = later >> 12u;
+      updateValue = ((earlier | later) & 0xfff000u) | ((earlier & 4095u & ~mask) | (later & 4095u));
     }
   `;
   const resolve = `${header}
     uniform highp usampler2D indices;
     uniform highp usampler2D sprites;
     uniform highp sampler2D palette;
+    uniform highp usampler2D hamHistory;
     layout(location = 0) out vec4 colour;
     uvec3 paletteRgb(uint index, int line) {
       return uvec3(round(texelFetch(palette, ivec2(int(index), line), 0).rgb * 255.0));
@@ -10147,10 +10223,22 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
         uint pf2 = ((raw >> 1u) & 1u) | ((raw >> 2u) & 2u) | ((raw >> 3u) & 4u);
         bool choose2 = pf2 != 0u && ((priority & 64u) != 0u || pf1 == 0u);
         index = choose2 ? pf2 + 8u : pf1;
-      } else if (((control >> 12u) & 7u) == 6u) {
+      } else if ((control & 2048u) == 0u && ((control >> 12u) & 7u) == 6u) {
         halfbrite = (raw & 32u) != 0u; index &= 31u;
       }
       uvec3 rgb = paletteRgb(index, line);
+      if ((control & 2048u) != 0u) {
+        rgb = paletteRgb(0u, line);
+        int start = int(reg(13, line)), stop = int(reg(14, line));
+        if ((reg(16, line) & 3u) == 3u && x >= start && x < stop) {
+          uint sourceX = (uint(x) - uint(start)) / nativeSamples;
+          uint update = texelFetch(hamHistory, ivec2(int(sourceX), line), 0).r;
+          uvec3 base = rgb / 17u;
+          uint word = ((base.r << 8u) | (base.g << 4u) | base.b);
+          word = (word & ~(update >> 12u)) | (update & 4095u);
+          rgb = uvec3((word >> 8u) & 15u, (word >> 4u) & 15u, word & 15u) * 17u;
+        }
+      }
       if (halfbrite) rgb = ((rgb / 17u) >> 1u) * 17u;
       for (int pair = 0; pair < 4; pair++) {
         uint a = spriteValue(pair * 2, x, line), b = spriteValue(pair * 2 + 1, x, line);
@@ -10181,7 +10269,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       colour = texelFetch(image, ivec2(int(sourceX), int(sourceY)), 0);
     }
   `;
-  return Object.freeze({ decode, resolve, present });
+  return Object.freeze({ decode, hamDecode, hamScan, resolve, present });
 }), (function presentationLayout(frame, viewportWidth, viewportHeight, options = {}) {
   const fail = message => { throw new Error(`Display presentation: ${message}`); };
   if (!frame || !Number.isInteger(frame.outputWidth) || frame.outputWidth < 1 || frame.outputWidth > 4096 ||

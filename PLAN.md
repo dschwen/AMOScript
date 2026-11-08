@@ -33,8 +33,8 @@ runtime implementations. The first-room replay answers the original ASM prompt,
 inspects a poster and pulls the handle into inventory; eight Canvas/eight actual
 GPU frames and 81,920 independent pixels cover it, including adjacent-window
 startup. The application chains the original intro into the main, preserving
-font enumeration and Ram:Level; Restart returns to the entry intro. Canvas remains
-explicit for the intro's HAM image. IO Light is the half-screen edition; JOY is full.
+font enumeration and Ram:Level; Restart returns to the entry intro. WebGL now also renders
+the intro's HAM image. IO Light is the half-screen edition; JOY is full.
 
 First-room assets are pinned with preparation/provenance. Befehle.Pic's alignment
 byte is corrected only during preparation; Befehle2.Pic is empty and its disk block
@@ -42,7 +42,8 @@ is overwritten, so its provisional Befehle4 conversation-panel substitution is
 visible on the page. Next: recover that panel, pin/validate later rooms/dialogue
 and minigame assets, then cover room progression and real save/load/end paths.
 Do not claim complete adventure execution. ZoneDefiner's text-control strings,
-IndexedDB persistence and WebGL HAM remain separate work.
+IndexedDB persistence remains separate work. WebGL HAM6 now uses GPU prefix
+scans; see [implementation and coverage](docs/webgl-ham.md).
 
 The shared harness now offers a [device-keyboard widget](docs/mobile-keyboard.md).
 A real focused input sends committed text, IME/Latin-1 characters and control keys
@@ -729,7 +730,7 @@ pool; finish DMA contention/timing and native mixed-layout capture coverage
 before claiming the complete sprite-reference workstream. Canvas assertions alone do not establish
 WebGL2 availability or GPU parity; the separate integer readback probe now proves
 local WebGL2 capability. The native non-HAM GPU renderer now passes 179 local
-GPU/CPU frames, including 100 seeded inputs. General viewport/input integration, HAM/events
+GPU/CPU frames, including 100 seeded inputs. General viewport/input integration, HAM8/events
 and unfinished mode/capture gates remain open.
 
 - Model object creation, movement, image selection, visibility, priority,
@@ -814,7 +815,7 @@ patches. Describe coverage precisely rather than claiming full AMOS support.
    with 179 GPU/CPU comparisons and restored-shader rerendering.
    GPU nearest/aspect/letterbox presentation now passes six canvas/restore checks.
    Bounded live host switching/input integration now passes; next add arbitrary
-   viewport/input routing, live diff, HAM and event support;
+   viewport/input routing, live diff, HAM8 and event support;
    [resource boundaries](docs/webgl-resources.md) remain explicit.
 6. Continue through D2–D6 and all associated M0–M12 gates. Build CPU/GPU parity
    on shared snapshots before replacing drawing storage or enabling new modes.
@@ -971,3 +972,9 @@ The two _C files are native compiled wrappers; use editable counterparts. Remain
 runtime work: locate/decode Fastballfont/9 glyph data, investigate the intro IFF's
 trailing BODY byte, then validate intro/editor interaction. No source/assets were
 rewritten or checks bypassed. See docs/fastball.md.
+
+## WebGL HAM6 milestone
+
+Implemented on `feature/webgl-ham6`: bounded five/six-plane HAM decoding and
+colour carry on the GPU, with prefix scans, sprite composition and restoration.
+See [plan](docs/webgl-ham-plan.md) and [contract](docs/webgl-ham.md).

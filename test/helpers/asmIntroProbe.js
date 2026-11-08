@@ -22,7 +22,7 @@ module.exports=async function asmIntroProbe(page) {
       if(match){const want=Uint8Array.from(atob(expected[match]),c=>c.charCodeAt(0)),actual=p.display.screen().pixels;check(want.length===actual.length&&actual.every((v,i)=>v===want[i]),'ASM picture pixels differ: '+label);picturePixels+=want.length;}
       host.render();const cpu=p.display.canvasFrame();frames++;
       if(globalThis.AMOS_DEMO_OBSERVE)globalThis.AMOS_DEMO_OBSERVE({name:'Canvas: ASM '+label,width:cpu.width,height:cpu.height,rgba:cpu.rgba});
-      if(ham){check(p.display.screen().ham,'Expected actual HAM screen');return;}
+      if(ham)check(p.display.screen().ham,'Expected actual HAM screen');
       const old=p.display.canvasFrame;p.display.canvasFrame=()=>{throw Error('ASM GPU used CPU presentation');};
       try{gpuHost.render();}finally{p.display.canvasFrame=old;}
       const actual=gpu.readPixels(),reference=p.display.renderDisplay();check(gpu.stats.lastResult.backend==='gpu'&&actual.length===reference.length&&actual.every((v,i)=>v===reference[i]),'ASM GPU mismatch: '+label);gpuFrames++;
@@ -47,20 +47,20 @@ module.exports=async function asmIntroProbe(page) {
       until(()=>p.state.halted,'Run');capture('loading');
       check(requests.at(-1)[0]==='Run'&&requests.at(-1)[1].filename==='ASM:ASM.Main','Original Run target differs');
       check(memory['ram:level']==='1\r\n','Selected level was not saved');check(clock.pending()===0,'Terminal Run left timers');
-      // Exercise the actual packaged page, with its selected Canvas renderer,
+      // Exercise the actual packaged page, with its selected WebGL renderer,
       // preloaded fonts, icon controls and no startup clicks injected into AMOS.
       const frame=document.createElement('iframe');frame.style.cssText='width:800px;height:600px';document.body.append(frame);
       const loaded=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=debugPage;await loaded;
       try{
         const doc=frame.contentDocument,win=frame.contentWindow;doc.getElementById('play-game').click();await new Promise(r=>setTimeout(r,180));
         check(doc.getElementById('game-viewport').dataset.phase==='running','Packaged intro failed to start');
-        check(doc.getElementById('game-input').getContext('2d'),'HAM showcase did not select Canvas');
+        check(doc.getElementById('game-input').getContext('webgl2'),'HAM showcase did not select WebGL');
         doc.getElementById('game-stop').click();check(doc.getElementById('game-viewport').dataset.phase==='stopped','Packaged Stop');
         doc.getElementById('game-resume').click();check(doc.getElementById('game-viewport').dataset.phase==='running','Packaged Resume');
         doc.getElementById('game-restart').click();await new Promise(r=>setTimeout(r,100));check(doc.getElementById('game-viewport').dataset.phase==='running','Packaged Restart');
         const pause=ms=>new Promise(r=>setTimeout(r,ms));
         const point=async(x,y,buttons=1)=>{
-          const input=doc.getElementById('game-input'),rect=input.getBoundingClientRect(),clientX=rect.left+x/input.width*rect.width,clientY=rect.top+y/input.height*rect.height;
+          const input=doc.getElementById('game-input'),rect=input.getBoundingClientRect(),physical=win.ASM_TEST_PROGRAM.display.snapshotDisplay().frame,clientX=rect.left+x/(physical.outputWidth/physical.samplesPerLowresPixel)*rect.width,clientY=rect.top+y/physical.lines*rect.height;
           input.dispatchEvent(new win.PointerEvent('pointerdown',{pointerId:1,pointerType:'mouse',button:buttons===2?2:0,buttons,clientX,clientY,bubbles:true}));await pause(40);
           input.dispatchEvent(new win.PointerEvent('pointerup',{pointerId:1,pointerType:'mouse',button:0,buttons:0,clientX,clientY,bubbles:true}));await pause(40);
         };
@@ -77,5 +77,5 @@ module.exports=async function asmIntroProbe(page) {
     }finally{host.detach();gpuHost.detach();p.stop();const gl=gpu.resources.context;gpu.dispose();const ext=gl.getExtension('WEBGL_lose_context');if(ext&&!gl.isContextLost())ext.loseContext();}
   },{source:new T(fs.readFileSync(path.join(root,'ASM_Intro.AMOS'))).toModule(),assets:prepared.assets,fonts,
     expected:Object.fromEntries(['Level.Pic','Intro1.Pic','Intro2.Pic','Intro3.Pic'].map(n=>[n,Buffer.from(bitmap(path.join(root,'intro',n)).pixels).toString('base64')])),
-    clockSource:require('./fakeTimers').createFakeTimers.toString(),gpuSources:require('./webglHostSources')(),debugPage:require('../../tools/build_asm').pages().get('asm-intro-debug.html')});
+    clockSource:require('./fakeTimers').createFakeTimers.toString(),gpuSources:require('./webglHostSources')(),debugPage:require('../../tools/build_asm').pages().get('asm-intro-debug.html').replace('host.attach(live);','globalThis.ASM_TEST_PROGRAM=live;host.attach(live);')});
 };

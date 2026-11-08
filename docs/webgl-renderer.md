@@ -1,4 +1,4 @@
-# Non-HAM WebGL2 renderer
+# WebGL2 renderer
 
 [renderer.js](../lib/display/webgl/renderer.js) implements actual GPU bitplane
 decode and colour/sprite resolve for the current CPU snapshot subset. Chromium
@@ -79,7 +79,7 @@ Supported profiles match normal CPU OCS/ECS grids of two/four native samples per
 lowres pixel, lowres up to six planes and hires up to four. Zero-plane lines,
 borders, disabled playfield DMA, per-line resolution/palette changes and explicit
 interlaced-field pointers are supported. GPU field presentation/weaving remains
-separate; the existing explicit CPU field composer is unchanged. HAM, AGA,
+separate; the existing explicit CPU field composer is unchanged. Bounded [HAM6 uses GPU prefix scans](webgl-ham.md). AGA,
 superhires extended registers and mid-line events reject before uploading/drawing.
 Planned modes and unfinished AMOS commands do not become implemented merely
 because their data could fit these textures.
@@ -130,6 +130,9 @@ CPU reference; context loss keeps the VM running, and restoration works while
 stopped. Clearing a removed screen forgets its presentation before restoration.
 See [the host contract](wonderland-game.md#live-webgl2-presentation).
 
-General viewport/letterbox input routing, live diff, HAM, mid-line events, full interlace presentation, remaining ECS modes and target-device timing
+General viewport/letterbox input routing, live diff, HAM8, mid-line events, full interlace presentation, remaining ECS modes and target-device timing
 budgets remain open. The full M7 gate still includes modes/captures that earlier
 milestones have not supplied; current-subset parity does not close those gates.
+
+HAM6 has its own [GPU contract and verification](webgl-ham.md). Non-HAM frames
+retain the two-pass path described above; HAM adds owned prefix-scan passes.
