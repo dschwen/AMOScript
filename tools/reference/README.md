@@ -28,3 +28,12 @@ implementation notes. `turbo_plus.py` and `amcaf.py` reproduce the artifacts fro
 the supplied distributions; `--check` verifies reproducibility. Original binary
 hashes are pinned, and optional independent amostools token images validate the
 recovered offsets/names/signatures. These catalogs do not enable runtime support.
+
+## Target extension inventories
+
+`inventory_extensions.py` walks tokenized source with the bounded reference
+decoder and resolves commands using explicit `--extension SLOT=CATALOG` mappings.
+It does not enable compiler support. The checked-in `ghostlight-extensions.json`
+contains only hashes, signatures and call locations; the game remains external.
+See the [Ghostlight implementation plan](../../docs/ghostlight-extension-plan.md)
+for the reproduction command and acceptance milestones.

@@ -16,7 +16,8 @@ and preview isolation are exercised by the Electron app tests.
    `Levels/One` becomes `GAME:Levels/One`. Leave the label empty for ordinary
    relative filenames. Importing a folder under two distinct labels creates aliases.
 3. Choose title, display backend, joystick port/fire keys, speed and touch controls.
-   Advanced options enable instruction combining and debug exports.
+   Advanced options enable instruction combining, debug exports and explicit
+   [extension slot mappings](extension-profiles.md).
 4. **Build & preview** compiles in a worker and opens a separate game window.
    Click Play Game there. Preview always enables diagnostics so missing AMOS paths
    and source locations can be reported back in the builder. Only one preview is

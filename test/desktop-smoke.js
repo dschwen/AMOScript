@@ -13,10 +13,11 @@ async function run(){
     const save=async value=>electron.evaluate((_electron,value)=>globalThis.smokeDialogs.save.push(value),value);
     assert.deepStrictEqual(await page.evaluate(()=>[typeof require,typeof amosBuilder]),['undefined','object']);
     await choose(main);await page.click('#choose-main');await page.locator('#main-path').filter({hasText:'Main.AMOS'}).waitFor();
-    await choose(assets);await page.click('#add-mount');await page.getByLabel('Disk label 1',{exact:true}).fill('GAME:');await page.fill('#title','Desktop <sample>');await page.selectOption('#touch','off');
+    await choose(assets);await page.click('#add-mount');await page.getByLabel('Disk label 1',{exact:true}).fill('GAME:');await page.fill('#title','Desktop <sample>');await page.selectOption('#touch','off');await page.click('summary');await page.fill('#extensions','8=amcaf-1.50beta4, 12=turbo-plus-2.15');
     const projectFile=path.join(temp,'saved project.amos-project.json');await save(projectFile);await page.click('#save');await page.waitForFunction(()=>document.querySelector('#status').textContent==='Project saved.');
-    const saved=JSON.parse(fs.readFileSync(projectFile));assert.strictEqual(saved.main,'Main.AMOS');assert.strictEqual(saved.mounts[0].directory,'Disk files');assert.strictEqual(saved.options.touch,'off');
+    const saved=JSON.parse(fs.readFileSync(projectFile));assert.strictEqual(saved.main,'Main.AMOS');assert.strictEqual(saved.mounts[0].directory,'Disk files');assert.strictEqual(saved.options.touch,'off');assert.deepStrictEqual(saved.options.extensions,{8:'amcaf-1.50beta4',12:'turbo-plus-2.15'});
     await page.fill('#title','Temporary change');await choose(projectFile);await page.click('#open');await page.waitForFunction(()=>document.querySelector('#title').value==='Desktop <sample>');
+    assert.strictEqual(await page.inputValue('#extensions'),'8=amcaf-1.50beta4, 12=turbo-plus-2.15');
     fs.mkdirSync(path.join(__dirname,'artifacts'),{recursive:true});await page.screenshot({path:path.join(__dirname,'artifacts/desktop-builder.png')});
     let next=electron.waitForEvent('window');await page.click('#build');const preview=await next;await preview.waitForSelector('#play-game');
     assert.deepStrictEqual(await preview.evaluate(()=>[typeof require,typeof amosBuilder]),['undefined','undefined']);assert.strictEqual(await preview.evaluate(()=>location.protocol),'amos-preview:');

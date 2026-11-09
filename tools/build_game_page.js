@@ -22,7 +22,7 @@ function loadAssets(filename, prefix = '') {
   }
   return assets;
 }
-function buildGamePage(source, { title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, slowdown = 1, initialMouse = null, renderer = 'webgl', touch = 'auto', diskFonts = [], stopOnUnlinkedRun = false, directories = [], restartFromEntry = false, entryFiles = {} } = {}) {
+function buildGamePage(source, { extensions = {}, title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, slowdown = 1, initialMouse = null, renderer = 'webgl', touch = 'auto', diskFonts = [], stopOnUnlinkedRun = false, directories = [], restartFromEntry = false, entryFiles = {} } = {}) {
   if(!entryFiles || typeof entryFiles!=='object' || Array.isArray(entryFiles) || Object.values(entryFiles).some(value=>typeof value!=='string' || Array.from(value).some(character=>character.charCodeAt(0)>255)))throw Error('entryFiles must map names to byte strings');
   if(typeof restartFromEntry!=='boolean')throw Error('restartFromEntry must be boolean');
   require('../lib/amos/files').createMemoryFiles({},[],directories);
@@ -39,11 +39,11 @@ function buildGamePage(source, { title = 'AMOS game', assets = {}, programs = {}
   const speedScales = [...new Set([1, 2, 3, 4, slowdown])].sort((a, b) => a - b);
   const speedOptions = speedScales.map(scale => `<option value="${scale}"${scale === slowdown ? ' selected' : ''}>Speed: ${Math.round(100 / scale)}%</option>`).join('');
   const fireLabel = [...new Set(fire.map(code => /^Control(?:Left|Right)$/.test(code) ? 'Ctrl' : /^Key[A-Z]$/.test(code) ? code.slice(3) : code))].join('/');
-  const compiled = new Transpiler(source).toModule({ optimize });
+  const compiled = new Transpiler(source, { extensions }).toModule({ optimize });
   const programNames=new Set();
   const linked=Object.entries(programs).map(([name,bytes])=>{
     const key=name.replace(/\\/g,'/').toLowerCase();if(programNames.has(key))throw Error('Duplicate linked program name: '+name);programNames.add(key);
-    return `[${json(key)},(()=>{const module={exports:{}};${new Transpiler(Buffer.from(bytes,'base64')).toModule({optimize})}\nreturn module.exports;})()]`;
+    return `[${json(key)},(()=>{const module={exports:{}};${new Transpiler(Buffer.from(bytes,'base64'), { extensions }).toModule({optimize})}\nreturn module.exports;})()]`;
   }).join(',');
   const scripts = ['browser', 'fullscreen', 'webAudio', 'browserAudio', 'files'].map(name => script(fs.readFileSync(path.join(root, 'lib/amos', `${name}.js`), 'utf8'))).join('\n');
   const model = require('../lib/display/model/frameState').createFrameStateModel;
@@ -68,16 +68,19 @@ ${script(runtime)}
 function main(args) {
   const positional = [], options = {};
   for (let i = 0; i < args.length; i++) {
-    if (['--optimize', '--debug'].includes(args[i])) options[args[i].slice(2)] = true;
+    if (args[i] === '--extension') {
+      if (i + 1 === args.length) throw Error('Missing value for --extension');
+      (options.extensionMappings ||= []).push(args[++i]);
+    } else if (['--optimize', '--debug'].includes(args[i])) options[args[i].slice(2)] = true;
     else if (['--assets', '--programs', '--prefix', '--port', '--title', '--fire', '--slowdown', '--touch'].includes(args[i])) {
       const name = args[i].slice(2); if (i + 1 === args.length || args[i + 1].startsWith('--')) throw new Error(`Missing value for --${name}`);
       options[name] = args[++i];
     } else if (args[i].startsWith('--')) throw new Error(`Unknown option: ${args[i]}`);
     else positional.push(args[i]);
   }
-  if (positional.length !== 2) throw new Error('Usage: node tools/build_game_page.js input.AMOS output.html [--optimize] [--debug] [--slowdown 2] [--touch auto|always|off] [--assets manifest.json] [--programs programs.json] [--prefix RII:] [--port 1] [--fire Enter,Space] [--title "My game"]');
+  if (positional.length !== 2) throw new Error('Usage: node tools/build_game_page.js input.AMOS output.html [--extension SLOT=LIBRARY] [--optimize] [--debug] [--slowdown 2] [--touch auto|always|off] [--assets manifest.json] [--programs programs.json] [--prefix RII:] [--port 1] [--fire Enter,Space] [--title "My game"]');
   const [input, output] = positional;
-  const page = buildGamePage(fs.readFileSync(input), { title: options.title || path.basename(input, path.extname(input)),
+  const page = buildGamePage(fs.readFileSync(input), { extensions: require('../lib/ExtensionProfiles').parseMappings(options.extensionMappings), title: options.title || path.basename(input, path.extname(input)),
     touch: options.touch || 'auto', assets: loadAssets(options.assets, options.prefix || ''), programs:loadAssets(options.programs,options.prefix||''), port: options.port == null ? 1 : Number(options.port), fire: options.fire == null ? ['Space', 'Enter'] : options.fire.split(','), optimize: !!options.optimize, debug: !!options.debug, slowdown: options.slowdown == null ? 1 : Number(options.slowdown) });
   fs.writeFileSync(output, page, { flag: 'wx' });
 }

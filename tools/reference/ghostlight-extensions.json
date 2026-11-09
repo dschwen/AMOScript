@@ -1,0 +1,462 @@
+{
+  "version": 1,
+  "evidence": "Static inventory; not compilation or native execution.",
+  "source": "GhostLight2.amos",
+  "sha256": "2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8",
+  "bytes": 67810,
+  "physicalLines": 2005,
+  "codeBytes": 67784,
+  "trailingBytes": 6,
+  "commands": [
+    {
+      "slot": 1,
+      "offset": "01d6",
+      "librarySha256": null,
+      "name": "led off",
+      "signature": "I",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 1775,
+          "byte": 60176,
+          "reference": 255
+        }
+      ]
+    },
+    {
+      "slot": 1,
+      "offset": "02ba",
+      "librarySha256": null,
+      "name": "track load",
+      "signature": "I2,0",
+      "occurrences": 2,
+      "locations": [
+        {
+          "line": 1774,
+          "byte": 60140,
+          "reference": 255
+        },
+        {
+          "line": 1777,
+          "byte": 60202,
+          "reference": 255
+        }
+      ]
+    },
+    {
+      "slot": 2,
+      "offset": "0056",
+      "librarySha256": null,
+      "name": "unpack",
+      "signature": "I0t0",
+      "occurrences": 3,
+      "locations": [
+        {
+          "line": 160,
+          "byte": 5046,
+          "reference": 255
+        },
+        {
+          "line": 216,
+          "byte": 6414,
+          "reference": 255
+        },
+        {
+          "line": 273,
+          "byte": 7800,
+          "reference": 255
+        }
+      ]
+    },
+    {
+      "slot": 3,
+      "offset": "0016",
+      "librarySha256": null,
+      "name": "request off",
+      "signature": "I",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 1997,
+          "byte": 67742,
+          "reference": 255
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "008a",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "bank temporary",
+      "signature": "I0",
+      "occurrences": 5,
+      "locations": [
+        {
+          "line": 1785,
+          "byte": 60446,
+          "reference": 1
+        },
+        {
+          "line": 1786,
+          "byte": 60462,
+          "reference": 1
+        },
+        {
+          "line": 1787,
+          "byte": 60478,
+          "reference": 1
+        },
+        {
+          "line": 1788,
+          "byte": 60494,
+          "reference": 1
+        },
+        {
+          "line": 1789,
+          "byte": 60510,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "0346",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "raster wait",
+      "signature": "I0",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 752,
+          "byte": 24968,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "05d6",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "flush libs",
+      "signature": "I",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 2002,
+          "byte": 67776,
+          "reference": 0
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "0956",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "audio lock",
+      "signature": "I",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 2004,
+          "byte": 67790,
+          "reference": 0
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "108e",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt play",
+      "signature": "I0",
+      "occurrences": 3,
+      "locations": [
+        {
+          "line": 43,
+          "byte": 2084,
+          "reference": 1
+        },
+        {
+          "line": 52,
+          "byte": 2226,
+          "reference": 1
+        },
+        {
+          "line": 1776,
+          "byte": 60186,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "10a8",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt stop",
+      "signature": "I",
+      "occurrences": 2,
+      "locations": [
+        {
+          "line": 51,
+          "byte": 2216,
+          "reference": 0
+        },
+        {
+          "line": 81,
+          "byte": 2836,
+          "reference": 0
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "10c6",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt volume",
+      "signature": "I0",
+      "occurrences": 3,
+      "locations": [
+        {
+          "line": 44,
+          "byte": 2100,
+          "reference": 1
+        },
+        {
+          "line": 53,
+          "byte": 2242,
+          "reference": 1
+        },
+        {
+          "line": 256,
+          "byte": 7400,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "10f2",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt cia speed",
+      "signature": "I0",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 67,
+          "byte": 2528,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "1400",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt sam stop",
+      "signature": "I0",
+      "occurrences": 2,
+      "locations": [
+        {
+          "line": 1907,
+          "byte": 65406,
+          "reference": 1
+        },
+        {
+          "line": 1928,
+          "byte": 66168,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "1412",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt raw play",
+      "signature": "I0,0,0,0",
+      "occurrences": 2,
+      "locations": [
+        {
+          "line": 1914,
+          "byte": 65598,
+          "reference": 4
+        },
+        {
+          "line": 1929,
+          "byte": 66190,
+          "reference": 4
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "142a",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "pt sam bank",
+      "signature": "I0",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 1940,
+          "byte": 66478,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "158c",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "smouse key",
+      "signature": "0",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 1750,
+          "byte": 59604,
+          "reference": 0
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "offset": "16dc",
+      "librarySha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4",
+      "name": "odd",
+      "signature": "00",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 1797,
+          "byte": 60850,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 12,
+      "offset": "036e",
+      "librarySha256": "ddc8abb16f35cd2fb4230e2c70dc85e6bcbbfe5f73ebcc6712135471faaafb07",
+      "name": "f plot",
+      "signature": "I0,0,0",
+      "occurrences": 4,
+      "locations": [
+        {
+          "line": 1795,
+          "byte": 60728,
+          "reference": 3
+        },
+        {
+          "line": 1796,
+          "byte": 60786,
+          "reference": 3
+        },
+        {
+          "line": 1798,
+          "byte": 60882,
+          "reference": 3
+        },
+        {
+          "line": 1800,
+          "byte": 60954,
+          "reference": 3
+        }
+      ]
+    },
+    {
+      "slot": 12,
+      "offset": "044c",
+      "librarySha256": "ddc8abb16f35cd2fb4230e2c70dc85e6bcbbfe5f73ebcc6712135471faaafb07",
+      "name": "f point",
+      "signature": "00,0",
+      "occurrences": 1,
+      "locations": [
+        {
+          "line": 1794,
+          "byte": 60688,
+          "reference": 2
+        }
+      ]
+    },
+    {
+      "slot": 12,
+      "offset": "04fe",
+      "librarySha256": "ddc8abb16f35cd2fb4230e2c70dc85e6bcbbfe5f73ebcc6712135471faaafb07",
+      "name": "set planes",
+      "signature": "I0",
+      "occurrences": 5,
+      "locations": [
+        {
+          "line": 292,
+          "byte": 8362,
+          "reference": 1
+        },
+        {
+          "line": 295,
+          "byte": 8480,
+          "reference": 1
+        },
+        {
+          "line": 683,
+          "byte": 22676,
+          "reference": 1
+        },
+        {
+          "line": 687,
+          "byte": 22724,
+          "reference": 1
+        },
+        {
+          "line": 690,
+          "byte": 22782,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 12,
+      "offset": "0928",
+      "librarySha256": "ddc8abb16f35cd2fb4230e2c70dc85e6bcbbfe5f73ebcc6712135471faaafb07",
+      "name": "amos pri",
+      "signature": "I0",
+      "occurrences": 2,
+      "locations": [
+        {
+          "line": 68,
+          "byte": 2584,
+          "reference": 1
+        },
+        {
+          "line": 71,
+          "byte": 2634,
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "slot": 12,
+      "offset": "0b86",
+      "librarySha256": "ddc8abb16f35cd2fb4230e2c70dc85e6bcbbfe5f73ebcc6712135471faaafb07",
+      "name": "word hunt",
+      "signature": "00t0,0,0t0",
+      "occurrences": 3,
+      "locations": [
+        {
+          "line": 587,
+          "byte": 19640,
+          "reference": 5
+        },
+        {
+          "line": 590,
+          "byte": 19842,
+          "reference": 5
+        },
+        {
+          "line": 592,
+          "byte": 19982,
+          "reference": 5
+        }
+      ]
+    }
+  ]
+}

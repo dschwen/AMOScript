@@ -59,6 +59,10 @@ Expected output: `Start → One → Two → Three → End` (one item per line).
 Omit the output path to write JavaScript to stdout. The CLI never overwrites an
 existing output file. Run `node bin/amoscript --help` for usage.
 
+Third-party programs can supply explicit [extension slot mappings](docs/extension-profiles.md),
+for example `--extension 8=amcaf-1.50beta4 --extension 12=turbo-plus-2.15`.
+AMCAF and Turbo Plus support is currently partial; unsupported commands still reject.
+
 Application pages offer **⌨** for the phone/tablet keyboard: typed text, Enter and
 Backspace reach AMOS directly, bypassing joystick key mappings.
 See [device keyboard input](docs/mobile-keyboard.md).

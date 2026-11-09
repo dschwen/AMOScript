@@ -1,5 +1,11 @@
 # Compatibility and implementation status
 
+Explicit [compile-time extension profiles](extension-profiles.md) now select
+AMCAF V1.50beta4 or Turbo Plus V2.15 at configured slots. The first checked subset
+implements AMCAF integer/byte-string helpers and Bank Temporary, plus Turbo Word
+Hunt. Full Ghostlight compilation, graphics and AMCAF replay remain open; see
+the [milestone plan](ghostlight-extension-plan.md).
+
 Updated 2026-10-31. The current local baseline has **982 passing tests**, plus a
 passing real-Chromium rendering/input smoke test, 82 offline demo scenarios and
 WebGL2 capability probe.

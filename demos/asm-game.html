@@ -6816,7 +6816,41 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     throw new Error(`Unsupported input query ${name}`);
   }
 
+  // Third-party extension helpers retain the recovered integer widths/endpoints.
+  function extensionBytes(value, count) {
+    const bits = integer(value);
+    return Array.from({ length: count }, (_, i) => String.fromCharCode((bits >>> ((count - i - 1) * 8)) & 255)).join('');
+  }
+  function extensionAsc(value, count) {
+    if (typeof value !== 'string' || value.length < count) throw Error('Extension Asc requires enough string bytes');
+    let bits = 0;
+    for (let i = 0; i < count; i++) bits = (bits << 8) | (value.charCodeAt(i) & 255);
+    return count === 2 ? bits & 65535 : bits;
+  }
+  function extensionWordHunt(start, end, action, low, high) {
+    start = integer(start) & ~1; end = integer(end) & ~1;
+    action = integer(action); low = (integer(low) << 16) >> 16; high = (integer(high) << 16) >> 16;
+    if (start > end) [start, end] = [end, start];
+    const length = Math.max(2, end - start);
+    if (length > 1024 * 1024) throw Error('Word Hunt range exceeds 1 MiB');
+    // Preflight the complete scan, including the native equal-address read.
+    const bytes = bankMemory.read(start, length);
+    for (let i = 0; i < length; i += 2) {
+      const value = ((bytes[i] * 256 + bytes[i + 1]) << 16) >> 16;
+      if (action === 0 ? value === low : action < 0 ? value < low || value > high : value >= low && value <= high) return start + i;
+    }
+    return 0;
+  }
+
   return {
+    extensionOdd: value => (integer(value) & 1) ? -1 : 0,
+    extensionEven: value => (integer(value) & 1) ? 0 : -1,
+    extensionVclip: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return Math.max(low, Math.min(high, value)); },
+    extensionVin: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return value >= low && value <= high ? -1 : 0; },
+    extensionChrWord: value => extensionBytes(value, 2), extensionChrLong: value => extensionBytes(value, 4),
+    extensionAscWord: value => extensionAsc(value, 2), extensionAscLong: value => extensionAsc(value, 4),
+    extensionBankTemporary: number => { const bank = banks.get(integer(number)); if (!bank) throw Error('Bank not reserved'); bank.permanent = false; },
+    extensionWordHunt,
     arrayReference:(array,type,indices,alive)=>references().reference(array,type,indices,alive),
     arrayReferenceValue:(handle,index)=>references().value(integer(handle),integer(index)),
     arrayReferenceInfo:handle=>references().info(integer(handle)),interfaceArraySize:handle=>references().size(integer(handle)),interfaceArrayRead:(handle,index)=>references().read(integer(handle),integer(index)),
@@ -16701,7 +16735,41 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     throw new Error(`Unsupported input query ${name}`);
   }
 
+  // Third-party extension helpers retain the recovered integer widths/endpoints.
+  function extensionBytes(value, count) {
+    const bits = integer(value);
+    return Array.from({ length: count }, (_, i) => String.fromCharCode((bits >>> ((count - i - 1) * 8)) & 255)).join('');
+  }
+  function extensionAsc(value, count) {
+    if (typeof value !== 'string' || value.length < count) throw Error('Extension Asc requires enough string bytes');
+    let bits = 0;
+    for (let i = 0; i < count; i++) bits = (bits << 8) | (value.charCodeAt(i) & 255);
+    return count === 2 ? bits & 65535 : bits;
+  }
+  function extensionWordHunt(start, end, action, low, high) {
+    start = integer(start) & ~1; end = integer(end) & ~1;
+    action = integer(action); low = (integer(low) << 16) >> 16; high = (integer(high) << 16) >> 16;
+    if (start > end) [start, end] = [end, start];
+    const length = Math.max(2, end - start);
+    if (length > 1024 * 1024) throw Error('Word Hunt range exceeds 1 MiB');
+    // Preflight the complete scan, including the native equal-address read.
+    const bytes = bankMemory.read(start, length);
+    for (let i = 0; i < length; i += 2) {
+      const value = ((bytes[i] * 256 + bytes[i + 1]) << 16) >> 16;
+      if (action === 0 ? value === low : action < 0 ? value < low || value > high : value >= low && value <= high) return start + i;
+    }
+    return 0;
+  }
+
   return {
+    extensionOdd: value => (integer(value) & 1) ? -1 : 0,
+    extensionEven: value => (integer(value) & 1) ? 0 : -1,
+    extensionVclip: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return Math.max(low, Math.min(high, value)); },
+    extensionVin: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return value >= low && value <= high ? -1 : 0; },
+    extensionChrWord: value => extensionBytes(value, 2), extensionChrLong: value => extensionBytes(value, 4),
+    extensionAscWord: value => extensionAsc(value, 2), extensionAscLong: value => extensionAsc(value, 4),
+    extensionBankTemporary: number => { const bank = banks.get(integer(number)); if (!bank) throw Error('Bank not reserved'); bank.permanent = false; },
+    extensionWordHunt,
     arrayReference:(array,type,indices,alive)=>references().reference(array,type,indices,alive),
     arrayReferenceValue:(handle,index)=>references().value(integer(handle),integer(index)),
     arrayReferenceInfo:handle=>references().info(integer(handle)),interfaceArraySize:handle=>references().size(integer(handle)),interfaceArrayRead:(handle,index)=>references().read(integer(handle),integer(index)),
