@@ -82,3 +82,18 @@ outputs, but cannot establish that Windows batch launchers or hosted workflows
 have passed. The Windows packaging job is the authoritative platform check.
 
 No release is created merely by adding this workflow or pushing a branch.
+
+## Retry after a runner/infrastructure failure
+
+GitHub retired macOS 14 runners on November 2, 2026. Desktop installers now use
+`macos-15` (Apple Silicon). See the [runner image status](https://github.com/actions/runner-images#available-images).
+
+A failed tag run retains its original workflow definition. Retrying that run
+does not pick up workflow fixes committed later. Instead, open **Actions →
+Windows release → Run workflow**, choose the current `master` workflow and enter
+the existing tag, such as `v0.2.0`. The manual run uses the corrected workflow
+while all packaging and reusable CI jobs check out `refs/tags/v0.2.0`. Version
+checks and publication gates still apply; the existing tag is not moved.
+
+If a GitHub Release already exists, inspect it first: automatic retries do not
+overwrite published assets. This route is for a failed, unpublished release.
