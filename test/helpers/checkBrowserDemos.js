@@ -815,6 +815,22 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#repeat-controls').getAttribute('data-status'), 'stopped');
         await page.click('#repeat-detach');
       }
+      if (scenario.id === 'amcaf-pcm') {
+        for (let i = 0; i < 2; i++) {
+          await page.click('#amcaf-pcm-play');
+          await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.state === 'playing');
+        }
+        await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.contexts === '1');
+        await page.click('#amcaf-pcm-stop');
+        await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.contexts === '0');
+        assert.strictEqual(await page.locator('#amcaf-pcm-status').getAttribute('data-state'), 'off');
+        await page.click('#amcaf-pcm-play');
+        await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.state === 'playing');
+        await page.evaluate(() => AMOS_AMCAF_PCM_CLEANUP());
+        assert.strictEqual(await page.locator('#amcaf-pcm-status').getAttribute('data-contexts'), '0');
+        await page.click('#amcaf-pcm-play');
+        assert.strictEqual(await page.locator('#amcaf-pcm-status').getAttribute('data-state'), 'off');
+      }
       if (scenario.id === 'music') {
         for (let number = 1; number <= 6; number++) {
           await page.click(`#audio-sample-${number}`);

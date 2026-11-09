@@ -294,3 +294,17 @@ read-only external trace without publishing private assets. Scheduling, the
 repeat-aware audio adapter and VM lifetime integration remain next. No `Pt Play`
 token support or audible playback is claimed yet; see
 [AMCAF tracker implementation](amcaf-tracker.md).
+
+
+### AMCAF playback progress: repeat-aware PCM
+
+The portable PCM renderer now preserves a current fetch until its boundary when
+an instrument-only row replaces the pending repeat sample. Fractional phase,
+pitch/volume updates, stereo pairing and nonzero one-word loops are covered by
+unit tests and eight independent-formula/native Web Audio browser comparisons.
+The public `amcaf-pcm` gallery demo plays synthetic music at a declared 50-Hz
+preview clock with owned Play/Stop/disposal; no private assets are distributed.
+Both private tunes also render finite, nonzero stereo PCM through their first
+end signal locally. This supplies the repeat-aware rendering foundation;
+streaming audio, CIA/driver timing and VM/SFX ownership remain next, and `Pt Play`
+is still gated. See [AMCAF tracker implementation](amcaf-tracker.md).

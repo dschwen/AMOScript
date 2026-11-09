@@ -24,6 +24,10 @@ now normalize 302/86 to 288/80 and present narrow lowres views without increasin
 DMA reads. The laced atlas's full bitmap decodes against independent Python
 hashes; existing-screen Unpack preserves all rows. Its original new-screen
 interlaced/overscan presentation and AMCAF playback remain open.
+AMCAF now has a source-derived tick controller and repeat-aware PCM renderer,
+with an audible synthetic [browser preview](demos/amcaf-pcm.html). Private song
+checks reach their first loop; streaming/CIA timing and VM/SFX integration remain
+open, so Pt Play is still gated. See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface
 

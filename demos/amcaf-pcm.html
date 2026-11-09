@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMCAF repeat-aware music preview · AMOScript</title><style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:2rem auto;padding:0 1rem;color:#17202a;background:#f5f6f8}a{color:#07569c}button,select{font:inherit;padding:.5rem;margin:.4rem .5rem .6rem 0}button{cursor:pointer}pre{padding:1rem;background:white;white-space:pre-wrap;overflow-wrap:anywhere;max-height:32rem;overflow:auto}#stage{overflow:auto;max-height:65vh}canvas,img{image-rendering:pixelated;max-width:100%;border:1px solid #b8c5cf}#stage img{min-width:128px}article{padding:1rem;background:white;margin:1rem 0;border:1px solid #dae2e8}#status{display:block;margin:1rem 0}body[data-status=failed] #status{color:#a00020}body[data-status=passed] #status{color:#126238}</style></head><body><nav><a href="https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html">Demo index (HTML Preview)</a> · <a href="index.html">Local index</a></nav>
+<h1>AMCAF repeat-aware music preview</h1><p>Play a synthetic music preview with arpeggio, vibrato, portamento and non-retriggering sample changes. Eight PAL/NTSC stereo comparisons check repeat boundaries and pitch changes. Uses a declared 50-Hz preview clock; AMOS VM and CIA integration remain open. No Ghostlight assets are bundled.</p><p>Run the same scenario and assertions as the browser test suite. Inspect the data controls and byte results below.</p><button id="run-demo" type="button">Run demo</button><span id="status" role="status" aria-live="polite">Ready</span><select id="frames" aria-label="Captured frame" hidden></select><label hidden>Zoom <select id="zoom"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select></label><section id="frame-view"><div class="amos-fullscreen-toolbar"><button id="frame-fullscreen" hidden>Fullscreen</button><span id="frame-fullscreen-status" role="status"></span></div><div id="stage"></div></section><style>#stage canvas,#stage img{max-width:none;min-width:0}</style><pre id="results" aria-label="Test results"></pre>
+<script>/* jshint esversion: 6 */
+'use strict';
+
+function createCanvasHost(canvas, options = {}) {
+  const mouseCoordinates = options.mouseCoordinates == null ? 'screen' : options.mouseCoordinates;
+  if (mouseCoordinates !== 'screen' && mouseCoordinates !== 'hardware') throw new Error('Invalid mouse coordinate mode');
+  if (options.getGamepads != null && typeof options.getGamepads !== 'function') throw new Error('getGamepads must be a function');
+  let textOptions = null;
+  if(options.textInput!=null && options.textInput!==false){const c=options.textInput;if(!c||!c.container||typeof c.container.append!=='function'||(c.toolbar&&typeof c.toolbar.append!=='function'))throw Error('Invalid text input configuration');textOptions={...c};}
+  let textWidget = null;
+  let touchOptions = null;
+  if (options.virtualJoystick != null && options.virtualJoystick !== false) {
+    const config = options.virtualJoystick;
+    if (!config || typeof config !== 'object' || !config.container || typeof config.container.append !== 'function' ||
+        (config.port != null && ![0, 1].includes(config.port)) ||
+        (config.visibility != null && !['auto', 'always', 'off'].includes(config.visibility)) ||
+        (config.fullscreenOnly != null && typeof config.fullscreenOnly !== 'boolean')) throw new Error('Invalid virtual joystick configuration');
+    touchOptions = { ...config, port: config.port == null ? 1 : config.port };
+  }
+  function withTouch(configurations) {
+    if (!Array.isArray(configurations)) return configurations;
+    return touchOptions && !configurations.some(config => config && config.port === touchOptions.port) ? [...configurations, { port: touchOptions.port }] : configurations;
+  }
+  const renderer = options.renderer || null;
+  if (renderer && ['render','present','clear'].some(name => typeof renderer[name] !== 'function')) throw new Error('Invalid display renderer');
+  const context = renderer ? null : canvas.getContext('2d');
+  if (!renderer && !context) throw new Error('Canvas 2D rendering is not available');
+  const request = options.requestAnimationFrame || (typeof requestAnimationFrame === 'function' ? requestAnimationFrame : callback => setTimeout(callback, 0));
+  const cancel = options.cancelAnimationFrame || (typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout);
+  const delay = options.setTimeout || setTimeout, clearDelay = options.clearTimeout || clearTimeout;
+  let program = null;
+  let unsubscribe = null;
+  let pending = null;
+  let previousCursor = null;
+  let unsubscribeInput = null, held = null, repeatTask = null;
+  let joystickInput = createJoystickInput(withTouch(options.joysticks || [])), unsubscribeJoystick = null;
+  let joystickStatus = [], touch = null;
+  let focusSuspended = false;
+  const rawHeld = new Map();
+  function releaseRawKeys() {
+    if (program && program.setKeyState) for (const scan of rawHeld.values()) program.setKeyState(scan, false);
+    rawHeld.clear();
+  }
+  function focused() {
+    return options.hasFocus ? options.hasFocus() : !!(!focusSuspended && canvas.ownerDocument && canvas.ownerDocument.activeElement === canvas && !canvas.ownerDocument.hidden);
+  }
+  function pollJoysticks() {
+    if (!program || !joystickInput.ports.length) return [];
+    let pads = [], status = 'disabled';
+    const active = focused() && !program.state.stopped && !program.state.halted;
+    if (active && joystickInput.usesGamepad) {
+      try {
+        if (options.getGamepads) { pads = options.getGamepads(); status = 'available'; }
+        else if (typeof navigator !== 'undefined' && typeof navigator.getGamepads === 'function') { pads = navigator.getGamepads(); status = 'available'; }
+        else status = 'unavailable';
+      } catch (_) { status = 'blocked'; }
+    }
+    const result = joystickInput.read(active ? pads : [], active ? status : 'inactive', active);
+    if (touch) for (const entry of result) if (entry.port === touchOptions.port) {
+      entry.virtual = active ? touch.mask() : 0;
+      entry.mask = entry.keyboard | entry.gamepad | entry.virtual;
+      if ((entry.mask & 3) === 3) entry.mask &= ~3;
+      if ((entry.mask & 12) === 12) entry.mask &= ~12;
+    }
+    for (const entry of result) program.setJoystick(entry.port, entry.mask);
+    joystickStatus = result;
+    return result;
+  }
+  function resetJoysticks() {
+    joystickInput.reset(); if (touch) touch.reset(false);
+    if (program && program.setJoystick) for (const port of joystickInput.ports) program.setJoystick(port, 0);
+    joystickStatus = [];
+  }
+  function bindJoysticks() {
+    if (program && program.setJoystickReader && joystickInput.ports.length) unsubscribeJoystick = program.setJoystickReader(port => {
+      const entry = pollJoysticks().find(entry => entry.port === port);
+      return entry ? entry.mask : null;
+    });
+  }
+  function configureJoysticks(configurations) {
+    const next = createJoystickInput(withTouch(configurations));
+    resetJoysticks();
+    if (unsubscribeJoystick) unsubscribeJoystick(); unsubscribeJoystick = null;
+    joystickInput = next; bindJoysticks();
+  }
+
+  function releaseKey() {
+    held = null;
+    if (repeatTask) { const previous = repeatTask; repeatTask = null; clearDelay(previous.id); }
+  }
+  function repeatAfter(ms) {
+    const task = { id: null }; repeatTask = task;
+    task.id = delay(() => {
+      if (repeatTask !== task) return;
+      repeatTask = null;
+      if (!program || !held || program.state.halted || program.state.stopped) { releaseKey(); return; }
+      const current = held;
+      program.sendKey(current.key, current.scanCode);
+      if (held === current) repeatAfter(current.config.intervalMs);
+    }, ms);
+  }
+
+  function render() {
+    if (!program) return;
+    const display = program.display;
+    if (canvas.style && program.mouseVisible) {
+      const shape = program.mouseShape ? program.mouseShape() : null;
+      const cursor = shape === 1 ? 'default' : shape === 2 ? 'crosshair' : shape === 3 ? 'wait' : previousCursor || '';
+      canvas.style.cursor = program.mouseVisible() ? cursor : 'none';
+    }
+    const screen = display.presentedScreen ? display.presentedScreen() : display.current == null ? null : display.screen();
+    if (!screen) { if (renderer) renderer.clear(); canvas.width = 0; canvas.height = 0; return; }
+    if (renderer) {
+      const snapshot = display.snapshotDisplay(), frame = snapshot.frame;
+      renderer.render(snapshot);
+      // Exact rational cells preserve the snapshot's pixel aspect without
+      // letterboxing, so the existing pointer contract covers the full canvas.
+      let divisor = frame.pixelAspect.numerator, remainder = frame.pixelAspect.denominator;
+      while (remainder) { const next = divisor % remainder; divisor = remainder; remainder = next; }
+      return renderer.present({ width: frame.outputWidth * (frame.pixelAspect.numerator / divisor),
+        height: Math.max(1, frame.lines * (frame.pixelAspect.denominator / divisor)) });
+    }
+    const output = display.canvasFrame ? display.canvasFrame() : { width: screen.width, height: screen.height, rgba: display.rgba(screen) };
+    if (canvas.width !== output.width) canvas.width = output.width;
+    if (canvas.height !== output.height) canvas.height = output.height;
+    const frame = context.createImageData(output.width, output.height);
+    frame.data.set(output.rgba);
+    context.putImageData(frame, 0, 0);
+  }
+  function schedule() {
+    if (pending) return;
+    const task = { id: null };
+    pending = task;
+    task.id = request(() => {
+      if (pending !== task) return;
+      pending = null;
+      render();
+    });
+  }
+  function keydown(event) {
+    if (!program) return;
+    if (event.isComposing || event.key === 'Dead' || event.key === 'Process') return;
+    const controlJoystick = event.ctrlKey && !event.metaKey && !event.altKey && joystickInput.controlChord(event.code || event.key);
+    if ((event.ctrlKey || event.metaKey || event.altKey) && !controlJoystick) {
+      releaseKey(); releaseRawKeys(); resetJoysticks();
+      if (program.clearScanCodes) program.clearScanCodes();
+      return;
+    }
+    if (controlJoystick) releaseKey();
+    const rawCode = event.code || event.key, rawScan = amigaScanCode(rawCode);
+    if (!event.repeat && rawScan != null && focused() && !program.state.stopped && !program.state.halted && program.setKeyState) {
+      rawHeld.set(rawCode, rawScan); program.setKeyState(rawScan, true);
+    }
+    const joystick = joystickInput.keydown(event.code || (event.key === ' ' ? 'Space' : event.key), !!event.repeat);
+    if (joystick.matched && (!focused() || program.state.stopped || program.state.halted)) resetJoysticks();
+    if (joystick.matched) { pollJoysticks(); if (joystick.consume) { event.preventDefault(); return; } }
+    // Explicit Ctrl joystick chords may update held input, but never produce
+    // modified text when a mapping opts out of consuming browser events.
+    if (event.ctrlKey) return;
+    const code = event.code || event.key;
+    const special = { Enter: '\r', NumpadEnter: '\r', Escape: '\x1b', Backspace: '\b', Tab: '\t',
+      ArrowUp: '\x1e', ArrowDown: '\x1f', ArrowRight: '\x1c', ArrowLeft: '\x1d', Delete: '\0', Help: '\0' };
+    let key = null;
+    if (Object.prototype.hasOwnProperty.call(special, code)) key = special[code];
+    else if (/^F(?:[1-9]|10)$/.test(code)) key = '\0';
+    else if (event.key.length === 1 && event.key.charCodeAt(0) <= 255) key = event.key;
+    if (key == null) return;
+    event.preventDefault();
+    const config = program.state.input.keySpeed;
+    if (program.state.halted || program.state.stopped || (config && event.repeat)) return;
+    const scanCode = amigaScanCode(code);
+    program.sendKey(key, scanCode == null ? 0 : scanCode);
+    if (config) {
+      releaseKey(); held = { code, key, scanCode: scanCode == null ? 0 : scanCode, config };
+      repeatAfter(config.delayMs);
+    }
+  }
+  function keyup(event) {
+    const code = event.code || event.key;
+    if (rawHeld.has(code)) {
+      if (program && program.setKeyState) program.setKeyState(rawHeld.get(code), false);
+      rawHeld.delete(code);
+    }
+    if (held && held.code === (event.code || event.key)) releaseKey();
+    if (joystickInput.keyup(event.code || (event.key === ' ' ? 'Space' : event.key))) pollJoysticks();
+  }
+  function pointer(event) {
+    if (!program || (mouseCoordinates === 'hardware' && (focusSuspended || program.state.stopped || program.state.halted))) return;
+    const screen = program.display.presentedScreen ? program.display.presentedScreen() : program.display.current == null ? null : program.display.screen();
+    if (!screen) return;
+    const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+    const scaleX = canvas.offsetWidth ? bounds.width / canvas.offsetWidth : 1;
+    const scaleY = canvas.offsetHeight ? bounds.height / canvas.offsetHeight : 1;
+    const width = canvas.clientWidth ? canvas.clientWidth * scaleX : bounds.width;
+    const height = canvas.clientHeight ? canvas.clientHeight * scaleY : bounds.height;
+    const left = bounds.left + (canvas.clientLeft || 0) * scaleX;
+    const top = bounds.top + (canvas.clientTop || 0) * scaleY;
+    const position = mouseCoordinates === 'hardware' ? program.display.pointerHardwarePosition : program.display.pointerPosition;
+    const [x, y] = position ? position.call(program.display, event.clientX - left, event.clientY - top, width, height) : [
+      Math.max(0, Math.min(screen.width - 1, Math.floor((event.clientX - left) * screen.width / width))),
+      Math.max(0, Math.min(screen.height - 1, Math.floor((event.clientY - top) * screen.height / height)))];
+    program.setMouse(x, y, event.buttons & 7);
+  }
+  function pointerdown(event) {
+    if (canvas.focus) canvas.focus();
+    if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+    pointer(event);
+  }
+  function blur() {
+    focusSuspended = true;
+    releaseKey(); releaseRawKeys();
+    resetJoysticks();
+    if (program) {
+      if (program.clearScanCodes) program.clearScanCodes();
+      if (program.clearMouseButtons) program.clearMouseButtons();
+      else program.setMouse(program.state.input.mouse.x, program.state.input.mouse.y, 0);
+    }
+  }
+  function focus() { focusSuspended = false; }
+  function visibility() { if (canvas.ownerDocument.hidden) blur(); }
+  const events = { keydown, keyup, pointermove: pointer, pointerdown, pointerup: pointer, blur, focus,
+    contextmenu(event){if(program&&options.contextMenu===false)event.preventDefault();},
+    pointercancel(){if(program&&program.clearMouseButtons)program.clearMouseButtons();} };
+
+  function detach() {
+    if(textWidget){textWidget.dispose();textWidget=null;}
+    if (touch) { touch.dispose(); touch = null; }
+    releaseKey(); releaseRawKeys();
+    resetJoysticks();
+    if (program && program.clearScanCodes) program.clearScanCodes();
+    if (program && program.clearMouseButtons) program.clearMouseButtons();
+    if (unsubscribeJoystick) unsubscribeJoystick(); unsubscribeJoystick = null;
+    if (unsubscribeInput) unsubscribeInput();
+    unsubscribeInput = null;
+    if (unsubscribe) unsubscribe();
+    unsubscribe = null;
+    if (pending) { cancel(pending.id); pending = null; }
+    for (const [name, listener] of Object.entries(events)) canvas.removeEventListener(name, listener);
+    if (canvas.ownerDocument) {
+      canvas.ownerDocument.removeEventListener('visibilitychange', visibility);
+      if (canvas.ownerDocument.defaultView) {
+        canvas.ownerDocument.defaultView.removeEventListener('blur', blur);
+        canvas.ownerDocument.defaultView.removeEventListener('focus', focus);
+      }
+    }
+    program = null;
+    if (canvas.style && previousCursor != null) canvas.style.cursor = previousCursor;
+    previousCursor = null;
+  }
+  function attach(next) {
+    detach();
+    if (mouseCoordinates === 'hardware' && typeof next.display.pointerHardwarePosition !== 'function') throw new Error('Hardware mouse coordinates are unavailable');
+    program = next;
+    if (program.subscribeInputReset) unsubscribeInput = program.subscribeInputReset(reason => {
+      releaseKey(); if (reason !== 'key-speed') {if(textWidget)textWidget.close(); releaseRawKeys(); resetJoysticks(); }
+    });
+    bindJoysticks();
+    if (canvas.style) previousCursor = canvas.style.cursor;
+    unsubscribe = program.display.subscribe(schedule);
+    for (const [name, listener] of Object.entries(events)) canvas.addEventListener(name, listener);
+    if (canvas.ownerDocument) {
+      canvas.ownerDocument.addEventListener('visibilitychange', visibility);
+      if (canvas.ownerDocument.defaultView) {
+        canvas.ownerDocument.defaultView.addEventListener('blur', blur);
+        canvas.ownerDocument.defaultView.addEventListener('focus', focus);
+      }
+    }
+    if(textOptions)textWidget=createTextInput(textOptions.container,{...textOptions,getProgram:()=>program,focusCanvas:()=>canvas.focus()});
+    if (touchOptions) touch = createVirtualJoystick(touchOptions.container, { ...touchOptions,
+      focus: () => canvas.focus(), onChange: pollJoysticks, isActive: () => program && focused() && !program.state.stopped && !program.state.halted });
+    render();
+  }
+  return { attach, detach, render,
+    setVirtualJoystickVisibility(value) { if (!touchOptions) throw new Error('Virtual joystick is not configured'); if (!['auto', 'always', 'off'].includes(value)) throw new Error('Invalid virtual joystick visibility'); touchOptions.visibility = value; if (touch) touch.setVisibility(value); },
+    virtualJoystickStatus: () => touch ? { ...touch.status(), port: touchOptions.port } : null, focus: () => canvas.focus(), configureJoysticks, pollJoysticks,
+    joystickStatus: () => joystickStatus.map(entry => ({ ...entry })) };
+}
+
+function createJoystickInput(configurations) {
+  if (!Array.isArray(configurations) || configurations.length > 2) throw new Error('Expected at most two joystick configurations');
+  const ports = new Set(), keys = new Set();
+  const defaults = { up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'], fire: ['Space', 'Enter'] };
+  const bits = { up: 1, down: 2, left: 4, right: 8, fire: 16 };
+  const configs = configurations.map(config => {
+    if (!config || !Number.isInteger(config.port) || config.port < 0 || config.port > 1 || ports.has(config.port)) throw new Error('Invalid or duplicate joystick port');
+    ports.add(config.port);
+    const keyboard = [];
+    if (config.keyboard) {
+      if (config.keyboard !== true && (typeof config.keyboard !== 'object' || Array.isArray(config.keyboard))) throw new Error('Invalid keyboard mapping');
+      for (const action of Object.keys(bits)) {
+        const supplied = config.keyboard === true || config.keyboard[action] == null ? defaults[action] : config.keyboard[action];
+        const codes = typeof supplied === 'string' ? [supplied] : supplied;
+        if (!Array.isArray(codes) || codes.some(code => typeof code !== 'string' || !code)) throw new Error('Invalid joystick key binding');
+        for (const code of codes) keyboard.push({ code, bit: bits[action] });
+      }
+    }
+    let gamepad = null;
+    if (config.gamepad) {
+      if (config.gamepad !== true && (typeof config.gamepad !== 'object' || Array.isArray(config.gamepad))) throw new Error('Invalid gamepad mapping');
+      const supplied = config.gamepad === true ? {} : config.gamepad;
+      if ([supplied.axes,supplied.buttons].some(value => value != null && (typeof value !== 'object' || Array.isArray(value)))) throw new Error('Gamepad axes/buttons must be binding objects');
+      const index = supplied.index == null ? 0 : supplied.index, deadZone = supplied.deadZone == null ? 0.25 : supplied.deadZone;
+      const axes = { x: 0, y: 1, ...supplied.axes }, buttons = { up: 12, down: 13, left: 14, right: 15, fire: 0, ...supplied.buttons };
+      if (!Number.isSafeInteger(index) || index < 0 || !Number.isFinite(deadZone) || deadZone < 0 || deadZone >= 1 ||
+          [...Object.values(axes), ...Object.values(buttons)].some(value => value !== null && (!Number.isSafeInteger(value) || value < 0))) throw new Error('Invalid gamepad index, dead zone or binding');
+      gamepad = { index, deadZone, axes, buttons, standardOnly: supplied.standardOnly !== false };
+    }
+    return { port: config.port, keyboard, consume: config.keyboard === true || !config.keyboard || config.keyboard.consume !== false, gamepad };
+  });
+  function match(code) { return configs.some(config => config.keyboard.some(binding => binding.code === code)); }
+  return { ports: [...ports], usesGamepad: configs.some(config => config.gamepad),
+    controlChord: code => (match('ControlLeft') || match('ControlRight')) && match(code),
+    keydown(code, repeat = false) {
+      const matching = configs.filter(config => config.keyboard.some(binding => binding.code === code));
+      if (matching.length && !repeat) keys.add(code);
+      return { matched: !!matching.length, consume: matching.some(config => config.consume) };
+    },
+    keyup(code) { keys.delete(code); return match(code); },
+    reset() { keys.clear(); },
+    read(pads, apiStatus = 'available', active = true) {
+      return configs.map(config => {
+        let keyboard = 0, gamepad = 0, status = config.gamepad ? apiStatus : 'disabled';
+        if (active) for (const binding of config.keyboard) if (keys.has(binding.code)) keyboard |= binding.bit;
+        const spec = config.gamepad, pad = active && spec && pads && pads[spec.index];
+        if (spec && active && apiStatus === 'available') {
+          status = !pad || pad.connected === false ? 'waiting' : spec.standardOnly && pad.mapping !== 'standard' ? 'unmapped' : 'connected';
+          if (status === 'connected') {
+            const x = spec.axes.x == null ? 0 : pad.axes && pad.axes[spec.axes.x], y = spec.axes.y == null ? 0 : pad.axes && pad.axes[spec.axes.y];
+            if (Number.isFinite(x) && x >= -1 && x <= 1) gamepad |= x < -spec.deadZone ? 4 : x > spec.deadZone ? 8 : 0;
+            if (Number.isFinite(y) && y >= -1 && y <= 1) gamepad |= y < -spec.deadZone ? 1 : y > spec.deadZone ? 2 : 0;
+            for (const action of Object.keys(bits)) {
+              const index = spec.buttons[action];
+              if (index != null && pad.buttons && pad.buttons[index] && pad.buttons[index].pressed === true) gamepad |= bits[action];
+            }
+          }
+        }
+        let mask = keyboard | gamepad;
+        if ((mask & 3) === 3) mask &= ~3;
+        if ((mask & 12) === 12) mask &= ~12;
+        return { port: config.port, mask, keyboard, gamepad, status };
+      });
+    } };
+}
+
+// A real form field opens the device keyboard. Text goes straight to AMOS's
+// character queue, independently of physical-key and joystick mappings.
+function createTextInput(container, { toolbar = container, getProgram, focusCanvas = () => {} } = {}) {
+  const doc=container.ownerDocument, win=doc.defaultView;
+  const button=doc.createElement('button'),form=doc.createElement('form'),input=doc.createElement('input'),enter=doc.createElement('button'),backspace=doc.createElement('button'),closeButton=doc.createElement('button'),status=doc.createElement('span');
+  button.type='button';button.textContent='⌨';button.title='Open device keyboard';button.setAttribute('aria-label','Open device keyboard');button.setAttribute('aria-expanded','false');button.className='amos-text-keyboard-toggle';
+  form.className='amos-text-keyboard amos-fullscreen-messages';form.hidden=true;form.setAttribute('aria-label','Device keyboard input');form.style.cssText='padding:.4rem;display:flex;flex-wrap:wrap;align-items:center;gap:.3rem';
+  // Author CSS must not override the HTML hidden attribute's display rule.
+  form.style.display='none';
+  input.type='text';input.autocomplete='off';input.setAttribute('autocapitalize','off');input.setAttribute('autocorrect','off');input.spellcheck=false;input.setAttribute('inputmode','text');input.setAttribute('enterkeyhint','enter');input.maxLength=1000;
+  input.setAttribute('aria-label','Text to send to AMOS');input.placeholder='Type to send text to the game';input.style.cssText='font:16px system-ui;min-width:8rem;flex:1;padding:.6rem';
+  enter.type='submit';enter.textContent='↵';enter.setAttribute('aria-label','Send Enter');
+  backspace.type='button';backspace.textContent='⌫';backspace.setAttribute('aria-label','Send Backspace');
+  closeButton.type='button';closeButton.textContent='×';closeButton.setAttribute('aria-label','Close device keyboard');status.setAttribute('role','status');
+  form.append(input,enter,backspace,closeButton,status);toolbar.append(button);container.append(form);
+  let composing=false,disposed=false;
+  const active=()=>{const p=getProgram();return !disposed&&!form.hidden&&p&&!p.state.stopped&&!p.state.halted?p:null;};
+  function send(text,scanCode=null){const p=active();if(!p)return;for(const char of text.normalize('NFC'))if(char.charCodeAt(0)<=255)p.sendKey(char,scanCode);else status.textContent='AMOS accepts Latin-1 text; an unsupported character was skipped.';}
+  function reset(){composing=false;input.value='';status.textContent='';}
+  function close(){reset();form.hidden=true;form.style.display='none';button.setAttribute('aria-expanded','false');if(doc.activeElement===input)input.blur();}
+  function open(){const p=getProgram();if(disposed||!p||p.state.stopped||p.state.halted)return;reset();form.hidden=false;form.style.display='flex';button.setAttribute('aria-expanded','true');input.focus();}
+  const toggle=()=>{if(form.hidden)open();else{close();focusCanvas();}};
+  const flush=event=>{if(composing||event.isComposing)return;const text=input.value;input.value='';send(text);};
+  const begin=()=>{composing=true;},end=()=>{composing=false;flush({});};
+  const before=event=>{
+    if(composing||event.isComposing)return;
+    if(['insertLineBreak','insertParagraph','deleteContentBackward'].includes(event.inputType)){event.preventDefault();send(event.inputType==='deleteContentBackward'?'\b':'\r',event.inputType==='deleteContentBackward'?0x41:0x44);input.value='';}
+  };
+  const key=event=>{if(event.isComposing||composing||event.ctrlKey||event.altKey||event.metaKey)return;const special={Enter:'\r',Backspace:'\b',Escape:'\x1b',ArrowUp:'\x1e',ArrowDown:'\x1f',ArrowRight:'\x1c',ArrowLeft:'\x1d',Delete:'\0'};if(Object.hasOwn(special,event.key)){event.preventDefault();send(special[event.key],amigaScanCode(event.key));}};
+  const submit=event=>{event.preventDefault();if(!composing){flush({});send('\r',0x44);input.focus();}};
+  const erase=()=>{send('\b',0x41);input.focus();};
+  const finish=()=>{close();focusCanvas();};
+  const visibility=()=>{if(doc.hidden)close();};
+  button.addEventListener('click',toggle);input.addEventListener('input',flush);input.addEventListener('beforeinput',before);input.addEventListener('compositionstart',begin);input.addEventListener('compositionend',end);input.addEventListener('keydown',key);form.addEventListener('submit',submit);backspace.addEventListener('click',erase);closeButton.addEventListener('click',finish);
+  win.addEventListener('blur',close);doc.addEventListener('visibilitychange',visibility);
+  return {open,close,dispose(){if(disposed)return;close();disposed=true;win.removeEventListener('blur',close);doc.removeEventListener('visibilitychange',visibility);button.removeEventListener('click',toggle);input.removeEventListener('input',flush);input.removeEventListener('beforeinput',before);input.removeEventListener('compositionstart',begin);input.removeEventListener('compositionend',end);input.removeEventListener('keydown',key);form.removeEventListener('submit',submit);backspace.removeEventListener('click',erase);closeButton.removeEventListener('click',finish);button.remove();form.remove();}};
+}
+
+// Optional pointer controller. It owns only its DOM, pointer holds and listeners;
+// the Canvas host merges its mask with keyboard/Gamepad input at query time.
+function createVirtualJoystick(container, options = {}) {
+  const doc = container.ownerDocument, win = doc.defaultView;
+  let visibility = options.visibility || 'auto';
+  const validate = value => { if (!['auto', 'always', 'off'].includes(value)) throw new Error('Invalid virtual joystick visibility'); };
+  validate(visibility);
+  const media = win.matchMedia ? win.matchMedia('(pointer: coarse)') : null;
+  const pointers = new Map(), buttons = new Map(); let disposed = false;
+  const bits = { up: 1, down: 2, left: 4, right: 8, fire: 16 };
+  const pad = doc.createElement('div'); pad.className = 'amos-virtual-joystick'; pad.setAttribute('aria-label', 'Virtual joystick');
+  const style = doc.createElement('style');
+  style.textContent = '.amos-virtual-joystick{position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(12px + env(safe-area-inset-bottom));z-index:20;display:grid;grid-template:repeat(3,clamp(44px,10vmin,64px))/repeat(3,clamp(44px,10vmin,64px));gap:4px;touch-action:none;user-select:none;-webkit-user-select:none}.amos-virtual-joystick[hidden]{display:none}.amos-virtual-joystick button{margin:0;padding:0;min-width:0;border:2px solid #fff;border-radius:12px;background:#17202add;color:#fff;font:700 24px system-ui;touch-action:none;user-select:none;-webkit-touch-callout:none}.amos-virtual-joystick button[data-direction=fire]{background:#b51621dd}.amos-virtual-joystick button[aria-pressed=true]{background:#07569c;border-color:#ffe665}.amos-virtual-joystick button:focus-visible{outline:3px solid #ffe665}';
+  for (const [direction, label, row, column] of [['up', '\u2191', 1, 2], ['left', '\u2190', 2, 1], ['fire', '\u25cf', 2, 2], ['right', '\u2192', 2, 3], ['down', '\u2193', 3, 2]]) {
+    const button = doc.createElement('button'); button.type = 'button'; button.textContent = label; button.dataset.direction = direction;
+    button.setAttribute('aria-label', direction === 'fire' ? 'Fire' : direction[0].toUpperCase() + direction.slice(1));
+    button.style.gridRow = row; button.style.gridColumn = column; pad.append(button); buttons.set(direction, button);
+  }
+  doc.head.append(style); container.append(pad);
+  function mask() { let value = 0; for (const bit of pointers.values()) value |= bit; return value; }
+  function changed(notify = true) {
+    const value = mask(); pad.dataset.mask = String(value);
+    for (const [direction, button] of buttons) button.setAttribute('aria-pressed', String(!!(value & bits[direction])));
+    if (notify && options.onChange) options.onChange();
+  }
+  function releaseCapture(id) { try { if (pad.hasPointerCapture && pad.hasPointerCapture(id)) pad.releasePointerCapture(id); } catch (_) { /* Already retired by the browser. */ } }
+  function reset(notify = true) { const ids = [...pointers.keys()]; pointers.clear(); for (const id of ids) releaseCapture(id); changed(notify); }
+  function refresh() {
+    const fullscreen = doc.fullscreenElement === container;
+    const touch = !!((media && media.matches) || (win.navigator && win.navigator.maxTouchPoints > 0));
+    pad.hidden = disposed || visibility === 'off' || (options.fullscreenOnly !== false && !fullscreen) || (visibility === 'auto' && !touch);
+    if (pad.hidden && pointers.size) reset();
+  }
+  function directionAt(target) { const button = target && target.closest ? target.closest('button[data-direction]') : null; return button && pad.contains(button) ? bits[button.dataset.direction] : 0; }
+  function down(event) {
+    if (disposed || pad.hidden || (event.button != null && event.button !== 0)) return;
+    const bit = directionAt(event.target); if (!bit) return;
+    event.preventDefault(); if (options.focus) options.focus();
+    if (options.isActive && !options.isActive()) return;
+    pointers.set(event.pointerId, bit);
+    try { pad.setPointerCapture(event.pointerId); } catch (_) { /* Synthetic tests have no native active pointer. */ }
+    changed();
+  }
+  function move(event) {
+    if (!pointers.has(event.pointerId)) return;
+    event.preventDefault(); pointers.set(event.pointerId, directionAt(doc.elementFromPoint(event.clientX, event.clientY))); changed();
+  }
+  function up(event) { if (!pointers.has(event.pointerId)) return; event.preventDefault(); pointers.delete(event.pointerId); releaseCapture(event.pointerId); changed(); }
+  const prevent = event => event.preventDefault();
+  const events = { pointerdown: down, pointermove: move, pointerup: up, pointercancel: up, lostpointercapture: up, contextmenu: prevent };
+  for (const [name, handler] of Object.entries(events)) pad.addEventListener(name, handler);
+  doc.addEventListener('fullscreenchange', refresh);
+  doc.addEventListener('pointerup', up); doc.addEventListener('pointercancel', up);
+  if (media && media.addEventListener) media.addEventListener('change', refresh);
+  if (win) win.addEventListener('resize', refresh);
+  changed(false); refresh();
+  return { mask, reset, refresh, setVisibility(value) { validate(value); visibility = value; refresh(); },
+    status: () => ({ visible: !pad.hidden, mask: mask(), visibility }),
+    dispose() {
+      if (disposed) return; disposed = true; pad.hidden = true; reset(false);
+      for (const [name, handler] of Object.entries(events)) pad.removeEventListener(name, handler);
+      doc.removeEventListener('fullscreenchange', refresh);
+      doc.removeEventListener('pointerup', up); doc.removeEventListener('pointercancel', up);
+      if (media && media.removeEventListener) media.removeEventListener('change', refresh);
+      if (win) win.removeEventListener('resize', refresh);
+      pad.remove(); style.remove();
+    }
+  };
+}
+
+const amigaKeyCodes = (() => {
+  const codes = { Numpad0: 0x0f, Numpad1: 0x1d, Numpad2: 0x1e, Numpad3: 0x1f,
+    Numpad4: 0x2d, Numpad5: 0x2e, Numpad6: 0x2f, IntlBackslash: 0x30, NumpadDecimal: 0x3c,
+    Numpad7: 0x3d, Numpad8: 0x3e, Numpad9: 0x3f, Space: 0x40, Backspace: 0x41, Tab: 0x42,
+    NumpadEnter: 0x43, Enter: 0x44, Escape: 0x45, Delete: 0x46, NumpadSubtract: 0x4a,
+    ArrowUp: 0x4c, ArrowDown: 0x4d, ArrowRight: 0x4e, ArrowLeft: 0x4f,
+    NumpadDivide: 0x5c, NumpadMultiply: 0x5d, NumpadAdd: 0x5e, Help: 0x5f };
+  for (const [start, row] of [[0, 'Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Digit6 Digit7 Digit8 Digit9 Digit0 Minus Equal Backslash'],
+    [0x10, 'KeyQ KeyW KeyE KeyR KeyT KeyY KeyU KeyI KeyO KeyP BracketLeft BracketRight'],
+    [0x20, 'KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon Quote'],
+    [0x31, 'KeyZ KeyX KeyC KeyV KeyB KeyN KeyM Comma Period Slash']]) row.split(' ').forEach((code, i) => { codes[code] = start + i; });
+  for (let number = 1; number <= 10; number++) codes[`F${number}`] = 0x4f + number;
+  return Object.freeze(codes);
+})();
+function amigaScanCode(code) { return Object.prototype.hasOwnProperty.call(amigaKeyCodes, code) ? amigaKeyCodes[code] : null; }
+
+if (typeof module === 'object' && module.exports) module.exports = { createCanvasHost, createJoystickInput, createVirtualJoystick, createTextInput, amigaScanCode };
+else globalThis.AMOS_BROWSER = { createCanvasHost, createJoystickInput, createVirtualJoystick, createTextInput, amigaScanCode };
+</script><script>/* jshint esversion: 6 */
+'use strict';
+
+// Own fullscreen for a stable container, independently of rendering and VM time.
+function createFullscreenHost(container, options = {}) {
+  const doc=container.ownerDocument, win=doc.defaultView, button=options.button;
+  const surface=options.surface||container;
+  const content=options.getContent||(()=>surface.querySelector('canvas,img'));
+  const supported=typeof container.requestFullscreen==='function'&&typeof doc.exitFullscreen==='function'&&doc.fullscreenEnabled!==false;
+  let disposed=false,pending=false,error=null,current=null,saved=null,transition=null,closing=null;
+  const active=()=>doc.fullscreenElement===container;
+  if(!supported){
+    if(button){button.textContent='Fullscreen';button.disabled=true;button.setAttribute('aria-pressed','false');}
+    if(options.statusElement)options.statusElement.textContent='Fullscreen is unavailable in this browser or frame.';
+    return {toggle:()=>Promise.resolve(false),refresh(){},dispose(){disposed=true;return Promise.resolve();},status:()=>({active:false,supported:false,pending:false,error:null,disposed})};
+  }
+
+  const style=doc.createElement('style');
+  style.textContent=`
+.amos-fullscreen:fullscreen{position:relative;display:block;box-sizing:border-box;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;gap:0;border:0!important;border-radius:0!important;overflow:hidden;background:#000;color:#fff}
+.amos-fullscreen:fullscreen>.amos-fullscreen-toolbar{position:absolute;z-index:20;top:env(safe-area-inset-top,0px);left:50%;transform:translateX(-50%);box-sizing:border-box;width:max-content;max-width:100%;font:14px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;padding:6px 10px!important;margin:0;background:rgba(20,25,32,.94);border:0;border-radius:0 0 10px 10px;visibility:hidden;pointer-events:none}
+.amos-fullscreen.amos-controls-visible:fullscreen>.amos-fullscreen-toolbar{visibility:visible;pointer-events:auto}
+@media (pointer:coarse) and (orientation:portrait){.amos-fullscreen:fullscreen>.amos-fullscreen-toolbar{visibility:visible;pointer-events:auto}}
+.amos-fullscreen:fullscreen>.amos-fullscreen-messages{position:absolute;z-index:19;bottom:0;left:0;right:0;max-height:40%;overflow:auto;font-size:14px;background:rgba(0,0,0,.85)}
+.amos-fullscreen-messages>p{margin:4px 0}
+.amos-fullscreen:fullscreen>.amos-fullscreen-surface{position:absolute;inset:0;min-width:0;min-height:0;width:100%;height:100%;margin:0;padding:0;border:0!important;border-radius:0!important;max-height:none!important;overflow:hidden!important;display:flex;align-items:center;justify-content:center;background:#000}
+.amos-fullscreen:fullscreen>.amos-fullscreen-surface>canvas,.amos-fullscreen:fullscreen>.amos-fullscreen-surface>img{flex:none;min-width:0!important;max-width:none!important;max-height:none!important;border:0!important;border-radius:0!important;image-rendering:pixelated}`;
+  doc.head.appendChild(style);container.classList.add('amos-fullscreen');surface.classList.add('amos-fullscreen-surface');
+  function restore(){if(current&&saved){current.style.width=saved.width;current.style.height=saved.height;}current=null;saved=null;}
+  function refresh(){
+    const next=content();
+    if(!active()||disposed||next!==current)restore();
+    if(active()&&!disposed&&next){
+      if(!current){current=next;saved={width:next.style.width,height:next.style.height};}
+      const width=next.naturalWidth||next.width,height=next.naturalHeight||next.height;
+      const borderX=Math.max(0,next.offsetWidth-next.clientWidth),borderY=Math.max(0,next.offsetHeight-next.clientHeight);
+      const scale=Math.min((surface.clientWidth-borderX)/width,(surface.clientHeight-borderY)/height);
+      if(width>0&&height>0&&scale>0){const w=`${Math.max(1,Math.floor(width*scale))}px`,h=`${Math.max(1,Math.floor(height*scale))}px`;if(next.style.width!==w)next.style.width=w;if(next.style.height!==h)next.style.height=h;}
+    }
+    if(button){button.textContent=active()?'Exit fullscreen':'Fullscreen';button.setAttribute('aria-pressed',String(active()));button.disabled=!supported||pending||disposed;}
+    if(options.statusElement)options.statusElement.textContent=error?`Fullscreen unavailable: ${error}`:!supported?'Fullscreen is unavailable in this browser or frame.':'';
+  }
+  function toggle(){
+    if(disposed||pending||!supported)return Promise.resolve(false);
+    pending=true;error=null;refresh();
+    let operation;
+    try{operation=active()?doc.exitFullscreen():container.requestFullscreen();}
+    catch(failure){error=failure.message;pending=false;refresh();return Promise.resolve(false);}
+    transition=Promise.resolve(operation).then(async()=>{
+      if(disposed&&active())await doc.exitFullscreen();
+      return !disposed;
+    }).catch(failure=>{error=failure.message;return false;}).finally(()=>{pending=false;refresh();});
+    return transition;
+  }
+  let previousActive=active();
+  function changed(){controls(false);refresh();const entered=active();if(entered!==previousActive){previousActive=entered;if(!disposed&&options.onChange)options.onChange(entered);}}
+  function controls(show){container.classList[show?'add':'remove']('amos-controls-visible');}
+  function pointer(event){
+    if(!active()||event.pointerType==='touch')return;
+    const rect=container.getBoundingClientRect(),toolbar=container.querySelector('.amos-fullscreen-toolbar');
+    if(event.clientY-rect.top<=12)controls(true);
+    else if(!toolbar||!toolbar.contains(event.target))controls(false);
+  }
+  function leave(){controls(false);}
+  function keyboard(event){if(active()&&event.key==='Tab')controls(true);}
+  function escape(event){if(active()&&event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();toggle();}}
+  container.addEventListener('pointermove',pointer);container.addEventListener('pointerleave',leave);
+  doc.addEventListener('keydown',keyboard);
+  if(button)button.addEventListener('click',toggle);
+  doc.addEventListener('fullscreenchange',changed);doc.addEventListener('keydown',escape,true);
+  function resized(){controls(false);refresh();}
+  if(win)win.addEventListener('resize',resized);surface.addEventListener('load',refresh,true);
+  const resize=win&&win.ResizeObserver?new win.ResizeObserver(refresh):null;if(resize)resize.observe(surface);
+  const mutation=win&&win.MutationObserver?new win.MutationObserver(refresh):null;
+  if(mutation)mutation.observe(surface,{childList:true,subtree:true,attributes:true,attributeFilter:['width','height','src','style']});
+  refresh();
+  function dispose(){
+    if(disposed)return closing||Promise.resolve();disposed=true;
+    if(button)button.removeEventListener('click',toggle);
+    doc.removeEventListener('fullscreenchange',changed);doc.removeEventListener('keydown',escape,true);
+    if(win)win.removeEventListener('resize',resized);surface.removeEventListener('load',refresh,true);if(resize)resize.disconnect();if(mutation)mutation.disconnect();
+    container.removeEventListener('pointermove',pointer);container.removeEventListener('pointerleave',leave);doc.removeEventListener('keydown',keyboard);controls(false);
+    restore();style.remove();container.classList.remove('amos-fullscreen');surface.classList.remove('amos-fullscreen-surface');
+    let exit;try{exit=active()?doc.exitFullscreen():null;}catch(failure){error=failure.message;}
+    closing=Promise.allSettled([transition,exit]).then(()=>{refresh();});return closing;
+  }
+  return {toggle,refresh,dispose,status:()=>({active:active(),supported,pending,error,disposed})};
+}
+
+if(typeof module==='object'&&module.exports)module.exports={createFullscreenHost};
+else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
+</script><script>(function installDemo(config) {
+  const button = document.getElementById('run-demo'), status = document.getElementById('status');
+  const output = document.getElementById('results'), selector = document.getElementById('frames');
+  const stage = document.getElementById('stage');
+  const zoom = document.getElementById('zoom');
+  const fullscreenButton=document.getElementById('frame-fullscreen');
+  const fullscreen=AMOS_FULLSCREEN.createFullscreenHost(document.getElementById('frame-view'),{button:fullscreenButton,statusElement:document.getElementById('frame-fullscreen-status'),surface:stage});
+  const equal = (a, b) => {
+    if (Object.is(a, b)) return true;
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+    const keys = Object.keys(a).sort(), other = Object.keys(b).sort();
+    return keys.length === other.length && keys.every((key, i) => key === other[i] && equal(a[key], b[key]));
+  };
+  const assert = {
+    ok(value) { if (!value) throw new Error('Expected a truthy result'); },
+    strictEqual(a, b) { if (!Object.is(a, b)) throw new Error(`Expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
+    deepStrictEqual(a, b) { if (!equal(a, b)) throw new Error(`Result differs: expected ${JSON.stringify(b)}, received ${JSON.stringify(a)}`); },
+    match(value, expression) { if (!expression.test(value)) throw new Error(`${value} does not match ${expression}`); }
+  };
+  const playButton = document.getElementById('play-game'), playStatus = document.getElementById('play-status');
+  if (playButton && !config.externalLauncher) playButton.addEventListener('click', async () => {
+    playButton.disabled = true; button.disabled = true; playStatus.textContent = 'Starting game…';
+    try {
+      // Do not yield before invoking the live host: audio and fullscreen must
+      // request permission within this click's transient user activation.
+      if (globalThis.AMOS_PLAY_GAME) await globalThis.AMOS_PLAY_GAME();
+      else await config.evaluate({ ...config.argument, liveOnly: true });
+      playStatus.textContent = 'Game running. Use the controls below to adjust sound or fullscreen.';
+      document.body.dataset.playing = 'true';
+    } catch (error) { playStatus.textContent = `Could not start the game: ${error.message}`; }
+    finally { playButton.disabled = false; button.disabled = false; }
+  });
+  let frames = [];
+  function show() {
+    stage.replaceChildren();
+    const frame = frames[Number(selector.value)]; if (!frame) return;
+    fullscreenButton.hidden=false;
+    if (frame.png) {
+      const image = new Image(); image.alt = frame.name;
+      image.onload = () => { image.style.width = `${image.naturalWidth * Number(zoom.value)}px`; };
+      image.src = frame.png; stage.append(image);
+    } else {
+      const canvas = document.createElement('canvas'); canvas.width = frame.width; canvas.height = frame.height;
+      canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(frame.rgba), frame.width, frame.height), 0, 0);
+      canvas.style.width = `${frame.width * Number(zoom.value)}px`;
+      canvas.setAttribute('aria-label', frame.name); stage.append(canvas);
+    }
+  }
+  selector.addEventListener('change', show);
+  zoom.addEventListener('change', show);
+  button.addEventListener('click', async () => {
+    button.disabled = true; if (playButton) playButton.disabled = true; status.textContent = 'Running…'; document.body.dataset.status = 'running';
+    fullscreenButton.hidden=true;frames = []; selector.replaceChildren(); stage.replaceChildren(); output.textContent = '';
+    const previousObserver = globalThis.AMOS_DEMO_OBSERVE;
+    const originalPut = CanvasRenderingContext2D.prototype.putImageData;
+    let previousPng = null;
+    globalThis.AMOS_DEMO_OBSERVE = frame => frames.push({ ...frame, rgba: new Uint8ClampedArray(frame.rgba) });
+    CanvasRenderingContext2D.prototype.putImageData = function(...args) {
+      const result = originalPut.apply(this, args);
+      const png = this.canvas.toDataURL('image/png');
+      if (png !== previousPng) frames.push({ name: `Frame ${frames.length + 1}`, png });
+      previousPng = png; return result;
+    };
+    try {
+      // Yield so the running state paints before the larger GPU corpus starts.
+      await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+      const result = await config.evaluate(config.argument);
+      config.check(result, assert);
+      if (result.failure) throw new Error(`GPU comparison failed: ${result.failure.name}`);
+      if (config.pngReference) {
+        const image = new Image(); image.src = config.pngReference; await image.decode();
+        const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+        const context = canvas.getContext('2d'); context.drawImage(image, 0, 0);
+        assert.deepStrictEqual(Array.from(context.getImageData(0, 0, image.width, image.height).data), result.pixels);
+        frames.push({ name: 'Integer readback / independent PNG decode', png: config.pngReference });
+      }
+      if (result.sample && !frames.length) {
+        const bytes = Uint8ClampedArray.from(atob(result.sample.rgba), ch => ch.charCodeAt(0));
+        frames.push({ name: 'Native GPU copper stack', width: result.sample.width, height: result.sample.height, rgba: bytes });
+      }
+      if (result.png && !frames.length) frames.push({ name: 'Rendered output', png: result.png });
+      output.textContent = JSON.stringify(result, (key, value) => ['png', 'rgba', 'chip', 'tables'].includes(key) ? '(image/binary data)' : value, 2);
+      status.textContent = 'Passed — the browser test assertions succeeded.'; document.body.dataset.status = 'passed';
+    } catch (error) {
+      output.textContent = error.stack || String(error); status.textContent = 'Failed'; document.body.dataset.status = 'failed';
+    } finally {
+      CanvasRenderingContext2D.prototype.putImageData = originalPut;
+      if (previousObserver === undefined) delete globalThis.AMOS_DEMO_OBSERVE;
+      else globalThis.AMOS_DEMO_OBSERVE = previousObserver;
+      frames.forEach((frame, i) => { const option = document.createElement('option'); option.value = i; option.textContent = frame.name; selector.append(option); });
+      selector.hidden = frames.length === 0;
+      if (frames.length) {
+        const preferred = frames.findIndex(frame => frame.name === config.initialFrame);
+        const copper = frames.findIndex(frame => frame.name === 'copper-stack-dma');
+        selector.value = preferred >= 0 ? preferred : copper < 0 ? Math.floor((frames.length - 1) / 2) : copper; show();
+      }
+      button.disabled = false; if (playButton) playButton.disabled = false;
+    }
+  });
+  document.body.dataset.status = 'idle';
+})({evaluate:(async ({ pitchSource, sequenceSource, pcmSource, moduleSource }) => {
+    const make = source => new Function(`return (${source})`)();
+    const createPitch = make(pitchSource), createSequence = make(sequenceSource), createPcm = make(pcmSource), preview = make(moduleSource);
+    const check = (value, message) => { if (!value) throw new Error(message); };
+    const bank = [
+      { number: 1, length: 8, pcm: Int8Array.from([8,16,24,32,40,48,56,64]) },
+      { number: 2, length: 6, pcm: Int8Array.from([80,88,96,104,112,120]) }
+    ];
+    const frame = (tick, period = 428, triggers = [], repeats = []) => ({ tick, triggers, repeats,
+      state: { voices: Array.from({ length: 4 }, () => ({ outputPeriod: period, outputVolume: 64 })) } });
+    let maxDifference = 0;
+    for (const standard of ['PAL','NTSC']) for (let voice = 0; voice < 4; voice++) {
+      const sampler = createPcm(bank, { sampleRate: 8000, standard }), side = voice === 0 || voice === 3 ? 0 : 1;
+      sampler.apply(frame(1, 428, [{ voice, sample: 1, length: 8 }], [{ voice, sample: 1, start: 2, length: 4 }]));
+      const a = sampler.render(128);
+      sampler.apply(frame(2, 856, [], [{ voice, sample: 2, start: 1, length: 3 }]));
+      const b = sampler.render(384), actual = [new Float32Array(512), new Float32Array(512)];
+      actual[0].set(a.left); actual[0].set(b.left,128); actual[1].set(a.right); actual[1].set(b.right,128);
+      // Independent absolute-phase formula: finish A's currently latched loop
+      // before switching to B. Pitch changes alter future slope, not past phase.
+      const step = (standard === 'PAL' ? 3546895 : 3579545) / 428 / 8000;
+      const phaseAtChange = 128 * step, boundary = 8 + Math.ceil((phaseAtChange - 8) / 4) * 4;
+      const literal = new Float32Array(512);
+      for (let i = 0; i < 512; i++) {
+        const phase = i < 128 ? i * step : phaseAtChange + (i - 128) * step / 2;
+        literal[i] = (phase < 8 ? bank[0].pcm[Math.floor(phase)] : phase < boundary ? bank[0].pcm[2 + Math.floor((phase - 8) % 4)]
+          : bank[1].pcm[1 + Math.floor((phase - boundary) % 3)]) / 256;
+      }
+      for (let i = 0; i < 512; i++) {
+        check(actual[1 - side][i] === 0, 'Opposite stereo channel leaked');
+        maxDifference = Math.max(maxDifference, Math.abs(actual[side][i] - literal[i]));
+      }
+      // Deliver rendered PCM through a real native stereo graph. Expected PCM
+      // is independently calculated above, not copied from the sampler.
+      const context = new OfflineAudioContext(2,512,8000), source = context.createBufferSource();
+      const buffer = context.createBuffer(2,512,8000);
+      buffer.copyToChannel(actual[0],0); buffer.copyToChannel(actual[1],1); source.buffer = buffer;
+      source.connect(context.destination); source.start(); const rendered = await context.startRendering();
+      for (let channel = 0; channel < 2; channel++) for (let i = 0; i < 512; i++) {
+        maxDifference = Math.max(maxDifference, Math.abs(rendered.getChannelData(channel)[i] - (channel === side ? literal[i] : 0)));
+      }
+      sampler.stop();
+    }
+    check(maxDifference < 1e-6, `Repeat/pitch PCM comparison failed: ${maxDifference}`);
+    const data = preview(), sequence = createSequence(data, createPitch);
+    const sampler = createPcm(data.samples, { sampleRate: 8000 });
+    // Explicit 50-Hz VBL preview clock, not a CIA-timing/VM integration claim.
+    const left = new Float32Array(385 * 160), right = new Float32Array(left.length);
+    let repeatOnly = 0, notes = 0;
+    for (let tick = 1; tick <= 384; tick++) {
+      const f = sequence.tick(); sampler.apply(f); notes += f.triggers.length;
+      if (tick === 54) repeatOnly = f.repeats.filter(r => r.voice === 0 && r.sample === 2 && !f.triggers.some(t => t.voice === 0)).length;
+      const pcm = sampler.render(160); left.set(pcm.left,tick * 160); right.set(pcm.right,tick * 160);
+    }
+    check(notes > 2 && repeatOnly === 1 && left.some(v => v !== 0) && right.some(v => v !== 0), 'Synthetic music did not reach its notes/repeat change');
+    sampler.stop(); sequence.stop();
+    if (globalThis.AMOS_AMCAF_PCM_CLEANUP) await globalThis.AMOS_AMCAF_PCM_CLEANUP();
+    document.getElementById('amcaf-pcm-controls')?.remove();
+    const controls = document.createElement('section'); controls.id = 'amcaf-pcm-controls';
+    const status = document.createElement('p'); status.id = 'amcaf-pcm-status'; status.dataset.state = 'off'; status.dataset.contexts = '0';
+    status.textContent = 'Play a synthetic AMCAF music preview (50-Hz clock; no game assets).';
+    const play = document.createElement('button'); play.id = 'amcaf-pcm-play'; play.textContent = 'Play music preview';
+    const stop = document.createElement('button'); stop.id = 'amcaf-pcm-stop'; stop.textContent = 'Stop';
+    controls.append(play,stop,status); document.body.append(controls);
+    let live = null, generation = 0, disposed = false, contexts = 0;
+    const pending = new Set();
+    function stopLive() {
+      generation++; const old = live; live = null;
+      if (old) {
+        if (old.source) { old.source.onended = null; try { old.source.stop(); } catch (_) { /* failed start */ } finally { old.source.disconnect(); } }
+        const closed = old.context.close().catch(() => {}).finally(() => {
+          contexts--; status.dataset.contexts = String(contexts); pending.delete(closed);
+        });
+        pending.add(closed);
+      }
+      status.dataset.state = 'off'; status.textContent = 'Stopped';
+    }
+    play.addEventListener('click', async () => {
+      if (disposed) return;
+      stopLive(); const token = generation;
+      try {
+        const context = new AudioContext(); live = { context, source: null };
+        contexts++; status.dataset.contexts = String(contexts);
+        const instance = live, resumed = context.resume();
+        await resumed;
+        if (disposed || token !== generation || instance !== live) return;
+        const source = context.createBufferSource(), buffer = context.createBuffer(2,left.length,8000);
+        buffer.copyToChannel(left,0); buffer.copyToChannel(right,1);
+        source.buffer = buffer; source.loop = true; source.connect(context.destination); instance.source = source; source.start();
+        status.dataset.state = 'playing'; status.textContent = 'Playing synthetic music preview';
+      } catch (error) {
+        if (disposed || token !== generation) return;
+        stopLive(); status.dataset.state = 'error'; status.textContent = `Audio failed: ${error.message}`;
+      }
+    });
+    stop.addEventListener('click', () => { if (!disposed) stopLive(); });
+    const onHide = () => { void cleanup(); };
+    async function cleanup() {
+      disposed = true; stopLive(); window.removeEventListener('pagehide',onHide);
+      await Promise.all([...pending]);
+    }
+    window.addEventListener('pagehide',onHide);
+    globalThis.AMOS_AMCAF_PCM_CLEANUP = cleanup;
+    return { comparisons: 8, maxDifference, previewTicks: 384, instrumentOnlyChange: repeatOnly, notes,
+      evidence: 'Synthetic source-derived PCM and native Web Audio delivery; no Amiga capture or VM/CIA timing.' };
+  }),argument:{"pitchSource":"function createAmcafPitch() {\n  // Original words at library file offsets $974c..$9bcb, in raw fine order\n  // 0..7,-8..-1. Do not replace with equal-temperament approximations.\n  const hex = [\n    '0358032802fa02d002a60280025c023a021a01fc01e001c501ac0194017d016801530140012e011d010d00fe00f000e2',\n    '00d600ca00be00b400aa00a00097008f0087007f007800710352032202f502cb02a2027d02590237021701f901dd01c2',\n    '01a90191017b01650151013e012c011c010c00fd00ef00e100d500c900bd00b300a9009f0096008e0086007e00770071',\n    '034c031c02f002c5029e027802550233021401f601da01bf01a6018e01780163014f013c012a011a010a00fb00ed00e0',\n    '00d300c700bc00b100a7009e0095008d0085007d007600700346031702ea02c0029902740250022f021001f201d601bc',\n    '01a3018b01750160014c013a01280118010800f900eb00de00d100c600bb00b000a6009d0094008c0084007d0076006f',\n    '0340031102e502bb0294026f024c022b020c01ef01d301b901a001880172015e014a013801260116010600f700e900dc',\n    '00d000c400b900af00a5009c0093008b0083007c0075006e033a030b02e002b6028f026b02480227020801eb01cf01b5',\n    '019d01860170015b0148013501240114010400f500e800db00ce00c300b800ae00a4009b0092008a0082007b0074006d',\n    '0334030602da02b1028b026602440223020401e701cc01b2019a0183016d01590145013301220112010200f400e600d9',\n    '00cd00c100b700ac00a3009a009100890081007a0073006d032e030002d502ac02860262023f021f020101e401c901af',\n    '01970180016b01560143013101200110010000f200e400d800cc00c000b500ab00a1009800900088008000790072006c',\n    '038b0358032802fa02d002a60280025c023a021a01fc01e001c501ac0194017d016801530140012e011d010d00fe00f0',\n    '00e200d600ca00be00b400aa00a00097008f0087007f007803840352032202f502cb02a3027c02590237021701f901dd',\n    '01c201a90191017b01650151013e012c011c010c00fd00ee00e100d400c800bd00b300a9009f0096008e0086007e0077',\n    '037e034c031c02f002c5029e027802550233021401f601da01bf01a6018e01780163014f013c012a011a010a00fb00ed',\n    '00df00d300c700bc00b100a7009e0095008d0085007d007603770346031702ea02c0029902740250022f021001f201d6',\n    '01bc01a3018b01750160014c013a01280118010800f900eb00de00d100c600bb00b000a6009d0094008c0084007d0076',\n    '03710340031102e502bb0294026f024c022b020c01ee01d301b901a001880172015e014a013801260116010600f700e9',\n    '00dc00d000c400b900af00a5009c0093008b0083007b0075036b033a030b02e002b6028f026b02480227020801eb01cf',\n    '01b5019d01860170015b0148013501240114010400f500e800db00ce00c300b800ae00a4009b0092008a0082007b0074',\n    '03640334030602da02b1028b026602440223020401e701cc01b2019a0183016d01590145013301220112010200f400e6',\n    '00d900cd00c100b700ac00a3009a009100890081007a0073035e032e030002d502ac02860262023f021f020101e401c9',\n    '01af01970180016b01560143013101200110010000f200e400d800cb00c000b500ab00a1009800900088008000790072'\n  ].join('');\n  const periods = Array.from({ length: 576 }, (_, i) => parseInt(hex.slice(i * 4, i * 4 + 4), 16));\n  const sine = [0,24,49,74,97,120,141,161,180,197,212,224,235,244,250,253,\n    255,253,250,244,235,224,212,197,180,161,141,120,97,74,49,24];\n  function integer(value, min, max, name) {\n    if (!Number.isInteger(value) || value \u003c min || value > max) throw new Error(`AMCAF pitch: invalid ${name}`);\n    return value;\n  }\n  function fine(value) { return integer(value, -8, 7, 'finetune') & 15; }\n  function word(value) { return integer(value, 0, 65535, 'period'); }\n  function read(index) {\n    if (index \u003c 0 || index >= periods.length) throw new Error('AMCAF pitch: period table address out of bounds');\n    return periods[index];\n  }\n  function tune(period, finetune) {\n    integer(period, 1, 4095, 'note');\n    const start = fine(finetune) * 36;\n    let i = 0;\n    // DBF #36 performs 37 comparisons; a miss leaves index 37.\n    while (i \u003c 37 && period \u003c read(i)) i++;\n    return read(start + i);\n  }\n  function target(period, finetune) {\n    integer(period, 1, 4095, 'note');\n    const raw = fine(finetune), start = raw * 37;\n    let i = 0;\n    while (i \u003c 37 && period \u003c read(start + i)) i++;\n    if (i === 37) i = 35;\n    if ((raw & 8) && i) i--;\n    return read(start + i);\n  }\n  function slide(period, parameter, down) {\n    word(period); integer(parameter, 0, 255, 'slide');\n    const value = (period + (down ? parameter : -parameter)) & 65535;\n    const low = value & 4095;\n    const result = down ? (low >= 856 ? (value & 61440) | 856 : value)\n      : (low \u003c 113 ? (value & 61440) | 113 : value);\n    return Object.freeze({ period: result, output: result & 4095 });\n  }\n  function arpeggio(period, finetune, parameter, counter) {\n    word(period); const start = fine(finetune) * 36;\n    integer(parameter, 0, 255, 'arpeggio'); integer(counter, 0, 255, 'tick counter');\n    const phase = counter % 3;\n    if (!phase || !parameter) return period;\n    const offset = phase === 1 ? parameter >> 4 : parameter & 15;\n    // Native code reads the shifted entry before comparing the base entry.\n    // A failed 37-entry search leaves the hardware period unchanged.\n    for (let i = 0; i \u003c 37; i++) {\n      const output = read(start + i + offset);\n      if (period >= read(start + i)) return output;\n    }\n    return null;\n  }\n  function vibrato(period, position, memory, parameter = 0) {\n    word(period); integer(position, 0, 255, 'vibrato position');\n    integer(memory, 0, 255, 'vibrato memory'); integer(parameter, 0, 255, 'vibrato parameter');\n    if (parameter & 15) memory = (memory & 240) | (parameter & 15);\n    if (parameter & 240) memory = (memory & 15) | (parameter & 240);\n    const delta = (sine[(position >> 2) & 31] * (memory & 15)) >> 7;\n    return Object.freeze({ output: (period + (position & 128 ? -delta : delta)) & 65535,\n      position: (position + ((memory >> 2) & 60)) & 255, memory });\n  }\n  return Object.freeze({ tune, target, slide, arpeggio, vibrato });\n}","sequenceSource":"function createAmcafSequencer(module, createPitch) {\n  const pitch = createPitch();\n  const check = (v, min, max, name) => {\n    if (!Number.isInteger(v) || v \u003c min || v > max) throw new Error(`AMCAF sequencer: invalid ${name}`);\n    return v;\n  };\n  const songLength = check(module.songLength, 1, 128, 'song length');\n  if (module.patterns.length \u003c 1 || module.patterns.length > 128 || module.samples.length !== 31) throw new Error('AMCAF sequencer: invalid module shape');\n  const patterns = module.patterns.map((pattern, p) => {\n    if (pattern.length !== 256) throw new Error('AMCAF sequencer: invalid pattern length');\n    return pattern.map((c, i) => {\n      const sample = check(c.sample, 0, 31, 'instrument'), period = check(c.period, 0, 4095, 'note');\n      const effect = check(c.effect, 0, 15, 'effect'), parameter = check(c.parameter, 0, 255, 'parameter');\n      if (![0,1,2,3,4,5,6,10,11,12,13,15].includes(effect) || effect === 11 && parameter > 127) {\n        throw new Error(`AMCAF sequencer: unsupported effect ${effect.toString(16)}:${parameter.toString(16)} at pattern ${p}, row ${i >> 2}, channel ${i & 3}`);\n      }\n      return { sample, period, effect, parameter };\n    });\n  });\n  if (module.orderTable.length !== 128) throw new Error('AMCAF sequencer: invalid order table');\n  const orders = Array.from(module.orderTable, p => check(p, 0, patterns.length - 1, 'pattern index'));\n  const samples = module.samples.map((s, i) => {\n    const length = check(s.length, 0, 131070, 'sample length');\n    const loopStart = check(s.loopStart, 0, length, 'loop start');\n    const loopLength = check(s.loopLength, 0, 131070, 'loop length');\n    // Empty MOD instruments conventionally have a one-word repeat header.\n    // They produce silence, never an out-of-range PCM fetch.\n    if (length && loopStart + loopLength > length) throw new Error('AMCAF sequencer: repeat exceeds sample');\n    if (s.pcm.length !== length) throw new Error('AMCAF sequencer: invalid PCM length');\n    return { number: i + 1, length, loopStart, loopLength,\n      finetune: check(s.finetune, -8, 7, 'finetune'), volume: check(s.volume, 0, 64, 'volume'),\n      pcm: Int8Array.from(s.pcm) };\n  });\n  const voices = Array.from({ length: 4 }, () => ({ sample: 0, period: 0, volume: 0,\n    outputPeriod: 0, outputVolume: 0, effect: 0, parameter: 0, finetune: 0,\n    target: 0, descending: false, portaSpeed: 0, vibratoMemory: 0, vibratoPosition: 0 }));\n  let playing = true, ticks = 0, counter = 0, speed = 6, bpm = 125, order = 0, row = 0, master = 64, ends = 0;\n  const signed = v => (v \u003c\u003c 16) >> 16;\n  const volume = v => { v.outputVolume = (v.volume * master) >> 6; };\n  function slideVolume(v) {\n    const up = v.parameter >> 4;\n    v.volume = Math.max(0, Math.min(64, v.volume + (up || -(v.parameter & 15))));\n    volume(v);\n  }\n  function porta(v) {\n    if (!v.target) return;\n    v.period = (v.period + (v.descending ? -v.portaSpeed : v.portaSpeed)) & 65535;\n    if (v.descending ? signed(v.period) \u003c= signed(v.target) : signed(v.period) >= signed(v.target)) {\n      v.period = v.target; v.target = 0;\n    }\n    v.outputPeriod = v.period;\n  }\n  function between(v) {\n    const e = v.effect, p = v.parameter;\n    if (!e && !p) { v.outputPeriod = v.period; volume(v); }\n    else if (!e) {\n      const output = pitch.arpeggio(v.period, v.finetune, p, counter);\n      if (output !== null) v.outputPeriod = output;\n    } else if (e === 1 || e === 2) {\n      const s = pitch.slide(v.period, p, e === 2); v.period = s.period; v.outputPeriod = s.output;\n    } else if (e === 3 || e === 5) {\n      if (e === 3 && p) { v.portaSpeed = p; v.parameter = 0; }\n      porta(v); if (e === 5) slideVolume(v);\n    } else if (e === 4 || e === 6) {\n      const s = pitch.vibrato(v.period, v.vibratoPosition, v.vibratoMemory, e === 4 ? p : 0);\n      v.outputPeriod = s.output; v.vibratoPosition = s.position; v.vibratoMemory = s.memory;\n      if (e === 6) slideVolume(v);\n    } else {\n      v.outputPeriod = v.period;\n      if (e === 10) slideVolume(v);\n    }\n  }\n  function snapshot() {\n    return Object.freeze({ playing, ticks, counter, speed, bpm, order, row, master, ends,\n      voices: Object.freeze(voices.map(v => Object.freeze({ ...v }))) });\n  }\n  function tick() {\n    if (!playing) return null;\n    const at = { tick: ++ticks, order, row }, triggers = [], repeats = [];\n    let isRow = false;\n    try {\n      if (++counter \u003c speed) voices.forEach(between);\n      else {\n        isRow = true; counter = 0;\n        let jump = false, breakRow = 0;\n        const cells = patterns[orders[order]];\n        for (let channel = 0; channel \u003c 4; channel++) {\n          const c = cells[row * 4 + channel], v = voices[channel];\n          v.effect = c.effect; v.parameter = c.parameter;\n          if (c.sample) {\n            const s = samples[c.sample - 1];\n            v.sample = c.sample; v.finetune = s.finetune; v.volume = s.volume; volume(v);\n          }\n          if (c.period) {\n            if (c.effect === 3 || c.effect === 5) {\n              v.target = pitch.target(c.period, v.finetune);\n              v.descending = signed(v.target) \u003c signed(v.period);\n              if (v.target === v.period) v.target = 0;\n            } else {\n              v.period = pitch.tune(c.period, v.finetune); v.outputPeriod = v.period; v.vibratoPosition = 0;\n              const s = samples[v.sample - 1];\n              triggers.push(Object.freeze({ voice: channel, sample: v.sample,\n                length: !s ? 0 : s.loopStart ? s.loopStart + s.loopLength : s.length }));\n            }\n          }\n          if (c.effect === 11) {\n            const previous = (c.parameter - 1) & 255;\n            if (((previous \u003c\u003c 24) >> 24) \u003c order) ends++;\n            order = previous; jump = true; breakRow = 0;\n          } else if (c.effect === 13) {\n            const value = (c.parameter >> 4) * 10 + (c.parameter & 15);\n            breakRow = value > 63 ? 0 : value; jump = true;\n          } else if (c.effect === 15) {\n            if (c.parameter && c.parameter \u003c 32) { speed = c.parameter; counter = 0; }\n            else if (c.parameter >= 32) bpm = c.parameter;\n          } else if (c.effect === 12) {\n            v.volume = Math.min(64, c.parameter); volume(v);\n          } else { v.outputPeriod = v.period; volume(v); }\n        }\n        // Native repeat registers are written after all new-note DMA starts,\n        // in reverse channel order, even when there was no new note.\n        for (let channel = 3; channel >= 0; channel--) {\n          const s = samples[voices[channel].sample - 1];\n          repeats.push(Object.freeze({ voice: channel, sample: s ? s.number : 0,\n            start: s ? s.loopStart : 0, length: s && s.length ? s.loopLength : 0 }));\n        }\n        if (jump || ++row === 64) {\n          row = breakRow; order = (order + 1) & 127;\n          if (order >= songLength) { order = 0; ends++; }\n        }\n      }\n      return Object.freeze({ ...at, isRow, triggers: Object.freeze(triggers), repeats: Object.freeze(repeats), state: snapshot() });\n    } catch (error) {\n      playing = false;\n      error.message += ` at AMCAF tick ${ticks}, order ${at.order}, row ${at.row}`;\n      throw error;\n    }\n  }\n  return Object.freeze({ tick, get state() { return snapshot(); }, stop() { playing = false; },\n    setVolume(value) {\n      check(value, -2147483648, 2147483647, 'master volume');\n      master = value \u003c 0 ? 0 : Math.min(64, value & 65535);\n    },\n    sample(number) {\n      const s = samples[check(number, 1, 31, 'sample number') - 1];\n      return Object.freeze({ ...s, pcm: Int8Array.from(s.pcm) });\n    } });\n}","pcmSource":"function createAmcafPcm(samples, options = {}) {\n  const integer = (value, min, max, name) => {\n    if (!Number.isInteger(value) || value \u003c min || value > max) throw new Error(`AMCAF PCM: invalid ${name}`);\n    return value;\n  };\n  const sampleRate = integer(options.sampleRate == null ? 48000 : options.sampleRate, 8000, 192000, 'sample rate');\n  const standard = options.standard == null ? 'PAL' : options.standard;\n  if (standard !== 'PAL' && standard !== 'NTSC') throw new Error('AMCAF PCM: unsupported audio standard');\n  const clock = standard === 'PAL' ? 3546895 : 3579545;\n  if (!Array.isArray(samples) || samples.length \u003c 1 || samples.length > 31) throw new Error('AMCAF PCM: invalid sample bank');\n  let total = 0;\n  const pcm = Array.from(samples, (s, i) => {\n    if (!s || s.number !== i + 1) throw new Error('AMCAF PCM: invalid sample number');\n    const length = integer(s.length, 0, 131070, 'sample length');\n    if (!s.pcm || s.pcm.length !== length || (total += length) > 16 * 1024 * 1024) throw new Error('AMCAF PCM: invalid PCM storage');\n    for (const value of s.pcm) integer(value, -128, 127, 'signed PCM byte');\n    return Int8Array.from(s.pcm);\n  });\n  const voices = Array.from({ length: 4 }, () => ({ active: false, sample: 0, start: 0,\n    length: 0, offset: 0, repeatSample: 0, repeatStart: 0, repeatLength: 0, period: 0, volume: 0 }));\n  let frames = 0, tick = 0, stopped = false;\n  function region(action, repeat) {\n    const voice = integer(action.voice, 0, 3, 'voice'), sample = integer(action.sample, 0, pcm.length, 'instrument');\n    const start = repeat ? integer(action.start, 0, 131070, 'repeat start') : 0;\n    const length = integer(action.length, 0, 131070, 'region length');\n    if (start + length > (sample ? pcm[sample - 1].length : 0)) throw new Error('AMCAF PCM: region exceeds sample');\n    return { voice, sample, start, length };\n  }\n  function actions(list, repeat) {\n    if (!Array.isArray(list) || list.length > 4) throw new Error('AMCAF PCM: invalid DMA intents');\n    const result = list.map(a => region(a, repeat));\n    if (new Set(result.map(a => a.voice)).size !== result.length) throw new Error('AMCAF PCM: duplicate voice intent');\n    return result;\n  }\n  function apply(frame) {\n    if (stopped) throw new Error('AMCAF PCM: renderer is stopped');\n    const nextTick = integer(frame.tick, tick + 1, Number.MAX_SAFE_INTEGER, 'tick sequence');\n    if (!Array.isArray(frame.state.voices) || frame.state.voices.length !== 4) throw new Error('AMCAF PCM: invalid voice state');\n    const registers = frame.state.voices.map(v => ({ period: integer(v.outputPeriod, 0, 65535, 'period'),\n      volume: integer(v.outputVolume, 0, 64, 'volume') }));\n    const starts = actions(frame.triggers, false), repeats = actions(frame.repeats, true);\n    for (let i = 0; i \u003c 4; i++) {\n      const start = starts.find(a => a.voice === i);\n      if ((start ? start.length > 0 : voices[i].active) && !registers[i].period) {\n        throw new Error('AMCAF PCM: active zero period is unsupported');\n      }\n    }\n    // All validation precedes any register, pointer or phase changes.\n    for (let i = 0; i \u003c 4; i++) Object.assign(voices[i], registers[i]);\n    for (const a of starts) Object.assign(voices[a.voice], { active: a.length > 0,\n      sample: a.sample, start: 0, length: a.length, offset: 0 });\n    for (const a of repeats) Object.assign(voices[a.voice], { repeatSample: a.sample,\n      repeatStart: a.start, repeatLength: a.length });\n    tick = nextTick;\n  }\n  function render(count) {\n    integer(count, 0, 1048576, 'frame count');\n    const left = new Float32Array(count), right = new Float32Array(count);\n    if (stopped) return Object.freeze({ left, right });\n    for (let i = 0; i \u003c count; i++) {\n      for (let number = 0; number \u003c 4; number++) {\n        const v = voices[number];\n        if (!v.active) continue;\n        const value = pcm[v.sample - 1][v.start + Math.floor(v.offset)] / 128 * v.volume / 64 * 0.5;\n        (number === 0 || number === 3 ? left : right)[i] += value;\n        v.offset += clock / v.period / sampleRate;\n        if (v.offset >= v.length) {\n          if (!v.repeatLength) { v.active = false; continue; }\n          v.offset = (v.offset - v.length) % v.repeatLength;\n          v.sample = v.repeatSample; v.start = v.repeatStart; v.length = v.repeatLength;\n        }\n      }\n    }\n    frames += count;\n    return Object.freeze({ left, right });\n  }\n  return Object.freeze({ apply, render, stop() { stopped = true; voices.forEach(v => { v.active = false; }); },\n    get state() { return Object.freeze({ sampleRate, standard, frames, tick, stopped,\n      voices: Object.freeze(voices.map(v => Object.freeze({ ...v }))) }); } });\n}","moduleSource":"function amcafPreviewModule() {\n  const samples = Array.from({ length: 31 }, (_, i) => {\n    const length = i \u003c 2 ? 64 : 0;\n    return { number: i + 1, length, loopStart: 0, loopLength: length ? 64 : 2,\n      volume: i ? 20 : 32, finetune: 0,\n      pcm: Int8Array.from({ length }, (_, n) => i ? (n \u003c 32 ? 80 : -80) : Math.round((n \u003c 32 ? n : 63 - n) * 6 - 96)) };\n  });\n  const pattern = Array.from({ length: 256 }, () => ({ sample: 0, period: 0, effect: 0, parameter: 0 }));\n  const put = (row, voice, sample, period, effect = 0, parameter = 0) => {\n    pattern[row * 4 + voice] = { sample, period, effect, parameter };\n  };\n  put(0, 0, 1, 428, 0, 0x37); put(0, 1, 2, 856, 4, 0x47);\n  put(8, 0, 2, 0); // Repeat-sample change without any new-note trigger.\n  put(12, 0, 0, 339, 3, 3); put(16, 0, 0, 428, 5, 1);\n  put(16, 1, 0, 0, 6, 1); put(24, 0, 1, 508, 0, 0x47);\n  put(32, 0, 1, 428, 4, 0x25); put(40, 0, 0, 0, 6, 1);\n  put(48, 0, 2, 339); put(56, 0, 1, 428, 0, 0x37);\n  return { songLength: 1, restart: 127, orderTable: new Uint8Array(128), patterns: [pattern], samples };\n}"},check:(function check(result, assert) {
+    assert.strictEqual(result.comparisons, 8); assert.ok(result.maxDifference < 1e-6);
+    assert.strictEqual(result.previewTicks, 384); assert.strictEqual(result.instrumentOnlyChange, 1); assert.ok(result.notes > 2);
+  }),pngReference:null,initialFrame:null});</script></body></html>

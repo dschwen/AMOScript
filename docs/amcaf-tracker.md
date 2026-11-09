@@ -2,7 +2,8 @@
 
 AMCAF `Pt Play` uses a different player from AMOS `Track Play`. The implementation currently consists of a pure pitch kernel in
 `lib/amos/amcafPitch.js` and a tick/row controller in
-`lib/amos/amcafSequencer.js`.
+`lib/amos/amcafSequencer.js`, plus a portable repeat-aware PCM renderer in
+`lib/amos/amcafPcm.js`.
 These are not registered as `Pt Play` yet and do not start sound or own timers.
 
 ## Source and implemented pitch rules
@@ -43,7 +44,7 @@ Arpeggio preserves contiguous-table spill and returns `null` when the native
 37-entry search would leave the hardware period unchanged. Out-of-table reads
 reject, including speculative shifted reads made before each comparison.
 
-Still required: an audio adapter for the controller intents, CIA/VBL scheduling,
+Still required: a streaming audio adapter for VM-driven PCM, CIA/VBL scheduling,
 shared voice arbitration, bank lifetime guards and browser lifecycle tests.
 Instrument-only changes may change repeat pointers without restarting the initial
 sample; the host contract must preserve that behavior. Ghostlight's private music
@@ -115,3 +116,54 @@ For the supplied Ghostlight modules:
 The game song's B03 jumps back to order 2. Its entire 14-order first pass is
 covered by the trace. These checks exercise sequencer execution, not Web Audio,
 CIA scheduling, AMOS VM integration, browser playback or game completion.
+
+
+## Repeat-aware PCM rendering
+
+`createAmcafPcm(samples, {sampleRate, standard})` owns signed PCM copies and four
+independent fetch cursors. Apply a sequencer frame at its tick boundary with
+`apply(frame)`, then render elapsed output frames with `render(count)`. The
+caller supplies time; the renderer starts no clocks, timers or host callbacks.
+It can be embedded as a standalone factory without imports.
+
+A note trigger latches an initial sample and length and resets only that voice's
+cursor. A repeat intent updates its pending sample/start/length. It leaves the
+currently fetched region intact, including when that region is already a loop.
+At the next region boundary, fetching switches to the latest pending repeat and
+carries fractional sample progress into it. Thus an instrument-only change can
+switch from one instrument's repeat to another's without replaying either
+instrument's attack. A later pitch change adjusts the advance rate without
+resetting cursor position. Muting still advances the cursor. Zero repeat length
+finishes the current fetch and then silences it; an empty note trigger silences
+immediately. Nonzero one-word repeats preserve and play their actual two bytes.
+
+The portable profile uses sample-and-hold output with PAL/NTSC clocks
+3,546,895/3,579,545 Hz divided by the output period. It sums voices 0/3 into left
+and 1/2 into right, with one-half gain per voice to keep each stereo pair bounded.
+Volume uses the controller's latched output volume, not the current master knob.
+This is not cycle-exact Paula word prefetch, DAC reconstruction or analog filter
+emulation. Active period zero is explicitly rejected pending a verified hardware
+contract; inactive voices can retain zero periods. Complete intents and register
+values are checked before any pointer/register mutation. Duplicate voice intents,
+invalid regions and nonmonotonic tick numbers reject. Render calls are bounded
+at 1,048,576 output frames; stopping is terminal and subsequent renders are silent.
+Changing render chunk sizes preserves the resulting PCM and cursor state.
+
+`test/amcaf-pcm.test.js` checks these transitions with independently transcribed
+sample bytes, pitch/volume changes, terminal cleanup, input ownership and
+standalone embedding. The [browser preview](../demos/amcaf-pcm.html) runs eight
+PAL/NTSC voice-routing comparisons against an independent absolute-phase formula
+and delivers that output through native OfflineAudioContext stereo graphs.
+It also offers Play/Stop controls for a synthetic eight-second music preview.
+Its explicit 50-Hz clock is a VBL preview, not a claim of CIA timing or AMOS VM
+integration. Repeated Play, Stop, disposal and page exit retire owned sources and
+contexts. No Ghostlight assets are included in the page.
+
+Both private modules were additionally rendered locally at 8 kHz with 160 output
+frames per sequencer tick through the first end signal: 245,760 frames for the
+title and 860,160 for the game. Both channels had nonzero energy and finite PCM;
+peak magnitudes were 0.3125 and 1 respectively. This is a bounded VBL-clock
+execution check, not independent musical parity, live game audio or a native
+capture. The existing AMOS Web Audio adapter and standard Track Play remain
+unchanged. VM scheduling, live streaming and shared music/SFX voice ownership
+are the next integration steps.
