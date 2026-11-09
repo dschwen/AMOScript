@@ -308,3 +308,17 @@ Both private tunes also render finite, nonzero stereo PCM through their first
 end signal locally. This supplies the repeat-aware rendering foundation;
 streaming audio, CIA/driver timing and VM/SFX ownership remain next, and `Pt Play`
 is still gated. See [AMCAF tracker implementation](amcaf-tracker.md).
+
+
+### AMCAF playback progress: per-voice streaming bridge
+
+The stream bridge emits independently cancellable PCM channels and preserves
+computed phase across Pause/Resume. Its composed Web Audio host schedules bounded
+queues, drops/trim expired chunks and supports mask-local ordinary-sample
+takeover. The synthetic gallery preview now streams the live engine with
+Play/Pause/Resume/Stop instead of replaying a pre-rendered loop. Eleven native
+browser comparisons cover repeat/pitch routing, takeover, underrun recovery and
+filtering; see [audio streaming](audio-streaming.md). Private modules also run
+through this bridge headlessly. Driver CIA/VBL scheduling, command registration,
+bank lifetimes and actual Pt Sam/Raw ownership semantics remain next; Pt Play is
+still gated.

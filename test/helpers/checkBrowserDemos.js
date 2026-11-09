@@ -821,6 +821,14 @@ module.exports = async function checkBrowserDemos(browser) {
           await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.state === 'playing');
         }
         await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.contexts === '1');
+        await page.waitForFunction(() => Number(document.getElementById('amcaf-pcm-status').dataset.ticks) >= 6);
+        await page.click('#amcaf-pcm-pause');
+        const pausedTicks = await page.locator('#amcaf-pcm-status').getAttribute('data-ticks');
+        await page.waitForTimeout(80);
+        assert.strictEqual(await page.locator('#amcaf-pcm-status').getAttribute('data-ticks'), pausedTicks);
+        assert.strictEqual(await page.locator('#amcaf-pcm-status').getAttribute('data-state'), 'paused');
+        await page.click('#amcaf-pcm-pause');
+        await page.waitForFunction(ticks => Number(document.getElementById('amcaf-pcm-status').dataset.ticks) > ticks, Number(pausedTicks));
         await page.click('#amcaf-pcm-stop');
         await page.waitForFunction(() => document.getElementById('amcaf-pcm-status').dataset.contexts === '0');
         assert.strictEqual(await page.locator('#amcaf-pcm-status').getAttribute('data-state'), 'off');

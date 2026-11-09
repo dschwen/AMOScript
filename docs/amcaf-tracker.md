@@ -44,7 +44,7 @@ Arpeggio preserves contiguous-table spill and returns `null` when the native
 37-entry search would leave the hardware period unchanged. Out-of-table reads
 reject, including speculative shifted reads made before each comparison.
 
-Still required: a streaming audio adapter for VM-driven PCM, CIA/VBL scheduling,
+Still required: VM integration of the streaming adapter, CIA/VBL scheduling,
 shared voice arbitration, bank lifetime guards and browser lifecycle tests.
 Instrument-only changes may change repeat pointers without restarting the initial
 sample; the host contract must preserve that behavior. Ghostlight's private music
@@ -154,7 +154,7 @@ sample bytes, pitch/volume changes, terminal cleanup, input ownership and
 standalone embedding. The [browser preview](../demos/amcaf-pcm.html) runs eight
 PAL/NTSC voice-routing comparisons against an independent absolute-phase formula
 and delivers that output through native OfflineAudioContext stereo graphs.
-It also offers Play/Stop controls for a synthetic eight-second music preview.
+It also offers Play, Pause/Resume and Stop controls for a live synthetic music preview.
 Its explicit 50-Hz clock is a VBL preview, not a claim of CIA timing or AMOS VM
 integration. Repeated Play, Stop, disposal and page exit retire owned sources and
 contexts. No Ghostlight assets are included in the page.
@@ -165,5 +165,7 @@ title and 860,160 for the game. Both channels had nonzero energy and finite PCM;
 peak magnitudes were 0.3125 and 1 respectively. This is a bounded VBL-clock
 execution check, not independent musical parity, live game audio or a native
 capture. The existing AMOS Web Audio adapter and standard Track Play remain
-unchanged. VM scheduling, live streaming and shared music/SFX voice ownership
-are the next integration steps.
+unchanged. The live streaming bridge is now implemented separately; VM scheduling and
+shared music/SFX command ownership remain the next integration steps. See
+[audio streaming](audio-streaming.md) for the per-voice protocol, queue bounds,
+eleven native browser comparisons and current timing limits.

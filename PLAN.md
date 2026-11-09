@@ -26,7 +26,8 @@ hashes; existing-screen Unpack preserves all rows. Its original new-screen
 interlaced/overscan presentation and AMCAF playback remain open.
 AMCAF now has a source-derived tick controller and repeat-aware PCM renderer,
 with an audible synthetic [browser preview](demos/amcaf-pcm.html). Private song
-checks reach their first loop; streaming/CIA timing and VM/SFX integration remain
+checks reach their first loop, and the preview now uses per-voice streaming with
+Pause/Resume and bounded native audio queues. CIA timing and VM/SFX integration remain
 open, so Pt Play is still gated. See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface
