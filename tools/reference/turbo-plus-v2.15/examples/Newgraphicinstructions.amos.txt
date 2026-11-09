@@ -1,0 +1,109 @@
+'*************************************************************************** 
+'*                                                                         * 
+'*                 AMOS/PRO NEW GRAPHIC INSTRUCTIONS DEMO                  * 
+'*                                                                         * 
+'*                 CODE WRITTEN BY : MANUEL ANDRE                          * 
+'*                                                                         * 
+'*             ANY SUGGESTIONS OR IMPROVEMENTS WRITE TO :                  * 
+'*                                                                         * 
+'*                    MANUEL ANDRE                                         * 
+'*                    ARBEIDERSSTRAAT 9                                    * 
+'*                    2600    BERCHEM                                      * 
+'*                    BELGIUM                                              * 
+'*                                                                         * 
+'*************************************************************************** 
+'
+'
+Flash Off 
+Curs Off 
+COMBINE
+Wait Key 
+Cls 
+SQUARE
+Wait Key 
+Cls 
+_FILL_SQUARE
+Wait Key 
+Cls 
+FIRST_BLOCK
+Wait Key 
+ENLARGE_FINER
+Wait Key 
+Cls 
+BLOCKS
+Cls 
+End 
+Procedure COMBINE
+   Text 10,62,"Draw combined with R Draw"
+   Text 10,72,"Press any key..."
+   Draw 100,0 To 100,50
+    R Draw 50,0
+   Draw To 150,0
+    R Draw -50,0
+End Proc
+Procedure SQUARE
+   Text 10,50,"The R Box instruction"
+   Text 10,62,"for hollow rectangles."
+   Text 10,74,"Press any key..."
+   Gr Locate 100,100
+    R Box 100,10
+    R Move 0,50
+    R Box 40,40
+End Proc
+Procedure _FILL_SQUARE
+   Text 10,50,"The R Bar instruction"
+   Text 10,62,"for filled rectangles."
+   Text 10,74,"Press any key..."
+   Gr Locate 100,100
+    R Bar 100,10
+    R Move 0,50
+    R Bar 40,40
+End Proc
+Procedure FIRST_BLOCK
+   Text 10,20,"These instructions can make life very "
+   Text 10,32,"easy..."
+   Text 10,44,"Press any key..."
+    R Home 30,50
+   For I=1 To 10
+       R Draw 170,0
+       R Move 0,5
+       R Draw -170,0
+       R Move 0,5
+   Next 
+    R Move 0,-5
+   For I=1 To 9
+       R Draw 0,-95
+       R Move 10,0
+       R Draw 0,95
+       R Move 10,0
+   Next 
+End Proc
+Procedure ENLARGE_FINER
+   Text 67,32,"and very complex !"
+   For J=0 To 100 Step 15
+       R Home 30+J,50
+      For I=1 To 10
+          R Draw 170,0
+          R Move 0,5
+          R Draw -170,0
+          R Move 0,5
+      Next 
+       R Move 0,-5
+      For I=1 To 9
+          R Draw 0,-95
+          R Move 10,0
+          R Draw 0,95
+          R Move 10,0
+      Next 
+   Next 
+End Proc
+Procedure BLOCKS
+   Repeat 
+      Text 20,100,"Left mouse button to stop..."
+       R Home Rnd(280),Rnd(160) : Rem of Gr Locate Rnd(),Rnd() 
+       R Draw 20,40
+       R Draw 40,0
+       R Draw -20,-40
+       R Draw -40,0
+   Until Mouse Click
+End Proc

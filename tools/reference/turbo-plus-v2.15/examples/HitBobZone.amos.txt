@@ -1,0 +1,33 @@
+Screen Open 1,640,200,2,Hires
+ Multi No 
+Reserve Zone 3
+Bob 0,128,80,2
+Set Zone 1,0,0 To 50,100
+Set Zone 2,51,0 To 200,100
+Set Zone 3,0,101 To 200,200
+For J=1 To 2
+   T=Timer
+   For I=1 To 5000
+      A=Zone(X Bob(0),Y Bob(0))
+   Next 
+   Print "TIME IN VBL";Timer-T;"  ZONE";A;" Zone(X Bob(0),Y Bob(0)"
+   T=Timer
+   For I=1 To 5000
+      A= Hit Bob Zone(0,0,0)
+   Next 
+   Print "TIME IN VBL";Timer-T;"  ZONE";A;" Hit Bob Zone(0,0,0)"
+   T=Timer
+   For I=1 To 5000
+      A=Zone(X Bob(0)+50,Y Bob(0)+2)
+   Next 
+   Print "TIME IN VBL";Timer-T;"  ZONE";A;" Zone(X Bob(0)+50,Y Bob(0)+2)"
+   T=Timer
+   For I=1 To 5000
+      A= Hit Bob Zone(50,2,0)
+   Next 
+   Print "TIME IN VBL";Timer-T;"  ZONE";A;" Hit Bob Zone(50,2,0)"
+   Print 
+Next 
+ Multi Yes 
+Print "Press any key"
+Wait Key 

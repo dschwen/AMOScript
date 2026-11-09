@@ -1,0 +1,54 @@
+' Change this size if you're cpu is too slow...  
+WX=256 : WY=256
+Screen Open 0,320,256,4,0
+Curs Off : Flash Off : Paper 0 : Pen 1 : Cls 
+Palette $F,$FFF,$F00,$F0
+ Alloc Code Bank 11,64000
+If Length(9)=0
+   Imploder Unpack 8 To 9
+'  Alloc Trans Source 9
+'  Reserve As Data 9,128*1024
+'  Ink 1,0 
+'  For Y=0 To 31 
+'    Text Y*4,Text Base+Y*8,"HALLO TEST 1 2 3" 
+'  Next  
+'  For Y=0 To 255
+'    For X=0 To 255
+'      Poke Start(9)+X+Y*256,Turbo Point(X,Y)
+'    Next  
+'  Next  
+'  Copy Start(9),Start(9)+64*1024 To Start(9)+64*1024
+End If 
+ Alloc Trans Map 10,WX,WY
+ST=Start(10)
+Gosub CALCMAP
+Y=0
+Timer=0
+Colour 0,$8
+For A=1 To 1000
+'  Wait Vbl  
+   Set Trans Source Start(9)+Y*256
+'  Trans Screen Dynamic 0,0,16,0 
+'  Call Start(11)
+   Trans Screen Runtime 0,0,16,0
+  Add Y,1,0 To 255
+Next 
+Print Timer
+End 
+CALCMAP:
+'  Vec Rot Pos 0,0,512 
+'  Vec Rot Angles AX,AY,AZ 
+'  Vec Rot Precalc 
+  For Y=0 To WY-1
+    For X=0 To WX-1
+      PX=X+ Qsin(X*4+Y*3,32)
+      PY=Y+ Qcos(Y*5+X*7,24)
+'      PX=((X-WX/2)*50)/((Y+20))+WX/2
+'      PY=Y
+'      PX=Vec Rot X(X*2-WX,Y*2-WY,0)+128 
+'      PY=Vec Rot Y+128
+'      Doke ST+(X+Y*WX)*2,Vclip(PX,0 To 255)+Vclip(PY,0 To 255)*256-$8000
+      Doke ST+(X+Y*WX)*2,PX+PY*256
+    Next 
+  Next 
+Return 

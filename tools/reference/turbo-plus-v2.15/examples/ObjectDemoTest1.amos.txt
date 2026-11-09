@@ -1,0 +1,40 @@
+Screen Open 0,640,200,2,Hires
+'Define the objects
+ Object Limit 32
+For OBJ=1 To 2
+    Reserve Object OBJ,5
+    Define Move OBJ,1 To 0,0
+    Define Draw OBJ,2 To 10,0
+    Define Draw OBJ,3 To 10,10
+    Define Draw OBJ,4 To 0,10
+    Define Draw OBJ,5 To 0,0
+Next 
+'draw them on the screen 
+For OBJ=1 To 2
+    R Object Draw OBJ,150,100
+    R Object Mag Draw OBJ,110,50,5
+    R Object Mag Draw OBJ,100,1,-2
+Next OBJ
+Text 0,150,"Ok, I've now saved the objects..."
+'
+ Object Save "dh0:test_object",1 To 2
+Text 0,160,"Now removing them !"
+'removing them 
+For OBJ=1 To 2
+    Object Erase OBJ
+Next 
+Text 0,170,"Just loading them back...YEAH !"
+Text 0,180,"Now press any key !"
+Wait Key 
+Cls 
+Text 0,150,"Now I'm loading and defining the objects."
+Text 0,160,"As you can see object 3 and 4 are now defined !"
+'
+ Object Load "dh0:test_object",3
+ R Object Draw 3,0,0
+ R Object Draw 4,100,100
+For OBJ=3 To 4
+    Object Erase OBJ
+Next 
+ Object Limit 0
+End 

@@ -1,0 +1,95 @@
+'another very early in development demo by Wayne Johnson of the
+'Australian AMOS Club
+'only a few hours work done on this  
+'
+'
+Unpack 6 To 0
+Set Sprite Buffer 260
+Double Buffer 
+Hide : Cls 0
+Autoback 0
+Flash Off 
+'Get Sprite Palette  
+Colour 17,$AAA : Colour 21,$AAA : Colour 25,$AAA : Colour 29,$AAA
+Colour 2,$F00 : Colour 3,$700
+Sprite 0,250,160,1
+Sprite 7,250,41,2
+Bob 0,-50,-50,3
+Bob 1,-20,-50,4
+Bob 2,10,-50,5
+Bob 3,40,-50,6
+Bob 4,70,-50,7
+Bob 5,100,-50,7
+Bob 6,0,270,51
+Bob 7,10,270,51
+Bob 8,20,270,51
+Bob 9,30,270,51
+For I=1 To 54
+   Set Bob I,-1,,
+Next 
+Channel 0 To Sprite 0
+Channel 1 To Sprite 7
+Channel 2 To Bob 0
+Channel 3 To Bob 1
+Channel 4 To Bob 2
+Channel 5 To Bob 3
+Channel 6 To Bob 4
+Channel 7 To Bob 5
+Channel 8 To Bob 6
+Channel 9 To Bob 7
+Channel 10 To Bob 8
+Channel 11 To Bob 9
+For X=0 To 11 : Amal X,X : Next X
+'=========================================================================== 
+'Do not give more than 300 'STARS', this would take to much processor time 
+'and the machine could crash !!! (MC68000 based machine) 
+'Anyway with 300 'STARS' on screen it would be to jerky... 
+'150 to 200 seems to be good enough. 
+'Also, the 'STARS' speed must ly between -7 and 7, else crash. Don't know
+'why... I've checked the 'STARS' code but I could not find any BUG ! 
+'=========================================================================== 
+STARS_COUNT#=200.0
+STARS_COUNT=STARS_COUNT#
+Y_INC#=(Screen Height-1.0)/STARS_COUNT#
+ Reserve Stars STARS_COUNT
+For I=1 To STARS_COUNT
+    Define Star I,Rnd(319),I*Y_INC#,0,0
+Next 
+ Stars Speed 1 To STARS_COUNT,(160-X Screen(X Mouse))/8,(128-Y Screen(Y Mouse))/20
+Amal On 
+Limit Mouse 178,48 To 384,278
+Bob Update Off 
+_X_OLD=X Mouse
+_Y_OLD=Y Mouse
+Repeat 
+   Screen Swap 
+   Wait Vbl 
+    Blit Clear 1
+   Bob Clear 
+   Bob Draw 
+   If Bob Col(4,0 To 3)=-1 and Col(0)=-1 and Col(3)=-1 : Amreg(8)=1 : End If 
+   If Bob Col(5,0 To 3)=-1 and Col(0)=-1 and Col(3)=-1 : Amreg(8)=2 : End If 
+    Display Stars 
+   MOUSE_X=X Mouse and $FFF8
+   MOUSE_Y=Y Mouse and $FFF8
+'   If(MOUSE_X<>_X_OLD) or(MOUSE_Y<>_Y_OLD)
+   If((MOUSE_X xor _X_OLD) xor(MOUSE_Y xor _Y_OLD))
+      X_SPEED=(160-X Screen(MOUSE_X))/6
+      Y_SPEED=(128-Y Screen(MOUSE_Y))/4
+      _X_OLD=MOUSE_X
+      _Y_OLD=MOUSE_Y
+      If X_SPEED<0
+         X_SPEED=Max(X_SPEED,-7)
+      Else 
+         X_SPEED=Min(X_SPEED,7)
+      End If 
+      If Y_SPEED<0
+         Y_SPEED=Max(Y_SPEED,-7)
+      Else 
+         Y_SPEED=Min(Y_SPEED,7)
+      End If 
+       Stars Speed 1 To STARS_COUNT,X_SPEED,Y_SPEED
+   End If 
+
+Until Mouse Key=2
+ Stars Erase 

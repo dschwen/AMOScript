@@ -1,0 +1,65 @@
+Screen Open 1,320,256,8,Lowres
+'turn off multitasking for much better screen synch
+ Multi No 
+' FIRST lets scroll with normal AMOS instructions! 
+SHIFT=1
+BLITS=10
+ Blit Clear -1
+Y=0
+For I=1 To BLITS
+   '  USE A POSITIVE SHIFT FOR SHIFTING TO THE RIGHT !!!
+   Def Scroll I,0,Y To 320,Y+20,-SHIFT,0
+   Add Y,20
+   Inc SHIFT
+Next 
+Locate 0,0
+For I=1 To 25
+   Print "jkdshfkjdsahflkjahdslkhagsdjhsjhhdhsksk"
+Next 
+Draw 0,200 To 300,200
+For I=1 To 100
+    Vbl Wait 255 : Rem we even let AMOS use Multi No & Vbl Wait, but still ugly 
+   For J=1 To BLITS
+      Scroll J
+   Next 
+Next 
+Print "THAT WAS AMOS!  Not very pretty!"
+Print "Left click for TURBO!"
+Repeat : Until Left Click 
+
+ Blit Clear -1
+Locate 0,0
+For I=1 To 25
+   Print "jkdshfkjdsahflkjahdslkhagsdjhsjhhdhsksk"
+Next 
+SHIFT=1
+BLITS=10
+Y=0
+'  DEFINE AND STORE ALL THE BLITS
+For I=1 To BLITS
+   '  USE A POSITIVE SHIFT FOR SHIFTING TO THE RIGHT !!!
+    Blit Store Left 1,I,0,Y To 320,Y+20,-SHIFT
+   Add Y,20
+Next 
+' THIS IS ONLY DONE TO SHOW THAT IT WORKS...I COULD HAVE CHANGED THE 
+' SHIFT VALUE WHEN DEFINING THE BLITS... 
+For I=1 To 10
+    Blit Speed I,I
+Next 
+' OK...HERE COMES THE SPEED !!! JUST FEED THE BLITTER WITH THE PRE-
+' CALCULATED VALUES !!!
+For I=1 To 100
+    Vbl Wait 255
+    Multi Blit 1 To BLITS
+Next 
+' DON'T FORGET TO FREE THE MEMORY USED BY THE BLIT DEFINITIONS !!! 
+For I=1 To BLITS
+    Blit Erase I
+Next 
+ Multi Yes 
+' DON't FORGET TO ENABLE MULTITASKING AFTER DISABLING IT !!! 
+ Multi Yes 
+Print "THAT was a TURBO SCROLL!"
+Print "PRESS LEFT MOUSE BUTTON"
+Repeat 
+Until Left Click 

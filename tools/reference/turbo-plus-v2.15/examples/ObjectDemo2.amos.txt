@@ -1,0 +1,149 @@
+Screen Open 0,320,256,2,Lowres
+Curs Off 
+Wait Vbl 
+Screen Open 1,320,256,2,Lowres
+Curs Off 
+Wait Vbl 
+Screen To Front 0
+For I=1 To 32
+   Print "AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!";
+Next 
+Wait Vbl 
+Dual Playfield 0,1
+Screen 0
+Text 73,110,"Press ANY mouse to stop..."
+Wait 200
+ Object Limit 32
+NUMBER=0
+For I=1 To 2
+   Restore 0+I
+   Read ZIN$
+   For J=1 To Len(ZIN$)
+      LETTER$=Mid$(ZIN$,J,1)
+      Restore LETTER$
+      Read LETTER$,COUNT
+      Inc NUMBER
+       Reserve Object NUMBER,COUNT
+      For LUS=1 To COUNT
+         Read WHAT,X,Y
+         If WHAT=0
+             Define Draw NUMBER,LUS To X-20,Y-23
+         Else 
+             Define Move NUMBER,LUS To X-20,Y-23
+         End If 
+      Next 
+   Next 
+Next 
+Double Buffer 
+Autoback 0
+Repeat 
+   Y=120
+   For SHRINK=1 To 15
+      X=60
+      For I=1 To 5
+          R Object Mag Draw I,X,Y,-SHRINK
+         Add X,50
+      Next 
+      Exit If Mouse Click,2
+      Screen Swap 
+      Wait 2 : Rem WAIT 2 VBL ! BECAUSE IF COMPILED IT IS TOO FAAAAAST !!!
+       Blit Clear -1
+   Next 
+   For SHRINK=15 To 1 Step -1
+      X=60
+      For I=6 To 10
+          R Object Mag Draw I,X,Y,-SHRINK
+         Add X,50
+      Next 
+      Exit If Mouse Click,2
+      Screen Swap 
+      Wait 2
+       Blit Clear -1
+   Next 
+   Wait 14
+   For SHRINK=1 To 15
+      X=60
+      For I=6 To 10
+          R Object Mag Draw I,X,Y,-SHRINK
+         Add X,50
+      Next 
+      Exit If Mouse Click,2
+      Screen Swap 
+      Wait 2
+       Blit Clear -1
+   Next 
+   For SHRINK=15 To 1 Step -1
+      X=60
+      For I=1 To 5
+          R Object Mag Draw I,X,Y,-SHRINK
+         Add X,50
+      Next 
+      Exit If Mouse Click,2
+      Screen Swap 
+      Wait 2
+       Blit Clear -1
+   Next 
+   Wait 14
+Until Mouse Click
+For I=1 To NUMBER
+    Object Erase I
+Next 
+ Object Limit 0
+Shift Off 
+Screen Close 1
+Screen Close 0
+'Multi Yes : Rem REMEMBER !!! ALLWAYS ENABLE MULTITASKING IF YOU DISASBLED IT !!     
+End 
+1 Data "XATOM"
+2 Data "AMOSX"
+A:
+Data "A",5
+Data 1,0,40
+Data 0,20,0
+Data 0,40,40
+Data 1,30,20
+Data 0,10,20
+T:
+Data "T",4
+Data 1,0,0
+Data 0,40,0
+Data 1,20,0
+Data 0,20,40
+O:
+Data "O",5
+Data 1,0,0
+Data 0,40,0
+Data 0,40,40
+Data 0,0,40
+Data 0,0,0
+M:
+Data "M",5
+Data 1,0,40
+Data 0,0,0
+Data 0,20,15
+Data 0,40,0
+Data 0,40,40
+E:
+Data "E",6
+Data 1,40,0
+Data 0,0,0
+Data 0,0,40
+Data 0,40,40
+Data 1,0,20
+Data 0,25,20
+S:
+Data "S",7
+Data 1,0,0
+Data 0,0,20
+Data 0,40,20
+Data 0,40,40
+Data 0,0,40
+Data 1,0,0
+Data 0,40,0
+Rem I use an X instead of ! because AMOS is not allowing it as a LABEL ! 
+X:
+Data "!",4
+Data 1,10,0
+Data 0,30,0
+Data 0,20,40
+Data 0,10,0

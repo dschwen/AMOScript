@@ -1,0 +1,31 @@
+Screen Open 0,320,200,8,Lowres
+Cls 0
+OFFX=160
+OFFY=100
+T=Timer
+Ink 7
+Print "This is the AMOS circle command!"
+For I=1 To 100
+   _CIRCLE[OFFX,OFFY,I]
+Next 
+G=Timer-T
+Print G;" vbl's to complete"
+
+Print "Next-TURBO F Circle command!"
+Print "Left click for it!"
+Repeat : Until Left Click 
+Cls 0 : T=Timer
+For I=1 To 100
+   FAST_CIRCLE[OFFX,OFFY,I]
+Next 
+G2=Timer-T
+Print G2;" vbls"
+Print(G*1.0)/G2*100.0;"% faster!"
+Wait Key 
+End 
+Procedure _CIRCLE[OFFX,OFFY,R]
+   Circle OFFX,OFFY,R
+End Proc
+Procedure FAST_CIRCLE[OFFX,OFFY,R]
+    F Circle OFFX,OFFY,R,7
+End Proc

@@ -1,0 +1,39 @@
+'Use the u,d,l,r,i,o keys and watch it happen... 
+'start with a few o
+'U)p, D)own, L)eft R)ight I)n O)ut 
+
+'
+Screen Open 0,640,256,2,Hires
+ Eye 3D 320,128
+D=0 : E=0 : F=610
+Draw 0,128 To 640,128
+Draw 320,0 To 320,256
+Repeat 
+   Repeat 
+      A$=""
+      A$=Inkey$
+   Until A$<>""
+   If A$="u" Then E=E-50
+   If A$="d" Then E=E+50
+   If A$="l" Then D=D-50
+   If A$="r" Then D=D+50
+   If A$="i" Then F=F+50
+   If A$="o" Then F=F-50
+      Restore 
+      For I=1 To 12
+         Read A1,B1,C1,A2,B2,C2
+          Line 3D A1+D,B1+E,C1+F To A2+D,B2+E,C2+F
+      Next 
+Until 1<0
+Data 0,0,0,50,0,0
+Data 50,0,0,50,0,50
+Data 50,0,50,0,0,50
+Data 0,0,50,0,0,0
+Data 0,0,0,0,50,0
+Data 0,50,0,50,50,0
+Data 50,50,0,50,50,50
+Data 50,50,50,0,50,50
+Data 0,50,50,0,50,0
+Data 0,50,50,0,0,50
+Data 50,50,50,50,0,50
+Data 50,50,0,50,0,0

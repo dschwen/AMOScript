@@ -1,0 +1,84 @@
+'Little starfield demo...
+'
+'These routines have their limitations...
+'
+'The "STARS" are only drawn in the first bitplane, but it has the advantage
+'that you can display BOB's on top of the "STARS" whithout having to save  
+'the background of them !
+'
+'Read the Set Bob command in the AMOS manual for better understanding of 
+'this process !
+'
+'No more than 4000 "STARS" can be defined... 
+'
+'The amount of stars you can display on the screen in 1 VBL depends of the 
+'X SPEED and Y SPEED parameters... 
+'
+'If you only use X SPEED (so X SPEED <> 0 but Y SPEED = 0), then 670 STARS 
+'are the limit.
+'
+'If you only use Y SPEED (X SPEED = 0 but Y SPEED <> 0), then 660 STARS  
+'are the limit.
+'
+'If you use both speeds (X SPEED <> 0 AND Y SPEED <> 0), then 520 STARS
+'are the limit.
+'
+'You may define more stars but the display will flimmer... 
+'
+'Owners of accelerator cards can display more 'STARS', this is because 
+'I use the 68000 processor to display the 'STARS' !!!
+'
+'Maybe in the future I'll make some SPRITE "STAR" routines...
+'
+Close Editor 
+Hide On 
+Screen Open 1,320,250,4,Lowres
+Double Buffer 
+Autoback 0
+Curs Off 
+Wait Vbl 
+Screen Open 2,320,250,4,Lowres
+Curs Off 
+Cls 0
+For I=1 To 31
+   Colour I,0
+Next 
+Colour 2,$AC
+Colour 3,$F00
+Colour 9,$FFF
+Wait 50
+Dual Playfield 2,1
+Dual Priority 1,2
+For I=1 To 16 : Print " AMOS !! STARS !! AMOS !! STARS !! AMOS " : Next 
+Ink 3
+Text 12,78,"ROUTINES FOR AMOS CODED BY ! MADMAX !"
+Text 30,110,"OOPS IT'S SNOWING STARS TODAY !!!"
+Text 30,142,"PRESS LEFT MOUSE BUTTON TO STOP !"
+Screen 1
+ Reserve Stars 520
+For I=1 To 520
+    Define Star I,Rnd(319),Rnd(239),Rnd(3)+1,Rnd(2)
+Next 
+ Stars Clip 0,0,319,239
+ Multi No 
+Repeat 
+   Add COUNT,1,1 To 451
+   Screen Swap 
+    Vbl Wait 0
+   '  Only 1 plane is cleared 
+    Blit Clear 1
+    Display Stars 
+   If COUNT=150
+       Stars Speed 1 To 200,Rnd(4)+1,Rnd(3)
+   Else 
+      If COUNT=300
+          Stars Speed 100 To 300,-Rnd(3),Rnd(2)+1
+      Else 
+         If COUNT=450
+             Stars Speed 50 To 150,-(Rnd(3)+1),-Rnd(3)
+         End If 
+      End If 
+   End If 
+Until Left Click 
+ Stars Erase 
+ Multi Yes 

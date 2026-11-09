@@ -1,0 +1,65 @@
+'Small demo to show the power of the new Static Block routines.  
+Screen Open 0,640,200,8,Hires
+Curs Off 
+For I=1 To 15
+    F Circle I+1,I+1,I,2
+   Get Block I,0,0,32,32
+Next 
+'I only do this for having more Blocks --> bigger linked list... 
+'The more blocks you use in your program, the greater speedup you will have. 
+For I=16 To 160
+   Get Block I,0,0,16,16
+Next 
+'reserve memory for 160 'static blocks'  
+ Reserve Static Block 160
+'ok, now build the 'static list' from the 'linked list'
+ Build Static Block 
+_ADDER=1
+ Multi No 
+'
+'First we use the normal AMOS routines...
+'
+For I=1 To 96
+   Add BLOCK,_ADDER
+   If BLOCK=16
+      _ADDER=-_ADDER
+      BLOCK=15
+   Else 
+      If BLOCK=0
+         _ADDER=-_ADDER
+         BLOCK=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+          Put Block BLOCK,X,Y
+      Next 
+   Next 
+Next 
+_ADDER=1
+Repeat 
+Until Left Click 
+'
+'And now with the new Static Block command   
+'
+For I=1 To 96
+   Add BLOCK,_ADDER
+   If BLOCK=16
+      _ADDER=-_ADDER
+      BLOCK=15
+   Else 
+      If BLOCK=0
+         _ADDER=-_ADDER
+         BLOCK=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+           F Put Static Block BLOCK,X,Y
+      Next 
+   Next 
+Next 
+ Multi Yes 
+ Static Block Erase 
+Repeat 
+Until Left Click 

@@ -1,0 +1,43 @@
+Screen Open 0,320,200,4,Lowres
+Curs Off 
+Cls 0
+Y=0
+For I=1 To 24
+   Text 10,Y,"!AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!"
+   Add Y,8
+Next 
+AANTAL=48
+SPATIE=2
+Dim SCHUIF(AANTAL)
+Global SCHUIF(),AANTAL,SPATIE
+For I=1 To AANTAL
+   Read SCHUIF(I)
+Next 
+Data -1,-1,-1,-1,-1,-1
+Data -1,-1,-1,-1,-1,0
+Data 1,1,1,1,1,1
+Data 1,1,1,1,1,0
+Data -1,-1,-1,-1,-1,-1
+Data -1,-1,-1,-1,-1,0
+Data 1,1,1,1,1,1
+Data 1,1,1,1,1,0
+'
+Repeat 
+WOBBLE
+Until Left Click 
+'
+Procedure WOBBLE
+   Y=50
+   For I=1 To AANTAL
+      SCHUIF_W=SCHUIF(I)
+      If SCHUIF_W<>0
+          Blit Left 0,0,Y To 320,Y+2,SCHUIF_W
+      End If 
+      Add Y,SPATIE
+   Next 
+   HULP=SCHUIF(1)
+   For I=2 To AANTAL
+      SCHUIF(I-1)=SCHUIF(I)
+   Next 
+   SCHUIF(AANTAL)=HULP
+End Proc

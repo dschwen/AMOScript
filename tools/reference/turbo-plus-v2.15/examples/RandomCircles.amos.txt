@@ -1,0 +1,14 @@
+Curs Off : Flash Off 
+Print "random circle demo-"
+Print "first, AMOS draws 100 circles"
+Print "then TURBO draws 400 circles"
+Print "left click to begin!"
+Repeat : Until Left Click 
+For Y=1 To 100
+   Ink Rnd(Screen Colour-1)
+   Circle Rnd(320),Rnd(200),Rnd(170)+3
+Next Y
+Home : Print "TURBO F DRAW!"
+For Y=1 To 400
+    F Circle Rnd(320),Rnd(200),Rnd(170)+3,Rnd(Screen Colour-1)
+Next Y

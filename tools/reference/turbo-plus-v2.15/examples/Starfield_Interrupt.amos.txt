@@ -1,0 +1,37 @@
+Screen Open 0,320,256,2,Lowres
+Hide 
+Cls 0
+Colour 1,$FFF
+'reserve memory for the 'STARS' and store the actual screen adress (screen 0)
+ Reserve Stars 300
+'define the stars... 
+'only X-speeds are used in the 'STARS INTERRUPT'...
+For I=1 To 300
+    Define Star I,Rnd(319)+1,I/1.5,Rnd(5)+1,0
+Next 
+Wait Vbl 
+ Multi No 
+'enable the 'STARS' interrupt...no automatic clear mode. 
+ Stars Int On 0
+'do something else 
+COUNT=0
+Repeat 
+   Inc COUNT
+   COUNT$=Str$(COUNT)
+   For Y=80 To 140 Step 20
+      Text 30,Y,COUNT$
+   Next 
+   Colour 1,COUNT
+   'try to use the Wait Vbl command...
+    Vbl Wait 201
+   'don't forget to clear the display every Vbl,
+   'because automatic clear mode is disabled !  
+    Blit Clear 1
+Until Left Click 
+'disable the 'STARS' interrupt 
+ Stars Int Off 
+'return the memory used to the system  
+ Stars Erase 
+ Multi Yes 
+'voila...  
+End 

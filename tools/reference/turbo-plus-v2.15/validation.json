@@ -1,0 +1,7 @@
+{
+  "reference": "AMOSPro_TURBO_Plus.Lib-V2.15",
+  "referenceSha256": "078815c00affc1e5ff16a20d4fc2d97dac909c17b7406a1972af16b927371bb0",
+  "matchedRecords": 153,
+  "compared": "Every name/signature/terminator/padding byte after the routine-pointer fields, at exact original token offsets.",
+  "evidence": "Independent preexisting amostools token image agrees with original library. This validates metadata, not command execution."
+}

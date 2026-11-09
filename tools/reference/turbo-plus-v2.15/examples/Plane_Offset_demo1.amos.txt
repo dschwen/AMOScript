@@ -1,0 +1,52 @@
+Screen Open 0,480,300,16,Lowres
+Screen Display 0,,0,,285
+ Plane Offset 0,-1,0,0
+Cls 0
+Ink 7
+For Y=0 To 300 Step 10
+   For X=0 To 340 Step 10
+      Box X,Y To X+10,Y+10
+   Next 
+Next 
+ Plane Shift Up 0,1 To 3
+ Plane Update 0
+Ink 7
+Text 5,90,"SMALL DISTURBED DEMO, NO BLITTER IS USED !"
+Ink 2
+Text 60,110,"OK GUYS...LET'S ROLL !!!"
+Ink 15
+Text 45,130,"PRESS ANY KEY TO GO NUTS !!!"
+Wait Key 
+ Multi No 
+For J=1 To 3
+   For I=1 To 60
+       Plane Offset 0,4,0,-1
+       Plane Offset 0,3,2,0
+       Plane Offset 0,2,-2,0
+       Plane Offset 0,1,0,2
+      Wait 4
+      Wait Vbl 
+       Plane Update 0
+   Next 
+    Plane Offset 0,-1,0,0
+   Wait Vbl 
+    Plane Update 0
+Next 
+Ink 2
+Text 45,250,"AND NOW AS FAST AS WE CAN !!!"
+Wait 200
+For J=1 To 10
+   For I=1 To 60
+       Plane Offset 0,4,0,-1
+       Plane Offset 0,3,2,0
+       Plane Offset 0,2,-2,0
+       Plane Offset 0,1,0,2
+      Wait Vbl 
+       Plane Update 0
+   Next 
+    Plane Offset 0,-1,0,0
+   Wait Vbl 
+    Plane Update 0
+Next 
+ Multi Yes 
+ Plane Offset 0,-1,0,0

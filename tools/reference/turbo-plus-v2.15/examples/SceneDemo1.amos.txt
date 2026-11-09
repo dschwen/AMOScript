@@ -1,0 +1,208 @@
+'Scene Demo  
+'
+'By C.B. Meeks 
+'
+'Graphics by - Ryan Scott
+'
+'For more info contact:
+'
+'Ryan Scott at:
+'
+'Playfield!
+'Dept F
+'PO Box 450884 
+'Sunrise, FL  33345-0884 
+'USA 
+'(305) 846-7969
+'Start up
+
+Screen Open 0,320,192,32,Lowres
+Screen Display 0,135,50,320,192
+Flash Off : Curs Off : Hide On : Cls 0
+Load "SpaceIcons.Abk"
+Get Icon Palette 
+ Scene Load Dir$+"Space2.Scene",6
+ Scene Convert 6 To 5
+ Scene Bank 5
+ Scene 16 View 0,0,0 To 320,192
+Pen 1 : Paper 0
+_PRINT
+Do 
+   A$=Inkey$
+   If A$="1"
+      SDRAWING
+   End If 
+   If A$="2"
+      SSCROLLING
+   End If 
+   If A$="3"
+      CREDITS
+   End If 
+   If A$="4"
+      Erase 2
+      Erase 6
+      Cls 0
+      Locate 0,12 : Centre "Bye!"
+      Wait 100
+      Erase 2
+      Erase 6
+      End 
+   End If 
+Loop 
+
+Procedure SDRAWING
+Cls 0
+Locate 0,0 : Centre "Speed Drawing"
+Locate 0,4 : Centre "320x192x32 screen / 16x16 icons"
+Locate 0,14 : Print "I will show you the difference between"
+Locate 0,15 : Print "Amos and Turbo Plus scene commands."
+Locate 0,20 : Centre "Press any key or mouse..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+Cls 0
+T=Timer
+For NUMBER=1 To 10 : Rem 10 times 
+   For Y=0 To 11
+      For X=0 To 19
+         Paste Icon X*16,Y*16,Peek(Start(6)+4+X+Y*200)+1
+      Next X
+   Next Y
+Next NUMBER
+TIME=Timer-T
+Cls 0
+Locate 0,0 : Centre "Regular Amos and Amos Pro"
+Locate 0,12
+Print "I just drew this scene 10 times and it"
+Print "took ";TIME;" verticle blanks"
+Locate 0,20 : Print "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+Cls 0
+T=Timer
+For Y=0 To 11
+   For X=0 To 19
+      Paste Icon X*16,Y*16,Peek(Start(6)+4+X+Y*200)+1
+   Next X
+Next Y
+TIME=Timer-T
+Cls 0
+Locate 0,0 : Centre "Regular Amos and Amos Pro"
+Locate 0,12
+Print "I just drew this scene 1 time and it"
+Print "took ";TIME;" verticle blanks"
+Locate 0,20 : Print "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+Cls 0
+Locate 0,0 : Centre "And NOW Turbo Scene commands!"
+Locate 0,12 : Centre "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+Cls 0
+T=Timer
+For NUMBER=1 To 10 : Rem 10 times 
+    Scene 16 Do 0,0 : Rem ONE command! 
+Next NUMBER
+TIME=Timer-T
+Cls 0
+Locate 0,0 : Centre "Turbo Plus Scene commands"
+Locate 0,12
+Print "I just drew this scene 10 times and it"
+Print "took ";TIME;" verticle blanks!"
+Locate 0,20 : Print "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+Cls 0
+T=Timer
+ Scene 16 Do 0,0
+TIME=T-Timer
+Cls 0
+Locate 0,0 : Centre "Turbo Plus Scene commands"
+Locate 0,12
+Print "I just drew this scene 1 time and it"
+Print "took ";TIME;" verticle blanks!!"
+Locate 0,20 : Print "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+_PRINT
+End Proc
+Procedure SSCROLLING
+Cls 0
+Locate 0,0 : Centre "Speed Scrolling"
+Locate 0,4 : Centre "320x192x32 screen / 16x16 icons"
+Locate 0,14 : Print "I will show you the difference between"
+Locate 0,15 : Print "Amos and Turbo Plus scene commands."
+Locate 0,20 : Centre "Press any key or mouse..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+MAPX=0
+T=Timer
+For MAPX=0 To 180
+   For Y=0 To 11
+      For X=0 To 19
+         Paste Icon X*16,Y*16,Peek(Start(6)+4+(X+MAPX)+Y*200)+1
+      Next X
+   Next Y
+   If Left Click Then Exit 
+Next MAPX
+TIME=Timer-T
+Cls 0
+Locate 0,0 : Centre "Regular Amos and Amos Pro"
+Locate 0,4 : Centre "Boy, was that S L O W !!!"
+'no-because you can exit early -Locate 0,6 : Print "It took ";TIME/60;" seconds!"  
+Locate 0,18 : Centre "Press anything for a REAL speed demon!"
+Wait 50
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+Cls 0
+T=Timer
+'we use scene do to draw the entire scene which is really unnecessary. 
+'its a bit slower than using scene Left/Right, etc, but much easier and
+'no extra BASIC code no matter which direction you scroll, so maybe even faster this way!
+For MAPX=0 To 180
+    Scene 16 Do MAPX,0
+Next 
+TIME=Timer-T
+Cls 0
+Locate 0,0 : Centre "Turbo Plus Scene commands"
+Locate 0,4 : Centre "Now that's a lot better!"
+Locate 0,6 : Print "It only took ";TIME/60;" seconds!"
+Locate 0,18 : Centre "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+_PRINT
+End Proc
+Procedure CREDITS
+Cls 0
+Locate 0,0 : Centre "Scene Demo"
+Locate 0,1 : Centre "by"
+Locate 0,3 : Centre "C.B. Meeks"
+Locate 0,4 : Centre "Graphics by Ryan Scott"
+Locate 0,6 : Centre "For more information contact:"
+Locate 0,8 : Centre "Playfield!"
+Locate 0,9 : Centre "Dept F"
+Locate 0,10 : Centre "PO Box 450884"
+Locate 0,11 : Centre "Sunrise, FL  33345-0884"
+Locate 0,12 : Centre "USA"
+Locate 0,13 : Centre "(305) 846-7969  VOICE"
+Locate 0,14 : Centre "(305) 846-8388  FAX"
+Locate 0,15 : Centre "(305) 456-0126  BBS"
+Locate 0,17 : Centre "C.B. Meeks"
+Locate 0,18 : Centre "PO Box 592"
+Locate 0,19 : Centre "Signal Mtn., TN  37377"
+Locate 0,20 : Centre "USA"
+Locate 0,21 : Centre "(615) 265-7887  VOICE"
+Locate 0,23 : Centre "Press anything..."
+Repeat 
+Until Inkey$<>"" or Mouse Key<>0
+_PRINT
+End Proc
+Procedure _PRINT
+Cls 0
+Locate 0,0 : Centre "Scene Demo"
+Locate 10,9 : Print "1> Speed Drawing"
+Locate 10,11 : Print "2> Speed Scrolling"
+Locate 10,13 : Print "3> Credits"
+Locate 10,15 : Print "4> Exit"
+Locate 10,20 : Print "Press a key now..."
+End Proc

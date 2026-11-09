@@ -1,0 +1,37 @@
+Set Buffer 40
+C=32
+Screen Open 0,320,200,C,Lowres
+Cls 0
+ Multi No 
+Dim X(1500),Y(1500),KOL(1500)
+For I=1 To 500
+   X(I)=Rnd(319)
+   Y(I)=Rnd(199)
+   KOL(I)=Rnd(C)+1
+Next 
+T=Timer
+For H=1 To 3
+   For I=1 To 1500
+       F Plot X(I),Y(I),KOL(I)
+   Next 
+Next H
+G=Timer-T
+Cls 0
+Print " F Plot timing in VBL's";G
+Repeat 
+   Multi Wait 
+Until Left Click 
+T=Timer
+For H=1 To 3
+   For I=1 To 1500
+      Plot X(I),Y(I),KOL(I)
+   Next 
+Next H
+G2=Timer-T
+Print " Plot timing in VBL's";G2
+Print(G2*1.0)/G*100.0;"% faster"
+Print "results vary with compilation,"
+Print "processor speed, and number of colours."
+ Multi Yes 
+Repeat 
+Until Left Click 

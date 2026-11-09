@@ -1,0 +1,18 @@
+'This is just a little program to show that the new instructions work
+'
+ Object Limit 32
+ Reserve Object 1,100
+ Define Attr 1,1 To 2,0
+ Define Move 1,2 To 100,100
+ Define Draw 1,3 To 120,100
+ Define Attr 1,4 To 5,0
+ Define Draw 1,5 To 120,60
+ Define Stop 1,6
+ Object Draw 1
+ Define Attr 1,6 To 4,0
+ Define Draw 1,7 To 100,60
+ Define Stop 1,8
+ Object Draw 1
+ Object Erase 1
+ Object Limit 0
+End 

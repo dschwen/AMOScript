@@ -1,0 +1,46 @@
+'This is another demo to demonstrate the speed of my F Plot instruction !
+'A STARFIELD DEMO..... 
+'Compile it to see the real SPEED !!!  
+'this is NOT using any STARFIELD commands
+Screen Open 1,320,256,2,Lowres
+Double Buffer 
+Autoback 0
+Curs Off 
+Palette 0,$FFF
+Hide On 
+ Blit Clear -1
+Wait Vbl 
+ Extension_5_003A 
+AANTAL=100
+Dim SPEED(AANTAL)
+Dim X_AS(AANTAL)
+Shared AANTAL,X_AS(),SPEED()
+For I=1 To AANTAL
+   SPEED(I)=Rnd(2)+1
+   X_AS(I)=Rnd(310)
+    F Plot X_AS(I),Y,1
+   Add Y,2
+Next 
+ Extension_5_004E 
+ Multi No 
+Repeat 
+    Extension_5_004E 
+   SET_STARS
+   CLEAR_STARS
+Until Left Click 
+ Multi Yes 
+End 
+Procedure SET_STARS
+   For I=1 To AANTAL
+       F Plot X_AS(I),Y,1
+      Add Y,2
+   Next 
+End Proc
+Procedure CLEAR_STARS
+   For I=1 To AANTAL
+      Add X_AS(I),SPEED(I),0 To 310
+   Next 
+   Screen Swap 
+   Wait Vbl 
+    Blit Clear -1
+End Proc

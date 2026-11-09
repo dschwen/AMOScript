@@ -1,0 +1,47 @@
+Break Off 
+Screen Open 0,320,200,2,Lowres
+Curs Off 
+Screen Open 1,320,200,2,Lowres
+Curs Off 
+TEKST$="HELLO GUYS...MULTI BLIT AND DISPLAY STARS ARE NOW RUNNING UNDER INTERRUPTS !!!"
+_LENGTE=Len(TEKST$)
+EERSTE_LETTER=1
+LAATSTE_LETTER=EERSTE_LETTER+_LENGTE
+LETTER=1
+ Blit Store Left 1,1,0,104 To 320,111,-2
+ Blit Store Left 1,2,0,122 To 320,129,2
+Screen 0
+ Reserve Stars 400
+For I=1 To 400
+    Define Star I,Rnd(319),I/2,Rnd(4)+2,0
+Next 
+Dual Playfield 0,1
+Colour 1,$FFF
+Colour 9,$FF
+ Stars Int On 0
+ Blit Int On 1 To 2
+ Blit Int Wait False
+Screen 1
+ Multi No 
+Repeat 
+   COUNT=0
+   LETTER$=Mid$(TEKST$,LETTER,1)
+   Text 300,110,LETTER$
+   Text 0,128,LETTER$
+   Add LETTER,1,EERSTE_LETTER To LAATSTE_LETTER
+   Repeat 
+      Screen 0
+       Vbl Wait 200
+       Blit Clear 1
+      Screen 1
+      Inc COUNT
+   Until COUNT>4
+Until Left Click 
+ Multi Yes 
+ Stars Int Off 
+ Blit Int Off 
+ Stars Erase 
+ Blit Erase 1
+ Blit Erase 2
+Break On 
+Default 

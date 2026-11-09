@@ -1,0 +1,126 @@
+'a very early in development project by Wayne Johnson of Australian AMOS Club
+'thanks to him for allowing its inclusion
+'********************
+'LightSpeed... Problems with remaining collisions, and missle choosing (using RE as some sort of track marker)   
+'********************
+Unpack 6 To 0 : Hide On : Colour 4,$F00 : AM=1
+Flash 5,"(a88,3)(B77,3)(C55,3)(D33,3)(E22,3)(F00,3)(F44,3)(F00,3)(E22,3)(D33,3)(C55,3)(B77,3)"
+Colour 4,$AAA
+Sprite 8,200,100,1
+Sprite 9,0,250,6
+Sprite 10,0,250,6
+Sprite 11,0,160,46
+Sprite 12,0,160,46
+Sprite 13,0,160,46
+Sprite 14,0,160,46
+'----------------
+Sprite 20,140,57,31
+Sprite 21,259,57,31
+For X=1 To 4
+   Sprite 21+X,263+(X*20),57,21
+Next X
+Global VB,X,Y
+'----------------
+'Still working on it, Manuel. The missiles don't work at the moment. 
+'This versions is not to be spread. The final will be PD. Just keep this 
+'version for yourself.   
+'Use SPACE to switch modes.
+'
+Screen Open 1,320,256,16,Lowres
+Curs Off : Flash Off : Cls 0
+Screen Display 1,150,80,280,256
+Get Icon Palette 
+CULUS
+Procedure CULUS
+Colour 17,$CCC
+Colour 18,$999
+Colour 19,$666
+Colour 21,$CCC : Rem$FB8
+Colour 22,$999 : Rem$F80
+Colour 23,$666 : Rem$B60
+Colour 25,$CCC : Rem$7BF
+Colour 26,$999 : Rem$8F 
+Colour 27,$666 : Rem$6B 
+Colour 29,$CCC
+Colour 30,$999
+Colour 31,$666
+End Proc
+Hide 
+SUP=36
+For X=1 To 320 Step 50
+    F Paste Icon X,120+SUP,1
+    F Paste Icon X,123+SUP,2
+    F Paste Icon X,131+SUP,3
+    F Paste Icon X,143+SUP,4
+    F Paste Icon X,159+SUP,5
+Next X
+P=0
+For A=1 To 7 : Blit Erase A : Next A
+ Blit Store Left 1,1,0,120+SUP To 320,123+SUP,-1
+ Blit Store Left 1,2,0,123+SUP To 320,131+SUP,-2
+ Blit Store Left 1,3,0,131+SUP To 320,143+SUP,-3
+ Blit Store Left 1,4,0,143+SUP To 320,159+SUP,-4
+ Blit Store Left 1,5,0,159+SUP To 320,182+SUP,-5
+'
+Channel 0 To Sprite 8 : Channel 1 To Sprite 9 : Channel 2 To Sprite 10
+Channel 8 To Sprite 20 : Channel 9 To Sprite 21
+Channel 3 To Sprite 11 : Channel 4 To Sprite 12
+Channel 5 To Sprite 13 : Channel 6 To Sprite 14
+Channel 10 To Sprite 22
+Channel 11 To Sprite 23
+Channel 12 To Sprite 24
+Channel 13 To Sprite 25
+Amal 0,0 : Amal 1,1 : Amal 2,2 : Amal 8,8 : Amal 9,9
+Amal 3,3 : Amal 4,4 : Amal 5,5 : Amal 6,6
+Amal 10,10 : Amal 11,11 : Amal 12,12 : Amal 13,13
+Amal On 
+Gr Writing 1
+'Track Play 7 : Led Off  
+FT=6 : Rem times to wait before flashing lazer
+Timer=0
+ Multi No 
+ Blit Int On 1 To 5
+ Blit Int Wait False
+Repeat 
+   Wait Vbl 
+   Add C1,1,1 To 47 : If C1=47 : F Paste Icon 272,120+SUP,1+ICO : End If 
+   Add C2,1,1 To 22 : If C2=22 : F Paste Icon 272,123+SUP,2+ICO : End If 
+   Add C3,1,1 To 10 : If C3=10 : F Paste Icon 272,131+SUP,3+ICO : End If 
+   Add C4,1,1 To 8 : If C4=8 : F Paste Icon 272,143+SUP,4+ICO : End If 
+   Add C5,1,1 To 8 : If C5=8 : F Paste Icon 272,159+SUP,5+ICO : End If 
+   If Amreg(18)=1
+      If VB=1 : Ink 0 : Draw X,Y To 320,Y : VB=0 : End If 
+      If FIYA=0 : 
+         X=X Screen(X Sprite(8))+25
+         Y=Y Screen(Y Sprite(8))+8
+      End If 
+      If Joy(1)>=16 and FTIMES=FT : Ink 1 : Draw X,Y To 320,Y : VB=1 : Add FTIMES,1,1 To FT
+   Else Add FTIMES,1,1 To FT : End If 
+   End If 
+   If KEYHIT=1 and Key State(64)=0 : KEYHIT=0
+Add AM,1,0 To 1 : If AM=0 : LAZER : Else MISS : End If : Amreg(18)=AM : End If 
+   If Raw Key(64) : KEYHIT=1 : End If 
+   If Timer>1520 : Add ICO,5,0 To 24 : Timer=0 : End If 
+Until Left Click 
+ Blit Int Off 
+ Multi Yes 
+Show 
+Default 
+Print "vbl pos=",Y Screen(Y Mouse)
+Repeat 
+Until Left Click 
+Procedure MISS
+   If VB=1 : Ink 0 : Draw X,Y To 320,Y : VB=0 : End If 
+   Screen 0
+   Flash Off 
+   Colour 4,$AAA
+   Flash 5,"(a88,3)(b77,3)(c55,3)(d33,3)(e22,3)(f00,3)(f44,3)(f00,3)(e22,3)(d33,3)(c55,3)(b77,3)"
+   Screen 1
+End Proc
+Procedure LAZER
+   Screen 0
+   Flash Off 
+   Flash 4,"(a88,3)(b77,3)(c55,3)(d33,3)(e22,3)(f00,3)(f44,3)(f00,3)(e22,3)(d33,3)(c55,3)(b77,3)"
+   Colour 5,$AAA
+   Screen 1
+End Proc

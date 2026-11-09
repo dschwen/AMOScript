@@ -1,0 +1,25 @@
+'this little proggy shows the speed of my new command for clearing the screen! 
+'!!! at this moment you can't give a colour parameter as with the normal Cls 
+'    instruction...I'll change this in the future...                       !!! 
+'
+'!!! you get the speed in Vertical Blancs...the lesser the faster... 
+'
+Screen Open 0,320,200,4,Lowres
+ Multi No 
+T=Timer
+For I=1 To 100
+   Cls 0
+Next 
+Print "AMOS's Cls Time in VBL's";Timer-T
+Print "Left mouse button..."
+Repeat 
+Until Left Click 
+T=Timer
+For I=1 To 100
+    Blit Clear -1
+Next 
+Print "TURBO's Blit Clear Time in VBL's";Timer-T
+Print "Left mouse button"
+ Multi Yes 
+Repeat 
+Until Left Click 

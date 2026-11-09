@@ -1,0 +1,30 @@
+Screen Open 0,320,200,16,Lowres
+'No multitasking...  
+ Multi No 
+'DOUBLE BUFFER...THANX !!! 
+Double Buffer 
+'WAIT UNTIL SCREENS PROPERLY INITIALISED...  
+Wait Vbl 
+'CANCEL THE DOUBLE BUFFERING PROCESS...  
+Autoback 0
+'Ok, define the first BLIT.  
+ Blit Store Left 0,1,0,0 To 320,120,-1
+'SWAP THE SCREENS AND THEREFORE ALSO THE BITMAPS ETC...  
+Screen Swap 
+'Define the second BLIT... 
+ Blit Store Left 0,2,0,0 To 320,120,-1
+'REACTIVATE THE DOUBLE BUFFERING PROCESS ! 
+Autoback 2
+'BRING YOUR STUFF ON SCREEN... 
+For I=1 To 25
+   Print "AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!AMOS!AMOS"
+Next 
+Repeat 
+    Vbl Wait 200
+   'Ok, do the scrolling on the Physical and Logical screen...
+    Multi Blit 1 To 2
+Until Left Click 
+  Blit Erase 1
+  Blit Erase 2
+'ENABLE MULTITASKING...
+ Multi Yes 

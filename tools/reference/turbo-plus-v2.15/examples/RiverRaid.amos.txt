@@ -1,0 +1,160 @@
+'A little River Raid clone in progress...' 
+
+'this program has banks included in it,  
+'If you type Erase 6 in direct mode, it will attempt to reload the banks 
+'with the next few lines of code.  This is a convienience for the programmer 
+'The banks are not included on the disk anywhere because there was no
+'room left over!  You can create the banks by doing the following: 
+'In Direct mode: Save "RiverRaid-icons.abk",2
+'Save "RiverRaid.scene",6
+'You can then load the scene and icons into Scene Editor, save IFF if you like.
+'You'll be able to edit the scene then!
+
+'the sprite in bank one is just a quicky!
+'please ignore the terrible graphics.  This is a scroll demo, not a real game! 
+
+'This program uses a hardware scroll (Screen Offset) on a double height screen.
+'This technique allows a smooth scroll (because no use of slow Scroll commands)
+'of a huge scene. The technique is explained in detail in
+'Ultimate AMOS, by Jason Holburn, sold through Amiga Format. 
+'look for more detail and info in PLAYFIELD! and on TURBO demo disks 
+'This program runs smoother under NTSC system.  You will need to fine tune 
+'to make it run smoothly under PAL..  Try adjusting Vbl Wait 
+
+'You can hack this code any which way you desire.  The way it is set up now  
+'is relatively easy to understand.  You have the basis of a vertical scroll game.  
+
+If Length(6)=0
+   Load "RiverRaid-icons.abk"
+    Scene Load "RiverRaid.scene",6
+End If 
+ Scene Bank 6
+
+'this is the status screen at the bottom 
+
+Screen Open 1,320+16,10,8,Lowres
+Cls 2 : Flash Off : Curs Off : Print "Score:                Fuel:"; : Home 
+Screen Display 1,112,40+192-1,,
+
+'this is the game screen itself
+
+HGT=192*2+32 : Rem height of entire screen to open. Visible area (192) * 2 + 2 hidden areas of 16 pixels each (32)
+Screen Open 0,320+16,HGT,16,Lowres
+Curs Off : Cls 0 : Flash Off : Get Icon Palette 
+Screen Display 0,112,40,320+16,190
+Colour 18,$FFF
+'Double Buffer : Autoback 0 : Update Off 
+Hide On 
+
+'show bottom half of screen
+YOFFSET=HGT-192-16 : Rem +2 to prep it for the scroll to occur immediately
+Screen Offset 0,0,YOFFSET
+
+YSCENE= Scene Y -13
+ Scene 16 Draw 0,YSCENE,21,14,0,YOFFSET-16
+Inc YSCENE
+'we need to draw yscene at yoffset-16 and at yoffset+192 
+
+'ship is a sprite and we use hardware coordinates for him. 
+'when we convert to screen coords, it automatically takes into 
+'account the screen offset...
+XSHIP=200 : YSHIP=200 : XOF=0 : YOF=0
+Global XSHIP,YSHIP,XOF,YOF
+
+'the next line is for smoothness of operation.  During testing and development,
+'you may wish to comment out this line so you can stop your program. 
+'Also, in AMOS if Multi No is on and your program stops because of an
+'error, you will have to reboot. 
+ Multi No : Amos Lock : Break Off 
+Repeat 
+   'this part scrolls the screen
+   
+   If(YOFFSET mod 16)=0
+      'We are at a 16 pixel boundary, its time to draw new icons 
+      Dec YSCENE
+      If YSCENE=-1
+         'what to do when we reach the top of the scene 
+         'here we just reset to the bottom!  You could load a new level,
+         'go to a big boss scene, whatever! 
+         YSCENE= Scene Y -1
+      End If 
+       Scene 16 Draw 0,YSCENE,21,1,0,YOFFSET-16
+       Scene 16 Draw 0,YSCENE,21,1,0,YOFFSET+192
+   End If 
+   Add YOFFSET,-1
+   If YOFFSET=0
+      'here we have hardware scrolled to the top of the screen,
+      'now flip to the bottom, ha!  its exactly the same as the top
+      'was, so you see no difference!
+      YOFFSET=HGT-192-16
+      Colour 5,Rnd($FFF) : Rem this just changes a colour so you can see when it happens! 
+   End If 
+   
+   'this part controls the ship 
+   'it sets xof and yof to be the offest to add to the ship 
+   'if xof =1, move ship to right, etc. 
+   
+   _MOVESHIP
+   
+   'check for collisions between ship and ground
+   
+   _CHECKGROUND
+   HIT=Param
+   'heres what we do if the ship hits ground! 
+   'right now we just move it to the right a bit. 
+   'we could use hit bitpattern to tell which side or nose hit.  See CHECKGROUND for info 
+   If HIT : XOF=-1 : End If 
+   
+   'actually move the ship
+   
+   Add XSHIP,XOF : Add YSHIP,YOF
+   
+    Vbl Wait 230 : Rem we only need to wait until scanline gets to status screen  
+   Sprite 1,XSHIP,YSHIP,1
+   Screen Offset 0,0,YOFFSET
+Until Left Click 
+ Multi Yes : Amos Unlock : Break On : Show On 
+Edit 
+
+Procedure _MOVESHIP
+   XOF=0 : YOF=0
+   If Jup(1)
+      YOF=-1
+   Else 
+      If Jdown(1)
+         YOF=1
+      End If 
+   End If 
+   If Jleft(1)
+      XOF=-1
+   Else 
+      If Jright(1)
+         XOF=1
+      End If 
+   End If 
+End Proc
+
+Procedure _CHECKGROUND
+   'we use F Point to check some points on the screen around the sprite 
+   
+   X=X Screen(XSHIP) : Y=Y Screen(YSHIP)
+   
+   'uncomment this line to see where hotspot of ship is located 
+   '   F Plot X,Y,0 
+   
+   'start checking at nose, because thats probably the first place to hit something 
+   'Here we check only nose & wing tips 
+   'any colour below 4 is ok to hit (0-3).  That would be all blues for water.
+   HIT=0
+   HIT=-%1*( F Point(X+5,Y)>3)
+   Add HIT,-%10*( F Point(X,Y+6)>3)
+   Add HIT,-%100*( F Point(X+9,Y+6)>3)
+
+   'HIT returns a bitpattern. 
+   'if 0, no hit occured
+   'if %1, nose hit something 
+   'if %10, left wing hit something 
+   'if %100,right wing hit something
+   'example, if %11, nose and left wing hit something 
+   'just a bit more flexible and faster than if/thens 
+End Proc[HIT]

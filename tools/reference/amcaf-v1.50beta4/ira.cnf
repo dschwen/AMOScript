@@ -1,0 +1,1906 @@
+OFFSET $1c48
+MACHINE 68000
+CODE $1c48 $1f74
+SYMBOL R000 $1c48
+COMMENT $1c48 internal
+CODE $1f74 $1f8c
+SYMBOL R002 $1f74
+COMMENT $1f74 vec rot pos
+CODE $1f8c $1fb6
+SYMBOL R003 $1f8c
+COMMENT $1f8c vec rot angles
+CODE $1fb6 $20a2
+SYMBOL R004 $1fb6
+COMMENT $1fb6 vec rot precalc
+CODE $20a2 $20ae
+SYMBOL R005 $20a2
+COMMENT $20a2 vec rot x
+CODE $20ae $20bc
+SYMBOL R006 $20ae
+COMMENT $20ae vec rot x
+CODE $20bc $20ca
+SYMBOL R007 $20bc
+COMMENT $20bc vec rot y
+CODE $20ca $20d8
+SYMBOL R008 $20ca
+COMMENT $20ca vec rot y
+CODE $20d8 $20e6
+SYMBOL R009 $20d8
+COMMENT $20d8 vec rot z
+CODE $20e6 $20f4
+SYMBOL R00a $20e6
+COMMENT $20e6 vec rot z
+CODE $20f4 $2134
+SYMBOL R00b $20f4
+COMMENT $20f4 pjoy
+CODE $2134 $215e
+SYMBOL R00c $2134
+COMMENT $2134 pjleft
+CODE $215e $2188
+SYMBOL R00d $215e
+COMMENT $215e pjright
+CODE $2188 $21b0
+SYMBOL R00e $2188
+COMMENT $2188 pjup
+CODE $21b0 $21da
+SYMBOL R00f $21b0
+COMMENT $21b0 pjdown
+CODE $21da $2202
+SYMBOL R010 $21da
+COMMENT $21da pfire
+CODE $2202 $22e6
+SYMBOL R011 $2202
+COMMENT $2202 xfire
+CODE $22e6 $22ee
+SYMBOL R012 $22e6
+COMMENT $22e6 amcaf base
+CODE $22ee $2330
+SYMBOL R013 $22ee
+COMMENT $22ee amcaf version$
+CODE $2330 $233a
+SYMBOL R014 $2330
+COMMENT $2330 amcaf length
+CODE $233a $233c
+SYMBOL R015 $233a
+COMMENT $233a nop
+CODE $233c $2340
+SYMBOL R016 $233c
+COMMENT $233c nfn
+CODE $2340 $23e6
+SYMBOL R017 $2340
+COMMENT $2340 audio lock
+CODE $23e6 $2420
+SYMBOL R018 $23e6
+COMMENT $23e6 audio free
+CODE $2420 $2436
+SYMBOL R019 $2420
+COMMENT $2420 bank permanent
+CODE $2436 $244c
+SYMBOL R01a $2436
+COMMENT $2436 bank temporary
+CODE $244c $24cc
+SYMBOL R01b $244c
+COMMENT $244c bank to chip
+CODE $24cc $254c
+SYMBOL R01c $24cc
+COMMENT $24cc bank to fast
+CODE $254c $2578
+SYMBOL R01d $254c
+COMMENT $254c bank delta encode
+CODE $2578 $2580
+SYMBOL R01e $2578
+COMMENT $2578 bank delta encode
+CODE $2580 $25a6
+SYMBOL R01f $2580
+COMMENT $2580 bank delta decode
+CODE $25a6 $25ae
+SYMBOL R020 $25a6
+COMMENT $25a6 bank delta decode
+CODE $25ae $25c8
+SYMBOL R021 $25ae
+COMMENT $25ae bank code xor.b
+CODE $25c8 $25d0
+SYMBOL R022 $25c8
+COMMENT $25c8 bank code xor.b
+CODE $25d0 $25ea
+SYMBOL R023 $25d0
+COMMENT $25d0 bank code add.b
+CODE $25ea $25f2
+SYMBOL R024 $25ea
+COMMENT $25ea bank code add.b
+CODE $25f2 $2614
+SYMBOL R025 $25f2
+COMMENT $25f2 bank code mix.b
+CODE $2614 $261c
+SYMBOL R026 $2614
+COMMENT $2614 bank code mix.b
+CODE $261c $263a
+SYMBOL R027 $261c
+COMMENT $261c bank code rol.b
+CODE $263a $2642
+SYMBOL R028 $263a
+COMMENT $263a bank code rol.b
+CODE $2642 $2660
+SYMBOL R029 $2642
+COMMENT $2642 bank code ror.b
+CODE $2660 $2668
+SYMBOL R02a $2660
+COMMENT $2660 bank code ror.b
+CODE $2668 $2684
+SYMBOL R02b $2668
+COMMENT $2668 bank code xor.w
+CODE $2684 $268c
+SYMBOL R02c $2684
+COMMENT $2684 bank code xor.w
+CODE $268c $26a8
+SYMBOL R02d $268c
+COMMENT $268c bank code add.w
+CODE $26a8 $26b0
+SYMBOL R02e $26a8
+COMMENT $26a8 bank code add.w
+CODE $26b0 $26d4
+SYMBOL R02f $26b0
+COMMENT $26b0 bank code mix.w
+CODE $26d4 $26dc
+SYMBOL R030 $26d4
+COMMENT $26d4 bank code mix.w
+CODE $26dc $26fc
+SYMBOL R031 $26dc
+COMMENT $26dc bank code rol.w
+CODE $26fc $2704
+SYMBOL R032 $26fc
+COMMENT $26fc bank code rol.w
+CODE $2704 $2724
+SYMBOL R033 $2704
+COMMENT $2704 bank code ror.w
+CODE $2724 $272c
+SYMBOL R034 $2724
+COMMENT $2724 bank code ror.w
+CODE $272c $27a2
+SYMBOL R035 $272c
+COMMENT $272c bank stretch
+CODE $27a2 $27c6
+SYMBOL R036 $27a2
+COMMENT $27a2 bank checksum
+CODE $27c6 $27ce
+SYMBOL R037 $27c6
+COMMENT $27c6 bank checksum
+CODE $27ce $283a
+SYMBOL R038 $27ce
+COMMENT $27ce bank copy
+CODE $283a $2846
+SYMBOL R039 $283a
+COMMENT $283a bank copy
+CODE $2846 $2876
+SYMBOL R03a $2846
+COMMENT $2846 bank name
+CODE $2876 $289c
+SYMBOL R03b $2876
+COMMENT $2876 bank name$
+CODE $289c $28be
+SYMBOL R03c $289c
+COMMENT $289c blitter copy limit
+CODE $28be $28f4
+SYMBOL R03d $28be
+COMMENT $28be blitter copy limit
+CODE $28f4 $28fe
+SYMBOL R03e $28f4
+COMMENT $28f4 blitter copy
+CODE $28fe $2a00
+SYMBOL R03f $28fe
+COMMENT $28fe blitter copy
+CODE $2a00 $2a0a
+SYMBOL R040 $2a00
+COMMENT $2a00 blitter copy
+CODE $2a0a $2b52
+SYMBOL R041 $2a0a
+COMMENT $2a0a blitter copy
+CODE $2b52 $2b60
+SYMBOL R042 $2b52
+COMMENT $2b52 blitter copy
+CODE $2b60 $2cee
+SYMBOL R043 $2b60
+COMMENT $2b60 blitter copy
+CODE $2cee $2d02
+SYMBOL R044 $2cee
+COMMENT $2cee blitter busy
+CODE $2d02 $2d1e
+SYMBOL R045 $2d02
+COMMENT $2d02 blitter wait
+CODE $2d1e $2d3e
+SYMBOL R046 $2d1e
+COMMENT $2d1e blitter clear
+CODE $2d3e $2e1c
+SYMBOL R047 $2d3e
+COMMENT $2d3e blitter clear
+CODE $2e1c $2e2c
+SYMBOL R048 $2e1c
+COMMENT $2e1c blitter fill
+CODE $2e2c $2e54
+SYMBOL R049 $2e2c
+COMMENT $2e2c blitter fill
+CODE $2e54 $2e7c
+SYMBOL R04a $2e54
+COMMENT $2e54 blitter fill
+CODE $2e7c $2fc2
+SYMBOL R04b $2e7c
+COMMENT $2e7c blitter fill
+CODE $2fc2 $3012
+SYMBOL R04c $2fc2
+COMMENT $2fc2 c2p fire
+CODE $3012 $3056
+SYMBOL R04d $3012
+COMMENT $3012 c2p shift
+CODE $3056 $3098
+SYMBOL R04e $3056
+COMMENT $3056 c2p convert
+CODE $3098 $309c
+SYMBOL R04f $3098
+COMMENT $3098 convert grey
+CODE $309c $30a8
+SYMBOL R050 $309c
+COMMENT $309c amcaf aga notation on
+CODE $30a8 $30b4
+SYMBOL R051 $30a8
+COMMENT $30a8 amcaf aga notation off
+CODE $30b4 $30ca
+SYMBOL R052 $30b4
+COMMENT $30b4 best pen
+CODE $30ca $31a0
+SYMBOL R053 $30ca
+COMMENT $30ca best pen
+CODE $31a0 $31da
+SYMBOL R054 $31a0
+COMMENT $31a0 mix colour
+CODE $31da $3280
+SYMBOL R055 $31da
+COMMENT $31da mix colour
+CODE $3280 $329a
+SYMBOL R056 $3280
+COMMENT $3280 glue colour
+CODE $329a $32ba
+SYMBOL R057 $329a
+COMMENT $329a red val
+CODE $32ba $32e0
+SYMBOL R058 $32ba
+COMMENT $32ba green val
+CODE $32e0 $3302
+SYMBOL R059 $32e0
+COMMENT $32e0 blue val
+CODE $3302 $3324
+SYMBOL R05a $3302
+COMMENT $3302 rrggbb to rgb
+CODE $3324 $3356
+SYMBOL R05b $3324
+COMMENT $3324 rgb to rrggbb
+CODE $3356 $33f4
+SYMBOL R05c $3356
+COMMENT $3356 count pixels
+CODE $33f4 $3406
+SYMBOL R05d $33f4
+COMMENT $33f4 coords bank
+CODE $3406 $3442
+SYMBOL R05e $3406
+COMMENT $3406 coords bank
+CODE $3442 $3556
+SYMBOL R05f $3442
+COMMENT $3442 coords read
+CODE $3556 $35ae
+SYMBOL R060 $3556
+COMMENT $3556 filename$
+CODE $35ae $3602
+SYMBOL R061 $35ae
+COMMENT $35ae path$
+CODE $3602 $367a
+SYMBOL R062 $3602
+COMMENT $3602 extpath$
+CODE $367a $36b4
+SYMBOL R063 $367a
+COMMENT $367a dos hash
+CODE $36b4 $3726
+SYMBOL R064 $36b4
+COMMENT $36b4 disk type
+CODE $3726 $379a
+SYMBOL R065 $3726
+COMMENT $3726 disk state
+CODE $379a $3810
+SYMBOL R066 $379a
+COMMENT $379a pattern match
+CODE $3810 $386a
+SYMBOL R067 $3810
+COMMENT $3810 dload
+CODE $386a $38c2
+SYMBOL R068 $386a
+COMMENT $386a wload
+CODE $38c2 $3908
+SYMBOL R069 $38c2
+COMMENT $38c2 wsave, dsave
+CODE $3908 $3942
+SYMBOL R06a $3908
+COMMENT $3908 sload
+CODE $3942 $397e
+SYMBOL R06b $3942
+COMMENT $3942 ssave
+CODE $397e $3a52
+SYMBOL R06c $397e
+COMMENT $397e file copy
+CODE $3a52 $3aa0
+SYMBOL R06d $3a52
+COMMENT $3a52 examine dir
+CODE $3aa0 $3ad6
+SYMBOL R06e $3aa0
+COMMENT $3aa0 examine next$
+CODE $3ad6 $3af6
+SYMBOL R06f $3ad6
+COMMENT $3ad6 examine stop
+CODE $3af6 $3b38
+SYMBOL R070 $3af6
+COMMENT $3af6 examine object
+CODE $3b38 $3b40
+SYMBOL R071 $3b38
+COMMENT $3b38 object name$
+CODE $3b40 $3b50
+SYMBOL R072 $3b40
+COMMENT $3b40 object name$
+CODE $3b50 $3b58
+SYMBOL R073 $3b50
+COMMENT $3b50 object type
+CODE $3b58 $3b64
+SYMBOL R074 $3b58
+COMMENT $3b58 object type
+CODE $3b64 $3b6c
+SYMBOL R075 $3b64
+COMMENT $3b64 object size
+CODE $3b6c $3b78
+SYMBOL R076 $3b6c
+COMMENT $3b6c object size
+CODE $3b78 $3b80
+SYMBOL R077 $3b78
+COMMENT $3b78 object blocks
+CODE $3b80 $3b8c
+SYMBOL R078 $3b80
+COMMENT $3b80 object blocks
+CODE $3b8c $3b94
+SYMBOL R079 $3b8c
+COMMENT $3b8c object date
+CODE $3b94 $3ba0
+SYMBOL R07a $3b94
+COMMENT $3b94 object date
+CODE $3ba0 $3ba8
+SYMBOL R07b $3ba0
+COMMENT $3ba0 object time
+CODE $3ba8 $3bbc
+SYMBOL R07c $3ba8
+COMMENT $3ba8 object time
+CODE $3bbc $3bc4
+SYMBOL R07d $3bbc
+COMMENT $3bbc object protection
+CODE $3bc4 $3bd0
+SYMBOL R07e $3bc4
+COMMENT $3bc4 object protection
+CODE $3bd0 $3c0c
+SYMBOL R07f $3bd0
+COMMENT $3bd0 object protection$
+CODE $3c0c $3c14
+SYMBOL R080 $3c0c
+COMMENT $3c0c object comment$
+CODE $3c14 $3c22
+SYMBOL R081 $3c14
+COMMENT $3c14 object comment$
+CODE $3c22 $3c40
+SYMBOL R082 $3c22
+COMMENT $3c22 protect object
+CODE $3c40 $3c74
+SYMBOL R083 $3c40
+COMMENT $3c40 set object comment
+CODE $3c74 $3cae
+SYMBOL R084 $3c74
+COMMENT $3c74 set object date
+CODE $3cae $3ccc
+SYMBOL R085 $3cae
+COMMENT $3cae extbase
+CODE $3ccc $3cf8
+SYMBOL R086 $3ccc
+COMMENT $3ccc extdefault
+CODE $3cf8 $3d28
+SYMBOL R087 $3cf8
+COMMENT $3cf8 extremove
+CODE $3d28 $3d88
+SYMBOL R088 $3d28
+COMMENT $3d28 extreinit
+CODE $3d88 $3df0
+SYMBOL R089 $3d88
+COMMENT $3d88 imploder unpack
+CODE $3df0 $3e98
+SYMBOL R08a $3df0
+COMMENT $3df0 imploder load
+CODE $3e98 $3f8e
+SYMBOL R08b $3e98
+COMMENT $3e98 make bank font
+CODE $3f8e $402c
+SYMBOL R08c $3f8e
+COMMENT $3f8e change bank font
+CODE $402c $4042
+SYMBOL R08d $402c
+COMMENT $402c change print font
+CODE $4042 $404a
+SYMBOL R08e $4042
+COMMENT $4042 change font
+CODE $404a $4050
+SYMBOL R08f $404a
+COMMENT $404a change font
+CODE $4050 $411e
+SYMBOL R090 $4050
+COMMENT $4050 change font
+CODE $411e $413a
+SYMBOL R091 $411e
+COMMENT $411e font style
+CODE $413a $4162
+SYMBOL R092 $413a
+COMMENT $413a alloc trans source
+CODE $4162 $4174
+SYMBOL R093 $4162
+COMMENT $4162 set trans source
+CODE $4174 $41b0
+SYMBOL R094 $4174
+COMMENT $4174 alloc trans map
+CODE $41b0 $41d6
+SYMBOL R095 $41b0
+COMMENT $41b0 set trans map
+CODE $41d6 $4200
+SYMBOL R096 $41d6
+COMMENT $41d6 alloc code bank
+CODE $4200 $4240
+SYMBOL R097 $4200
+COMMENT $4200 internal
+CODE $4240 $4292
+SYMBOL R098 $4240
+COMMENT $4240 trans screen runtime
+CODE $4292 $431c
+SYMBOL R099 $4292
+COMMENT $4292 trans screen dynamic
+CODE $431c $431e
+SYMBOL R09a $431c
+COMMENT $431c trans screen static
+CODE $431e $4322
+SYMBOL R09b $431e
+COMMENT $431e internal
+CODE $4322 $4326
+SYMBOL R09c $4322
+COMMENT $4322 internal
+CODE $4326 $432a
+SYMBOL R09d $4326
+COMMENT $4326 internal
+CODE $432a $432e
+SYMBOL R09e $432a
+COMMENT $432a internal
+CODE $432e $4332
+SYMBOL R09f $432e
+COMMENT $432e internal
+CODE $4332 $442a
+SYMBOL R0a0 $4332
+COMMENT $4332 ham point
+CODE $442a $447c
+SYMBOL R0a1 $442a
+COMMENT $442a ham colour
+CODE $447c $45ba
+SYMBOL R0a2 $447c
+COMMENT $447c ham best
+CODE $45ba $4656
+SYMBOL R0a3 $45ba
+COMMENT $45ba ham fade out
+CODE $4656 $466a
+SYMBOL R0a4 $4656
+COMMENT $4656 x smouse
+CODE $466a $467e
+SYMBOL R0a5 $466a
+COMMENT $466a y smouse
+CODE $467e $4690
+SYMBOL R0a6 $467e
+COMMENT $467e smouse x
+CODE $4690 $46a2
+SYMBOL R0a7 $4690
+COMMENT $4690 smouse y
+CODE $46a2 $46e4
+SYMBOL R0a8 $46a2
+COMMENT $46a2 limit smouse
+CODE $46e4 $4702
+SYMBOL R0a9 $46e4
+COMMENT $46e4 limit smouse
+CODE $4702 $472a
+SYMBOL R0aa $4702
+COMMENT $4702 smouse speed
+CODE $472a $4760
+SYMBOL R0ab $472a
+COMMENT $472a smouse key
+CODE $4760 $4772
+SYMBOL R0ac $4760
+COMMENT $4760 io error
+CODE $4772 $4776
+SYMBOL R0ad $4772
+COMMENT $4772 io error$
+CODE $4776 $47bc
+SYMBOL R0ae $4776
+COMMENT $4776 mask copy
+CODE $47bc $47c8
+SYMBOL R0af $47bc
+COMMENT $47bc mask copy
+CODE $47c8 $480a
+SYMBOL R0b0 $47c8
+COMMENT $47c8 mask copy
+CODE $480a $4882
+SYMBOL R0b1 $480a
+COMMENT $480a lzstr$
+CODE $48ae $4952
+SYMBOL R0b2 $48ae
+COMMENT $48ae lsstr$
+CODE $497e $4998
+SYMBOL R0b3 $497e
+COMMENT $497e chr.w$
+CODE $4998 $49b0
+SYMBOL R0b4 $4998
+COMMENT $4998 chr.l$
+CODE $49b0 $49c4
+SYMBOL R0b5 $49b0
+COMMENT $49b0 asc.w
+CODE $49c4 $49d6
+SYMBOL R0b6 $49c4
+COMMENT $49c4 asc.l
+CODE $49d6 $49ec
+SYMBOL R0b7 $49d6
+COMMENT $49d6 vclip
+CODE $49ec $4a06
+SYMBOL R0b8 $49ec
+COMMENT $49ec vin
+CODE $4a06 $4a30
+SYMBOL R0b9 $4a06
+COMMENT $4a06 vmod
+CODE $4a30 $4a64
+SYMBOL R0ba $4a30
+COMMENT $4a30 vmod
+CODE $4a64 $4ace
+SYMBOL R0bb $4a64
+COMMENT $4a64 insstr$
+CODE $4ace $4b3e
+SYMBOL R0bc $4ace
+COMMENT $4ace cutstr$
+CODE $4b3e $4c1c
+SYMBOL R0bd $4b3e
+COMMENT $4b3e replacestr$
+CODE $4c1c $4c2a
+SYMBOL R0be $4c1c
+COMMENT $4c1c itemstr$
+CODE $4c2a $4cae
+SYMBOL R0bf $4c2a
+COMMENT $4c2a itemstr$
+CODE $4cae $4cba
+SYMBOL R0c0 $4cae
+COMMENT $4cae odd
+CODE $4cba $4cca
+SYMBOL R0c1 $4cba
+COMMENT $4cba even
+CODE $4cca $4ce2
+SYMBOL R0c2 $4cca
+COMMENT $4cca binexp
+CODE $4ce2 $4d02
+SYMBOL R0c3 $4ce2
+COMMENT $4ce2 binlog
+CODE $4d02 $4d0c
+SYMBOL R0c4 $4d02
+COMMENT $4d02 lsl
+CODE $4d0c $4d16
+SYMBOL R0c5 $4d0c
+COMMENT $4d0c lsr
+CODE $4d16 $4d1e
+SYMBOL R0c6 $4d16
+COMMENT $4d16 wordswap
+CODE $4d1e $4d2a
+SYMBOL R0c7 $4d1e
+COMMENT $4d1e sdeek
+CODE $4d2a $4d38
+SYMBOL R0c8 $4d2a
+COMMENT $4d2a speek
+CODE $4d38 $4d60
+SYMBOL R0c9 $4d38
+COMMENT $4d38 set rain colour
+CODE $4d60 $4df0
+SYMBOL R0ca $4d60
+COMMENT $4d60 rain fade
+CODE $4df0 $4eba
+SYMBOL R0cb $4df0
+COMMENT $4df0 rain fade
+CODE $4eba $4ec8
+SYMBOL R0cc $4eba
+COMMENT $4eba x raster
+CODE $4ec8 $4eda
+SYMBOL R0cd $4ec8
+COMMENT $4ec8 y raster
+CODE $4eda $4ef8
+SYMBOL R0ce $4eda
+COMMENT $4eda raster wait
+CODE $4ef8 $4f24
+SYMBOL R0cf $4ef8
+COMMENT $4ef8 raster wait
+CODE $4f24 $4f38
+SYMBOL R0d0 $4f24
+COMMENT $4f24 set ntsc
+CODE $4f38 $4f4c
+SYMBOL R0d1 $4f38
+COMMENT $4f38 set pal
+CODE $4f4c $4f5c
+SYMBOL R0d2 $4f4c
+COMMENT $4f4c set sprite priority
+CODE $4f5c $4f64
+SYMBOL R0d3 $4f5c
+COMMENT $4f5c cop pos
+CODE $4f64 $4fac
+SYMBOL R0d4 $4f64
+COMMENT $4f64 exchange bob
+CODE $4fac $4ff4
+SYMBOL R0d5 $4fac
+COMMENT $4fac exchange icon
+CODE $4ff4 $5010
+SYMBOL R0d6 $4ff4
+COMMENT $4ff4 write cli
+CODE $5010 $5046
+SYMBOL R0d7 $5010
+COMMENT $5010 reset computer
+CODE $5046 $508a
+SYMBOL R0d8 $5046
+COMMENT $5046 cpu
+CODE $508a $50c4
+SYMBOL R0d9 $508a
+COMMENT $508a fpu
+CODE $50c4 $50e6
+SYMBOL R0da $50c4
+COMMENT $50c4 aga detect
+CODE $50e6 $5132
+SYMBOL R0db $50e6
+COMMENT $50e6 flush libs
+CODE $5132 $514e
+SYMBOL R0dc $5132
+COMMENT $5132 open workbench
+CODE $514e $515a
+SYMBOL R0dd $514e
+COMMENT $514e launch
+CODE $515a $51a0
+SYMBOL R0de $515a
+COMMENT $515a launch
+CODE $51a0 $51a8
+SYMBOL R0df $51a0
+COMMENT $51a0 shade pix
+CODE $51a8 $51ee
+SYMBOL R0e0 $51a8
+COMMENT $51a8 shade pix
+CODE $51ee $527a
+SYMBOL R0e1 $51ee
+COMMENT $51ee make pix mask
+CODE $527a $5366
+SYMBOL R0e2 $527a
+COMMENT $527a pix shift up
+CODE $5366 $5444
+SYMBOL R0e3 $5366
+COMMENT $5366 pix shift up
+CODE $5444 $5530
+SYMBOL R0e4 $5444
+COMMENT $5444 pix shift down
+CODE $5530 $560e
+SYMBOL R0e5 $5530
+COMMENT $5530 pix shift down
+CODE $560e $56ce
+SYMBOL R0e6 $560e
+COMMENT $560e pix brighten
+CODE $56ce $5780
+SYMBOL R0e7 $56ce
+COMMENT $56ce pix brighten
+CODE $5780 $5840
+SYMBOL R0e8 $5780
+COMMENT $5780 pix darken
+CODE $5840 $58f2
+SYMBOL R0e9 $5840
+COMMENT $5840 pix darken
+CODE $58f2 $5a04
+SYMBOL R0ea $58f2
+COMMENT $58f2 pptodisk
+CODE $5a04 $5a0c
+SYMBOL R0eb $5a04
+COMMENT $5a04 pptodisk
+CODE $5a0c $5aa0
+SYMBOL R0ec $5a0c
+COMMENT $5a0c ppunpack
+CODE $5aa0 $5ba0
+SYMBOL R0ed $5aa0
+COMMENT $5aa0 ppfromdisk
+CODE $5ba0 $5ba8
+SYMBOL R0ee $5ba0
+COMMENT $5ba0 pt free voice
+CODE $5ba8 $5d2e
+SYMBOL R0ef $5ba8
+COMMENT $5ba8 pt free voice
+CODE $5d2e $5d40
+SYMBOL R0f0 $5d2e
+COMMENT $5d2e pt cpattern
+CODE $5d40 $5d54
+SYMBOL R0f1 $5d40
+COMMENT $5d40 pt cpos
+CODE $5d54 $5d7e
+SYMBOL R0f2 $5d54
+COMMENT $5d54 pt cinstr
+CODE $5d7e $5db8
+SYMBOL R0f3 $5d7e
+COMMENT $5d7e pt cnote
+CODE $5db8 $5dd0
+SYMBOL R0f4 $5db8
+COMMENT $5db8 pt sam volume
+CODE $5dd0 $5e16
+SYMBOL R0f5 $5dd0
+COMMENT $5dd0 pt sam volume
+CODE $5e16 $5e70
+SYMBOL R0f6 $5e16
+COMMENT $5e16 pt sam freq
+CODE $5e70 $5eb0
+SYMBOL R0f7 $5e70
+COMMENT $5e70 pt sam stop
+CODE $5eb0 $5ec4
+SYMBOL R0f8 $5eb0
+COMMENT $5eb0 pt raw play
+CODE $5ec4 $5ed6
+SYMBOL R0f9 $5ec4
+COMMENT $5ec4 pt sam bank
+CODE $5ed6 $5f0c
+SYMBOL R0fa $5ed6
+COMMENT $5ed6 pt sam play
+CODE $5f0c $5f42
+SYMBOL R0fb $5f0c
+COMMENT $5f0c pt sam play
+CODE $5f42 $5f7a
+SYMBOL R0fc $5f42
+COMMENT $5f42 pt sam play
+CODE $5f7a $5f8c
+SYMBOL R0fd $5f7a
+COMMENT $5f7a pt data base
+CODE $5f8c $5f9e
+SYMBOL R0fe $5f8c
+COMMENT $5f8c pt instr play
+CODE $5f9e $5fa8
+SYMBOL R0ff $5f9e
+COMMENT $5f9e pt instr play
+CODE $5fa8 $5fd2
+SYMBOL R100 $5fa8
+COMMENT $5fa8 pt instr play
+CODE $5fd2 $6006
+SYMBOL R101 $5fd2
+COMMENT $5fd2 pt instr address
+CODE $6006 $6036
+SYMBOL R102 $6006
+COMMENT $6006 pt instr length
+CODE $6036 $607e
+SYMBOL R103 $6036
+COMMENT $6036 pt cia speed
+CODE $607e $60a4
+SYMBOL R104 $607e
+COMMENT $607e pt vu
+CODE $60a4 $60c2
+SYMBOL R105 $60a4
+COMMENT $60a4 pt volume
+CODE $60c2 $612c
+SYMBOL R106 $60c2
+COMMENT $60c2 pt voice
+CODE $612c $614e
+SYMBOL R107 $612c
+COMMENT $612c pt bank
+CODE $614e $6154
+SYMBOL R108 $614e
+COMMENT $614e pt play
+CODE $6154 $618e
+SYMBOL R109 $6154
+COMMENT $6154 pt play
+CODE $618e $61b6
+SYMBOL R10a $618e
+COMMENT $618e pt continue
+CODE $61b6 $61dc
+SYMBOL R10b $61b6
+COMMENT $61b6 pt stop
+CODE $61dc $61f4
+SYMBOL R10c $61dc
+COMMENT $61dc pt signal
+CODE $61f4 $6200
+SYMBOL R10d $61f4
+COMMENT $61f4 ptile bank
+CODE $6200 $62a6
+SYMBOL R10e $6200
+COMMENT $6200 paste ptile
+CODE $62a6 $630a
+SYMBOL R10f $62a6
+COMMENT $62a6 qsqr
+CODE $630a $633c
+SYMBOL R110 $630a
+COMMENT $630a qrnd
+CODE $633c $6346
+SYMBOL R111 $633c
+COMMENT $633c qcos
+CODE $6346 $6370
+SYMBOL R112 $6346
+COMMENT $6346 qsin
+CODE $6370 $63e0
+SYMBOL R113 $6370
+COMMENT $6370 qarc
+CODE $63e0 $63e6
+SYMBOL R114 $63e0
+COMMENT $63e0 rnc unpack
+CODE $63e6 $63e8
+SYMBOL R115 $63e6
+COMMENT $63e6 rnp
+CODE $63e8 $6414
+SYMBOL R116 $63e8
+COMMENT $63e8 scanstr$
+CODE $65d6 $65e8
+SYMBOL R117 $65d6
+COMMENT $65d6 scrn rastport
+CODE $65e8 $65fa
+SYMBOL R118 $65e8
+COMMENT $65e8 scrn bitmap
+CODE $65fa $660c
+SYMBOL R119 $65fa
+COMMENT $65fa scrn layerinfo
+CODE $660c $661e
+SYMBOL R11a $660c
+COMMENT $660c scrn layer
+CODE $661e $6630
+SYMBOL R11b $661e
+COMMENT $661e scrn region
+CODE $6630 $6646
+SYMBOL R11c $6630
+COMMENT $6630 shade bob mask
+CODE $6646 $6664
+SYMBOL R11d $6646
+COMMENT $6646 shade bob planes
+CODE $6664 $6802
+SYMBOL R11e $6664
+COMMENT $6664 shade bob up
+CODE $6802 $699c
+SYMBOL R11f $6802
+COMMENT $6802 shade bob down
+CODE $699c $69d2
+SYMBOL R120 $699c
+COMMENT $699c splinters bank
+CODE $69d2 $69de
+SYMBOL R121 $69d2
+COMMENT $69d2 splinters max
+CODE $69de $69ea
+SYMBOL R122 $69de
+COMMENT $69de splinters fuel
+CODE $69ea $6a14
+SYMBOL R123 $69ea
+COMMENT $69ea splinters limit
+CODE $6a14 $6a46
+SYMBOL R124 $6a14
+COMMENT $6a14 splinters limit
+CODE $6a46 $6a58
+SYMBOL R125 $6a46
+COMMENT $6a46 splinters gravity
+CODE $6a58 $6a80
+SYMBOL R126 $6a58
+COMMENT $6a58 splinters colour
+CODE $6a80 $6aa4
+SYMBOL R127 $6a80
+COMMENT $6a80 splinters init
+CODE $6aa4 $6ab4
+SYMBOL R128 $6aa4
+COMMENT $6aa4 splinters single do
+CODE $6ab4 $6ac4
+SYMBOL R129 $6ab4
+COMMENT $6ab4 splinters double do
+CODE $6ac4 $6b86
+SYMBOL R12a $6ac4
+COMMENT $6ac4 splinters single del
+CODE $6b86 $6c52
+SYMBOL R12b $6b86
+COMMENT $6b86 splinters double del
+CODE $6c52 $6c94
+SYMBOL R12c $6c52
+COMMENT $6c52 splinters move
+CODE $6c94 $6d02
+SYMBOL R12d $6c94
+COMMENT $6c94 splinters back
+CODE $6d02 $6d6a
+SYMBOL R12e $6d02
+COMMENT $6d02 splinters draw
+CODE $6d6a $6da4
+SYMBOL R12f $6d6a
+COMMENT $6d6a splinters active
+CODE $6da4 $6dda
+SYMBOL R130 $6da4
+COMMENT $6da4 td stars bank
+CODE $6dda $6e12
+SYMBOL R131 $6dda
+COMMENT $6dda td stars limit
+CODE $6e12 $6e50
+SYMBOL R132 $6e12
+COMMENT $6e12 td stars limit
+CODE $6e50 $6e66
+SYMBOL R133 $6e50
+COMMENT $6e50 td stars origin
+CODE $6e66 $6ea0
+SYMBOL R134 $6e66
+COMMENT $6e66 td stars init
+CODE $6ea0 $6eb2
+SYMBOL R135 $6ea0
+COMMENT $6ea0 td stars gravity
+CODE $6eb2 $6ebc
+SYMBOL R136 $6eb2
+COMMENT $6eb2 td stars accelerate on
+CODE $6ebc $6ec6
+SYMBOL R137 $6ebc
+COMMENT $6ebc td stars accelerate off
+CODE $6ec6 $6f06
+SYMBOL R138 $6ec6
+COMMENT $6ec6 td stars planes
+CODE $6f06 $6f12
+SYMBOL R139 $6f06
+COMMENT $6f06 td stars single do
+CODE $6f12 $6f1e
+SYMBOL R13a $6f12
+COMMENT $6f12 td stars double do
+CODE $6f1e $6f88
+SYMBOL R13b $6f1e
+COMMENT $6f1e td stars single del
+CODE $6f88 $6ff4
+SYMBOL R13c $6f88
+COMMENT $6f88 td stars double del
+CODE $6ff4 $701c
+SYMBOL R13d $6ff4
+COMMENT $6ff4 td stars move
+CODE $701c $7046
+SYMBOL R13e $701c
+COMMENT $701c td stars move
+CODE $7046 $70e4
+SYMBOL R13f $7046
+COMMENT $7046 td stars draw
+CODE $70e4 $7100
+SYMBOL R140 $70e4
+COMMENT $70e4 current date
+CODE $7100 $7124
+SYMBOL R141 $7100
+COMMENT $7100 current time
+CODE $7124 $714e
+SYMBOL R142 $7124
+COMMENT $7124 cd year
+CODE $714e $7156
+SYMBOL R143 $714e
+COMMENT $714e cd month
+CODE $7156 $7160
+SYMBOL R144 $7156
+COMMENT $7156 cd day
+CODE $7160 $7172
+SYMBOL R145 $7160
+COMMENT $7160 cd weekday
+CODE $7172 $71c8
+SYMBOL R146 $7172
+COMMENT $7172 ct string
+CODE $71c8 $7218
+SYMBOL R147 $71c8
+COMMENT $71c8 cd string
+CODE $7218 $728e
+SYMBOL R148 $7218
+COMMENT $7218 cd date$
+CODE $72de $72f0
+SYMBOL R149 $72de
+COMMENT $72de ct hour
+CODE $72f0 $7302
+SYMBOL R14a $72f0
+COMMENT $72f0 ct minute
+CODE $7302 $7314
+SYMBOL R14b $7302
+COMMENT $7302 ct second
+CODE $7314 $7326
+SYMBOL R14c $7314
+COMMENT $7314 ct tick
+CODE $7326 $738a
+SYMBOL R14d $7326
+COMMENT $7326 ct time$
+CODE $738a $746c
+SYMBOL R14e $738a
+COMMENT $738a pal spread
+CODE $746c $749c
+SYMBOL R14f $746c
+COMMENT $746c pal get screen
+CODE $749c $74d4
+SYMBOL R150 $749c
+COMMENT $749c pal set screen
+CODE $74d4 $7506
+SYMBOL R151 $74d4
+COMMENT $74d4 pal get
+CODE $7506 $7538
+SYMBOL R152 $7506
+COMMENT $7506 pal set
+CODE $7538 $754c
+SYMBOL R153 $7538
+COMMENT $7538 amos task
+CODE $754c $759e
+SYMBOL R154 $754c
+COMMENT $754c command name$
+CODE $759e $75b6
+SYMBOL R155 $759e
+COMMENT $759e amos cli
+CODE $75b6 $764a
+SYMBOL R156 $75b6
+COMMENT $75b6 tool types$
+CODE $764a $7650
+SYMBOL R157 $764a
+COMMENT $764a turbo text
+CODE $7650 $7658
+SYMBOL R158 $7650
+COMMENT $7650 turbo text
+CODE $7658 $7780
+SYMBOL R159 $7658
+COMMENT $7658 turbo text
+CODE $7780 $779e
+SYMBOL R15a $7780
+COMMENT $7780 turbo draw
+CODE $779e $7a36
+SYMBOL R15b $779e
+COMMENT $779e turbo draw
+CODE $7a36 $7aae
+SYMBOL R15c $7a36
+COMMENT $7a36 turbo plot
+CODE $7aae $7b1a
+SYMBOL R15d $7aae
+COMMENT $7aae turbo point
+CODE $7b1a $7b24
+SYMBOL R15e $7b1a
+COMMENT $7b1a fcircle
+CODE $7b24 $7b76
+SYMBOL R15f $7b24
+COMMENT $7b24 fellipse
+CODE $7b76 $7df4
+SYMBOL R160 $7b76
+COMMENT $7b76 bzoom
+CODE $7df4 $7ecc
+SYMBOL R161 $7df4
+COMMENT $7df4 bcircle
+CODE $7ecc $7ef8
+SYMBOL R162 $7ecc
+COMMENT $7ecc internal
+CODE $7ef8 $7f30
+SYMBOL R163 $7ef8
+COMMENT $7ef8 internal
+CODE $7f30 $81e2
+SYMBOL R164 $7f30
+COMMENT $7f30 internal
+CODE $81e2 $8206
+SYMBOL R165 $81e2
+COMMENT $81e2 internal
+CODE $8206 $822a
+SYMBOL R166 $8206
+COMMENT $8206 internal
+CODE $822a $8252
+SYMBOL R167 $822a
+COMMENT $822a internal
+CODE $8252 $8270
+SYMBOL R168 $8252
+COMMENT $8252 internal
+CODE $8270 $828e
+SYMBOL R169 $8270
+COMMENT $8270 internal
+CODE $828e $82a0
+SYMBOL R16a $828e
+COMMENT $828e internal
+CODE $82a0 $82cc
+SYMBOL R16b $82a0
+COMMENT $82a0 internal
+CODE $82cc $8374
+SYMBOL R16c $82cc
+COMMENT $82cc internal
+CODE $8374 $839e
+SYMBOL R16d $8374
+COMMENT $8374 internal
+CODE $839e $83e2
+SYMBOL R16e $839e
+COMMENT $839e internal
+CODE $83e2 $8420
+SYMBOL R16f $83e2
+COMMENT $83e2 internal
+CODE $8420 $8466
+SYMBOL R170 $8420
+COMMENT $8420 internal
+CODE $8466 $84aa
+SYMBOL R171 $8466
+COMMENT $8466 internal
+CODE $84aa $84dc
+SYMBOL R172 $84aa
+COMMENT $84aa internal
+CODE $84dc $84f6
+SYMBOL R173 $84dc
+COMMENT $84dc internal
+CODE $84f6 $8504
+SYMBOL R174 $84f6
+COMMENT $84f6 internal
+CODE $8504 $8582
+SYMBOL R175 $8504
+COMMENT $8504 internal
+CODE $8582 $86d2
+SYMBOL R176 $8582
+COMMENT $8582 internal
+CODE $86d2 $87fa
+SYMBOL R177 $86d2
+COMMENT $86d2 internal
+CODE $87fa $8850
+SYMBOL R178 $87fa
+COMMENT $87fa internal
+CODE $8850 $8972
+SYMBOL R179 $8850
+COMMENT $8850 internal
+CODE $8972 $8996
+SYMBOL R17a $8972
+COMMENT $8972 internal
+CODE $8996 $89d8
+SYMBOL R17b $8996
+COMMENT $8996 internal
+CODE $89d8 $8a0c
+SYMBOL R17c $89d8
+COMMENT $89d8 internal
+CODE $8a0c $9718
+SYMBOL R17d $8a0c
+COMMENT $8a0c internal
+CODE $9d2c $a528
+SYMBOL R17e $9d2c
+COMMENT $9d2c internal
+CODE $a528 $a586
+SYMBOL R17f $a528
+COMMENT $a528 internal
+CODE $a7e6 $a8aa
+SYMBOL R180 $a7e6
+COMMENT $a7e6 internal
+CODE $a8aa $a924
+SYMBOL R181 $a8aa
+COMMENT $a8aa internal
+CODE $a924 $a9a2
+SYMBOL R182 $a924
+COMMENT $a924 internal
+CODE $a9a2 $a9de
+SYMBOL R183 $a9a2
+COMMENT $a9a2 internal
+CODE $a9de $aa60
+SYMBOL R184 $a9de
+COMMENT $a9de internal
+CODE $aa60 $aa6c
+SYMBOL R185 $aa60
+COMMENT $aa60 internal
+CODE $aa6c $aa78
+SYMBOL R186 $aa6c
+COMMENT $aa6c internal
+CODE $aa78 $aa84
+SYMBOL R187 $aa78
+COMMENT $aa78 internal
+CODE $aa84 $aa90
+SYMBOL R188 $aa84
+COMMENT $aa84 internal
+CODE $aa90 $aa9c
+SYMBOL R189 $aa90
+COMMENT $aa90 internal
+CODE $aa9c $aaa8
+SYMBOL R18a $aa9c
+COMMENT $aa9c internal
+CODE $aaa8 $aab2
+SYMBOL R18b $aaa8
+COMMENT $aaa8 internal
+CODE $aab2 $ab9e
+SYMBOL R18c $aab2
+COMMENT $aab2 internal
+CODE $afa4 $afb4
+SYMBOL R18d $afa4
+COMMENT $afa4 internal
+CODE $b1a6 $b1b2
+SYMBOL R18e $b1a6
+COMMENT $b1a6 internal
+COMMENT $1cae original fe31017d: Rbsr R17d
+COMMENT $1cec original fe31009f: Rbsr R09f
+COMMENT $1e2e original fe31010b: Rbsr R10b
+COMMENT $1ed2 original fe310018: Rbsr R018
+COMMENT $1edc original fe31006f: Rbsr R06f
+COMMENT $1ee0 original fe310162: Rbsr R162
+COMMENT $1f56 original fe11f700044c: Rjsr slot 0 Bnk_GetAdr (1100)
+COMMENT $1f6a original fe31010b: Rbsr R10b
+COMMENT $20a6 original fe310175: Rbsr R175
+COMMENT $20c0 original fe310175: Rbsr R175
+COMMENT $20dc original fe310175: Rbsr R175
+COMMENT $210c original fe51009d: Rbne R09d
+COMMENT $2146 original fe51009d: Rbne R09d
+COMMENT $2170 original fe51009d: Rbne R09d
+COMMENT $219a original fe51009d: Rbne R09d
+COMMENT $21c2 original fe51009d: Rbne R09d
+COMMENT $21ec original fe51009d: Rbne R09d
+COMMENT $220c original fee1009d: Rbmi R09d
+COMMENT $2214 original fe91009d: Rbge R09d
+COMMENT $221a original fee1009d: Rbmi R09d
+COMMENT $2222 original fe91009d: Rbge R09d
+COMMENT $2230 original fe310171: Rbsr R171
+COMMENT $23bc original fe21009c: Rbra R09c
+COMMENT $2422 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $2438 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $2450 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $2464 original fe21009c: Rbra R09c
+COMMENT $248c original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $2492 original fe41009e: Rbeq R09e
+COMMENT $24be original fe11f7000450: Rjsr slot 0 Bnk_Eff (1104)
+COMMENT $24d0 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $24e4 original fe21009c: Rbra R09c
+COMMENT $250c original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $2512 original fe41009e: Rbeq R09e
+COMMENT $253e original fe11f7000450: Rjsr slot 0 Bnk_Eff (1104)
+COMMENT $2578 original fe310172: Rbsr R172
+COMMENT $257c original fe21001d: Rbra R01d
+COMMENT $25a6 original fe310172: Rbsr R172
+COMMENT $25aa original fe21001f: Rbra R01f
+COMMENT $25c8 original fe310172: Rbsr R172
+COMMENT $25cc original fe210021: Rbra R021
+COMMENT $25ea original fe310172: Rbsr R172
+COMMENT $25ee original fe210023: Rbra R023
+COMMENT $2614 original fe310172: Rbsr R172
+COMMENT $2618 original fe210025: Rbra R025
+COMMENT $263a original fe310172: Rbsr R172
+COMMENT $263e original fe210027: Rbra R027
+COMMENT $2660 original fe310172: Rbsr R172
+COMMENT $2664 original fe210029: Rbra R029
+COMMENT $2684 original fe310172: Rbsr R172
+COMMENT $2688 original fe21002b: Rbra R02b
+COMMENT $26a8 original fe310172: Rbsr R172
+COMMENT $26ac original fe21002d: Rbra R02d
+COMMENT $26d4 original fe310172: Rbsr R172
+COMMENT $26d8 original fe21002f: Rbra R02f
+COMMENT $26fc original fe310172: Rbsr R172
+COMMENT $2700 original fe210031: Rbra R031
+COMMENT $2724 original fe310172: Rbsr R172
+COMMENT $2728 original fe210033: Rbra R033
+COMMENT $2732 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $2748 original fe21009c: Rbra R09c
+COMMENT $2762 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $2768 original fe41009e: Rbeq R09e
+COMMENT $2794 original fe11f7000450: Rjsr slot 0 Bnk_Eff (1104)
+COMMENT $27c6 original fe310172: Rbsr R172
+COMMENT $27ca original fe210036: Rbra R036
+COMMENT $27e8 original fe41009d: Rbeq R09d
+COMMENT $2808 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $280e original fe41009e: Rbeq R09e
+COMMENT $283c original fe310172: Rbsr R172
+COMMENT $2842 original fe210038: Rbra R038
+COMMENT $284a original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $2878 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $2884 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $28a2 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $28da original fe21009d: Rbra R09d
+COMMENT $28fa original fe21003f: Rbra R03f
+COMMENT $290c original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2918 original fe91009d: Rbge R09d
+COMMENT $2932 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $293e original fe91009d: Rbge R09d
+COMMENT $2a06 original fe210041: Rbra R041
+COMMENT $2a18 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2a24 original fe91009d: Rbge R09d
+COMMENT $2a3e original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2a4a original fe91009d: Rbge R09d
+COMMENT $2a64 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2a70 original fe91009d: Rbge R09d
+COMMENT $2b5c original fe210043: Rbra R043
+COMMENT $2b6e original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2b7a original fe91009d: Rbge R09d
+COMMENT $2b94 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2ba0 original fe91009d: Rbge R09d
+COMMENT $2bba original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2bc6 original fe91009d: Rbge R09d
+COMMENT $2be0 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2bec original fe91009d: Rbge R09d
+COMMENT $2d22 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2d3a original fe210047: Rbra R047
+COMMENT $2d76 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2d82 original fe91009d: Rbge R09d
+COMMENT $2e28 original fe21004b: Rbra R04b
+COMMENT $2e34 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2e50 original fe21004b: Rbra R04b
+COMMENT $2e5c original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2e78 original fe21004b: Rbra R04b
+COMMENT $2e84 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2e90 original fe91009d: Rbge R09d
+COMMENT $2eda original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $2ee6 original fe91009d: Rbge R09d
+COMMENT $3066 original fe21009c: Rbra R09c
+COMMENT $3074 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $3086 original fe21009c: Rbra R09c
+COMMENT $3094 original fe21017e: Rbra R17e
+COMMENT $3098 original fe210164: Rbra R164
+COMMENT $30c6 original fe210053: Rbra R053
+COMMENT $30cc original fee1009d: Rbmi R09d
+COMMENT $30d4 original feb1009d: Rbhi R09d
+COMMENT $30da original fee1009d: Rbmi R09d
+COMMENT $30e2 original feb1009d: Rbhi R09d
+COMMENT $30e8 original fee1009d: Rbmi R09d
+COMMENT $3372 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $337c original fe410186: Rbeq R186
+COMMENT $3380 original fee10186: Rbmi R186
+COMMENT $3386 original fe410186: Rbeq R186
+COMMENT $338a original fee10186: Rbmi R186
+COMMENT $33fa original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $340c original fe410186: Rbeq R186
+COMMENT $3422 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $3428 original fe410185: Rbeq R185
+COMMENT $344c original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $346e original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $3478 original fe41009d: Rbeq R09d
+COMMENT $347c original fee1009d: Rbmi R09d
+COMMENT $3482 original fe41009d: Rbeq R09d
+COMMENT $3486 original fee1009d: Rbmi R09d
+COMMENT $358a original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $35e2 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $3622 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $364e original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $36b6 original fe31016b: Rbsr R16b
+COMMENT $36be original fe410186: Rbeq R186
+COMMENT $371a original fe410187: Rbeq R187
+COMMENT $3728 original fe31016b: Rbsr R16b
+COMMENT $3730 original fe410186: Rbeq R186
+COMMENT $374c original fe410187: Rbeq R187
+COMMENT $376e original fe410188: Rbeq R188
+COMMENT $379a original fe310173: Rbsr R173
+COMMENT $37e4 original fe410186: Rbeq R186
+COMMENT $3814 original fe310165: Rbsr R165
+COMMENT $381a original fe210187: Rbra R187
+COMMENT $3820 original fe310167: Rbsr R167
+COMMENT $3838 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $3844 original fe310168: Rbsr R168
+COMMENT $384a original fe31016a: Rbsr R16a
+COMMENT $384e original fe210188: Rbra R188
+COMMENT $3852 original fe31016a: Rbsr R16a
+COMMENT $385a original fe31016a: Rbsr R16a
+COMMENT $385e original fe210185: Rbra R185
+COMMENT $386e original fe310165: Rbsr R165
+COMMENT $3874 original fe210187: Rbra R187
+COMMENT $387a original fe310167: Rbsr R167
+COMMENT $3890 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $389c original fe310168: Rbsr R168
+COMMENT $38a2 original fe31016a: Rbsr R16a
+COMMENT $38a6 original fe210188: Rbra R188
+COMMENT $38aa original fe31016a: Rbsr R16a
+COMMENT $38b2 original fe31016a: Rbsr R16a
+COMMENT $38b6 original fe210185: Rbra R185
+COMMENT $38c4 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $38da original fe21018d: Rbra R18d
+COMMENT $38e0 original fe310166: Rbsr R166
+COMMENT $38e6 original fe210188: Rbra R188
+COMMENT $38f4 original fe310169: Rbsr R169
+COMMENT $38fa original fe31016a: Rbsr R16a
+COMMENT $38fe original fe210188: Rbra R188
+COMMENT $3902 original fe31016a: Rbsr R16a
+COMMENT $390a original fee10186: Rbmi R186
+COMMENT $3910 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $3920 original fe710186: Rbcc R186
+COMMENT $3926 original fee10186: Rbmi R186
+COMMENT $3936 original fe410186: Rbeq R186
+COMMENT $393c original fe310168: Rbsr R168
+COMMENT $3944 original fee10186: Rbmi R186
+COMMENT $394a original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $395c original fe710186: Rbcc R186
+COMMENT $3962 original fee10186: Rbmi R186
+COMMENT $3972 original fe410186: Rbeq R186
+COMMENT $3978 original fe310169: Rbsr R169
+COMMENT $3986 original fe310165: Rbsr R165
+COMMENT $398c original fe210187: Rbra R187
+COMMENT $3992 original fe310167: Rbsr R167
+COMMENT $399a original fe31016a: Rbsr R16a
+COMMENT $39a0 original fe310166: Rbsr R166
+COMMENT $39a6 original fe210187: Rbra R187
+COMMENT $39aa original fe31016a: Rbsr R16a
+COMMENT $39d4 original fe31016a: Rbsr R16a
+COMMENT $39d8 original fe210185: Rbra R185
+COMMENT $39e4 original fe310166: Rbsr R166
+COMMENT $39ec original fe31016a: Rbsr R16a
+COMMENT $39f0 original fe310162: Rbsr R162
+COMMENT $39f4 original fe210187: Rbra R187
+COMMENT $3a0c original fe310168: Rbsr R168
+COMMENT $3a12 original fe31016a: Rbsr R16a
+COMMENT $3a18 original fe31016a: Rbsr R16a
+COMMENT $3a1c original fe310162: Rbsr R162
+COMMENT $3a20 original fe210188: Rbra R188
+COMMENT $3a26 original fe310169: Rbsr R169
+COMMENT $3a2c original fe31016a: Rbsr R16a
+COMMENT $3a32 original fe31016a: Rbsr R16a
+COMMENT $3a36 original fe310162: Rbsr R162
+COMMENT $3a3a original fe210188: Rbra R188
+COMMENT $3a42 original fe31016a: Rbsr R16a
+COMMENT $3a48 original fe31016a: Rbsr R16a
+COMMENT $3a4c original fe310162: Rbsr R162
+COMMENT $3a52 original fe31006f: Rbsr R06f
+COMMENT $3a58 original fe31016b: Rbsr R16b
+COMMENT $3a6e original fe410187: Rbeq R187
+COMMENT $3a90 original fe31006f: Rbsr R06f
+COMMENT $3a94 original fe210188: Rbra R188
+COMMENT $3aa8 original fe410186: Rbeq R186
+COMMENT $3ac0 original fe510072: Rbne R072
+COMMENT $3ac4 original fe31006f: Rbsr R06f
+COMMENT $3af8 original fe31016b: Rbsr R16b
+COMMENT $3b0e original fe410187: Rbeq R187
+COMMENT $3b32 original fe410188: Rbeq R188
+COMMENT $3b38 original fe310070: Rbsr R070
+COMMENT $3b3c original fe210072: Rbra R072
+COMMENT $3b4a original fe31016e: Rbsr R16e
+COMMENT $3b50 original fe310070: Rbsr R070
+COMMENT $3b54 original fe210074: Rbra R074
+COMMENT $3b64 original fe310070: Rbsr R070
+COMMENT $3b68 original fe210076: Rbra R076
+COMMENT $3b78 original fe310070: Rbsr R070
+COMMENT $3b7c original fe210078: Rbra R078
+COMMENT $3b8c original fe310070: Rbsr R070
+COMMENT $3b90 original fe21007a: Rbra R07a
+COMMENT $3ba0 original fe310070: Rbsr R070
+COMMENT $3ba4 original fe21007c: Rbra R07c
+COMMENT $3bbc original fe310070: Rbsr R070
+COMMENT $3bc0 original fe21007e: Rbra R07e
+COMMENT $3bd2 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $3c0c original fe310070: Rbsr R070
+COMMENT $3c10 original fe210081: Rbra R081
+COMMENT $3c1e original fe21016e: Rbra R16e
+COMMENT $3c26 original fe31016b: Rbsr R16b
+COMMENT $3c3a original fe410187: Rbeq R187
+COMMENT $3c5a original fe31016b: Rbsr R16b
+COMMENT $3c6e original fe410187: Rbeq R187
+COMMENT $3c74 original fe310173: Rbsr R173
+COMMENT $3c8e original fe31016b: Rbsr R16b
+COMMENT $3ca8 original fe410187: Rbeq R187
+COMMENT $3cb2 original fee10186: Rbmi R186
+COMMENT $3cba original fe910186: Rbge R186
+COMMENT $3cd0 original fee10186: Rbmi R186
+COMMENT $3cd8 original fe910186: Rbge R186
+COMMENT $3cfc original fee10186: Rbmi R186
+COMMENT $3d04 original fe910186: Rbge R186
+COMMENT $3d2c original fee10186: Rbmi R186
+COMMENT $3d34 original fe910186: Rbge R186
+COMMENT $3d82 original fe21018d: Rbra R18d
+COMMENT $3d8e original fe410186: Rbeq R186
+COMMENT $3d92 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $3d9a original fe410186: Rbeq R186
+COMMENT $3daa original fe21018d: Rbra R18d
+COMMENT $3dbe original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $3dc4 original fe410185: Rbeq R185
+COMMENT $3de4 original fe210176: Rbra R176
+COMMENT $3df4 original fe310162: Rbsr R162
+COMMENT $3dfc original fe310165: Rbsr R165
+COMMENT $3e00 original fe410187: Rbeq R187
+COMMENT $3e06 original fe310167: Rbsr R167
+COMMENT $3e10 original fe310168: Rbsr R168
+COMMENT $3e16 original fe31016a: Rbsr R16a
+COMMENT $3e1a original fe210188: Rbra R188
+COMMENT $3e2e original fe31016a: Rbsr R16a
+COMMENT $3e32 original fe210068: Rbra R068
+COMMENT $3e36 original fe31016a: Rbsr R16a
+COMMENT $3e3a original fe2100ed: Rbra R0ed
+COMMENT $3e52 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $3e58 original fe410185: Rbeq R185
+COMMENT $3e74 original fe310168: Rbsr R168
+COMMENT $3e7a original fe31016a: Rbsr R16a
+COMMENT $3e80 original fe210176: Rbra R176
+COMMENT $3edc original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $3ee2 original fe410185: Rbeq R185
+COMMENT $3f90 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $3f9c original fe510186: Rbne R186
+COMMENT $402e original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $4046 original fe21008f: Rbra R08f
+COMMENT $404c original fe210090: Rbra R090
+COMMENT $405a original fe41018a: Rbeq R18a
+COMMENT $40d6 original fe21018d: Rbra R18d
+COMMENT $40ec original fe21018d: Rbra R18d
+COMMENT $40f8 original fe41018a: Rbeq R18a
+COMMENT $4124 original fe41018a: Rbeq R18a
+COMMENT $414a original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $4150 original fe41009e: Rbeq R09e
+COMMENT $4168 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $4198 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $419e original fe41009e: Rbeq R09e
+COMMENT $41ca original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $41e8 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $41ee original fe41009e: Rbeq R09e
+COMMENT $4210 original fee1009d: Rbmi R09d
+COMMENT $4218 original feb1009d: Rbhi R09d
+COMMENT $421e original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $4240 original fe310097: Rbsr R097
+COMMENT $4292 original fe310097: Rbsr R097
+COMMENT $429a original fe41009d: Rbeq R09d
+COMMENT $431e original fe21017e: Rbra R17e
+COMMENT $4322 original fe21018d: Rbra R18d
+COMMENT $4326 original fe210186: Rbra R186
+COMMENT $432a original fe210185: Rbra R185
+COMMENT $432e original fe21018c: Rbra R18c
+COMMENT $4472 original fe41018a: Rbeq R18a
+COMMENT $45bc original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $45ca original fe410186: Rbeq R186
+COMMENT $4772 original fe21017f: Rbra R17f
+COMMENT $477a original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $478a original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $47c4 original fe2100b0: Rbra R0b0
+COMMENT $47d2 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $47ee original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $480c original fe410186: Rbeq R186
+COMMENT $4814 original feb10186: Rbhi R186
+COMMENT $4822 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $48b0 original fe410186: Rbeq R186
+COMMENT $48b8 original feb10186: Rbhi R186
+COMMENT $48c6 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $4980 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $499a original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $49b8 original fe810186: Rblt R186
+COMMENT $49cc original fe810186: Rblt R186
+COMMENT $4a0a original fee10186: Rbmi R186
+COMMENT $4a0e original fe410186: Rbeq R186
+COMMENT $4a38 original fee10186: Rbmi R186
+COMMENT $4a3c original fe410186: Rbeq R186
+COMMENT $4a66 original fee10186: Rbmi R186
+COMMENT $4a72 original feb10186: Rbhi R186
+COMMENT $4a90 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $4ad0 original fee10186: Rbmi R186
+COMMENT $4ad6 original fee10186: Rbmi R186
+COMMENT $4ada original fe410186: Rbeq R186
+COMMENT $4ae2 original fee10186: Rbmi R186
+COMMENT $4aec original fee10186: Rbmi R186
+COMMENT $4af2 original fee10186: Rbmi R186
+COMMENT $4b04 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $4b5a original fe410186: Rbeq R186
+COMMENT $4bb2 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $4c22 original fe2100bf: Rbra R0bf
+COMMENT $4c32 original fe510186: Rbne R186
+COMMENT $4c3a original fee10186: Rbmi R186
+COMMENT $4c42 original fe410186: Rbeq R186
+COMMENT $4c50 original fe410186: Rbeq R186
+COMMENT $4c5c original fe410186: Rbeq R186
+COMMENT $4c7e original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $4cd2 original fee10186: Rbmi R186
+COMMENT $4cda original fe910186: Rbge R186
+COMMENT $4ce4 original fe410186: Rbeq R186
+COMMENT $4cfc original fe510186: Rbne R186
+COMMENT $4d3c original fee10186: Rbmi R186
+COMMENT $4d44 original fe910186: Rbge R186
+COMMENT $4d64 original fee10186: Rbmi R186
+COMMENT $4d6c original fe910186: Rbge R186
+COMMENT $4d86 original fe410186: Rbeq R186
+COMMENT $4df2 original fee10186: Rbmi R186
+COMMENT $4dfa original fe910186: Rbge R186
+COMMENT $4e00 original fee10186: Rbmi R186
+COMMENT $4e08 original fe910186: Rbge R186
+COMMENT $4e0e original fe410186: Rbeq R186
+COMMENT $4e38 original fe410186: Rbeq R186
+COMMENT $4e44 original fe410186: Rbeq R186
+COMMENT $4f64 original fe11f700044d: Rjsr slot 0 Bnk_GetBobs (1101)
+COMMENT $4f6a original fe410186: Rbeq R186
+COMMENT $4f76 original feb10186: Rbhi R186
+COMMENT $4f7c original feb10186: Rbhi R186
+COMMENT $4fac original fe11f700044e: Rjsr slot 0 Bnk_GetIcons (1102)
+COMMENT $4fb2 original fe410186: Rbeq R186
+COMMENT $4fbe original feb10186: Rbhi R186
+COMMENT $4fc4 original feb10186: Rbhi R186
+COMMENT $5010 original fe310174: Rbsr R174
+COMMENT $50e6 original fe310162: Rbsr R162
+COMMENT $5144 original fe21018d: Rbra R18d
+COMMENT $5156 original fe2100de: Rbra R0de
+COMMENT $515e original fe31016b: Rbsr R16b
+COMMENT $5174 original fe410187: Rbeq R187
+COMMENT $519c original fe21018d: Rbra R18d
+COMMENT $51a4 original fe2100e0: Rbra R0e0
+COMMENT $5202 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $521a original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $5220 original fe410185: Rbeq R185
+COMMENT $5280 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $52a4 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $5386 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $544a original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $546e original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $5550 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $5614 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $5638 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $56ee original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $5786 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $57aa original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $5860 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $58f6 original fe310162: Rbsr R162
+COMMENT $58fa original fe310170: Rbsr R170
+COMMENT $5906 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $591c original fe21018d: Rbra R18d
+COMMENT $5922 original fe310166: Rbsr R166
+COMMENT $5928 original fe210188: Rbra R188
+COMMENT $5952 original fe31016a: Rbsr R16a
+COMMENT $5956 original fe210185: Rbra R185
+COMMENT $59bc original fe31016a: Rbsr R16a
+COMMENT $59d0 original fe310162: Rbsr R162
+COMMENT $59d6 original fe21018d: Rbra R18d
+COMMENT $59de original fe310169: Rbsr R169
+COMMENT $59e4 original fe31016a: Rbsr R16a
+COMMENT $59f8 original fe310162: Rbsr R162
+COMMENT $59fe original fe510188: Rbne R188
+COMMENT $5a08 original fe2100ea: Rbra R0ea
+COMMENT $5a10 original fe310162: Rbsr R162
+COMMENT $5a14 original fe310170: Rbsr R170
+COMMENT $5a1e original fe410186: Rbeq R186
+COMMENT $5a22 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $5a38 original fe21018d: Rbra R18d
+COMMENT $5a4e original fe21018d: Rbra R18d
+COMMENT $5a54 original fe21018d: Rbra R18d
+COMMENT $5a74 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $5a7a original fe410185: Rbeq R185
+COMMENT $5aa4 original fe310162: Rbsr R162
+COMMENT $5aa8 original fe310170: Rbsr R170
+COMMENT $5ab0 original fe310165: Rbsr R165
+COMMENT $5ab4 original fe410187: Rbeq R187
+COMMENT $5aba original fe310167: Rbsr R167
+COMMENT $5ac8 original fe310168: Rbsr R168
+COMMENT $5ace original fe31016a: Rbsr R16a
+COMMENT $5ad2 original fe210188: Rbra R188
+COMMENT $5aee original fe31016a: Rbsr R16a
+COMMENT $5af2 original fe210068: Rbra R068
+COMMENT $5af6 original fe31016a: Rbsr R16a
+COMMENT $5afa original fe21008a: Rbra R08a
+COMMENT $5afe original fe31016a: Rbsr R16a
+COMMENT $5b04 original fe31018d: Rbsr R18d
+COMMENT $5b1e original fe31016a: Rbsr R16a
+COMMENT $5b22 original fe210185: Rbra R185
+COMMENT $5b3a original fe310168: Rbsr R168
+COMMENT $5b40 original fe31016a: Rbsr R16a
+COMMENT $5b44 original fe310162: Rbsr R162
+COMMENT $5b48 original fe210188: Rbra R188
+COMMENT $5b4c original fe31016a: Rbsr R16a
+COMMENT $5b68 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $5b6e original fe410185: Rbeq R185
+COMMENT $5b8a original fe310162: Rbsr R162
+COMMENT $5ba4 original fe2100ef: Rbra R0ef
+COMMENT $5bae original fe31017d: Rbsr R17d
+COMMENT $5d56 original fee10186: Rbmi R186
+COMMENT $5d5e original fe910186: Rbge R186
+COMMENT $5d80 original fee10186: Rbmi R186
+COMMENT $5d88 original fe910186: Rbge R186
+COMMENT $5dd6 original fe31017d: Rbsr R17d
+COMMENT $5e1c original fe31017d: Rbsr R17d
+COMMENT $5e76 original fe31017d: Rbsr R17d
+COMMENT $5ec0 original fe210177: Rbra R177
+COMMENT $5eca original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $5ede original fe410186: Rbeq R186
+COMMENT $5ee8 original fe410186: Rbeq R186
+COMMENT $5ef4 original feb10186: Rbhi R186
+COMMENT $5f08 original fe210177: Rbra R177
+COMMENT $5f14 original fe410186: Rbeq R186
+COMMENT $5f1e original fe410186: Rbeq R186
+COMMENT $5f2a original feb10186: Rbhi R186
+COMMENT $5f3e original fe210177: Rbra R177
+COMMENT $5f4a original fe410186: Rbeq R186
+COMMENT $5f56 original fe410186: Rbeq R186
+COMMENT $5f62 original feb10186: Rbhi R186
+COMMENT $5f76 original fe210177: Rbra R177
+COMMENT $5f80 original fe31017d: Rbsr R17d
+COMMENT $5f9a original fe210100: Rbra R100
+COMMENT $5fa4 original fe210100: Rbra R100
+COMMENT $5fba original fe310101: Rbsr R101
+COMMENT $5fc2 original fe310102: Rbsr R102
+COMMENT $5fce original fe210177: Rbra R177
+COMMENT $5fda original fe410186: Rbeq R186
+COMMENT $5fe0 original fe31017d: Rbsr R17d
+COMMENT $5fe6 original fee10186: Rbmi R186
+COMMENT $5fea original fe410186: Rbeq R186
+COMMENT $5ff2 original feb10186: Rbhi R186
+COMMENT $600e original fe410186: Rbeq R186
+COMMENT $6016 original fee10186: Rbmi R186
+COMMENT $601a original fe410186: Rbeq R186
+COMMENT $6022 original feb10186: Rbhi R186
+COMMENT $604c original fe31017d: Rbsr R17d
+COMMENT $6052 original fe31017a: Rbsr R17a
+COMMENT $6056 original fe310179: Rbsr R179
+COMMENT $6064 original fe21017d: Rbra R17d
+COMMENT $6074 original fe31017b: Rbsr R17b
+COMMENT $6078 original fe210178: Rbra R178
+COMMENT $6080 original fee10186: Rbmi R186
+COMMENT $6088 original fe910186: Rbge R186
+COMMENT $6092 original fe31017d: Rbsr R17d
+COMMENT $60aa original fe31017d: Rbsr R17d
+COMMENT $60c8 original fe31017d: Rbsr R17d
+COMMENT $6130 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $6142 original fe910186: Rbge R186
+COMMENT $614a original fe21017d: Rbra R17d
+COMMENT $6150 original fe210109: Rbra R109
+COMMENT $6158 original fe31010b: Rbsr R10b
+COMMENT $6164 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $6176 original fe910186: Rbge R186
+COMMENT $617e original fe31017d: Rbsr R17d
+COMMENT $6186 original fe410179: Rbeq R179
+COMMENT $618a original fe210178: Rbra R178
+COMMENT $6194 original fe31017d: Rbsr R17d
+COMMENT $619c original fe410186: Rbeq R186
+COMMENT $61a6 original fe910186: Rbge R186
+COMMENT $61ae original fe410179: Rbeq R179
+COMMENT $61b2 original fe210178: Rbra R178
+COMMENT $61bc original fe31017d: Rbsr R17d
+COMMENT $61ce original fe31017b: Rbsr R17b
+COMMENT $61d2 original fe31017a: Rbsr R17a
+COMMENT $61d8 original fe21017d: Rbra R17d
+COMMENT $61e2 original fe31017d: Rbsr R17d
+COMMENT $620a original fe410186: Rbeq R186
+COMMENT $620e original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $6218 original fe910186: Rbge R186
+COMMENT $62ae original fee10186: Rbmi R186
+COMMENT $6342 original fe210112: Rbra R112
+COMMENT $63ee original feb10186: Rbhi R186
+COMMENT $640a original fe410186: Rbeq R186
+COMMENT $6410 original fe21016e: Rbra R16e
+COMMENT $65dc original fe41018a: Rbeq R18a
+COMMENT $65ee original fe41018a: Rbeq R18a
+COMMENT $6600 original fe41018a: Rbeq R18a
+COMMENT $6612 original fe41018a: Rbeq R18a
+COMMENT $6624 original fe41018a: Rbeq R18a
+COMMENT $664c original fe410186: Rbeq R186
+COMMENT $6650 original fee10186: Rbmi R186
+COMMENT $6658 original feb10186: Rbhi R186
+COMMENT $666c original fe310180: Rbsr R180
+COMMENT $680a original fe310180: Rbsr R180
+COMMENT $69a2 original fe410186: Rbeq R186
+COMMENT $69ba original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $69c0 original fe410185: Rbeq R185
+COMMENT $69f4 original fe41018a: Rbeq R18a
+COMMENT $6a62 original fe41018a: Rbeq R18a
+COMMENT $6a72 original fec10186: Rble R186
+COMMENT $6a8a original fe410186: Rbeq R186
+COMMENT $6aa4 original fe31012a: Rbsr R12a
+COMMENT $6aa8 original fe31012c: Rbsr R12c
+COMMENT $6aac original fe31012d: Rbsr R12d
+COMMENT $6ab0 original fe21012e: Rbra R12e
+COMMENT $6ab4 original fe31012b: Rbsr R12b
+COMMENT $6ab8 original fe31012c: Rbsr R12c
+COMMENT $6abc original fe31012d: Rbsr R12d
+COMMENT $6ac0 original fe21012e: Rbra R12e
+COMMENT $6ace original fe410186: Rbeq R186
+COMMENT $6adc original fe41018a: Rbeq R18a
+COMMENT $6b90 original fe410186: Rbeq R186
+COMMENT $6b9e original fe41018a: Rbeq R18a
+COMMENT $6c5c original fe410186: Rbeq R186
+COMMENT $6c68 original fe410186: Rbeq R186
+COMMENT $6c82 original fe310182: Rbsr R182
+COMMENT $6c9e original fe410186: Rbeq R186
+COMMENT $6cac original fe41018a: Rbeq R18a
+COMMENT $6d0c original fe410186: Rbeq R186
+COMMENT $6d1a original fe41018a: Rbeq R18a
+COMMENT $6d74 original fe410186: Rbeq R186
+COMMENT $6daa original fe410186: Rbeq R186
+COMMENT $6dc2 original fe11f700044f: Rjsr slot 0 Bnk_Reserve (1103)
+COMMENT $6dc8 original fe410185: Rbeq R185
+COMMENT $6de4 original fe41018a: Rbeq R18a
+COMMENT $6e70 original fe410186: Rbeq R186
+COMMENT $6e80 original fe310183: Rbsr R183
+COMMENT $6e8e original fe310184: Rbsr R184
+COMMENT $6ed0 original fe41018a: Rbeq R18a
+COMMENT $6ee0 original fe21018d: Rbra R18d
+COMMENT $6eea original fec10186: Rble R186
+COMMENT $6ef0 original fec10186: Rble R186
+COMMENT $6f06 original fe31013b: Rbsr R13b
+COMMENT $6f0a original fe31013d: Rbsr R13d
+COMMENT $6f0e original fe21013f: Rbra R13f
+COMMENT $6f12 original fe31013c: Rbsr R13c
+COMMENT $6f16 original fe31013d: Rbsr R13d
+COMMENT $6f1a original fe21013f: Rbra R13f
+COMMENT $6f28 original fe410186: Rbeq R186
+COMMENT $6f36 original fe41018a: Rbeq R18a
+COMMENT $6f46 original fe21018d: Rbra R18d
+COMMENT $6f92 original fe410186: Rbeq R186
+COMMENT $6fa0 original fe41018a: Rbeq R18a
+COMMENT $6fb0 original fe21018d: Rbra R18d
+COMMENT $6ffe original fe410186: Rbeq R186
+COMMENT $700e original fe310184: Rbsr R184
+COMMENT $7026 original fe410186: Rbeq R186
+COMMENT $7032 original fee10186: Rbmi R186
+COMMENT $7042 original fe210184: Rbra R184
+COMMENT $7050 original fe410186: Rbeq R186
+COMMENT $705e original fe41018a: Rbeq R18a
+COMMENT $706e original fe21018d: Rbra R18d
+COMMENT $714e original fe310142: Rbsr R142
+COMMENT $7152 original fe210163: Rbra R163
+COMMENT $7156 original fe310143: Rbsr R143
+COMMENT $7172 original fe310173: Rbsr R173
+COMMENT $71c8 original fe310173: Rbsr R173
+COMMENT $721a original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $723e original fe310142: Rbsr R142
+COMMENT $7244 original fe310163: Rbsr R163
+COMMENT $7328 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $7396 original fee10186: Rbmi R186
+COMMENT $739e original fe910186: Rbge R186
+COMMENT $73a6 original fee10186: Rbmi R186
+COMMENT $73ae original fe910186: Rbge R186
+COMMENT $7472 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $747a original fee10186: Rbmi R186
+COMMENT $7482 original fe910186: Rbge R186
+COMMENT $74a2 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $74aa original fee10186: Rbmi R186
+COMMENT $74b2 original fe910186: Rbge R186
+COMMENT $74da original fee10186: Rbmi R186
+COMMENT $74e2 original fe910186: Rbge R186
+COMMENT $74e8 original fee10186: Rbmi R186
+COMMENT $74f0 original fe910186: Rbge R186
+COMMENT $750e original fee10186: Rbmi R186
+COMMENT $7516 original fe910186: Rbge R186
+COMMENT $751c original fee10186: Rbmi R186
+COMMENT $7524 original fe910186: Rbge R186
+COMMENT $7576 original fe21016f: Rbra R16f
+COMMENT $758c original fe21016e: Rbra R16e
+COMMENT $759a original fe21016e: Rbra R16e
+COMMENT $75da original fe21018d: Rbra R18d
+COMMENT $75e4 original fe410186: Rbeq R186
+COMMENT $7600 original fe410188: Rbeq R188
+COMMENT $7638 original fe21016e: Rbra R16e
+COMMENT $764c original fe210158: Rbra R158
+COMMENT $7654 original fe210159: Rbra R159
+COMMENT $7672 original fee10186: Rbmi R186
+COMMENT $767c original fe410186: Rbeq R186
+COMMENT $7690 original feb10186: Rbhi R186
+COMMENT $7698 original fee10186: Rbmi R186
+COMMENT $7794 original fe21015b: Rbra R15b
+COMMENT $7878 original fe31015b: Rbsr R15b
+COMMENT $7a4a original fe41018a: Rbeq R18a
+COMMENT $7b20 original fe21015f: Rbra R15f
+COMMENT $7b2e original fe41018a: Rbeq R18a
+COMMENT $7b38 original fe31016c: Rbsr R16c
+COMMENT $7b56 original fe31016d: Rbsr R16d
+COMMENT $7b5a original fe210186: Rbra R186
+COMMENT $7b68 original fe31016d: Rbsr R16d
+COMMENT $7b70 original fe210186: Rbra R186
+COMMENT $7b7c original fee10186: Rbmi R186
+COMMENT $7b88 original fe410186: Rbeq R186
+COMMENT $7baa original fe510186: Rbne R186
+COMMENT $7bc0 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $7c18 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $7df6 original fee10186: Rbmi R186
+COMMENT $7dfe original fe910186: Rbge R186
+COMMENT $7e0e original fe410186: Rbeq R186
+COMMENT $7e14 original fee10186: Rbmi R186
+COMMENT $7e46 original fee10186: Rbmi R186
+COMMENT $7f52 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $7f60 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $81e6 original fe31016b: Rbsr R16b
+COMMENT $820a original fe31016b: Rbsr R16b
+COMMENT $82ac original fe710186: Rbcc R186
+COMMENT $82bc original fe11f700045f: Rjsr slot 0 Dsk_PathIt (1119)
+COMMENT $82d4 original fe310162: Rbsr R162
+COMMENT $830e original fe41018a: Rbeq R18a
+COMMENT $833e original fe410185: Rbeq R185
+COMMENT $8396 original fe310162: Rbsr R162
+COMMENT $83b8 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $83f6 original fe11f700002e: Rjsr slot 0 Demande (46)
+COMMENT $8448 original fe21018d: Rbra R18d
+COMMENT $848e original fe21018d: Rbra R18d
+COMMENT $84b0 original fe11f7000461: Rjsr slot 0 Bnk_OrAdr (1121)
+COMMENT $84c4 original fe21018d: Rbra R18d
+COMMENT $84ec original fe81018b: Rblt R18b
+COMMENT $856e original fe410186: Rbeq R186
+COMMENT $86ec original fe3100ef: Rbsr R0ef
+COMMENT $8832 original fe31017d: Rbsr R17d
+COMMENT $8940 original fe21018d: Rbra R18d
+COMMENT $8954 original fe31017d: Rbsr R17d
+COMMENT $8a4e original fe210186: Rbra R186
+COMMENT $a528 original fe310174: Rbsr R174
+COMMENT $a558 original fe21016e: Rbra R16e
+COMMENT $a57e original fe21016e: Rbra R16e
+COMMENT $a7e6 original fe11f700044d: Rjsr slot 0 Bnk_GetBobs (1101)
+COMMENT $a7ec original fe410186: Rbeq R186
+COMMENT $a7f6 original feb10186: Rbhi R186
+COMMENT $a802 original fe410186: Rbeq R186
+COMMENT $a838 original fe11f700011f: Rjsr slot 0 GetEc (287)
+COMMENT $a938 original fe410181: Rbeq R181
+COMMENT $a948 original fe410181: Rbeq R181
+COMMENT $a99e original fe210181: Rbra R181
+COMMENT $aa5c original fe210183: Rbra R183
+COMMENT $aa60 original fe310162: Rbsr R162
+COMMENT $aa66 original fe01f7000400: Rjmp slot 0 Error (1024)
+COMMENT $aa6c original fe310162: Rbsr R162
+COMMENT $aa72 original fe01f7000400: Rjmp slot 0 Error (1024)
+COMMENT $aa78 original fe310162: Rbsr R162
+COMMENT $aa7e original fe01f7000400: Rjmp slot 0 Error (1024)
+COMMENT $aa84 original fe310162: Rbsr R162
+COMMENT $aa8a original fe01f7000400: Rjmp slot 0 Error (1024)
+COMMENT $aa90 original fe310162: Rbsr R162
+COMMENT $aa96 original fe01f7000400: Rjmp slot 0 Error (1024)
+COMMENT $aa9c original fe310162: Rbsr R162
+COMMENT $aaa2 original fe01f7000400: Rjmp slot 0 Error (1024)
+COMMENT $aaa8 original fe310162: Rbsr R162
+COMMENT $aaae original fe21018d: Rbra R18d
+COMMENT $afae original fe01f7000401: Rjmp slot 0 ErrorExt (1025)
+COMMENT $b1ac original fe01f7000401: Rjmp slot 0 ErrorExt (1025)
+END

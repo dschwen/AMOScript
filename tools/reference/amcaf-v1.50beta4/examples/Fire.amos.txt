@@ -1,0 +1,63 @@
+Hide 
+WX=128 : WY=128
+Screen Open 0,320,256,64,0
+Curs Off : Flash Off : Paper 0 : Pen 1 : Cls 
+ Pal Spread 0,0 To 15,$F00 : Pal Spread 15,$F00 To 28,$FF0 : Pal Spread 28,$FF0 To 31,$FFF
+'Bank Copy 8 To 9
+Reserve As Work 9,WX*WY+WX*4
+Reserve As Work 10,WX*WY+WX*4
+NWX=256 : NWY=200
+Reserve As Work 11,NWX*NWY
+MAD=WX*WY-1
+Wait Vbl 
+Limit Mouse 
+Timer=1
+Repeat 
+'  Wait Vbl  
+  ST1=Start(9)+WX : ST2=Start(10)+WX
+  XM= Vclip(X Screen(X Mouse),4 To WX-5) : YM= Vclip(Y Screen(Y Mouse),4 To WY-5)
+  Copy ST1,ST1+MAD+1 To ST2
+   C2P Fire ST2,WX,WY-1 To ST1,0
+  ST=ST1+XM+YM*WX
+  Poke ST,31
+  Poke ST-1,224 : Poke ST+1,224
+  Poke ST-WX,224 : Poke ST+WX,224
+  Poke ST-1-WX,192 : Poke ST+1-WX,192
+  Poke ST-1+WX,192 : Poke ST+1+WX,192
+'  For A=0 To 99 
+'    Poke ST1+(WY-(Rnd(2)+1))*WX+Rnd(WX-1),255 
+'    Poke ST1+WX*Rnd(WY-1)+Rnd(WX-1),255 
+'  Next  
+  ST=ST1+WX*(WY-1)
+  Fill ST To ST+WX,0
+   C2P Shift ST1,WX,WY To ST2,3
+   C2P Convert ST2,WX,WY-2 To 0,0,8
+  Inc FRAMES
+  Pen 15 : Home : Print(FRAMES*50.0)/Timer
+Until Mouse Key
+While Mouse Key : Wend 
+Repeat 
+  Wait Vbl 
+  ST1=Start(9)+WX : ST2=Start(10)+WX
+  XM= Vclip(X Screen(X Mouse),4 To WX-5) : YM= Vclip(Y Screen(Y Mouse),4 To WY-5)
+  Copy ST1,ST1+MAD+1 To ST2
+   C2P Fire ST2+WX,WX,WY-1 To ST1,1
+  ST=ST1+XM+YM*WX
+  Poke ST,255
+  Poke ST-1,224 : Poke ST+1,224
+  Poke ST-WX,224 : Poke ST+WX,224
+  Poke ST-1-WX,192 : Poke ST+1-WX,192
+  Poke ST-1+WX,192 : Poke ST+1+WX,192
+  For A=0 To 99
+    Poke ST1+(WY-(Rnd(2)+1))*WX+Rnd(WX-1),255
+  Next 
+  ST=ST1+WX*(WY-1)
+  Fill ST To ST+WX,0
+   C2P Shift ST1,WX,WY To ST2,3
+  NWX=X Screen(X Mouse)
+  NWY=Y Screen(Y Mouse)
+
+   C2P Convert ST2,WX,WY-3 To 0,0,0
+'  C2p Zoom Start(11),NWX,NWY,0,0 To Vclip(X Screen(X Mouse),1 To NWX),Vclip(Y Screen(Y Mouse),1 To NWY),0 
+'  C2p Convert Start(11),NWX,NWY-3 To 0,0,0
+Until Mouse Key

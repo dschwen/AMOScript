@@ -1,0 +1,8 @@
+'T Clip demo!
+For G=1 To 10
+   For T=1 To 50 Step 5
+      Print T;" clip at";G;"="; T Clip(T,G)
+   Next T
+   Print "press key"
+   Wait Key 
+Next G

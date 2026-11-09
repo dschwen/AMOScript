@@ -1,0 +1,268 @@
+{
+  "summary": {
+    "programs": 2,
+    "tokens": 347,
+    "routines": 399,
+    "coveredExtensionTokens": 12,
+    "extensionOccurrences": 20,
+    "relocationMarkers": 716,
+    "foreignSlots": [],
+    "evidence": "Structural checks and static decoding only; examples have not been run in AMOS."
+  },
+  "programs": [
+    {
+      "file": "AMCAF_Examples/Fire.AMOS",
+      "sha256": "12065e143039811a3f6e026cd58c5f39cfe3634d27ed20e00de568eb38cf8d90",
+      "bytes": 2972,
+      "physicalLines": 63,
+      "codeBytes": 2946,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 5,
+          "fileOffset": 144,
+          "slot": 8,
+          "reference": 4,
+          "offset": 5922,
+          "name": "pal spread"
+        },
+        {
+          "line": 5,
+          "fileOffset": 182,
+          "slot": 8,
+          "reference": 4,
+          "offset": 5922,
+          "name": "pal spread"
+        },
+        {
+          "line": 5,
+          "fileOffset": 220,
+          "slot": 8,
+          "reference": 4,
+          "offset": 5922,
+          "name": "pal spread"
+        },
+        {
+          "line": 18,
+          "fileOffset": 642,
+          "slot": 8,
+          "reference": 3,
+          "offset": 5682,
+          "name": "vclip"
+        },
+        {
+          "line": 18,
+          "fileOffset": 698,
+          "slot": 8,
+          "reference": 3,
+          "offset": 5682,
+          "name": "vclip"
+        },
+        {
+          "line": 20,
+          "fileOffset": 806,
+          "slot": 8,
+          "reference": 5,
+          "offset": 6030,
+          "name": "c2p fire"
+        },
+        {
+          "line": 33,
+          "fileOffset": 1466,
+          "slot": 8,
+          "reference": 5,
+          "offset": 6006,
+          "name": "c2p shift"
+        },
+        {
+          "line": 34,
+          "fileOffset": 1526,
+          "slot": 8,
+          "reference": 6,
+          "offset": 5978,
+          "name": "c2p convert"
+        },
+        {
+          "line": 42,
+          "fileOffset": 1784,
+          "slot": 8,
+          "reference": 3,
+          "offset": 5682,
+          "name": "vclip"
+        },
+        {
+          "line": 42,
+          "fileOffset": 1840,
+          "slot": 8,
+          "reference": 3,
+          "offset": 5682,
+          "name": "vclip"
+        },
+        {
+          "line": 44,
+          "fileOffset": 1948,
+          "slot": 8,
+          "reference": 5,
+          "offset": 6030,
+          "name": "c2p fire"
+        },
+        {
+          "line": 56,
+          "fileOffset": 2612,
+          "slot": 8,
+          "reference": 5,
+          "offset": 6006,
+          "name": "c2p shift"
+        },
+        {
+          "line": 60,
+          "fileOffset": 2724,
+          "slot": 8,
+          "reference": 6,
+          "offset": 5978,
+          "name": "c2p convert"
+        }
+      ],
+      "listing": "examples/Fire.amos.txt"
+    },
+    {
+      "file": "AMCAF_Examples/ScreenTrans.AMOS",
+      "sha256": "7d5cb7ab68a58fb77d822fb749bc8ddbe9e31f10e3f088e76a93c10f6fd3ee50",
+      "bytes": 3780,
+      "physicalLines": 54,
+      "codeBytes": 1720,
+      "trailingBytes": 2040,
+      "occurrences": [
+        {
+          "line": 6,
+          "fileOffset": 230,
+          "slot": 8,
+          "reference": 2,
+          "offset": 6214,
+          "name": "alloc code bank"
+        },
+        {
+          "line": 8,
+          "fileOffset": 282,
+          "slot": 8,
+          "reference": 2,
+          "offset": 3722,
+          "name": "imploder unpack"
+        },
+        {
+          "line": 22,
+          "fileOffset": 686,
+          "slot": 8,
+          "reference": 3,
+          "offset": 6164,
+          "name": "alloc trans map"
+        },
+        {
+          "line": 30,
+          "fileOffset": 874,
+          "slot": 8,
+          "reference": 1,
+          "offset": 6140,
+          "name": "set trans source"
+        },
+        {
+          "line": 33,
+          "fileOffset": 978,
+          "slot": 8,
+          "reference": 4,
+          "offset": 6238,
+          "name": "trans screen runtime"
+        },
+        {
+          "line": 44,
+          "fileOffset": 1288,
+          "slot": 8,
+          "reference": 2,
+          "offset": 4358,
+          "name": "qsin"
+        },
+        {
+          "line": 45,
+          "fileOffset": 1364,
+          "slot": 8,
+          "reference": 2,
+          "offset": 4372,
+          "name": "qcos"
+        }
+      ],
+      "listing": "examples/ScreenTrans.amos.txt"
+    }
+  ],
+  "assets": [
+    {
+      "file": "AMCAF_Examples/Fire.AMOS",
+      "bytes": 2972,
+      "sha256": "12065e143039811a3f6e026cd58c5f39cfe3634d27ed20e00de568eb38cf8d90"
+    },
+    {
+      "file": "AMCAF_Examples/ScreenTrans.AMOS",
+      "bytes": 3780,
+      "sha256": "7d5cb7ab68a58fb77d822fb749bc8ddbe9e31f10e3f088e76a93c10f6fd3ee50"
+    },
+    {
+      "file": "AMCAF_Install/AMCAF.Guide",
+      "bytes": 234834,
+      "sha256": "81f6b211c9bab0542da9a2d401421c7eb5abfd7162ac76792cadd65d208f35b1"
+    },
+    {
+      "file": "AMCAF_Install/AMOSGuide",
+      "bytes": 19272,
+      "sha256": "0b939b31be461a8c2fb90a981feb17f4db04b3677681681c4378ccb887aa0e58"
+    },
+    {
+      "file": "AMCAF_Install/AMOSPro_AMCAF.Lib",
+      "bytes": 45568,
+      "sha256": "9894a7e216ff501244bbcdc47d3830abdbcf4382d4f4a6daa43551faa87917e4"
+    },
+    {
+      "file": "AMCAF_Install/AMOSPro_AMCAFUpdate.Lib",
+      "bytes": 25430,
+      "sha256": "6448501495e7c40ad92cc41027ff17e8ce6092dd4fd8941d1da7f6ab6f84a7ec"
+    },
+    {
+      "file": "AMCAF_Install/InstallAMCAF",
+      "bytes": 84076,
+      "sha256": "11bf1bff5c16e4c166bc0ead9b5f3d9c966a96c33c067b82f23755e46853d46c"
+    },
+    {
+      "file": "AMCAF_Install/c/FImp",
+      "bytes": 8264,
+      "sha256": "6ac4ea85544508c53f130895ee4025986af59c813e7a5d5fa1fe2720d2df0482"
+    },
+    {
+      "file": "AMCAF_Install/c/FImp.man",
+      "bytes": 9884,
+      "sha256": "5de5818fb479a99cc819fee2867c3a639f1a19e68726db50c72e881af55d85ed"
+    },
+    {
+      "file": "AMCAF_Install/libs/amos.library",
+      "bytes": 47156,
+      "sha256": "6575093b277fe9c6bfe251910dfd94b6b3214ae445bef3376f5a9a8d4b5fe7cd"
+    },
+    {
+      "file": "AMCAF_Install/libs/explode.library",
+      "bytes": 1876,
+      "sha256": "2043d7412121c042fa4700c3c4755f4cd88fccd2bf2d40307cbac2966f4c5d98"
+    },
+    {
+      "file": "AMCAF_Install/libs/powerpacker.library",
+      "bytes": 6036,
+      "sha256": "0ce6b2a5584f34ba0fb1c615d2003360fc52272966abb04cdc4623c91e80371f"
+    },
+    {
+      "file": "AMCAF_Install/mod.no good",
+      "bytes": 243130,
+      "sha256": "bf3f951e43ef1b1fb78a6316f387aa542f4e3ae69f2d023d54ab9e932aa3fbb8"
+    },
+    {
+      "file": "ExecuteMeFirst!",
+      "bytes": 151,
+      "sha256": "3469817d4e2019ae97c0d012056abd87f92a7b96305db01f6cb02bb27bd96375"
+    }
+  ]
+}

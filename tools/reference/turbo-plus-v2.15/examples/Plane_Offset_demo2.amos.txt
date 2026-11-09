@@ -1,0 +1,32 @@
+'little demo to demonstrate a problem (NOT A BUG) in this version of 
+'the Plane Update command. 
+'
+'The planes on each of the screens are updated, but only the LAST update 
+'is copied into the copperlist.
+'Watch out for the next version !
+'
+Screen Open 0,320,100,32,Lowres
+Curs Off 
+Flash Off 
+Screen Open 1,320,100,32,Lowres
+Curs Off 
+Flash Off 
+Screen Display 1,,150,,
+SCR_DRAW[0]
+SCR_DRAW[1]
+For I=1 To 100
+    Plane Offset 0,1,2,1
+    Plane Offset 1,2,0,1
+   Wait Vbl 
+    Plane Update 0
+    Plane Update 1
+Next 
+ Plane Offset 0,-1,0,0
+ Plane Offset 1,-1,0,0
+Procedure SCR_DRAW[_SCREEN]
+   Screen _SCREEN
+   Print "This is Screen :";_SCREEN
+   For I=1 To 50 Step 5
+       F Circle 160,50,I,Rnd(15)
+   Next 
+End Proc

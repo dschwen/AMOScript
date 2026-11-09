@@ -1,0 +1,127 @@
+'non-turbo demo- just for fun and our future projects! 
+
+
+Screen Open 0,320,200,16,Lowres
+Colour 0,0
+Colour 1,0
+Colour 2,$F00
+Hide 
+Curs Off 
+For I=1 To 12
+   Print "!!!  ABSOLUTELY NO BLITTER IS USED  !!!"
+   Print "!!!   ALL WORK DONE BY THE COPPER   !!!"
+Next 
+Hide 
+Wait Vbl : View : Wait Vbl : View 
+L=0
+COP_ADRES=Cop Logic
+Repeat 
+   C=Leek(COP_ADRES+L)
+   Add L,4
+Until C=$FFFFFFFE
+Reserve As Work 10,L+4
+L=0
+COP_COPY=Start(10)
+Repeat 
+   C=Leek(COP_ADRES+L)
+   Loke COP_COPY+L,C
+   Add L,4
+Until C=$FFFFFFFE
+Copper Off : Wait Vbl 
+NEW_COPLIST=Cop Logic
+OLD_COPLIST=Start(10)
+CHANGED=False
+Restore NEW_COPPER_INSTRUCTIONS
+Read LINE_TO_WAIT
+Repeat 
+   If CHANGED=False
+      _WAIT=Deek(OLD_COPLIST)
+      If _WAIT and 1
+         If _WAIT/256>LINE_TO_WAIT
+            CHANGE_ADRES=NEW_COPLIST
+            Cop Wait 7,LINE_TO_WAIT
+            Cop Move $184,$F
+            Add NEW_COPLIST,8
+            Read COUNT
+            For I=1 To COUNT
+               Read LINE,SHIFT
+               Cop Wait 7,LINE
+               Cop Move $102,SHIFT
+               Add NEW_COPLIST,8
+            Next 
+            Cop Wait 7,LINE+1
+            Cop Move $102,0
+            Add NEW_COPLIST,8
+            CHANGED=True
+         End If 
+      End If 
+   End If 
+   If _WAIT=$182
+      Cop Move $182,$0
+   Else 
+      Cop Move 0,0
+      Loke NEW_COPLIST,Leek(OLD_COPLIST)
+   End If 
+   Add NEW_COPLIST,4
+   Add OLD_COPLIST,4
+Until Leek(OLD_COPLIST)=$FFFFFFFE
+Cop Swap 
+Add CHANGE_ADRES,4
+ Multi No 
+Repeat 
+   Wait Vbl 
+   FIRST_SHIFT=Leek(CHANGE_ADRES)
+   For I=CHANGE_ADRES To CHANGE_ADRES+COUNT*8 Step 8
+      Loke I,Leek(I+8)
+   Next 
+   Loke I,FIRST_SHIFT
+Until Left Click 
+ Multi Yes 
+NEW_COPPER_INSTRUCTIONS:
+Data 100,46
+Data 100,$11
+Data 104,$22
+Data 108,$33
+Data 112,$44
+Data 116,$55
+Data 120,$66
+Data 124,$77
+Data 128,$66
+Data 132,$55
+Data 136,$44
+Data 140,$33
+Data 144,$22
+Data 148,$11
+Data 149,$11
+Data 150,$22
+Data 151,$33
+Data 152,$44
+Data 153,$55
+Data 154,$66
+Data 155,$77
+Data 156,$66
+Data 157,$55
+Data 158,$44
+Data 159,$33
+Data 160,$22
+Data 161,$11
+Data 162,$22
+Data 166,$33
+Data 170,$44
+Data 174,$55
+Data 178,$66
+Data 182,$77
+Data 186,$88
+Data 190,$99
+Data 194,$AA
+Data 198,$BB
+Data 202,$CC
+Data 206,$DD
+Data 210,$EE
+Data 214,$CC
+Data 218,$AA
+Data 222,$88
+Data 226,$66
+Data 230,$44
+Data 234,$22
+Data 238,$11

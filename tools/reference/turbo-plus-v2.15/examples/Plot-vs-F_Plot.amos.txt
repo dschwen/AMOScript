@@ -1,0 +1,12 @@
+Curs Off : Locate 0,10 : Print "AMOS PLOT!"
+For Y=0 To 49
+   For X=0 To 319
+       Plot X,Y,0
+   Next X
+Next Y
+Home : Print "TURBO F PLOT!"
+For Y=50 To 100
+   For X=0 To 319
+       F Plot X,Y,0
+   Next X
+Next Y

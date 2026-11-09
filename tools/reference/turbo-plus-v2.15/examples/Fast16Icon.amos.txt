@@ -1,0 +1,67 @@
+'Small demo to show the power of the new Icon routines.
+Screen Open 0,640,200,8,Hires : Curs Off 
+ Blit Clear -1
+Ink 1
+Curs Off 
+For I=1 To 7
+   Circle I+1,I+1,I
+   Get Icon I,0,0 To 16,16
+Next 
+ Blit Clear -1
+_ADDER=1
+ Multi No 
+'
+'First we use the normal AMOS routines...
+ Blit Clear -1
+Print "Using normal AMOS Paste Icon to fill the screen with icons"
+Print "Left click to do 96 iterations"
+Repeat : Until Left Click 
+ Blit Clear -1
+'
+For I=1 To 96
+   Add ICON,_ADDER
+   If ICON=7
+      _ADDER=-_ADDER
+      ICON=6
+   Else 
+      If ICON=0
+         _ADDER=-_ADDER
+         ICON=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+          Paste Icon X,Y,ICON
+      Next 
+   Next 
+Next 
+_ADDER=1
+'
+ Blit Clear -1
+Print "Using TURBO F Paste Icon to fill the screen with icons"
+Print "Left click to do 96 iterations"
+Repeat : Until Left Click 
+ Blit Clear -1
+'
+'And now with the new Icon command for displaying 16*16 pixeled Icons... 
+'
+For I=1 To 96
+   Add ICON,_ADDER
+   If ICON=7
+      _ADDER=-_ADDER
+      ICON=6
+   Else 
+      If ICON=0
+         _ADDER=-_ADDER
+         ICON=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+          F 16 Icon X,Y,ICON
+      Next 
+   Next 
+Next 
+ Multi Yes 
+Repeat 
+Until Left Click 

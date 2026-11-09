@@ -1,0 +1,82 @@
+'Small demo to show the power of the new Block routines.   
+'they are not as fast as the static block commands, but a few % faster 
+'than normal amos block commands!
+Screen Open 0,640,200,8,Hires
+Curs Off 
+For I=1 To 15
+    F Circle I+1,I+1,I,2
+   Get Block I,0,0,32,32
+Next 
+_ADDER=1
+ Multi No 
+'
+'First we use the normal AMOS routines...
+'
+For I=1 To 96
+   Add BLOCK,_ADDER
+   If BLOCK=16
+      _ADDER=-_ADDER
+      BLOCK=15
+   Else 
+      If BLOCK=0
+         _ADDER=-_ADDER
+         BLOCK=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+         Put Block BLOCK,X,Y
+      Next 
+   Next 
+Next 
+_ADDER=1
+Repeat 
+Until Left Click 
+'
+'And now with the new Fast block commands  
+'
+For I=1 To 96
+   Add BLOCK,_ADDER
+   If BLOCK=16
+      _ADDER=-_ADDER
+      BLOCK=15
+   Else 
+      If BLOCK=0
+         _ADDER=-_ADDER
+         BLOCK=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+          F Put Block BLOCK,X,Y
+      Next 
+   Next 
+Next 
+'for even more speed!- not very noticable in this demo.
+'more speed is gained with  - more blocks in the list - more bitplanes 
+'build the static block list 
+ Reserve Static Block 15
+ Build Static Block 
+Repeat : Until Left Click 
+For I=1 To 96
+   Add BLOCK,_ADDER
+   If BLOCK=16
+      _ADDER=-_ADDER
+      BLOCK=15
+   Else 
+      If BLOCK=0
+         _ADDER=-_ADDER
+         BLOCK=1
+      End If 
+   End If 
+   For Y=0 To 191 Step 32
+      For X=0 To 608 Step 32
+          F Put Static Block BLOCK,X,Y
+      Next 
+   Next 
+Next 
+
+ Multi Yes 
+ Static Block Erase : Rem don't forget this! 
+Repeat 
+Until Left Click 

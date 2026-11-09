@@ -1,0 +1,34 @@
+ Multi No 
+Sprite 2,X Hard(29),Y Hard(182),2
+ Reserve Check 650
+Reserve Zone 650
+X=0
+Y=0
+_ZONE=1
+' Install some zones...
+For I=1 To 65
+   For J=1 To 10
+       Set Check _ZONE,X,Y To X+14,Y+4
+      Set Zone _ZONE,X,Y To X+14,Y+4
+      Add X,15
+      Inc _ZONE
+   Next 
+   X=0
+   Add Y,3
+Next 
+'Check zone's speed increase comes from the fact that you can  
+'restrict the check to certain zones.
+T=Timer
+For I=1 To 1000
+   _ZONE= Hit Spr Check(400 To 650,0,0,2)
+   '  Checks from zone 400 to 650 
+Next 
+Print "Check Time in VBL ";Timer-T
+T=Timer
+For I=1 To 1000
+   _ZONE=Hzone(X Sprite(2),Y Sprite(2))
+   '  Checks from zone 1 to 650 
+Next 
+Print "Zone Time in VBL ";Timer-T
+ Check Erase 
+ Multi Yes 

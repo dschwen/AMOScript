@@ -1,0 +1,7 @@
+{
+  "reference": "AMOSPro_AMCAF.Lib-V1.50beta4",
+  "referenceSha256": "2f8f70d8a3c74ab4e1dc2a6bdf9842e828146ea3f00909bce5e08e0bc1ffbb6d",
+  "matchedRecords": 347,
+  "compared": "Every name/signature/terminator/padding byte after the routine-pointer fields, at exact original token offsets.",
+  "evidence": "Independent preexisting amostools token image agrees with original library. This validates metadata, not command execution."
+}

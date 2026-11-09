@@ -18,3 +18,13 @@ and locations before attempting the actual compiler. Unknown encodings and
 truncated payloads reject; the scanner does not guess a resynchronization point.
 It is an inventory tool for this format subset, not an alternate parser or proof
 that a named command has implemented semantics.
+
+## Third-party extension reverse engineering
+
+[Turbo Plus V2.15](../../docs/turbo-plus.md) and
+[AMCAF V1.50beta4](../../docs/amcaf.md) have full diagnostic command catalogs,
+relocation-aware IRA/binutils listings, restored original example listings and
+implementation notes. `turbo_plus.py` and `amcaf.py` reproduce the artifacts from
+the supplied distributions; `--check` verifies reproducibility. Original binary
+hashes are pinned, and optional independent amostools token images validate the
+recovered offsets/names/signatures. These catalogs do not enable runtime support.

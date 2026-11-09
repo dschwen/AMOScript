@@ -1,0 +1,3271 @@
+{
+  "summary": {
+    "programs": 33,
+    "tokens": 153,
+    "routines": 340,
+    "coveredExtensionTokens": 69,
+    "extensionOccurrences": 328,
+    "relocationMarkers": 497,
+    "foreignSlots": [
+      2,
+      5
+    ],
+    "evidence": "Structural checks and static decoding only; examples have not been run in AMOS."
+  },
+  "programs": [
+    {
+      "file": "Examples/3D-Drawing.AMOS",
+      "sha256": "260d4f1c25c0fb5db0cc9faf00ad58a1b1dc78e071b736dd16d54a92f87cd4c6",
+      "bytes": 1640,
+      "physicalLines": 39,
+      "codeBytes": 1614,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 7,
+          "fileOffset": 198,
+          "slot": 12,
+          "reference": 2,
+          "offset": 702,
+          "name": "eye 3d"
+        },
+        {
+          "line": 25,
+          "fileOffset": 834,
+          "slot": 12,
+          "reference": 6,
+          "offset": 678,
+          "name": "line 3d"
+        }
+      ],
+      "listing": "examples/3D-Drawing.amos.txt"
+    },
+    {
+      "file": "Examples/BlitClear.AMOS",
+      "sha256": "d86650f0b93074ebd34f614262b1f38f1efa8e7099215546b9fed0683c130505",
+      "bytes": 774,
+      "physicalLines": 25,
+      "codeBytes": 748,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 8,
+          "fileOffset": 410,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 16,
+          "fileOffset": 574,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 19,
+          "fileOffset": 632,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 23,
+          "fileOffset": 740,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 25,
+          "fileOffset": 760,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/BlitClear.amos.txt"
+    },
+    {
+      "file": "Examples/BlitLeft_Wobble.AMOS",
+      "sha256": "4e4ab0d2af97101faa7fcceb64fe383fb02517021bb8431994ad34ed8e3008a6",
+      "bytes": 1430,
+      "physicalLines": 43,
+      "codeBytes": 1404,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 27,
+          "fileOffset": 940,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 34,
+          "fileOffset": 1116,
+          "slot": 12,
+          "reference": 0,
+          "offset": 852,
+          "name": "blit left"
+        }
+      ],
+      "listing": "examples/BlitLeft_Wobble.amos.txt"
+    },
+    {
+      "file": "Examples/Copper-demo.AMOS",
+      "sha256": "270fcc58ad51eccb3890e063bcc7daef82a5cd20ee9f4e56a7b73398b3ba140e",
+      "bytes": 3060,
+      "physicalLines": 127,
+      "codeBytes": 3034,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 70,
+          "fileOffset": 1730,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 78,
+          "fileOffset": 1968,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 79,
+          "fileOffset": 1978,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/Copper-demo.amos.txt"
+    },
+    {
+      "file": "Examples/DoubleBufferScroll.AMOS",
+      "sha256": "7b692addfb4a86a7b4a9bfc0a178ab560d66df8a1b8acbe80c6261cc67ce59b0",
+      "bytes": 920,
+      "physicalLines": 30,
+      "codeBytes": 894,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 3,
+          "fileOffset": 90,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 11,
+          "fileOffset": 294,
+          "slot": 12,
+          "reference": 0,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 15,
+          "fileOffset": 464,
+          "slot": 12,
+          "reference": 0,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 23,
+          "fileOffset": 726,
+          "slot": 12,
+          "reference": 0,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 25,
+          "fileOffset": 808,
+          "slot": 12,
+          "reference": 0,
+          "offset": 794,
+          "name": "multi blit"
+        },
+        {
+          "line": 26,
+          "fileOffset": 834,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 27,
+          "fileOffset": 844,
+          "slot": 12,
+          "reference": 0,
+          "offset": 814,
+          "name": "blit erase"
+        },
+        {
+          "line": 28,
+          "fileOffset": 860,
+          "slot": 12,
+          "reference": 0,
+          "offset": 814,
+          "name": "blit erase"
+        },
+        {
+          "line": 30,
+          "fileOffset": 906,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/DoubleBufferScroll.amos.txt"
+    },
+    {
+      "file": "Examples/F_Plot_Starfield.AMOS",
+      "sha256": "c9c72205afff0c23e16885015878ac075e22571afbea0e144725e734459cf2f4",
+      "bytes": 1144,
+      "physicalLines": 46,
+      "codeBytes": 1118,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 11,
+          "fileOffset": 316,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 13,
+          "fileOffset": 340,
+          "slot": 5,
+          "reference": 0,
+          "offset": 58,
+          "name": null
+        },
+        {
+          "line": 21,
+          "fileOffset": 620,
+          "slot": 12,
+          "reference": 0,
+          "offset": 878,
+          "name": "f plot"
+        },
+        {
+          "line": 24,
+          "fileOffset": 698,
+          "slot": 5,
+          "reference": 0,
+          "offset": 78,
+          "name": null
+        },
+        {
+          "line": 25,
+          "fileOffset": 708,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 27,
+          "fileOffset": 726,
+          "slot": 5,
+          "reference": 0,
+          "offset": 78,
+          "name": null
+        },
+        {
+          "line": 30,
+          "fileOffset": 780,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 31,
+          "fileOffset": 790,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 35,
+          "fileOffset": 874,
+          "slot": 12,
+          "reference": 0,
+          "offset": 878,
+          "name": "f plot"
+        },
+        {
+          "line": 45,
+          "fileOffset": 1116,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        }
+      ],
+      "listing": "examples/F_Plot_Starfield.amos.txt"
+    },
+    {
+      "file": "Examples/Fast16Icon.AMOS",
+      "sha256": "21fcbbf131c24fd7eccb48af514c0918311b764c96baf7904f8b1b4d225407ca",
+      "bytes": 1652,
+      "physicalLines": 67,
+      "codeBytes": 1626,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 3,
+          "fileOffset": 128,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 10,
+          "fileOffset": 298,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 12,
+          "fileOffset": 340,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 15,
+          "fileOffset": 406,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 18,
+          "fileOffset": 540,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 19,
+          "fileOffset": 550,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 40,
+          "fileOffset": 984,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 43,
+          "fileOffset": 1114,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 44,
+          "fileOffset": 1124,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 61,
+          "fileOffset": 1560,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1462,
+          "name": "f 16 icon"
+        },
+        {
+          "line": 65,
+          "fileOffset": 1618,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 67,
+          "fileOffset": 1638,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/Fast16Icon.amos.txt"
+    },
+    {
+      "file": "Examples/Fast32Icon.AMOS",
+      "sha256": "39b35d06279cac2c7e840cb32745e4d00cdfc6904fca1d838e10b3d91af2e1ab",
+      "bytes": 1626,
+      "physicalLines": 64,
+      "codeBytes": 1600,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 4,
+          "fileOffset": 134,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 6,
+          "fileOffset": 184,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1116,
+          "name": "f circle"
+        },
+        {
+          "line": 10,
+          "fileOffset": 322,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 13,
+          "fileOffset": 388,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 16,
+          "fileOffset": 522,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 17,
+          "fileOffset": 532,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 39,
+          "fileOffset": 1046,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 42,
+          "fileOffset": 1176,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 43,
+          "fileOffset": 1186,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 58,
+          "fileOffset": 1534,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1442,
+          "name": "f 32 icon"
+        },
+        {
+          "line": 62,
+          "fileOffset": 1592,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 64,
+          "fileOffset": 1612,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/Fast32Icon.amos.txt"
+    },
+    {
+      "file": "Examples/FastBlocks.AMOS",
+      "sha256": "89d95d29a802a9e00708f4479d7a20f7620f319ae4a7696459dfeb76e7a6beb4",
+      "bytes": 2072,
+      "physicalLines": 82,
+      "codeBytes": 2046,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 7,
+          "fileOffset": 284,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1116,
+          "name": "f circle"
+        },
+        {
+          "line": 11,
+          "fileOffset": 422,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 34,
+          "fileOffset": 918,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 51,
+          "fileOffset": 1326,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1606,
+          "name": "f put block"
+        },
+        {
+          "line": 58,
+          "fileOffset": 1562,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1628,
+          "name": "reserve static block"
+        },
+        {
+          "line": 59,
+          "fileOffset": 1578,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1680,
+          "name": "build static block"
+        },
+        {
+          "line": 60,
+          "fileOffset": 1596,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 74,
+          "fileOffset": 1938,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1704,
+          "name": "f put static block"
+        },
+        {
+          "line": 79,
+          "fileOffset": 2002,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 80,
+          "fileOffset": 2012,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1656,
+          "name": "static block erase"
+        },
+        {
+          "line": 82,
+          "fileOffset": 2058,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/FastBlocks.amos.txt"
+    },
+    {
+      "file": "Examples/FastCircle.AMOS",
+      "sha256": "43ec1fc7d92333d795f91231f882c6fc39c546c1c9de80b3418f270b8cf795c8",
+      "bytes": 914,
+      "physicalLines": 31,
+      "codeBytes": 888,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 16,
+          "fileOffset": 422,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 30,
+          "fileOffset": 854,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1116,
+          "name": "f circle"
+        }
+      ],
+      "listing": "examples/FastCircle.amos.txt"
+    },
+    {
+      "file": "Examples/FastPlot.AMOS",
+      "sha256": "b93f390d373ab2c56c1c099379f236bd87ce52e6af1a6b3c30d812efbad2f428",
+      "bytes": 1054,
+      "physicalLines": 37,
+      "codeBytes": 1028,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 5,
+          "fileOffset": 108,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 15,
+          "fileOffset": 428,
+          "slot": 12,
+          "reference": 0,
+          "offset": 878,
+          "name": "f plot"
+        },
+        {
+          "line": 23,
+          "fileOffset": 622,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 35,
+          "fileOffset": 1020,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 37,
+          "fileOffset": 1040,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/FastPlot.amos.txt"
+    },
+    {
+      "file": "Examples/FastScroll.AMOS",
+      "sha256": "b267fcfe13b7cbd9ed3ac87ae2546ebf12260a4dad40e4be207778961ac18b61",
+      "bytes": 2056,
+      "physicalLines": 65,
+      "codeBytes": 2030,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 3,
+          "fileOffset": 120,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 7,
+          "fileOffset": 236,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 21,
+          "fileOffset": 676,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 28,
+          "fileOffset": 902,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 30,
+          "fileOffset": 916,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 41,
+          "fileOffset": 1248,
+          "slot": 12,
+          "reference": 7,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 47,
+          "fileOffset": 1518,
+          "slot": 12,
+          "reference": 2,
+          "offset": 832,
+          "name": "blit speed"
+        },
+        {
+          "line": 52,
+          "fileOffset": 1688,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 53,
+          "fileOffset": 1704,
+          "slot": 12,
+          "reference": 2,
+          "offset": 794,
+          "name": "multi blit"
+        },
+        {
+          "line": 57,
+          "fileOffset": 1852,
+          "slot": 12,
+          "reference": 1,
+          "offset": 814,
+          "name": "blit erase"
+        },
+        {
+          "line": 59,
+          "fileOffset": 1876,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 61,
+          "fileOffset": 1954,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 65,
+          "fileOffset": 2042,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/FastScroll.amos.txt"
+    },
+    {
+      "file": "Examples/HitBobZone.AMOS",
+      "sha256": "e8417364bc15ee37dc183cd0d89003cba98ba17cfb5b00ce7b50126dd8e0fe14",
+      "bytes": 1108,
+      "physicalLines": 33,
+      "codeBytes": 1082,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 2,
+          "fileOffset": 62,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 16,
+          "fileOffset": 530,
+          "slot": 12,
+          "reference": 0,
+          "offset": 304,
+          "name": "hit bob zone"
+        },
+        {
+          "line": 26,
+          "fileOffset": 924,
+          "slot": 12,
+          "reference": 0,
+          "offset": 304,
+          "name": "hit bob zone"
+        },
+        {
+          "line": 31,
+          "fileOffset": 1064,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/HitBobZone.amos.txt"
+    },
+    {
+      "file": "Examples/HitSprCheck.AMOS",
+      "sha256": "0574a3e3ace655670ad6ec326db6b98139d48d70d3279736d5481d9425eb8266",
+      "bytes": 1032,
+      "physicalLines": 34,
+      "codeBytes": 1006,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 1,
+          "fileOffset": 22,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 3,
+          "fileOffset": 80,
+          "slot": 12,
+          "reference": 0,
+          "offset": 182,
+          "name": "reserve check"
+        },
+        {
+          "line": 11,
+          "fileOffset": 266,
+          "slot": 12,
+          "reference": 0,
+          "offset": 238,
+          "name": "set check"
+        },
+        {
+          "line": 23,
+          "fileOffset": 688,
+          "slot": 12,
+          "reference": 0,
+          "offset": 328,
+          "name": "hit spr check"
+        },
+        {
+          "line": 33,
+          "fileOffset": 1008,
+          "slot": 12,
+          "reference": 0,
+          "offset": 202,
+          "name": "check erase"
+        },
+        {
+          "line": 34,
+          "fileOffset": 1018,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/HitSprCheck.amos.txt"
+    },
+    {
+      "file": "Examples/HitSprZone.AMOS",
+      "sha256": "4d6ba273d1a8eaeb00ea2774a717bebb6dfb715f78aaea19cdf49f73192fda1f",
+      "bytes": 1120,
+      "physicalLines": 33,
+      "codeBytes": 1094,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 2,
+          "fileOffset": 62,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 16,
+          "fileOffset": 536,
+          "slot": 12,
+          "reference": 0,
+          "offset": 280,
+          "name": "hit spr zone"
+        },
+        {
+          "line": 26,
+          "fileOffset": 936,
+          "slot": 12,
+          "reference": 0,
+          "offset": 280,
+          "name": "hit spr zone"
+        },
+        {
+          "line": 31,
+          "fileOffset": 1076,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/HitSprZone.amos.txt"
+    },
+    {
+      "file": "Examples/LightSpeed.AMOS",
+      "sha256": "b02da4d3605c9abbd28598c91adec6b88cd3694c8c5448ff40137a5adbb996aa",
+      "bytes": 29806,
+      "physicalLines": 126,
+      "codeBytes": 5172,
+      "trailingBytes": 24614,
+      "occurrences": [
+        {
+          "line": 6,
+          "fileOffset": 330,
+          "slot": 2,
+          "reference": 255,
+          "offset": 86,
+          "name": null
+        },
+        {
+          "line": 51,
+          "fileOffset": 1792,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 52,
+          "fileOffset": 1838,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 53,
+          "fileOffset": 1884,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 54,
+          "fileOffset": 1930,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 55,
+          "fileOffset": 1976,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 58,
+          "fileOffset": 2086,
+          "slot": 12,
+          "reference": 1,
+          "offset": 814,
+          "name": "blit erase"
+        },
+        {
+          "line": 59,
+          "fileOffset": 2116,
+          "slot": 12,
+          "reference": 7,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 60,
+          "fileOffset": 2206,
+          "slot": 12,
+          "reference": 7,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 61,
+          "fileOffset": 2296,
+          "slot": 12,
+          "reference": 7,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 62,
+          "fileOffset": 2386,
+          "slot": 12,
+          "reference": 7,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 63,
+          "fileOffset": 2476,
+          "slot": 12,
+          "reference": 7,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 81,
+          "fileOffset": 3216,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 82,
+          "fileOffset": 3226,
+          "slot": 12,
+          "reference": 2,
+          "offset": 1190,
+          "name": "blit int on"
+        },
+        {
+          "line": 83,
+          "fileOffset": 3250,
+          "slot": 12,
+          "reference": 1,
+          "offset": 2548,
+          "name": "blit int wait"
+        },
+        {
+          "line": 86,
+          "fileOffset": 3334,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 87,
+          "fileOffset": 3452,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 88,
+          "fileOffset": 3570,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 89,
+          "fileOffset": 3688,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 90,
+          "fileOffset": 3806,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1418,
+          "name": "f paste icon"
+        },
+        {
+          "line": 102,
+          "fileOffset": 4522,
+          "slot": 12,
+          "reference": 1,
+          "offset": 356,
+          "name": "raw key"
+        },
+        {
+          "line": 104,
+          "fileOffset": 4642,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 105,
+          "fileOffset": 4652,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1210,
+          "name": "blit int off"
+        },
+        {
+          "line": 106,
+          "fileOffset": 4662,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 111,
+          "fileOffset": 4722,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/LightSpeed.amos.txt"
+    },
+    {
+      "file": "Examples/New_2Define.AMOS",
+      "sha256": "0707f40507f0ded2aea3712a2295fcbc879ccdac89d592e2f05eba066546e805",
+      "bytes": 548,
+      "physicalLines": 18,
+      "codeBytes": 522,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 3,
+          "fileOffset": 106,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1258,
+          "name": "object limit"
+        },
+        {
+          "line": 4,
+          "fileOffset": 122,
+          "slot": 12,
+          "reference": 0,
+          "offset": 446,
+          "name": "reserve object"
+        },
+        {
+          "line": 5,
+          "fileOffset": 146,
+          "slot": 12,
+          "reference": 0,
+          "offset": 538,
+          "name": "define attr"
+        },
+        {
+          "line": 6,
+          "fileOffset": 186,
+          "slot": 12,
+          "reference": 0,
+          "offset": 494,
+          "name": "define move"
+        },
+        {
+          "line": 7,
+          "fileOffset": 226,
+          "slot": 12,
+          "reference": 0,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 8,
+          "fileOffset": 266,
+          "slot": 12,
+          "reference": 0,
+          "offset": 538,
+          "name": "define attr"
+        },
+        {
+          "line": 9,
+          "fileOffset": 306,
+          "slot": 12,
+          "reference": 0,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 10,
+          "fileOffset": 346,
+          "slot": 12,
+          "reference": 0,
+          "offset": 518,
+          "name": "define stop"
+        },
+        {
+          "line": 11,
+          "fileOffset": 370,
+          "slot": 12,
+          "reference": 0,
+          "offset": 562,
+          "name": "object draw"
+        },
+        {
+          "line": 12,
+          "fileOffset": 386,
+          "slot": 12,
+          "reference": 0,
+          "offset": 538,
+          "name": "define attr"
+        },
+        {
+          "line": 13,
+          "fileOffset": 426,
+          "slot": 12,
+          "reference": 0,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 14,
+          "fileOffset": 466,
+          "slot": 12,
+          "reference": 0,
+          "offset": 518,
+          "name": "define stop"
+        },
+        {
+          "line": 15,
+          "fileOffset": 490,
+          "slot": 12,
+          "reference": 0,
+          "offset": 562,
+          "name": "object draw"
+        },
+        {
+          "line": 16,
+          "fileOffset": 506,
+          "slot": 12,
+          "reference": 0,
+          "offset": 658,
+          "name": "object erase"
+        },
+        {
+          "line": 17,
+          "fileOffset": 522,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1258,
+          "name": "object limit"
+        }
+      ],
+      "listing": "examples/New_2Define.amos.txt"
+    },
+    {
+      "file": "Examples/Newgraphicinstructions.AMOS",
+      "sha256": "8daab71d843485f15a5fb3bbdaf0f66b87e9ab56a2f56f9dba89bf012577329e",
+      "bytes": 3412,
+      "physicalLines": 109,
+      "codeBytes": 3386,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 40,
+          "fileOffset": 1568,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 42,
+          "fileOffset": 1612,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 49,
+          "fileOffset": 1828,
+          "slot": 12,
+          "reference": 0,
+          "offset": 402,
+          "name": "r box"
+        },
+        {
+          "line": 50,
+          "fileOffset": 1852,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 51,
+          "fileOffset": 1876,
+          "slot": 12,
+          "reference": 0,
+          "offset": 402,
+          "name": "r box"
+        },
+        {
+          "line": 58,
+          "fileOffset": 2096,
+          "slot": 12,
+          "reference": 0,
+          "offset": 432,
+          "name": "r bar"
+        },
+        {
+          "line": 59,
+          "fileOffset": 2120,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 60,
+          "fileOffset": 2144,
+          "slot": 12,
+          "reference": 0,
+          "offset": 432,
+          "name": "r bar"
+        },
+        {
+          "line": 66,
+          "fileOffset": 2346,
+          "slot": 12,
+          "reference": 0,
+          "offset": 416,
+          "name": "r home"
+        },
+        {
+          "line": 68,
+          "fileOffset": 2402,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 69,
+          "fileOffset": 2426,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 70,
+          "fileOffset": 2450,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 71,
+          "fileOffset": 2476,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 73,
+          "fileOffset": 2506,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 75,
+          "fileOffset": 2564,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 76,
+          "fileOffset": 2590,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 77,
+          "fileOffset": 2614,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 78,
+          "fileOffset": 2638,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 84,
+          "fileOffset": 2792,
+          "slot": 12,
+          "reference": 0,
+          "offset": 416,
+          "name": "r home"
+        },
+        {
+          "line": 86,
+          "fileOffset": 2858,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 87,
+          "fileOffset": 2882,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 88,
+          "fileOffset": 2906,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 89,
+          "fileOffset": 2932,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 91,
+          "fileOffset": 2962,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 93,
+          "fileOffset": 3020,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 94,
+          "fileOffset": 3046,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 95,
+          "fileOffset": 3070,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 96,
+          "fileOffset": 3094,
+          "slot": 12,
+          "reference": 0,
+          "offset": 370,
+          "name": "r move"
+        },
+        {
+          "line": 103,
+          "fileOffset": 3224,
+          "slot": 12,
+          "reference": 0,
+          "offset": 416,
+          "name": "r home"
+        },
+        {
+          "line": 104,
+          "fileOffset": 3292,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 105,
+          "fileOffset": 3316,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 106,
+          "fileOffset": 3340,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        },
+        {
+          "line": 107,
+          "fileOffset": 3368,
+          "slot": 12,
+          "reference": 0,
+          "offset": 386,
+          "name": "r draw"
+        }
+      ],
+      "listing": "examples/Newgraphicinstructions.amos.txt"
+    },
+    {
+      "file": "Examples/ObjectDemo2.AMOS",
+      "sha256": "5c0a57483eb93c402d1a2532056af934dcefa89a3d14fb9397da1dd95e549aaf",
+      "bytes": 3658,
+      "physicalLines": 149,
+      "codeBytes": 3632,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 16,
+          "fileOffset": 330,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1258,
+          "name": "object limit"
+        },
+        {
+          "line": 26,
+          "fileOffset": 602,
+          "slot": 12,
+          "reference": 2,
+          "offset": 446,
+          "name": "reserve object"
+        },
+        {
+          "line": 30,
+          "fileOffset": 740,
+          "slot": 12,
+          "reference": 4,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 32,
+          "fileOffset": 818,
+          "slot": 12,
+          "reference": 4,
+          "offset": 494,
+          "name": "define move"
+        },
+        {
+          "line": 44,
+          "fileOffset": 1046,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 50,
+          "fileOffset": 1228,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 55,
+          "fileOffset": 1350,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 61,
+          "fileOffset": 1470,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 67,
+          "fileOffset": 1594,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 73,
+          "fileOffset": 1714,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 78,
+          "fileOffset": 1836,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 84,
+          "fileOffset": 1956,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 89,
+          "fileOffset": 2038,
+          "slot": 12,
+          "reference": 1,
+          "offset": 658,
+          "name": "object erase"
+        },
+        {
+          "line": 91,
+          "fileOffset": 2062,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1258,
+          "name": "object limit"
+        }
+      ],
+      "listing": "examples/ObjectDemo2.amos.txt"
+    },
+    {
+      "file": "Examples/ObjectDemoTest1.AMOS",
+      "sha256": "37dd7e39125652a6f8aeef01b1ce5f6a9633c4f4933222b141a37237d54354a2",
+      "bytes": 1296,
+      "physicalLines": 40,
+      "codeBytes": 1270,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 3,
+          "fileOffset": 88,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1258,
+          "name": "object limit"
+        },
+        {
+          "line": 5,
+          "fileOffset": 138,
+          "slot": 12,
+          "reference": 2,
+          "offset": 446,
+          "name": "reserve object"
+        },
+        {
+          "line": 6,
+          "fileOffset": 166,
+          "slot": 12,
+          "reference": 4,
+          "offset": 494,
+          "name": "define move"
+        },
+        {
+          "line": 7,
+          "fileOffset": 210,
+          "slot": 12,
+          "reference": 4,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 8,
+          "fileOffset": 254,
+          "slot": 12,
+          "reference": 4,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 9,
+          "fileOffset": 298,
+          "slot": 12,
+          "reference": 4,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 10,
+          "fileOffset": 342,
+          "slot": 12,
+          "reference": 4,
+          "offset": 470,
+          "name": "define draw"
+        },
+        {
+          "line": 14,
+          "fileOffset": 458,
+          "slot": 12,
+          "reference": 3,
+          "offset": 580,
+          "name": "r object draw"
+        },
+        {
+          "line": 15,
+          "fileOffset": 494,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 16,
+          "fileOffset": 538,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 20,
+          "fileOffset": 668,
+          "slot": 12,
+          "reference": 3,
+          "offset": 718,
+          "name": "object save"
+        },
+        {
+          "line": 24,
+          "fileOffset": 816,
+          "slot": 12,
+          "reference": 1,
+          "offset": 658,
+          "name": "object erase"
+        },
+        {
+          "line": 33,
+          "fileOffset": 1108,
+          "slot": 12,
+          "reference": 2,
+          "offset": 740,
+          "name": "object load"
+        },
+        {
+          "line": 34,
+          "fileOffset": 1146,
+          "slot": 12,
+          "reference": 3,
+          "offset": 580,
+          "name": "r object draw"
+        },
+        {
+          "line": 35,
+          "fileOffset": 1178,
+          "slot": 12,
+          "reference": 3,
+          "offset": 580,
+          "name": "r object draw"
+        },
+        {
+          "line": 37,
+          "fileOffset": 1244,
+          "slot": 12,
+          "reference": 1,
+          "offset": 658,
+          "name": "object erase"
+        },
+        {
+          "line": 39,
+          "fileOffset": 1270,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1258,
+          "name": "object limit"
+        }
+      ],
+      "listing": "examples/ObjectDemoTest1.amos.txt"
+    },
+    {
+      "file": "Examples/Plane_Offset_demo1.AMOS",
+      "sha256": "6a85313778602e436d198ee35e242150e77dd386f23a0a8588f3392df304b418",
+      "bytes": 1384,
+      "physicalLines": 52,
+      "codeBytes": 1358,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 3,
+          "fileOffset": 94,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 11,
+          "fileOffset": 312,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1344,
+          "name": "plane shift up"
+        },
+        {
+          "line": 12,
+          "fileOffset": 344,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 20,
+          "fileOffset": 574,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 23,
+          "fileOffset": 648,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 24,
+          "fileOffset": 690,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 25,
+          "fileOffset": 730,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 26,
+          "fileOffset": 772,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 29,
+          "fileOffset": 830,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 31,
+          "fileOffset": 852,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 33,
+          "fileOffset": 900,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 40,
+          "fileOffset": 1066,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 41,
+          "fileOffset": 1108,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 42,
+          "fileOffset": 1148,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 43,
+          "fileOffset": 1190,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 45,
+          "fileOffset": 1236,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 47,
+          "fileOffset": 1258,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 49,
+          "fileOffset": 1306,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 51,
+          "fileOffset": 1328,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 52,
+          "fileOffset": 1338,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        }
+      ],
+      "listing": "examples/Plane_Offset_demo1.amos.txt"
+    },
+    {
+      "file": "Examples/Plane_Offset_demo2.AMOS",
+      "sha256": "7ec58219198e9a9fc6ee2cfee749c80485abaebed852a0cc8b3a1b09057f943f",
+      "bytes": 944,
+      "physicalLines": 32,
+      "codeBytes": 918,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 18,
+          "fileOffset": 524,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 19,
+          "fileOffset": 564,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 21,
+          "fileOffset": 610,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 22,
+          "fileOffset": 626,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1398,
+          "name": "plane update"
+        },
+        {
+          "line": 24,
+          "fileOffset": 648,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 25,
+          "fileOffset": 690,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1296,
+          "name": "plane offset"
+        },
+        {
+          "line": 30,
+          "fileOffset": 880,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1116,
+          "name": "f circle"
+        }
+      ],
+      "listing": "examples/Plane_Offset_demo2.amos.txt"
+    },
+    {
+      "file": "Examples/Plot-vs-F_Plot.AMOS",
+      "sha256": "0d3929230fda78d945a3aacb5d745f831003277ea8f75bfa2d1937823aec1111",
+      "bytes": 348,
+      "physicalLines": 12,
+      "codeBytes": 322,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 10,
+          "fileOffset": 280,
+          "slot": 12,
+          "reference": 3,
+          "offset": 878,
+          "name": "f plot"
+        }
+      ],
+      "listing": "examples/Plot-vs-F_Plot.amos.txt"
+    },
+    {
+      "file": "Examples/RandomCircles.AMOS",
+      "sha256": "043132de6f94a46382cc274fe8197985084b286c48385f8d45fd23e0fa4cfa5d",
+      "bytes": 464,
+      "physicalLines": 14,
+      "codeBytes": 438,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 6,
+          "fileOffset": 178,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 13,
+          "fileOffset": 370,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1116,
+          "name": "f circle"
+        }
+      ],
+      "listing": "examples/RandomCircles.amos.txt"
+    },
+    {
+      "file": "Examples/RiverRaid.AMOS",
+      "sha256": "1c68cd7a27c9b95bb04ff9efa03f5a02d1c48ec6aecb717b2309a3919b6b055f",
+      "bytes": 26289,
+      "physicalLines": 160,
+      "codeBytes": 6318,
+      "trailingBytes": 19951,
+      "occurrences": [
+        {
+          "line": 29,
+          "fileOffset": 1566,
+          "slot": 12,
+          "reference": 2,
+          "offset": 2482,
+          "name": "scene load"
+        },
+        {
+          "line": 31,
+          "fileOffset": 1610,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1734,
+          "name": "scene bank"
+        },
+        {
+          "line": 53,
+          "fileOffset": 2422,
+          "slot": 12,
+          "reference": 0,
+          "offset": 2330,
+          "name": "scene y"
+        },
+        {
+          "line": 54,
+          "fileOffset": 2440,
+          "slot": 12,
+          "reference": 6,
+          "offset": 1846,
+          "name": "scene 16 draw"
+        },
+        {
+          "line": 68,
+          "fileOffset": 3200,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 79,
+          "fileOffset": 3602,
+          "slot": 12,
+          "reference": 0,
+          "offset": 2330,
+          "name": "scene y"
+        },
+        {
+          "line": 81,
+          "fileOffset": 3626,
+          "slot": 12,
+          "reference": 6,
+          "offset": 1846,
+          "name": "scene 16 draw"
+        },
+        {
+          "line": 82,
+          "fileOffset": 3704,
+          "slot": 12,
+          "reference": 6,
+          "offset": 1846,
+          "name": "scene 16 draw"
+        },
+        {
+          "line": 112,
+          "fileOffset": 4776,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 115,
+          "fileOffset": 4944,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 116,
+          "fileOffset": 4954,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 149,
+          "fileOffset": 5814,
+          "slot": 12,
+          "reference": 2,
+          "offset": 1100,
+          "name": "f point"
+        },
+        {
+          "line": 150,
+          "fileOffset": 5890,
+          "slot": 12,
+          "reference": 2,
+          "offset": 1100,
+          "name": "f point"
+        },
+        {
+          "line": 151,
+          "fileOffset": 5966,
+          "slot": 12,
+          "reference": 2,
+          "offset": 1100,
+          "name": "f point"
+        }
+      ],
+      "listing": "examples/RiverRaid.amos.txt"
+    },
+    {
+      "file": "Examples/SceneDemo1.AMOS",
+      "sha256": "3a3a5a40f65ad171455fcf733690922481b311cfafaad308ce52be17989fcd24",
+      "bytes": 6276,
+      "physicalLines": 208,
+      "codeBytes": 6250,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 24,
+          "fileOffset": 466,
+          "slot": 12,
+          "reference": 2,
+          "offset": 2482,
+          "name": "scene load"
+        },
+        {
+          "line": 25,
+          "fileOffset": 504,
+          "slot": 12,
+          "reference": 2,
+          "offset": 2904,
+          "name": "scene convert"
+        },
+        {
+          "line": 26,
+          "fileOffset": 528,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1734,
+          "name": "scene bank"
+        },
+        {
+          "line": 27,
+          "fileOffset": 544,
+          "slot": 12,
+          "reference": 5,
+          "offset": 2036,
+          "name": "scene 16 view"
+        },
+        {
+          "line": 104,
+          "fileOffset": 2640,
+          "slot": 12,
+          "reference": 2,
+          "offset": 2092,
+          "name": "scene 16 do"
+        },
+        {
+          "line": 117,
+          "fileOffset": 3024,
+          "slot": 12,
+          "reference": 2,
+          "offset": 2092,
+          "name": "scene 16 do"
+        },
+        {
+          "line": 146,
+          "fileOffset": 4014,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 163,
+          "fileOffset": 4712,
+          "slot": 12,
+          "reference": 2,
+          "offset": 2092,
+          "name": "scene 16 do"
+        }
+      ],
+      "listing": "examples/SceneDemo1.amos.txt"
+    },
+    {
+      "file": "Examples/StarfieldDemo1.AMOS",
+      "sha256": "5a3d4a70004c0ce6f4032e6537c8c44cacbf57b537abe3422ada0765ca58e659",
+      "bytes": 2516,
+      "physicalLines": 84,
+      "codeBytes": 2490,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 58,
+          "fileOffset": 1854,
+          "slot": 12,
+          "reference": 1,
+          "offset": 930,
+          "name": "reserve stars"
+        },
+        {
+          "line": 60,
+          "fileOffset": 1902,
+          "slot": 12,
+          "reference": 5,
+          "offset": 950,
+          "name": "define star"
+        },
+        {
+          "line": 62,
+          "fileOffset": 1990,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1076,
+          "name": "stars clip"
+        },
+        {
+          "line": 63,
+          "fileOffset": 2030,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 67,
+          "fileOffset": 2096,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 69,
+          "fileOffset": 2146,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 70,
+          "fileOffset": 2162,
+          "slot": 12,
+          "reference": 0,
+          "offset": 976,
+          "name": "display stars"
+        },
+        {
+          "line": 72,
+          "fileOffset": 2200,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1052,
+          "name": "stars speed"
+        },
+        {
+          "line": 75,
+          "fileOffset": 2296,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1052,
+          "name": "stars speed"
+        },
+        {
+          "line": 78,
+          "fileOffset": 2394,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1052,
+          "name": "stars speed"
+        },
+        {
+          "line": 82,
+          "fileOffset": 2482,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 83,
+          "fileOffset": 2492,
+          "slot": 12,
+          "reference": 0,
+          "offset": 996,
+          "name": "stars erase"
+        },
+        {
+          "line": 84,
+          "fileOffset": 2502,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/StarfieldDemo1.amos.txt"
+    },
+    {
+      "file": "Examples/Starfield_Interrupt.AMOS",
+      "sha256": "cdf77db594e48a93c1e8349f89d0bf4c74f94cd101b12525a01c5c4b06bd8d80",
+      "bytes": 1060,
+      "physicalLines": 37,
+      "codeBytes": 1034,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 6,
+          "fileOffset": 184,
+          "slot": 12,
+          "reference": 1,
+          "offset": 930,
+          "name": "reserve stars"
+        },
+        {
+          "line": 10,
+          "fileOffset": 318,
+          "slot": 12,
+          "reference": 5,
+          "offset": 950,
+          "name": "define star"
+        },
+        {
+          "line": 13,
+          "fileOffset": 418,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 15,
+          "fileOffset": 492,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1150,
+          "name": "stars int on"
+        },
+        {
+          "line": 26,
+          "fileOffset": 770,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 29,
+          "fileOffset": 890,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 30,
+          "fileOffset": 908,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 32,
+          "fileOffset": 956,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1170,
+          "name": "stars int off"
+        },
+        {
+          "line": 34,
+          "fileOffset": 1012,
+          "slot": 12,
+          "reference": 0,
+          "offset": 996,
+          "name": "stars erase"
+        },
+        {
+          "line": 35,
+          "fileOffset": 1022,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/Starfield_Interrupt.amos.txt"
+    },
+    {
+      "file": "Examples/Stars&Blit_Interrupt.AMOS",
+      "sha256": "751c2c65d2a87b4a91427141de83383f4c37a9e3c829a80f958f2e4ce8552162",
+      "bytes": 1222,
+      "physicalLines": 47,
+      "codeBytes": 1196,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 11,
+          "fileOffset": 376,
+          "slot": 12,
+          "reference": 0,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 12,
+          "fileOffset": 442,
+          "slot": 12,
+          "reference": 0,
+          "offset": 760,
+          "name": "blit store left"
+        },
+        {
+          "line": 14,
+          "fileOffset": 518,
+          "slot": 12,
+          "reference": 0,
+          "offset": 930,
+          "name": "reserve stars"
+        },
+        {
+          "line": 16,
+          "fileOffset": 566,
+          "slot": 12,
+          "reference": 0,
+          "offset": 950,
+          "name": "define star"
+        },
+        {
+          "line": 21,
+          "fileOffset": 712,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1150,
+          "name": "stars int on"
+        },
+        {
+          "line": 22,
+          "fileOffset": 728,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1190,
+          "name": "blit int on"
+        },
+        {
+          "line": 23,
+          "fileOffset": 752,
+          "slot": 12,
+          "reference": 0,
+          "offset": 2548,
+          "name": "blit int wait"
+        },
+        {
+          "line": 25,
+          "fileOffset": 776,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 34,
+          "fileOffset": 1034,
+          "slot": 12,
+          "reference": 0,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 35,
+          "fileOffset": 1050,
+          "slot": 12,
+          "reference": 0,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 39,
+          "fileOffset": 1124,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 40,
+          "fileOffset": 1134,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 41,
+          "fileOffset": 1144,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1170,
+          "name": "stars int off"
+        },
+        {
+          "line": 42,
+          "fileOffset": 1154,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1210,
+          "name": "blit int off"
+        },
+        {
+          "line": 43,
+          "fileOffset": 1164,
+          "slot": 12,
+          "reference": 0,
+          "offset": 996,
+          "name": "stars erase"
+        },
+        {
+          "line": 44,
+          "fileOffset": 1174,
+          "slot": 12,
+          "reference": 0,
+          "offset": 814,
+          "name": "blit erase"
+        },
+        {
+          "line": 45,
+          "fileOffset": 1190,
+          "slot": 12,
+          "reference": 0,
+          "offset": 814,
+          "name": "blit erase"
+        }
+      ],
+      "listing": "examples/Stars&Blit_Interrupt.amos.txt"
+    },
+    {
+      "file": "Examples/StaticBlocks.AMOS",
+      "sha256": "c0701c811bc6f6f5b422721f54c4ea5329d5cf5f59fcd0244c2a6a0aa19512ac",
+      "bytes": 1696,
+      "physicalLines": 65,
+      "codeBytes": 1670,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 5,
+          "fileOffset": 172,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1116,
+          "name": "f circle"
+        },
+        {
+          "line": 14,
+          "fileOffset": 574,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1628,
+          "name": "reserve static block"
+        },
+        {
+          "line": 16,
+          "fileOffset": 652,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1680,
+          "name": "build static block"
+        },
+        {
+          "line": 18,
+          "fileOffset": 686,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 41,
+          "fileOffset": 1182,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 58,
+          "fileOffset": 1592,
+          "slot": 12,
+          "reference": 3,
+          "offset": 1704,
+          "name": "f put static block"
+        },
+        {
+          "line": 62,
+          "fileOffset": 1652,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        },
+        {
+          "line": 63,
+          "fileOffset": 1662,
+          "slot": 12,
+          "reference": 0,
+          "offset": 1656,
+          "name": "static block erase"
+        },
+        {
+          "line": 65,
+          "fileOffset": 1682,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        }
+      ],
+      "listing": "examples/StaticBlocks.amos.txt"
+    },
+    {
+      "file": "Examples/T_Clip.AMOS",
+      "sha256": "dd2272ee5dbcac0ec93f9b0fc48924c2dd44bbfbf53cc2453f40ded7e460a4cc",
+      "bytes": 248,
+      "physicalLines": 8,
+      "codeBytes": 222,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 4,
+          "fileOffset": 158,
+          "slot": 12,
+          "reference": 0,
+          "offset": 2696,
+          "name": "t clip"
+        }
+      ],
+      "listing": "examples/T_Clip.amos.txt"
+    },
+    {
+      "file": "Examples/TargetSystem.AMOS",
+      "sha256": "a1d9b5e4bf6efdca137db47b5da9eb288663b1d240d3f11610c495ebe8ed99a5",
+      "bytes": 23638,
+      "physicalLines": 95,
+      "codeBytes": 3314,
+      "trailingBytes": 20304,
+      "occurrences": [
+        {
+          "line": 6,
+          "fileOffset": 180,
+          "slot": 2,
+          "reference": 255,
+          "offset": 86,
+          "name": null
+        },
+        {
+          "line": 54,
+          "fileOffset": 1944,
+          "slot": 12,
+          "reference": 1,
+          "offset": 930,
+          "name": "reserve stars"
+        },
+        {
+          "line": 56,
+          "fileOffset": 2016,
+          "slot": 12,
+          "reference": 5,
+          "offset": 950,
+          "name": "define star"
+        },
+        {
+          "line": 58,
+          "fileOffset": 2094,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1052,
+          "name": "stars speed"
+        },
+        {
+          "line": 67,
+          "fileOffset": 2298,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 72,
+          "fileOffset": 2566,
+          "slot": 12,
+          "reference": 0,
+          "offset": 976,
+          "name": "display stars"
+        },
+        {
+          "line": 91,
+          "fileOffset": 3232,
+          "slot": 12,
+          "reference": 4,
+          "offset": 1052,
+          "name": "stars speed"
+        },
+        {
+          "line": 95,
+          "fileOffset": 3326,
+          "slot": 12,
+          "reference": 0,
+          "offset": 996,
+          "name": "stars erase"
+        }
+      ],
+      "listing": "examples/TargetSystem.amos.txt"
+    },
+    {
+      "file": "Examples/Vector3dfrom2d.AMOS",
+      "sha256": "82707d042fe0347b45330e4e9d6da50b5e207f54d89bf305ad1fe22ddaae9eb5",
+      "bytes": 1050,
+      "physicalLines": 38,
+      "codeBytes": 1024,
+      "trailingBytes": 6,
+      "occurrences": [
+        {
+          "line": 9,
+          "fileOffset": 228,
+          "slot": 12,
+          "reference": 0,
+          "offset": 22,
+          "name": "multi no"
+        },
+        {
+          "line": 10,
+          "fileOffset": 238,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1258,
+          "name": "object limit"
+        },
+        {
+          "line": 13,
+          "fileOffset": 378,
+          "slot": 12,
+          "reference": 2,
+          "offset": 740,
+          "name": "object load"
+        },
+        {
+          "line": 14,
+          "fileOffset": 434,
+          "slot": 12,
+          "reference": 2,
+          "offset": 740,
+          "name": "object load"
+        },
+        {
+          "line": 19,
+          "fileOffset": 564,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 20,
+          "fileOffset": 588,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 21,
+          "fileOffset": 610,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 22,
+          "fileOffset": 626,
+          "slot": 12,
+          "reference": 1,
+          "offset": 562,
+          "name": "object draw"
+        },
+        {
+          "line": 23,
+          "fileOffset": 644,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 24,
+          "fileOffset": 696,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 28,
+          "fileOffset": 806,
+          "slot": 12,
+          "reference": 0,
+          "offset": 914,
+          "name": "left click"
+        },
+        {
+          "line": 29,
+          "fileOffset": 830,
+          "slot": 12,
+          "reference": 1,
+          "offset": 166,
+          "name": "vbl wait"
+        },
+        {
+          "line": 30,
+          "fileOffset": 852,
+          "slot": 12,
+          "reference": 1,
+          "offset": 896,
+          "name": "blit clear"
+        },
+        {
+          "line": 31,
+          "fileOffset": 868,
+          "slot": 12,
+          "reference": 1,
+          "offset": 562,
+          "name": "object draw"
+        },
+        {
+          "line": 32,
+          "fileOffset": 886,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 33,
+          "fileOffset": 938,
+          "slot": 12,
+          "reference": 4,
+          "offset": 628,
+          "name": "r object mag draw"
+        },
+        {
+          "line": 36,
+          "fileOffset": 1002,
+          "slot": 12,
+          "reference": 1,
+          "offset": 658,
+          "name": "object erase"
+        },
+        {
+          "line": 37,
+          "fileOffset": 1020,
+          "slot": 12,
+          "reference": 1,
+          "offset": 1258,
+          "name": "object limit"
+        },
+        {
+          "line": 38,
+          "fileOffset": 1036,
+          "slot": 12,
+          "reference": 0,
+          "offset": 6,
+          "name": "multi yes"
+        }
+      ],
+      "listing": "examples/Vector3dfrom2d.amos.txt"
+    }
+  ],
+  "assets": [
+    {
+      "file": "ASCII_Examples/BOUNCING_ICONS.ASC",
+      "bytes": 3264,
+      "sha256": "08bb280b7b0e9cf9be8f5855ebaeea92bee7409092bdd8b8c486a4f34c761617"
+    },
+    {
+      "file": "ASCII_Examples/DUAL_PLAYFIELD_DEMO.ASC",
+      "bytes": 4244,
+      "sha256": "2c4b263bcba6450558d7a87bfd94cb46dca16319a4ab30db47e98eca08080ffa"
+    },
+    {
+      "file": "ASCII_Examples/INSCR_MOUSE.ASC",
+      "bytes": 338,
+      "sha256": "6d4d3dfe96982906c062674a527aa9437a0dd486065ab8d6a5daf60c26ee08be"
+    },
+    {
+      "file": "ASCII_Examples/STRING_HUNT.ASC",
+      "bytes": 387,
+      "sha256": "8442ac1bba3e3ec2ac0a4f39ac5c8158c14dedcf08999965df9865f207b580e4"
+    },
+    {
+      "file": "ASCII_Examples/TURBO_PLASMA.ASC",
+      "bytes": 2089,
+      "sha256": "4780c0ca7674848ef5ef858b6b3d3bfded7b726544bbb979d0c20e2f292a28b8"
+    },
+    {
+      "file": "Docs/TURBO_DocsV2.15.Asc",
+      "bytes": 69919,
+      "sha256": "451d4e98e93c337884184d825b30713e042d79421e87c62b1f1f7f39e447443a"
+    },
+    {
+      "file": "Examples/3D-Drawing.AMOS",
+      "bytes": 1640,
+      "sha256": "260d4f1c25c0fb5db0cc9faf00ad58a1b1dc78e071b736dd16d54a92f87cd4c6"
+    },
+    {
+      "file": "Examples/BlitClear.AMOS",
+      "bytes": 774,
+      "sha256": "d86650f0b93074ebd34f614262b1f38f1efa8e7099215546b9fed0683c130505"
+    },
+    {
+      "file": "Examples/BlitLeft_Wobble.AMOS",
+      "bytes": 1430,
+      "sha256": "4e4ab0d2af97101faa7fcceb64fe383fb02517021bb8431994ad34ed8e3008a6"
+    },
+    {
+      "file": "Examples/Copper-demo.AMOS",
+      "bytes": 3060,
+      "sha256": "270fcc58ad51eccb3890e063bcc7daef82a5cd20ee9f4e56a7b73398b3ba140e"
+    },
+    {
+      "file": "Examples/DoubleBufferScroll.AMOS",
+      "bytes": 920,
+      "sha256": "7b692addfb4a86a7b4a9bfc0a178ab560d66df8a1b8acbe80c6261cc67ce59b0"
+    },
+    {
+      "file": "Examples/F_Plot_Starfield.AMOS",
+      "bytes": 1144,
+      "sha256": "c9c72205afff0c23e16885015878ac075e22571afbea0e144725e734459cf2f4"
+    },
+    {
+      "file": "Examples/Fast16Icon.AMOS",
+      "bytes": 1652,
+      "sha256": "21fcbbf131c24fd7eccb48af514c0918311b764c96baf7904f8b1b4d225407ca"
+    },
+    {
+      "file": "Examples/Fast32Icon.AMOS",
+      "bytes": 1626,
+      "sha256": "39b35d06279cac2c7e840cb32745e4d00cdfc6904fca1d838e10b3d91af2e1ab"
+    },
+    {
+      "file": "Examples/FastBlocks.AMOS",
+      "bytes": 2072,
+      "sha256": "89d95d29a802a9e00708f4479d7a20f7620f319ae4a7696459dfeb76e7a6beb4"
+    },
+    {
+      "file": "Examples/FastCircle.AMOS",
+      "bytes": 914,
+      "sha256": "43ec1fc7d92333d795f91231f882c6fc39c546c1c9de80b3418f270b8cf795c8"
+    },
+    {
+      "file": "Examples/FastPlot.AMOS",
+      "bytes": 1054,
+      "sha256": "b93f390d373ab2c56c1c099379f236bd87ce52e6af1a6b3c30d812efbad2f428"
+    },
+    {
+      "file": "Examples/FastScroll.AMOS",
+      "bytes": 2056,
+      "sha256": "b267fcfe13b7cbd9ed3ac87ae2546ebf12260a4dad40e4be207778961ac18b61"
+    },
+    {
+      "file": "Examples/HitBobZone.AMOS",
+      "bytes": 1108,
+      "sha256": "e8417364bc15ee37dc183cd0d89003cba98ba17cfb5b00ce7b50126dd8e0fe14"
+    },
+    {
+      "file": "Examples/HitSprCheck.AMOS",
+      "bytes": 1032,
+      "sha256": "0574a3e3ace655670ad6ec326db6b98139d48d70d3279736d5481d9425eb8266"
+    },
+    {
+      "file": "Examples/HitSprZone.AMOS",
+      "bytes": 1120,
+      "sha256": "4d6ba273d1a8eaeb00ea2774a717bebb6dfb715f78aaea19cdf49f73192fda1f"
+    },
+    {
+      "file": "Examples/LightSpeed.AMOS",
+      "bytes": 29806,
+      "sha256": "b02da4d3605c9abbd28598c91adec6b88cd3694c8c5448ff40137a5adbb996aa"
+    },
+    {
+      "file": "Examples/New_2Define.AMOS",
+      "bytes": 548,
+      "sha256": "0707f40507f0ded2aea3712a2295fcbc879ccdac89d592e2f05eba066546e805"
+    },
+    {
+      "file": "Examples/Newgraphicinstructions.AMOS",
+      "bytes": 3412,
+      "sha256": "8daab71d843485f15a5fb3bbdaf0f66b87e9ab56a2f56f9dba89bf012577329e"
+    },
+    {
+      "file": "Examples/ObjectDemo2.AMOS",
+      "bytes": 3658,
+      "sha256": "5c0a57483eb93c402d1a2532056af934dcefa89a3d14fb9397da1dd95e549aaf"
+    },
+    {
+      "file": "Examples/ObjectDemoTest1.AMOS",
+      "bytes": 1296,
+      "sha256": "37dd7e39125652a6f8aeef01b1ce5f6a9633c4f4933222b141a37237d54354a2"
+    },
+    {
+      "file": "Examples/Plane_Offset_demo1.AMOS",
+      "bytes": 1384,
+      "sha256": "6a85313778602e436d198ee35e242150e77dd386f23a0a8588f3392df304b418"
+    },
+    {
+      "file": "Examples/Plane_Offset_demo2.AMOS",
+      "bytes": 944,
+      "sha256": "7ec58219198e9a9fc6ee2cfee749c80485abaebed852a0cc8b3a1b09057f943f"
+    },
+    {
+      "file": "Examples/Plot-vs-F_Plot.AMOS",
+      "bytes": 348,
+      "sha256": "0d3929230fda78d945a3aacb5d745f831003277ea8f75bfa2d1937823aec1111"
+    },
+    {
+      "file": "Examples/RandomCircles.AMOS",
+      "bytes": 464,
+      "sha256": "043132de6f94a46382cc274fe8197985084b286c48385f8d45fd23e0fa4cfa5d"
+    },
+    {
+      "file": "Examples/RiverRaid.AMOS",
+      "bytes": 26289,
+      "sha256": "1c68cd7a27c9b95bb04ff9efa03f5a02d1c48ec6aecb717b2309a3919b6b055f"
+    },
+    {
+      "file": "Examples/SceneDemo1.AMOS",
+      "bytes": 6276,
+      "sha256": "3a3a5a40f65ad171455fcf733690922481b311cfafaad308ce52be17989fcd24"
+    },
+    {
+      "file": "Examples/Space2.Scene",
+      "bytes": 2404,
+      "sha256": "688bdeb354e0267f126fd9ea0f2de2befda7d82694bc0e884b3631f77208de92"
+    },
+    {
+      "file": "Examples/Spaceicons.abk",
+      "bytes": 40870,
+      "sha256": "693aa8740da64d52f86c66f7cfff496449a79eaacddee42a32a58603a819c8e4"
+    },
+    {
+      "file": "Examples/StarfieldDemo1.AMOS",
+      "bytes": 2516,
+      "sha256": "5a3d4a70004c0ce6f4032e6537c8c44cacbf57b537abe3422ada0765ca58e659"
+    },
+    {
+      "file": "Examples/Starfield_Interrupt.AMOS",
+      "bytes": 1060,
+      "sha256": "cdf77db594e48a93c1e8349f89d0bf4c74f94cd101b12525a01c5c4b06bd8d80"
+    },
+    {
+      "file": "Examples/Stars&Blit_Interrupt.AMOS",
+      "bytes": 1222,
+      "sha256": "751c2c65d2a87b4a91427141de83383f4c37a9e3c829a80f958f2e4ce8552162"
+    },
+    {
+      "file": "Examples/StaticBlocks.AMOS",
+      "bytes": 1696,
+      "sha256": "c0701c811bc6f6f5b422721f54c4ea5329d5cf5f59fcd0244c2a6a0aa19512ac"
+    },
+    {
+      "file": "Examples/T_Clip.AMOS",
+      "bytes": 248,
+      "sha256": "dd2272ee5dbcac0ec93f9b0fc48924c2dd44bbfbf53cc2453f40ded7e460a4cc"
+    },
+    {
+      "file": "Examples/TargetSystem.AMOS",
+      "bytes": 23638,
+      "sha256": "a1d9b5e4bf6efdca137db47b5da9eb288663b1d240d3f11610c495ebe8ed99a5"
+    },
+    {
+      "file": "Examples/Vector3dfrom2d.AMOS",
+      "bytes": 1050,
+      "sha256": "82707d042fe0347b45330e4e9d6da50b5e207f54d89bf305ad1fe22ddaae9eb5"
+    },
+    {
+      "file": "Examples/vectors/amos_and_amospro1.vec",
+      "bytes": 44406,
+      "sha256": "4ab402227cd4d99882c4f1eabe209d3de6fd0557fc65d3bc33f3f260bd55bd69"
+    },
+    {
+      "file": "Examples/vectors/amos_and_amospro2.vec",
+      "bytes": 44406,
+      "sha256": "1559282d424ead4d27b5fb96b79b162380157402f202634e6752afd6a9d90b02"
+    },
+    {
+      "file": "Turbo_Banks/DUAL_PLAYFIELD_DEMO.ABK",
+      "bytes": 81454,
+      "sha256": "c929e5f8d112d90570101a13567a031b9dc072fb10183093b0fa0afbf0364f9e"
+    },
+    {
+      "file": "Turbo_Banks/TURBO_BOUNCE.ABK",
+      "bytes": 144,
+      "sha256": "741e8cde1c1b79cd8f6d9e77bfcd84fc74645efe01b758b9d7a746894ec66cb5"
+    }
+  ]
+}

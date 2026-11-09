@@ -1,0 +1,38 @@
+'this is a small vector demo done with precalculation in 2D vectors
+'look for REAL 3D commands soon! 
+
+Screen Open 0,640,280,2,Hires
+Wait Vbl : Wait Vbl 
+Palette 0,$FFF
+Double Buffer 
+Autoback 0
+ Multi No 
+ Object Limit 120
+'it is necessary to provide the full pathname for Object Load!  Just use Dir$+ 
+'if its the current directory. 
+ Object Load Dir$+"vectors/amos_and_amospro1.vec",1
+ Object Load Dir$+"vectors/amos_and_amospro2.vec",61
+_WAIT=250
+Do 
+   For I=1 To 120
+      Screen Swap 
+      If Left Click Then Exit 2
+       Vbl Wait _WAIT
+       Blit Clear 1
+       Object Draw I
+       R Object Mag Draw 121-I,0,70,-3
+       R Object Mag Draw 121-I,400,70,-2
+   Next 
+   For I=120 To 1 Step -1
+      Screen Swap 
+      If Left Click Then Exit 2
+       Vbl Wait _WAIT
+       Blit Clear 1
+       Object Draw I
+       R Object Mag Draw 121-I,0,70,-3
+       R Object Mag Draw 121-I,400,70,-2
+   Next 
+Loop 
+ Object Erase -1
+ Object Limit 0
+ Multi Yes 
