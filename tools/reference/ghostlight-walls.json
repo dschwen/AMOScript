@@ -1,0 +1,14 @@
+{
+  "bytes": 41774,
+  "sourceSha256": "49b3d15979f8437b917dfd9ce8617d5cab727668fbc9cd2ebe1550980e4bedf4",
+  "width": 368,
+  "height": 900,
+  "depth": 3,
+  "control": "3204",
+  "indexedSha256": "8d68a66a94df4cd9016952a0dfba19e90224489e66dbc279776033823fafa58a",
+  "rowSha256": {
+    "0": "71818ecc26433c32172dd9a3544657971c7078daa2257da7c3c303e08693cb23",
+    "450": "893a6ff4e2fc2eb7d5a661e8e26412efa911780e18abd8cc5f756790bbd2df90",
+    "899": "71818ecc26433c32172dd9a3544657971c7078daa2257da7c3c303e08693cb23"
+  }
+}

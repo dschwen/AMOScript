@@ -8,6 +8,11 @@ the [milestone plan](ghostlight-extension-plan.md).
 Turbo F Plot/F Point/Set Planes and masked/plane-selected core block overloads
 now run the bounded INIT graphics excerpt, with six independent Canvas/GPU
 matrix frames. [Graphics contract](extension-graphics.md).
+AMOS Screen Open now applies native word truncation (302/86 become 288/80), and
+cropped narrow lowres views retain bounded DMA reads. The laced walls bitmap
+decodes and supports existing-screen Unpack, with independent Python hashes;
+new-screen interlace/overscan and narrow slices in wider priority outputs remain
+gated. [Storage and width contract](packed-storage-screens.md).
 
 Updated 2026-10-31. The current local baseline has **982 passing tests**, plus a
 passing real-Chromium rendering/input smoke test, 82 offline demo scenarios and

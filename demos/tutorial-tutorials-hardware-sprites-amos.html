@@ -1596,11 +1596,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const word = at => view.getUint16(at, false), long = at => view.getUint32(at, false);
   if (long(0) !== 0x12031990 || long(90) !== 0x06071963) fail('expected packed screen and bitmap signatures');
   const width = word(4), height = word(6), depth = word(24), control = word(20), colours = word(22);
-  const hires = !!(control & 0x8000);
+  const hires = !!(control & 0x8000), interlace = !!(control & 4);
   if (width < 16 || width > 1024 || width % 16 || height < 1 || height > 1023 || depth < 1 || depth > (hires ? 4 : 6) ||
-      colours !== 1 << depth || (control & ~0x0200) !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
+      colours !== 1 << depth || (control & ~0x0204) !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
   const x = word(8), y = view.getInt16(10, false), windowWidth = word(12), windowHeight = word(14), offsetX = word(16), offsetY = word(18);
-  if (y < -4095 || windowWidth < 128 || windowWidth > 320 || !windowHeight ||
+  if (y < -4095 || windowWidth < 1 || windowWidth > 1024 || !windowHeight ||
       offsetX >= width || offsetY >= height || y + windowHeight > 28671 ||
       (hires && offsetX % 2)) fail('unsupported screen window/offset');
   const palette = Array.from({ length: 32 }, (_, index) => word(26 + index * 2));
@@ -1632,7 +1632,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   for (let plane = 0; plane < depth; plane++) for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
     if (planar[plane * planeSize + y * columns + (x >> 3)] & (128 >> (x & 7))) pixels[y * width + x] |= 1 << plane;
   }
-  return { width, height, depth, colours, control, mode: hires ? 0x8000 : 0, palette, pixels,
+  return { width, height, depth, colours, control, mode: (hires ? 0x8000 : 0) | (interlace ? 4 : 0), palette, pixels,
     window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
     consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
 };
@@ -2399,7 +2399,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     for (const view of views) {
       const { width, height, depth, pointers, rowBytes, palette, x, y } = view;
       const hires = view.hires === true, sourceWidth = hires ? Math.ceil(width / 2) : width;
-      const endX = x + sourceWidth, endY = y + height;
+      // A narrow lowres bitmap can fetch fewer words than the minimum OCS
+      // DIWSTOP endpoint. Keep its viewport cropped to the logical width;
+      // extending DIW must not extend DDF or read beyond the owned row.
+      const endX = hires ? x + sourceWidth : Math.max(256, x + sourceWidth), endY = y + height;
       const windowY = view.windowY == null ? y : view.windowY;
       const windowEnd = view.windowEnd == null ? endY : view.windowEnd;
       if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 0 || (height === 0 && view.setupOnly !== true) ||
@@ -5534,7 +5537,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
     if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
     const image = packedPictureReader(Uint8Array.from(bank.data));
+    if (image.mode & 4) throw Error('Unpack Screen interlaced presentation is not implemented; Unpack into an existing bitmap for data-only use');
     const window = image.window;
+    if (window.width < 128 || window.width > 320) throw Error('Unpack Screen display window is not implemented for this width');
     const placement = display.checkedWindow({ width:image.width, height:image.height, mode:image.mode,
       hardwareX:128, hardwareY:50, windowWidth:image.width, windowHeight:image.height }, window.x, window.y, window.width, window.height);
     if (placement.width + window.offsetX > image.width || placement.height + window.offsetY > image.height) throw Error('Unpack window extends outside bitmap');
@@ -5862,6 +5867,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a packed-picture bank');
     const image = packedPictureReader(Uint8Array.from(bank.data));
     if (image.width > target.width || image.height > target.height || image.depth !== Math.log2(target.colours)) throw new Error('Unpack image does not fit current bitmap/planes');
+    // UnPack_Bitmap ignores the packed screen mode: preserve every bitmap row,
+    // including a laced source, without changing destination mode or palette.
     // Existing-screen unpack retains geometry/palette and uses ordinary Autoback.
     display.pasteGraphic({ ...image, depth: Math.log2(image.colours), pixels: image.pixels }, 0, 0, false);
   }
@@ -6889,7 +6896,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return 0;
   }
 
+  function amosScreenOpen(number,width,height,colours,mode) {
+    [number,width,height,colours,mode] = [number,width,height,colours,mode].map(integer);
+    // InScreenOpen -> EcCree masks off the low four width bits before checks.
+    width = Math.floor(width / 16) * 16;
+    if (width < 16 || width >= 1024 || height < 1 || height >= 1024) throw Error('Invalid AMOS Screen Open dimensions');
+    return display.open(number,width,height,colours,mode);
+  }
+
   return {
+    amosScreenOpen,
     amosToFront: () => systemCommand('Amos To Front'),
     requestOff: () => systemCommand('Request Off'),
     extensionFlushLibs: () => systemCommand('Flush Libs'),
@@ -9530,7 +9546,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[2] = function(state){ state.location = {"line":176,"offset":8056}; if (array_int_xd !== null) throw new Error('Array already dimensioned'); array_int_xd = program.dim([program.integer(7)], "integer"); return {}; };
     cases[3] = function(state){ state.location = {"line":176,"offset":8056}; if (array_int_yd !== null) throw new Error('Array already dimensioned'); array_int_yd = program.dim([program.integer(7)], "integer"); return {}; };
     cases[4] = function(state){ state.location = {"line":182,"offset":8260}; program.loadBanks("AMOSPro_Tutorial:Objects/Sprites.abk"); return {}; };
-    cases[5] = function(state){ state.location = {"line":187,"offset":8358}; program.display.open(program.integer(0), program.integer(640), program.integer(200), program.integer(4), program.integer(32768)); return {}; };
+    cases[5] = function(state){ state.location = {"line":187,"offset":8358}; program.amosScreenOpen(program.integer(0), program.integer(640), program.integer(200), program.integer(4), program.integer(32768)); return {}; };
     cases[6] = function(state){ state.location = {"line":187,"offset":8396}; program.flashOff(); return {}; };
     cases[7] = function(state){ state.location = {"line":188,"offset":8402}; program.display.setPalette(program.integer(0), program.integer(3840), program.integer(240), program.integer(15)); return {}; };
     cases[8] = function(state){ state.location = {"line":189,"offset":8438}; program.display.cursOff(); return {}; };
@@ -9563,7 +9579,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[35] = function(state){ state.location = {"line":214,"offset":9448}; return { goto: 28 }; };
     cases[36] = function(state){ state.location = {"line":217,"offset":9470}; return { edit: true }; };
     cases[37] = function(state){ state.location = {"line":222,"offset":9534}; return { goto: 87 }; };
-    cases[38] = function(state){ state.location = {"line":223,"offset":9562}; program.display.open(program.integer(1), program.integer(320), program.integer(200), program.integer(8), program.integer(0)); return {}; };
+    cases[38] = function(state){ state.location = {"line":223,"offset":9562}; program.amosScreenOpen(program.integer(1), program.integer(320), program.integer(200), program.integer(8), program.integer(0)); return {}; };
     cases[39] = function(state){ state.location = {"line":223,"offset":9600}; program.flashOff(); return {}; };
     cases[40] = function(state){ state.location = {"line":223,"offset":9604}; program.display.cursOff(); return {}; };
     cases[41] = function(state){ state.location = {"line":223,"offset":9608}; program.spritePalette(); return {}; };
@@ -9613,7 +9629,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[85] = function(state){ state.location = {"line":240,"offset":10608}; program.showOn(); return {}; };
     cases[86] = function(state){ state.location = {"line":241,"offset":10614}; return { procReturn: true }; };
     cases[87] = function(state){ state.location = {"line":242,"offset":10620}; return { goto: 137 }; };
-    cases[88] = function(state){ state.location = {"line":243,"offset":10648}; program.display.open(program.integer(1), program.integer(320), program.integer(200), program.integer(16), program.integer(0)); return {}; };
+    cases[88] = function(state){ state.location = {"line":243,"offset":10648}; program.amosScreenOpen(program.integer(1), program.integer(320), program.integer(200), program.integer(16), program.integer(0)); return {}; };
     cases[89] = function(state){ state.location = {"line":243,"offset":10686}; program.flashOff(); return {}; };
     cases[90] = function(state){ state.location = {"line":243,"offset":10690}; program.display.cursOff(); return {}; };
     cases[91] = function(state){ state.location = {"line":243,"offset":10694}; program.spritePalette(); return {}; };
@@ -9663,7 +9679,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[135] = function(state){ state.location = {"line":260,"offset":11710}; program.showOn(); return {}; };
     cases[136] = function(state){ state.location = {"line":261,"offset":11716}; return { procReturn: true }; };
     cases[137] = function(state){ state.location = {"line":262,"offset":11722}; return { goto: 184 }; };
-    cases[138] = function(state){ state.location = {"line":263,"offset":11748}; program.display.open(program.integer(1), program.integer(320), program.integer(200), program.integer(4), program.integer(0)); return {}; };
+    cases[138] = function(state){ state.location = {"line":263,"offset":11748}; program.amosScreenOpen(program.integer(1), program.integer(320), program.integer(200), program.integer(4), program.integer(0)); return {}; };
     cases[139] = function(state){ state.location = {"line":263,"offset":11786}; program.flashOff(); return {}; };
     cases[140] = function(state){ state.location = {"line":263,"offset":11790}; program.display.cursOff(); return {}; };
     cases[141] = function(state){ state.location = {"line":263,"offset":11794}; program.spritePalette(); return {}; };
@@ -9710,7 +9726,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[182] = function(state){ state.location = {"line":279,"offset":12834}; program.showOn(); return {}; };
     cases[183] = function(state){ state.location = {"line":280,"offset":12840}; return { procReturn: true }; };
     cases[184] = function(state){ state.location = {"line":281,"offset":12846}; return { goto: 228 }; };
-    cases[185] = function(state){ state.location = {"line":282,"offset":12872}; program.display.open(program.integer(1), program.integer(320), program.integer(200), program.integer(16), program.integer(0)); return {}; };
+    cases[185] = function(state){ state.location = {"line":282,"offset":12872}; program.amosScreenOpen(program.integer(1), program.integer(320), program.integer(200), program.integer(16), program.integer(0)); return {}; };
     cases[186] = function(state){ state.location = {"line":282,"offset":12910}; program.flashOff(); return {}; };
     cases[187] = function(state){ state.location = {"line":282,"offset":12914}; program.display.cursOff(); return {}; };
     cases[188] = function(state){ state.location = {"line":282,"offset":12918}; program.spritePalette(); return {}; };
@@ -9754,7 +9770,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[226] = function(state){ state.location = {"line":297,"offset":13862}; program.showOn(); return {}; };
     cases[227] = function(state){ state.location = {"line":298,"offset":13868}; return { procReturn: true }; };
     cases[228] = function(state){ state.location = {"line":299,"offset":13874}; return { goto: 306 }; };
-    cases[229] = function(state){ state.location = {"line":300,"offset":13898}; program.display.open(program.integer(1), program.integer(320), program.integer(290), program.integer(4096), program.integer(0)); return {}; };
+    cases[229] = function(state){ state.location = {"line":300,"offset":13898}; program.amosScreenOpen(program.integer(1), program.integer(320), program.integer(290), program.integer(4096), program.integer(0)); return {}; };
     cases[230] = function(state){ state.location = {"line":301,"offset":13938}; program.display.cursOff(); return {}; };
     cases[231] = function(state){ state.location = {"line":301,"offset":13942}; program.display.clear(program.integer(0)); return {}; };
     cases[232] = function(state){ state.location = {"line":301,"offset":13952}; program.flashOff(); return {}; };
@@ -9832,7 +9848,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     cases[304] = function(state){ state.location = {"line":326,"offset":15432}; program.showOn(); return {}; };
     cases[305] = function(state){ state.location = {"line":327,"offset":15438}; return { procReturn: true }; };
     cases[306] = function(state){ state.location = {"line":328,"offset":15444}; return { goto: 366 }; };
-    cases[307] = function(state){ state.location = {"line":329,"offset":15468}; program.display.open(program.integer(1), program.integer(320), program.integer(200), program.integer(64), program.integer(0)); return {}; };
+    cases[307] = function(state){ state.location = {"line":329,"offset":15468}; program.amosScreenOpen(program.integer(1), program.integer(320), program.integer(200), program.integer(64), program.integer(0)); return {}; };
     cases[308] = function(state){ state.location = {"line":329,"offset":15506}; program.display.cursOff(); return {}; };
     cases[309] = function(state){ state.location = {"line":329,"offset":15510}; program.flashOff(); return {}; };
     cases[310] = function(state){ state.location = {"line":329,"offset":15514}; program.display.clear(program.integer(0)); return {}; };

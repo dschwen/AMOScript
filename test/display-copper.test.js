@@ -143,7 +143,7 @@ test('copper display: screen stacks preserve selection, hidden buffers and old s
   assert.deepStrictEqual(pixel(display.snapshotDisplay([1, 2]), 0, 0), [0, 0, 0, 255]);
   assert.deepStrictEqual(pixel(snapshot, 0, 0), [255, 0, 0, 255]);
   display.open(3, 16, 8, 2, 0);
-  assert.throws(() => display.snapshotDisplay(), /geometry/);
+  assert.deepStrictEqual([display.snapshotDisplay().frame.outputWidth,display.snapshotDisplay().frame.lines],[32,8]);
   assert.strictEqual(display.snapshotPlayfield().frame.outputWidth, 32);
 });
 

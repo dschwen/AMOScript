@@ -3,7 +3,7 @@
 const assert=require('assert'),fs=require('fs'),path=require('path'),crypto=require('crypto');
 const {binary,token:t,word:w,integer:n,identifier:id,text,compile,execute}=require('./helpers/program');
 const createDisplay=require('../lib/amos/display'),glyph=require('./fixtures/roller2/panel-glyphs.json').glyphs.A;
-const open=(width=8,height=8)=>[t('Screen Open'),n(0),t(','),n(width),t(','),n(height),t(','),n(64),t(','),t('Lowres')];
+const open=(width=16,height=8)=>[t('Screen Open'),n(0),t(','),n(width),t(','),n(height),t(','),n(64),t(','),t('Lowres')];
 const expected=(old,pen,paper,mode,parts)=>Uint8Array.from({length:64},(_,at)=>{const foreground=!!(glyph[at>>3]&(1<<(at&7))),source=foreground?(parts===1?0:pen):(parts===2?0:paper);return mode===0?source:mode===1?old|source:mode===2?old^source:mode===3?old&source:old;});
 const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 
@@ -25,7 +25,7 @@ test('Writing: exact token arities, DATA/arrays/boxed procedure results and once
     [t('Data'),w(0),n(2)],[t('Read'),id('parts')],[t('Dim'),id('a'),t('('),n(1),t(')')],[id('a'),t('('),n(1),t(')'),t('='),id('parts')],
     [t('Procedure'),[0,0,0,0],w(0),0,0,id('mode')],[t('End Proc'),t('['),t('Val'),t('('),text('0.9'),t(')'),t(']')],[id('mode',0x12)],
     [w(0x1418),t('Param'),t(','),id('a'),t('('),n(1),t(')')],[t('Print'),text('A'),t(';')],[t('Wait Key')]]));
-  assert.deepStrictEqual(Array.from(p.display.screen().pixels),Array.from(expected(36,21,10,0,2)));p.stop();
+  const glyphExpected=expected(36,21,10,0,2);assert.deepStrictEqual(Array.from(p.display.screen().pixels),Array.from({length:128},(_,at)=>(at%16)<8?glyphExpected[Math.floor(at/16)*8+at%16]:36));p.stop();
   const calls=[],value=name=>[t('Val'),t('('),t('Fsel$'),t('('),text(name),t(')'),t(')')];
   const result=execute(binary([[w(0x1418),value('mode'),t(','),value('parts')],[w(0x1408),n(0)],[t('Wait Key')]]),1000,{files:{select({path:name}){calls.push(name);return name==='mode'?'1':'2';}}});assert.deepStrictEqual(calls,['mode','parts']);assert.strictEqual(result.program.display.screen().writingActive,false);result.program.stop();
   for(const line of [[t('Writing'),text('0')],[t('Writing2'),n(0),t(','),text('2')]])assert.throws(()=>compile(binary([line])),/numeric.*line 1/);

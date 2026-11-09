@@ -506,6 +506,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html"
     },
     {
+      "file": "narrow-packed.html",
+      "title": "Native screen widths and packed bitmap storage",
+      "description": "AMOS word-truncated widths (302 to 288 and 86 to 80), bounded narrow-screen copper fetches, and all-row bitmap-only unpack of synthetic laced packed data. Three Canvas/GPU frames; visible interlaced Unpack Screen remains gated.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/narrow-packed.html"
+    },
+    {
       "file": "extension-graphics.html",
       "title": "Turbo Plus pixels and masked lighting blocks",
       "description": "Six independent indexed matrices cover graphics versus block plane masks, F Plot/F Point, rounded transparent captures and buffer publication; six real GPU comparisons. Synthetic lighting fixture, not Ghostlight gameplay or a native capture.",

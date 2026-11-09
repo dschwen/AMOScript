@@ -25,6 +25,15 @@ third-party encodings are now implemented; the remaining ten include AMCAF
 playback, Raster Wait/Smouse Key and Turbo Amos Pri. The packed walls atlas and
 non-word-sized presentation still need separate work.
 
+[Native screen width normalization](packed-storage-screens.md) now makes the
+302-/86-pixel requests into the actual AMOS 288-/80-pixel bitmaps. Narrow lowres
+copper presentation has three Canvas/GPU checks. The packed walls atlas decodes
+all 900 rows with independent Python hashes, and existing-screen Unpack copies
+it as bitmap data. Original new-screen Unpack remains explicitly gated on its
+interlace/overscan presentation; the LACE flag is preserved rather than dropped.
+Narrow slices inside a wider priority output also retain their fetched-data gate;
+the cropped narrow-view fixture does not claim that combination.
+
 ## What the initial investigation establishes
 
 The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
@@ -261,6 +270,6 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** the packed walls atlas/non-word-sized presentation
-and AMCAF playback work. Pt Play remains the
+**Next implementation task:** AMCAF playback, followed by interlaced/overscan
+integration for the atlas's original new-screen Unpack. Pt Play remains the
 first production whole-file compilation blocker.

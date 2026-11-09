@@ -4,10 +4,10 @@ const assert=require('assert'),fs=require('fs'),path=require('path');
 const {binary,token:t,integer:n,word:w,identifier:id,dword,execute,compile}=require('./helpers/program');
 const screen=(width=35,height=25)=>[t('Screen Open'),n(0),t(','),n(width),t(','),n(height),t(','),n(16),t(','),t('Lowres')];
 
-test('Cline: original bare token clears the whole current text row in paper colour and preserves cursor and partial edge pixels',()=>{
+test('Cline: original bare token clears the whole current text row in paper colour and preserves cursor, native width truncation and host partial edge pixels',()=>{
   const {program:p}=execute(binary([screen(),[t('Cls Colour'),n(5)],[t('Paper'),n(3)],[t('Locate'),n(2),t(','),n(1)],[w(0x158a)],[t('Wait Key')]])),s=p.display.screen();
-  for(let y=0;y<25;y++)for(let x=0;x<35;x++)assert.strictEqual(p.display.point(x,y),y>=8&&y<16&&x<32?3:5);
-  assert.deepStrictEqual([s.x,s.y,s.paper,s.pen,s.ink],[2,1,3,2,2]);assert.strictEqual(s.pixels,s.physicalPixels);p.stop();
+  assert.strictEqual(s.width,32);for(let y=0;y<25;y++)for(let x=0;x<32;x++)assert.strictEqual(p.display.point(x,y),y>=8&&y<16?3:5);
+  assert.deepStrictEqual([s.x,s.y,s.paper,s.pen,s.ink],[2,1,3,2,2]);assert.strictEqual(s.pixels,s.physicalPixels);p.display.open(0,35,25,16,0);p.display.clear(5);p.display.paper(3);p.display.locate(2,1);p.display.clearLine();for(let y=0;y<25;y++)for(let x=0;x<35;x++)assert.strictEqual(p.display.point(x,y),y>=8&&y<16&&x<32?3:5);p.stop();
 });
 
 test('Cline: Autoback modes preserve buffer identities and clear exactly the applicable rows',()=>{

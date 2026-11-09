@@ -37,3 +37,8 @@ It does not enable compiler support. The checked-in `ghostlight-extensions.json`
 contains only hashes, signatures and call locations; the game remains external.
 See the [Ghostlight implementation plan](../../docs/ghostlight-extension-plan.md)
 for the reproduction command and acceptance milestones.
+
+`check_packed_picture.py FILE` independently expands packed bitmap runs and
+reports dimensions, source/index hashes and selected row hashes. The
+`ghostlight-walls.json` report is metadata only; its source atlas remains external.
+See [packed storage screens](../../docs/packed-storage-screens.md).

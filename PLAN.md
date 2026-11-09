@@ -15,10 +15,15 @@ The [system-information contract](docs/system-information.md) now lets the bound
 original PREPARE routine complete with explicit version metadata and startup
 notifications. The [graphics subset](docs/extension-graphics.md) now completes
 the declared INIT graphics excerpt, including all ten captured blocks, with Turbo pixels/planes,
-plus six independent Canvas/GPU matrix frames. Next: packed walls atlas and
-non-word-sized presentation, AMCAF music/SFX/timing and a complete
-local browser build. No full compilation or execution has passed yet; source/assets and
+plus six independent Canvas/GPU matrix frames. Next: AMCAF music/SFX/timing,
+interlaced/overscan atlas presentation and a complete local browser build. No full compilation or execution has passed yet; source/assets and
 generated full-game pages remain external to the public repository.
+
+[Native Screen Open widths and packed storage](docs/packed-storage-screens.md)
+now normalize 302/86 to 288/80 and present narrow lowres views without increasing
+DMA reads. The laced atlas's full bitmap decodes against independent Python
+hashes; existing-screen Unpack preserves all rows. Its original new-screen
+interlaced/overscan presentation and AMCAF playback remain open.
 
 ## Tutorial Interface
 

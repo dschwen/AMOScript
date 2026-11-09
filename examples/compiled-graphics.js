@@ -773,11 +773,11 @@
   const word = at => view.getUint16(at, false), long = at => view.getUint32(at, false);
   if (long(0) !== 0x12031990 || long(90) !== 0x06071963) fail('expected packed screen and bitmap signatures');
   const width = word(4), height = word(6), depth = word(24), control = word(20), colours = word(22);
-  const hires = !!(control & 0x8000);
+  const hires = !!(control & 0x8000), interlace = !!(control & 4);
   if (width < 16 || width > 1024 || width % 16 || height < 1 || height > 1023 || depth < 1 || depth > (hires ? 4 : 6) ||
-      colours !== 1 << depth || (control & ~0x0200) !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
+      colours !== 1 << depth || (control & ~0x0204) !== ((depth << 12) | (hires ? 0x8000 : 0))) fail('unsupported screen dimensions/mode');
   const x = word(8), y = view.getInt16(10, false), windowWidth = word(12), windowHeight = word(14), offsetX = word(16), offsetY = word(18);
-  if (y < -4095 || windowWidth < 128 || windowWidth > 320 || !windowHeight ||
+  if (y < -4095 || windowWidth < 1 || windowWidth > 1024 || !windowHeight ||
       offsetX >= width || offsetY >= height || y + windowHeight > 28671 ||
       (hires && offsetX % 2)) fail('unsupported screen window/offset');
   const palette = Array.from({ length: 32 }, (_, index) => word(26 + index * 2));
@@ -809,7 +809,7 @@
   for (let plane = 0; plane < depth; plane++) for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
     if (planar[plane * planeSize + y * columns + (x >> 3)] & (128 >> (x & 7))) pixels[y * width + x] |= 1 << plane;
   }
-  return { width, height, depth, colours, control, mode: hires ? 0x8000 : 0, palette, pixels,
+  return { width, height, depth, colours, control, mode: (hires ? 0x8000 : 0) | (interlace ? 4 : 0), palette, pixels,
     window: { x, y, width: windowWidth, height: windowHeight, offsetX, offsetY },
     consumed: { data: dataAt - dataStart, flags: flagsAt - flagsStart, pointers: pointerAt - pointersStart + (tableBit === 7 ? 0 : 1) } };
 };
@@ -1576,7 +1576,10 @@
     for (const view of views) {
       const { width, height, depth, pointers, rowBytes, palette, x, y } = view;
       const hires = view.hires === true, sourceWidth = hires ? Math.ceil(width / 2) : width;
-      const endX = x + sourceWidth, endY = y + height;
+      // A narrow lowres bitmap can fetch fewer words than the minimum OCS
+      // DIWSTOP endpoint. Keep its viewport cropped to the logical width;
+      // extending DIW must not extend DDF or read beyond the owned row.
+      const endX = hires ? x + sourceWidth : Math.max(256, x + sourceWidth), endY = y + height;
       const windowY = view.windowY == null ? y : view.windowY;
       const windowEnd = view.windowEnd == null ? endY : view.windowEnd;
       if (!Number.isInteger(width) || width < 1 || !Number.isInteger(height) || height < 0 || (height === 0 && view.setupOnly !== true) ||
@@ -4711,7 +4714,9 @@
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
     if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
     const image = packedPictureReader(Uint8Array.from(bank.data));
+    if (image.mode & 4) throw Error('Unpack Screen interlaced presentation is not implemented; Unpack into an existing bitmap for data-only use');
     const window = image.window;
+    if (window.width < 128 || window.width > 320) throw Error('Unpack Screen display window is not implemented for this width');
     const placement = display.checkedWindow({ width:image.width, height:image.height, mode:image.mode,
       hardwareX:128, hardwareY:50, windowWidth:image.width, windowHeight:image.height }, window.x, window.y, window.width, window.height);
     if (placement.width + window.offsetX > image.width || placement.height + window.offsetY > image.height) throw Error('Unpack window extends outside bitmap');
@@ -5039,6 +5044,8 @@
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a packed-picture bank');
     const image = packedPictureReader(Uint8Array.from(bank.data));
     if (image.width > target.width || image.height > target.height || image.depth !== Math.log2(target.colours)) throw new Error('Unpack image does not fit current bitmap/planes');
+    // UnPack_Bitmap ignores the packed screen mode: preserve every bitmap row,
+    // including a laced source, without changing destination mode or palette.
     // Existing-screen unpack retains geometry/palette and uses ordinary Autoback.
     display.pasteGraphic({ ...image, depth: Math.log2(image.colours), pixels: image.pixels }, 0, 0, false);
   }
@@ -6066,7 +6073,16 @@
     return 0;
   }
 
+  function amosScreenOpen(number,width,height,colours,mode) {
+    [number,width,height,colours,mode] = [number,width,height,colours,mode].map(integer);
+    // InScreenOpen -> EcCree masks off the low four width bits before checks.
+    width = Math.floor(width / 16) * 16;
+    if (width < 16 || width >= 1024 || height < 1 || height >= 1024) throw Error('Invalid AMOS Screen Open dimensions');
+    return display.open(number,width,height,colours,mode);
+  }
+
   return {
+    amosScreenOpen,
     amosToFront: () => systemCommand('Amos To Front'),
     requestOff: () => systemCommand('Request Off'),
     extensionFlushLibs: () => systemCommand('Flush Libs'),
@@ -8691,7 +8707,7 @@
     const stringLabels = Object.freeze(Object.fromEntries([]));
     const dataTables = Object.create(null);
     dataTables["@main"] = [];
-    cases[0] = function(state){ state.location = {"line":1,"offset":22}; program.display.open(program.integer(0), program.integer(320), program.integer(200), program.integer(16), program.integer(0)); return {}; };
+    cases[0] = function(state){ state.location = {"line":1,"offset":22}; program.amosScreenOpen(program.integer(0), program.integer(320), program.integer(200), program.integer(16), program.integer(0)); return {}; };
     cases[1] = function(state){ state.location = {"line":2,"offset":62}; program.display.setPalette(program.integer(0), program.integer(291), program.integer(4095), program.integer(3968), program.integer(143), program.integer(712)); return {}; };
     cases[2] = function(state){ state.location = {"line":3,"offset":114}; program.display.clear(program.integer(0)); return {}; };
     cases[3] = function(state){ state.location = {"line":4,"offset":126}; program.display.ink(program.integer(4)); return {}; };
