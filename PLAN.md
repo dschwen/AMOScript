@@ -11,7 +11,9 @@ version read, masked block operations, packed atlas flags and MOD effects that
 also block execution. Explicit [extension profiles](docs/extension-profiles.md)
 and typed function signatures now work across API/CLI/page/project/desktop builds;
 the first AMCAF utilities and Turbo Word Hunt have checked implementations.
-Next: boot/system-information, graphics/lighting, AMCAF music/SFX/timing and a complete
+The [system-information contract](docs/system-information.md) now lets the bounded
+original PREPARE routine complete with explicit version metadata and startup
+notifications. Next: graphics/lighting, AMCAF music/SFX/timing and a complete
 local browser build. No full compilation or execution has passed yet; source/assets and
 generated full-game pages remain external to the public repository.
 

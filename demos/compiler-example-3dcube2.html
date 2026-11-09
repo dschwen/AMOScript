@@ -4547,7 +4547,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       else{const shift=(3-at)*8;r.write(((r.read()&~(255<<shift))|((value&255)<<shift))|0);}
     }
   };
-  const bankMemory = bankMemoryFactory(banks, { externalMemory: display.memory, variableMemory, beforeWrite(bank) {
+  const bankMemory = bankMemoryFactory(banks, { systemInfo: options.systemInfo, externalMemory: display.memory, variableMemory, beforeWrite(bank) {
     if (amal.usesBank(bank)) throw new Error('Writing an active AMAL movement bank is not implemented; Amal Off first');
     if (animations.has(bank)) throw new Error('Writing a Frame Load animation bank is not implemented');
     if (bank === musicBank) throw new Error('Writing an active Music bank is not implemented; Music Off first');
@@ -5083,6 +5083,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const result = options.system.command(name);
       if (result && typeof result.then === 'function') throw new Error('System host commands must complete synchronously');
     }
+    if (name === 'Amos To Front') state.system.amosFront = true;
+    if (name === 'Request Off') state.system.requesterTarget = 'off';
+    if (name === 'Flush Libs') state.system.libraryFlushRequests = (state.system.libraryFlushRequests || 0) + 1;
+    if (name === 'Audio Lock') state.system.audioLocked = true;
     if (name === 'Amos Lock') { state.system.amosLocked = true; state.system.amosFront = true; }
     if (name === 'Close Editor') state.system.editorOpen = false;
     if (name === 'Break Off') state.breakEnabled = false;
@@ -6843,6 +6847,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   return {
+    amosToFront: () => systemCommand('Amos To Front'),
+    requestOff: () => systemCommand('Request Off'),
+    extensionFlushLibs: () => systemCommand('Flush Libs'),
+    extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionOdd: value => (integer(value) & 1) ? -1 : 0,
     extensionEven: value => (integer(value) & 1) ? 0 : -1,
     extensionVclip: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return Math.max(low, Math.min(high, value)); },
@@ -8676,6 +8684,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
 };
   const bankMemoryFactory = function createBankMemory(banks, options = {}) {
   const allocations = new Map();
+  // Explicit portable system metadata, not emulated machine RAM. Only the
+  // ExecBase pointer and Library.lib_Version word are exposed, read-only.
+  const systemRegions = [];
+  if (options.systemInfo != null) {
+    const info = options.systemInfo;
+    if (!info || typeof info !== 'object' || Array.isArray(info) || Object.keys(info).some(key => key !== 'execVersion') ||
+        !Number.isInteger(info.execVersion) || info.execVersion < 0 || info.execVersion > 65535) throw Error('systemInfo requires execVersion in 0..65535');
+    systemRegions.push({ base: 4, capacity: 4, kind: 'system', bytes: Uint8Array.of(0, 0, 32, 0) },
+      { base: 0x2014, capacity: 2, kind: 'system', bytes: Uint8Array.of(info.execVersion >>> 8, info.execVersion & 255) });
+  }
   const variablePointer=address=>options.variableMemory && Number.isInteger(address) && address>=-2147483648 && address<=0xffffffff && (address>>>0)>=0x90000000 && (address>>>0)<0xa0000000;
   let next = 65536;
   function allocate(capacity) {
@@ -8732,6 +8750,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!Number.isInteger(address) || address < 0 || address > 0x7fffffff) throw new Error('Bank memory address out of bounds');
     if (!Number.isSafeInteger(length) || length < 0) throw new Error('Invalid bank memory range');
     if (address >= 0x40000000 && options.externalMemory) return options.externalMemory.resolve(address, length);
+    for (const region of systemRegions) {
+      if (address >= region.base && address < region.base + region.capacity) {
+        if (length > region.base + region.capacity - address) throw Error('System information address out of bounds');
+        return { region, offset: address - region.base };
+      }
+    }
     prune();
     for (const [bank, allocation] of allocations) for (const region of allocation.regions || [allocation]) {
       if (address >= region.base && address <= region.base + region.capacity) {
@@ -8750,12 +8774,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
   }
   function writable(access, length) {
+    if (access.region.kind === 'system') throw Error('System information memory is read-only');
     if (length && (access.region.kind === 'table' || (access.region.kind === 'image' && access.offset < 10))) throw new Error('Raw icon table/header writes are not implemented');
     if (access.region.kind === 'display' || access.region.kind==='variable') return;
     if (length && options.beforeWrite) options.beforeWrite(access.bank);
   }
   function byteAt(access, relative) {
     const { bank, region } = access, offset = access.offset + relative;
+    if (region.kind === 'system') return region.bytes[offset];
     if(region.kind==='variable')return options.variableMemory.read(region,offset);
     if (region.kind === 'display') return options.externalMemory.read(region, offset);
     if (!region.kind) return bank.data[offset];
@@ -10546,7 +10572,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
       const fallback = canvas.cloneNode(); canvas.replaceWith(fallback); canvas = fallback;
     }
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
-    live = factory({ displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
+    live = factory({ systemInfo: settings.systemInfo, displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       system:{command(name,request){
         if(name!=='Run')return;
         const nextFactory=request.filename==null?factory:Object.hasOwn(linkedPrograms,key(request.filename))?linkedPrograms[key(request.filename)]:null;

@@ -10,8 +10,11 @@ now flow through the API, CLI, page builder, saved projects and desktop form.
 Separate typed extension functions/statements preserve exact internal separators.
 AMCAF Bank Temporary, Odd/Even, Vclip/Vin and byte-string conversions, plus Turbo
 Word Hunt, have bounded implementations and synthetic standalone-module tests.
-This completes the profile plumbing and starts the utility subset; PREPARE's
-system-information contract and the other milestone phases remain open.
+This completes the profile plumbing and starts the utility subset.
+[Explicit read-only system metadata](system-information.md), Request Off, Amos
+To Front and AMCAF Flush Libs/Audio Lock now let a bounded original PREPARE fixture
+complete with host-provided Exec versions 34 and 40. The rest of boot/graphics,
+music and gameplay remain open; there is still no complete game compilation.
 
 ## What the initial investigation establishes
 
@@ -249,6 +252,6 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** the boot/system-information contract, followed by
-graphics initialization/lighting and the AMCAF playback work. Pt Play remains the
+**Next implementation task:** graphics initialization/lighting and the AMCAF
+playback work. Pt Play remains the
 first production whole-file compilation blocker.

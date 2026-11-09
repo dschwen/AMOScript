@@ -46,7 +46,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
       const fallback = canvas.cloneNode(); canvas.replaceWith(fallback); canvas = fallback;
     }
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
-    live = factory({ displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
+    live = factory({ systemInfo: settings.systemInfo, displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       system:{command(name,request){
         if(name!=='Run')return;
         const nextFactory=request.filename==null?factory:Object.hasOwn(linkedPrograms,key(request.filename))?linkedPrograms[key(request.filename)]:null;

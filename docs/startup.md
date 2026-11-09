@@ -93,6 +93,9 @@ wrapped-counter hardware edge behavior and boot-state captures remain open.
 
 ## Host system commands
 
+Additional requester/foreground commands, AMCAF Flush Libs/Audio Lock and opt-in
+read-only Exec version metadata are described in [system information](system-information.md).
+
 `Amos Lock` (`$24e0`) brings AMOS forward and sets its no-flip flag in the original
 handler. `Close Editor` (`$171a`) requests closing the AMOS editor; the original
 standalone CLI entry has no editor work. In AMOScript these commands update

@@ -506,6 +506,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html"
     },
     {
+      "file": "system-information.html",
+      "title": "Portable system information and boot commands",
+      "description": "Explicit read-only Exec version metadata, strict default bounds and synchronous Request Off/Amos To Front/AMCAF startup notifications. Synthetic programs; no machine RAM or OS emulation.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-information.html"
+    },
+    {
       "file": "trigonometry.html",
       "title": "Trigonometry and angle modes",
       "description": "Source-compiled Sin/Cos/Tan, degree/radian modes and matching Canvas/planar/copper pixels.",

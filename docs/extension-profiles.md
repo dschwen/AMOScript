@@ -39,7 +39,7 @@ extension binaries or a runtime slot-selection step.
 
 | Library | Commands |
 |---|---|
-| AMCAF | Bank Temporary; Odd; Even; Vclip; Vin; Chr.w$; Chr.l$; Asc.w; Asc.l |
+| AMCAF | Bank Temporary; Odd; Even; Vclip; Vin; Chr.w$; Chr.l$; Asc.w; Asc.l; Flush Libs; Audio Lock |
 | Turbo Plus | Word Hunt |
 
 Function signatures retain their exact types and internal separators. Vclip/Vin
@@ -80,6 +80,9 @@ grammar, memory boundaries and factory/address isolation. CLI/page/project tests
 cover option propagation; the Electron smoke saves and reopens the form mappings.
 Expectations derive from the recovered routines, not native Amiga captures.
 
+The [system-information contract](system-information.md) adds explicit read-only
+Exec version metadata and portable startup command notifications. Ghostlight's
+bounded original PREPARE routine completes with this opt-in host setting.
 Ghostlight still rejects at `Pt Play`, slot 8 `$108e`, line 43, byte 2084.
 No complete Ghostlight build or gameplay has passed. Continue with the
 [Ghostlight milestone plan](ghostlight-extension-plan.md): boot/system-information

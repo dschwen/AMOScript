@@ -22,7 +22,8 @@ function loadAssets(filename, prefix = '') {
   }
   return assets;
 }
-function buildGamePage(source, { extensions = {}, title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, slowdown = 1, initialMouse = null, renderer = 'webgl', touch = 'auto', diskFonts = [], stopOnUnlinkedRun = false, directories = [], restartFromEntry = false, entryFiles = {} } = {}) {
+function buildGamePage(source, { extensions = {}, systemInfo = null, title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, slowdown = 1, initialMouse = null, renderer = 'webgl', touch = 'auto', diskFonts = [], stopOnUnlinkedRun = false, directories = [], restartFromEntry = false, entryFiles = {} } = {}) {
+  require('../lib/amos/bankMemory')(new Map(), { systemInfo });
   if(!entryFiles || typeof entryFiles!=='object' || Array.isArray(entryFiles) || Object.values(entryFiles).some(value=>typeof value!=='string' || Array.from(value).some(character=>character.charCodeAt(0)>255)))throw Error('entryFiles must map names to byte strings');
   if(typeof restartFromEntry!=='boolean')throw Error('restartFromEntry must be boolean');
   require('../lib/amos/files').createMemoryFiles({},[],directories);
@@ -54,7 +55,7 @@ function buildGamePage(source, { extensions = {}, title = 'AMOS game', assets = 
   const runtime = `const create = (() => { const module = { exports: {} };\n${compiled}\nreturn module.exports; })();
 const model = (${model})(); const sprites = (${sprites})();
 const createRenderer = (${rendererFactory})(model, sprites, (${resources})(model), (${shaders}), (${layout}));
-(${require('./gamePageRuntime')})(create, JSON.parse(${json(JSON.stringify(assets))}), createRenderer, ${port}, ${json(fire)}, ${debug}, (${require('./gamePageUI')}), Object.fromEntries([${linked}]), ${json(initialMouse)}, ${json({ renderer, touch, diskFonts: fonts, stopOnUnlinkedRun, directories, restartFromEntry, entryFiles })});`;
+(${require('./gamePageRuntime')})(create, JSON.parse(${json(JSON.stringify(assets))}), createRenderer, ${port}, ${json(fire)}, ${debug}, (${require('./gamePageUI')}), Object.fromEntries([${linked}]), ${json(initialMouse)}, ${json({ renderer, touch, ...(systemInfo == null ? {} : { systemInfo }), diskFonts: fonts, stopOnUnlinkedRun, directories, restartFromEntry, entryFiles })});`;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${html(title)}</title>
 <style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:1.5rem auto;padding:0 1rem;background:#101721;color:#eef2f6}button,select{font:inherit;padding:.6rem;margin:.3rem}button{cursor:pointer}#play-game{display:block;background:#c71920;color:white;border:0;border-radius:.6rem;padding:1.1rem 2.5rem;font-size:2rem;font-weight:800}canvas{display:block;image-rendering:pixelated;max-width:100%;border:0}#game-status{font-size:.9rem}h1{font-size:1.5rem}summary{cursor:pointer}body[data-playing=true] #play-game{font-size:1rem;padding:.7rem 1.3rem}#game-surface{background:#05080c;border-radius:8px;overflow:hidden}</style></head><body>
