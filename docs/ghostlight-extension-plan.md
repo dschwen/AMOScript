@@ -273,3 +273,12 @@ failures. Keep static deductions, browser checks and actual Amiga captures disti
 **Next implementation task:** AMCAF playback, followed by interlaced/overscan
 integration for the atlas's original new-screen Unpack. Pt Play remains the
 first production whole-file compilation blocker.
+
+### AMCAF playback progress: pitch kernel
+
+The standalone source-derived pitch kernel now preserves all sixteen literal
+finetune tables, the 74-byte portamento-target stride, word-wrapped slides, arpeggio and
+integer sine vibrato with separate speed/depth memory. See
+[AMCAF tracker implementation](amcaf-tracker.md) for its vectors and remaining
+controller/host work. This is a prerequisite, not playback or a newly supported
+token: `Pt Play` is still gated.
