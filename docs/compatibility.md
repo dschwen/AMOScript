@@ -5,6 +5,9 @@ AMCAF V1.50beta4 or Turbo Plus V2.15 at configured slots. The first checked subs
 implements AMCAF integer/byte-string helpers and Bank Temporary, plus Turbo Word
 Hunt. Full Ghostlight compilation, graphics and AMCAF replay remain open; see
 the [milestone plan](ghostlight-extension-plan.md).
+Turbo F Plot/F Point/Set Planes and masked/plane-selected core block overloads
+now run the bounded INIT graphics excerpt, with six independent Canvas/GPU
+matrix frames. [Graphics contract](extension-graphics.md).
 
 Updated 2026-10-31. The current local baseline has **982 passing tests**, plus a
 passing real-Chromium rendering/input smoke test, 82 offline demo scenarios and

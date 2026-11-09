@@ -40,7 +40,7 @@ extension binaries or a runtime slot-selection step.
 | Library | Commands |
 |---|---|
 | AMCAF | Bank Temporary; Odd; Even; Vclip; Vin; Chr.w$; Chr.l$; Asc.w; Asc.l; Flush Libs; Audio Lock |
-| Turbo Plus | Word Hunt |
+| Turbo Plus | Word Hunt; F Plot; F Point; Set Planes |
 
 Function signatures retain their exact types and internal separators. Vclip/Vin
 use `(value, lower To upper)`; Word Hunt uses `(start To end, action, lower To
@@ -83,6 +83,8 @@ Expectations derive from the recovered routines, not native Amiga captures.
 The [system-information contract](system-information.md) adds explicit read-only
 Exec version metadata and portable startup command notifications. Ghostlight's
 bounded original PREPARE routine completes with this opt-in host setting.
+The [graphics subset](extension-graphics.md) now runs a declared original INIT
+graphics excerpt, with distinct graphics/block masks and word-rounded captures.
 Ghostlight still rejects at `Pt Play`, slot 8 `$108e`, line 43, byte 2084.
 No complete Ghostlight build or gameplay has passed. Continue with the
 [Ghostlight milestone plan](ghostlight-extension-plan.md): boot/system-information

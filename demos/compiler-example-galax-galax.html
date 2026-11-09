@@ -3009,7 +3009,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const next = {
       id, width, height, colours, mode, ham, zones: null, hidden: false, cloneOwner: null,
       pixels: new Uint8Array(width * height),
-      physicalPixels: null, doubleBuffered: false, autoback: 0,
+      physicalPixels: null, doubleBuffered: false, autoback: 0, graphicsPlaneMask: 255,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
       windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: Array.from(screens.values()).some(other => other.id !== id && other.windowed),
@@ -3357,10 +3357,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const cursor=[target.gx,target.gy],old=clippingGraphics;clippingGraphics=true;
     try{return painter(...args);}finally{[target.gx,target.gy]=cursor;clippingGraphics=old;}
   }
-  let clippingGraphics=true;
+  let clippingGraphics=true, rasterMasks=true;
   function drawing(painter, args) {
-    const previousClip=clippingGraphics;clippingGraphics=![write,centre,clearLine,clear,clearWindow].includes(painter);
-    try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;}
+    const previousClip=clippingGraphics, previousMask=rasterMasks;clippingGraphics=![write,centre,clearLine,clear,clearWindow].includes(painter);
+    rasterMasks=![write,centre,clearLine,clear,clearWindow,clearRect].includes(painter);
+    try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;rasterMasks=previousMask;}
   }
   function drawOwned(painter,args) {
     const target = screen();
@@ -3408,7 +3409,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function pixel(target, x, y, colour) {
     const clip=clippingGraphics&&target.graphicsClip;if(clip&&(x<clip.left||y<clip.top||x>=clip.right||y>=clip.bottom))return;
-    if (x >= 0 && y >= 0 && x < target.width && y < target.height) target.pixels[y * target.width + x] = colour;
+    if (x >= 0 && y >= 0 && x < target.width && y < target.height) {
+      const at = y * target.width + x, mask = rasterMasks ? target.graphicsPlaneMask : 255;
+      target.pixels[at] = (target.pixels[at] & ~mask) | (colour & mask);
+    }
   }
   function clear(colour = 0) {
     const target = screen();
@@ -3527,6 +3531,26 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     pixel(target, x, y, target.ink);
     target.gx = x; target.gy = y;
     changed();
+  }
+  function setGraphicsPlanes(value) { screen().graphicsPlaneMask = whole(value) & 255; }
+  function fastCoordinates(x,y) {
+    const target = screen(); whole(x); whole(y);
+    if (target.width % 16) throw Error('Fast pixels require a word-aligned bitmap width');
+    if (x < -32768 || x > 32767 || y < -32768 || y > 32767) throw Error('Fast pixels require signed-word coordinates');
+    return target;
+  }
+  function fastPlotRaw(x,y,colour) {
+    const target = screen(); target.pixels[y * target.width + x] = colour & (target.colours - 1); changed();
+  }
+  function fastPlot(x,y,colour) {
+    whole(colour); if (colour < 0) throw Error('F Plot requires a nonnegative colour');
+    const target = fastCoordinates(x,y);
+    if (x < 0 || y < 0 || x >= target.width || y >= target.height) return;
+    return drawOwned(fastPlotRaw,[x,y,colour]);
+  }
+  function fastPoint(x,y) {
+    const target = fastCoordinates(x,y);
+    return x < 0 || y < 0 || x >= target.width || y >= target.height ? -1 : target.pixels[y*target.width+x];
   }
   function point(x, y) {
     const target = screen();
@@ -3688,7 +3712,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const clip=clippingGraphics&&target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
       for (let y = Math.max(0, top,clip.top); y <= Math.min(target.height - 1, bottom,clip.bottom-1); y++) {
         if (left < clip.right && right >= clip.left) {
-          if(!target.fillPattern)target.pixels.fill(colour, y*target.width+Math.max(0,left,clip.left), y*target.width+Math.min(target.width-1,right,clip.right-1)+1);
+          if(!target.fillPattern) {
+            const first=Math.max(0,left,clip.left),last=Math.min(target.width-1,right,clip.right-1);
+            if (!rasterMasks || (target.graphicsPlaneMask & (target.colours-1)) === target.colours-1) target.pixels.fill(colour,y*target.width+first,y*target.width+last+1);
+            else for(let x=first;x<=last;x++)pixel(target,x,y,colour);
+          }
           else for(let x=Math.max(0,left,clip.left);x<=Math.min(target.width-1,right,clip.right-1);x++){const pattern=target.fillPattern;let c=0;for(let p=0;p<pattern.depth;p++)if(pattern.rows[p*pattern.height+(y&(pattern.height-1))]&(0x8000>>(x&15)))c|=1<<p;pixel(target,x,y,pattern.depth===1?(c?colour:target.inkBackground):c&(target.colours-1));}
         }
       }
@@ -3735,7 +3763,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (x < 0 || y < 0 || x >= target.width || y >= target.height) return;
     const clip=target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
     if(x<clip.left||y<clip.top||x>=clip.right||y>=clip.bottom)return;
-    const seed = y * target.width + x, colour = target.ink;
+    const seed = y * target.width + x, mask = target.graphicsPlaneMask;
+    const colour = (original & ~mask) | (target.ink & mask);
     if (original === colour || target.pixels[seed] !== original) return;
     // Two-argument InPaint2 selects mode 1: four-connected seed-colour fill.
     // Mark on enqueue so each bitmap pixel occupies the bounded queue once.
@@ -3799,7 +3828,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       for (let i = 0; i + 1 < intersections.length; i += 2) {
         const start = Math.max(left, Math.ceil(intersections[i] - 0.5));
         const end = Math.min(right + 1, Math.ceil(intersections[i + 1] - 0.5));
-        if (end > start) target.pixels.fill(target.ink, y * target.width + start, y * target.width + end);
+        if (end > start) {
+          if ((target.graphicsPlaneMask & (target.colours-1)) === target.colours-1) target.pixels.fill(target.ink,y*target.width+start,y*target.width+end);
+          else for(let x=start;x<end;x++)pixel(target,x,y,target.ink);
+        }
       }
     }
     for (let i = 0; i < points.length; i++) {
@@ -4189,6 +4221,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       points.forEach(pair => { if (!Array.isArray(pair) || pair.length !== 2) throw Error('Invalid Polyline point'); validatePattern(pair); coordinates(screen(), pair); });
       return drawing(polyline, [points]);
     },
+    setGraphicsPlanes, fastPlot, fastPoint,
     plot: (...args) => drawing(plot, args), draw: (...args) => { validatePattern(args); return drawing(draw, args); },
     drawTo: (...args) => { const target = screen(); validatePattern([target.gx, target.gy, ...args]); return drawing(drawTo, args); },
     box: (...args) => { validatePattern(args); return drawing(box, args); },
@@ -5758,18 +5791,28 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     sorted.sort((a,b)=>{a=value(a);b=value(b);return a<b?-1:a>b?1:0;});
     array.values.clear();sorted.forEach((v,i)=>{if(v!==array.defaultValue)array.values.set(i,v);});
   }
-  function getBlock(number, x, y, width, height) {
+  function getBlock(number, x, y, width, height, mask = 0) {
     [number,x,y,width,height] = [number,x,y,width,height].map(integer);
     const target = display.screen();
     if (number < 1 || number > 65535 || width <= 0 || height <= 0 || x < 0 || y < 0 || x + width > target.width || y + height > target.height) throw new Error('Invalid Get Block rectangle/number');
-    if (width % 16) throw new Error('Get Block requires a word-aligned width in this subset');
-    const saved = display.capture(x, y, width, height);
-    blocks.set(number, { x, y, image: { width, height, depth: Math.log2(target.colours), pixels: saved.pixels, masked: false, mask: null } });
+    mask = (integer(mask) & 65535) !== 0;
+    const saved = display.capture(x, y, width, height), rounded = Math.ceil(width / 16) * 16;
+    const pixels = new Uint8Array(rounded * height);
+    for (let row = 0; row < height; row++) pixels.set(saved.pixels.subarray(row * width, (row + 1) * width), row * rounded);
+    const image = { width: rounded, height, depth: Math.log2(target.colours), pixels, masked: mask, mask: null };
+    if (mask) makeImageMask(image);
+    blocks.set(number, { x, y, image });
   }
-  function putBlock(number, x = null, y = null) {
+  function putBlock(number, x = null, y = null, planes = null) {
     number = integer(number); const block = blocks.get(number);
     if (!block) throw new Error('Block not defined');
-    display.pasteGraphic(block.image, x == null ? block.x : integer(x), y == null ? block.y : integer(y), false);
+    x = x == null ? block.x : integer(x); y = y == null ? block.y : integer(y);
+    if (x === -2147483648) x = block.x; if (y === -2147483648) y = block.y;
+    if (x < -32768 || x > 32767 || y < -32768 || y > 32767) throw Error('Put Block requires signed-word coordinates');
+    planes = planes == null ? -2147483648 : integer(planes);
+    planes = planes === -2147483648 ? 65535 : planes & 65535;
+    // DrawBloc writes EcCurrent directly: no normal drawing/Autoback replay.
+    display.paste(block.image, x, y, block.image.masked, undefined, { planes });
   }
   function delBlock(number = null) { if (number == null) blocks.clear(); else { number = integer(number); if (number < 1 || number > 65535) throw new Error('Invalid block number'); blocks.delete(number); } }
   function delSprite(number) {
@@ -6851,6 +6894,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     requestOff: () => systemCommand('Request Off'),
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
+    extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
+    extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
+    extensionFastPoint: (x,y) => display.fastPoint(integer(x),integer(y)),
     extensionOdd: value => (integer(value) & 1) ? -1 : 0,
     extensionEven: value => (integer(value) & 1) ? 0 : -1,
     extensionVclip: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return Math.max(low, Math.min(high, value)); },

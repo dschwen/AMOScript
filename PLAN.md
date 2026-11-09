@@ -13,7 +13,10 @@ and typed function signatures now work across API/CLI/page/project/desktop build
 the first AMCAF utilities and Turbo Word Hunt have checked implementations.
 The [system-information contract](docs/system-information.md) now lets the bounded
 original PREPARE routine complete with explicit version metadata and startup
-notifications. Next: graphics/lighting, AMCAF music/SFX/timing and a complete
+notifications. The [graphics subset](docs/extension-graphics.md) now completes
+the declared INIT graphics excerpt, including all ten captured blocks, with Turbo pixels/planes,
+plus six independent Canvas/GPU matrix frames. Next: packed walls atlas and
+non-word-sized presentation, AMCAF music/SFX/timing and a complete
 local browser build. No full compilation or execution has passed yet; source/assets and
 generated full-game pages remain external to the public repository.
 

@@ -16,6 +16,15 @@ To Front and AMCAF Flush Libs/Audio Lock now let a bounded original PREPARE fixt
 complete with host-provided Exec versions 34 and 40. The rest of boot/graphics,
 music and gameplay remain open; there is still no complete game compilation.
 
+The [graphics subset](extension-graphics.md) now adds Turbo F Plot/F Point/Set
+Planes and core masked Get Block/plane-selected Put Block. Original INIT graphics
+lines 1791–1815 complete with the supplied sprite bank in a declared excerpt,
+including all ten block captures.
+Six synthetic matrix frames have Canvas/GPU parity. Eight of the game's eighteen
+third-party encodings are now implemented; the remaining ten include AMCAF
+playback, Raster Wait/Smouse Key and Turbo Amos Pri. The packed walls atlas and
+non-word-sized presentation still need separate work.
+
 ## What the initial investigation establishes
 
 The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
@@ -252,6 +261,6 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** graphics initialization/lighting and the AMCAF
-playback work. Pt Play remains the
+**Next implementation task:** the packed walls atlas/non-word-sized presentation
+and AMCAF playback work. Pt Play remains the
 first production whole-file compilation blocker.

@@ -76,7 +76,8 @@ AMOS programs.
   table, PAL/NTSC periods, default master volume and three-stage envelope.
   Sam Loop cannot loop it, and Stop cancels it. This is source-derived portable
   synthesis, not a recorded Amiga output or an emulation of mutable Wave/Envelope.
-- `Get Sprite` reuses checked owned image capture. `Get Block` (word-aligned widths), `Put Block`
+- `Get Sprite` reuses checked owned image capture. `Get Block` now supports
+  [word-rounded widths and transparent masks](extension-graphics.md); `Put Block`
   (original location or explicit x/y), `Del Block`, `Del Sprite` and bounded
   logical `Sprite Col` pixel-mask queries support the GALAX forms. Hardware
   channel allocation/collision timing and additional block overloads remain open.

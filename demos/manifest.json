@@ -506,6 +506,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html"
     },
     {
+      "file": "extension-graphics.html",
+      "title": "Turbo Plus pixels and masked lighting blocks",
+      "description": "Six independent indexed matrices cover graphics versus block plane masks, F Plot/F Point, rounded transparent captures and buffer publication; six real GPU comparisons. Synthetic lighting fixture, not Ghostlight gameplay or a native capture.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/extension-graphics.html"
+    },
+    {
       "file": "system-information.html",
       "title": "Portable system information and boot commands",
       "description": "Explicit read-only Exec version metadata, strict default bounds and synchronous Request Off/Amos To Front/AMCAF startup notifications. Synthetic programs; no machine RAM or OS emulation.",
