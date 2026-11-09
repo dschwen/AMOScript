@@ -282,3 +282,15 @@ integer sine vibrato with separate speed/depth memory. See
 [AMCAF tracker implementation](amcaf-tracker.md) for its vectors and remaining
 controller/host work. This is a prerequisite, not playback or a newly supported
 token: `Pt Play` is still gated.
+
+
+### AMCAF playback progress: tick controller
+
+The pure controller now executes the Ghostlight effect families through both
+modules' first end signal, preserving non-retriggering instrument-only repeat
+changes, original PCM, finetunes and volume latches. Synthetic tick tests cover
+flow and combined effects; `tools/check_amcaf_music.js` provides a bounded,
+read-only external trace without publishing private assets. Scheduling, the
+repeat-aware audio adapter and VM lifetime integration remain next. No `Pt Play`
+token support or audible playback is claimed yet; see
+[AMCAF tracker implementation](amcaf-tracker.md).
