@@ -107,7 +107,7 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Core Bchg `$2226` | Hex$ and drawing now compile. Bit changes, cursor strings and sprite-Anim forms remain; the requested Data/mod.4spirits asset is also missing. No substitute tune is silently supplied. |
+| Protracker | Core Bchg `$2226` | Hex$ and drawing now compile. Bit changes, cursor strings and sprite-Anim forms remain; the requested Data/mod.4spirits is now supplied from Modland (see [provenance](../examples/AMCAF/ASSETS.md)). |
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
@@ -128,7 +128,8 @@ Implementation order:
 2. **Protracker examples.** Masks and order/row/instrument/frequency/VU/signal
    queries, Hex$ and bounded raw plane graphics are implemented. Protracker2
    runs unchanged. Continue with the first version’s core Bchg/cursor-string/Anim
-   gaps and obtain its missing tune before claiming original music compatibility.
+   gaps before claiming original music compatibility. Its recovered tune passes
+   the MOD decoder and is preloaded under the original filename.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
    native OS libraries or parallel-port hardware must not become invented device
    readings; browser adapters and declared simulated inputs need honest labels.

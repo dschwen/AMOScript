@@ -2,7 +2,7 @@
 
 [Demo gallery](index.md)
 
-2/12 original programs compile. The original quick-maths example and Protracker2 music visualizer run with Canvas/WebGL. The remaining programs have explicit blocker pages. Sources and all four data files are preserved under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+2/12 original programs compile. The original quick-maths example and Protracker2 music visualizer run with Canvas/WebGL. The remaining programs have explicit blocker pages. Sources, four original data files and the separately recovered 4 spirits module are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
 

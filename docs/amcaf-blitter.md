@@ -81,5 +81,6 @@ with sound/fullscreen, pause/resume and mouse exit. This is browser/source-deriv
 evidence, not native captures or a full six-minute GUI replay.
 
 Protracker (the first version) advances past Hex$ to Bchg and other core/Anim
-forms. Its `Data/mod.4spirits` input is absent from the supplied distribution.
+forms. Its `Data/mod.4spirits` input has been recovered from Modland (see
+[asset provenance](../examples/AMCAF/ASSETS.md)).
 The compiler and asset builder do not silently replace it with Hawkeye.
