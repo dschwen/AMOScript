@@ -97,7 +97,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported token 0x5d0 at line 91, byte 4078"
+      "error": "Unsupported token 0x2226 at line 101, byte 4486"
     },
     {
       "source": "Protracker2.AMOS",
@@ -107,9 +107,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported extension 8:0x1030 (amcaf-1.50beta4) at line 61, byte 2904"
+      "runtime": "Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL.",
+      "compiled": true
     },
     {
       "source": "QsinCosArcSqr.AMOS",

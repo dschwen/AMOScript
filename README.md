@@ -32,7 +32,7 @@ link. See [demo instructions](demos/README.md) for local use.
 
 [AMOS Tutorial examples](https://github.com/dschwen/AMOScript/blob/master/demos/tutorial.md): a topic-based catalogue of all supplied programs, including build status and standalone development demos. See [rebuilding and remaining blockers](docs/tutorial.md).
 
-[Original AMCAF examples](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md): twelve supplied programs with individual pages and build/runtime status. The quick-maths mouse demo runs; the remaining examples have explicit blockers. See the [compatibility plan](docs/amcaf-examples.md).
+[Original AMCAF examples](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md): twelve supplied programs with individual pages and build/runtime status. The quick-maths mouse demo and original Protracker2 music visualizer run; the remaining examples have explicit blockers. See the [compatibility plan](docs/amcaf-examples.md).
 
 [Original AMOS compiler examples](https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.md): all 19 sources compile into individual debug pages. See [rebuild instructions and runtime limits](docs/compiler-examples.md).
 

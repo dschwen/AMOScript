@@ -7,6 +7,16 @@ module.exports=async function(browser){
   assert.strictEqual(manifest.programs.length,12);const catalogue=fs.readFileSync(path.join(root,'amcaf-examples.md'),'utf8');
   for(const item of manifest.programs)assert(catalogue.includes('https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+item.file));
   for(const p of manifest.programs){if(p.compiled)continue;await page.goto(pathToFileURL(path.join(root,p.file)).href);assert.strictEqual(await page.locator('pre').textContent(),p.error);assert.strictEqual(await page.locator('#play-game').count(),0);}
+  const music=manifest.programs.find(p=>p.source==='Protracker2.AMOS');assert(music.compiled);
+  await page.goto(pathToFileURL(path.join(root,music.file)).href);
+  await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const h=make(...args);return{...h,attach(p){window.protracker2=p;return h.attach(p);}};};});
+  await page.click('#play-game');await page.waitForFunction(()=>window.protracker2?.state.tracker.position?.position.sequence.ticks>=12);
+  assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-backend'),'webgl');assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-source-error'),'');
+  await page.locator('#game-stop').evaluate(node=>node.click());const meterTick=await page.evaluate(()=>protracker2.state.tracker.position.position.sequence.ticks);await page.waitForTimeout(60);assert.strictEqual(await page.evaluate(()=>protracker2.state.tracker.position.position.sequence.ticks),meterTick);
+  await page.locator('#game-resume').evaluate(node=>node.click());await page.waitForFunction(n=>protracker2.state.tracker.position.position.sequence.ticks>n,meterTick);
+  if(await page.evaluate(()=>!!document.fullscreenElement)){await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement);}
+  const meterCanvas=await page.locator('#game-input').boundingBox();await page.mouse.move(meterCanvas.x+meterCanvas.width/2,meterCanvas.y+meterCanvas.height/2);await page.mouse.down();await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='ended');await page.mouse.up();
+  await page.evaluate(()=>AMOS_GAME_PAGE.dispose());
   const q=manifest.programs.find(p=>p.source==='QsinCosArcSqr.AMOS');assert(q.compiled);
   await page.goto(pathToFileURL(path.join(root,q.file)).href);
   await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const h=make(...args);return{...h,attach(p){window.mathsProgram=p;return h.attach(p);}};};});
@@ -56,6 +66,6 @@ module.exports=async function(browser){
   await page.locator('#game-sound').click();await page.waitForFunction(n=>document.getElementById('game-viewport').dataset.sound==='on'&&audioRecovery.starts>n,starts);
   assert.strictEqual(await page.evaluate(()=>audioRecovery.attempts),3);
   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());assert.deepStrictEqual(errors,[]);assert.deepStrictEqual(network,[]);
-  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; one-click activation/suspension recovery passes; original Protracker interfaces remain blocked.');
+  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original Protracker2 animation/pause/mouse exit and quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; one-click activation/suspension recovery passes; the first Protracker version remains blocked.');
  }finally{await page.close();}
 };

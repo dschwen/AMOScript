@@ -8,11 +8,13 @@ Current priority is the original twelve-program AMCAF collection, now preserved
 under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.md) includes every
 program and its actual build/runtime status. The unchanged quick-maths example
 runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
-1/12 programs currently compile. Shared IMP! decompression and file/bank loading
+2/12 programs currently compile and run. Shared IMP! decompression and file/bank loading
 now pass bounded tests. Decimal/path helpers, native arithmetic shifts and raw
-Work-bank loading/saving are implemented with a standalone utility demo. Both
+Work-bank loading/saving are implemented with a standalone utility demo.
 Protracker playback, voice masks and six status/VU queries are implemented.
-The current Protracker blockers are core Hex$(value,width) and Turbo Draw. A declared Hawkeye harness plays the original IMP! module from a chip
+Hex$ and bounded Turbo Draw/Plot/Blitter Fill/Wait now run the entire original
+Protracker2 visualizer with WebGL. The first version reaches Bchg and later
+core/animation gaps; its requested mod.4spirits asset is also missing. A declared Hawkeye harness plays the original IMP! module from a chip
 Work bank with voice control, E0 filtering and EA/EB fine volume. Other first
 blockers include Change Bank Font and core Set Tempras, Peek$, Stop and Amos Here.
 Next address the Protracker examples, then fonts, devices, file/bank utilities and intro

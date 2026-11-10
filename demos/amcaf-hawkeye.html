@@ -3573,6 +3573,50 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     for(let y=y1;y<y2;y++)for(let x=left;x<right;x++)target.pixels[y*target.width+x]&=mask;
     changed();
   }
+  // AMCAF blitter paths write logical planes directly, bypassing AMOS drawing
+  // masks, cursors, clip rectangles and Bob/Autoback hooks.
+  function turboPlot(x,y,colour){
+    const target=screen();whole(x);whole(y);whole(colour);
+    if(x<-32768||x>32767||y<-32768||y>32767||target.width%16)throw Error('Turbo Plot requires signed-word coordinates and word-aligned bitmap');
+    if(x<0||y<0||x>=target.width||y>=target.height)return;
+    target.pixels[y*target.width+x]=colour&(target.colours-1);changed();
+  }
+  function turboDraw(x1,y1,x2,y2,colour,planes=null){
+    const target=screen();[x1,y1,x2,y2,colour].forEach(whole);if(planes!==null)whole(planes);
+    if(target.width%16||[x1,x2].some(x=>x<0||x>32767||x>=target.width)||[y1,y2].some(y=>y<0||y>32767||y>=target.height))throw Error('Turbo Draw requires bounded in-bitmap signed-word coordinates');
+    const single=planes!==null&&planes<0,mask=(planes===null?target.colours-1:Math.abs(planes))&(target.colours-1),pattern=target.linePattern;
+    if(!mask)return;
+    if(single&&(pattern!==65535||(colour&mask)!==mask))throw Error('Turbo Draw blitter lines require solid patterns and set colour bits for selected planes');
+    if(y2<=y1){[x1,x2]=[x2,x1];[y1,y2]=[y2,y1];}
+    const dx=Math.abs(x2-x1),dy=y2-y1,major=Math.max(dx,dy),minor=Math.min(dx,dy),sx=x2>=x1?1:-1;
+    if(major>1023||y1*(target.width/8)+Math.floor(x1/16)*2>32767)throw Error('Turbo Draw exceeds bounded blitter line geometry');
+    if(single&&!dy)return;
+    let error=minor*2-major,x=x1,y=y1,lastY=y1;
+    for(let step=0;step<=major;step++){
+      const at=y*target.width+x;
+      if(single){if(y!==lastY){target.pixels[at]^=mask;lastY=y;}}
+      else{const bits=(pattern&(32768>>>(step&15)))?colour&mask:0;target.pixels[at]=(target.pixels[at]&~mask)|bits;}
+      if(step===major)break;
+      if(error>=0){if(dx>=dy)y++;else x+=sx;error-=major*2;}
+      if(dx>=dy)x+=sx;else y++;error+=minor*2;
+    }
+    changed();
+  }
+  function fillBitplane(sourceId,sourcePlane,x1=0,y1=0,x2=null,y2=null,targetId=sourceId,targetPlane=sourcePlane){
+    const source=screen(whole(sourceId)),target=screen(whole(targetId));whole(sourcePlane);whole(targetPlane);
+    if(sourcePlane<0||sourcePlane>=Math.log2(source.colours)||targetPlane<0||targetPlane>=Math.log2(target.colours))throw Error('Blitter Fill bitplane out of bounds');
+    x2=x2===null?source.width:whole(x2);y2=y2===null?source.height:whole(y2);whole(x1);whole(y1);
+    if(source.width%16||target.width%16||[x1,x2].some(x=>x<0||x>32767||x>source.width||x>target.width)||[y1,y2].some(y=>y<0||y>32767||y>source.height||y>target.height))throw Error('Blitter Fill requires bounded bitmap rectangles');
+    const left=Math.floor(x1/16)*16,right=Math.ceil(x2/16)*16,height=y2-y1,words=(right-left)/16;
+    if(words<=0||height<=0)return;
+    if(words>63||height>1024)throw Error('Blitter Fill exceeds bounded blitter size');
+    const sourceBit=1<<sourcePlane,targetBit=1<<targetPlane;
+    for(let y=y2-1;y>=y1;y--){let carry=false;for(let x=right-1;x>=left;x--){
+      const bit=!!(source.pixels[y*source.width+x]&sourceBit),filled=bit!==carry,at=y*target.width+x;
+      target.pixels[at]=(target.pixels[at]&~targetBit)|(filled?targetBit:0);if(bit)carry=!carry;
+    }}
+    changed();
+  }
   function clearRect(colour, x1, y1, x2, y2) {
     const target = screen();
     rectangle(target, x1, y1, x2, y2, colourIndex(colour, target), true);
@@ -4358,6 +4402,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   open(0, 320, 200, 16, 0);
   return {
     interfaceDraw,interfaceMeasure,
+    turboDraw, turboPlot, fillBitplane, waitForBlitter:()=>true,
     clip, clearBitplane, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
@@ -6871,6 +6916,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       case 'Border$':case 'Zone$':{const limit=name==='Border$'?16:207;if(integer(b)<=0||integer(b)>=limit)throw Error('Invalid text border/zone number');const command=name==='Border$'?'E':'Z';return '\x1b'+command+'0'+a+'\x1b'+command+String.fromCharCode(48+integer(b));}
       case 'Upper$': return a.replace(/[a-z]/g, value => value.toUpperCase());
       case 'Lower$': return a.replace(/[A-Z]/g, value => value.toLowerCase());
+      case 'Hex$':case 'Hex$2':{
+        const text=(integer(a)>>>0).toString(16).toUpperCase(),digits=name==='Hex$'?-1:integer(b);
+        return '$'+(digits<0||digits>8?text:digits===0?'':text.padStart(8,'0').slice(8-digits));
+      }
       case 'Str$': return (value(a) < 0 ? '' : ' ') + String(value(a));
       case 'Len': return a.length;
       case 'Asc': return a.length ? a.charCodeAt(0) : 0;
@@ -7261,6 +7310,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     extensionQcos:(a,r)=>amcafMath().cos(integer(a),integer(r)),
     extensionQsqr:v=>amcafMath().sqr(integer(v)),
     extensionQarc:(x,y)=>amcafMath().arc(integer(x),integer(y)),
+    extensionTurboDraw:(...args)=>display.turboDraw(...args.map(integer)),
+    extensionTurboPlot:(...args)=>display.turboPlot(...args.map(integer)),
+    extensionBlitterFillTo:(s,p,t,q)=>display.fillBitplane(integer(s),integer(p),0,0,null,null,integer(t),integer(q)),
+    extensionBlitterFill:(...args)=>display.fillBitplane(...args.map(integer)),
+    // The portable blitter completes every write synchronously; this barrier
+    // has no outstanding DMA to wait on and does not invent a field delay.
+    extensionBlitterWait:()=>display.waitForBlitter(),
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,

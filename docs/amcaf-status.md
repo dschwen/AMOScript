@@ -2,9 +2,8 @@
 
 [Run the standalone status demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-status.html).
 The synthetic compiled program selects extension slot 19 and prints two reports
-while music advances on the driver's field clock. The two original Protracker
-interfaces now compile these functions, but formatting and graphics still block
-the full programs.
+while music advances on the driver's field clock. Both original Protracker interfaces compile these functions. Protracker2 now
+runs; the first version has additional core/animation gaps and a missing tune.
 
 ## Native meanings
 
@@ -68,6 +67,6 @@ order row instrument frequency VU VU-again signal signal-again
 ```
 
 These are independent source-derived checks and browser execution, not Amiga
-captures. The original music interfaces still need the core two-argument Hex$
-overload, Turbo Draw, Blitter Fill, and additional plotting/wait forms. Adding
-queries alone is not counted as another completed original example.
+captures. Hex$, Turbo Draw, Blitter Fill and plotting/wait forms now also
+support the unchanged Protracker2 interface. The first Protracker version remains
+blocked by Bchg and later core/animation forms, and its requested tune is absent.

@@ -9,7 +9,7 @@ separate private project and are not part of this collection.
 **[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
-coverage are separate: currently **1/12 compiles and runs**, not twelve completed
+coverage are separate: currently **2/12 compile and run**, not twelve completed
 demos.
 
 ## Working example: quick maths
@@ -28,14 +28,31 @@ axis-needle pixels, circle cardinal points, three complete GPU/Canvas comparison
 and actual mouse/exit/restart input on the application page. These are browser
 and source-derived checks, not native Amiga captures.
 
+## Working example: original Protracker2
+
+[Play Protracker2](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html)
+loads the supplied Hawkeye tune and runs the entire unchanged AMOS visualizer.
+Its frequency meters, rainbow bands, scrolling note trail and double buffers
+run through the original loop. Press a mouse button on the canvas to exit.
+Page Stop/Resume pauses the whole VM and music; sound/fullscreen and Restart
+use the shared application harness.
+
+[Graphics browser checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-blitter.html)
+include four primitive stages and four original first-note frames, 196,608
+independent indexed-pixel checks and eight Canvas/WebGL pairs. The independent
+original-frame region covers the meters; the note trail has full CPU/GPU
+regressions. No VM variables, instruction pointers or source bytes are edited.
+These are source-derived checks, not native captures or whole-song GUI replay.
+See the [blitter contract](amcaf-blitter.md) for supported geometry and fill rules.
+
 ## Music support preview
 
 [Play the original Hawkeye tune](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html)
 in a declared compiled AMOS harness. It loads the supplied IMP! file into a chip
 Work bank and plays it with the AMCAF engine. Press a key to disable voice 1,
 a second to re-enable it, and a third to stop. The page supports sound,
-fullscreen, Stop/Resume and Restart. This is additional music coverage; the two
-original Protracker interfaces still do not compile.
+fullscreen, Stop/Resume and Restart. This is a separate music harness. The original Protracker2 interface now runs;
+the first version remains blocked.
 
 [Voice DMA browser checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html)
 compare four independent constant-wave stereo mixes in native offline Web Audio
@@ -79,7 +96,7 @@ python3 tools/reference/inventory_amcaf_examples.py > examples/AMCAF/inventory.j
 python3 tools/reference/check_amcaf_math.py > test/fixtures/amcaf/math.json
 ```
 
-The eleven statically walkable programs use 155 distinct AMCAF offsets; 37 of
+The eleven statically walkable programs use 155 distinct AMCAF offsets; 45 of
 those offsets are currently registered. The protected/native-code program is not
 included in that count. The inventory describes encoded calls, not implemented
 runtime compatibility.
@@ -90,8 +107,8 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Core two-argument Hex$ `$05d0` | Playback and status/VU queries are implemented; core formatting and Turbo Draw/Blitter Fill remain. |
-| Protracker2 | Turbo Draw `$1030` | Playback and status/VU queries are implemented; masked line drawing, fill/plot operations and graphics checks remain. |
+| Protracker | Core Bchg `$2226` | Hex$ and drawing now compile. Bit changes, cursor strings and sprite-Anim forms remain; the requested Data/mod.4spirits asset is also missing. No substitute tune is silently supplied. |
+| Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
 | GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |
@@ -109,8 +126,9 @@ Implementation order:
    Standalone file/bank commands share the decoder; continue with the newly
    exposed blockers below. These tests do not establish full intro/music runtime compatibility.
 2. **Protracker examples.** Masks and order/row/instrument/frequency/VU/signal
-   queries are implemented. Next add the core Hex$ overload and bounded raw
-   plane graphics, retaining the independent music clock.
+   queries, Hex$ and bounded raw plane graphics are implemented. Protracker2
+   runs unchanged. Continue with the first version’s core Bchg/cursor-string/Anim
+   gaps and obtain its missing tune before claiming original music compatibility.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
    native OS libraries or parallel-port hardware must not become invented device
    readings; browser adapters and declared simulated inputs need honest labels.
@@ -229,4 +247,4 @@ latches; repeated status reads cannot generate extra music ticks.
 [The query contract](amcaf-status.md) documents native units, the low instrument
 nibble, signal effect 8, supported channel bounds and retained post-Stop state.
 The standalone synthetic program exercises relocated extension slot 19 and two
-actual compiled reports. This is support coverage, not either original GUI.
+actual compiled reports. The separate Protracker2 page now runs its original GUI.

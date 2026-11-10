@@ -16,7 +16,7 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
  for(const name of fs.readdirSync(source).filter(name=>/\.amos$/i.test(name)).sort()){
   const slug=name.replace(/\.amos$/i,'').toLowerCase(),file=(repository?'amcaf-example-':'')+slug+'.html',bytes=fs.readFileSync(path.join(source,name));
   const record=inventory.find(p=>p.source===name);if(!record||record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex'))throw Error('AMCAF source inventory differs: '+name);
-  const item={source:name,file,bytes:bytes.length,sha256:record.sha256,extensions,runtime:name==='QsinCosArcSqr.AMOS'?'Original input loop, three mouse directions, double-buffer publication and Escape exit covered.':'Not yet verified in browser checks.'};
+  const item={source:name,file,bytes:bytes.length,sha256:record.sha256,extensions,runtime:name==='Protracker2.AMOS'?'Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL.':name==='QsinCosArcSqr.AMOS'?'Original input loop, three mouse directions, double-buffer publication and Escape exit covered.':'Not yet verified in browser checks.'};
   const nav=`<nav><a href="${repository?github(index):index}">AMCAF examples</a> · <a href="${index}">Local catalogue</a></nav>`;
   try{
    const module=new Transpiler(bytes,{extensions}).toModule({optimize:true});
@@ -33,9 +33,11 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
 
 ${link('Demo gallery',repository?'index.md':github('index.md'))}
 
-${count}/${programs.length} original programs compile. The quick-maths example runs with mouse input, fullscreen and Canvas/WebGL. The remaining programs have explicit blocker pages. Sources and all four data files are preserved under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+${count}/${programs.length} original programs compile. The original quick-maths example and Protracker2 music visualizer run with Canvas/WebGL. The remaining programs have explicit blocker pages. Sources and all four data files are preserved under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
-## Try the working example
+## Try the working examples
+
+${link('Protracker2 — original music visualizer',repository?preview('amcaf-example-protracker2.html'):'protracker2.html')}: start the supplied Hawkeye tune, watch the frequency meters and note trail, then press a mouse button on the canvas to exit.
 
 ${link('Quick sine, cosine, angle and square root',repository?preview('amcaf-example-qsincosarcsqr.html'):'qsincosarcsqr.html')}: move the pointer to aim the line and resize the circle. Press Escape outside fullscreen or a mouse button to exit.
 
@@ -45,9 +47,11 @@ ${link('Protracker status and VU support checks',preview('amcaf-status.html'))}.
 
 ${link('String, shift and raw Work-file support checks',preview('amcaf-utilities.html'))} — a synthetic compatibility demo for the shared utilities needed by the remaining examples.
 
+${link('Blitter graphics and original Protracker2 browser checks',preview('amcaf-blitter.html'))}.
+
 ## Music support preview
 
-${link('Play Hawkeye with AMCAF voice controls',preview('amcaf-hawkeye.html'))}. A declared compiled harness loads the original packed module into a chip Work bank. Press keys to disable voice 1, re-enable it, then stop. The two original Protracker interfaces still have compile blockers. ${link('Voice DMA and native audio graph checks',preview('amcaf-voice.html'))}.
+${link('Play Hawkeye with AMCAF voice controls',preview('amcaf-hawkeye.html'))}. A declared compiled harness loads the original packed module into a chip Work bank. Press keys to disable voice 1, re-enable it, then stop. Protracker2 now has its own original visualizer page above; the first Protracker version remains blocked. ${link('Voice DMA and native audio graph checks',preview('amcaf-voice.html'))}.
 
 ## Complete collection
 

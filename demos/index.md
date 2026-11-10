@@ -30,7 +30,7 @@ Play the shooter with sound, fullscreen, keyboard/Gamepad and optional touch con
 
 ### AMCAF — original example collection
 
-Twelve original AMCAF programs with sources, bundled assets and explicit build/runtime status. The quick-maths mouse demo runs; the catalogue records the remaining blockers.
+Twelve original AMCAF programs with sources, bundled assets and explicit build/runtime status. The original quick-maths mouse demo and Protracker2 music visualizer run; the catalogue records the remaining blockers.
 
 [Browse collection](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md) · [Local file](amcaf-examples.md)
 
@@ -103,7 +103,7 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (92 demos)</summary>
+<summary>Compiler and runtime checks (93 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
 
@@ -341,9 +341,15 @@ Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle P
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html) · [Local file](roller2-amos-music.html)
 
+### AMCAF blitter graphics and original Protracker2
+
+Raw Turbo Draw/Plot, single-dot polygon edges and exclusive Blitter Fill update logical planes, with explicit buffer swaps. Four independent primitive matrices and four unchanged Protracker2 frames cover its first frequency meters and mouse exit; eight real GPU comparisons. These are source-derived expectations, not native Amiga captures.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-blitter.html) · [Local file](amcaf-blitter.html)
+
 ### AMCAF Protracker status and VU queries
 
-A synthetic compiled program maps AMCAF to slot 19 and prints order, next row, current instrument nibble, base-period frequency, destructive VU and signal results at two field-clock positions. One thousand reads do not advance music. Stopped/retired-bank queries retain owned status. The original player GUIs still need graphics support.
+A synthetic compiled program maps AMCAF to slot 19 and prints order, next row, current instrument nibble, base-period frequency, destructive VU and signal results at two field-clock positions. One thousand reads do not advance music. Stopped/retired-bank queries retain owned status. Protracker2 now runs; the first Protracker interface remains blocked.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-status.html) · [Local file](amcaf-status.html)
 
