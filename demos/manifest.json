@@ -254,6 +254,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
     },
     {
+      "file": "amcaf-voice.html",
+      "title": "AMCAF voice DMA and Hawkeye module checks",
+      "description": "Four native offline Web Audio graphs compare independently calculated constant-wave stereo mixes through disable/re-enable and note retrigger. Checks also cover a partial-field flush and the supplied packed Hawkeye module through its first wrap. The Hawkeye trace is a source-derived regression, not an Amiga capture.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html"
+    },
+    {
       "file": "amcaf-utilities.html",
       "title": "AMCAF strings, shifts and raw Work files",
       "description": "A compiled synthetic program selects AMCAF in slot 19, round-trips all 256 byte values through Wload/Wsave/Dsave, and prints decimal, lexical path and signed-shift results. This is a primitive compatibility check, not an original utility or native Amiga capture.",
@@ -624,6 +630,12 @@
       "title": "Planet Zybex — full game with debug enabled",
       "description": "The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html"
+    },
+    {
+      "file": "amcaf-hawkeye.html",
+      "title": "AMCAF Hawkeye — packed music preview",
+      "description": "The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker interfaces remain blocked.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html"
     },
     {
       "file": "amcaf-examples.md",

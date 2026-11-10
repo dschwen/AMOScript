@@ -27,6 +27,7 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
   }catch(error){item.compiled=false;item.runtime='Not executed: compilation blocked.';item.error=error.message;outputs.set(file,document(name,nav+`<h1>${escape(name)}</h1><p>This original example does not compile yet. Its source is retained unchanged and its current first blocker is shown below.</p><pre>${escape(item.error)}</pre><p>See the <a href="${repository?'https://github.com/dschwen/AMOScript/blob/master/docs/amcaf-examples.md':'../../docs/amcaf-examples.md'}">compatibility plan</a> for remaining command families and assets.</p>`));}
   programs.push(item);
  }
+ if(repository)outputs.set('amcaf-hawkeye.html',buildGamePage(require('../test/helpers/amcafHawkeyeProgram')(),{extensions,title:'AMCAF — Hawkeye music harness',assets,debug:true,optimize:true}));
  const count=programs.filter(p=>p.compiled).length;
  outputs.set(index,`# Original AMCAF examples
 
@@ -41,6 +42,10 @@ ${link('Quick sine, cosine, angle and square root',repository?preview('amcaf-exa
 ${link('Quick-maths browser checks and captured frames',preview('amcaf-quick-maths.html'))}
 
 ${link('String, shift and raw Work-file support checks',preview('amcaf-utilities.html'))} — a synthetic compatibility demo for the shared utilities needed by the remaining examples.
+
+## Music support preview
+
+${link('Play Hawkeye with AMCAF voice controls',preview('amcaf-hawkeye.html'))}. A declared compiled harness loads the original packed module into a chip Work bank. Press keys to disable voice 1, re-enable it, then stop. The two original Protracker interfaces still have compile blockers. ${link('Voice DMA and native audio graph checks',preview('amcaf-voice.html'))}.
 
 ## Complete collection
 

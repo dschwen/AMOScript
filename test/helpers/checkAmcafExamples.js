@@ -19,6 +19,20 @@ module.exports=async function(browser){
   await page.locator('#game-restart').evaluate(node=>node.click());await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='running');
   await page.locator('#game-stop').evaluate(node=>node.click());assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-phase'),'stopped');
   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());assert.deepStrictEqual(errors,[]);assert.deepStrictEqual(network,[]);
-  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original quick-maths mouse/exit/restart with WebGL. Other programs remain blocked.');
+  await page.goto(pathToFileURL(path.join(root,'amcaf-hawkeye.html')).href);
+  await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const h=make(...args);return{...h,attach(p){window.hawkeye=p;return h.attach(p);}};};});
+  await page.click('#play-game');await page.waitForFunction(()=>window.hawkeye?.state.tracker.position?.position.sequence.ticks>=8);
+  assert.strictEqual(await page.evaluate(()=>hawkeye.banks.get(3).name),'Work    ');
+  assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-backend'),'webgl');
+  if(await page.evaluate(()=>!!document.fullscreenElement)){await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement);}
+  await page.selectOption('#game-keyboard','typing');await page.locator('#game-input').focus();await page.keyboard.press('x');
+  await page.waitForFunction(()=>hawkeye.state.tracker.position.position.mask===14);
+  const muted=await page.evaluate(()=>hawkeye.state.tracker.position.position.sampler.voices[0].active);assert.strictEqual(muted,false);
+  await page.keyboard.press('x');await page.waitForFunction(()=>hawkeye.state.tracker.position.position.mask===15);
+  await page.locator('#game-stop').evaluate(node=>node.click());const ticks=await page.evaluate(()=>hawkeye.state.tracker.position.position.sequence.ticks);await page.waitForTimeout(60);assert.strictEqual(await page.evaluate(()=>hawkeye.state.tracker.position.position.sequence.ticks),ticks);
+  await page.locator('#game-resume').evaluate(node=>node.click());await page.waitForFunction(n=>hawkeye.state.tracker.position.position.sequence.ticks>n,ticks);
+  await page.locator('#game-input').focus();await page.keyboard.press('x');await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='ended');
+  await page.evaluate(()=>AMOS_GAME_PAGE.dispose());assert.deepStrictEqual(errors,[]);assert.deepStrictEqual(network,[]);
+  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; original Protracker interfaces remain blocked.');
  }finally{await page.close();}
 };

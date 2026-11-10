@@ -66,7 +66,7 @@ counts describe encoded order traversal, not a completed playback trace.
 cells, order slots, instrument descriptors and PCM. It deliberately does not run
 AMOS Track Play's destructive sample-prefix and finetune preprocessing. All
 patterns, including unused ones, are checked before ticking. Supported effects
-are 0, 1, 2, 3, 4, 5, 6, A, B, C, D and F; other effects and B parameters above
+are 0, 1, 2, 3, 4, 5, 6, A, B, C, D, E0, EA, EB and F; other effects and B parameters above
 127 reject. Sample lengths and repeat ranges are checked; empty instruments
 produce zero-length DMA intents rather than unchecked memory reads.
 

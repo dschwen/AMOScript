@@ -125,3 +125,30 @@ test('AMCAF VM: compiled raw-only playback needs no MOD, releases its own wake a
   clock.tick(10000);p.extensionPtRawPlay(8,p.bankStart(5),4,8000);assert.strictEqual(clock.pending(),1);
   p.stop();clock.tick(200);p.resume();clock.tick(20);assert.strictEqual(clock.pending(),0);p.extensionPtStop();
 });
+
+test('AMCAF VM: raw chip Work MODs play without Tracker workspace; user masks persist across songs and retain bank protection',()=>{
+ const clock=createFakeTimers(),events=[],create=compile([[extension(0x0456),text('music'),t(','),n(-7)],[extension(0x10d6),n(0x1000e)],[extension(0x108e),n(7)],[t('Wait Key')]]);
+ const p=create({...clock,files:createFiles({music:raw.toString('latin1')}),audio:{command:e=>events.push(e)}});
+ try{p.tick(1000);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.banks.get(7).name,'Work    ');assert.deepStrictEqual(Buffer.from(p.banks.get(7).data),raw);clock.tick(160);
+  assert.strictEqual(p.state.tracker.position.position.mask,14);assert(events.filter(e=>e.type==='pcm').every(e=>e.mask===14&&e.channels[0].every(v=>v===0)));
+  assert.throws(()=>p.poke(p.bankStart(7),0),/active Tracker/);p.extensionPtStop();p.extensionPtPlay(7);clock.tick(160);assert.strictEqual(p.state.tracker.position.position.mask,14);
+  const old=p.state.tracker.position;p.reserveWork(9,4);assert.throws(()=>p.extensionPtPlay(9),/chip bank/);assert.strictEqual(p.state.tracker.position,old);
+  p.extensionWload('music',-7);assert.strictEqual(p.state.tracker.playing,false);assert.strictEqual(clock.pending(),0);
+ }finally{p.stop();}
+});
+
+test('AMCAF VM: malformed Work module preflight preserves current playback and host callback Stop during mask flush cannot restart ticks',()=>{
+ let current,armed=false;const {p,clock}=start({speed:0,host:e=>{if(armed&&e.type==='pcm'){armed=false;current.stop();}}});current=p;
+ try{p.reserveChipWork(9,1084);const prior=p.state.tracker.position;assert.throws(()=>p.extensionPtPlay(9),/MOD/);assert.strictEqual(p.state.tracker.position,prior);
+  clock.tick(145);armed=true;p.extensionPtVoice(0);assert(p.state.stopped);assert.strictEqual(clock.pending(),0);const ticks=p.state.tracker.position.position.sequence.ticks;
+  clock.tick(100);assert.strictEqual(p.state.tracker.position.position.sequence.ticks,ticks);p.resume();clock.tick(20);assert.strictEqual(p.state.tracker.position.position.mask,0);
+ }finally{p.stop();}
+});
+
+test('AMCAF VM: E0 filter notification updates shared intent and synchronous host Stop defers tick cleanup safely',()=>{
+ const bytes=Buffer.from(raw);bytes[1086]=0x1e;bytes[1087]=0;
+ const clock=createFakeTimers();let p,armed=true;
+ const make=compile([[[w(0x4e),[1,0],w(0x2ba)],text('music'),t(','),n(3)],[extension(0x10f2),n(0)],[extension(0x108e),n(3)],[t('Wait Key')]]);
+ p=make({...clock,files:createFiles({music:bytes.toString('latin1')}),audio:{command:e=>{if(armed&&e.type==='filter'&&e.enabled){armed=false;p.stop();}}}});
+ try{p.tick(1000);clock.tick(140);assert(p.state.stopped);assert.strictEqual(p.state.audio.filterEnabled,true);assert.strictEqual(clock.pending(),0);assert.strictEqual(p.state.tracker.position.position.sequence.ticks,6);p.resume();clock.tick(20);assert.strictEqual(p.state.tracker.position.position.sequence.ticks,7);}finally{p.stop();}
+});

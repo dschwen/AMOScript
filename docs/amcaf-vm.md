@@ -1,17 +1,18 @@
 # AMCAF Protracker VM integration
 
-The `amcaf-1.50beta4` compilation profile now registers four statements:
+The `amcaf-1.50beta4` compilation profile provides these base playback statements:
 
 | Offset | Statement | Portable subset |
 | --- | --- | --- |
-| `$108e` | `Pt Play bank` | Checked chip `Tracker ` bank produced by Track Load |
+| `$108e` | `Pt Play bank` | Complete MOD in a generic chip bank, or Track Load’s `Tracker ` bank |
+| `$10d6` | `Pt Voice mask` | Persistent low-four-bit music gate; disable DMA immediately, resume at a new trigger |
 | `$10a8` | `Pt Stop` | Stop the owned AMCAF player and cancel its wake |
 | `$10c6` | `Pt Volume value` | Native signed-long/low-word clamp; delayed register latches |
 | `$10f2` | `Pt Cia Speed value` | Zero selects VBL; 32..255 select CIA tempo |
 
 Slots remain explicit and relocatable, for example `--extension
 8=amcaf-1.50beta4`. The cached two-argument Pt Play overload, native raw addresses,
-M!K! files and other bank forms remain gated. This does not alias AMOS Track Play:
+M!K! files, fast-memory and object banks remain gated. This does not alias AMOS Track Play:
 finetunes, PCM bytes and repeats retain AMCAF semantics.
 
 ## Clock and rendering
@@ -20,8 +21,7 @@ finetunes, PCM bytes and repeats retain AMCAF semantics.
 the driver's existing owned tracker wake. It reads the driver's fractional
 field clock, including during Wait Key and other waits; it does not use rAF,
 instruction throughput or an independent host timer. Normal AMOS Track Play
-retains its whole-field behavior. Emitted factories include the five AMCAF
-helpers only when their compilation profile is selected.
+retains its whole-field behavior. AMCAF helpers are embedded only when their compilation profile is selected.
 
 CIA mode starts at native tempo 125. AMCAF R179 supplies dividend 1,773,447 for
 PAL and 1,789,773 for NTSC; the portable profile computes the timer latch with
@@ -56,7 +56,7 @@ validation. The native routine stops first; preflight-before-replacement is the
 portable error policy. Pt Play during AMOS Music rejects. AMOS Track Play can
 replace AMCAF through ordinary tracker cleanup; Pt Stop during standard Track
 Play rejects. Standard sample/voice commands during AMCAF are explicitly gated
-until Pt Sam/Raw ownership is implemented.
+in favor of the implemented bounded Pt Sam/Raw commands.
 
 The active bank uses the shared Tracker identity and checked bank-memory guard.
 Poke/Bload/bulk writes reject while playing. Replacement, erasure and shrink
@@ -113,3 +113,5 @@ all have bounded implementations. [Interlaced Unpack Screen](interlaced-unpack.m
 now creates the atlas and the private WebGL page reaches level 1 with music.
 A bounded input check uses a match without an error; sustained gameplay and
 completion remain unverified.
+
+[Pt Voice, raw Work modules and E0/EA/EB effects](amcaf-voice.md) extend this foundation.

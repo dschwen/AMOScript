@@ -11,8 +11,10 @@ runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser inpu
 1/12 programs currently compile. Shared IMP! decompression and file/bank loading
 now pass bounded tests. Decimal/path helpers, native arithmetic shifts and raw
 Work-bank loading/saving are implemented with a standalone utility demo. Both
-Protracker examples now reach Pt Voice; other first blockers include Change Bank
-Font and core Set Tempras, Peek$, Stop and Amos Here.
+Protracker examples now compile Pt Voice and reach status queries (Pt Cpattern /
+Pt Cinstr). A declared Hawkeye harness plays the original IMP! module from a chip
+Work bank with voice control, E0 filtering and EA/EB fine volume. Other first
+blockers include Change Bank Font and core Set Tempras, Peek$, Stop and Amos Here.
 Next address the Protracker examples, then fonts, devices, file/bank utilities and intro
 effects. The protected/native AGA source has a separate format boundary.
 See [AMCAF example support](docs/amcaf-examples.md).

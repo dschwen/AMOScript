@@ -94,8 +94,8 @@ test('AMCAF sequencer: speed/tempo changes, BCD break, jump and independent coun
 
 test('AMCAF sequencer: validates unused effects before ticks; freezes snapshots, stops once and attributes pitch failures', () => {
   const m = fixture(); m.patterns.push(m.patterns[0].map(c => ({ ...c })));
-  m.patterns[1][255].effect = 14;
-  assert.throws(() => create(m, pitch), /unsupported effect e:0 at pattern 1, row 63, channel 3/);
+  m.patterns[1][255].effect = 14; m.patterns[1][255].parameter = 0x10;
+  assert.throws(() => create(m, pitch), /unsupported effect e:10 at pattern 1, row 63, channel 3/);
   m.patterns.pop(); cell(m, 0, 0, 1, 1); m.samples[0].finetune = -1;
   const p = create(m, pitch); ticks(p, 5);
   assert.throws(() => p.tick(), /table address.*AMCAF tick 6, order 0, row 0/);
@@ -104,4 +104,13 @@ test('AMCAF sequencer: validates unused effects before ticks; freezes snapshots,
   const other = create(fixture(), pitch); other.stop(); other.stop(); assert.strictEqual(other.tick(), null);
   const standalone = vm.runInNewContext(`(${create.toString()})(input, (${pitch.toString()}))`, { input: fixture() });
   assert.strictEqual(ticks(standalone, 6).isRow, true);
+});
+
+test('AMCAF extended effects: E0 repeats filter intent while EA/EB change volume only on row tick with clamping',()=>{
+ const m=fixture();cell(m,0,0,1,428,14,0xa3);cell(m,0,1,0,0,14,0x01);cell(m,1,0,0,0,14,0xbf);cell(m,1,1,0,0,14,0x00);
+ m.samples[0].volume=63;const p=create(m,pitch);ticks(p,5);let f=p.tick();assert.strictEqual(f.state.voices[0].volume,64);assert.deepStrictEqual(f.filters,[false]);
+ for(let i=0;i<5;i++){f=p.tick();assert.strictEqual(f.state.voices[0].volume,64);assert.deepStrictEqual(f.filters,[false]);}
+ f=p.tick();assert.strictEqual(f.state.voices[0].volume,49);assert.deepStrictEqual(f.filters,[true]);
+ for(let i=0;i<5;i++)assert.strictEqual(p.tick().state.voices[0].volume,49);
+ const muted=fixture();cell(muted,0,0,1,428,12,7);muted.samples[0].volume=32;const q=create(muted,pitch);ticks(q,5);assert.strictEqual(q.tick(14).state.voices[0].volume,32,'disabled Cxx must not store its volume');
 });

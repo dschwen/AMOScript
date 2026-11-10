@@ -103,7 +103,7 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (89 demos)</summary>
+<summary>Compiler and runtime checks (91 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
 
@@ -340,6 +340,12 @@ Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original samp
 Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. Separate direct-player foundation; the VM demo adds command/lifecycle integration.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html) · [Local file](roller2-amos-music.html)
+
+### AMCAF voice DMA and Hawkeye module checks
+
+Four native offline Web Audio graphs compare independently calculated constant-wave stereo mixes through disable/re-enable and note retrigger. Checks also cover a partial-field flush and the supplied packed Hawkeye module through its first wrap. The Hawkeye trace is a source-derived regression, not an Amiga capture.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html) · [Local file](amcaf-voice.html)
 
 ### AMCAF strings, shifts and raw Work files
 
@@ -640,6 +646,12 @@ The full current game and assets with a Debug menu for downloading modified sess
 The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html) · [Local file](planet-zybex-game-debug.html)
+
+### AMCAF Hawkeye — packed music preview
+
+The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker interfaces remain blocked.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html) · [Local file](amcaf-hawkeye.html)
 
 </details>
 

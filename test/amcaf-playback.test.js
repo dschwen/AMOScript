@@ -73,3 +73,23 @@ test('AMCAF clock: host Stop during raw takeover or VBL release defers pause unt
     assert.strictEqual(p.state.position.sampler.rawMask,0);p.stop();
   }
 });
+
+test('AMCAF Pt Voice: flush partial fields, disable DMA, keep ticks running and wait for a real new note after re-enable',()=>{
+ const events=[],p=create(moduleData(),factories,{sampleRate:8000,cia:false,host:{command:e=>events.push(e)}});
+ p.advance(7);assert(events.at(-1).channels[0].some(v=>v!==0));const before=p.state.position.sequence.ticks;
+ p.setVoiceMask(14,7.25);assert.strictEqual(events.at(-2).channels[0].length,40);assert.deepStrictEqual(events.at(-1),{type:'stop',mask:1});
+ assert.strictEqual(p.state.position.sampler.voices[0].active,false);assert.strictEqual(p.nextField(),8);
+ p.advance(13);assert.strictEqual(p.state.position.sequence.ticks,before+6);assert.strictEqual(events.at(-1).mask,14);
+ p.setVoiceMask(15,13.25);p.advance(14);assert(events.at(-1).channels[0].every(v=>v===0));
+ while(p.state.position.sequence.ticks<149){p.advance(p.nextField());assert(events.at(-1).channels[0].every(v=>v===0));}
+ p.advance(150);p.advance(151);assert(events.at(-1).channels[0].some(v=>v!==0));p.stop();
+});
+
+test('AMCAF Pt Voice: pause retains the user mask; raw DMA is silenced without discarding its lease',()=>{
+ const p=create(moduleData(),factories,{sampleRate:8000,cia:false});p.advance(7);p.pause();
+ const ticks=p.state.position.sequence.ticks;p.setVoiceMask(0,100);assert.strictEqual(p.state.position.mask,0);assert.strictEqual(p.state.position.sequence.ticks,ticks);p.resume(100);p.advance(101);
+ assert(p.state.position.sampler.voices.every(v=>!v.active));
+ p.rawPlay(8,Uint8Array.of(128,64,0,64),428,3,101.25);const leases=p.state.position.leases;
+ p.setVoiceMask(0,101.5);assert.deepStrictEqual(p.state.position.leases,leases);assert.strictEqual(p.state.position.sampler.rawMask,8);assert.strictEqual(p.state.position.sampler.voices[3].active,false);
+ p.advance(104);assert.strictEqual(p.state.position.sampler.rawMask,0);assert.strictEqual(p.state.position.mask,0);p.stop();
+});

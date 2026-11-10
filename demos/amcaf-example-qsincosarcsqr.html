@@ -4703,7 +4703,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const animations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
-  let ptCia=true,ptMaster=64;
+  let ptCia=true,ptMaster=64,ptVoiceMask=15;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
   function variableAddress(owner,key,type,read,write,alive=()=>true) {
@@ -4787,26 +4787,35 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if(music)throw new Error('Pt Play during Music is not implemented; Music Off first');
     number=integer(number);
     const bank=banks.get(number);
-    if(number<1||number>65535||!bank||bank.type!=='data'||bank.memory!=='chip'||bank.name!=='Tracker ')throw new Error('Pt Play requires a chip Tracker bank loaded with Track Load');
+    if(number<1||number>65535||!bank||bank.type!=='data'||bank.memory!=='chip')throw new Error('Pt Play requires a generic chip bank containing a complete MOD');
     if(state.halted)throw new Error('Cannot start Pt Play in a halted program');
     if(!options.audioFieldTime||!options.requestTrackerWake)throw new Error('Pt Play requires the runtime field clock');
-    const module=modReaderFactory(bank.data.subarray(0,-32));
+    const module=modReaderFactory(bank.name==='Tracker '?bank.data.subarray(0,-32):bank.data);
     let committed=false;
     const next=amcafPlaybackFactory(module,{sequence:amcafSequencerFactory,pitch:amcafPitchFactory,pcm:amcafPcmFactory,stream:amcafStreamFactory},
       {field:options.audioFieldTime(),vblHz:options.audioVblHz,standard:options.audioStandard,cia:ptCia,
-        host:{command(event){if(committed)audio.command(event);}}});
+        host:{command(event){if(committed){if(event.type==='filter')audio.filter(event.enabled);else audio.command(event);}}}});
     next.setVolume(ptMaster);
     const wasStopped=state.stopped;
     trackStop();const revision=trackerRevision;audio.stop();
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
     audio.filter(false);
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
+    next.setVoiceMask(ptVoiceMask,options.audioFieldTime());
     trackerKind='amcaf';tracker=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
     state.tracker.engine='amcaf';state.tracker.bank=number;state.tracker.playing=true;state.tracker.paused=state.stopped;
     committed=true;if(state.stopped)next.pause();state.tracker.position=next.state;
     options.requestTrackerWake();
   }
   function ptStop(){if(tracker&&trackerKind!=='amcaf')throw new Error('Pt Stop during Track Play is not implemented');trackStop();}
+  function ptVoice(value){
+    const mask=integer(value)&15;
+    if(music||tracker&&trackerKind!=='amcaf')throw Error('Pt Voice during Music or Track Play is not implemented');
+    ptVoiceMask=mask;
+    if(tracker){const current=tracker;current.setVoiceMask(mask,options.audioFieldTime());if(tracker===current)state.tracker.position=current.state;}
+    else if(mask!==15)audio.stop((~mask)&15);
+    if(options.requestTrackerWake)options.requestTrackerWake();
+  }
   function ptSamStop(value){
     const mask=integer(value)&15;
     if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Sam Stop during Music or Track Play is not implemented');
@@ -7247,7 +7256,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
-    extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
+    extensionPtPlay:ptPlay,extensionPtVoice:ptVoice,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
     extensionFastPoint: (x,y) => display.fastPoint(integer(x),integer(y)),
@@ -9008,7 +9017,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return pattern.map((c, i) => {
       const sample = check(c.sample, 0, 31, 'instrument'), period = check(c.period, 0, 4095, 'note');
       const effect = check(c.effect, 0, 15, 'effect'), parameter = check(c.parameter, 0, 255, 'parameter');
-      if (![0,1,2,3,4,5,6,10,11,12,13,15].includes(effect) || effect === 11 && parameter > 127) {
+      if (![0,1,2,3,4,5,6,10,11,12,13,14,15].includes(effect) || effect === 14 && ![0,10,11].includes(parameter>>4) || effect === 11 && parameter > 127) {
         throw new Error(`AMCAF sequencer: unsupported effect ${effect.toString(16)}:${parameter.toString(16)} at pattern ${p}, row ${i >> 2}, channel ${i & 3}`);
       }
       return { sample, period, effect, parameter };
@@ -9047,8 +9056,9 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
     v.outputPeriod = v.period;
   }
-  function between(v) {
+  function between(v, filters) {
     const e = v.effect, p = v.parameter;
+    if(e===14){if(!(p>>4))filters.push(!(p&1));return;}
     if (!e && !p) { v.outputPeriod = v.period; volume(v); }
     else if (!e) {
       const output = pitch.arpeggio(v.period, v.finetune, p, counter);
@@ -9071,12 +9081,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return Object.freeze({ playing, ticks, counter, speed, bpm, order, row, master, ends,
       voices: Object.freeze(voices.map(v => Object.freeze({ ...v }))) });
   }
-  function tick() {
+  function tick(enabled = 15) {
+    check(enabled,0,15,'voice mask');
     if (!playing) return null;
-    const at = { tick: ++ticks, order, row }, triggers = [], repeats = [];
+    const at = { tick: ++ticks, order, row }, triggers = [], repeats = [], filters = [];
     let isRow = false;
     try {
-      if (++counter < speed) voices.forEach(between);
+      if (++counter < speed) voices.forEach(v=>between(v,filters));
       else {
         isRow = true; counter = 0;
         let jump = false, breakRow = 0;
@@ -9111,7 +9122,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
             if (c.parameter && c.parameter < 32) { speed = c.parameter; counter = 0; }
             else if (c.parameter >= 32) bpm = c.parameter;
           } else if (c.effect === 12) {
-            v.volume = Math.min(64, c.parameter); volume(v);
+            if(enabled & (1<<channel)){v.volume = Math.min(64, c.parameter); volume(v);}
+          } else if(c.effect===14){
+            const kind=c.parameter>>4,amount=c.parameter&15;
+            if(!kind)filters.push(!(c.parameter&1));
+            else {v.volume=kind===10?Math.min(64,v.volume+amount):Math.max(0,v.volume-amount);volume(v);}
           } else { v.outputPeriod = v.period; volume(v); }
         }
         // Native repeat registers are written after all new-note DMA starts,
@@ -9126,7 +9141,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
           if (order >= songLength) { order = 0; ends++; }
         }
       }
-      return Object.freeze({ ...at, isRow, triggers: Object.freeze(triggers), repeats: Object.freeze(repeats), state: snapshot() });
+      return Object.freeze({ ...at, isRow, ...(filters.length?{filters:Object.freeze(filters)}:{}), triggers: Object.freeze(triggers), repeats: Object.freeze(repeats), state: snapshot() });
     } catch (error) {
       playing = false;
       error.message += ` at AMCAF tick ${ticks}, order ${at.order}, row ${at.row}`;
@@ -9179,7 +9194,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (new Set(result.map(a => a.voice)).size !== result.length) throw new Error('AMCAF PCM: duplicate voice intent');
     return result;
   }
-  function apply(frame) {
+  function apply(frame, enabled = 15) {
+    integer(enabled, 0, 15, 'music voice mask');
     if (stopped) throw new Error('AMCAF PCM: renderer is stopped');
     const nextTick = integer(frame.tick, tick + 1, Number.MAX_SAFE_INTEGER, 'tick sequence');
     if (!Array.isArray(frame.state.voices) || frame.state.voices.length !== 4) throw new Error('AMCAF PCM: invalid voice state');
@@ -9188,15 +9204,15 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const starts = actions(frame.triggers, false), repeats = actions(frame.repeats, true);
     for (let i = 0; i < 4; i++) {
       const start = starts.find(a => a.voice === i);
-      if (!raw[i] && (start ? start.length > 0 : voices[i].active) && !registers[i].period) {
+      if ((enabled & (1 << i)) && !raw[i] && (start ? start.length > 0 : voices[i].active) && !registers[i].period) {
         throw new Error('AMCAF PCM: active zero period is unsupported');
       }
     }
     // All validation precedes any register, pointer or phase changes.
-    for (let i = 0; i < 4; i++) if (!raw[i]) Object.assign(voices[i], registers[i]);
-    for (const a of starts) if (!raw[a.voice]) Object.assign(voices[a.voice], { active: a.length > 0,
+    for (let i = 0; i < 4; i++) if ((enabled & (1 << i)) && !raw[i]) Object.assign(voices[i], registers[i]);
+    for (const a of starts) if ((enabled & (1 << a.voice)) && !raw[a.voice]) Object.assign(voices[a.voice], { active: a.length > 0,
       sample: a.sample, start: 0, length: a.length, offset: 0 });
-    for (const a of repeats) if (!raw[a.voice]) Object.assign(voices[a.voice], { repeatSample: a.sample,
+    for (const a of repeats) if ((enabled & (1 << a.voice)) && !raw[a.voice]) Object.assign(voices[a.voice], { repeatSample: a.sample,
       repeatStart: a.start, repeatLength: a.length });
     tick = nextTick;
   }
@@ -9234,6 +9250,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     }
   }
   return Object.freeze({ apply, rawPlay, render: count => render(count), renderVoices: count => render(count, true),
+    silenceVoices(mask) {
+      integer(mask, 0, 15, 'voice mask');
+      voices.forEach((v,i)=>{if(mask & (1<<i)){v.active=false;v.volume=0;if(raw[i]){raw[i].active=false;raw[i].volume=0;}}});
+    },
     stopVoices(mask) {
       integer(mask, 0, 15, 'voice mask');
       voices.forEach((v, i) => { if (mask & (1 << i)) { v.active = false; v.volume = 0; raw[i] = null; } });
@@ -9249,6 +9269,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const sampleRate = sampler.state.sampleRate;
   if (options.host != null && typeof options.host.command !== 'function') throw new Error('AMCAF stream requires a synchronous audio host');
   const leases = [0, 0, 0, 0];
+  let voiceMask = 15;
   let frame = 0, stream = 1, mask = module ? 15 : 0, paused = false, stopped = false, busy = false;
   function emit(event) {
     if (!options.host) return;
@@ -9268,7 +9289,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     finally { busy = false; }
   }
   return Object.freeze({
-    tick: () => run(() => { if (paused || !sequence) return null; const next = sequence.tick(); sampler.apply(next); return next; }),
+    tick: () => run(() => { if (paused || !sequence) return null; const next = sequence.tick(voiceMask & ~sampler.state.rawMask); sampler.apply(next,voiceMask); for(const enabled of next.filters||[]) { emit({type:'filter',enabled}); if(stopped||paused)break; } return next; }),
     render: count => run(() => {
       if (paused) return false;
       if (!Number.isInteger(count) || count < 0 || count > 65536 || frame > Number.MAX_SAFE_INTEGER - count) throw new Error('AMCAF stream: invalid frame count');
@@ -9280,6 +9301,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (!Number.isInteger(value) || value < 0 || value > 15) throw new Error('AMCAF stream: invalid voice mask');
       const removed = mask & ~value; mask = value;
       if (removed) emit({ type: 'stop', mask: removed });
+    }),
+    setVoiceMask: value => run(() => {
+      if (!Number.isInteger(value) || value < 0 || value > 15) throw new Error('AMCAF stream: invalid voice mask');
+      voiceMask=value;const disabled=(~value)&15;
+      // DMA is disabled immediately; merely re-enabling cannot restore phase.
+      // Raw leases retain their countdown, with held DMA silenced as on hardware.
+      sampler.silenceVoices(disabled);mask=(module?voiceMask:0)|sampler.state.rawMask;
+      if(disabled)emit({type:'stop',mask:disabled});
     }),
     setVolume: value => run(() => { if (sequence) sequence.setVolume(value); }),
     stopVoices: value => run(() => {
@@ -9300,7 +9329,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (paused) return;
       let released=0;
       for(let i=0;i<4;i++) if(leases[i] && --leases[i]===0) released |= 1<<i;
-      if(released){sampler.stopVoices(released);if(!sequence)mask &= ~released;emit({type:'stop',mask:released});}
+      if(released){sampler.stopVoices(released);mask=(mask&~released)|(sequence?(voiceMask&released):0);emit({type:'stop',mask:released});}
     }),
     setTempo: value => run(() => { if (sequence) sequence.setTempo(value); }),
     pause: () => run(() => { if (!paused) { paused = true; emit({ type: 'stop', mask }); } }),
@@ -9351,7 +9380,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         const duration=musicTick ? (cia?interval():1) : 0;
         renderUntil(at);if(!playing||paused)return;
         if(rawTick){dispatch(()=>player.vbl());if(!playing||paused)return;scheduleRaw(at);}
-        if(musicTick){next=at+duration;player.tick();}
+        if(musicTick){next=at+duration;dispatch(()=>player.tick());}
       }
     }catch(error){try{stop();}catch(_){/* preserve initiating failure */}throw error;}
   }
@@ -9365,6 +9394,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if(mode!==cia){renderUntil(now);if(!playing)return;cia=mode;next=module ? deadline(now) : null;}
     },
     setVolume:value=>player.setVolume(value),
+    setVoiceMask(value,now){
+      if(!Number.isInteger(value)||value<0||value>15)throw new Error('AMCAF playback: invalid voice mask');
+      advance(now);if(!playing)return;
+      if(!paused)renderUntil(now);
+      if(playing)dispatch(()=>player.setVoiceMask(value));
+    },
     stopVoices(value,now){
       if(!Number.isInteger(value)||value<0||value>15)throw new Error('AMCAF playback: invalid voice mask');
       advance(now);if(!playing)return;

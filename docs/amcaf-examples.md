@@ -28,6 +28,21 @@ axis-needle pixels, circle cardinal points, three complete GPU/Canvas comparison
 and actual mouse/exit/restart input on the application page. These are browser
 and source-derived checks, not native Amiga captures.
 
+## Music support preview
+
+[Play the original Hawkeye tune](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html)
+in a declared compiled AMOS harness. It loads the supplied IMP! file into a chip
+Work bank and plays it with the AMCAF engine. Press a key to disable voice 1,
+a second to re-enable it, and a third to stop. The page supports sound,
+fullscreen, Stop/Resume and Restart. This is additional music coverage; the two
+original Protracker interfaces still do not compile.
+
+[Voice DMA browser checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html)
+compare four independent constant-wave stereo mixes in native offline Web Audio
+graphs. The supplied module's complete first wrap has 19,202 ticks and 6,653 note
+triggers, matching an independent Python order/cell audit. These counts are not native captures.
+See [voice control and module support](amcaf-voice.md) for timing and scope.
+
 ## Rebuild
 
 ```sh
@@ -64,7 +79,7 @@ python3 tools/reference/inventory_amcaf_examples.py > examples/AMCAF/inventory.j
 python3 tools/reference/check_amcaf_math.py > test/fixtures/amcaf/math.json
 ```
 
-The eleven statically walkable programs use 155 distinct AMCAF offsets; 30 of
+The eleven statically walkable programs use 155 distinct AMCAF offsets; 31 of
 those offsets are currently registered. The protected/native-code program is not
 included in that count. The inventory describes encoded calls, not implemented
 runtime compatibility.
@@ -75,8 +90,8 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Pt Voice `$10d6` | Decimal formatting and Lsr now compile; player masks/queries, Work-bank module playback and blitter drawing remain. |
-| Protracker2 | Pt Voice `$10d6` | Player masks/queries and the same music work, plus frequency-meter rendering. |
+| Protracker | Pt Cpattern `$15de` | Pt Voice and Work-bank module playback now work in the declared Hawkeye harness; status/VU queries and blitter drawing remain. |
+| Protracker2 | Pt Cinstr `$15fe` | The same playback foundation works; status/VU queries, frequency-meter rendering and blitter drawing remain. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
 | GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |

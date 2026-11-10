@@ -3781,7 +3781,7 @@
   const animations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
-  let ptCia=true,ptMaster=64;
+  let ptCia=true,ptMaster=64,ptVoiceMask=15;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
   function variableAddress(owner,key,type,read,write,alive=()=>true) {
@@ -3865,26 +3865,35 @@
     if(music)throw new Error('Pt Play during Music is not implemented; Music Off first');
     number=integer(number);
     const bank=banks.get(number);
-    if(number<1||number>65535||!bank||bank.type!=='data'||bank.memory!=='chip'||bank.name!=='Tracker ')throw new Error('Pt Play requires a chip Tracker bank loaded with Track Load');
+    if(number<1||number>65535||!bank||bank.type!=='data'||bank.memory!=='chip')throw new Error('Pt Play requires a generic chip bank containing a complete MOD');
     if(state.halted)throw new Error('Cannot start Pt Play in a halted program');
     if(!options.audioFieldTime||!options.requestTrackerWake)throw new Error('Pt Play requires the runtime field clock');
-    const module=modReaderFactory(bank.data.subarray(0,-32));
+    const module=modReaderFactory(bank.name==='Tracker '?bank.data.subarray(0,-32):bank.data);
     let committed=false;
     const next=amcafPlaybackFactory(module,{sequence:amcafSequencerFactory,pitch:amcafPitchFactory,pcm:amcafPcmFactory,stream:amcafStreamFactory},
       {field:options.audioFieldTime(),vblHz:options.audioVblHz,standard:options.audioStandard,cia:ptCia,
-        host:{command(event){if(committed)audio.command(event);}}});
+        host:{command(event){if(committed){if(event.type==='filter')audio.filter(event.enabled);else audio.command(event);}}}});
     next.setVolume(ptMaster);
     const wasStopped=state.stopped;
     trackStop();const revision=trackerRevision;audio.stop();
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
     audio.filter(false);
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
+    next.setVoiceMask(ptVoiceMask,options.audioFieldTime());
     trackerKind='amcaf';tracker=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
     state.tracker.engine='amcaf';state.tracker.bank=number;state.tracker.playing=true;state.tracker.paused=state.stopped;
     committed=true;if(state.stopped)next.pause();state.tracker.position=next.state;
     options.requestTrackerWake();
   }
   function ptStop(){if(tracker&&trackerKind!=='amcaf')throw new Error('Pt Stop during Track Play is not implemented');trackStop();}
+  function ptVoice(value){
+    const mask=integer(value)&15;
+    if(music||tracker&&trackerKind!=='amcaf')throw Error('Pt Voice during Music or Track Play is not implemented');
+    ptVoiceMask=mask;
+    if(tracker){const current=tracker;current.setVoiceMask(mask,options.audioFieldTime());if(tracker===current)state.tracker.position=current.state;}
+    else if(mask!==15)audio.stop((~mask)&15);
+    if(options.requestTrackerWake)options.requestTrackerWake();
+  }
   function ptSamStop(value){
     const mask=integer(value)&15;
     if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Sam Stop during Music or Track Play is not implemented');
@@ -6325,7 +6334,7 @@
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
-    extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
+    extensionPtPlay:ptPlay,extensionPtVoice:ptVoice,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
     extensionFastPoint: (x,y) => display.fastPoint(integer(x),integer(y)),

@@ -1,0 +1,11 @@
+{
+  "evidence": "Independent Python order/cell audit of pinned decoded bytes; not native execution.",
+  "decodedSha256": "847b4017191e92ab5140d447d4edf218186237d10f9ed96e277ed285cf45013a",
+  "decodedBytes": 62068,
+  "orders": 75,
+  "rows": 4800,
+  "ticks": 19202,
+  "triggers": 6653,
+  "filterWrites": 4,
+  "fineVolumeCells": 15
+}
