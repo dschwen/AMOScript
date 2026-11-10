@@ -8,7 +8,7 @@ test('ASM: pinned source inventory has seven compilable originals and the remain
   const manifest=require('../tools/build_asm').inputs();let compiled=0;
   for(const name of manifest.sources) {
     const bytes=fs.readFileSync(path.join(root,name));
-    if(name==='ZoneDefiner.AMOS')assert.throws(()=>compile(bytes),/0x14f8.*line 25/);
+    if(name==='ZoneDefiner.AMOS')assert.throws(()=>compile(bytes),/0x13b8.*line 161/);
     else{compile(bytes);compiled++;}
   }
   assert.strictEqual(compiled,7);

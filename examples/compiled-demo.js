@@ -5227,10 +5227,10 @@
     if(!cblocks.delete(number))throw Error('Cblock not defined');
   }
   function bitIndex(bit) {bit=integer(bit);if(bit<0)throw Error('Bit number must be nonnegative');return bit;}
-  function changeBit(command,bit,current) {const mask=1<<(bit&31);return command==='Bset' ? current|mask : current&~mask;}
+  function changeBit(command,bit,current) {const mask=1<<(bit&31);return command==='Bset' ? current|mask : command==='Bchg' ? current^mask : current&~mask;}
   function modifyMemoryBit(command,bit,address) {
-    address=integer(address);const current=bankMemory.peek(address),mask=1<<(bit&7);
-    bankMemory.poke(address,command==='Bset'?current|mask:current&~mask);
+    address=integer(address);const current=bankMemory.peek(address);
+    bankMemory.poke(address,changeBit(command,bit&7,current));
   }
   function testBit(bit,read,address) {
     bit=bitIndex(bit);const data=integer(read());
@@ -5978,6 +5978,7 @@
     const [a, b, c] = args;
     switch (name) {
       case 'Left$': case 'Right$': case 'Mid$': case 'Mid$2': return substring(name, a, b, c);
+      case 'Cup$':return '\x1e'; case 'Cdown$':return '\x1f'; case 'Cleft$':return '\x1d'; case 'Cright$':return '\x1c';
       case 'Flip$': return a.split('').reverse().join('');
       case 'Chr$': {
         const code = integer(a);

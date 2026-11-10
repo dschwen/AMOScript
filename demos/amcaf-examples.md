@@ -33,7 +33,7 @@
 | [Fonts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html) | Blocked | Unsupported extension 8:0x1204 (amcaf-1.50beta4) at line 16, byte 770 |
 | [GamePorts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html) | Blocked | Unsupported extension 8:0x15be (amcaf-1.50beta4) at line 14, byte 720 |
 | [Iff2Raw.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html) | Blocked | Unsupported token 0x3c0 at line 30, byte 1206 |
-| [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Blocked | Unsupported token 0x2226 at line 101, byte 4486 |
+| [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Blocked | Unsupported token 0x1f52 at line 165, byte 7118 |
 | [Protracker2.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html) | Compiles | Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL. |
 | [QsinCosArcSqr.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-qsincosarcsqr.html) | Compiles | Original input loop, three mouse directions, double-buffer publication and Escape exit covered. |
 | [SamBankFixer.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-sambankfixer.html) | Blocked | Unsupported token 0x28ae at line 22, byte 882 |

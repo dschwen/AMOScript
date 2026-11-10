@@ -97,7 +97,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported token 0x2226 at line 101, byte 4486"
+      "error": "Unsupported token 0x1f52 at line 165, byte 7118"
     },
     {
       "source": "Protracker2.AMOS",

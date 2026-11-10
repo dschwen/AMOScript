@@ -2,6 +2,12 @@
   "version": 1,
   "scenarios": [
     {
+      "file": "bit-cursor.html",
+      "title": "Bit toggles and keyboard cursor strings",
+      "description": "A compiled synthetic program toggles a voice mask using Bchg and compares injected browser arrow-key events against Cup$, Cdown$, Cleft$ and Cright$. Original Protracker1 still has Anim compilation blockers.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bit-cursor.html"
+    },
+    {
       "file": "gru-support.html",
       "title": "Gru programs: scrolling and linked browser programs",
       "description": "Six independent overlap/clipping matrices and actual GPU comparisons exercise Def Scroll. A complete generated application chains Run File to a compiled target, then bare Run restarts that target while retaining session-file writes.",
@@ -646,7 +652,7 @@
     {
       "file": "amcaf-hawkeye.html",
       "title": "AMCAF Hawkeye — packed music preview",
-      "description": "The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker interfaces remain blocked.",
+      "description": "The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker2 visualizer also runs; the first version remains blocked.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html"
     },
     {

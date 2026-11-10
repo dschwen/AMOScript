@@ -103,9 +103,15 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (93 demos)</summary>
+<summary>Compiler and runtime checks (94 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
+
+### Bit toggles and keyboard cursor strings
+
+A compiled synthetic program toggles a voice mask using Bchg and compares injected browser arrow-key events against Cup$, Cdown$, Cleft$ and Cright$. Original Protracker1 still has Anim compilation blockers.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bit-cursor.html) · [Local file](bit-cursor.html)
 
 ### Gru programs: scrolling and linked browser programs
 
@@ -661,7 +667,7 @@ The current game and assets at half speed, with a Debug menu for source error lo
 
 ### AMCAF Hawkeye — packed music preview
 
-The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker interfaces remain blocked.
+The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker2 visualizer also runs; the first version remains blocked.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html) · [Local file](amcaf-hawkeye.html)
 

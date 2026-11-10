@@ -13,8 +13,9 @@ now pass bounded tests. Decimal/path helpers, native arithmetic shifts and raw
 Work-bank loading/saving are implemented with a standalone utility demo.
 Protracker playback, voice masks and six status/VU queries are implemented.
 Hex$ and bounded Turbo Draw/Plot/Blitter Fill/Wait now run the entire original
-Protracker2 visualizer with WebGL. The first version reaches Bchg and later
-core/animation gaps; its requested mod.4spirits asset has been recovered from Modland. A declared Hawkeye harness plays the original IMP! module from a chip
+Protracker2 visualizer with WebGL. The first version now compiles Bchg and cursor
+strings, stopping at unsupported core Anim. Its requested mod.4spirits asset has
+been recovered from Modland. A declared Hawkeye harness plays the original IMP! module from a chip
 Work bank with voice control, E0 filtering and EA/EB fine volume. Other first
 blockers include Change Bank Font and core Set Tempras, Peek$, Stop and Amos Here.
 Next address the Protracker examples, then fonts, devices, file/bank utilities and intro

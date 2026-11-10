@@ -107,7 +107,7 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Core Bchg `$2226` | Hex$ and drawing now compile. Bit changes, cursor strings and sprite-Anim forms remain; the requested Data/mod.4spirits is now supplied from Modland (see [provenance](../examples/AMCAF/ASSETS.md)). |
+| Protracker | Core Anim `$1f52` | Hex$ and drawing now compile. Bchg and cursor strings now compile; sprite-Anim forms remain; the requested Data/mod.4spirits is now supplied from Modland (see [provenance](../examples/AMCAF/ASSETS.md)). |
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
@@ -127,7 +127,7 @@ Implementation order:
    exposed blockers below. These tests do not establish full intro/music runtime compatibility.
 2. **Protracker examples.** Masks and order/row/instrument/frequency/VU/signal
    queries, Hex$ and bounded raw plane graphics are implemented. Protracker2
-   runs unchanged. Continue with the first version’s core Bchg/cursor-string/Anim
+   runs unchanged. Continue with the first version’s core Anim
    gaps before claiming original music compatibility. Its recovered tune passes
    the MOD decoder and is preloaded under the original filename.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
@@ -249,3 +249,34 @@ latches; repeated status reads cannot generate extra music ticks.
 nibble, signal effect 8, supported channel bounds and retained post-Stop state.
 The standalone synthetic program exercises relocated extension slot 19 and two
 actual compiled reports. The separate Protracker2 page now runs its original GUI.
+
+## Core bit toggles and cursor strings
+
+`Bchg` (`$2226`) now shares the checked `Bset`/`Bclr` path. A direct integer
+variable or array element toggles a modulo-32 bit; an address expression
+(including a parenthesized variable) toggles a modulo-8 bit in a checked bank
+byte. Negative selectors reject before evaluating the target. Array lookup
+preserves the existing left-to-right validation and captured owner.
+
+`Cup$`, `Cdown$`, `Cleft$` and `Cright$` return one byte: 30, 31, 29 and 28,
+respectively. Native `InBchg` in `+ILib.s` selects 68000 long-variable versus
+byte-address BCHG; `+Lib.s` supplies the cursor character constants. These match native `FnCup`/`FnCdown`/`FnCleft`/`FnCright` in the
+AMOS library and the existing browser arrow-key text mapping. They do not read
+or consume the keyboard queue and take no arguments.
+
+[Bit toggles and browser cursor-string checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bit-cursor.html)
+uses a compiled synthetic program and injected DOM keyboard events. It is not
+an execution of the original Protracker interface. The unchanged first example
+now stops compiling at `Anim` on line 165, byte 7118. Its finite drum-frame
+strings and `Anim On` need native channel lifecycle and VBL scheduling support
+before the original program can be counted as running.
+
+For the next Anim batch, use the native `InAnim2`/`InAnimOn1` paths rather than
+registering aliases for AMAL commands. Native `Anim` selects animation type 1
+in `AMALCre`, and `Anim On/Off/Freeze` address the animation lane with mask 2;
+this differs from the AMAL execution lane. Implement the original example’s
+finite `(image,duration)` lists first, sharing channel bindings and the existing
+VBL clock while preserving separate lane state. Test replacement during a drum
+sequence, first/last frame timing, Stop/Resume, `Amal Off` cleanup, and sprites
+0/2/6 with Canvas/WebGL before counting the first original interface as working.
+Wider numeric-bank and repeat forms should keep explicit gates until verified.

@@ -67,7 +67,7 @@ first locations and counts for the remaining unsupported encodings.
 | LabEdit.Bak | 61 | Compiles; same source as the existing Joy editor demo |
 | Labyrinth.AMOS | 103 | Compiles; complete gameplay not yet checked |
 | Labyrinth.Bak | 103 | Compiles; known source-level neighbour-read issue remains |
-| ZoneDefiner.AMOS | 172 | Missing cursor/paper control-string functions |
+| ZoneDefiner.AMOS | 172 | Missing Paper$ control-string function |
 
 Build standalone JavaScript modules, normal/debug intro pages and a compilation
 report into a **new output directory**:
@@ -216,7 +216,7 @@ all eight main-game checkpoints also execute with actual WebGL.
 3. Keep IndexedDB persistence separate from the current session filesystem.
 4. WebGL HAM6 is implemented; retain CPU/GPU intro comparisons. HAM8 and
    mid-line events remain separate work.
-5. Add ZoneDefiner's remaining Cdown$/Cup$/Cright$/Cleft$/Paper$ authoring functions.
+5. Add ZoneDefiner's remaining Paper$ authoring function; cursor strings are implemented.
 
 Validation covers both music choices, both editions, the full title route,
 right-click Pop/skip, Ram:Level bytes, terminal Run cleanup and the actual packaged
