@@ -21,7 +21,8 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys, ...(settings.amcafAudio?{fire2:['ShiftLeft','ShiftRight']}:{}) } : false,
     gamepad:settings.amcafAudio?{buttons:{fire2:1,fire3:2}}:true }];
   function update() {
-    const audio = sound.status(); soundButton.textContent = audio.requested ? 'Mute sound' : 'Enable sound';
+    const audio = sound.status(); soundButton.textContent = audio.state === 'on' ? 'Mute sound' : audio.state === 'starting' ? 'Enabling sound…' : 'Enable sound';
+    soundButton.disabled = audio.state === 'starting';
     status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
@@ -75,12 +76,15 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
     try {
       await Promise.allSettled([audio, screen]);
       if (disposed || token !== launch) return;
+      // Fullscreen transitions can suspend a context after its first resume.
+      if (sound.status().state === 'suspended') await sound.enable();
+      if (disposed || token !== launch) return;
       if (!live || live.state.halted || failure) start(); else if (live.state.stopped) live.resume();
       document.body.dataset.playing = 'true'; host.focus(); update();
     } catch (error) { fail(error); }
     finally { if (!disposed && token === launch) play.disabled = false; }
   };
-  soundButton.onclick = () => { if (sound.status().requested) sound.mute(); else sound.enable().then(update); if (host) host.focus(); update(); };
+  soundButton.onclick = () => { if (sound.status().state === 'on') sound.mute(); else sound.enable().then(update); if (host) host.focus(); update(); };
   byId('game-restart').onclick = () => { launch++; play.disabled = false; try { start(); } catch (error) { fail(error); } };
   byId('game-stop').onclick = () => { launch++; play.disabled = false; if (live) live.stop(); update(); };
   byId('game-resume').onclick = () => { if (live && !failure) live.resume(); if (host) host.focus(); update(); };

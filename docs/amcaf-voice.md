@@ -83,3 +83,11 @@ WebGL, the compiled bank loader and voice commands, and owned disposal.
 Unit checks cover malformed module preflight, active Work-bank write protection,
 mask persistence across songs, Pause/Resume, raw-lease silencing, row-only fine
 volume, muted Cxx, and synchronous host Stop during both PCM and filter callbacks.
+
+The application sound button reflects the actual AudioContext state. A failed or
+suspended activation offers **Enable sound** and retries on one click; only a
+running session offers **Mute sound**. Startup checks audio again after the
+fullscreen transition. Dropped suspended PCM invalidates the old host timeline
+before current audio resumes, preserving frame continuity without replaying
+missed blocks. Browser checks assert non-silent source scheduling on the initial
+Play and after prepared activation refusal and context suspension.

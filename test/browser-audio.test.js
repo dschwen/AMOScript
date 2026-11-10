@@ -51,3 +51,14 @@ test('browser audio: missing APIs stay optional, disposal needs no context, and 
   const broken=create(()=>({command:e=>{if(e.type==='play')throw new Error('broken host');},activeVoices:()=>[],dispose(){}}),()=>context);
   const adapter=broken.bind();await broken.enable();assert.throws(()=>adapter.command(play),/broken host/);await broken.dispose();
 });
+
+test('browser audio: suspension drops PCM then resets the host before forwarding only the current block on resume',async()=>{
+ const f=fixture(),adapter=f.session.bind();await f.session.enable();
+ const block=frame=>({type:'pcm',frame,mask:1});adapter.command(block(0));
+ f.context.state='suspended';adapter.command(block(160));adapter.command(block(320));assert.strictEqual(f.session.status().state,'suspended');
+ const count=f.events.length;await f.session.enable();assert.deepStrictEqual(f.events.slice(count),[{type:'stop',mask:15}]);
+ adapter.command(block(480));assert.deepStrictEqual(f.events.at(-1),block(480));assert(!f.events.some(e=>e.type==='pcm'&&[160,320].includes(e.frame)));
+ const before=f.events.length;await f.session.enable();assert.strictEqual(f.events.length,before,'Repeat Play while running retains queued audio');
+ f.context.state='suspended';adapter.command(block(640));f.context.state='running';adapter.command(block(800));assert.deepStrictEqual(f.events.slice(-2),[{type:'stop',mask:15},block(800)]);
+ await f.session.dispose();
+});
