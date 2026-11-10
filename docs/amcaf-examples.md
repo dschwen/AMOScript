@@ -64,7 +64,7 @@ python3 tools/reference/inventory_amcaf_examples.py > examples/AMCAF/inventory.j
 python3 tools/reference/check_amcaf_math.py > test/fixtures/amcaf/math.json
 ```
 
-The eleven statically walkable programs use 155 distinct AMCAF offsets; 21 of
+The eleven statically walkable programs use 155 distinct AMCAF offsets; 30 of
 those offsets are currently registered. The protected/native-code program is not
 included in that count. The inventory describes encoded calls, not implemented
 runtime compatibility.
@@ -75,14 +75,14 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Lsstr$ `$0ec8` | Packed module loading now compiles; string helpers, player masks/queries, Work-bank module playback and blitter drawing remain. |
+| Protracker | Pt Voice `$10d6` | Decimal formatting and Lsr now compile; player masks/queries, Work-bank module playback and blitter drawing remain. |
 | Protracker2 | Pt Voice `$10d6` | Player masks/queries and the same music work, plus frequency-meter rendering. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
-| BigAmcafIntro | Wsave `$0472` | Shared IMP! loading now compiles; stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
+| BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
 | GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |
-| SamBankFixer | Lsstr$ `$0ec8` | String helpers, core Peek$, sample-bank playback and meaningful prepared file selection/save. |
-| Iff2Raw | Path$ `$03e0` | Path/string helpers, Wload/Wsave, Binexp and supported image conversion. |
-| FileRequester | Filename$ `$02f0` | Bounded directory/object metadata, paths, patterns, IO errors, font/drawing helpers and requester interaction. |
+| SamBankFixer | Core Peek$ `$28ae` | Decimal formatting now compiles; bounded memory strings, sample-bank playback and meaningful prepared file selection/save remain. |
+| Iff2Raw | Core Stop `$03c0` | Lexical paths and Work-file loading/saving now compile; Stop, Binexp, Itemstr$ and supported image conversion remain. |
+| FileRequester | Core Amos Here `$24d0` | Filename/path helpers now compile; core host metadata, patterns, directory/object metadata, IO errors, font/drawing helpers and requester interaction remain. |
 | BankManager | Core Amos Here `$24d0` | Core/standard extension gaps plus bank naming, relocation, transforms, compression and requester utilities. |
 | BZoomAnimPlayer | Examine Object `$0672` | File metadata and Bzoom animation; an animation input still needs to be supplied/prepared. |
 | ShowAGAPic | Native code-region validation at byte 4786 | The static walk also reports an encrypted/compiled procedure. Establish a supported source representation before adding AGA display. Preserve the original; do not silently skip protected code or emulate AGA with an OCS-labelled output. |
@@ -162,3 +162,42 @@ retain the native AMCAF routine's unchecked-checksum behavior. Malformed structu
 still rejects. The native zero-byte long-match count means 256 bytes, and native
 word distance bases are signed. Successful decompression alone does not make
 Work-bank Protracker playback or bank-font selection supported.
+
+## String, shift and Work-file utilities
+
+[Run the utility checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-utilities.html).
+This synthetic compiled program maps AMCAF to slot 19, round-trips all 256 byte
+values through Wload/Wsave/Dsave, and prints formatting/path/shift results. It
+does not claim that the original file utilities or Protracker examples run yet.
+
+- `Lsstr$(value,width)` pads with spaces; `Lzstr$` pads digits with zeroes.
+  Widths 1–10 are supported. Values saturate to the available decimal digits,
+  reserving a character for a negative sign. The source's signed `NEG.L` overflow
+  for -2147483648 is preserved, including its zero result. Independent Python
+  decimal-loop vectors cover all widths, signs, saturation and the signed limits.
+- `Filename$` takes the suffix after the final slash or colon. `Path$` returns
+  the prefix, retaining a volume colon but excluding the final slash. `Extpath$`
+  appends a slash unless the string is empty or already ends in slash/colon.
+  These are lexical byte-string operations: case, NUL bytes, backslashes and
+  parent-path components are not normalized or interpreted. Inputs are bounded
+  to 32,760 bytes; these functions never access the filesystem.
+- `Lsl` and `Lsr` use the low six count bits. Despite its name, the native `Lsr`
+  routine executes `ASR.L`, preserving the sign bit. Counts 32–63 therefore
+  produce zero or the extended sign, rather than JavaScript's modulo-32 shift.
+- `Wload filename$,bank` loads raw bytes into a temporary Work bank, using a
+  negative destination for chip memory. Unlike Imploder Load, it does not decode
+  an `IMP!` header. `Wsave` and its `Dsave` alias save the complete generic bank
+  payload, accepting a bank selector or its exact start address. No ABK header
+  is written. Transfers are bounded to nonempty data of at most 16 MiB.
+  Loading validates before replacement; saving snapshots and validates before
+  truncation and retains the resolved filename across both synchronous writes.
+  Interior pointers and object-bank serialization are explicitly unsupported.
+
+Regenerate the independent formatting vectors with:
+
+```sh
+python3 tools/reference/check_amcaf_strings.py > test/fixtures/amcaf/strings.json
+```
+
+Implementation evidence is the recovered AMCAF R0b1/R0b2, R060–R062, R0c4/R0c5
+and R068/R069 routines. These tests are source-derived checks, not Amiga captures.

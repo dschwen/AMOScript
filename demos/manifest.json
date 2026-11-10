@@ -254,6 +254,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
     },
     {
+      "file": "amcaf-utilities.html",
+      "title": "AMCAF strings, shifts and raw Work files",
+      "description": "A compiled synthetic program selects AMCAF in slot 19, round-trips all 256 byte values through Wload/Wsave/Dsave, and prints decimal, lexical path and signed-shift results. This is a primitive compatibility check, not an original utility or native Amiga capture.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-utilities.html"
+    },
+    {
       "file": "amcaf-quick-maths.html",
       "title": "Original AMCAF quick maths",
       "description": "The complete unchanged QsinCosArcSqr.AMOS example follows three mouse directions, swaps double buffers and exits on Escape. Recovered integer tables drive Qsin/Qcos/Qarc/Qsqr; raw Blitter Clear clears one logical plane. Three Canvas/GPU pairs and 15,795 independent needle pixels. The full collection is linked from the AMCAF catalogue.",

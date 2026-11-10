@@ -5694,6 +5694,22 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const data=decodeImploder(bankMemory.read(address,length));
     installBanks([{...target,type:'data',name:'Work    ',permanent:false,data}]);
   }
+  function extensionWload(filename,destination) {
+    const target=imploderTarget(destination),resolved=resolveFileName(filename);
+    if(!options.files||typeof options.files.read!=='function')throw Error('Wload requires a synchronous files adapter');
+    const contents=options.files.read(resolved);
+    if(typeof contents!=='string'||/[^\x00-\xff]/.test(contents))throw Error('Wload requires synchronous byte strings');
+    if(!contents.length||contents.length>16*1024*1024)throw Error('Wload requires 1 byte..16 MiB');
+    const data=Uint8Array.from(contents,c=>c.charCodeAt(0));
+    installBanks([{...target,type:'data',name:'Work    ',permanent:false,data}]);
+  }
+  function extensionWsave(filename,selector) {
+    const address=bankMemory.address(integer(selector)),access=bankMemory.locate(address);
+    if(!access.bank||access.bank.type!=='data'||access.region.kind||access.offset!==0)throw Error('Wsave requires a generic bank or its start address');
+    const length=access.bank.data.length;
+    if(!length||length>16*1024*1024)throw Error('Wsave requires 1 byte..16 MiB');
+    bsave(filename,address,address+length);
+  }
   function imploderLoad(filename,destination) {
     const target=imploderTarget(destination),resolved=resolveFileName(filename);
     if(!options.files||typeof options.files.read!=='function')throw Error('Imploder Load requires a synchronous files adapter');
@@ -7072,6 +7088,24 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
 
   // Third-party extension helpers retain the recovered integer widths/endpoints.
+  function extensionDecimal(value,width,zeros) {
+    value=integer(value);width=integer(width);
+    if(width<1||width>10)throw Error('AMCAF decimal width requires 1..10');
+    // NEG.L keeps $80000000 negative. Preserve the recovered formatter's
+    // resulting zero digits, rather than JS Math.abs's extra positive value.
+    if(value===-2147483648)return zeros?'-'+'0'.repeat(width-1):' '.repeat(width-1)+'0';
+    const negative=value<0, digits=width-(negative?1:0);
+    if(!digits)return '-';
+    const magnitude=Math.min(Math.abs(value),10**digits-1).toString();
+    return zeros?(negative?'-':'')+magnitude.padStart(digits,'0'):((negative?'-':'')+magnitude).padStart(width,' ');
+  }
+  function extensionPathPart(value,kind) {
+    if(typeof value!=='string'||value.length>32760||/[^\x00-\xff]/.test(value))throw Error('AMCAF path helpers require a bounded byte string');
+    const slash=value.lastIndexOf('/'),colon=value.lastIndexOf(':');
+    if(kind==='filename')return value.slice(Math.max(slash,colon)+1);
+    if(kind==='path')return value.slice(0,slash>colon?slash:colon+1);
+    return !value.length||/[:/]$/.test(value)?value:value+'/';
+  }
   function extensionBytes(value, count) {
     const bits = integer(value);
     return Array.from({ length: count }, (_, i) => String.fromCharCode((bits >>> ((count - i - 1) * 8)) & 255)).join('');
@@ -7128,6 +7162,14 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     extensionEven: value => (integer(value) & 1) ? 0 : -1,
     extensionVclip: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return Math.max(low, Math.min(high, value)); },
     extensionVin: (value, low, high) => { value = integer(value); low = integer(low); high = integer(high); return value >= low && value <= high ? -1 : 0; },
+    extensionWload,extensionWsave,
+    extensionLsl:(value,count)=>{value=integer(value);count=integer(count)&63;return count>=32?0:value<<count;},
+    extensionLsr:(value,count)=>{value=integer(value);count=integer(count)&63;return count>=32?(value<0?-1:0):value>>count;},
+    extensionLsstr:(value,width)=>extensionDecimal(value,width,false),
+    extensionLzstr:(value,width)=>extensionDecimal(value,width,true),
+    extensionFilename:value=>extensionPathPart(value,'filename'),
+    extensionPath:value=>extensionPathPart(value,'path'),
+    extensionExtpath:value=>extensionPathPart(value,'extend'),
     extensionChrWord: value => extensionBytes(value, 2), extensionChrLong: value => extensionBytes(value, 4),
     extensionAscWord: value => extensionAsc(value, 2), extensionAscLong: value => extensionAsc(value, 4),
     extensionBankTemporary: number => { const bank = banks.get(integer(number)); if (!bank) throw Error('Bank not reserved'); bank.permanent = false; },

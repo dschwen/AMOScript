@@ -37,7 +37,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0x472 (amcaf-1.50beta4) at line 15, byte 544"
+      "error": "Unsupported token 0x10ac at line 21, byte 704"
     },
     {
       "source": "FileRequester.AMOS",
@@ -49,7 +49,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0x2f0 (amcaf-1.50beta4) at line 228, byte 9468"
+      "error": "Unsupported token 0x24d0 at line 251, byte 10314"
     },
     {
       "source": "Fonts.AMOS",
@@ -85,7 +85,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0x3e0 (amcaf-1.50beta4) at line 18, byte 760"
+      "error": "Unsupported token 0x3c0 at line 30, byte 1206"
     },
     {
       "source": "Protracker.AMOS",
@@ -97,7 +97,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0xec8 (amcaf-1.50beta4) at line 43, byte 2038"
+      "error": "Unsupported extension 8:0x10d6 (amcaf-1.50beta4) at line 80, byte 3706"
     },
     {
       "source": "Protracker2.AMOS",
@@ -132,7 +132,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0xec8 (amcaf-1.50beta4) at line 22, byte 846"
+      "error": "Unsupported token 0x28ae at line 22, byte 882"
     },
     {
       "source": "ShowAGAPic.AMOS",

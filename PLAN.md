@@ -9,7 +9,10 @@ under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.md) includes every
 program and its actual build/runtime status. The unchanged quick-maths example
 runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
 1/12 programs currently compile. Shared IMP! decompression and file/bank loading
-now pass bounded tests, exposing Pt Voice, Lsstr$, Change Bank Font and Wsave.
+now pass bounded tests. Decimal/path helpers, native arithmetic shifts and raw
+Work-bank loading/saving are implemented with a standalone utility demo. Both
+Protracker examples now reach Pt Voice; other first blockers include Change Bank
+Font and core Set Tempras, Peek$, Stop and Amos Here.
 Next address the Protracker examples, then fonts, devices, file/bank utilities and intro
 effects. The protected/native AGA source has a separate format boundary.
 See [AMCAF example support](docs/amcaf-examples.md).

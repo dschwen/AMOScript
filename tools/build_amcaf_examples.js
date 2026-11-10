@@ -40,6 +40,8 @@ ${link('Quick sine, cosine, angle and square root',repository?preview('amcaf-exa
 
 ${link('Quick-maths browser checks and captured frames',preview('amcaf-quick-maths.html'))}
 
+${link('String, shift and raw Work-file support checks',preview('amcaf-utilities.html'))} — a synthetic compatibility demo for the shared utilities needed by the remaining examples.
+
 ## Complete collection
 
 | Program | Build | Runtime evidence / first blocker |

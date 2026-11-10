@@ -103,7 +103,7 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (88 demos)</summary>
+<summary>Compiler and runtime checks (89 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
 
@@ -340,6 +340,12 @@ Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original samp
 Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. Separate direct-player foundation; the VM demo adds command/lifecycle integration.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html) · [Local file](roller2-amos-music.html)
+
+### AMCAF strings, shifts and raw Work files
+
+A compiled synthetic program selects AMCAF in slot 19, round-trips all 256 byte values through Wload/Wsave/Dsave, and prints decimal, lexical path and signed-shift results. This is a primitive compatibility check, not an original utility or native Amiga capture.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-utilities.html) · [Local file](amcaf-utilities.html)
 
 ### Original AMCAF quick maths
 
