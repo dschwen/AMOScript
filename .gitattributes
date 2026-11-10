@@ -12,3 +12,9 @@ test/fixtures/compiler-examples/*.indices binary
 examples/ASM/game/*.Txt -text whitespace=-blank-at-eol
 examples/ASM/game/Unterhaltungen/* -text whitespace=-blank-at-eol
 examples/ASM/game/Labyrinth/* binary
+
+# Retain the supplied AMCAF distribution exactly, including its native assign script.
+examples/AMCAF/AMCAF_Examples/*.AMOS binary
+examples/AMCAF/AMCAF_Examples/Data/* binary
+examples/AMCAF/*.info binary
+examples/AMCAF/ExecuteMeFirst! -text whitespace=-blank-at-eof
