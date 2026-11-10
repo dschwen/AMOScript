@@ -40,8 +40,8 @@ The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
 six-byte empty bank trailer. SHA-256:
 `2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8`.
 At baseline the compiler rejected AMCAF Pt Play at line 43, byte 2084.
-The current compiler passes those music statements and rejects Turbo Amos Pri
-at line 68, byte 2584; see the VM progress update below.
+The current compiler passes those music statements, Amos Pri and Raster Wait,
+and rejects Smouse Key at line 1750, byte 59604; see the latest progress update.
 No complete compilation or game execution has passed yet.
 
 An independent bounded token walk finds **13 AMCAF encodings / 24 occurrences**
@@ -239,6 +239,15 @@ game over and title return. Verify a fresh game, Stop/Resume/Restart, debug logs
 keyboard/Gamepad/touch and actual GPU frames without VM-variable/IP edits.
 Document remaining untested paths rather than claiming completion from startup.
 
+The private browser project now lives at `/home/daniel/Programs/ghostlight-browser`,
+with build configuration, an eight-file asset manifest and build reporting. It
+reads the original source/assets from the external `ghostlight` directory and
+writes JS/normal/debug HTML only to its own `dist/`. Run `npm run build` there;
+while unsupported commands remain, it writes a blocked report and no new game
+artifacts. The project and game files are not part of this repository. Its builder
+rejects output paths inside the compiler checkout; repository ignore rules also
+cover recognizable Ghostlight source/module/page names and directories.
+
 The supplied Readme restricts use/distribution of the game. Keep its source,
 assets, generated game modules/HTML and full listings out of the public repo and
 release artifacts. Public browser tests should use distributable synthetic
@@ -272,9 +281,9 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** Turbo Amos Pri and the remaining Pt Sam/Raw
-commands, then interlaced/overscan integration for the atlas. Pt Play now has VM
-integration; Amos Pri is the next whole-file compilation blocker.
+**Next implementation task:** Smouse Key and the remaining Pt Sam/Raw commands,
+then interlaced/overscan integration for the atlas. Music playback has VM
+integration; Smouse Key is the next whole-file compilation blocker.
 
 The progress entries below describe successive stages; the final entry records
 the current VM support. Earlier gated statements are historical stage bounds.
@@ -343,3 +352,19 @@ This raises Ghostlight's implemented third-party encodings from 8/18 to 12/18.
 The next production compile blocker is Turbo Amos Pri, slot 12 `$0928`, line 68,
 byte 2584. Pt Sam/Raw ownership, other AMCAF commands, interlaced presentation and
 whole-game execution remain open. Private assets remain external.
+
+
+### Priority and raster pacing (2026-11-10)
+
+Turbo Amos Pri now preserves signed-long bounds and records optional synchronous
+host intent without changing browser scheduling. AMCAF's one-argument Raster Wait
+now returns dedicated control IR and waits on the unscaled program field clock,
+with explicit PAL/NTSC, line-zero, passed-line and out-of-field behavior. A public
+manual-clock demo covers both operations and owned Stop/Resume/End handling.
+See [extension timing](extension-timing.md) for source offsets and limitations.
+
+Ghostlight now has 14/18 third-party encodings implemented. The next compiler
+blocker is Smouse Key at line 1750, byte 59604. Its native inputs are CIA bit 7
+and POTINP 6/4, so it must not be aliased to the main mouse mask; the next input
+work needs a second-port button policy. Pt Sam/Raw, atlas presentation and full
+game execution remain open. The original source/assets stay private/external.

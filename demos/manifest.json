@@ -254,6 +254,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
     },
     {
+      "file": "extension-timing.html",
+      "title": "Extension priority and raster timing",
+      "description": "Step a synthetic AMOS program through Turbo Amos Pri and AMCAF Raster Wait with a manual PAL clock. PAL/NTSC checks cover line deadlines, slowdown independence and owned waits. Priority is an optional system-hook intent; no browser OS scheduling or cycle-exact beam is claimed.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/extension-timing.html"
+    },
+    {
       "file": "amcaf-vm.html",
       "title": "AMCAF music in a compiled AMOS application",
       "description": "A synthetic tokenized AMOS program runs Track Load and Pt Play through the VM CIA clock while waiting for a key. The page builder supplies the streaming host automatically. Play, sound, Stop/Resume and Restart use the normal application harness; 128 opening PCM samples have independent native audio checks. No Ghostlight assets are included.",

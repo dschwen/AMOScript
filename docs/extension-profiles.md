@@ -87,7 +87,9 @@ The [graphics subset](extension-graphics.md) now runs a declared original INIT
 graphics excerpt, with distinct graphics/block masks and word-rounded captures.
 [Pt Play/Stop/Volume/Cia Speed](amcaf-vm.md) now execute with driver-owned
 CIA/VBL scheduling and the page builder's streaming host. Ghostlight's next
-compile blocker is Turbo Amos Pri, slot 12 `$0928`, line 68, byte 2584.
+compile blocker is now Smouse Key, slot 8 `$158c`, line 1750, byte 59604.
+[Amos Pri and Raster Wait](extension-timing.md) have bounded host-intent and
+cooperative timing implementations.
 No complete Ghostlight build or gameplay has passed. Continue with the
 [Ghostlight milestone plan](ghostlight-extension-plan.md): boot/system-information
 contracts, graphics/masked blocks, and AMCAF music/SFX/timing remain open.

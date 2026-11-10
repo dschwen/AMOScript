@@ -4,3 +4,10 @@ node_modules
 test/artifacts/
 
 dist/
+
+# Private Ghostlight inputs/output belong in the sibling ghostlight-browser project.
+/[Gg][Hh][Oo][Ss][Tt][Ll][Ii][Gg][Hh][Tt]*/
+**/[Gg][Hh][Oo][Ss][Tt][Ll][Ii][Gg][Hh][Tt]*.[aA][mM][oO][sS]*
+**/[Gg][Hh][Oo][Ss][Tt][Ll][Ii][Gg][Hh][Tt]*.[aA][sS][cC]*
+**/[Gg][Hh][Oo][Ss][Tt][Ll][Ii][Gg][Hh][Tt]*.[jJ][sS]
+**/[Gg][Hh][Oo][Ss][Tt][Ll][Ii][Gg][Hh][Tt]*.[hH][tT][mM][lL]

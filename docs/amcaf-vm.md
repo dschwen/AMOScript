@@ -106,8 +106,7 @@ game tune at 48 kHz. Each tick emitted one block, bank bytes remained unchanged,
 and Stop left no pending wakes. These are original music modules in a declared
 synthetic AMOS harness, not original full-game execution or independent captures.
 
-Ghostlight now compiles past the four music statements. The next production
-compile blocker is Turbo Plus `Amos Pri`, slot 12 `$0928`, at line 68, byte 2584.
-Its remaining compile gaps also include AMCAF Raster Wait, SmouseKey and the
-Pt Sam/Raw commands. Interlaced atlas presentation and complete original game
+Ghostlight now compiles past the four music statements. At that stage the next production compile blocker was Turbo Amos Pri at line 68.
+[Amos Pri and Raster Wait now pass](extension-timing.md); the current compile
+blocker is Smouse Key at line 1750, byte 59604, followed by Pt Sam/Raw commands. Interlaced atlas presentation and complete original game
 execution remain separate milestones.

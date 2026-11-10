@@ -340,6 +340,10 @@ const scenarios = [
   { id: 'roller2-amos-music', capturedFrames: false, title: 'Roller II AMOS Music end tunes', description: 'Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. Separate direct-player foundation; the VM demo adds command/lifecycle integration.', run: require('./amosMusicProbe'), check(result, assert) {
     assert.deepStrictEqual(result.traces, [3392, 3392, 5731, 5731]); assert.strictEqual(result.graphs, 25); assert.ok(result.maxDifference <= 1e-6);
   } },
+  { id: 'extension-timing', capturedFrames: false, title: 'Extension priority and raster timing', description: 'Step a synthetic AMOS program through Turbo Amos Pri and AMCAF Raster Wait with a manual PAL clock. PAL/NTSC checks cover line deadlines, slowdown independence and owned waits. Priority is an optional system-hook intent; no browser OS scheduling or cycle-exact beam is claimed.', run: require('./extensionTimingProbe'), check(result, assert) {
+    assert.deepStrictEqual(result.cases, [{ standard: 'PAL', before: true, after: true }, { standard: 'NTSC', before: true, after: true }]);
+    assert.strictEqual(result.slowdown, 4); assert.deepStrictEqual(result.priorityRequests, [20, 0]);
+  } },
   { id: 'amcaf-vm', capturedFrames: false, title: 'AMCAF music in a compiled AMOS application', description: 'A synthetic tokenized AMOS program runs Track Load and Pt Play through the VM CIA clock while waiting for a key. The page builder supplies the streaming host automatically. Play, sound, Stop/Resume and Restart use the normal application harness; 128 opening PCM samples have independent native audio checks. No Ghostlight assets are included.', run: require('./amcafVmProbe'), check(result, assert) {
     assert.strictEqual(result.vmTicks, 10); assert.strictEqual(result.openingSamples, 128); assert.ok(result.maxDifference < 1e-6);
     assert.strictEqual(result.compiled, true); assert.strictEqual(result.builderStreamingHost, true);

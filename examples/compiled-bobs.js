@@ -4327,10 +4327,35 @@
     else throw new Error('Unsupported Execall vector');
     return dataRegisters[0];
   }
-  function systemCommand(name) {
+  let priorityRevision=0;
+  function amosPriority(value) {
+    value=integer(value);
+    // Turbo R07d silently returns outside this signed-long interval.
+    if(value < -128 || value > 20)return;
+    const revision=priorityRevision;
+    systemCommand('Amos Pri',Object.freeze({priority:value}));
+    // A reentrant successful request owns the resulting task intent.
+    if(revision===priorityRevision){priorityRevision++;state.system.amosPriority=value;}
+  }
+  function rasterWait(value) {
+    const line=(integer(value)<<16)>>16;
+    const ntsc=options.displayOptions&&options.displayOptions.snapshotStandard
+      ? options.displayOptions.snapshotStandard==='NTSC' : options.audioVblHz===60;
+    const rows=ntsc?262:312;
+    if(line>=rows)throw new Error('Raster Wait target exceeds the nonlaced field');
+    if(typeof options.audioFieldTime!=='function')throw new Error('Raster Wait requires the runtime field clock');
+    const now=options.audioFieldTime();
+    if(!Number.isFinite(now)||now<0)throw new Error('Invalid Raster Wait field clock');
+    const phase=now-Math.floor(now),beam=Math.min(rows-1,Math.floor(phase*rows+1e-9));
+    if(beam>0&&beam>=line)return {};
+    // R0ce never exits on vertical zero, even for zero/negative targets.
+    const delay=Math.max(1,line)/rows-phase;
+    return {sleepVbl:Math.max(0,delay),physicalWait:true};
+  }
+  function systemCommand(name, request) {
     if (options.system != null) {
       if (typeof options.system.command !== 'function') throw new Error('System host requires a synchronous command method');
-      const result = options.system.command(name);
+      const result = request==null?options.system.command(name):options.system.command(name,request);
       if (result && typeof result.then === 'function') throw new Error('System host commands must complete synchronously');
     }
     if (name === 'Amos To Front') state.system.amosFront = true;
@@ -6124,6 +6149,8 @@
     requestOff: () => systemCommand('Request Off'),
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
+    extensionAmosPriority:amosPriority,
+    extensionRasterWait:rasterWait,
     extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
@@ -8549,7 +8576,7 @@
     if (res.halt) { state.halted = true; return { done: true }; }
     if (res.yield) { scheduleNext(0); return { yielded: true }; }
     if (res.sleepVbl != null) {
-      const delay = (1000 / timing.vblHz) * res.sleepVbl * timing.sleepScale;
+      const delay = (1000 / timing.vblHz) * res.sleepVbl * (res.physicalWait ? 1 : timing.sleepScale);
       if (!Number.isFinite(delay) || delay < 0) { state.halted = true; throw new Error('Invalid wait duration'); }
       state.waiting = 'sleep';
       scheduleNext(delay);

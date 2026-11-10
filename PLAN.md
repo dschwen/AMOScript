@@ -29,8 +29,9 @@ with an audible synthetic [browser preview](demos/amcaf-pcm.html). Private song
 checks reach their first loop, and the preview now uses per-voice streaming with
 Pause/Resume and bounded native audio queues. [Pt Play/Stop/Volume/Cia Speed now run in the VM](docs/amcaf-vm.md), with
 fractional CIA/VBL wakes, bank guards and automatic page-builder audio hosting.
-The next compile blocker is Turbo Amos Pri (line 68); Pt Sam/Raw and the atlas
-presentation remain open. See [tracker implementation](docs/amcaf-tracker.md).
+[Turbo Amos Pri and AMCAF Raster Wait](docs/extension-timing.md) now pass with
+portable priority intent and cooperative field-line timing. The next compile
+blocker is Smouse Key (line 1750); Pt Sam/Raw and atlas presentation remain open. See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface
 

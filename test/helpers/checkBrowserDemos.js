@@ -815,6 +815,17 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#repeat-controls').getAttribute('data-status'), 'stopped');
         await page.click('#repeat-detach');
       }
+      if (scenario.id === 'extension-timing') {
+        const status=page.locator('#extension-timing-status');
+        assert.strictEqual(await status.getAttribute('data-priority'),'20');
+        await page.click('#timing-one');await page.click('#timing-stop');await page.click('#timing-ten');
+        assert.strictEqual(await status.getAttribute('data-logs'),'[1]');assert.strictEqual(await status.getAttribute('data-stopped'),'true');
+        await page.click('#timing-resume');await page.click('#timing-ten');
+        assert.strictEqual(await status.getAttribute('data-logs'),'[1,2]');assert.strictEqual(await status.getAttribute('data-priority'),'0');
+        await page.click('#timing-finish');assert.strictEqual(await status.getAttribute('data-waiting'),'ended');
+        await page.click('#timing-restart');assert.strictEqual(await status.getAttribute('data-priority'),'20');
+        await page.evaluate(()=>AMOS_EXTENSION_TIMING_CLEANUP());
+      }
       if (scenario.id === 'amcaf-vm') {
         const app=page.frameLocator('#amcaf-vm-player');
         await app.locator('body').evaluate(()=>{
