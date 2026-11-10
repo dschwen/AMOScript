@@ -2637,6 +2637,16 @@
     target.x = target.y = 0;
     changed();
   }
+  function clearBitplane(id, plane, x1=0, y1=0, x2=null, y2=null) {
+    const target=screen(whole(id));plane=whole(plane);
+    if(plane<0||plane>=Math.log2(target.colours))throw Error('Blitter Clear bitplane out of bounds');
+    x2=x2==null?target.width:whole(x2);y2=y2==null?target.height:whole(y2);whole(x1);whole(y1);
+    if(target.width%16||x1<0||y1<0||x2<0||y2<0||x1>target.width||x2>target.width||y1>target.height||y2>target.height)throw Error('Blitter Clear requires bounded bitmap coordinates');
+    const left=Math.floor(x1/16)*16,right=Math.ceil(x2/16)*16,mask=~(1<<plane);
+    if(right<=left||y2<=y1)return;
+    for(let y=y1;y<y2;y++)for(let x=left;x<right;x++)target.pixels[y*target.width+x]&=mask;
+    changed();
+  }
   function clearRect(colour, x1, y1, x2, y2) {
     const target = screen();
     rectangle(target, x1, y1, x2, y2, colourIndex(colour, target), true);
@@ -3422,7 +3432,7 @@
   open(0, 320, 200, 16, 0);
   return {
     interfaceDraw,interfaceMeasure,
-    clip, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
+    clip, clearBitplane, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
@@ -3637,6 +3647,8 @@
 };
   const operationsFactory = function createOperations(state, options) {
   const display = options.display || displayFactory(options.displayOptions);
+  let quickMath=null;
+  function amcafMath(){if(!quickMath){if(typeof amcafMathFactory!=='function')throw Error('AMCAF math requires an AMCAF compilation profile');quickMath=amcafMathFactory();}return quickMath;}
   // InResourceBank only stores IDia_BankPuzzle. Lookup belongs to the later
   // resource consumer (Sliders selects bank16 before loading it). Zero selects
   // the system resources; retain the full nonnegative longword selector.
@@ -6239,6 +6251,11 @@
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    extensionQsin:(a,r)=>amcafMath().sin(integer(a),integer(r)),
+    extensionQcos:(a,r)=>amcafMath().cos(integer(a),integer(r)),
+    extensionQsqr:v=>amcafMath().sqr(integer(v)),
+    extensionQarc:(x,y)=>amcafMath().arc(integer(x),integer(y)),
+    extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
     extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,

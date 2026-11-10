@@ -1,13 +1,23 @@
 # AMOScript development plan
 
-Assessment updated: 2026-11-02.
+Assessment updated: 2026-11-10.
+
+## AMCAF example collection
+
+Current priority is the original twelve-program AMCAF collection, now preserved
+under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.html) includes every
+program and its actual build/runtime status. The unchanged quick-maths example
+runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
+1/12 programs currently compile. Next implement shared IMP! decompression/loading
+before the Protracker examples, then fonts, devices, file/bank utilities and intro
+effects. The protected/native AGA source has a separate format boundary.
+See [AMCAF example support](docs/amcaf-examples.md).
 
 ## Ghostlight: AMCAF and Turbo Plus
 
-Priority remains compiling and running Ghostlight in its separate private project.
-The twelve programs in `amcaf_examples/AMCAF_Examples` are a follow-up AMCAF
-compatibility corpus; use relevant examples to unblock Ghostlight, with broader
-example builds/support deferred until that milestone.
+Ghostlight remains a private integration target; its source/assets and compiled
+pages stay outside this repository. The AMCAF examples are now the active
+compatibility corpus rather than deferred follow-up work.
 
 The next extension milestone is the unchanged local GhostLight2.amos program,
 on `feature/amcaf-turbo-ghostlight`. The [implementation plan](docs/ghostlight-extension-plan.md)

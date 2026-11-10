@@ -1,0 +1,2544 @@
+[
+  {
+    "source": "BZoomAnimPlayer.AMOS",
+    "sha256": "a736316f77a337c3048396a8c957464a7190c45285aeb2218d3d8f2c1cffc54a",
+    "bytes": 2182,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x672",
+        "name": "examine object",
+        "lines": [
+          14
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6a2",
+        "name": "object size",
+        "lines": [
+          15
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x998",
+        "name": "asc.l",
+        "lines": [
+          20,
+          22
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1520",
+        "name": "bzoom",
+        "lines": [
+          41
+        ]
+      }
+    ]
+  },
+  {
+    "source": "BankManager.AMOS",
+    "sha256": "f870bf7c0041d29dcddb75ea470be5a273a1f6616411a9fd48bc645555c821bb",
+    "bytes": 99252,
+    "extensions": [
+      {
+        "slot": 1,
+        "offset": "0x2c",
+        "name": null,
+        "lines": [
+          231,
+          236
+        ]
+      },
+      {
+        "slot": 1,
+        "offset": "0x58",
+        "name": null,
+        "lines": [
+          229,
+          234
+        ]
+      },
+      {
+        "slot": 2,
+        "offset": "0x26",
+        "name": null,
+        "lines": [
+          870
+        ]
+      },
+      {
+        "slot": 2,
+        "offset": "0x56",
+        "name": null,
+        "lines": [
+          219
+        ]
+      },
+      {
+        "slot": 3,
+        "offset": "0x6",
+        "name": null,
+        "lines": [
+          1446
+        ]
+      },
+      {
+        "slot": 3,
+        "offset": "0x16",
+        "name": null,
+        "lines": [
+          1443
+        ]
+      },
+      {
+        "slot": 5,
+        "offset": "0x120",
+        "name": null,
+        "lines": [
+          1120
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x74",
+        "name": "bank permanent",
+        "lines": [
+          544
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x8a",
+        "name": "bank temporary",
+        "lines": [
+          541
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xa0",
+        "name": "bank to chip",
+        "lines": [
+          227,
+          243,
+          531
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xb4",
+        "name": "bank to fast",
+        "lines": [
+          527
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xc8",
+        "name": "bank code xor.b",
+        "lines": [
+          119,
+          175
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xee",
+        "name": "bank code add.b",
+        "lines": [
+          105,
+          161
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x114",
+        "name": "bank code mix.b",
+        "lines": [
+          133,
+          189
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x13a",
+        "name": "bank code rol.b",
+        "lines": [
+          147
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x160",
+        "name": "bank code ror.b",
+        "lines": [
+          203
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x186",
+        "name": "bank code xor.w",
+        "lines": [
+          114,
+          170
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1ac",
+        "name": "bank code add.w",
+        "lines": [
+          100,
+          156
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1d2",
+        "name": "bank code mix.w",
+        "lines": [
+          128,
+          184
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1f8",
+        "name": "bank code rol.w",
+        "lines": [
+          142
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x21e",
+        "name": "bank code ror.w",
+        "lines": [
+          198
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x244",
+        "name": "bank stretch",
+        "lines": [
+          514
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x25a",
+        "name": "bank copy",
+        "lines": [
+          486
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x27a",
+        "name": "bank name$",
+        "lines": [
+          210,
+          492,
+          625,
+          666,
+          724,
+          972,
+          1002,
+          1019,
+          1026,
+          1026
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x28c",
+        "name": "bank name",
+        "lines": [
+          497,
+          975,
+          980,
+          1005,
+          1010,
+          1019,
+          1026
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x2d0",
+        "name": "disk type",
+        "lines": [
+          1440
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x2f0",
+        "name": "filename$",
+        "lines": [
+          795,
+          915,
+          1042,
+          1068
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x300",
+        "name": "pattern match",
+        "lines": [
+          1652
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x388",
+        "name": "turbo plot",
+        "lines": [
+          2115,
+          2116,
+          2126,
+          2126
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3e0",
+        "name": "path$",
+        "lines": [
+          796,
+          916,
+          1043,
+          1069,
+          1343,
+          1424
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3ec",
+        "name": "extpath$",
+        "lines": [
+          1331,
+          1476
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3fc",
+        "name": "rnc unpack",
+        "lines": [
+          459
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x464",
+        "name": "dload",
+        "lines": [
+          836,
+          861,
+          894,
+          974,
+          979,
+          1004,
+          1009
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x472",
+        "name": "wsave",
+        "lines": [
+          212,
+          920,
+          987,
+          1145,
+          1164
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x4b4",
+        "name": "pptodisk",
+        "lines": [
+          959
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x4d2",
+        "name": "ppunpack",
+        "lines": [
+          443
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x4e4",
+        "name": "ppfromdisk",
+        "lines": [
+          851,
+          1158
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x522",
+        "name": "io error$",
+        "lines": [
+          792,
+          808,
+          926,
+          942,
+          949,
+          1049,
+          1065,
+          1084,
+          1451,
+          1626
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x532",
+        "name": "io error",
+        "lines": [
+          792,
+          808,
+          926,
+          942,
+          949,
+          1049,
+          1065,
+          1084,
+          1451,
+          1626
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x5b0",
+        "name": "change font",
+        "lines": [
+          1380
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x63a",
+        "name": "examine dir",
+        "lines": [
+          1621
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x64c",
+        "name": "examine next$",
+        "lines": [
+          1637
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x660",
+        "name": "examine stop",
+        "lines": [
+          1423,
+          1428,
+          1631
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x672",
+        "name": "examine object",
+        "lines": [
+          966,
+          991,
+          1444
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x688",
+        "name": "object type",
+        "lines": [
+          1643
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6a2",
+        "name": "object size",
+        "lines": [
+          967,
+          992,
+          1661
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6d8",
+        "name": "object name$",
+        "lines": [
+          1448
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6f4",
+        "name": "object date",
+        "lines": [
+          1645
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x70e",
+        "name": "object time",
+        "lines": [
+          1645
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x728",
+        "name": "object protection$",
+        "lines": [
+          1647
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x742",
+        "name": "object protection",
+        "lines": [
+          1647
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x762",
+        "name": "object comment$",
+        "lines": [
+          1646
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x8c4",
+        "name": "chr.w$",
+        "lines": [
+          667,
+          667,
+          879,
+          1280,
+          1280,
+          1313,
+          1313
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x8d2",
+        "name": "chr.l$",
+        "lines": [
+          667,
+          667,
+          759
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x93a",
+        "name": "lsr",
+        "lines": [
+          745,
+          2043,
+          2066,
+          2071,
+          2092,
+          2094
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x98c",
+        "name": "asc.w",
+        "lines": [
+          100,
+          105,
+          114,
+          119,
+          128,
+          133,
+          142,
+          147,
+          156,
+          161,
+          170,
+          175,
+          184,
+          189,
+          198,
+          203,
+          208,
+          273,
+          316,
+          440,
+          469,
+          479,
+          481,
+          491,
+          504,
+          522,
+          538,
+          623,
+          628,
+          633,
+          820,
+          830,
+          845,
+          855,
+          875,
+          889,
+          918,
+          920,
+          933,
+          958,
+          977,
+          987,
+          1007,
+          1017,
+          1024,
+          1117,
+          1129,
+          1364,
+          1365
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x998",
+        "name": "asc.l",
+        "lines": [
+          211,
+          239,
+          442,
+          450,
+          458,
+          745,
+          746,
+          747,
+          748,
+          750,
+          753,
+          756,
+          764,
+          765,
+          798,
+          816,
+          841,
+          879,
+          1071,
+          1103,
+          1114,
+          1127,
+          1135,
+          1154
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xe8a",
+        "name": "imploder unpack",
+        "lines": [
+          451
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xea2",
+        "name": "imploder load",
+        "lines": [
+          826,
+          1139
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xeb8",
+        "name": "lzstr$",
+        "lines": [
+          29,
+          29,
+          293,
+          293,
+          327,
+          327,
+          624,
+          626,
+          666,
+          666,
+          1915,
+          2034
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xec8",
+        "name": "lsstr$",
+        "lines": [
+          683,
+          683,
+          1661
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf0a",
+        "name": "cd date$",
+        "lines": [
+          1645
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf1a",
+        "name": "ct time$",
+        "lines": [
+          1645
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xfce",
+        "name": "bank delta encode",
+        "lines": [
+          1018
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xff2",
+        "name": "bank delta decode",
+        "lines": [
+          1025
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1016",
+        "name": "turbo draw",
+        "lines": [
+          2235,
+          2236,
+          2237,
+          2238,
+          2246,
+          2247,
+          2248,
+          2249,
+          2273,
+          2286
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x108e",
+        "name": "pt play",
+        "lines": [
+          246,
+          252
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10a8",
+        "name": "pt stop",
+        "lines": [
+          248,
+          254
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10f2",
+        "name": "pt cia speed",
+        "lines": [
+          245,
+          251
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1258",
+        "name": "blitter wait",
+        "lines": [
+          360,
+          366
+        ]
+      }
+    ]
+  },
+  {
+    "source": "BigAmcafIntro.AMOS",
+    "sha256": "7719d2b9ff2003c119d785efbdc9db9c463ee4950e7220bf4c9f82c0fee9d2ef",
+    "bytes": 57284,
+    "extensions": [
+      {
+        "slot": 2,
+        "offset": "0x56",
+        "name": null,
+        "lines": [
+          112,
+          278,
+          570,
+          584,
+          1140,
+          1369
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x346",
+        "name": "raster wait",
+        "lines": [
+          1059
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x388",
+        "name": "turbo plot",
+        "lines": [
+          1064
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3b2",
+        "name": "red val",
+        "lines": [
+          870
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3c0",
+        "name": "green val",
+        "lines": [
+          871
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3d0",
+        "name": "blue val",
+        "lines": [
+          872
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x472",
+        "name": "wsave",
+        "lines": [
+          15
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x4f8",
+        "name": "binexp",
+        "lines": [
+          703,
+          969,
+          970,
+          971,
+          972,
+          984,
+          985,
+          986,
+          998,
+          999,
+          1000,
+          1009,
+          1010,
+          1011,
+          1020,
+          1021,
+          1022,
+          1267
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x5e6",
+        "name": "fcircle",
+        "lines": [
+          451
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x5f8",
+        "name": "fellipse",
+        "lines": [
+          452
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x60e",
+        "name": "cpu",
+        "lines": [
+          882
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x92e",
+        "name": "lsl",
+        "lines": [
+          343,
+          344,
+          353,
+          353,
+          354,
+          354,
+          355,
+          355,
+          356,
+          356
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x93a",
+        "name": "lsr",
+        "lines": [
+          359,
+          359,
+          360,
+          360
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x976",
+        "name": "convert grey",
+        "lines": [
+          591
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xa0e",
+        "name": "glue colour",
+        "lines": [
+          873,
+          1121
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xa7e",
+        "name": "td stars bank",
+        "lines": [
+          67,
+          618
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xa94",
+        "name": "td stars limit",
+        "lines": [
+          66,
+          617
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xab8",
+        "name": "td stars origin",
+        "lines": [
+          76,
+          640,
+          642
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xad0",
+        "name": "td stars init",
+        "lines": [
+          71,
+          622
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xafc",
+        "name": "td stars double do",
+        "lines": [
+          79,
+          644
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xb78",
+        "name": "td stars gravity",
+        "lines": [
+          70,
+          77,
+          620,
+          634,
+          636
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xb92",
+        "name": "td stars accelerate on",
+        "lines": [
+          69,
+          621,
+          631
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xbae",
+        "name": "td stars accelerate off",
+        "lines": [
+          629
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xbcc",
+        "name": "td stars planes",
+        "lines": [
+          68,
+          619
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xbe4",
+        "name": "sdeek",
+        "lines": [
+          1425,
+          1425,
+          1430,
+          1430
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xcf2",
+        "name": "count pixels",
+        "lines": [
+          306
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xd24",
+        "name": "coords bank",
+        "lines": [
+          310
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xd2e",
+        "name": "coords read",
+        "lines": [
+          311
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xd4e",
+        "name": "splinters bank",
+        "lines": [
+          308
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xd66",
+        "name": "splinters limit",
+        "lines": [
+          295
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xd8a",
+        "name": "splinters gravity",
+        "lines": [
+          305
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xda4",
+        "name": "splinters init",
+        "lines": [
+          312
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xdb8",
+        "name": "splinters colour",
+        "lines": [
+          296
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xdec",
+        "name": "splinters double do",
+        "lines": [
+          317
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xe62",
+        "name": "splinters max",
+        "lines": [
+          304
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xea2",
+        "name": "imploder load",
+        "lines": [
+          14,
+          19
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xec8",
+        "name": "lsstr$",
+        "lines": [
+          560,
+          561
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xefc",
+        "name": "mix colour",
+        "lines": [
+          703,
+          874
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf2a",
+        "name": "splinters fuel",
+        "lines": [
+          297
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf40",
+        "name": "splinters active",
+        "lines": [
+          318
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf56",
+        "name": "shade bob mask",
+        "lines": [
+          206,
+          341,
+          1331
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf6c",
+        "name": "shade bob planes",
+        "lines": [
+          207,
+          340,
+          1330
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf84",
+        "name": "shade bob up",
+        "lines": [
+          210,
+          359,
+          1336
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf9e",
+        "name": "shade bob down",
+        "lines": [
+          360
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xfba",
+        "name": "ham fade out",
+        "lines": [
+          578,
+          1397,
+          1413
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1030",
+        "name": "turbo draw",
+        "lines": [
+          128,
+          131,
+          182,
+          189,
+          265,
+          266,
+          267,
+          268,
+          536,
+          538,
+          540,
+          542,
+          544,
+          546,
+          548,
+          549,
+          550,
+          551,
+          552,
+          553,
+          736,
+          738,
+          741,
+          744,
+          853,
+          854,
+          855,
+          856,
+          863,
+          864,
+          865,
+          866,
+          969,
+          970,
+          971,
+          972,
+          984,
+          985,
+          986,
+          998,
+          999,
+          1000,
+          1009,
+          1010,
+          1011,
+          1020,
+          1021,
+          1022,
+          1433,
+          1436
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1042",
+        "name": "blitter fill",
+        "lines": [
+          133,
+          269,
+          882,
+          1230,
+          1238
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1058",
+        "name": "blitter fill",
+        "lines": [
+          495
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1066",
+        "name": "blitter fill",
+        "lines": [
+          192,
+          880,
+          881,
+          1268
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1078",
+        "name": "blitter fill",
+        "lines": [
+          748
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x108e",
+        "name": "pt play",
+        "lines": [
+          23
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10a8",
+        "name": "pt stop",
+        "lines": [
+          1412
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10c6",
+        "name": "pt volume",
+        "lines": [
+          23,
+          556,
+          566,
+          1395
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10d6",
+        "name": "pt voice",
+        "lines": [
+          23
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10e6",
+        "name": "pt vu",
+        "lines": [
+          487,
+          531
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10f2",
+        "name": "pt cia speed",
+        "lines": [
+          23,
+          557,
+          565
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1106",
+        "name": "qsin",
+        "lines": [
+          264,
+          352,
+          383,
+          384,
+          436,
+          489,
+          557,
+          640,
+          712,
+          712,
+          712,
+          833,
+          833,
+          967,
+          980,
+          981,
+          982,
+          994,
+          995,
+          996,
+          1005,
+          1005,
+          1006,
+          1016,
+          1018,
+          1033,
+          1154,
+          1198,
+          1199
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1114",
+        "name": "qcos",
+        "lines": [
+          264,
+          351,
+          383,
+          384,
+          490,
+          556,
+          640,
+          833,
+          967,
+          980,
+          981,
+          982,
+          994,
+          995,
+          996,
+          1006,
+          1007,
+          1007,
+          1016,
+          1017,
+          1017,
+          1018,
+          1033,
+          1154
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1122",
+        "name": "vec rot pos",
+        "lines": [
+          162,
+          527,
+          712,
+          834
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1138",
+        "name": "vec rot angles",
+        "lines": [
+          163,
+          528,
+          716,
+          835
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1152",
+        "name": "vec rot precalc",
+        "lines": [
+          164,
+          529,
+          717,
+          836
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1178",
+        "name": "vec rot x",
+        "lines": [
+          172,
+          181,
+          534,
+          535,
+          537,
+          539,
+          541,
+          543,
+          545,
+          547,
+          719,
+          841
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1184",
+        "name": "vec rot y",
+        "lines": [
+          172,
+          181,
+          534,
+          535,
+          537,
+          539,
+          541,
+          543,
+          545,
+          547,
+          720,
+          842
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x11d4",
+        "name": "vec rot z",
+        "lines": [
+          868
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1204",
+        "name": "change bank font",
+        "lines": [
+          62,
+          282,
+          334,
+          337,
+          369,
+          372,
+          400,
+          403,
+          470,
+          473,
+          476,
+          510,
+          513,
+          516,
+          592,
+          596,
+          609,
+          612,
+          792,
+          795,
+          798,
+          925,
+          928,
+          931,
+          1039,
+          1042,
+          1080,
+          1085,
+          1130,
+          1135,
+          1175,
+          1180,
+          1195,
+          1319,
+          1322
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x121c",
+        "name": "blitter clear",
+        "lines": [
+          78,
+          261,
+          497,
+          937,
+          1058,
+          1234,
+          1265,
+          1298
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1234",
+        "name": "blitter clear",
+        "lines": [
+          156,
+          420,
+          449,
+          526,
+          752,
+          756,
+          829,
+          837,
+          1292
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1258",
+        "name": "blitter wait",
+        "lines": [
+          134,
+          492,
+          1230,
+          1238,
+          1303
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x126a",
+        "name": "shade pix",
+        "lines": [
+          385,
+          386,
+          387,
+          388
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x128a",
+        "name": "blitter copy limit",
+        "lines": [
+          1275
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x12a4",
+        "name": "blitter copy limit",
+        "lines": [
+          1290
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x12b2",
+        "name": "blitter copy",
+        "lines": [
+          1291
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x12dc",
+        "name": "blitter copy",
+        "lines": [
+          1276
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1330",
+        "name": "set rain colour",
+        "lines": [
+          1152,
+          1194
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1348",
+        "name": "rain fade",
+        "lines": [
+          1104
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x135c",
+        "name": "rain fade",
+        "lines": [
+          1097
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1372",
+        "name": "bcircle",
+        "lines": [
+          493
+        ]
+      }
+    ]
+  },
+  {
+    "source": "FileRequester.AMOS",
+    "sha256": "d25572e3d67ef1255521373ba923cdbf77c87bdef2704e03a2ac519786105e5f",
+    "bytes": 54026,
+    "extensions": [
+      {
+        "slot": 3,
+        "offset": "0x6",
+        "name": null,
+        "lines": [
+          425
+        ]
+      },
+      {
+        "slot": 3,
+        "offset": "0x16",
+        "name": null,
+        "lines": [
+          422
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x2d0",
+        "name": "disk type",
+        "lines": [
+          419
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x2f0",
+        "name": "filename$",
+        "lines": [
+          228
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x300",
+        "name": "pattern match",
+        "lines": [
+          631
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x388",
+        "name": "turbo plot",
+        "lines": [
+          1094,
+          1095,
+          1105,
+          1105
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3e0",
+        "name": "path$",
+        "lines": [
+          228,
+          322,
+          403
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3ec",
+        "name": "extpath$",
+        "lines": [
+          310,
+          455
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x522",
+        "name": "io error$",
+        "lines": [
+          430,
+          605
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x532",
+        "name": "io error",
+        "lines": [
+          430,
+          605
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x5b0",
+        "name": "change font",
+        "lines": [
+          359
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x63a",
+        "name": "examine dir",
+        "lines": [
+          600
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x64c",
+        "name": "examine next$",
+        "lines": [
+          616
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x660",
+        "name": "examine stop",
+        "lines": [
+          402,
+          407,
+          610
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x672",
+        "name": "examine object",
+        "lines": [
+          423
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x688",
+        "name": "object type",
+        "lines": [
+          622
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6a2",
+        "name": "object size",
+        "lines": [
+          640
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6d8",
+        "name": "object name$",
+        "lines": [
+          427
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x6f4",
+        "name": "object date",
+        "lines": [
+          624
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x70e",
+        "name": "object time",
+        "lines": [
+          624
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x728",
+        "name": "object protection$",
+        "lines": [
+          626
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x742",
+        "name": "object protection",
+        "lines": [
+          626
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x762",
+        "name": "object comment$",
+        "lines": [
+          625
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x8c4",
+        "name": "chr.w$",
+        "lines": [
+          259,
+          259,
+          292,
+          292
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x93a",
+        "name": "lsr",
+        "lines": [
+          1022,
+          1045,
+          1050,
+          1071,
+          1073
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x98c",
+        "name": "asc.w",
+        "lines": [
+          343,
+          344
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xeb8",
+        "name": "lzstr$",
+        "lines": [
+          894,
+          1013
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xec8",
+        "name": "lsstr$",
+        "lines": [
+          640
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf0a",
+        "name": "cd date$",
+        "lines": [
+          624
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xf1a",
+        "name": "ct time$",
+        "lines": [
+          624
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1016",
+        "name": "turbo draw",
+        "lines": [
+          1214,
+          1215,
+          1216,
+          1217,
+          1225,
+          1226,
+          1227,
+          1228,
+          1252,
+          1265
+        ]
+      }
+    ]
+  },
+  {
+    "source": "Fonts.AMOS",
+    "sha256": "a87f4d97c9367705791c4b3f74156eb7686ba0bbd94091aeb333a8eefba53b01",
+    "bytes": 9032,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x8a",
+        "name": "bank temporary",
+        "lines": [
+          32
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x59c",
+        "name": "change font",
+        "lines": [
+          28
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x5d6",
+        "name": "flush libs",
+        "lines": [
+          43
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xe8a",
+        "name": "imploder unpack",
+        "lines": [
+          10
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x11a0",
+        "name": "change print font",
+        "lines": [
+          20
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x11ee",
+        "name": "make bank font",
+        "lines": [
+          32
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1204",
+        "name": "change bank font",
+        "lines": [
+          16,
+          48
+        ]
+      }
+    ]
+  },
+  {
+    "source": "GamePorts.AMOS",
+    "sha256": "76d70f7d91db4e1f17cc8acc10ed4187ec5f79fad91e7e864d108476e836c5ed",
+    "bytes": 39704,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x8e0",
+        "name": "pjoy",
+        "lines": [
+          54,
+          56
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x153c",
+        "name": "x smouse",
+        "lines": [
+          43
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x154a",
+        "name": "y smouse",
+        "lines": [
+          43
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1558",
+        "name": "smouse x",
+        "lines": [
+          27
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1568",
+        "name": "smouse y",
+        "lines": [
+          27
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1578",
+        "name": "smouse speed",
+        "lines": [
+          29
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x158c",
+        "name": "smouse key",
+        "lines": [
+          49
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x159c",
+        "name": "limit smouse",
+        "lines": [
+          25
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x15be",
+        "name": "xfire",
+        "lines": [
+          14,
+          71,
+          73,
+          77,
+          79,
+          82,
+          85,
+          87
+        ]
+      }
+    ]
+  },
+  {
+    "source": "Iff2Raw.AMOS",
+    "sha256": "147dd9b7f587144a2ae59f98fd856d9b5ef9734c74c2f81287d2c42b46054c08",
+    "bytes": 3844,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x2f0",
+        "name": "filename$",
+        "lines": [
+          18
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x3e0",
+        "name": "path$",
+        "lines": [
+          18
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x456",
+        "name": "wload",
+        "lines": [
+          26
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x472",
+        "name": "wsave",
+        "lines": [
+          21,
+          22
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x4f8",
+        "name": "binexp",
+        "lines": [
+          45
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x998",
+        "name": "asc.l",
+        "lines": [
+          30,
+          31,
+          37,
+          58,
+          66
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x16a4",
+        "name": "itemstr$",
+        "lines": [
+          50
+        ]
+      }
+    ]
+  },
+  {
+    "source": "Protracker.AMOS",
+    "sha256": "3a686af71349415b5f64bcc7142c56160e2e8fec7ef6f077c554e93009e67a27",
+    "bytes": 13886,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x93a",
+        "name": "lsr",
+        "lines": [
+          56,
+          103
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xea2",
+        "name": "imploder load",
+        "lines": [
+          15
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xec8",
+        "name": "lsstr$",
+        "lines": [
+          43,
+          47,
+          110,
+          117,
+          124,
+          131
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1016",
+        "name": "turbo draw",
+        "lines": [
+          142,
+          143
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1066",
+        "name": "blitter fill",
+        "lines": [
+          148
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x108e",
+        "name": "pt play",
+        "lines": [
+          82
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10a8",
+        "name": "pt stop",
+        "lines": [
+          193
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10b6",
+        "name": "pt signal",
+        "lines": [
+          150
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10c6",
+        "name": "pt volume",
+        "lines": [
+          78,
+          111,
+          118
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10d6",
+        "name": "pt voice",
+        "lines": [
+          80,
+          104
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10e6",
+        "name": "pt vu",
+        "lines": [
+          138
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10f2",
+        "name": "pt cia speed",
+        "lines": [
+          76,
+          125,
+          132
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1234",
+        "name": "blitter clear",
+        "lines": [
+          135
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x15de",
+        "name": "pt cpattern",
+        "lines": [
+          86
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x15f0",
+        "name": "pt cpos",
+        "lines": [
+          87
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x15fe",
+        "name": "pt cinstr",
+        "lines": [
+          91
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x160e",
+        "name": "pt cnote",
+        "lines": [
+          91
+        ]
+      }
+    ]
+  },
+  {
+    "source": "Protracker2.AMOS",
+    "sha256": "bb58c76268c2c8e95158fcf624baf38fc7659ab7df1ae1403c1cb90fd7034afa",
+    "bytes": 4018,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x388",
+        "name": "turbo plot",
+        "lines": [
+          67,
+          76
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0xea2",
+        "name": "imploder load",
+        "lines": [
+          17
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1030",
+        "name": "turbo draw",
+        "lines": [
+          61,
+          62
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1066",
+        "name": "blitter fill",
+        "lines": [
+          70
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x108e",
+        "name": "pt play",
+        "lines": [
+          41
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10a8",
+        "name": "pt stop",
+        "lines": [
+          82
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10c6",
+        "name": "pt volume",
+        "lines": [
+          39
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10d6",
+        "name": "pt voice",
+        "lines": [
+          40
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10e6",
+        "name": "pt vu",
+        "lines": [
+          76
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x10f2",
+        "name": "pt cia speed",
+        "lines": [
+          38
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1234",
+        "name": "blitter clear",
+        "lines": [
+          45
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1258",
+        "name": "blitter wait",
+        "lines": [
+          73
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x15fe",
+        "name": "pt cinstr",
+        "lines": [
+          49,
+          76
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x160e",
+        "name": "pt cnote",
+        "lines": [
+          50,
+          76
+        ]
+      }
+    ]
+  },
+  {
+    "source": "QsinCosArcSqr.AMOS",
+    "sha256": "9fb9d5babc69702ebf4c12bfe7d550613cee8f81ef01ed1717252b4f436a638e",
+    "bytes": 1964,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0x1106",
+        "name": "qsin",
+        "lines": [
+          34
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1114",
+        "name": "qcos",
+        "lines": [
+          34
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x121c",
+        "name": "blitter clear",
+        "lines": [
+          24
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x1366",
+        "name": "qsqr",
+        "lines": [
+          32
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x16c2",
+        "name": "qarc",
+        "lines": [
+          30
+        ]
+      }
+    ]
+  },
+  {
+    "source": "SamBankFixer.AMOS",
+    "sha256": "d343ea0417ba60b33d02ad771b66865291c483e749205554a7919d81eb2c25a4",
+    "bytes": 1138,
+    "extensions": [
+      {
+        "slot": 8,
+        "offset": "0xec8",
+        "name": "lsstr$",
+        "lines": [
+          22,
+          22,
+          22
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x142a",
+        "name": "pt sam bank",
+        "lines": [
+          19
+        ]
+      },
+      {
+        "slot": 8,
+        "offset": "0x143c",
+        "name": "pt sam play",
+        "lines": [
+          24
+        ]
+      }
+    ]
+  },
+  {
+    "source": "ShowAGAPic.AMOS",
+    "sha256": "bf84422d1c7a91f482b1b90127662f6dee7da5d95128c049acd0df1843b24903",
+    "bytes": 4854,
+    "inventoryError": "Encrypted/compiled procedure"
+  }
+]

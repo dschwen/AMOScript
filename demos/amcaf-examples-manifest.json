@@ -1,0 +1,150 @@
+{
+  "profile": {
+    "8": "amcaf-1.50beta4"
+  },
+  "programs": [
+    {
+      "source": "BZoomAnimPlayer.AMOS",
+      "file": "amcaf-example-bzoomanimplayer.html",
+      "bytes": 2182,
+      "sha256": "a736316f77a337c3048396a8c957464a7190c45285aeb2218d3d8f2c1cffc54a",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0x672 (amcaf-1.50beta4) at line 14, byte 644"
+    },
+    {
+      "source": "BankManager.AMOS",
+      "file": "amcaf-example-bankmanager.html",
+      "bytes": 99252,
+      "sha256": "f870bf7c0041d29dcddb75ea470be5a273a1f6616411a9fd48bc645555c821bb",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported token 0x24d0 at line 27, byte 756"
+    },
+    {
+      "source": "BigAmcafIntro.AMOS",
+      "file": "amcaf-example-bigamcafintro.html",
+      "bytes": 57284,
+      "sha256": "7719d2b9ff2003c119d785efbdc9db9c463ee4950e7220bf4c9f82c0fee9d2ef",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0xea2 (amcaf-1.50beta4) at line 14, byte 502"
+    },
+    {
+      "source": "FileRequester.AMOS",
+      "file": "amcaf-example-filerequester.html",
+      "bytes": 54026,
+      "sha256": "d25572e3d67ef1255521373ba923cdbf77c87bdef2704e03a2ac519786105e5f",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0x2f0 (amcaf-1.50beta4) at line 228, byte 9468"
+    },
+    {
+      "source": "Fonts.AMOS",
+      "file": "amcaf-example-fonts.html",
+      "bytes": 9032,
+      "sha256": "a87f4d97c9367705791c4b3f74156eb7686ba0bbd94091aeb333a8eefba53b01",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0xe8a (amcaf-1.50beta4) at line 10, byte 544"
+    },
+    {
+      "source": "GamePorts.AMOS",
+      "file": "amcaf-example-gameports.html",
+      "bytes": 39704,
+      "sha256": "76d70f7d91db4e1f17cc8acc10ed4187ec5f79fad91e7e864d108476e836c5ed",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0x15be (amcaf-1.50beta4) at line 14, byte 720"
+    },
+    {
+      "source": "Iff2Raw.AMOS",
+      "file": "amcaf-example-iff2raw.html",
+      "bytes": 3844,
+      "sha256": "147dd9b7f587144a2ae59f98fd856d9b5ef9734c74c2f81287d2c42b46054c08",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0x3e0 (amcaf-1.50beta4) at line 18, byte 760"
+    },
+    {
+      "source": "Protracker.AMOS",
+      "file": "amcaf-example-protracker.html",
+      "bytes": 13886,
+      "sha256": "3a686af71349415b5f64bcc7142c56160e2e8fec7ef6f077c554e93009e67a27",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0xea2 (amcaf-1.50beta4) at line 15, byte 874"
+    },
+    {
+      "source": "Protracker2.AMOS",
+      "file": "amcaf-example-protracker2.html",
+      "bytes": 4018,
+      "sha256": "bb58c76268c2c8e95158fcf624baf38fc7659ab7df1ae1403c1cb90fd7034afa",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0xea2 (amcaf-1.50beta4) at line 17, byte 964"
+    },
+    {
+      "source": "QsinCosArcSqr.AMOS",
+      "file": "amcaf-example-qsincosarcsqr.html",
+      "bytes": 1964,
+      "sha256": "9fb9d5babc69702ebf4c12bfe7d550613cee8f81ef01ed1717252b4f436a638e",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Original input loop, three mouse directions, double-buffer publication and Escape exit covered.",
+      "compiled": true
+    },
+    {
+      "source": "SamBankFixer.AMOS",
+      "file": "amcaf-example-sambankfixer.html",
+      "bytes": 1138,
+      "sha256": "d343ea0417ba60b33d02ad771b66865291c483e749205554a7919d81eb2c25a4",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Unsupported extension 8:0xec8 (amcaf-1.50beta4) at line 22, byte 846"
+    },
+    {
+      "source": "ShowAGAPic.AMOS",
+      "file": "amcaf-example-showagapic.html",
+      "bytes": 4854,
+      "sha256": "bf84422d1c7a91f482b1b90127662f6dee7da5d95128c049acd0df1843b24903",
+      "extensions": {
+        "8": "amcaf-1.50beta4"
+      },
+      "runtime": "Not executed: compilation blocked.",
+      "compiled": false,
+      "error": "Invalid AMOS line length at byte 4786"
+    }
+  ]
+}

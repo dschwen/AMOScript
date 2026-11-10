@@ -4,6 +4,7 @@ node_modules
 test/artifacts/
 
 dist/
+/build/
 
 # Private Ghostlight inputs/output belong in the sibling ghostlight-browser project.
 /[Gg][Hh][Oo][Ss][Tt][Ll][Ii][Gg][Hh][Tt]*/

@@ -254,6 +254,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
     },
     {
+      "file": "amcaf-quick-maths.html",
+      "title": "Original AMCAF quick maths",
+      "description": "The complete unchanged QsinCosArcSqr.AMOS example follows three mouse directions, swaps double buffers and exits on Escape. Recovered integer tables drive Qsin/Qcos/Qarc/Qsqr; raw Blitter Clear clears one logical plane. Three Canvas/GPU pairs and 15,795 independent needle pixels. The full collection is linked from the AMCAF catalogue.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-quick-maths.html"
+    },
+    {
       "file": "smouse-key.html",
       "title": "AMCAF second-port buttons",
       "description": "A compiled AMOS loop reads Smouse Key from the second mouse/joystick port. Optional keyboard/gamepad mappings expose secondary and third fire without widening Joy masks or consuming main-mouse clicks. Stop/Resume, typing mode and input cleanup are checked; the gamepad checks use an injected device.",
@@ -612,6 +618,12 @@
       "title": "Planet Zybex — full game with debug enabled",
       "description": "The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html"
+    },
+    {
+      "file": "amcaf-examples.html",
+      "title": "AMCAF — original example collection",
+      "description": "Twelve original AMCAF programs with sources, bundled assets and explicit build/runtime status. The quick-maths mouse demo runs; the catalogue records the remaining blockers.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.html"
     },
     {
       "file": "tutorial.html",

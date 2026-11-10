@@ -21,7 +21,8 @@
     "desktop:pack": "npm --prefix desktop run pack",
     "desktop:dist": "npm --prefix desktop run dist",
     "build:project": "node tools/build_project.js",
-    "test:desktop": "node test/desktop-smoke.js"
+    "test:desktop": "node test/desktop-smoke.js",
+    "build:amcaf": "node tools/build_amcaf_examples.js"
   },
   "repository": {
     "type": "git",

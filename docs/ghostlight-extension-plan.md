@@ -266,14 +266,14 @@ Ghostlight showcase needs a separately established redistribution grant.
 
 ## Support for both libraries beyond Ghostlight
 
-The supplied `amcaf_examples/AMCAF_Examples` directory is the follow-up AMCAF
+The supplied `examples/AMCAF/AMCAF_Examples` directory is now the active AMCAF
 compatibility corpus: twelve AMOS programs and four accompanying assets.
 Examples include GamePorts, Protracker/Protracker2, SamBankFixer, BankManager,
 Fonts, FileRequester, QsinCosArcSqr, BZoomAnimPlayer, Iff2Raw, ShowAGAPic and
-BigAmcafIntro. Consult a relevant example when it directly unblocks Ghostlight;
-defer a bulk compilation/gallery effort and unrelated extension families until
-the private Ghostlight browser milestone. Example execution will supplement the
-recovered library evidence, not replace independent expectations or native captures.
+BigAmcafIntro. The user has explicitly prioritized collection support and a
+public gallery; see the [example support plan](amcaf-examples.md). Example
+execution supplements the recovered library evidence, not independent
+expectations or native captures.
 
 Ghostlight covers only 18 of the combined 500 catalog entries. After its
 milestone, continue by coherent families rather than bulk token registration:
@@ -451,3 +451,12 @@ sources/assets and all resulting game modules, pages and captures remain outside
 the repository. Longer gameplay, death/restart, later levels and exact native
 field timing remain unverified; there is no newly asserted compile/runtime
 blocker in this bounded path.
+
+
+### AMCAF collection pivot
+
+The user has moved the active priority to the twelve original AMCAF examples.
+Their unchanged distribution is now under `examples/AMCAF/`, with a public
+catalogue and an [implementation plan](amcaf-examples.md). Ghostlight remains
+private and useful for regression checks; it is no longer a prerequisite for
+broader example support.
