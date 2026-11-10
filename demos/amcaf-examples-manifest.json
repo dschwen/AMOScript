@@ -37,7 +37,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0xea2 (amcaf-1.50beta4) at line 14, byte 502"
+      "error": "Unsupported extension 8:0x472 (amcaf-1.50beta4) at line 15, byte 544"
     },
     {
       "source": "FileRequester.AMOS",
@@ -61,7 +61,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0xe8a (amcaf-1.50beta4) at line 10, byte 544"
+      "error": "Unsupported extension 8:0x1204 (amcaf-1.50beta4) at line 16, byte 770"
     },
     {
       "source": "GamePorts.AMOS",
@@ -97,7 +97,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0xea2 (amcaf-1.50beta4) at line 15, byte 874"
+      "error": "Unsupported extension 8:0xec8 (amcaf-1.50beta4) at line 43, byte 2038"
     },
     {
       "source": "Protracker2.AMOS",
@@ -109,7 +109,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported extension 8:0xea2 (amcaf-1.50beta4) at line 17, byte 964"
+      "error": "Unsupported extension 8:0x10d6 (amcaf-1.50beta4) at line 40, byte 1964"
     },
     {
       "source": "QsinCosArcSqr.AMOS",

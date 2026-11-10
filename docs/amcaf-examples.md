@@ -64,7 +64,7 @@ python3 tools/reference/inventory_amcaf_examples.py > examples/AMCAF/inventory.j
 python3 tools/reference/check_amcaf_math.py > test/fixtures/amcaf/math.json
 ```
 
-The eleven statically walkable programs use 155 distinct AMCAF offsets; 19 of
+The eleven statically walkable programs use 155 distinct AMCAF offsets; 21 of
 those offsets are currently registered. The protected/native-code program is not
 included in that count. The inventory describes encoded calls, not implemented
 runtime compatibility.
@@ -75,10 +75,10 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Imploder Load `$0ea2` | Decode IMP! data, load chip modules, player masks/queries and blitter drawing. |
-| Protracker2 | Imploder Load `$0ea2` | Same decompression/music work, plus frequency-meter rendering. |
-| Fonts | Imploder Unpack `$0e8a` | Owned decompression, bank fonts and print/graphics font selection. |
-| BigAmcafIntro | Imploder Load `$0ea2` | Shared loading, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects. |
+| Protracker | Lsstr$ `$0ec8` | Packed module loading now compiles; string helpers, player masks/queries, Work-bank module playback and blitter drawing remain. |
+| Protracker2 | Pt Voice `$10d6` | Player masks/queries and the same music work, plus frequency-meter rendering. |
+| Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
+| BigAmcafIntro | Wsave `$0472` | Shared IMP! loading now compiles; stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
 | GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |
 | SamBankFixer | Lsstr$ `$0ec8` | String helpers, core Peek$, sample-bank playback and meaningful prepared file selection/save. |
 | Iff2Raw | Path$ `$03e0` | Path/string helpers, Wload/Wsave, Binexp and supported image conversion. |
@@ -89,10 +89,10 @@ Unknown commands are never registered as successful no-ops to get a build.
 
 Implementation order:
 
-1. **IMP! decompression and loading.** Three supplied files actually start with
-   `IMP!`: `Data/mod.hawkeye`, `Data/AMCAFAdvert.Abk` and `Data/MyBootLogo.raw`.
-   A raw-file-only “Imploder Load” would not unblock them. Share checked decoding
-   between file and bank commands, then validate the original module and advert.
+1. **IMP! decompression and loading: implemented.** The three supplied packed
+   files decode with checked lengths/checksums and pinned expanded hashes.
+   Standalone file/bank commands share the decoder; continue with the newly
+   exposed blockers below. These tests do not establish full intro/music runtime compatibility.
 2. **Protracker examples.** Add the required masks, trigger/note/instrument/volume
    queries and bounded raw plane graphics, retaining the independent music clock.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
@@ -137,3 +137,28 @@ The integer reference checker independently transcribes R10f/R111/R112/R113;
 Blitter Clear follows R046/R047. The catalogue tables are binary/source evidence,
 not Amiga execution captures. Main compiled paths still use the ordinary parser,
 IR, instruction functions and shared planar display bridge.
+
+## Imploder loading contract
+
+`lib/amos/amcafImploder.js` implements the recovered AMCAF R176 reverse
+unpacker. It owns its input snapshot and output, redirects restored header reads
+into the footer, and validates literal runs, backward matches and source bounds.
+The portable subset caps compressed and expanded data at 16 MiB. Independent
+all-literal bytes exercise header restoration; bundled streams additionally have
+pinned expanded lengths and hashes. Those hashes are regression checks from the
+source-derived decoder, not native Amiga captures or an independent decoder.
+
+`Imploder Load filename$,bank` decodes IMP! or loads an ordinary raw file.
+`Imploder Unpack source To bank` reads checked generic bank memory, accepting
+a bank selector or its virtual address. Both create temporary Work banks; a
+negative destination selects chip memory and a positive destination fast memory.
+Decode completes before destination replacement, preserving the destination on
+failure. Unpack preserves its source and rejects source/destination bank aliases.
+PP20 dispatch remains explicitly unsupported. File loading uses one synchronous
+byte-string read with a retained resolved filename. No host decompressor is needed.
+
+Optional checksum validation is available on the pure decoder; runtime commands
+retain the native AMCAF routine's unchecked-checksum behavior. Malformed structure
+still rejects. The native zero-byte long-match count means 256 bytes, and native
+word distance bases are signed. Successful decompression alone does not make
+Work-bank Protracker playback or bank-font selection supported.

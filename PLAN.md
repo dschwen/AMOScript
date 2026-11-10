@@ -8,8 +8,9 @@ Current priority is the original twelve-program AMCAF collection, now preserved
 under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.html) includes every
 program and its actual build/runtime status. The unchanged quick-maths example
 runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
-1/12 programs currently compile. Next implement shared IMP! decompression/loading
-before the Protracker examples, then fonts, devices, file/bank utilities and intro
+1/12 programs currently compile. Shared IMP! decompression and file/bank loading
+now pass bounded tests, exposing Pt Voice, Lsstr$, Change Bank Font and Wsave.
+Next address the Protracker examples, then fonts, devices, file/bank utilities and intro
 effects. The protected/native AGA source has a separate format boundary.
 See [AMCAF example support](docs/amcaf-examples.md).
 
