@@ -103,7 +103,7 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (91 demos)</summary>
+<summary>Compiler and runtime checks (92 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
 
@@ -340,6 +340,12 @@ Unmodified first 17 lines execute Set Stack/Break Off, Dir$, TRUE, original samp
 Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. Separate direct-player foundation; the VM demo adds command/lifecycle integration.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html) · [Local file](roller2-amos-music.html)
+
+### AMCAF Protracker status and VU queries
+
+A synthetic compiled program maps AMCAF to slot 19 and prints order, next row, current instrument nibble, base-period frequency, destructive VU and signal results at two field-clock positions. One thousand reads do not advance music. Stopped/retired-bank queries retain owned status. The original player GUIs still need graphics support.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-status.html) · [Local file](amcaf-status.html)
 
 ### AMCAF voice DMA and Hawkeye module checks
 

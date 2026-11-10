@@ -79,7 +79,7 @@ python3 tools/reference/inventory_amcaf_examples.py > examples/AMCAF/inventory.j
 python3 tools/reference/check_amcaf_math.py > test/fixtures/amcaf/math.json
 ```
 
-The eleven statically walkable programs use 155 distinct AMCAF offsets; 31 of
+The eleven statically walkable programs use 155 distinct AMCAF offsets; 37 of
 those offsets are currently registered. The protected/native-code program is not
 included in that count. The inventory describes encoded calls, not implemented
 runtime compatibility.
@@ -90,8 +90,8 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Pt Cpattern `$15de` | Pt Voice and Work-bank module playback now work in the declared Hawkeye harness; status/VU queries and blitter drawing remain. |
-| Protracker2 | Pt Cinstr `$15fe` | The same playback foundation works; status/VU queries, frequency-meter rendering and blitter drawing remain. |
+| Protracker | Core two-argument Hex$ `$05d0` | Playback and status/VU queries are implemented; core formatting and Turbo Draw/Blitter Fill remain. |
+| Protracker2 | Turbo Draw `$1030` | Playback and status/VU queries are implemented; masked line drawing, fill/plot operations and graphics checks remain. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
 | GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |
@@ -108,8 +108,9 @@ Implementation order:
    files decode with checked lengths/checksums and pinned expanded hashes.
    Standalone file/bank commands share the decoder; continue with the newly
    exposed blockers below. These tests do not establish full intro/music runtime compatibility.
-2. **Protracker examples.** Add the required masks, trigger/note/instrument/volume
-   queries and bounded raw plane graphics, retaining the independent music clock.
+2. **Protracker examples.** Masks and order/row/instrument/frequency/VU/signal
+   queries are implemented. Next add the core Hex$ overload and bounded raw
+   plane graphics, retaining the independent music clock.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
    native OS libraries or parallel-port hardware must not become invented device
    readings; browser adapters and declared simulated inputs need honest labels.
@@ -216,3 +217,16 @@ python3 tools/reference/check_amcaf_strings.py > test/fixtures/amcaf/strings.jso
 
 Implementation evidence is the recovered AMCAF R0b1/R0b2, R060–R062, R0c4/R0c5
 and R068/R069 routines. These tests are source-derived checks, not Amiga captures.
+
+## Protracker status queries
+
+[Run the status demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-status.html).
+Six source-derived query functions now compile in both original music examples.
+They read owned sequencer data without advancing a clock, invoking an audio host
+or copying the PCM buffers. `Pt Vu` and `Pt Signal` consume their own byte
+latches; repeated status reads cannot generate extra music ticks.
+
+[The query contract](amcaf-status.md) documents native units, the low instrument
+nibble, signal effect 8, supported channel bounds and retained post-Stop state.
+The standalone synthetic program exercises relocated extension slot 19 and two
+actual compiled reports. This is support coverage, not either original GUI.

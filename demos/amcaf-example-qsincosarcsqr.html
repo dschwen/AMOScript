@@ -4707,7 +4707,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const animations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
-  let ptCia=true,ptMaster=64,ptVoiceMask=15;
+  let ptCia=true,ptMaster=64,ptVoiceMask=15,ptQueries=null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
   function variableAddress(owner,key,type,read,write,alive=()=>true) {
@@ -4806,12 +4806,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     audio.filter(false);
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
     next.setVoiceMask(ptVoiceMask,options.audioFieldTime());
-    trackerKind='amcaf';tracker=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
+    trackerKind='amcaf';tracker=next;ptQueries=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
     state.tracker.engine='amcaf';state.tracker.bank=number;state.tracker.playing=true;state.tracker.paused=state.stopped;
     committed=true;if(state.stopped)next.pause();state.tracker.position=next.state;
     options.requestTrackerWake();
   }
   function ptStop(){if(tracker&&trackerKind!=='amcaf')throw new Error('Pt Stop during Track Play is not implemented');trackStop();}
+  function ptQuery(kind,voice=null){
+    if(voice!==null){voice=integer(voice);if(voice<0||voice>3)throw Error('Pt query voice requires 0..3');}
+    return ptQueries?ptQueries.readStatus(kind,voice):0;
+  }
   function ptVoice(value){
     const mask=integer(value)&15;
     if(music||tracker&&trackerKind!=='amcaf')throw Error('Pt Voice during Music or Track Play is not implemented');
@@ -7260,6 +7264,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
+    extensionPtCpattern:()=>ptQuery('order'),extensionPtCpos:()=>ptQuery('row'),
+    extensionPtCinstr:v=>ptQuery('instrument',v),extensionPtCnote:v=>ptQuery('note',v),extensionPtVu:v=>ptQuery('vu',v),extensionPtSignal:()=>ptQuery('signal'),
     extensionPtPlay:ptPlay,extensionPtVoice:ptVoice,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
@@ -9021,7 +9027,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return pattern.map((c, i) => {
       const sample = check(c.sample, 0, 31, 'instrument'), period = check(c.period, 0, 4095, 'note');
       const effect = check(c.effect, 0, 15, 'effect'), parameter = check(c.parameter, 0, 255, 'parameter');
-      if (![0,1,2,3,4,5,6,10,11,12,13,14,15].includes(effect) || effect === 14 && ![0,10,11].includes(parameter>>4) || effect === 11 && parameter > 127) {
+      if (![0,1,2,3,4,5,6,8,10,11,12,13,14,15].includes(effect) || effect === 14 && ![0,10,11].includes(parameter>>4) || effect === 11 && parameter > 127) {
         throw new Error(`AMCAF sequencer: unsupported effect ${effect.toString(16)}:${parameter.toString(16)} at pattern ${p}, row ${i >> 2}, channel ${i & 3}`);
       }
       return { sample, period, effect, parameter };
@@ -9044,6 +9050,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   const voices = Array.from({ length: 4 }, () => ({ sample: 0, period: 0, volume: 0,
     outputPeriod: 0, outputVolume: 0, effect: 0, parameter: 0, finetune: 0,
     target: 0, descending: false, portaSpeed: 0, vibratoMemory: 0, vibratoPosition: 0 }));
+  const instruments=[0,0,0,0],vu=[0,0,0,0];let signal=0;
   let playing = true, ticks = 0, counter = 0, speed = 6, bpm = 125, order = 0, row = 0, master = 64, ends = 0;
   const signed = v => (v << 16) >> 16;
   const volume = v => { v.outputVolume = (v.volume * master) >> 6; };
@@ -9098,10 +9105,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         const cells = patterns[orders[order]];
         for (let channel = 0; channel < 4; channel++) {
           const c = cells[row * 4 + channel], v = voices[channel];
-          v.effect = c.effect; v.parameter = c.parameter;
+          v.effect = c.effect; v.parameter = c.parameter; instruments[channel]=c.sample&15;
           if (c.sample) {
             const s = samples[c.sample - 1];
             v.sample = c.sample; v.finetune = s.finetune; v.volume = s.volume; volume(v);
+            if(enabled & (1<<channel))vu[channel]=v.outputVolume;
           }
           if (c.period) {
             if (c.effect === 3 || c.effect === 5) {
@@ -9115,9 +9123,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
                 length: !s ? 0 : s.loopStart ? s.loopStart + s.loopLength : s.length }));
             }
           }
-          if (c.effect === 11) {
+          if(c.effect===8){signal=c.parameter;v.outputPeriod=v.period;volume(v);}
+          else if (c.effect === 11) {
             const previous = (c.parameter - 1) & 255;
-            if (((previous << 24) >> 24) < order) ends++;
+            if (((previous << 24) >> 24) < order) {ends++;signal=255;}
             order = previous; jump = true; breakRow = 0;
           } else if (c.effect === 13) {
             const value = (c.parameter >> 4) * 10 + (c.parameter & 15);
@@ -9126,7 +9135,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
             if (c.parameter && c.parameter < 32) { speed = c.parameter; counter = 0; }
             else if (c.parameter >= 32) bpm = c.parameter;
           } else if (c.effect === 12) {
-            if(enabled & (1<<channel)){v.volume = Math.min(64, c.parameter); volume(v);}
+            if(enabled & (1<<channel)){v.volume = Math.min(64, c.parameter); volume(v);if(c.period)vu[channel]=v.outputVolume;}
           } else if(c.effect===14){
             const kind=c.parameter>>4,amount=c.parameter&15;
             if(!kind)filters.push(!(c.parameter&1));
@@ -9142,7 +9151,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
         }
         if (jump || ++row === 64) {
           row = breakRow; order = (order + 1) & 127;
-          if (order >= songLength) { order = 0; ends++; }
+          if (order >= songLength) { order = 0; ends++; signal=255; }
         }
       }
       return Object.freeze({ ...at, isRow, ...(filters.length?{filters:Object.freeze(filters)}:{}), triggers: Object.freeze(triggers), repeats: Object.freeze(repeats), state: snapshot() });
@@ -9152,7 +9161,21 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       throw error;
     }
   }
-  return Object.freeze({ tick, get state() { return snapshot(); }, stop() { playing = false; },
+  function readStatus(kind,voice){
+    if(['instrument','note','vu'].includes(kind))check(voice,0,3,'query voice');
+    if(kind==='order')return order;
+    if(kind==='row')return row;
+    if(kind==='instrument')return instruments[voice];
+    if(kind==='note'){
+      const period=voices[voice].period,value=period?Math.floor(3546895/period):0;
+      if(value>65535)throw Error('AMCAF Cnote DIVU overflow is not implemented');
+      return value;
+    }
+    if(kind==='vu'){const value=vu[voice];vu[voice]=0;return value;}
+    if(kind==='signal'){const value=signal;signal=0;return value;}
+    throw Error('Unknown AMCAF status query');
+  }
+  return Object.freeze({ tick, readStatus, get state() { return snapshot(); }, stop() { playing = false; },
     setTempo(value) { bpm = check(value, 32, 255, 'tempo'); },
     setVolume(value) {
       check(value, -2147483648, 2147483647, 'master volume');
@@ -9293,6 +9316,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     finally { busy = false; }
   }
   return Object.freeze({
+    readStatus:(kind,voice)=>sequence?sequence.readStatus(kind,voice):0,
     tick: () => run(() => { if (paused || !sequence) return null; const next = sequence.tick(voiceMask & ~sampler.state.rawMask); sampler.apply(next,voiceMask); for(const enabled of next.filters||[]) { emit({type:'filter',enabled}); if(stopped||paused)break; } return next; }),
     render: count => run(() => {
       if (paused) return false;
@@ -9388,7 +9412,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       }
     }catch(error){try{stop();}catch(_){/* preserve initiating failure */}throw error;}
   }
-  return Object.freeze({advance,stop,nextField:()=>paused ? null : nextEvent(),
+  return Object.freeze({advance,stop,readStatus:(kind,voice)=>player.readStatus(kind,voice),nextField:()=>paused ? null : nextEvent(),
     setSpeed(value,now){
       if(!Number.isInteger(value)||value!==0&&(value<32||value>255))throw new Error('Pt Cia Speed requires 0 or 32..255');
       advance(now);if(!playing)return;

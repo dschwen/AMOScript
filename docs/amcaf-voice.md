@@ -3,7 +3,7 @@
 [Play Hawkeye](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html)
 loads the original packed module from the AMCAF distribution in a declared
 compiled harness. Press keys to disable voice 1, re-enable it, then stop.
-The original Protracker interfaces still require status/VU queries and graphics;
+The original Protracker interfaces now compile their status/VU queries but still require core formatting and graphics;
 this harness is not counted as a second completed original example.
 
 ## Banks and validation

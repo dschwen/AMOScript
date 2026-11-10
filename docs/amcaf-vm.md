@@ -115,3 +115,5 @@ A bounded input check uses a match without an error; sustained gameplay and
 completion remain unverified.
 
 [Pt Voice, raw Work modules and E0/EA/EB effects](amcaf-voice.md) extend this foundation.
+
+[Six status and VU queries](amcaf-status.md) read owned player state without advancing the field clock, and retain it after Stop or bank retirement.

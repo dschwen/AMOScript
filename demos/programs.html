@@ -4408,7 +4408,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   const animations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
-  let ptCia=true,ptMaster=64,ptVoiceMask=15;
+  let ptCia=true,ptMaster=64,ptVoiceMask=15,ptQueries=null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
   function variableAddress(owner,key,type,read,write,alive=()=>true) {
@@ -4507,12 +4507,16 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     audio.filter(false);
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
     next.setVoiceMask(ptVoiceMask,options.audioFieldTime());
-    trackerKind='amcaf';tracker=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
+    trackerKind='amcaf';tracker=next;ptQueries=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
     state.tracker.engine='amcaf';state.tracker.bank=number;state.tracker.playing=true;state.tracker.paused=state.stopped;
     committed=true;if(state.stopped)next.pause();state.tracker.position=next.state;
     options.requestTrackerWake();
   }
   function ptStop(){if(tracker&&trackerKind!=='amcaf')throw new Error('Pt Stop during Track Play is not implemented');trackStop();}
+  function ptQuery(kind,voice=null){
+    if(voice!==null){voice=integer(voice);if(voice<0||voice>3)throw Error('Pt query voice requires 0..3');}
+    return ptQueries?ptQueries.readStatus(kind,voice):0;
+  }
   function ptVoice(value){
     const mask=integer(value)&15;
     if(music||tracker&&trackerKind!=='amcaf')throw Error('Pt Voice during Music or Track Play is not implemented');
@@ -6961,6 +6965,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
+    extensionPtCpattern:()=>ptQuery('order'),extensionPtCpos:()=>ptQuery('row'),
+    extensionPtCinstr:v=>ptQuery('instrument',v),extensionPtCnote:v=>ptQuery('note',v),extensionPtVu:v=>ptQuery('vu',v),extensionPtSignal:()=>ptQuery('signal'),
     extensionPtPlay:ptPlay,extensionPtVoice:ptVoice,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
@@ -13394,7 +13400,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   const animations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
-  let ptCia=true,ptMaster=64,ptVoiceMask=15;
+  let ptCia=true,ptMaster=64,ptVoiceMask=15,ptQueries=null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
   function variableAddress(owner,key,type,read,write,alive=()=>true) {
@@ -13493,12 +13499,16 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     audio.filter(false);
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
     next.setVoiceMask(ptVoiceMask,options.audioFieldTime());
-    trackerKind='amcaf';tracker=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
+    trackerKind='amcaf';tracker=next;ptQueries=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
     state.tracker.engine='amcaf';state.tracker.bank=number;state.tracker.playing=true;state.tracker.paused=state.stopped;
     committed=true;if(state.stopped)next.pause();state.tracker.position=next.state;
     options.requestTrackerWake();
   }
   function ptStop(){if(tracker&&trackerKind!=='amcaf')throw new Error('Pt Stop during Track Play is not implemented');trackStop();}
+  function ptQuery(kind,voice=null){
+    if(voice!==null){voice=integer(voice);if(voice<0||voice>3)throw Error('Pt query voice requires 0..3');}
+    return ptQueries?ptQueries.readStatus(kind,voice):0;
+  }
   function ptVoice(value){
     const mask=integer(value)&15;
     if(music||tracker&&trackerKind!=='amcaf')throw Error('Pt Voice during Music or Track Play is not implemented');
@@ -15947,6 +15957,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
+    extensionPtCpattern:()=>ptQuery('order'),extensionPtCpos:()=>ptQuery('row'),
+    extensionPtCinstr:v=>ptQuery('instrument',v),extensionPtCnote:v=>ptQuery('note',v),extensionPtVu:v=>ptQuery('vu',v),extensionPtSignal:()=>ptQuery('signal'),
     extensionPtPlay:ptPlay,extensionPtVoice:ptVoice,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
@@ -22397,7 +22409,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
   const animations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
-  let ptCia=true,ptMaster=64,ptVoiceMask=15;
+  let ptCia=true,ptMaster=64,ptVoiceMask=15,ptQueries=null;
   let music = null, musicBank = null, musicNext = null, musicLocation = null;
   const variableRegions=new Map(),variableOwners=new WeakMap();let nextVariableAddress=0x90000000;
   function variableAddress(owner,key,type,read,write,alive=()=>true) {
@@ -22496,12 +22508,16 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     audio.filter(false);
     if(revision!==trackerRevision||state.halted||!wasStopped&&state.stopped){next.stop();return;}
     next.setVoiceMask(ptVoiceMask,options.audioFieldTime());
-    trackerKind='amcaf';tracker=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
+    trackerKind='amcaf';tracker=next;ptQueries=next;trackerBank=bank;trackerLocation=state.location&&{...state.location};
     state.tracker.engine='amcaf';state.tracker.bank=number;state.tracker.playing=true;state.tracker.paused=state.stopped;
     committed=true;if(state.stopped)next.pause();state.tracker.position=next.state;
     options.requestTrackerWake();
   }
   function ptStop(){if(tracker&&trackerKind!=='amcaf')throw new Error('Pt Stop during Track Play is not implemented');trackStop();}
+  function ptQuery(kind,voice=null){
+    if(voice!==null){voice=integer(voice);if(voice<0||voice>3)throw Error('Pt query voice requires 0..3');}
+    return ptQueries?ptQueries.readStatus(kind,voice):0;
+  }
   function ptVoice(value){
     const mask=integer(value)&15;
     if(music||tracker&&trackerKind!=='amcaf')throw Error('Pt Voice during Music or Track Play is not implemented');
@@ -24950,6 +24966,8 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
+    extensionPtCpattern:()=>ptQuery('order'),extensionPtCpos:()=>ptQuery('row'),
+    extensionPtCinstr:v=>ptQuery('instrument',v),extensionPtCnote:v=>ptQuery('note',v),extensionPtVu:v=>ptQuery('vu',v),extensionPtSignal:()=>ptQuery('signal'),
     extensionPtPlay:ptPlay,extensionPtVoice:ptVoice,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
