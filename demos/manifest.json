@@ -254,6 +254,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
     },
     {
+      "file": "smouse-key.html",
+      "title": "AMCAF second-port buttons",
+      "description": "A compiled AMOS loop reads Smouse Key from the second mouse/joystick port. Optional keyboard/gamepad mappings expose secondary and third fire without widening Joy masks or consuming main-mouse clicks. Stop/Resume, typing mode and input cleanup are checked; the gamepad checks use an injected device.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/smouse-key.html"
+    },
+    {
       "file": "extension-timing.html",
       "title": "Extension priority and raster timing",
       "description": "Step a synthetic AMOS program through Turbo Amos Pri and AMCAF Raster Wait with a manual PAL clock. PAL/NTSC checks cover line deadlines, slowdown independence and owned waits. Priority is an optional system-hook intent; no browser OS scheduling or cycle-exact beam is claimed.",

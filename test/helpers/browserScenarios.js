@@ -340,6 +340,9 @@ const scenarios = [
   { id: 'roller2-amos-music', capturedFrames: false, title: 'Roller II AMOS Music end tunes', description: 'Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. Separate direct-player foundation; the VM demo adds command/lifecycle integration.', run: require('./amosMusicProbe'), check(result, assert) {
     assert.deepStrictEqual(result.traces, [3392, 3392, 5731, 5731]); assert.strictEqual(result.graphs, 25); assert.ok(result.maxDifference <= 1e-6);
   } },
+  { id: 'smouse-key', title: 'AMCAF second-port buttons', description: 'A compiled AMOS loop reads Smouse Key from the second mouse/joystick port. Optional keyboard/gamepad mappings expose secondary and third fire without widening Joy masks or consuming main-mouse clicks. Stop/Resume, typing mode and input cleanup are checked; the gamepad checks use an injected device.', run: require('./smouseKeyProbe'), check(result, assert) {
+    assert.strictEqual(result.buttons, 7); assert.strictEqual(result.joy, 16); assert.strictEqual(result.mainMouse, 7);
+  } },
   { id: 'extension-timing', capturedFrames: false, title: 'Extension priority and raster timing', description: 'Step a synthetic AMOS program through Turbo Amos Pri and AMCAF Raster Wait with a manual PAL clock. PAL/NTSC checks cover line deadlines, slowdown independence and owned waits. Priority is an optional system-hook intent; no browser OS scheduling or cycle-exact beam is claimed.', run: require('./extensionTimingProbe'), check(result, assert) {
     assert.deepStrictEqual(result.cases, [{ standard: 'PAL', before: true, after: true }, { standard: 'NTSC', before: true, after: true }]);
     assert.strictEqual(result.slowdown, 4); assert.deepStrictEqual(result.priorityRequests, [20, 0]);

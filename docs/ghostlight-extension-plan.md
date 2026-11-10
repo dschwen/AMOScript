@@ -40,8 +40,9 @@ The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
 six-byte empty bank trailer. SHA-256:
 `2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8`.
 At baseline the compiler rejected AMCAF Pt Play at line 43, byte 2084.
-The current compiler passes those music statements, Amos Pri and Raster Wait,
-and rejects Smouse Key at line 1750, byte 59604; see the latest progress update.
+The current compiler passes those music statements, Amos Pri, Raster Wait and
+Smouse Key. It rejects Pt Sam Stop at line 1907, byte 65406; see the latest
+progress update.
 No complete compilation or game execution has passed yet.
 
 An independent bounded token walk finds **13 AMCAF encodings / 24 occurrences**
@@ -290,9 +291,9 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** Smouse Key and the remaining Pt Sam/Raw commands,
-then interlaced/overscan integration for the atlas. Music playback has VM
-integration; Smouse Key is the next whole-file compilation blocker.
+**Next implementation task:** the remaining Pt Sam/Raw commands, then
+interlaced/overscan integration for the atlas. Music and second-port input have
+VM integration; Pt Sam Stop is the next whole-file compilation blocker.
 
 The progress entries below describe successive stages; the final entry records
 the current VM support. Earlier gated statements are historical stage bounds.
@@ -377,3 +378,18 @@ blocker is Smouse Key at line 1750, byte 59604. Its native inputs are CIA bit 7
 and POTINP 6/4, so it must not be aliased to the main mouse mask; the next input
 work needs a second-port button policy. Pt Sam/Raw, atlas presentation and full
 game execution remain open. The original source/assets stay private/external.
+
+
+### Second-port button input (2026-11-10)
+
+Smouse Key now reads three held buttons on port 1, sharing primary fire with Joy
+without widening its five-bit mask or consuming main-mouse clicks/text. Optional
+fire2/fire3 keyboard/gamepad bindings and reset ownership are in the Canvas host.
+AMCAF application pages select Shift and standard gamepad buttons 1/2, with Typing
+mode releasing keyboard bindings. Compiled-loop and application browser checks
+cover polling, device merging and lifecycle; see [Smouse Key](smouse-key.md).
+
+Ghostlight's supported third-party encodings now total 15/18. The private external
+build reaches Pt Sam Stop, slot 8 `$1400`, line 1907, byte 65406. Pt Raw Play,
+Pt Sam Bank, interlaced atlas presentation and full game execution remain open.
+The external build emits no new game artifacts while compilation is blocked.

@@ -18,7 +18,8 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(settings.amcafAudio ? context=>AMOS_WEB_AUDIO_STREAM(context,AMOS_WEB_AUDIO.createWebAudioHost) : AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
-  const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys } : false, gamepad: true }];
+  const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys, ...(settings.amcafAudio?{fire2:['ShiftLeft','ShiftRight']}:{}) } : false,
+    gamepad:settings.amcafAudio?{buttons:{fire2:1,fire3:2}}:true }];
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.requested ? 'Mute sound' : 'Enable sound';
     status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +

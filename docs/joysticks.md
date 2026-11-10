@@ -174,3 +174,8 @@ Alt/Meta combinations retain the existing modifier filtering. Modified joystick
 chords never inject AMOS text, including with `consume: false`. Entering a Ctrl
 chord cancels owned text repeat without changing the AMOS Key Speed settings. Keyup, blur,
 Stop and detach use the same owned hold cleanup as other joystick keys.
+
+Optional `fire2`/`fire3` keyboard and gamepad bindings now provide three-bit
+[port button input](smouse-key.md) for AMCAF Smouse Key. Ordinary Joy masks stay
+five-bit; existing configurations do not enable these extra bindings implicitly.
+The application page harness selects explicit extra bindings for AMCAF profiles.

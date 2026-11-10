@@ -108,5 +108,6 @@ synthetic AMOS harness, not original full-game execution or independent captures
 
 Ghostlight now compiles past the four music statements. At that stage the next production compile blocker was Turbo Amos Pri at line 68.
 [Amos Pri and Raster Wait now pass](extension-timing.md); the current compile
-blocker is Smouse Key at line 1750, byte 59604, followed by Pt Sam/Raw commands. Interlaced atlas presentation and complete original game
+blocker is Pt Sam Stop at line 1907, byte 65406.
+[Smouse Key input](smouse-key.md) now passes; Pt Sam/Raw commands remain. Interlaced atlas presentation and complete original game
 execution remain separate milestones.

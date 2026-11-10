@@ -36,7 +36,8 @@ Pause/Resume and bounded native audio queues. [Pt Play/Stop/Volume/Cia Speed now
 fractional CIA/VBL wakes, bank guards and automatic page-builder audio hosting.
 [Turbo Amos Pri and AMCAF Raster Wait](docs/extension-timing.md) now pass with
 portable priority intent and cooperative field-line timing. The next compile
-blocker is Smouse Key (line 1750); Pt Sam/Raw and atlas presentation remain open. See [tracker implementation](docs/amcaf-tracker.md).
+blocker is Pt Sam Stop (line 1907). [Smouse Key](docs/smouse-key.md) now has
+second-port keyboard/gamepad input; Pt Sam/Raw and atlas presentation remain open. See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface
 

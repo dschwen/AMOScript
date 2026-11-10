@@ -4280,13 +4280,24 @@
     if (!Number.isInteger(mask) || mask < 0 || mask > 31) throw new Error('Invalid joystick mask');
     state.input.joysticks[port] = mask;
   }
+  if(!state.input.portButtons)state.input.portButtons=[0,0];
+  function setPortButtons(port, buttons) {
+    joystickPort(port);
+    if(!Number.isInteger(buttons)||buttons<0||buttons>7)throw new Error('Invalid port button mask');
+    state.input.portButtons[port]=buttons;
+  }
   function readJoystick(port, accept = null) {
     if (joystickBinding && joystickBinding.reader) {
       const binding=joystickBinding, mask = binding.reader(port);
       if (accept && (binding!==joystickBinding || !accept())) throw new Error('AMAL changed during joystick read');
       if (mask != null) setJoystick(port, mask);
     }
-    return state.input.joysticks[port];
+    return state.input.joysticks[port]|(state.input.portButtons[port]&1?16:0);
+  }
+  function portButtons(port) {
+    port=joystickPort(integer(port));
+    const mask=readJoystick(port);
+    return state.input.portButtons[port]|(mask&16?1:0);
   }
   function joystickInfo(name, port) {
     port = joystickPort(integer(port));
@@ -6150,6 +6161,7 @@
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
     extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
@@ -6285,7 +6297,7 @@
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
       if (options.resetInput) options.resetInput('key-speed');
     },
-    setJoystick, joystickInfo,
+    setJoystick, joystickInfo, setPortButtons, portButtons,
     keyState(code) {
       code = integer(code);
       if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
@@ -8230,7 +8242,7 @@
     runRequest: null,
     systemRequest: null,
     column: 0,
-    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0], portButtons: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -8293,7 +8305,7 @@
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); state.input.portButtons.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }

@@ -815,6 +815,26 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#repeat-controls').getAttribute('data-status'), 'stopped');
         await page.click('#repeat-detach');
       }
+      if (scenario.id === 'smouse-key') {
+        const status=page.locator('#smouse-status');
+        await page.focus('#smouse-input');await page.keyboard.down('Shift');
+        await page.waitForFunction(()=>document.getElementById('smouse-status').dataset.buttons==='2'&&document.getElementById('smouse-status').dataset.compiled==='2');
+        assert.strictEqual(await status.getAttribute('data-joy'),'0');await page.locator('#smouse-speed').evaluate(button=>button.click());
+        assert.strictEqual(await status.getAttribute('data-buttons'),'2');await page.keyboard.up('Shift');
+        await page.evaluate(()=>{window.smousePad=[1,2];Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',axes:[0,0],buttons:Array.from({length:16},(_,i)=>({pressed:window.smousePad.includes(i)}))}]});});
+        await page.focus('#smouse-input');await page.waitForFunction(()=>document.getElementById('smouse-status').dataset.buttons==='6');
+        await page.click('#smouse-typing');assert.strictEqual(await status.getAttribute('data-buttons'),'6');
+        await page.evaluate(()=>{window.smousePad=[];});await page.keyboard.down('Shift');
+        await page.waitForFunction(()=>document.getElementById('smouse-status').dataset.buttons==='0');await page.keyboard.up('Shift');
+        await page.click('#smouse-typing');await page.keyboard.down('Shift');await page.waitForFunction(()=>document.getElementById('smouse-status').dataset.buttons==='2');
+        await page.click('#smouse-stop');assert.strictEqual(await status.getAttribute('data-buttons'),'0');await page.keyboard.up('Shift');
+        await page.click('#smouse-resume');await page.focus('#smouse-input');await page.keyboard.down('x');
+        await page.waitForFunction(()=>document.getElementById('smouse-status').dataset.buttons==='4');
+        await page.locator('#smouse-input').evaluate(canvas=>canvas.dispatchEvent(new Event('blur')));
+        await page.waitForFunction(()=>document.getElementById('smouse-status').dataset.buttons==='0');await page.keyboard.up('x');
+        await page.click('#smouse-restart');assert.strictEqual(await status.getAttribute('data-buttons'),'0');
+        await page.evaluate(()=>AMOS_SMOUSE_CLEANUP());
+      }
       if (scenario.id === 'extension-timing') {
         const status=page.locator('#extension-timing-status');
         assert.strictEqual(await status.getAttribute('data-priority'),'20');
@@ -831,9 +851,18 @@ module.exports = async function checkBrowserDemos(browser) {
         await app.locator('body').evaluate(()=>{
           window.pcmStarts=0;const start=AudioBufferSourceNode.prototype.start;
           AudioBufferSourceNode.prototype.start=function(...args){window.pcmStarts++;return start.apply(this,args);};
+          const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const host=make(...args);return{...host,attach(program){window.amcafButtonProgram=program;return host.attach(program);}};};
         });
         await app.locator('#play-game').click();
         await app.locator('body').evaluate(()=>new Promise((resolve,reject)=>{const begun=performance.now();const check=()=>{if(window.pcmStarts>=24)return resolve();if(performance.now()-begun>5000)return reject(Error('No VM PCM playback'));setTimeout(check,20);};check();}));
+        await app.locator('#game-input').focus();await page.keyboard.down('Shift');
+        assert.strictEqual(await app.locator('body').evaluate(()=>window.amcafButtonProgram.extensionSmouseKey()),2);await page.keyboard.up('Shift');
+        await app.locator('#game-keyboard').evaluate(select=>{select.value='typing';select.dispatchEvent(new Event('change',{bubbles:true}));});
+        await page.keyboard.down('Shift');assert.strictEqual(await app.locator('body').evaluate(()=>window.amcafButtonProgram.extensionSmouseKey()),0);await page.keyboard.up('Shift');
+        await app.locator('body').evaluate(()=>Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',axes:[0,0],buttons:[{pressed:false},{pressed:true},{pressed:true}]}]}));
+        assert.strictEqual(await app.locator('body').evaluate(()=>window.amcafButtonProgram.extensionSmouseKey()),6);
+        await app.locator('body').evaluate(()=>{delete navigator.getGamepads;});
+        await app.locator('#game-keyboard').evaluate(select=>{select.value='game';select.dispatchEvent(new Event('change',{bubbles:true}));});
         await app.locator('#game-stop').evaluate(node=>node.click());
         const stopped=await app.locator('body').evaluate(()=>window.pcmStarts);await page.waitForTimeout(80);
         assert.strictEqual(await app.locator('body').evaluate(()=>window.pcmStarts),stopped);

@@ -119,13 +119,16 @@ function createCanvasHost(canvas, options = {}) {
       if ((entry.mask & 3) === 3) entry.mask &= ~3;
       if ((entry.mask & 12) === 12) entry.mask &= ~12;
     }
-    for (const entry of result) program.setJoystick(entry.port, entry.mask);
+    for (const entry of result) {
+      if(entry.buttons!=null&&program.setPortButtons){entry.buttons=(entry.buttons&6)|(entry.mask&16?1:0);program.setPortButtons(entry.port,entry.buttons);}
+      program.setJoystick(entry.port, entry.mask);
+    }
     joystickStatus = result;
     return result;
   }
   function resetJoysticks() {
     joystickInput.reset(); if (touch) touch.reset(false);
-    if (program && program.setJoystick) for (const port of joystickInput.ports) program.setJoystick(port, 0);
+    if (program && program.setJoystick) for (const port of joystickInput.ports) {program.setJoystick(port, 0);if(program.setPortButtons)program.setPortButtons(port,0);}
     joystickStatus = [];
   }
   function bindJoysticks() {
@@ -337,8 +340,8 @@ function createCanvasHost(canvas, options = {}) {
 function createJoystickInput(configurations) {
   if (!Array.isArray(configurations) || configurations.length > 2) throw new Error('Expected at most two joystick configurations');
   const ports = new Set(), keys = new Set();
-  const defaults = { up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'], fire: ['Space', 'Enter'] };
-  const bits = { up: 1, down: 2, left: 4, right: 8, fire: 16 };
+  const defaults = { up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'], fire: ['Space', 'Enter'], fire2: [], fire3: [] };
+  const bits = { up: 1, down: 2, left: 4, right: 8, fire: 16, fire2: 32, fire3: 64 };
   const configs = configurations.map(config => {
     if (!config || !Number.isInteger(config.port) || config.port < 0 || config.port > 1 || ports.has(config.port)) throw new Error('Invalid or duplicate joystick port');
     ports.add(config.port);
@@ -358,12 +361,13 @@ function createJoystickInput(configurations) {
       const supplied = config.gamepad === true ? {} : config.gamepad;
       if ([supplied.axes,supplied.buttons].some(value => value != null && (typeof value !== 'object' || Array.isArray(value)))) throw new Error('Gamepad axes/buttons must be binding objects');
       const index = supplied.index == null ? 0 : supplied.index, deadZone = supplied.deadZone == null ? 0.25 : supplied.deadZone;
-      const axes = { x: 0, y: 1, ...supplied.axes }, buttons = { up: 12, down: 13, left: 14, right: 15, fire: 0, ...supplied.buttons };
+      const axes = { x: 0, y: 1, ...supplied.axes }, buttons = { up: 12, down: 13, left: 14, right: 15, fire: 0, fire2:null, fire3:null, ...supplied.buttons };
       if (!Number.isSafeInteger(index) || index < 0 || !Number.isFinite(deadZone) || deadZone < 0 || deadZone >= 1 ||
           [...Object.values(axes), ...Object.values(buttons)].some(value => value !== null && (!Number.isSafeInteger(value) || value < 0))) throw new Error('Invalid gamepad index, dead zone or binding');
       gamepad = { index, deadZone, axes, buttons, standardOnly: supplied.standardOnly !== false };
     }
-    return { port: config.port, keyboard, consume: config.keyboard === true || !config.keyboard || config.keyboard.consume !== false, gamepad };
+    const extended=keyboard.some(binding=>binding.bit>31)||!!(gamepad&&(gamepad.buttons.fire2!=null||gamepad.buttons.fire3!=null));
+    return { port: config.port, keyboard, consume: config.keyboard === true || !config.keyboard || config.keyboard.consume !== false, gamepad, extended };
   });
   function match(code) { return configs.some(config => config.keyboard.some(binding => binding.code === code)); }
   return { ports: [...ports], usesGamepad: configs.some(config => config.gamepad),
@@ -392,10 +396,12 @@ function createJoystickInput(configurations) {
             }
           }
         }
-        let mask = keyboard | gamepad;
+        const raw = keyboard | gamepad;
+        let mask = raw & 31;
         if ((mask & 3) === 3) mask &= ~3;
         if ((mask & 12) === 12) mask &= ~12;
-        return { port: config.port, mask, keyboard, gamepad, status };
+        return { port: config.port, mask, keyboard:keyboard&31, gamepad:gamepad&31, status,
+          ...(config.extended?{buttons:(raw&16?1:0)|(raw&32?2:0)|(raw&64?4:0)}:{}) };
       });
     } };
 }
@@ -4901,13 +4907,24 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (!Number.isInteger(mask) || mask < 0 || mask > 31) throw new Error('Invalid joystick mask');
     state.input.joysticks[port] = mask;
   }
+  if(!state.input.portButtons)state.input.portButtons=[0,0];
+  function setPortButtons(port, buttons) {
+    joystickPort(port);
+    if(!Number.isInteger(buttons)||buttons<0||buttons>7)throw new Error('Invalid port button mask');
+    state.input.portButtons[port]=buttons;
+  }
   function readJoystick(port, accept = null) {
     if (joystickBinding && joystickBinding.reader) {
       const binding=joystickBinding, mask = binding.reader(port);
       if (accept && (binding!==joystickBinding || !accept())) throw new Error('AMAL changed during joystick read');
       if (mask != null) setJoystick(port, mask);
     }
-    return state.input.joysticks[port];
+    return state.input.joysticks[port]|(state.input.portButtons[port]&1?16:0);
+  }
+  function portButtons(port) {
+    port=joystickPort(integer(port));
+    const mask=readJoystick(port);
+    return state.input.portButtons[port]|(mask&16?1:0);
   }
   function joystickInfo(name, port) {
     port = joystickPort(integer(port));
@@ -6771,6 +6788,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
     extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
@@ -6906,7 +6924,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
       if (options.resetInput) options.resetInput('key-speed');
     },
-    setJoystick, joystickInfo,
+    setJoystick, joystickInfo, setPortButtons, portButtons,
     keyState(code) {
       code = integer(code);
       if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
@@ -8851,7 +8869,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     runRequest: null,
     systemRequest: null,
     column: 0,
-    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0], portButtons: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -8914,7 +8932,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); state.input.portButtons.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -13696,13 +13714,24 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (!Number.isInteger(mask) || mask < 0 || mask > 31) throw new Error('Invalid joystick mask');
     state.input.joysticks[port] = mask;
   }
+  if(!state.input.portButtons)state.input.portButtons=[0,0];
+  function setPortButtons(port, buttons) {
+    joystickPort(port);
+    if(!Number.isInteger(buttons)||buttons<0||buttons>7)throw new Error('Invalid port button mask');
+    state.input.portButtons[port]=buttons;
+  }
   function readJoystick(port, accept = null) {
     if (joystickBinding && joystickBinding.reader) {
       const binding=joystickBinding, mask = binding.reader(port);
       if (accept && (binding!==joystickBinding || !accept())) throw new Error('AMAL changed during joystick read');
       if (mask != null) setJoystick(port, mask);
     }
-    return state.input.joysticks[port];
+    return state.input.joysticks[port]|(state.input.portButtons[port]&1?16:0);
+  }
+  function portButtons(port) {
+    port=joystickPort(integer(port));
+    const mask=readJoystick(port);
+    return state.input.portButtons[port]|(mask&16?1:0);
   }
   function joystickInfo(name, port) {
     port = joystickPort(integer(port));
@@ -15566,6 +15595,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
     extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
@@ -15701,7 +15731,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
       if (options.resetInput) options.resetInput('key-speed');
     },
-    setJoystick, joystickInfo,
+    setJoystick, joystickInfo, setPortButtons, portButtons,
     keyState(code) {
       code = integer(code);
       if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
@@ -17646,7 +17676,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     runRequest: null,
     systemRequest: null,
     column: 0,
-    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0], portButtons: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -17709,7 +17739,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); state.input.portButtons.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
@@ -22508,13 +22538,24 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     if (!Number.isInteger(mask) || mask < 0 || mask > 31) throw new Error('Invalid joystick mask');
     state.input.joysticks[port] = mask;
   }
+  if(!state.input.portButtons)state.input.portButtons=[0,0];
+  function setPortButtons(port, buttons) {
+    joystickPort(port);
+    if(!Number.isInteger(buttons)||buttons<0||buttons>7)throw new Error('Invalid port button mask');
+    state.input.portButtons[port]=buttons;
+  }
   function readJoystick(port, accept = null) {
     if (joystickBinding && joystickBinding.reader) {
       const binding=joystickBinding, mask = binding.reader(port);
       if (accept && (binding!==joystickBinding || !accept())) throw new Error('AMAL changed during joystick read');
       if (mask != null) setJoystick(port, mask);
     }
-    return state.input.joysticks[port];
+    return state.input.joysticks[port]|(state.input.portButtons[port]&1?16:0);
+  }
+  function portButtons(port) {
+    port=joystickPort(integer(port));
+    const mask=readJoystick(port);
+    return state.input.portButtons[port]|(mask&16?1:0);
   }
   function joystickInfo(name, port) {
     port = joystickPort(integer(port));
@@ -24378,6 +24419,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
     extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
@@ -24513,7 +24555,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
       if (options.resetInput) options.resetInput('key-speed');
     },
-    setJoystick, joystickInfo,
+    setJoystick, joystickInfo, setPortButtons, portButtons,
     keyState(code) {
       code = integer(code);
       if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
@@ -26458,7 +26500,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     runRequest: null,
     systemRequest: null,
     column: 0,
-    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0] },
+    input: { keys: [], scanCode: 0, rawKeys: new Uint8Array(128), mouse: { x: 0, y: 0, buttons: 0 }, mouseClick: 0, mouseLimits: null, joysticks: [0, 0], portButtons: [0, 0] },
   };
 
   let lastMaxSteps = 1000;
@@ -26521,7 +26563,7 @@ else globalThis.AMOS_FULLSCREEN={createFullscreenHost};
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); state.input.portButtons.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }
