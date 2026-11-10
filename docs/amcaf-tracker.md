@@ -51,7 +51,8 @@ implementations; wider native bank/overload forms remain open. Driver scheduling
 Instrument-only changes may change repeat pointers without restarting the initial
 sample; the host contract must preserve that behavior. Ghostlight's private music
 and assets remain outside the public repository. All 18 used extension encodings
-now compile; game entry stops at interlaced Unpack Screen, line 273, byte 7800.
+now compile. [Interlaced Unpack Screen](interlaced-unpack.md) now creates its atlas
+and the private WebGL page reaches level 1 with music; full gameplay remains open.
 
 A read-only scan of the supplied private modules found 145 instrument changes
 without a note in the game song (zero in the title song), and no instrument

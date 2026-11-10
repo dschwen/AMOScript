@@ -27,8 +27,8 @@ generated full-game pages remain external to the public repository.
 [Native Screen Open widths and packed storage](docs/packed-storage-screens.md)
 now normalize 302/86 to 288/80 and present narrow lowres views without increasing
 DMA reads. The laced atlas's full bitmap decodes against independent Python
-hashes; existing-screen Unpack preserves all rows. Its original new-screen
-interlaced/overscan presentation and full AMCAF/SFX game integration remain open.
+hashes; existing-screen Unpack preserves all rows. [Interlaced new-screen Unpack](docs/interlaced-unpack.md) now preserves both fields
+and overscan placement through Canvas/WebGL.
 AMCAF now has a source-derived tick controller and repeat-aware PCM renderer,
 with an audible synthetic [browser preview](demos/amcaf-pcm.html). Private song
 checks reach their first loop, and the preview now uses per-voice streaming with
@@ -39,8 +39,9 @@ portable priority intent and cooperative field-line timing. [Smouse Key](docs/sm
 now has second-port keyboard/gamepad input. [Pt Sam Stop](docs/amcaf-sample-stop.md)
 and [Pt Raw Play/Pt Sam Bank](docs/amcaf-raw.md) finish Ghostlight's 18 extension
 encodings: the complete source compiles into its private external project.
-The browser reaches the animated title with music; starting a game stops at
-interlaced Unpack Screen, line 273, byte 7800. Atlas presentation is next.
+The browser now reaches level 1 with music after the original atlas Unpack.
+A bounded input check uses a match without an error. Next establish a longer
+gameplay replay, including movement, effects, death/restart and later levels.
 See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface

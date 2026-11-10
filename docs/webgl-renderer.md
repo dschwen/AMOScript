@@ -141,3 +141,10 @@ milestones have not supplied; current-subset parity does not close those gates.
 
 HAM6 has its own [GPU contract and verification](webgl-ham.md). Non-HAM frames
 retain the two-pass path described above; HAM adds owned prefix-scan passes.
+
+
+AMOS packed-screen interlace now uses a [static row-table weave](interlaced-unpack.md).
+Both fields retain their own source pointers and stride; the GPU decodes the
+combined snapshot directly. Four additional standalone Canvas/GPU pairs check
+396,064 independent pixels. This is separate from raw single-field decoding and
+does not claim live field timing or CPU fallback.

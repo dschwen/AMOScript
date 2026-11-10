@@ -6,9 +6,10 @@ claim. The local benchmark is `/home/daniel/Programs/ghostlight/GhostLight2.amos
 Implement reusable extension semantics, keeping the game source unchanged.
 
 Current milestone (2026-11-10): all 18 used third-party encodings are supported
-and the entire unchanged source compiles. The private WebGL page reaches the
-animated title with music. Starting a game exposes the next runtime gate:
-interlaced Unpack Screen at line 273, byte 7800. See [raw effects](amcaf-raw.md).
+and the entire unchanged source compiles. [Interlaced Unpack Screen](interlaced-unpack.md)
+now creates the atlas without dropping its mode or rows. The private WebGL page
+reaches level 1 with music, and a bounded input check uses a match without an
+error. Longer gameplay, death/restart and progression still need validation.
 Game source/assets/generated pages remain outside this repository.
 
 ## Earlier implementation stages
@@ -49,8 +50,8 @@ six-byte empty bank trailer. SHA-256:
 `2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8`.
 At baseline the compiler rejected AMCAF Pt Play at line 43, byte 2084.
 The current compiler passes all 18 extension encodings and compiles the full file.
-The private title/menu boot runs; game entry stops at interlaced Unpack Screen,
-line 273, byte 7800. Complete gameplay remains open.
+The private title/menu and first-level setup run after the original interlaced
+atlas unpack. Complete gameplay remains open.
 
 An independent bounded token walk finds **13 AMCAF encodings / 24 occurrences**
 and **5 Turbo Plus encodings / 15 occurrences**. Standard extensions add Track
@@ -298,9 +299,9 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** interlaced/overscan integration for the atlas,
-then the first actual level. All used extensions compile and raw effects have
-VM integration; Unpack Screen at line 273 is the next runtime blocker.
+**Next implementation task:** a sustained input-only gameplay replay through
+movement, effects, death/restart and progression. All used extensions compile
+and the original interlaced atlas unpack now reaches the first actual level.
 
 The progress entries below describe successive stages; the final entry records
 the current VM support. Earlier gated statements are historical stage bounds.
@@ -432,3 +433,21 @@ enters game setup and stops at interlaced Unpack Screen, line 273, byte 7800.
 The atlas flag is preserved and its presentation guard remains in place.
 No complete level or gameplay is claimed. Next implement interlaced/overscan
 atlas presentation and then validate the first raw effects in actual gameplay.
+
+
+### Interlaced atlas presentation and first level (2026-11-10)
+
+The original Unpack 6 To 2 now creates its complete 368×900 laced bitmap, retaining
+all rows and applying the packed overscan placement. Both copper field pointers
+and doubled stride feed a static row-table weave for Canvas and WebGL. Progressive
+peers repeat their rows, while clipping and input stay in hardware field units.
+The public synthetic demo checks four Canvas/GPU pairs and 396,064 independent
+pixels; see [interlaced unpack](interlaced-unpack.md).
+
+The private WebGL page renders level 1 after original setup and music. A short
+held-key replay uses second fire and changes the match count from 2 to 1 without
+an error. No VM variable/IP/bank edits or game-source changes were used. Original
+sources/assets and all resulting game modules, pages and captures remain outside
+the repository. Longer gameplay, death/restart, later levels and exact native
+field timing remain unverified; there is no newly asserted compile/runtime
+blocker in this bounded path.

@@ -6,9 +6,10 @@ The explicitly selected `amcaf-1.50beta4` profile implements:
 - `Pt Sam Bank bankOrAddress` at `$142a`.
 
 These finish the 18 extension encodings used by the supplied Ghostlight source.
-The complete unchanged file compiles. Its private page reaches the animated title
-and music, then fails on interlaced `Unpack Screen` at line 273, byte 7800 when
-fire starts a game. This is a separate display gap, not completed gameplay.
+The complete unchanged file compiles. [Interlaced Unpack Screen](interlaced-unpack.md)
+now creates its original atlas and the private WebGL page reaches level 1 with
+music. A bounded second-fire check uses a match without an error; sustained
+gameplay and completion remain unverified.
 
 ## Raw playback and channel ownership
 

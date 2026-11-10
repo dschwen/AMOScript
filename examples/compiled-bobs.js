@@ -1199,26 +1199,57 @@
     memory.writeBytes(record.allocation.address, packed);
     const pointers = Array.from({ length: depth }, (_, plane) => record.allocation.address + plane * rowBytes * target.height);
     return { width: target.width, height: target.height, depth, pointers, rowBytes,
-      palette: target.palette, hires: target.mode === 0x8000, ham: target.ham, x: target.hardwareX, y: target.hardwareY,
+      palette: target.palette, hires: !!(target.mode & 0x8000), lace: !!(target.mode & 4), ham: target.ham, x: target.hardwareX, y: target.hardwareY,
       bplcon2: (target.spritePriority << 3) | target.spritePriority };
   }
   function snapshot(target) {
     const { rowBytes, depth, pointers } = prepare(target);
     const frame = staticFrame({ width: target.width, height: target.height, depth, pointers, rowBytes,
-      palette: target.palette, hires: target.mode === 0x8000, ham: target.ham, revision: ++revision,
+      palette: target.palette, hires: !!(target.mode & 0x8000), ham: target.ham, revision: ++revision,
       videoRate: options.snapshotVideoRate, pixelAspect: options.snapshotPixelAspect,
       origin: { x: target.hardwareX, y: target.hardwareY } });
     return snapshotModel.createSnapshot({ chip: memory.bytes, frame });
   }
-  function snapshotDisplay(targets, geometry, windows = null) {
+  // Static presentation of both fields: weave row tables, never CPU RGBA.
+  // Every pointer still refers to the authoritative planar chip allocation.
+  function weave(even, odd) {
+    const source = even.frame, lines = source.lines * 2;
+    if (odd.frame.lines !== source.lines || odd.frame.outputWidth !== source.outputWidth) throw Error('Interlaced field geometry differs');
+    let numerator = source.pixelAspect.numerator * 2, denominator = source.pixelAspect.denominator;
+    let divisor = numerator, remainder = denominator;
+    while (remainder) { const next = divisor % remainder; divisor = remainder; remainder = next; }
+    const frame = { ...source, revision: ++revision, lines, outputHeight: lines, interlaceField: null,
+      origin: { x: source.origin.x, y: source.origin.y * 2 },
+      pixelAspect: { numerator: numerator / divisor, denominator: denominator / divisor } };
+    for (const [name, stride] of [['lineRegs', 32], ['linePal', 1024], ['lineSprites', 32], ['lineEvents', source.maxEvents * 4]]) {
+      frame[name] = new source[name].constructor(lines * stride);
+      for (let y = 0; y < lines; y++) {
+        const field = (y & 1) ? odd.frame : source, row = y >> 1;
+        frame[name].set(field[name].subarray(row * stride, (row + 1) * stride), y * stride);
+      }
+    }
+    const overflow = []; frame.eventOffsets = new Uint32Array(lines + 1);
+    for (let y = 0; y < lines; y++) {
+      const field = (y & 1) ? odd.frame : source, row = y >> 1;
+      overflow.push(...field.overflowEvents.subarray(field.eventOffsets[row] * 4, field.eventOffsets[row + 1] * 4));
+      frame.eventOffsets[y + 1] = overflow.length / 4;
+    }
+    frame.overflowEvents = Uint32Array.from(overflow);
+    return snapshotModel.createSnapshot({ chip: odd.chip, frame });
+  }
+  function snapshotDisplay(targets, geometry, windows = null, parity = null, prepared = new Map()) {
+    if(!windows&&targets.some(target=>target.mode&4))windows=targets.map(target=>({target,
+      x:target.hardwareX,y:target.hardwareY,width:target.windowWidth,height:target.windowHeight,
+      offsetX:target.offsetX,offsetY:target.offsetY}));
     if (!targets.length) throw new Error('Display snapshot needs at least one screen');
+    const source = target => { if(!prepared.has(target))prepared.set(target,prepare(target));return {...prepared.get(target)}; };
     let views = targets.map((target, index) => {
-      const view = prepare(target), window = windows ? windows[index] : target.windowed ? {
+      const view = source(target), window = windows ? windows[index] : target.windowed ? {
         x: target.hardwareX, y: target.hardwareY, width: target.windowWidth, height: target.windowHeight,
         offsetX: target.offsetX, offsetY: target.offsetY } : null;
       const dual = window && window.dual;
       if (dual) {
-        const other = prepare(dual.target), width = window.width, height = window.height;
+        const other = source(dual.target), width = window.width, height = window.height;
         if (dual.offsetX + width > dual.target.width || dual.offsetY + height > dual.target.height) throw Error('Dual Playfield window exceeds secondary bitmap');
         // Separate bitmap planes feed alternating OCS playfields. The primary
         // owns all 32 palette registers; PF2 uses registers 8..15.
@@ -1231,18 +1262,22 @@
       }
       // OCS DIWSTOP cannot directly encode an early vertical end. Default
       // Screen Open bitmaps need the same DMA-bounded window as explicit crops.
-      if (!window) return view.y + view.height < 128 ? { ...view, dmaWindow: true } : view;
+      if (!window) {
+        if(view.lace){view.height=Math.floor(view.height/2);view.pointers=view.pointers.map(pointer=>pointer+parity*view.rowBytes);view.rowBytes*=2;}
+        return view.y + view.height < 128 ? { ...view, dmaWindow: true } : view;
+      }
       const { offsetX, offsetY } = window;
       if (offsetX + window.width > target.width || offsetY + window.height > target.height) throw new Error('Screen window extends outside physical bitmap');
       const fine = offsetX & 15;
       const delay = fine ? (view.hires ? 8 - (fine >> 1) : 16 - fine) : 0;
-      return { ...view, width: Math.min(window.width, ((view.hires ? 448 : 464) - window.x) * (view.hires ? 2 : 1)), height: window.height, x: window.x, y: window.y,
-        pointers: view.pointers.map(pointer => pointer + offsetY * view.rowBytes + (offsetX >> 4) * 2),
+      return { ...view, width: Math.min(window.width, ((view.hires ? 448 : 464) - window.x) * (view.hires ? 2 : 1)), height: Math.floor(window.height/(view.lace?2:1)), x: window.x, y: window.y,
+        rowBytes: view.rowBytes*(view.lace?2:1),
+        pointers: view.pointers.map(pointer => pointer + (offsetY+(view.lace?parity:0)) * view.rowBytes + (offsetX >> 4) * 2),
         scroll: delay | ((dual ? ((dual.offsetX & 15) ? 16 - (dual.offsetX & 15) : 0) : delay) << 4), fetchAdvance: view.hires ? 4 : 8 };
     });
     const originalViews = views;
     const bounds = windows ? display.windowGeometry(windows, geometry.standard) : null;
-    if (bounds) views = views.filter(view => view.y < bounds.end && view.y + view.height > 26).map(view => {
+    if (bounds) views = views.filter(view => view.height>0 && view.y < bounds.end && view.y + view.height > 26).map(view => {
       const top = Math.max(26, view.y), bottom = Math.min(bounds.end, view.y + view.height);
       return { ...view, y: top, height: bottom - top, dmaWindow: view.y < 26 || bottom < 128,
         pointers: view.pointers.map(pointer => pointer + (top - view.y) * view.rowBytes) };
@@ -1253,6 +1288,8 @@
     if (windows) views = views.filter((view, index, all) => !all.slice(0, index).some(front =>
       front.x <= view.x && front.x + front.width / (front.hires ? 2 : 1) >= view.x + view.width / (view.hires ? 2 : 1) &&
       front.y <= view.y && front.y + front.height >= view.y + view.height));
+    if(parity==null&&views.some(view=>view.lace))return weave(
+      snapshotDisplay(targets,geometry,windows,0,prepared),snapshotDisplay(targets,geometry,windows,1,prepared));
     const overlap = views.some((view, index) => views.slice(index + 1).some(other => view.y < other.y + other.height && other.y < view.y + view.height));
     const touching = views.some((view, index) => !view.ham && !view.hires && views.slice(index + 1).some(other =>
       !other.ham && !other.hires && (view.y + view.height === other.y || other.y + other.height === view.y)));
@@ -1299,7 +1336,7 @@
       backgroundPalette: geometry.backdropColour == null ? originalViews[0].palette : [geometry.backdropColour, ...originalViews[0].palette.slice(1)],
       standard: options.snapshotStandard, videoRate: options.snapshotVideoRate,
       paletteRows: display.paletteRows ? display.paletteRows(views.length ? views : originalViews) : [],
-      pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
+      pixelAspect: options.snapshotPixelAspect || { numerator: 1, denominator: parity!=null ? 2 : views.length === 1 && views[0].hires ? 1 : 2 }, ...geometry });
     if (copperAllocation) { memory.free(copperAllocation); copperAllocation = null; }
     copperAllocation = memory.allocate(compiled.bytes.length);
     memory.writeBytes(copperAllocation.address, compiled.bytes);
@@ -1595,7 +1632,7 @@
       if (view.ham && (![5, 6].includes(depth) || hires || view.dualPlayfield)) fail('invalid HAM mode');
       const scroll = view.scroll == null ? 0 : view.scroll;
       if (!Number.isInteger(scroll) || scroll < 0 || scroll > 255) fail('invalid scroll');
-      const control = (depth << 12) | (hires ? 0x8000 : 0) | (view.dualPlayfield ? 0x400 : 0) | (view.ham ? 0x800 : 0);
+      const control = (depth << 12) | (hires ? 0x8000 : 0) | (view.dualPlayfield ? 0x400 : 0) | (view.ham ? 0x800 : 0) | (view.lace ? 4 : 0);
       const fetchWords = hires ? Math.ceil(width / 32) * 2 : Math.ceil(width / 16);
       const advance = view.fetchAdvance == null ? 8 : view.fetchAdvance;
       if (![4, 8].includes(advance) || (!hires && advance !== 8)) fail('invalid fetch advance');
@@ -1912,7 +1949,7 @@
       spriteDma.tick(line, horizontal);
       if (!fetched && horizontal === dataFetchPosition(get(R.BPLCON0), get(R.DDFSTRT)) && verticalWindow() && dma()) {
         const control = get(R.BPLCON0), count = (control >> 12) & 7;
-        if (control & ~0xfe00 || count > 6 || (control & 0x8000 && count > 4)) fail('unsupported OCS bitplane mode');
+        if (control & ~0xfe04 || count > 6 || (control & 0x8000 && count > 4)) fail('unsupported OCS bitplane mode');
         if (count) {
           let length;
           try { length = fetchBytes(control, get(R.DDFSTRT), get(R.DDFSTOP)); } catch (error) { fail(error.message); }
@@ -2180,8 +2217,8 @@
     if (!Number.isInteger(id) || id < 0 || id > 7) throw new Error('Invalid screen number');
     if (!Number.isInteger(width) || width < 1 || width > 1024 || !Number.isInteger(height) || height < 1 || height > 1023) throw new Error('Invalid screen dimensions');
     if (![2, 4, 8, 16, 32, 64, 4096].includes(colours)) throw new Error('Unsupported screen colour mode');
-    if (mode !== 0 && mode !== 0x8000) throw new Error('Unsupported screen resolution mode');
-    if (mode === 0x8000 && colours > 16) throw new Error('Hires screens support at most 16 colours');
+    if (![0, 4, 0x8000, 0x8004].includes(mode)) throw new Error('Unsupported screen resolution mode');
+    if ((mode & 0x8000) !== 0 && colours > 16) throw new Error('Hires screens support at most 16 colours');
     checkClones(screens.get(id));
     const ham = colours === 4096;
     colours = ham ? 64 : colours;
@@ -2192,7 +2229,7 @@
       physicalPixels: null, doubleBuffered: false, autoback: 0, graphicsPlaneMask: 255,
       palette: Array.from({ length: 32 }, (_, i) => palette[i] == null ? 0 : palette[i]),
       hardwareX: 128, hardwareY: 50, spritePriority: 4,
-      windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: Array.from(screens.values()).some(other => other.id !== id && other.windowed),
+      windowWidth: width, windowHeight: height, offsetX: 0, offsetY: 0, windowed: !!(mode & 4) || Array.from(screens.values()).some(other => other.id !== id && other.windowed),
       pen: colours === 2 ? 1 : 2, paper, ink: colours === 2 ? 1 : 2,
       // Preserve the legacy default until Gr Writing explicitly selects JAM1/2.
       inkBackground: 0, graphicsBackground: paper, graphicsMode: null, inkBorder: 0, linePattern: 65535, linePhase: 15, writingActive: false, textEscape: '', x: 0, y: 0, gx: 0, gy: 0, tabSize: 4,
@@ -2255,11 +2292,11 @@
   }
   function windowGeometry(windows = presentedWindows, standard = options.snapshotStandard) {
     const end = standard === 'NTSC' ? 260 : 310;
-    const visible = windows.filter(window => window.y < end && window.y + window.height > 26);
+    const visible = windows.filter(window => window.y < end && Math.floor(window.height / (window.target.mode & 4 ? 2 : 1)) > 0 && window.y + Math.floor(window.height / (window.target.mode & 4 ? 2 : 1)) > 26);
     const left = Math.min(...windows.map(window => window.x));
-    const right = Math.min(454, Math.max(...windows.map(window => Math.min(window.target.mode === 0x8000 ? 448 : 464, window.x + window.width / (window.target.mode === 0x8000 ? 2 : 1)))));
+    const right = Math.min(454, Math.max(...windows.map(window => Math.min(!!(window.target.mode & 0x8000) ? 448 : 464, window.x + window.width / (!!(window.target.mode & 0x8000) ? 2 : 1)))));
     const top = visible.length ? Math.max(26, Math.min(...visible.map(window => window.y))) : 0;
-    const bottom = visible.length ? Math.min(end, Math.max(...visible.map(window => window.y + window.height))) : end;
+    const bottom = visible.length ? Math.min(end, Math.max(...visible.map(window => window.y + Math.floor(window.height / (window.target.mode & 4 ? 2 : 1))))) : end;
     return { left, top, right, bottom, end };
   }
   function view() { presented = visibleScreen(); commitWindows(); changed(); }
@@ -2285,11 +2322,11 @@
     if (nextX < 96 || nextX > 240) throw new Error('Unsupported Screen Display horizontal placement');
     if (y != null && (y < -4095 || y > 28671)) throw new Error('Unsupported Screen Display vertical placement');
     if ((width != null && (width < 0 || width > 65535)) || (height != null && (height < 0 || height > 65535))) throw new Error('Invalid Screen Display size');
-    const hires = target.mode === 0x8000;
+    const hires = !!(target.mode & 0x8000);
     const nextWidth = width == null || !(width & 0xfff0) ? target.windowWidth : Math.min(width & 0xfff0, target.width / (hires ? 2 : 1)) * (hires ? 2 : 1);
     const nextHeight = height == null || height === 0 ? target.windowHeight : Math.min(height, target.height);
-    const bottom = (y == null ? target.hardwareY : y) + nextHeight;
-    if (nextWidth / (hires ? 2 : 1) < 128 || nextWidth / (hires ? 2 : 1) > 320 ||
+    const bottom = (y == null ? target.hardwareY : y) + Math.floor(nextHeight / (target.mode & 4 ? 2 : 1));
+    if (nextWidth / (hires ? 2 : 1) < 128 || nextWidth / (hires ? 2 : 1) > 384 ||
         nextX + nextWidth / (hires ? 2 : 1) < 256 || bottom > 28671) throw new Error('Unsupported Screen Display window');
     return { x: nextX, y: y == null ? target.hardwareY : y, width: nextWidth, height: nextHeight };
   }
@@ -2304,7 +2341,7 @@
     [x, y].filter(value => value != null).forEach(whole);
     if ((x != null && (x < 0 || x >= target.width)) || (y != null && (y < 0 || y >= target.height))) throw new Error('Unsupported Screen Offset outside bitmap');
     if (target.ham && x != null && (x & 15)) throw new Error('HAM fine Screen Offset is not implemented');
-    if (x != null) target.offsetX = target.mode === 0x8000 ? x & ~1 : x;
+    if (x != null) target.offsetX = !!(target.mode & 0x8000) ? x & ~1 : x;
     if (y != null) target.offsetY = y;
     target.windowed = true;
     changed(true);
@@ -3212,9 +3249,10 @@
     const word = value => (value << 16) >> 16;
     const horizontal = name.startsWith('X');
     const origin = horizontal ? target.hardwareX : target.hardwareY;
-    if (name.endsWith('Hard')) return word((horizontal && target.mode === 0x8000 ? word(value) >> 1 : word(value)) + origin);
+    const doubled = horizontal ? !!(target.mode & 0x8000) : !!(target.mode & 4);
+    if (name.endsWith('Hard')) return word((doubled ? word(value) >> 1 : word(value)) + origin);
     const offset = word(value - origin);
-    return word((horizontal && target.mode === 0x8000 ? offset * 2 : offset) + (horizontal ? target.offsetX : target.offsetY));
+    return word((doubled ? offset * 2 : offset) + (horizontal ? target.offsetX : target.offsetY));
   }
   function reserveZones(count = 0) {
     whole(count);
@@ -3266,26 +3304,26 @@
     for (let index = Math.max(first, 0); index < priorityOrder.length; index++) {
       const target = screens.get(priorityOrder[index]);
       if (!target || target.hidden) continue;
-      const width = target.windowWidth / (target.mode === 0x8000 ? 2 : 1);
+      const width = target.windowWidth / (!!(target.mode & 0x8000) ? 2 : 1);
       if (x >= target.hardwareX && x < target.hardwareX + width &&
-          y >= target.hardwareY && y < target.hardwareY + target.windowHeight) return target.id;
+          y >= target.hardwareY && y < target.hardwareY + Math.floor(target.windowHeight / (target.mode & 4 ? 2 : 1))) return target.id;
     }
     return -2147483648;
   }
   function mouseZone(x, y) {
-    const target = screen(), scale = target.mode === 0x8000 ? 2 : 1;
+    const target = screen(), scale = !!(target.mode & 0x8000) ? 2 : 1;
     x = (whole(x) & 65535) - target.hardwareX;
     y = (whole(y) & 65535) - target.hardwareY;
-    if (x < 0 || x >= target.windowWidth / scale || y < 0 || y >= target.windowHeight) return 0;
+    if (x < 0 || x >= target.windowWidth / scale || y < 0 || y >= Math.floor(target.windowHeight / (target.mode & 4 ? 2 : 1))) return 0;
     // The language function uses ZoHd on the current screen, not SyMouZ's
     // separate priority-list scan. Geometry is live even before View.
-    return zone(x * scale + target.offsetX, y + target.offsetY);
+    return zone(x * scale + target.offsetX, y * (target.mode & 4 ? 2 : 1) + target.offsetY);
   }
   function rgba(id = current) {
     const target = typeof id === 'object' ? id : screen(id);
     const result = new Uint8ClampedArray(target.width * target.height * 4);
     let spriteFrame = null, spriteRows = null;
-    const samples = target.mode === 0x8000 ? 1 : 2;
+    const samples = !!(target.mode & 0x8000) ? 1 : 2;
     if (spriteWriter) {
       if (!spriteModel) throw new Error('Sprite helpers are not loaded');
       spriteFrame = { origin: { x: target.hardwareX, y: target.hardwareY }, lines: target.height,
@@ -3356,7 +3394,7 @@
     if (!presentedWindows) return presented ? { width: presented.width, height: presented.height, rgba: rgba(presented) } : null;
     const snapshot = snapshotDisplay(), frame = snapshot.frame;
     const source = referenceRenderer.render(snapshot.chip, frame);
-    const scale = presentedWindows.some(window => window.target.mode === 0x8000) ? 1 : 2;
+    const scale = presentedWindows.some(window => window.target.mode & 0x8000) || frame.lineRegs.some((value,index)=>index%32===8&&(value&4)) ? 1 : 2;
     const width = frame.outputWidth / scale, height = frame.lines;
     const pixels = new Uint8ClampedArray(width * height * 4);
     for (let i = 0; i < width * height; i++) pixels.set(source.subarray(i * scale * 4, i * scale * 4 + 4), i * 4);
@@ -3369,7 +3407,7 @@
     }
     const target = presentedHardware;
     if (!target) throw new Error('No physical display for hardware mouse coordinates');
-    return [target.x + Math.floor(x * target.width / width / (target.mode === 0x8000 ? 2 : 1)),
+    return [target.x + Math.floor(x * target.width / width / (!!(target.mode & 0x8000) ? 2 : 1)),
       target.y + Math.floor(y * target.height / height)];
   }
   function pointerPosition(x, y, width, height) {
@@ -3378,8 +3416,8 @@
       Math.max(0, Math.min(target.height - 1, Math.floor(y * target.height / height)))];
     const { left, right, top, bottom } = windowGeometry();
     const view = presentedWindows.find(window => window.target === target);
-    return [Math.floor(x * (right - left) * (target.mode === 0x8000 ? 2 : 1) / width) + (left - (view ? view.x : target.hardwareX)) * (target.mode === 0x8000 ? 2 : 1) + (view ? view.offsetX : target.offsetX),
-      Math.floor(y * (bottom - top) / height + top - (view ? view.y : target.hardwareY)) + (view ? view.offsetY : target.offsetY)];
+    return [Math.floor(x * (right - left) * (!!(target.mode & 0x8000) ? 2 : 1) / width) + (left - (view ? view.x : target.hardwareX)) * (!!(target.mode & 0x8000) ? 2 : 1) + (view ? view.offsetX : target.offsetX),
+      Math.floor((y * (bottom - top) / height + top - (view ? view.y : target.hardwareY)) * (target.mode & 4 ? 2 : 1)) + (view ? view.offsetY : target.offsetY)];
   }
   open(0, 320, 200, 16, 0);
   return {
@@ -4828,9 +4866,8 @@
     if (!bank || bank.type !== 'data') throw new Error('Unpack requires a reserved packed-picture bank');
     if (bank.data.length > 16 * 1024 * 1024) throw new Error('Packed picture bank exceeds 16 MiB');
     const image = packedPictureReader(Uint8Array.from(bank.data));
-    if (image.mode & 4) throw Error('Unpack Screen interlaced presentation is not implemented; Unpack into an existing bitmap for data-only use');
     const window = image.window;
-    if (window.width < 128 || window.width > 320) throw Error('Unpack Screen display window is not implemented for this width');
+    if (window.width < 128 || window.width > 384) throw Error('Unpack Screen display window is not implemented for this width');
     const placement = display.checkedWindow({ width:image.width, height:image.height, mode:image.mode,
       hardwareX:128, hardwareY:50, windowWidth:image.width, windowHeight:image.height }, window.x, window.y, window.width, window.height);
     if (placement.width + window.offsetX > image.width || placement.height + window.offsetY > image.height) throw Error('Unpack window extends outside bitmap');

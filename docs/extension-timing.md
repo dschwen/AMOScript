@@ -90,8 +90,8 @@ Ghostlight now passes these encodings and [Smouse Key](smouse-key.md). [Pt Sam S
 now pass, completing compilation of all 18 used extension encodings. The recovered Smouse Key routine
 reads CIA bit 7 and POTINP bits 6/4: these are the second mouse/joystick port's
 three buttons, not the main mouse's held mask. The implementation now supplies explicit portable
-second-port input. Wider Pt Sam/Raw forms, interlaced atlas presentation and
+second-port input. Wider Pt Sam/Raw forms, exact field timing and
 whole-game execution also remain open. No private game assets are distributed.
 
-The private title/menu now runs with music; game entry stops at interlaced
-Unpack Screen, line 273, byte 7800. Full gameplay remains open.
+[Interlaced Unpack Screen](interlaced-unpack.md) now creates the original atlas
+and the private WebGL page reaches level 1 with music. Full gameplay remains open.

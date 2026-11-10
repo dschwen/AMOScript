@@ -494,3 +494,10 @@ Useful entry points:
   [renderer orchestration](../lib/display/webgl/renderer.js).
 - [WebGL renderer demo](../demos/webgl-renderer.html) and
   [WebGL HAM demo](../demos/webgl-ham.html).
+
+
+AMOS packed screens now also support [static interlaced presentation](interlaced-unpack.md).
+The bridge builds both field copper lists with alternating source rows, weaves
+their register/palette/sprite/event tables, and passes the combined snapshot to
+the GPU. Progressive windows repeat their rows within that shared grid. No CPU
+colour conversion is involved; dynamic field timing remains separate work.

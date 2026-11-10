@@ -79,9 +79,10 @@ pad and also verify the default mapping in the generated AMCAF application page.
 These are portable/source-derived checks, not Amiga or physical-gamepad captures.
 
 The complete Ghostlight source now compiles, including [Pt Sam Stop](amcaf-sample-stop.md)
-and [Pt Raw Play/Pt Sam Bank](amcaf-raw.md). The private page reaches the animated
-title with music; game entry stops at interlaced Unpack Screen, line 273, byte
-7800. Full gameplay remains open. The external project's generated module,
+and [Pt Raw Play/Pt Sam Bank](amcaf-raw.md). [Interlaced Unpack Screen](interlaced-unpack.md)
+now creates the original atlas and the private WebGL page reaches level 1 with
+music. Second fire uses a match in a bounded input check; full gameplay remains
+open. The external project's generated module,
 normal/debug HTML and build report stay in
 `/home/daniel/Programs/ghostlight-browser/dist/`; no source/assets or compiled game
 are added to AMOScript.

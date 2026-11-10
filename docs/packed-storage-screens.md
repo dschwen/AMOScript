@@ -60,13 +60,12 @@ palette, geometry and existing Autoback semantics. Hidden storage can hold all
 rows, including those below the visible field, and ordinary checked Screen Copy
 can read them.
 
-`Unpack bank To screen` is the screen-creation operation. It **still rejects
-interlaced presentation explicitly before replacing anything**. The old bounded
-128..320 packed display-window width gate remains in that operation, rather than
-blocking the pure data decoder. There is no automatic conversion of a laced
-screen into a progressive one, no hidden-source special case, and no alteration
-of Ghostlight's original `Unpack 6 To 2`. Rendering both fields and integrating
-its raw overscan placement remain future work.
+`Unpack bank To screen` now supports bounded interlaced creation and overscan
+windows up to 384 hardware pixels wide. It retains all bitmap rows and source
+mode, constructs both fields with doubled planar stride, and weaves row tables
+for Canvas/WebGL. No source flag is dropped and no game-specific hidden-screen
+case is used. See [interlaced unpack](interlaced-unpack.md) for exact geometry,
+input mapping, independent browser checks and remaining timing/mode gates.
 
 ## Supplied atlas evidence
 
@@ -100,6 +99,7 @@ widths is `InScreenOpen` / `UnPack_Screen` / `UnPack_Bitmap` in `+Lib.s`, and
 `EcCree` in `+W.s` from the
 [official AMOS source](https://github.com/AOZ-Studio/AMOS-Professional-Official/tree/533b4b1f5acd604814513f78e02c7b4796cb0531).
 
-Full Ghostlight compilation remains blocked first at AMCAF Pt Play. Its original
-atlas screen also still needs interlaced/overscan display integration. See the
+Full Ghostlight compilation now passes all 18 used extension encodings. Its
+original new-screen atlas unpack now runs, and the private WebGL page reaches
+level 1. Sustained gameplay/completion and native captures remain open. See the
 [milestone plan](ghostlight-extension-plan.md).

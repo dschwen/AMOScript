@@ -93,7 +93,7 @@ the complete Ghostlight source now compiles.
 [Pt Sam Stop](amcaf-sample-stop.md) cancels selected DMA voices while music continues.
 [Amos Pri and Raster Wait](extension-timing.md) have bounded host-intent and
 cooperative timing implementations.
-The private title/menu runs with music; game entry stops at interlaced Unpack Screen,
-line 273, byte 7800. Complete gameplay remains open. Continue with the
-[Ghostlight milestone plan](ghostlight-extension-plan.md): boot/system-information
-contracts, graphics/masked blocks, and AMCAF music/SFX/timing remain open.
+[Interlaced Unpack Screen](interlaced-unpack.md) now creates the atlas and the
+private WebGL page reaches level 1 with music. Complete gameplay remains open.
+Continue with the [Ghostlight milestone plan](ghostlight-extension-plan.md): a
+sustained input-only gameplay replay, effects, death/restart and progression.
