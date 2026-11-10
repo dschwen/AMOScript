@@ -9,7 +9,7 @@ test('AMCAF example builds: preserve all original sources and assets, explicit p
  }
  const spirits=Buffer.from(result.assets['data/mod.4spirits'],'base64');assert.strictEqual(crypto.createHash('sha256').update(spirits).digest('hex'),'77d3535bcbf378a2e9c06faea48bc114de2ea96bb379c98c6501c93f1a557ffd');const module=require('../lib/amos/mod')(spirits);assert.strictEqual(module.title,'4 spirits');assert.strictEqual(module.songLength,52);assert.strictEqual(module.patternCount,43);assert(module.patterns.flat().some(c=>c.effect===9));assert(module.patterns.flat().some(c=>c.effect===14&&(c.parameter>>4)===9));assert(!module.patterns.flat().some(c=>c.effect===8));
  const index=result.outputs.get('amcaf-examples.md');for(const p of result.programs)assert(index.includes(require('../tools/demoLinks').preview(p.file)));
- assert.match(result.programs.find(p=>p.source==='Protracker.AMOS').runtime,/unsupported 9xx/);
+ assert.match(result.programs.find(p=>p.source==='Protracker.AMOS').runtime,/Original music interface/);
  assert(result.programs.find(p=>p.source==='ShowAGAPic.AMOS').error.includes('line length'));
  assert(!fs.existsSync(path.join(__dirname,'../amcaf_examples')));
 });

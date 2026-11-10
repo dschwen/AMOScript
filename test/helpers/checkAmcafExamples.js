@@ -7,10 +7,30 @@ module.exports=async function(browser){
   assert.strictEqual(manifest.programs.length,12);const catalogue=fs.readFileSync(path.join(root,'amcaf-examples.md'),'utf8');
   for(const item of manifest.programs)assert(catalogue.includes('https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+item.file));
   for(const p of manifest.programs){if(p.compiled)continue;await page.goto(pathToFileURL(path.join(root,p.file)).href);assert.strictEqual(await page.locator('pre').textContent(),p.error);assert.strictEqual(await page.locator('#play-game').count(),0);}
-  const first=manifest.programs.find(p=>p.source==='Protracker.AMOS');assert(first.compiled);assert.match(first.runtime,/unsupported 9xx/);
-  await page.goto(pathToFileURL(path.join(root,first.file)).href);await page.click('#play-game');
-  await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='error');
-  assert.match(await page.locator('[data-debug-log]').textContent(),/unsupported effect 9:d.*line 82/);
+  const first=manifest.programs.find(p=>p.source==='Protracker.AMOS');assert(first.compiled);
+  await page.goto(pathToFileURL(path.join(root,first.file)).href);
+  await page.evaluate(()=>{
+    const make=AMOS_BROWSER.createCanvasHost;
+    AMOS_BROWSER.createCanvasHost=(...args)=>{const host=make(...args);return{...host,attach(p){window.protracker1=p;return host.attach(p);}};};
+    const start=AudioBufferSourceNode.prototype.start;window.protrackerAudibleStarts=0;
+    AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.getChannelData(0).some(value=>value!==0))protrackerAudibleStarts++;return start.apply(this,args);};
+  });
+  assert.strictEqual(await page.locator('#game-keyboard').inputValue(),'typing');await page.click('#play-game');
+  await page.waitForFunction(()=>window.protracker1?.state.tracker.position?.position.sequence.ticks>=12&&protrackerAudibleStarts>0);
+  assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-backend'),'webgl');
+  assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-phase'),'running');
+  for(const [key,name,value]of [['1','voi',14],['1','voi',15],['2','voi',13],['2','voi',15],['3','voi',11],['3','voi',15],['4','voi',7],['4','voi',15],['ArrowDown','vol',63],['ArrowUp','vol',64],['ArrowLeft','bpm',124],['ArrowRight','bpm',125]]){
+    await page.keyboard.press(key);await page.waitForFunction(([name,value])=>protracker1.state.variables['int_'+name]===value,[name,value]);
+  }
+  await page.locator('#game-stop').evaluate(node=>node.click());
+  const firstTick=await page.evaluate(()=>protracker1.state.tracker.position.position.sequence.ticks);
+  await page.waitForTimeout(60);assert.strictEqual(await page.evaluate(()=>protracker1.state.tracker.position.position.sequence.ticks),firstTick);
+  await page.locator('#game-resume').evaluate(node=>node.click());
+  await page.waitForFunction(tick=>protracker1.state.tracker.position.position.sequence.ticks>tick,firstTick);
+  if(await page.evaluate(()=>!!document.fullscreenElement)){await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement);}
+  const firstCanvas=await page.locator('#game-input').boundingBox();await page.mouse.move(firstCanvas.x+firstCanvas.width/2,firstCanvas.y+firstCanvas.height/2);await page.mouse.down();
+  await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='ended');await page.mouse.up();
+  assert.strictEqual(await page.evaluate(()=>protracker1.state.tracker.playing),false);
   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());
   await page.goto(pathToFileURL(path.join(root,'amcaf-drums.html')).href);
   await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const h=make(...args);return{...h,attach(p){window.drums=p;return h.attach(p);}};};});
@@ -78,6 +98,6 @@ module.exports=async function(browser){
   await page.locator('#game-sound').click();await page.waitForFunction(n=>document.getElementById('game-viewport').dataset.sound==='on'&&audioRecovery.starts>n,starts);
   assert.strictEqual(await page.evaluate(()=>audioRecovery.attempts),3);
   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());assert.deepStrictEqual(errors,[]);assert.deepStrictEqual(network,[]);
-  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original Protracker2 animation/pause/mouse exit and quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; one-click activation/suspension recovery passes; the first Protracker version compiles and reports its explicit tracker-effect runtime blocker. The live drum Anim harness starts, pauses and resumes with WebGL.');
+  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original Protracker2 animation/pause/mouse exit and quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; one-click activation/suspension recovery passes; the original Protracker1 interface plays audible music, changes voices/volume/tempo with keyboard input, pauses/resumes and exits through Mouse Key. The live drum Anim harness starts, pauses and resumes with WebGL.');
  }finally{await page.close();}
 };

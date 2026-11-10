@@ -33,9 +33,15 @@ test('Anim: all cached On/Off/Freeze signatures execute through ordinary compile
  [t('Anim On')],[t('Anim Freeze Number'),n(1)],[t('Synchro')],[t('Anim On Number'),n(1)],[t('Anim Freeze')],[t('Synchro')],[t('Anim On')],[t('Synchro')],[t('Anim Off Number'),n(0)],[t('Anim Off')],[t('Wait Key')]]));
  assert.deepStrictEqual([p.spriteInfo('I Sprite',0),p.spriteInfo('I Sprite',1)],[3,4]);assert.strictEqual(p.animSnapshot().length,0);p.stop();
 });
-test('AMCAF Protracker1: unchanged source now compiles and reaches the explicit recovered-module effect-9 runtime blocker',()=>{
+test('AMCAF Protracker1: unchanged source runs a music wrap with keyboard controls and exits through Mouse Key',()=>{
  const fs=require('fs'),path=require('path'),crypto=require('crypto'),T=require('../lib/Transpiler'),raw=fs.readFileSync(path.join(__dirname,'../examples/AMCAF/AMCAF_Examples/Protracker.AMOS'));
  assert.strictEqual(crypto.createHash('sha256').update(raw).digest('hex'),oracle.sourceSha256);
  const m={exports:{}};new Function('module',new T(raw,{extensions:{8:'amcaf-1.50beta4'}}).toModule())(m);const clock=require('./helpers/fakeTimers').createFakeTimers(),p=m.exports({...clock,print(){},files:require('../lib/amos/files').createMemoryFiles({'Data/mod.4spirits':fs.readFileSync(path.join(__dirname,'../examples/AMCAF/AMCAF_Examples/Data/mod.4spirits'),'latin1')})});
- try{assert.throws(()=>p.tick(100000),/unsupported effect 9:d.*line 82/);assert.strictEqual(clock.pending(),0);assert.strictEqual(p.animSnapshot().length,0);}finally{p.stop();}
+ try{
+  p.tick(100000);clock.tick(40000);assert(p.state.tracker.playing);assert(p.state.tracker.position.position.sequence.ticks>=1926);
+  for(const [key,name,value]of [['1','voi',14],['1','voi',15],['2','voi',13],['2','voi',15],['3','voi',11],['3','voi',15],['4','voi',7],['4','voi',15],['\x1f','vol',63],['\x1e','vol',64],['\x1d','bpm',124],['\x1c','bpm',125]]){p.sendKey(key);clock.tick(20);assert.strictEqual(p.state.variables['int_'+name],value);}
+  while(!p.state.tracker.position.position.sequence.ends&&clock.now()<1000000)clock.tick(20);
+  assert.strictEqual(p.state.tracker.position.position.sequence.ends,1);clock.tick(160);
+  assert(p.display.snapshotDisplay().frame.outputWidth>0);p.setMouse(160,100,1);clock.tick(40);assert(p.state.halted);assert.strictEqual(p.state.tracker.playing,false);assert.strictEqual(clock.pending(),0);assert.strictEqual(p.animSnapshot().length,0);
+ }finally{p.stop();}
 });

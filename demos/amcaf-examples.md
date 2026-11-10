@@ -2,9 +2,11 @@
 
 [Demo gallery](index.md)
 
-3/12 original programs compile. The original quick-maths example and Protracker2 music visualizer run with Canvas/WebGL. Protracker1 now compiles but its music still has runtime blockers; other programs have explicit compile-blocker pages. Sources, four original data files and the separately recovered 4 spirits module are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+3/12 original programs compile. All three compiled originals run with Canvas/WebGL: quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources, four original data files and the separately recovered 4 spirits module are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
+
+[Protracker1 — original music interface](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html): play the recovered 4 spirits tune. Typing mode is selected. Use arrows to adjust volume/tempo and keys 1–4 to toggle voices. A mouse button on the canvas exits. The recovered tune has no drum/text synchronization cues.
 
 [Protracker2 — original music visualizer](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html): start the supplied Hawkeye tune, watch the frequency meters and note trail, then press a mouse button on the canvas to exit.
 
@@ -24,7 +26,7 @@
 
 ## Music support preview
 
-[Play Hawkeye with AMCAF voice controls](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html). A declared compiled harness loads the original packed module into a chip Work bank. Press keys to disable voice 1, re-enable it, then stop. Protracker2 now has its own original visualizer page above; the first Protracker version compiles but still has tracker-effect runtime blockers. [Voice DMA and native audio graph checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html).
+[Play Hawkeye with AMCAF voice controls](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html). A declared compiled harness loads the original packed module into a chip Work bank. Press keys to disable voice 1, re-enable it, then stop. Protracker2 now has its own original visualizer page above; the first version also runs with the recovered 4 spirits module. [Voice DMA and native audio graph checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html).
 
 ## Complete collection
 
@@ -37,7 +39,7 @@
 | [Fonts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html) | Blocked | Unsupported extension 8:0x1204 (amcaf-1.50beta4) at line 16, byte 770 |
 | [GamePorts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html) | Blocked | Unsupported extension 8:0x15be (amcaf-1.50beta4) at line 14, byte 720 |
 | [Iff2Raw.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html) | Blocked | Unsupported token 0x3c0 at line 30, byte 1206 |
-| [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Compiles | Compiles unchanged; runtime stops at Pt Play: the recovered 4 spirits module needs unsupported 9xx sample offsets and E9x retriggers. |
+| [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Compiles | Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues. |
 | [Protracker2.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html) | Compiles | Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL. |
 | [QsinCosArcSqr.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-qsincosarcsqr.html) | Compiles | Original input loop, three mouse directions, double-buffer publication and Escape exit covered. |
 | [SamBankFixer.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-sambankfixer.html) | Blocked | Unsupported token 0x28ae at line 22, byte 882 |

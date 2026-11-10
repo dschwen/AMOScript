@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>AMCAF — Protracker.AMOS</title>
 <style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:1.5rem auto;padding:0 1rem;background:#101721;color:#eef2f6}button,select{font:inherit;padding:.6rem;margin:.3rem}button{cursor:pointer}#play-game{display:block;background:#c71920;color:white;border:0;border-radius:.6rem;padding:1.1rem 2.5rem;font-size:2rem;font-weight:800}canvas{display:block;image-rendering:pixelated;max-width:100%;border:0}#game-status{font-size:.9rem}h1{font-size:1.5rem}summary{cursor:pointer}body[data-playing=true] #play-game{font-size:1rem;padding:.7rem 1.3rem}#game-surface{background:#05080c;border-radius:8px;overflow:hidden}</style></head><body>
-<nav><a href="https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md">AMCAF examples</a> · <a href="amcaf-examples.md">Local catalogue</a></nav><p>Original AMCAF example. Compiles unchanged; runtime stops at Pt Play: the recovered 4 spirits module needs unsupported 9xx sample offsets and E9x retriggers. Compilation and runtime compatibility are reported separately. Select Keyboard: Typing for text prompts.</p><h1>AMCAF — Protracker.AMOS</h1><button id="play-game" type="button">Play Game</button><details class="game-help"><summary>Controls</summary><p>Follow the game's intro and menu prompts. Arrows move; Space/Enter fires. Choose Keyboard: Typing to enter text; switch back to Keyboard: Joystick to play. Gamepad and touch controls work in both modes. Escape leaves fullscreen.</p><p>Shift or the gamepad’s right face button is secondary fire. The left face button supplies third fire. Typing mode releases keyboard fire mappings.</p></details>
-<section id="game-viewport"><div class="amos-fullscreen-toolbar"><button id="game-sound">Enable sound</button><button id="game-fullscreen">Fullscreen</button><span id="fullscreen-status" role="status"></span><button id="game-restart">Restart</button><button id="game-stop">Stop</button><button id="game-resume">Resume</button><select id="game-keyboard" aria-label="Keyboard mode"><option value="game">Keyboard: Joystick</option><option value="typing">Keyboard: Typing</option></select><select id="game-speed" aria-label="Game speed"><option value="1" selected>Speed: 100%</option><option value="2">Speed: 50%</option><option value="3">Speed: 33%</option><option value="4">Speed: 25%</option></select><select id="game-touch" aria-label="Touch joystick"><option value="auto">Touch: Auto</option><option value="always">Touch: On</option><option value="off">Touch: Off</option></select></div>
+<nav><a href="https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md">AMCAF examples</a> · <a href="amcaf-examples.md">Local catalogue</a></nav><p>Original AMCAF example. Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues. Compilation and runtime compatibility are reported separately. Select Keyboard: Typing for text prompts.</p><h1>AMCAF — Protracker.AMOS</h1><button id="play-game" type="button">Play Game</button><details class="game-help"><summary>Controls</summary><p>Follow the game's intro and menu prompts. Arrows move; Space/Enter fires. Choose Keyboard: Typing to enter text; switch back to Keyboard: Joystick to play. Gamepad and touch controls work in both modes. Escape leaves fullscreen.</p><p>Shift or the gamepad’s right face button is secondary fire. The left face button supplies third fire. Typing mode releases keyboard fire mappings.</p></details>
+<section id="game-viewport"><div class="amos-fullscreen-toolbar"><button id="game-sound">Enable sound</button><button id="game-fullscreen">Fullscreen</button><span id="fullscreen-status" role="status"></span><button id="game-restart">Restart</button><button id="game-stop">Stop</button><button id="game-resume">Resume</button><select id="game-keyboard" aria-label="Keyboard mode"><option value="game">Keyboard: Joystick</option><option value="typing" selected>Keyboard: Typing</option></select><select id="game-speed" aria-label="Game speed"><option value="1" selected>Speed: 100%</option><option value="2">Speed: 50%</option><option value="3">Speed: 33%</option><option value="4">Speed: 25%</option></select><select id="game-touch" aria-label="Touch joystick"><option value="auto">Touch: Auto</option><option value="always">Touch: On</option><option value="off">Touch: Off</option></select></div>
 <div id="game-surface"><canvas id="game-input" width="320" height="256" tabindex="0" aria-label="Game display"></canvas></div><p id="game-status" class="amos-fullscreen-messages" role="status"></p></section>
 <script>/* jshint esversion: 6 */
 'use strict';
@@ -9135,7 +9135,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return pattern.map((c, i) => {
       const sample = check(c.sample, 0, 31, 'instrument'), period = check(c.period, 0, 4095, 'note');
       const effect = check(c.effect, 0, 15, 'effect'), parameter = check(c.parameter, 0, 255, 'parameter');
-      if (![0,1,2,3,4,5,6,8,10,11,12,13,14,15].includes(effect) || effect === 14 && ![0,10,11].includes(parameter>>4) || effect === 11 && parameter > 127) {
+      if (![0,1,2,3,4,5,6,8,9,10,11,12,13,14,15].includes(effect) || effect === 14 && ![0,9,10,11].includes(parameter>>4) || effect === 11 && parameter > 127) {
         throw new Error(`AMCAF sequencer: unsupported effect ${effect.toString(16)}:${parameter.toString(16)} at pattern ${p}, row ${i >> 2}, channel ${i & 3}`);
       }
       return { sample, period, effect, parameter };
@@ -9157,11 +9157,40 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   });
   const voices = Array.from({ length: 4 }, () => ({ sample: 0, period: 0, volume: 0,
     outputPeriod: 0, outputVolume: 0, effect: 0, parameter: 0, finetune: 0,
-    target: 0, descending: false, portaSpeed: 0, vibratoMemory: 0, vibratoPosition: 0 }));
+    target: 0, descending: false, portaSpeed: 0, vibratoMemory: 0, vibratoPosition: 0,
+    fetchStart: 0, fetchLength: 0, sampleOffset: 0 }));
   const instruments=[0,0,0,0],vu=[0,0,0,0];let signal=0;
   let playing = true, ticks = 0, counter = 0, speed = 6, bpm = 125, order = 0, row = 0, master = 64, ends = 0;
   const signed = v => (v << 16) >> 16;
   const volume = v => { v.outputVolume = (v.volume * master) >> 6; };
+  function offsetSample(voice, parameter) {
+    if (parameter) voice.sampleOffset = parameter;
+    const offsetWords = voice.sampleOffset << 7;
+    // LAB_048C compares signed words and falls back to one DMA word.
+    if (offsetWords >= signed(voice.fetchLength / 2)) voice.fetchLength = 2;
+    else {
+      voice.fetchLength -= offsetWords * 2;
+      voice.fetchStart += offsetWords * 2;
+    }
+  }
+  function startSample(voice, channel) {
+    const sample = samples[voice.sample - 1];
+    const start = sample && sample.length ? voice.fetchStart : 0;
+    const length = sample && sample.length ? voice.fetchLength : 0;
+    if (start + length > (sample ? sample.length : 0)) throw Error('AMCAF sequencer: sample fetch exceeds instrument');
+    return Object.freeze({ voice: channel, sample: voice.sample, ...(start ? { start } : {}), length });
+  }
+  function retrigger(voice, channel, triggers, repeats, enabled) {
+    const interval = voice.parameter & 15;
+    if (!interval || counter % interval || !(enabled & (1 << channel))) return;
+    triggers.push(startSample(voice, channel));
+    voice.outputPeriod = voice.period;
+    if (repeats) {
+      const sample = samples[voice.sample - 1];
+      repeats.push(Object.freeze({ voice: channel, sample: sample ? sample.number : 0,
+        start: sample ? sample.loopStart : 0, length: sample && sample.length ? sample.loopLength : 0 }));
+    }
+  }
   function slideVolume(v) {
     const up = v.parameter >> 4;
     v.volume = Math.max(0, Math.min(64, v.volume + (up || -(v.parameter & 15))));
@@ -9206,7 +9235,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const at = { tick: ++ticks, order, row }, triggers = [], repeats = [], filters = [];
     let isRow = false;
     try {
-      if (++counter < speed) voices.forEach(v=>between(v,filters));
+      if (++counter < speed) voices.forEach((voice, channel) => {
+        between(voice, filters);
+        if (voice.effect === 14 && (voice.parameter >> 4) === 9) retrigger(voice, channel, triggers, repeats, enabled);
+      });
       else {
         isRow = true; counter = 0;
         let jump = false, breakRow = 0;
@@ -9216,6 +9248,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
           v.effect = c.effect; v.parameter = c.parameter; instruments[channel]=c.sample&15;
           if (c.sample) {
             const s = samples[c.sample - 1];
+            v.fetchStart = 0; v.fetchLength = s.loopStart ? s.loopStart + s.loopLength : s.length;
             v.sample = c.sample; v.finetune = s.finetune; v.volume = s.volume; volume(v);
             if(enabled & (1<<channel))vu[channel]=v.outputVolume;
           }
@@ -9225,13 +9258,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
               v.descending = signed(v.target) < signed(v.period);
               if (v.target === v.period) v.target = 0;
             } else {
+              if (c.effect === 9) offsetSample(v, c.parameter);
               v.period = pitch.tune(c.period, v.finetune); v.outputPeriod = v.period; v.vibratoPosition = 0;
-              const s = samples[v.sample - 1];
-              triggers.push(Object.freeze({ voice: channel, sample: v.sample,
-                length: !s ? 0 : s.loopStart ? s.loopStart + s.loopLength : s.length }));
+              triggers.push(startSample(v, channel));
             }
           }
           if(c.effect===8){signal=c.parameter;v.outputPeriod=v.period;volume(v);}
+          else if (c.effect === 9) offsetSample(v, c.parameter);
           else if (c.effect === 11) {
             const previous = (c.parameter - 1) & 255;
             if (((previous << 24) >> 24) < order) {ends++;signal=255;}
@@ -9247,6 +9280,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
           } else if(c.effect===14){
             const kind=c.parameter>>4,amount=c.parameter&15;
             if(!kind)filters.push(!(c.parameter&1));
+            else if (kind === 9) { if (!c.period) retrigger(v, channel, triggers, null, enabled); }
             else {v.volume=kind===10?Math.min(64,v.volume+amount):Math.max(0,v.volume-amount);volume(v);}
           } else { v.outputPeriod = v.period; volume(v); }
         }
@@ -9318,7 +9352,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   let frames = 0, tick = 0, stopped = false;
   function region(action, repeat) {
     const voice = integer(action.voice, 0, 3, 'voice'), sample = integer(action.sample, 0, pcm.length, 'instrument');
-    const start = repeat ? integer(action.start, 0, 131070, 'repeat start') : 0;
+    const suppliedStart = action.start;
+    const start = integer(suppliedStart == null && !repeat ? 0 : suppliedStart, 0, 131070, 'region start');
     const length = integer(action.length, 0, 131070, 'region length');
     if (start + length > (sample ? pcm[sample - 1].length : 0)) throw new Error('AMCAF PCM: region exceeds sample');
     return { voice, sample, start, length };
@@ -9346,7 +9381,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     // All validation precedes any register, pointer or phase changes.
     for (let i = 0; i < 4; i++) if ((enabled & (1 << i)) && !raw[i]) Object.assign(voices[i], registers[i]);
     for (const a of starts) if ((enabled & (1 << a.voice)) && !raw[a.voice]) Object.assign(voices[a.voice], { active: a.length > 0,
-      sample: a.sample, start: 0, length: a.length, offset: 0 });
+      sample: a.sample, start: a.start, length: a.length, offset: 0 });
     for (const a of repeats) if ((enabled & (1 << a.voice)) && !raw[a.voice]) Object.assign(voices[a.voice], { repeatSample: a.sample,
       repeatStart: a.start, repeatLength: a.length });
     tick = nextTick;

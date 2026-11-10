@@ -274,7 +274,7 @@
     {
       "file": "amcaf-status.html",
       "title": "AMCAF Protracker status and VU queries",
-      "description": "A synthetic compiled program maps AMCAF to slot 19 and prints order, next row, current instrument nibble, base-period frequency, destructive VU and signal results at two field-clock positions. One thousand reads do not advance music. Stopped/retired-bank queries retain owned status. Protracker2 now runs; the first Protracker interface remains blocked.",
+      "description": "A synthetic compiled program maps AMCAF to slot 19 and prints order, next row, current instrument nibble, base-period frequency, destructive VU and signal results at two field-clock positions. One thousand reads do not advance music. Stopped/retired-bank queries retain owned status. Both original Protracker interfaces now run.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-status.html"
     },
     {
@@ -658,19 +658,19 @@
     {
       "file": "amcaf-drums.html",
       "title": "AMCAF drums — live Anim harness",
-      "description": "Six original Protracker1 drum sequences and its embedded sprites on a declared synthetic scheduler. Anim plays live with WebGL; the original music interface still has tracker effect blockers.",
+      "description": "Six original Protracker1 drum sequences and its embedded sprites on a declared synthetic scheduler. Anim plays live with WebGL; the recovered music module has no effect-8 drum cues.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-drums.html"
     },
     {
       "file": "amcaf-hawkeye.html",
       "title": "AMCAF Hawkeye — packed music preview",
-      "description": "The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker2 visualizer also runs; the first version remains blocked.",
+      "description": "The original packed MOD in a declared compiled harness, with voice disable/re-enable, Stop/Resume, sound and fullscreen. The original Protracker2 visualizer also runs; the first version also runs with recovered 4 spirits playback.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-hawkeye.html"
     },
     {
       "file": "amcaf-examples.md",
       "title": "AMCAF — original example collection",
-      "description": "Twelve original AMCAF programs with sources, bundled assets and explicit build/runtime status. The original quick-maths mouse demo and Protracker2 music visualizer run; the catalogue records the remaining blockers.",
+      "description": "Twelve original AMCAF programs with sources, bundled assets and explicit build/runtime status. The original quick-maths mouse demo and both Protracker interfaces run; the catalogue records the remaining blockers.",
       "preview": "https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md"
     },
     {

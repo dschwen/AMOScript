@@ -87,14 +87,11 @@ browser comparisons, not native Amiga captures.
 
 ## Original Protracker1 status
 
-The complete original `Protracker.AMOS` now compiles unchanged. Its recovered
-`Data/mod.4spirits` loads as a raw chip Work bank, and startup reaches `Pt Play`
-on line 82, byte 3764. The sequencer rejects effect `9:d` at pattern 5, row 0,
-channel 1 during preflight. The module also uses E9 retrigger. Both need native
-tracker implementation and PCM coverage before this interface can run.
+The complete original `Protracker.AMOS` compiles and runs with the recovered
+`Data/mod.4spirits` loaded into a chip Work bank. Playback includes 9xx sample
+offsets and E9x retriggers. The interface's voice toggles, volume/tempo arrow
+controls, Stop/Resume and Mouse Key exit have browser coverage.
 
-The recovered Modland file has no AMCAF effect-8 synchronization cells. Its
-music can therefore eventually play without triggering the original text/drum
-callbacks, even after these playback effects are implemented. No cues are
-invented or inserted into the supplied source or module. The drum harness
-provides an explicitly separate animation demonstration.
+The recovered Modland file has no AMCAF effect-8 synchronization cells, so the
+original text/drum callbacks remain inactive. The live drum harness cycles all
+six original animation lists using its synthetic scheduler.

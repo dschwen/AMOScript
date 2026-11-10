@@ -4,7 +4,7 @@
 loads the original packed module from the AMCAF distribution in a declared
 compiled harness. Press keys to disable voice 1, re-enable it, then stop.
 The original Protracker2 visualizer now runs with its supplied tune; the first
-Protracker version has additional blockers. This harness remains a separate
+Protracker version also runs with the recovered 4 spirits module. This harness remains a separate
 support demo.
 
 ## Banks and validation
@@ -58,7 +58,7 @@ The shared fine-volume-down branch EB is also implemented and checked.
 - EA and EB add/subtract the low parameter nibble once on the row tick, clamping
   volume to 0..64. They update stored volume even while a voice is disabled;
   hardware output remains gated. They do not repeat on intervening ticks.
-- Other E effects still reject during module validation, including in unused
+- E9 retrigger is also supported. Other E effects still reject during module validation, including in unused
   patterns. The change does not silently treat unknown effects as no-ops.
 
 The browser filter is the existing portable low-pass approximation, not a

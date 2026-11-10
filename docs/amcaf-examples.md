@@ -9,8 +9,8 @@ separate private project and are not part of this collection.
 **[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
-coverage are separate: currently **3/12 compile**, and **2/12 run**. Protracker1 now compiles but
-its recovered music still needs tracker effects 9xx/E9x.
+coverage are separate: currently **3/12 compile and run**, covering quick maths and both
+Protracker interfaces.
 
 ## Working example: quick maths
 
@@ -27,6 +27,20 @@ maths calls and Escape cleanup run in the VM. Checks cover 15,795 independent
 axis-needle pixels, circle cardinal points, three complete GPU/Canvas comparisons,
 and actual mouse/exit/restart input on the application page. These are browser
 and source-derived checks, not native Amiga captures.
+
+## Working example: original Protracker1
+
+The original interface plays the recovered 4 spirits tune with WebGL. Its page defaults to
+Keyboard: Typing to send the arrows to the program. Up/down change volume,
+left/right change tempo, and keys 1–4 toggle the four music voices. A mouse
+button on the canvas exits. Page Stop/Resume pauses VM and music together.
+[Play Protracker1](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html).
+
+The recovered module contains no AMCAF effect-8 synchronization cells, so its
+drum sprites stay at their initial images and the text cues remain inactive.
+The linked drum harness cycles all six original frame lists. The complete
+first music wrap matches 6,531 independent sample starts over 19,892 ticks.
+See [sample-offset and retrigger semantics](amcaf-vm.md#sample-offset-and-retrigger-effects).
 
 ## Working example: original Protracker2
 
@@ -52,7 +66,7 @@ in a declared compiled AMOS harness. It loads the supplied IMP! file into a chip
 Work bank and plays it with the AMCAF engine. Press a key to disable voice 1,
 a second to re-enable it, and a third to stop. The page supports sound,
 fullscreen, Stop/Resume and Restart. This is a separate music harness. The original Protracker2 interface now runs;
-the first version remains blocked.
+the first version also runs with the recovered 4 spirits module.
 
 [Voice DMA browser checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-voice.html)
 compare four independent constant-wave stereo mixes in native offline Web Audio
@@ -107,7 +121,7 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Complete unchanged source compiles; Pt Play runtime blocker | Core Anim/On/Off/Freeze are implemented; recovered 4 spirits needs 9xx sample-offset and E9x retrigger effects. See [Anim scope and drum demo](anim.md), including the recovered file’s absent synchronization cues. |
+| Protracker | Complete original interface, music, controls and mouse exit | Recovered 4 spirits playback uses 9xx/E9x. The file lacks effect-8 drum/text cues. See [Anim scope and drum demo](anim.md). |
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
@@ -126,10 +140,9 @@ Implementation order:
    Standalone file/bank commands share the decoder; continue with the newly
    exposed blockers below. These tests do not establish full intro/music runtime compatibility.
 2. **Protracker examples.** Masks and order/row/instrument/frequency/VU/signal
-   queries, Hex$ and bounded raw plane graphics are implemented. Protracker2
-   runs unchanged. Continue with the first version’s 9xx/E9x tracker
-   effects before claiming original music compatibility. Its recovered tune passes
-   the MOD decoder and is preloaded under the original filename.
+   queries, Hex$ and bounded raw plane graphics are implemented. Both
+   original interfaces run, with 9xx/E9x support for recovered 4 spirits playback.
+   Wider tracker effects and native captures remain follow-up work.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
    native OS libraries or parallel-port hardware must not become invented device
    readings; browser adapters and declared simulated inputs need honest labels.
@@ -269,4 +282,4 @@ uses a compiled synthetic program and injected DOM keyboard events. It is not
 an execution of the original Protracker interface. The unchanged first example
 now compiles completely, including its finite drum strings and Anim controls.
 See [AMOS Anim](anim.md) for the native record contract, live drum harness,
-independent timing vectors and remaining original-music runtime blocker.
+independent timing vectors and the recovered module’s absent drum/text cues.

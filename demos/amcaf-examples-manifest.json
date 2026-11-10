@@ -95,7 +95,7 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Compiles unchanged; runtime stops at Pt Play: the recovered 4 spirits module needs unsupported 9xx sample offsets and E9x retriggers.",
+      "runtime": "Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues.",
       "compiled": true
     },
     {

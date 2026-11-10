@@ -81,6 +81,6 @@ with sound/fullscreen, pause/resume and mouse exit. This is browser/source-deriv
 evidence, not native captures or a full six-minute GUI replay.
 
 Protracker (the first version) now compiles, including Hex$, Bchg, cursor strings
-and core Anim. Its runtime is blocked by tracker effects 9xx/E9x. Its `Data/mod.4spirits` input has been recovered from Modland (see
+and core Anim. Its recovered music plays with tracker effects 9xx/E9x. Its `Data/mod.4spirits` input has been recovered from Modland (see
 [asset provenance](../examples/AMCAF/ASSETS.md)).
 The compiler and asset builder do not silently replace it with Hawkeye.

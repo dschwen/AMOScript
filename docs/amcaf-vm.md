@@ -117,3 +117,34 @@ completion remain unverified.
 [Pt Voice, raw Work modules and E0/EA/EB effects](amcaf-voice.md) extend this foundation.
 
 [Six status and VU queries](amcaf-status.md) read owned player state without advancing the field clock, and retain it after Stop or bank retirement.
+
+## Sample offset and retrigger effects
+
+9xx retains a per-voice offset byte. Parameter zero reuses that byte. Native
+LAB_048C at $931a compares the offset in words against the signed current DMA
+length. A successful offset advances the start by parameter × 256 bytes and
+shortens the fetch. An offset beyond the current length selects a one-word
+fetch from the current start. A new instrument resets start/length while
+retaining offset memory.
+
+For a note with effect 9, the native row path dispatches the offset before
+starting DMA and again afterward. The second dispatch changes the retained
+registers used by later notes and retriggers. PCM trigger intents carry a
+checked start offset, and repeat pointers retain their separate region. The
+sampler validates every region before committing pointer or phase changes.
+
+E9x follows LAB_04AC at $959c. A nonzero low nibble retriggers on tick-counter
+multiples. A row containing a note supplies its normal initial start. A row
+without a note may retrigger at counter zero. E90 supplies no extra starts.
+Each retrigger restarts the retained fetch, restores the base period and writes
+the current repeat region. Voice masks suppress retrigger DMA.
+
+The recovered 4 spirits module completes its first wrap in 19,892 ticks and
+3,232 rows. Its 6,531 starts include 1,365 shifted starts. The independent Python
+audit in `tools/reference/check_amcaf_spirits.py` hashes every start address,
+length, instrument and channel, plus all row positions. Tests compare that
+trace, signed-word fallback, offset memory/reset, E9 timing/masks and shifted
+PCM followed by its original repeat region. Browser checks run the original
+interface with WebGL, audible Web Audio buffers, keyboard controls, pause/resume
+and its natural mouse exit. The headless source test also completes a music
+wrap before exiting through the original mouse condition.
