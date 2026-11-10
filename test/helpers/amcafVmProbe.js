@@ -26,13 +26,25 @@ module.exports=async function amcafVmProbe(page){
     if(difference>1e-6)throw Error('Compiled VM opening PCM differs: '+difference);
     p.stop();p.extensionPtStop();host.dispose();
     if(timers.pending()!==0)throw Error('VM cleanup leaked wakes');
+    // A second offline graph checks masked cancellation independently of the
+    // opening-wave comparison, whose queued nodes must remain untouched.
+    const stopContext=new OfflineAudioContext(2,12000,48000),stopHost=createHost(stopContext,createSampleHost,{latency:0});
+    const stopTimers=new Function(`return (${timerSource})`)()();
+    const stopped=compiled.exports({files:{read:()=>atob(bytes)},now:stopTimers.now,
+      setTimeout:stopTimers.setTimeout,clearTimeout:stopTimers.clearTimeout,audio:stopHost});
+    stopped.tick(1000);stopTimers.tick(140);stopped.sendKey('q');stopped.tick(1000);stopTimers.tick(40);
+    if(!stopped.state.tracker.playing||stopped.state.tracker.position.position.sampler.voices[0].active)throw Error('Pt Sam Stop did not retain song ownership and stop voice 1');
+    const silence=await stopContext.startRendering();
+    if(silence.getChannelData(0).some(x=>x!==0)||!silence.getChannelData(1).some(x=>x!==0))throw Error('Pt Sam Stop did not cancel only its selected Web Audio channel');
+    stopped.stop();stopped.extensionPtStop();stopHost.dispose();
+    if(stopTimers.pending()!==0)throw Error('Pt Sam Stop probe leaked wakes');
     if(globalThis.AMOS_AMCAF_VM_CLEANUP)await globalThis.AMOS_AMCAF_VM_CLEANUP();
     document.getElementById('amcaf-vm-player')?.remove();
     const frame=document.createElement('iframe');frame.id='amcaf-vm-player';frame.title='Compiled AMCAF music application';
     frame.style.cssText='width:100%;height:700px;border:0';frame.allow='autoplay; fullscreen';frame.allowFullscreen=true;
     const loaded=new Promise(resolve=>frame.onload=resolve);frame.srcdoc=app;document.body.append(frame);await loaded;
     globalThis.AMOS_AMCAF_VM_CLEANUP=async()=>{if(frame.contentWindow?.AMOS_GAME_PAGE)await frame.contentWindow.AMOS_GAME_PAGE.dispose();frame.remove();};
-    return{vmTicks:ticks,openingSamples:128,maxDifference:difference,compiled:true,builderStreamingHost:true};
+    return{vmTicks:ticks,openingSamples:128,maxDifference:difference,compiled:true,builderStreamingHost:true,maskedSampleStop:true};
   },{source,bytes:bytes.toString('base64'),app,timerSource:require('./fakeTimers').createFakeTimers.toString(),
     hostSource:require('../../lib/amos/webAudioStream').toString(),sampleHostSource:require('../../lib/amos/webAudio').createWebAudioHost.toString()});
 };

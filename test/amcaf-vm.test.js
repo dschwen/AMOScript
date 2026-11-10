@@ -67,3 +67,21 @@ test('AMCAF VM: synchronous host Stop during a PCM callback pauses without reent
   assert.strictEqual(p.state.tracker.position.frames,p.state.tracker.position.position.frame);
   p.extensionPtStop();
 });
+
+test('AMCAF VM: compiled Pt Sam Stop uses low mask bits without stopping music or retiring its bank',()=>{
+  const {p,clock,events}=start({speed:0,lines:[[t('Wait Key')],[extension(0x1400),n(17)]]});
+  clock.tick(140);const ticks=p.state.tracker.position.position.sequence.ticks;
+  p.sendKey('x');p.tick(100);assert.strictEqual(p.state.waiting,'key');
+  assert.strictEqual(events.at(-1).type,'stop');assert.strictEqual(events.at(-1).mask,1);
+  assert.strictEqual(p.state.tracker.playing,true);assert.strictEqual(clock.pending(),1);
+  assert.strictEqual(p.state.tracker.position.position.sequence.ticks,ticks);
+  assert.throws(()=>p.poke(p.bankStart(3),0),/active Tracker/);
+  clock.tick(20);const e=events.at(-1);assert.strictEqual(e.type,'pcm');
+  assert(e.channels[0].every(v=>v===0));assert(e.channels[1].some(v=>v!==0));
+  p.stop();const frozen=JSON.stringify(p.state.tracker.position.position.sequence);
+  p.extensionPtSamStop(-1);assert.strictEqual(events.at(-1).mask,15);
+  assert.strictEqual(JSON.stringify(p.state.tracker.position.position.sequence),frozen);
+  p.resume();clock.tick(20);assert(events.at(-1).channels.every(channel=>channel.every(v=>v===0)));
+  p.extensionPtStop();assert.strictEqual(clock.pending(),0);
+  p.extensionPtSamStop(0x10008);assert.strictEqual(events.at(-1).mask,8);
+});

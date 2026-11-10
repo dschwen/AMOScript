@@ -79,8 +79,8 @@ pad and also verify the default mapping in the generated AMCAF application page.
 These are portable/source-derived checks, not Amiga or physical-gamepad captures.
 
 The private Ghostlight build now passes Smouse Key. Its next compile blocker is
-Pt Sam Stop, slot 8 `$1400`, at line 1907, byte 65406. Pt Raw Play and Pt Sam Bank
-also remain unimplemented; original interlaced atlas presentation and full game
+Pt Raw Play, slot 8 `$1412`, at line 1914, byte 65598.
+[Pt Sam Stop](amcaf-sample-stop.md) now passes; Pt Sam Bank remains unimplemented; original interlaced atlas presentation and full game
 execution remain open. The external project's build report is updated in
 `/home/daniel/Programs/ghostlight-browser/dist/`; no source/assets or compiled game
 are added to AMOScript.

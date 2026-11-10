@@ -50,7 +50,7 @@ forms. Driver scheduling, bank guards and the page-builder audio host now have
 [VM integration tests](amcaf-vm.md).
 Instrument-only changes may change repeat pointers without restarting the initial
 sample; the host contract must preserve that behavior. Ghostlight's private music
-and assets remain outside the public repository. The next whole-file compilation blocker is now Pt Sam Stop at line 1907.
+and assets remain outside the public repository. The next whole-file compilation blocker is now Pt Raw Play at line 1914.
 
 A read-only scan of the supplied private modules found 145 instrument changes
 without a note in the game song (zero in the title song), and no instrument

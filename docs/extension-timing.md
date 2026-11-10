@@ -87,7 +87,7 @@ its live stepping/restart controls. These are source-derived portable checks,
 not Amiga execution captures.
 
 Ghostlight now passes these encodings and [Smouse Key](smouse-key.md). Its next
-production compile blocker is Pt Sam Stop at line 1907, byte 65406. The recovered routine
+production compile blocker is Pt Raw Play at line 1914, byte 65598. [Pt Sam Stop](amcaf-sample-stop.md) now passes. The recovered Smouse Key routine
 reads CIA bit 7 and POTINP bits 6/4: these are the second mouse/joystick port's
 three buttons, not the main mouse's held mask. The implementation now supplies explicit portable
 second-port input. Pt Sam/Raw support, interlaced atlas presentation and

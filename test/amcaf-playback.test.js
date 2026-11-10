@@ -35,3 +35,16 @@ test('AMCAF clock: catch-up is bounded, and callback Stop cannot continue old ti
   const initial=reads;for(let i=0;i<10000;i++)assert(cheap.nextField()>0);
   assert.strictEqual(reads,initial,'Polling a deadline must not inspect/copy voice state');cheap.stop();
 });
+
+test('AMCAF clock: sample cancellation flushes partial fields without rebasing the tick deadline',()=>{
+  const events=[],p=create(moduleData(),factories,{sampleRate:8000,cia:false,host:{command:e=>events.push(e)}});
+  p.advance(7);const next=p.nextField(),ticks=p.state.position.sequence.ticks;
+  p.stopVoices(1,7.25);
+  assert.deepStrictEqual(events.at(-1),{type:'stop',mask:1});
+  assert.strictEqual(events.at(-2).channels[0].length,40);
+  assert.strictEqual(p.nextField(),next);assert.strictEqual(p.state.position.sequence.ticks,ticks);
+  assert.strictEqual(p.state.frames,1160);p.advance(8);
+  assert.strictEqual(events.at(-1).channels[0].length,120);
+  assert(events.at(-1).channels[0].every(x=>x===0));assert(events.at(-1).channels[1].some(x=>x!==0));
+  const before=p.state;assert.throws(()=>p.stopVoices(16,8.25),/mask/);assert.deepStrictEqual(p.state,before);p.stop();
+});

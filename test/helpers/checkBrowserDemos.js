@@ -863,6 +863,8 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await app.locator('body').evaluate(()=>window.amcafButtonProgram.extensionSmouseKey()),6);
         await app.locator('body').evaluate(()=>{delete navigator.getGamepads;});
         await app.locator('#game-keyboard').evaluate(select=>{select.value='game';select.dispatchEvent(new Event('change',{bubbles:true}));});
+        await app.locator('#game-input').focus();await page.keyboard.press('q');
+        await app.locator('body').evaluate(()=>new Promise((resolve,reject)=>{const begun=performance.now();const check=()=>{const p=window.amcafButtonProgram;if(p.state.tracker.playing&&!p.state.tracker.position.position.sampler.voices[0].active)return resolve();if(performance.now()-begun>5000)return reject(Error('Compiled Pt Sam Stop did not release voice 1'));setTimeout(check,20);};check();}));
         await app.locator('#game-stop').evaluate(node=>node.click());
         const stopped=await app.locator('body').evaluate(()=>window.pcmStarts);await page.waitForTimeout(80);
         assert.strictEqual(await app.locator('body').evaluate(()=>window.pcmStarts),stopped);

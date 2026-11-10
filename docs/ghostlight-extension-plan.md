@@ -40,8 +40,8 @@ The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
 six-byte empty bank trailer. SHA-256:
 `2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8`.
 At baseline the compiler rejected AMCAF Pt Play at line 43, byte 2084.
-The current compiler passes those music statements, Amos Pri, Raster Wait and
-Smouse Key. It rejects Pt Sam Stop at line 1907, byte 65406; see the latest
+The current compiler passes those music statements, Amos Pri, Raster Wait,
+Smouse Key and Pt Sam Stop. It rejects Pt Raw Play at line 1914, byte 65598; see the latest
 progress update.
 No complete compilation or game execution has passed yet.
 
@@ -293,7 +293,7 @@ failures. Keep static deductions, browser checks and actual Amiga captures disti
 
 **Next implementation task:** the remaining Pt Sam/Raw commands, then
 interlaced/overscan integration for the atlas. Music and second-port input have
-VM integration; Pt Sam Stop is the next whole-file compilation blocker.
+VM integration; Pt Raw Play is the next whole-file compilation blocker.
 
 The progress entries below describe successive stages; the final entry records
 the current VM support. Earlier gated statements are historical stage bounds.
@@ -393,3 +393,17 @@ Ghostlight's supported third-party encodings now total 15/18. The private extern
 build reaches Pt Sam Stop, slot 8 `$1400`, line 1907, byte 65406. Pt Raw Play,
 Pt Sam Bank, interlaced atlas presentation and full game execution remain open.
 The external build emits no new game artifacts while compilation is blocked.
+
+
+### Selected sample cancellation (2026-11-10)
+
+Pt Sam Stop (`$1400`) now cancels the low four selected DMA voices without
+stopping song progression, changing its mask or retiring its bank. Later tracker
+note triggers restore playback; instrument-only changes and portamento do not
+restart a stopped voice. Compiled VM tests and the synthetic AMCAF browser demo
+cover selected cancellation and continuing music. See [sample cancellation](amcaf-sample-stop.md).
+
+The private external Ghostlight build now passes 16/18 extension encodings and
+stops at Pt Raw Play (`$1412`), line 1914, byte 65598. Pt Sam Bank and atlas
+presentation also remain open. No game source, asset or compiled game was added
+to this repository.

@@ -4,9 +4,11 @@ module.exports=function amcafPreviewProgram(){
   const ext=(slot,offset)=>[w(0x4e),[slot,0],w(offset)];
   return binary([
     [t('Print'),text('AMCAF streaming music - compiled AMOS')],
-    [t('Print'),text('Use the page controls to Stop or Resume.')],
+    [t('Print'),text('Press Q to stop voice 1; Q again ends music.')],
+    [t('Print'),text('Page Stop/Resume pauses the whole song.')],
     [ext(1,0x2ba),text('music.mod'),t(','),n(3)],
     [ext(8,0x108e),n(3)],
+    [t('Wait Key')],[ext(8,0x1400),n(1)],
     [t('Wait Key')],[ext(8,0x10a8)],[t('End')]
   ]);
 };

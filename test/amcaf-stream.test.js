@@ -50,3 +50,19 @@ test('AMCAF stream: volume uses sequencer latches; invalid bounds halt and stand
   const standalone=vm.runInNewContext(source,{input:preview()});
   for(let i=0;i<6;i++)standalone.tick();assert.strictEqual(standalone.render(128),true);
 });
+
+test('AMCAF stream: selected DMA cancellation keeps song position and resumes only on a later note trigger', () => {
+  const events=[],p=create(preview(),factories,{sampleRate:8000,host:{command:e=>events.push(e)}});
+  for(let i=0;i<6;i++)p.tick();
+  p.render(160);assert(events.at(-1).channels[0].some(x=>x!==0));
+  const before=p.state.sequence;p.stopVoices(1);
+  assert.deepStrictEqual(events.at(-1),{type:'stop',mask:1});
+  assert.deepStrictEqual(p.state.sequence,before);assert.strictEqual(p.state.mask,15);
+  p.tick();p.render(160);
+  assert(events.at(-1).channels[0].every(x=>x===0));
+  assert(events.at(-1).channels[1].some(x=>x!==0));
+  // Instrument-only row 8 and portamento row 12 do not restart DMA.
+  while(p.state.sequence.ticks<149){p.tick();p.render(1);assert(events.at(-1).channels[0].every(x=>x===0));}
+  p.tick();p.render(160);assert(events.at(-1).channels[0].some(x=>x!==0));
+  assert.strictEqual(p.state.sequence.ticks,150);
+});

@@ -87,8 +87,9 @@ The [graphics subset](extension-graphics.md) now runs a declared original INIT
 graphics excerpt, with distinct graphics/block masks and word-rounded captures.
 [Pt Play/Stop/Volume/Cia Speed](amcaf-vm.md) now execute with driver-owned
 CIA/VBL scheduling and the page builder's streaming host. Ghostlight's next
-compile blocker is now Pt Sam Stop, slot 8 `$1400`, line 1907, byte 65406.
+compile blocker is now Pt Raw Play, slot 8 `$1412`, line 1914, byte 65598.
 [Smouse Key](smouse-key.md) now reads explicit second-port button inputs.
+[Pt Sam Stop](amcaf-sample-stop.md) cancels selected DMA voices while music continues.
 [Amos Pri and Raster Wait](extension-timing.md) have bounded host-intent and
 cooperative timing implementations.
 No complete Ghostlight build or gameplay has passed. Continue with the

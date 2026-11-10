@@ -268,7 +268,7 @@
     {
       "file": "amcaf-vm.html",
       "title": "AMCAF music in a compiled AMOS application",
-      "description": "A synthetic tokenized AMOS program runs Track Load and Pt Play through the VM CIA clock while waiting for a key. The page builder supplies the streaming host automatically. Play, sound, Stop/Resume and Restart use the normal application harness; 128 opening PCM samples have independent native audio checks. No Ghostlight assets are included.",
+      "description": "A synthetic tokenized AMOS program runs Track Load and Pt Play through the VM CIA clock while waiting for a key. The page builder supplies the streaming host automatically. Play, sound, Stop/Resume and Restart use the normal application harness; 128 opening PCM samples and selected Pt Sam Stop cancellation have native audio checks. Press Q to stop voice 1 and Q again to end music. No Ghostlight assets are included.",
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-vm.html"
     },
     {
