@@ -124,6 +124,9 @@ Keys are the complete filenames requested by the AMOS program, including any
 names like these, omit `--prefix`; Roller II's shipped manifest instead needs
 `--prefix RII:`. Omit `--assets` for programs whose banks are all embedded.
 
+For AMOS authors, [fixed game-speed best practices](docs/fixed-game-speed.md) covers
+clock-based movement, resource timers, fixed updates, input and rendering.
+
 Add `--debug` for source error logs and downloads of new/modified session files,
 `--slowdown 2` for longer Wait/Wait Vbl delays, or `--optimize` for optional
 instruction batching. Browser file writes survive Restart but are lost on page
