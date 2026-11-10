@@ -84,4 +84,4 @@ unchanged selector/file slices and the unmodified whole-program bounded run. An
 independent-byte conformance fixture uses literal original words and declared
 host choices. The shared Chromium scenario checks the original routines, optional
 preload, new save names and four original game frames. It includes a rendered frame and an HTML Preview
-link in the [gallery](../demos/index.html). No Amiga GUI or execution capture has been added.
+link in the [gallery](../demos/index.md). No Amiga GUI or execution capture has been added.

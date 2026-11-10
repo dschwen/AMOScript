@@ -11,14 +11,15 @@ const { buildBrowserDemos } = require('../tools/build_browser_demos');
 
 test('browser demos: catalogue covers every shared scenario with self-contained HTML and preview links', () => {
   const root = path.join(__dirname, '../demos'), manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json')));
-  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'amcaf-examples.html', 'tutorial.html', 'compiler-examples.html', 'asm-intro.html', 'asm-intro-debug.html', 'asm-room1.html', 'asm-game.html', 'asm-game-debug.html']);
-  const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  assert.ok(index.indexOf('id="games"') < index.indexOf('id="technical-demos"'));
-  assert.match(index, /<details id="technical-demos"><summary>Compiler and runtime checks/);
-  assert.doesNotMatch(index, /<details id="technical-demos"[^>]*\bopen\b/);
+  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'amcaf-examples.md', 'tutorial.md', 'compiler-examples.md', 'asm-intro.html', 'asm-intro-debug.html', 'asm-room1.html', 'asm-game.html', 'asm-game-debug.html']);
+  const index = fs.readFileSync(path.join(root, 'index.md'), 'utf8');
+  assert.ok(index.indexOf('## Play the games') < index.indexOf('## Technical checks'));
+  assert.match(index, /<details>\n<summary>Compiler and runtime checks/);
+  assert.doesNotMatch(index, /<details[^>]*\bopen\b/);
   for (const entry of manifest.scenarios) {
-    assert.strictEqual(entry.preview, `https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/${entry.file}`);
+    assert.strictEqual(entry.preview, require('../tools/demoLinks').destination(entry.file));
     assert.ok(index.includes(entry.preview));
+    if(entry.file.endsWith('.md'))continue;
     const html = fs.readFileSync(path.join(root, entry.file), 'utf8');
     assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=/i, `${entry.file} embeds dependencies`);
     if (['roller2-game.html', 'wonderland-game.html', 'planet-zybex-game.html'].includes(entry.file)) {
@@ -52,7 +53,7 @@ test('browser demos: generated check reports missing/stale gallery pages without
     fs.mkdirSync(path.join(directory, 'examples'));
     for (const name of ['Test21.AMOS', 'Graphics.AMOS', 'Bobs.AMOS']) fs.copyFileSync(path.join(__dirname, '../examples', name), path.join(directory, 'examples', name));
     const missing = await buildBrowserDemos({ check: true, directory });
-    assert.ok(missing.includes('demos/index.html') && missing.includes('demos/webgl-renderer.html'));
+    assert.ok(missing.includes('demos/index.md') && missing.includes('demos/webgl-renderer.html'));
     assert.strictEqual(fs.existsSync(path.join(directory, 'demos')), false);
     await buildBrowserDemos({ directory });
     assert.deepStrictEqual(await buildBrowserDemos({ check: true, directory }), []);

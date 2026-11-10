@@ -7,22 +7,7 @@ const { pathToFileURL } = require('url');
 const { scenarios } = require('./browserScenarios');
 
 module.exports = async function checkBrowserDemos(browser) {
-  const gallery = await browser.newPage();
-  try {
-    await gallery.goto(pathToFileURL(path.join(__dirname, '../../demos/index.html')).href);
-    assert.strictEqual(await gallery.locator('#games article').count(), 3);
-    assert.strictEqual(await gallery.locator('#games a.play').first().isVisible(), true);
-    assert.strictEqual(await gallery.locator('#technical-demos').evaluate(node => node.open), false);
-    assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), false);
-    await gallery.screenshot({ path: path.join(__dirname, '../artifacts/demo-index.png'), fullPage: true });
-    await gallery.locator('#technical-demos summary').click();
-    assert.strictEqual(await gallery.locator('#technical-demos article').first().isVisible(), true);
-    assert.strictEqual(await gallery.locator('#limited-demos a[href="asm-intro.html"]').count(), 1);
-    assert.strictEqual(await gallery.locator('#showcases a[href="tunnel.html"]').count(), 1);
-    assert.strictEqual(await gallery.locator('#showcases a[href="anim5.html"]').count(), 1);
-    assert.strictEqual(await gallery.locator('#showcases a[href="bob-test.html"]').count(), 1);
-    assert.strictEqual(await gallery.locator('#showcases a[href="planet-zybex.html"]').count(), 1);
-  } finally { await gallery.close(); }
+  require('./checkDemoIndexes')();
   await require('./checkTutorialDemos')(browser);
   await require('./checkAmcafExamples')(browser);
   const debug = await browser.newPage(), debugErrors = [], debugNetwork = [];

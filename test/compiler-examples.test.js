@@ -22,7 +22,7 @@ test('Compiler examples: batch catalogue builds every source, embeds supplied as
   const {outputs,programs}=require('../tools/build_compiler_examples').buildCompilerExamples({modules:true});
   assert.strictEqual(programs.filter(p=>p.compiled).length,19);
   assert.strictEqual([...outputs.keys()].filter(n=>n.endsWith('.module.js')).length,19);
-  assert(outputs.get('index.html').includes('19/19'));
+  assert(outputs.get('index.md').includes('19/19'));
   assert(outputs.get('galax-galax.html').includes('amospro_extras:compiler_examples/amos_versions/galax/mapping.abk'));
 });
 

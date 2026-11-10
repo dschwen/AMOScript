@@ -141,7 +141,7 @@ Web Audio control graphs, with a 1e-6 maximum difference. Two additional cases
 check looping and disabling a loop; replacement, selected stopping, program Stop
 and disposal are checked too. The standalone demo has explicit audition buttons
 for all six samples and Stop, exercised in Chromium. No sound starts automatically.
-It appears in the [demo index](../demos/index.html) with an
+It appears in the [demo index](../demos/index.md) with an
 [HTML Preview link](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/music.html).
 
 These are source-derived language and browser-adapter checks, not Amiga audio

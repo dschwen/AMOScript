@@ -117,7 +117,7 @@ The unmodified complete source now compiles and its own fire/game branch reaches
 a bounded two-second first-level run with attached sprites. See
 [the milestone](wonderland.md). The
 [HTML Preview menu](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland-menu.html)
-is linked from the shared [demo index](../demos/index.html).
+is linked from the shared [demo index](../demos/index.md).
 
 ## Optional fullscreen touch cross
 

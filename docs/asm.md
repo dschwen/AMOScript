@@ -74,7 +74,7 @@ report into a **new output directory**:
 
 ```sh
 node tools/build_asm.js /tmp/asm-browser
-# Open /tmp/asm-browser/index.html
+# View /tmp/asm-browser/index.md, then open a linked HTML demo
 ```
 
 The report preserves ZoneDefiner's compile failure; seven supplied programs

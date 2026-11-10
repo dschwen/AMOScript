@@ -131,7 +131,7 @@ local coordinates, and five lifecycle paths. Live controls use a declared
 synthetic 50 Hz polling harness to step the original selection slice, with
 Stop/Resume/Restart. Gallery tests hold a real Chromium pointer button across polls
 and check its selected action and cleanup. The page has an HTML Preview link in
-the [demo index](../demos/index.html).
+the [demo index](../demos/index.md).
 
 Pinned primary sources are
 [`src/lib/sprites.cpp`](https://github.com/AOZ-Studio/AMOS-Professional-Official/blob/7f32e0abe1b6b415c9502b598cd3e4cb131018f8/src/lib/sprites.cpp)

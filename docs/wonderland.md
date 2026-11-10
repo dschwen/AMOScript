@@ -180,7 +180,7 @@ npm run test:browser
 
 The shared `wonderland` browser scenario runs both startup benchmark branches and generates a self-contained
 [HTML Preview demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/wonderland.html)
-and appears in the [demo index](../demos/index.html). Its frame selector exposes
+and appears in the [demo index](../demos/index.md). Its frame selector exposes
 the title, landscape, score panel and editor panel; its result includes the
 compiler's successful whole-source result and zero-missing-token inventory.
 

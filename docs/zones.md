@@ -66,7 +66,7 @@ Reset/Restore controls. Pointer movement in this inspector explicitly injects
 panel-relative hardware coordinates. The separate [mouse demo](mouse.md) exercises
 the hardware Canvas adapter and original selection statements.
 All browser assertions and demo inputs share the same scenario, linked through
-HTML Preview in the [gallery](../demos/index.html).
+HTML Preview in the [gallery](../demos/index.md).
 
 ## Source and verification
 

@@ -6,7 +6,7 @@ optional sound. AMOS and Amiga compatibility is still in progress.
 
 ## Play and explore
 
-**[Open the demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)** — start with the games and animation demos. No install is required.
+**[Open the demo gallery](https://github.com/dschwen/AMOScript/blob/master/demos/index.md)** — start with the games and animation demos. No install is required.
 
 | Featured demo | What to expect |
 | --- | --- |
@@ -30,11 +30,11 @@ individual-command and rendering checks remain available in a collapsed section
 for development. Every browser test has a self-contained demo and HTML Preview
 link. See [demo instructions](demos/README.md) for local use.
 
-[AMOS Tutorial examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tutorial.html): a topic-based catalogue of all supplied programs, including build status and standalone development demos. See [rebuilding and remaining blockers](docs/tutorial.md).
+[AMOS Tutorial examples](https://github.com/dschwen/AMOScript/blob/master/demos/tutorial.md): a topic-based catalogue of all supplied programs, including build status and standalone development demos. See [rebuilding and remaining blockers](docs/tutorial.md).
 
-[Original AMCAF examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.html): twelve supplied programs with individual pages and build/runtime status. The quick-maths mouse demo runs; the remaining examples have explicit blockers. See the [compatibility plan](docs/amcaf-examples.md).
+[Original AMCAF examples](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md): twelve supplied programs with individual pages and build/runtime status. The quick-maths mouse demo runs; the remaining examples have explicit blockers. See the [compatibility plan](docs/amcaf-examples.md).
 
-[Original AMOS compiler examples](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.html): all 19 sources compile into individual debug pages. See [rebuild instructions and runtime limits](docs/compiler-examples.md).
+[Original AMOS compiler examples](https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.md): all 19 sources compile into individual debug pages. See [rebuild instructions and runtime limits](docs/compiler-examples.md).
 
 Try the [AMOS 3D car/hero animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amos-3d.html),
 a portable rendering of the original Gru1 3D excerpt. [Supported profile and references](docs/amos-3d.md).

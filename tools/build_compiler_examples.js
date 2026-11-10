@@ -5,7 +5,7 @@ const Transpiler = require('../lib/Transpiler');
 const { buildGamePage } = require('./build_game_page');
 const root = path.join(__dirname, '..');
 const escape = text => text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const preview = file => `https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/${file}`;
+const {preview,github,link,text:md}=require('./demoLinks');
 function buildCompilerExamples({ source = path.join(root, 'examples/CompilerExamples'), modules = false, repository = false } = {}) {
   const outputs = new Map(), programs = [], assets = {};
   function walk(directory) {
@@ -37,14 +37,19 @@ function buildCompilerExamples({ source = path.join(root, 'examples/CompilerExam
     try {
       const module = new Transpiler(bytes).toModule({ optimize: true });
       const page = buildGamePage(bytes, {title: relative, assets, debug: true, optimize: true});
-      outputs.set(file, page.replace('<h1>', `<p><a href="${repository ? preview('compiler-examples.html') : 'index.html'}">Compiler examples catalogue</a></p><p>Compiled original source. Some examples still require display modes or runtime behavior beyond the current implementation. Use Keyboard: Typing for Input prompts; click the canvas to focus it.</p><h1>`));
+      outputs.set(file, page.replace('<h1>', `<p><a href="${repository ? github('compiler-examples.md') : 'index.md'}">Compiler examples catalogue</a></p><p>Compiled original source. Some examples still require display modes or runtime behavior beyond the current implementation. Use Keyboard: Typing for Input prompts; click the canvas to focus it.</p><h1>`));
       if (modules) outputs.set(name + '.module.js', module);
       item.compiled = true;
     } catch (error) { item.compiled = false; item.error = error.message; }
     programs.push(item);
   }
-  const index = repository ? 'compiler-examples.html' : 'index.html';
-  outputs.set(index, `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMOS Compiler Examples</title><style>body{font:16px system-ui;max-width:60rem;margin:2rem auto;padding:1rem;background:#101721;color:#eef2f6}a{color:#9bc9ff}li{margin:1rem 0}</style><h1>AMOS Compiler Examples</h1><p>${programs.filter(p=>p.compiled).length}/${programs.length} original AMOS programs compile. These are development builds, with sound, fullscreen, typing controls and debug errors. Compilation does not imply completed execution. Unsupported display geometry and other runtime limits still affect some programs. Supplied graphics, animation files and Galax banks are embedded.</p><ul>${programs.map(p=>`<li>${p.compiled ? `<a href="${p.file}">${escape(p.source)}</a>${repository ? ` · <a href="${preview(p.file)}">HTML Preview</a>` : ''}` : `${escape(p.source)}: ${escape(p.error)}`}</li>`).join('')}</ul></html>\n`);
+  const index = repository ? 'compiler-examples.md' : 'index.md';
+  outputs.set(index, `# AMOS Compiler Examples
+
+${repository ? '[Demo gallery](index.md)\n\n' : ''}${programs.filter(p=>p.compiled).length}/${programs.length} original AMOS programs compile. These development builds include sound, fullscreen, typing controls and debug errors. Compilation does not imply completed execution. Unsupported display geometry and other runtime limits still affect some programs. Supplied graphics, animation files and Galax banks are embedded.
+
+${programs.map(p=>'- '+(p.compiled ? link(p.source,repository?preview(p.file):p.file) : md(p.source+': '+p.error))).join('\n')}
+`);
   outputs.set(repository ? 'compiler-examples-manifest.json' : 'manifest.json', JSON.stringify({programs}, null, 2) + '\n');
   return {outputs, programs, assets};
 }
@@ -57,7 +62,7 @@ if (require.main === module) {
   fs.mkdirSync(directory, {recursive:true});
   for (const [name, content] of outputs) fs.writeFileSync(path.join(directory,name), content);
   for (const item of programs) console.log(`${item.compiled ? 'Built' : 'FAILED'} ${item.source}${item.error ? ': '+item.error : ''}`);
-  console.log(`Catalogue: ${path.join(directory,'index.html')}`);
+  console.log(`Catalogue: ${path.join(directory,'index.md')}`);
   if (!programs.length || programs.some(p=>!p.compiled)) process.exitCode=1;
 }
 module.exports = {buildCompilerExamples};

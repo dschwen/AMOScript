@@ -6,7 +6,7 @@ metadata and original assign script. Program bytes are unchanged; the inventory
 pins their SHA-256 hashes. Ghostlight sources/assets/builds remain in their
 separate private project and are not part of this collection.
 
-**[Open the AMCAF catalogue](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.html)**
+**[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
 coverage are separate: currently **1/12 compiles and runs**, not twelve completed
@@ -46,7 +46,7 @@ npm run build:amcaf
 node tools/build_amcaf_examples.js examples/AMCAF/AMCAF_Examples build/amcaf-examples
 ```
 
-The separate builder writes `build/amcaf-examples/index.html` and `manifest.json`.
+The separate builder writes `build/amcaf-examples/index.md` and `manifest.json`.
 It emits a blocker page for an unsupported program and exits with status 1 while
 any program remains blocked. Successful modules/pages are still emitted.
 The repository demo builder deliberately includes those blocker pages in its

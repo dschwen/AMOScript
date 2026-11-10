@@ -7,7 +7,7 @@ Graphics files are pinned under
 `examples/CompilerExamples`, with byte lengths and SHA-256 hashes in its manifest.
 Their original author and copyright comments remain in the programs.
 
-[Open the catalogue](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.html)
+[Open the catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/compiler-examples.md)
 for individual debug pages with Play, sound, fullscreen, keyboard modes and error
 locations. Compilation is covered for every source; full execution is not.
 
@@ -20,7 +20,7 @@ npm run build:compiler-examples
 This reads the user's current `compiler_examples/AMOS_versions` files, discovers
 the sibling `compiler_examples/Graphics` directory, and writes
 19 standalone `.module.js` files, 19 self-contained debug pages, `manifest.json`
-and `index.html` in `compiler_examples/build`. Open that index in a browser.
+and `index.md` in `compiler_examples/build`. View that Markdown index in a Markdown viewer, then open a linked HTML demo in your browser.
 The builder overwrites its generated outputs so subsequent edits can be rebuilt.
 To select other input/output directories:
 

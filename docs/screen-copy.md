@@ -73,7 +73,7 @@ hidden drawing and published copying against independent uniform RGB expectation
 
 The [self-contained demo](../demos/screen-copy.html) includes all five levels,
 explicit injected-clock Prepare/Publish controls and host-controlled bitmap
-scroll inspection. It appears with an HTML Preview link in the [gallery](../demos/index.html).
+scroll inspection. It appears with an HTML Preview link in the [gallery](../demos/index.md).
 The unmodified Wonderland source now compiles completely. Controlled game entry
 now runs and renders a bounded first-level loop for two nominal seconds; see
 [the milestone](wonderland.md) and [selector/whole-program evidence](file-selector.md).

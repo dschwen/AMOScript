@@ -78,7 +78,7 @@ Canvas/CPU frames against independent uniform RGB values (460,800 Canvas pixels)
 physical-buffer preservation, snapshot immutability and cancellation without an
 animation callback. Live controls exercise Stop/Resume/Flash Off/Restart. Two
 native GPU frames use independent red/green expectations. All pages have HTML
-Preview links in the [gallery](../demos/index.html).
+Preview links in the [gallery](../demos/index.md).
 
 The screen-window fixture now executes unchanged Wonderland lines 351–362,
 including its own Flash Off and Auto View On, with synthetic game/background

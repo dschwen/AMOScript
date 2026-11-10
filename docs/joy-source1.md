@@ -36,7 +36,7 @@ node tools/build_joy_source1.js joy/build-src1
 
 Choose a new output directory. The tool validates pinned source/asset hashes,
 writes a standalone `.module.js` and a debug `.html` page for every successful
-source, and creates `index.html` and `report.json`. It exits with status 1 while
+source, and creates `index.md` and `report.json`. It exits with status 1 while
 empty/failed inputs remain, after writing the complete report and successful
 builds. Output files are exclusive; originals are never overwritten.
 

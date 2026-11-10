@@ -5,7 +5,7 @@ const Transpiler = require('../lib/Transpiler');
 const { buildGamePage } = require('./build_game_page');
 const root = path.join(__dirname, '..');
 const escape = text => text.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const preview = file => `https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/${file}`;
+const {preview,github,link,text:md}=require('./demoLinks');
 function buildTutorial({ source = path.join(root, 'examples/Tutorial'), modules = false, repository = false } = {}) {
   const outputs = new Map(), programs = [], assets = {};
   function walk(directory) {
@@ -32,7 +32,7 @@ function buildTutorial({ source = path.join(root, 'examples/Tutorial'), modules 
     const file = `${repository ? 'tutorial-' : ''}${name}.html`;
     const item = {source:relative,file,byteLength:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')};
     if(relative==='Tutorials/Menus/Menus_6.AMOS'&&item.sha256==='455be1772dc073fd67708235d821e50bcef49eb17b851a5ec8be87e4cce1ebf6')item.sourceCorrection='Line 179: six demo items branch to labels 1–6; the supplied unused seventh target had no label. Native source offsets are preserved. The original is retained in test/fixtures/tutorial/menus6-original.amos.';
-    const nav = `<nav><a href="${repository ? preview('tutorial.html') : 'index.html'}">Tutorial catalogue</a> · <a href="${repository ? 'tutorial.html' : 'index.html'}">Local catalogue</a></nav>`;
+    const nav = `<nav><a href="${repository ? github('tutorial.md') : 'index.md'}">Tutorial catalogue</a> · <a href="${repository ? 'tutorial.md' : 'index.md'}">Local catalogue</a></nav>`;
     try {
       const module = new Transpiler(bytes).toModule({optimize:true});
       const page = buildGamePage(bytes,{title:relative,assets,debug:true,optimize:true});
@@ -53,7 +53,14 @@ function buildTutorial({ source = path.join(root, 'examples/Tutorial'), modules 
     if (!groups.has(group)) groups.set(group,[]);
     groups.get(group).push(p);
   }
-  outputs.set(repository ? 'tutorial.html' : 'index.html',document('AMOS Tutorial',`<nav><a href="${repository ? preview('index.html') : '../index.html'}">Demo index</a></nav><h1>AMOS Tutorial</h1><p>${compiled}/${programs.length} original program files compile. Every program, including versioned backups and the editor accessory, has a page below. Built pages embed the supplied assets, sound/fullscreen controls and debug tools. Build status is separate from runtime compatibility; these are development demos.</p>${[...groups].map(([group,items])=>`<h2>${escape(group)}</h2><ul>${items.map(p=>`<li><a href="${p.file}">${escape(p.source)}</a>${repository ? ` · <a href="${preview(p.file)}">HTML Preview</a>` : ''} — ${p.compiled?'builds':`blocked: <code>${escape(p.error)}</code>`}</li>`).join('')}</ul>`).join('')}`));
+  outputs.set(repository ? 'tutorial.md' : 'index.md', `# AMOS Tutorial
+
+${link('Demo gallery',repository?'index.md':github('index.md'))}
+
+${compiled}/${programs.length} original program files compile. Every program, including versioned backups and the editor accessory, is listed below. Built pages embed supplied assets, sound/fullscreen controls and debug tools. Build status is separate from runtime compatibility; these are development demos.
+
+${[...groups].map(([group,items])=>`## ${md(group)}\n\n${items.map(p=>`- ${link(p.source,repository?preview(p.file):p.file)} — ${p.compiled?'builds':'blocked: '+md(p.error)}`).join('\n')}`).join('\n\n')}
+`);
   outputs.set(repository ? 'tutorial-manifest.json' : 'manifest.json',JSON.stringify({programs},null,2)+'\n');
   return {outputs,programs,assets};
 }
@@ -65,7 +72,7 @@ if (require.main===module) {
   fs.mkdirSync(directory,{recursive:true});
   for(const [name,contents] of outputs)fs.writeFileSync(path.join(directory,name),contents);
   for(const p of programs)console.log(`${p.compiled?'Built':'FAILED'} ${p.source}${p.error?': '+p.error:''}`);
-  console.log(`${programs.filter(p=>p.compiled).length}/${programs.length} compiled. Catalogue: ${path.join(directory,'index.html')}`);
+  console.log(`${programs.filter(p=>p.compiled).length}/${programs.length} compiled. Catalogue: ${path.join(directory,'index.md')}`);
   if(programs.some(p=>!p.compiled)||!programs.length)process.exitCode=1;
 }
 module.exports={buildTutorial};

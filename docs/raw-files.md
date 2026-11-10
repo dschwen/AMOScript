@@ -71,7 +71,7 @@ round trips and 72,050 byte comparisons. Its controls edit a map cell, execute t
 original save/load statements, damage the bank, download raw bytes, or preload a
 chosen local file before reload. This is a file/data inspector, not a game display
 or implementation of `Fsel$`. Each browser scenario is linked through HTML
-Preview in the [gallery](../demos/index.html).
+Preview in the [gallery](../demos/index.md).
 
 IndexedDB-backed persistence is [planned](../PLAN.md#browser-persistent-files-planned).
 The current demo Map is volatile; its download control is the current explicit

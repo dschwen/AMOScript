@@ -1,6 +1,6 @@
 # Browser demos
 
-**[Open the gallery through HTML Preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)** or [open it locally](index.html).
+**[Open the demo gallery on GitHub](https://github.com/dschwen/AMOScript/blob/master/demos/index.md)** or [view its Markdown locally](index.md).
 
 ## Start here
 
@@ -15,9 +15,12 @@ Individual command, parser/runtime and graphics verification demos are grouped
 under **Compiler and runtime checks**, closed by default. All remain linked and
 runnable; the gallery is the complete catalogue.
 
+Share the GitHub gallery or collection URL directly on Facebook and other social sites.
+Only the links that launch runnable HTML use HTML Preview.
+
 ## Running locally
 
-Open `demos/index.html` in a browser. Each page embeds its scripts and prepared
+View `demos/index.md` in a Markdown viewer, then open a linked HTML page in your browser. Each demo embeds its scripts and prepared
 assets, so no server or network downloads are required. On the full-game pages,
 click the large red **Play Game** button to launch directly with sound, fullscreen
 and game startup. Roller II stays on its original intro until you press a key;

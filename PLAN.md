@@ -5,7 +5,7 @@ Assessment updated: 2026-11-10.
 ## AMCAF example collection
 
 Current priority is the original twelve-program AMCAF collection, now preserved
-under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.html) includes every
+under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.md) includes every
 program and its actual build/runtime status. The unchanged quick-maths example
 runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
 1/12 programs currently compile. Shared IMP! decompression and file/bank loading
@@ -213,7 +213,7 @@ in [the pre-implementation inventory](docs/introideen-inventory.json). See
 and [signed screen placement](docs/screen-slide.md)
 for the completed slices.
 
-The [demo gallery](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/index.html)
+The [demo gallery](https://github.com/dschwen/AMOScript/blob/master/demos/index.md)
 now highlights complete games, animation/music and interactive examples; individual
 runtime/command checks remain linked in a collapsed section. Original Tunneltest
 now uses its supplied external icons and IFF background, with 48 independent

@@ -8,7 +8,7 @@ icon are retained alongside the original directory layout.
 - `AMCAF_Examples/`: twelve tokenized AMOS programs and four shared data files.
 - `inventory.json`: source hashes and static extension-call inventory; it is not
   a runtime support claim.
-- [Demo catalogue](../../demos/amcaf-examples.html): playable pages or exact build
+- [Demo catalogue](../../demos/amcaf-examples.md): playable pages or exact build
   blockers for every program, with HTML Preview links.
 - [Compatibility plan and rebuild instructions](../../docs/amcaf-examples.md).
 

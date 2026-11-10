@@ -75,7 +75,7 @@ original tokens and literal expected sequences.
 The [self-contained browser data inspector](../demos/random.html) checks all five
 vectors and 216 original initializer steps, then exposes seed/beam selection,
 step/reset and cached-read controls. It shares its evaluator/assertions with
-Playwright and has an HTML Preview link in the [gallery](../demos/index.html).
+Playwright and has an HTML Preview link in the [gallery](../demos/index.md).
 These are source-derived/injected checks; no native execution or Amiga capture
 has been added.
 

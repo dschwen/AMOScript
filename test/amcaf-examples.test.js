@@ -7,7 +7,7 @@ test('AMCAF example builds: preserve all original sources and assets, explicit p
  for(const name of ['AMCAFAdvert.Abk','MyBootLogo.col','MyBootLogo.raw','mod.hawkeye']){
   const key='data/'+name.toLowerCase();assert.strictEqual(result.assets[key],fs.readFileSync(path.join(__dirname,'../examples/AMCAF/AMCAF_Examples/Data',name)).toString('base64'));assert.strictEqual(result.assets['amcaf_examples:'+key],result.assets[key]);
  }
- const index=result.outputs.get('amcaf-examples.html');assert.strictEqual((index.match(/>HTML Preview</g)||[]).length,12);
+ const index=result.outputs.get('amcaf-examples.md');for(const p of result.programs)assert(index.includes(require('../tools/demoLinks').preview(p.file)));
  assert(result.programs.find(p=>p.source==='ShowAGAPic.AMOS').error.includes('line length'));
  assert(!fs.existsSync(path.join(__dirname,'../amcaf_examples')));
 });

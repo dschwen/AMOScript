@@ -21,13 +21,18 @@ function build(outputDirectory) {
     } catch (error) { item.compiled = false; item.error = error.message; }
     report.push(item);
   }
-  const escape = text => text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  outputs.set('index.html', `<!doctype html><html lang="en"><meta charset="utf-8"><title>Joy Src1 builds</title><style>body{font:16px system-ui;max-width:65rem;margin:2rem auto;padding:1rem}li{margin:1rem 0}</style><h1>Joy Src1</h1><p>${report.filter(r => r.compiled).length}/${report.length} supplied sources compile. All three nonempty sources compile; four supplied files are empty. Pages embed the declared accompanying assets. Compilation does not establish full execution: Labyrinth.Bak currently reaches a checked bank-memory error at original line 70, which reads a neighbour before checking its bounds at line 71. The editors support keyboard/mouse and session files; Fsel$ requires a prepared selection.</p><ul>${report.map(r => `<li>${r.compiled ? `<a href="${escape(r.page)}">${escape(r.path)}</a> · <a href="${escape(r.module)}">JavaScript</a>` : escape(r.path + ': ' + r.error)}</li>`).join('')}</ul></html>\n`);
+  const {link,text:md}=require('./demoLinks');
+  outputs.set('index.md', `# Joy Src1
+
+${report.filter(r=>r.compiled).length}/${report.length} supplied sources compile. All three nonempty sources compile; four supplied files are empty. Pages embed the declared accompanying assets. Compilation does not establish full execution: Labyrinth.Bak reaches a checked bank-memory error at original line 70, which reads a neighbour before checking its bounds at line 71. The editors support keyboard/mouse and session files; Fsel$ requires a prepared selection.
+
+${report.map(r=>'- '+(r.compiled?link(r.path,r.page)+' · '+link('JavaScript',r.module):md(r.path+': '+r.error))).join('\n')}
+`);
   outputs.set('report.json', JSON.stringify(report, null, 2) + '\n');
   fs.mkdirSync(output, { recursive: true });
   for (const [name, content] of outputs) fs.writeFileSync(path.join(output, name), content, { flag: 'wx' });
   for (const item of report) console.log(`${item.compiled ? 'PASS' : 'FAIL'} ${item.path}${item.error ? ': ' + item.error : ''}`);
-  console.log(`Catalogue: ${path.join(output, 'index.html')}`);
+  console.log(`Catalogue: ${path.join(output, 'index.md')}`);
   return report;
 }
 if (require.main === module) try {

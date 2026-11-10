@@ -493,7 +493,7 @@ also been used locally. Hosted CI evidence exists only after the workflow runs.
   in the appropriate `docs/` contract and compatibility matrix.
 - Keep browser scenarios in `test/helpers/browserScenarios.js` so Playwright and
   generated demos share evaluator inputs and assertions. Every browser test must
-  have a runnable demo and an HTML Preview link from `demos/index.html`.
+  have a runnable demo and an HTML Preview link from `demos/index.md`.
 
 ## Commits and pull requests
 

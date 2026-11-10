@@ -1,6 +1,6 @@
 # AMOS Tutorial collection
 
-[Open the Tutorial catalogue](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/tutorial.html).
+[Open the Tutorial catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/tutorial.md).
 
 The repository pins the supplied programs and their assets under
 `examples/Tutorial`. The uploaded `Tutorial` directory is left untouched.
@@ -24,7 +24,7 @@ A standalone build with separate JavaScript modules is also available:
 npm run build:tutorial -- examples/Tutorial /tmp/amos-tutorial
 ```
 
-Open `/tmp/amos-tutorial/index.html` through a local HTTP server. This command
+View `/tmp/amos-tutorial/index.md` in a Markdown viewer and open a linked HTML page, optionally through a local HTTP server. This command
 writes all pages and the manifest, then exits nonzero if any program fails to
 compile. A blocked program gets a diagnostic page; it is not a working demo.
 The repository-wide generated check verifies that these diagnostics remain up

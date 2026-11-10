@@ -3,7 +3,7 @@ const assert = require('assert'), fs = require('fs'), path = require('path');
 const {pathToFileURL} = require('url');
 
 // These tests exercise the actual repository demo pages. The same pages are
-// linked from tutorial.html, including their HTML Preview links.
+// linked from tutorial.md, including their HTML Preview links.
 module.exports = async function checkTutorialDemos(browser) {
   const root = path.join(__dirname, '../../demos');
   const programs = JSON.parse(fs.readFileSync(path.join(root, 'tutorial-manifest.json'))).programs;
@@ -11,8 +11,8 @@ module.exports = async function checkTutorialDemos(browser) {
   page.on('pageerror', error => errors.push(error.message));
   await page.route(/^https?:/, route => {network.push(route.request().url());return route.abort();});
   try {
-    await page.goto(pathToFileURL(path.join(root,'tutorial.html')).href);
-    assert.strictEqual(await page.locator('li').count(),programs.length);
+    const catalogue=fs.readFileSync(path.join(root,'tutorial.md'),'utf8');
+    for(const item of programs)assert(catalogue.includes('https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+item.file));
     for (const item of programs.filter(item => item.compiled)) {
       try {
       await page.goto(pathToFileURL(path.join(root,item.file)).href);

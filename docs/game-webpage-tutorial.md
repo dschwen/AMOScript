@@ -281,7 +281,7 @@ The public gallery page has an additional reproducible verification layer:
 Use the small builder/runtime as your starting point. Use the gallery's probe when
 you want the extra acceptance replay, captured frames and regression evidence.
 All browser scenarios retain a runnable page and an HTML Preview link in
-[the demo index](../demos/index.html).
+[the demo index](../demos/index.md).
 
 ## 7. Publish and verify
 

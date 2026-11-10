@@ -41,7 +41,7 @@ The shared [keyboard demo](../demos/key-repeat.html) asserts events at 0, 200 an
 240 ms with no native duplication, then verifies release/blur/Stop/detach/End
 cleanup and no pending timers. A focused live canvas exposes the same repeat
 behavior with Stop/Resume/Detach controls, exercised in Chromium. It is linked
-from the [demo index](../demos/index.html) through
+from the [demo index](../demos/index.md) through
 [HTML Preview](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/key-repeat.html).
 
 These are source-derived language and browser-host checks, not AMOS input-device

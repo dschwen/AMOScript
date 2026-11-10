@@ -231,7 +231,7 @@ cooperative budgets and optimizer boundaries; Frame Load/Play are effectful
 functions and must never be classified as pure/batched scalar work.
 
 Every new browser check must be a shared browser scenario with a repository demo
-and HTML Preview link from `demos/index.html`. Give each program an honest status:
+and HTML Preview link from `demos/index.md`. Give each program an honest status:
 compiled, bounded execution, independent pixels/bytes, CPU/GPU parity and native
 capture are different evidence levels. The sibling `introideen-compiled` catalogue
 is an output convenience, not the only place acceptance demos may live.

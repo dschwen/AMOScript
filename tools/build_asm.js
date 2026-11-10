@@ -18,7 +18,7 @@ function pages() {
     let page=buildGamePage(source,{title:'ASM — Das Spiel: limited demo intro'+(debug?' (debug)':''),assets,diskFonts,renderer:'webgl',stopOnUnlinkedRun:true,debug});
     const preview=n=>'https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+n;
     const other=debug?'asm-intro.html':'asm-intro-debug.html';
-    page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular preview':'Debug preview'}</a> · <a href="${preview('asm-intro-checks.html')}">Browser checks</a></nav><h1>`)
+    page=page.replace('<h1>',`<nav><a href="https://github.com/dschwen/AMOScript/blob/master/demos/index.md">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular preview':'Debug preview'}</a> · <a href="${preview('asm-intro-checks.html')}">Browser checks</a></nav><h1>`)
       .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse to choose music and edition; click to advance the intro.').replace('<details class="game-help">','<p>Development preview of the complete original intro. Use the mouse to choose music and edition, then click through the logo and title screens; right click skips to loading. WebGL renders the HAM title image. The main adventure is the next milestone and is not included yet.</p><details class="game-help">');
     outputs.set(file,page);
   }
@@ -29,7 +29,7 @@ function pages() {
       programs:{'ASM:ASM.Main':main.toString('base64')},renderer:'webgl',debug,restartFromEntry:true,directories:['Df0:','Ram:']});
     const other=debug?'asm-game.html':'asm-game-debug.html';
     const preview=n=>'https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+n;
-    page=page.replace('<h1>',`<nav><a href="${preview('index.html')}">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular build':'Debug build'}</a> · <a href="${preview('asm-main-checks.html')}">Browser checks</a> · <a href="${preview('asm-rooms.html')}">Room gallery</a></nav><h1>`)
+    page=page.replace('<h1>',`<nav><a href="https://github.com/dschwen/AMOScript/blob/master/demos/index.md">Demo index</a> · <a href="${preview('asm-room1.html')}">Direct room 1</a> · <a href="${preview(other)}">${debug?'Regular build':'Debug build'}</a> · <a href="${preview('asm-main-checks.html')}">Browser checks</a> · <a href="${preview('asm-rooms.html')}">Room gallery</a></nav><h1>`)
       .replace('<details class="game-help">','<p>Limited demo (rooms 1–5): the original intro now launches the complete compiled main source. Choose JOY for the full view (IO Light intentionally shows half). Click through the opening messages, then use ⌨ to type the requested letter of ASM. Only rooms 1–5 are included. The demo ends before entering another room; later room assets and minigames are not bundled.</p><details class="game-help">')
       .replace("Follow the game's intro and menu prompts. Arrows move; Space/Enter fires.", 'Use the mouse or touch to select commands and objects. Open ⌨ for text input; Enter and Backspace go directly to AMOS.');
     outputs.set(debug?'asm-game-debug.html':'asm-game.html',page);
@@ -47,7 +47,7 @@ function build(outputDirectory) {
     report.push(item);
   }
   outputs.set('report.json',JSON.stringify(report,null,2)+'\n');
-  outputs.set('index.html','<!doctype html><html lang="en"><meta charset="utf-8"><title>ASM limited demo builds</title><h1>ASM — Das Spiel: limited demo</h1><p><a href="asm-intro.html">Play the intro</a> · <a href="asm-intro-debug.html">Debug preview</a></p><p><a href="asm-game.html">Play the limited demo</a> · <a href="asm-game-debug.html">Debug main game</a></p><p>Limited demo: only rooms 1–5 are bundled. Play ends before entering a later room. See report.json for compilation results.</p></html>\n');
+  outputs.set('index.md','# ASM — Das Spiel: limited demo\n\n[Play the intro](asm-intro.html) · [Debug preview](asm-intro-debug.html)\n\n[Play the limited demo](asm-game.html) · [Debug main game](asm-game-debug.html)\n\nOnly rooms 1–5 are bundled. Play ends before entering a later room. See report.json for compilation results.\n');
   fs.mkdirSync(outputDirectory,{recursive:true});
   for(const [name,content]of outputs)fs.writeFileSync(path.join(outputDirectory,name),content,{flag:'wx'});
   for(const item of report)console.log(`${item.compiled?'PASS':'FAIL'} ${item.source}: ${item.error||item.instructions+' instructions'}`);
