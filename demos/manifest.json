@@ -254,6 +254,12 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/roller2-amos-music.html"
     },
     {
+      "file": "amcaf-vm.html",
+      "title": "AMCAF music in a compiled AMOS application",
+      "description": "A synthetic tokenized AMOS program runs Track Load and Pt Play through the VM CIA clock while waiting for a key. The page builder supplies the streaming host automatically. Play, sound, Stop/Resume and Restart use the normal application harness; 128 opening PCM samples have independent native audio checks. No Ghostlight assets are included.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-vm.html"
+    },
+    {
       "file": "amcaf-pcm.html",
       "title": "AMCAF streaming music preview",
       "description": "Stream synthetic music with arpeggio, vibrato, portamento and non-retriggering sample changes. Play, Pause/Resume and Stop control the live engine. Eight PAL/NTSC stereo comparisons plus native sample-takeover, underrun and filter checks cover the streaming host. Uses a declared 50-Hz preview clock; AMOS VM and CIA integration remain open. No Ghostlight assets are bundled.",

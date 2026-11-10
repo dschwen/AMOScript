@@ -45,7 +45,7 @@ test('Extension profiles: slots are explicit, frozen per compile, relocatable an
   assert.ok(Object.isFrozen(a.transpiler.extensions));
   assert.deepStrictEqual(start(a.create).logs, [[-1]]);
   assert.deepStrictEqual(start(compile([[t('Print'), fn(19, 0x16dc, n(2))], [t('End')]], { 19: 'amcaf-1.50beta4' }).create).logs, [[0]]);
-  assert.throws(() => compile([[ext(8, 0x108e), n(3)] ]), /Unsupported extension.*amcaf-1.50beta4/);
+  assert.throws(() => compile([[ext(8, 0x109e), n(3)] ]), /Unsupported extension.*amcaf-1.50beta4/);
   for (const config of [null, [], { 0: 'amcaf-1.50beta4' }, { 256: 'amcaf-1.50beta4' }, { '08': 'amcaf-1.50beta4' }, { 8: 'amcaf' }]) assert.throws(() => profiles.normalize(config));
   assert.throws(() => profiles.parseMappings(['8=amcaf-1.50beta4', '8=turbo-plus-2.15']), /Duplicate/);
   assert.throws(() => profiles.parseMappings(['8']), /SLOT=LIBRARY/);

@@ -2,8 +2,9 @@
 
 The AMCAF controller and sample fetcher are portable. The stream bridge emits
 synchronous, finite, per-voice PCM blocks; the optional Web Audio adapter queues
-those blocks alongside ordinary AMOS samples. These components do not register
-`Pt Play` or own the AMOS VM clock yet.
+those blocks alongside ordinary AMOS samples. These components do not themselves register
+`Pt Play`; the [VM integration](amcaf-vm.md) now supplies command registration
+and driver clock ownership.
 
 ## Pure bridge
 
@@ -114,8 +115,7 @@ first end signal at an explicit 50-Hz clock: 1,536/5,376 blocks of 160 frames at
 magnitudes 0.1611328125 and 0.5. No private source, assets or generated audio are
 included in the repository.
 
-Next: integrate fractional CIA/VBL deadlines and cumulative output-frame rounding
-into the driver, register Pt Play/Stop/Volume/Cia Speed, apply bank write/retirement
-checks and shared Music/Tracker/SFX ownership, and use the composed host in the
-application page builder. No whole-file Ghostlight compilation or live VM
-playback is claimed by these bridge tests.
+The [VM integration](amcaf-vm.md) now supplies fractional CIA/VBL deadlines,
+cumulative frame rounding, Pt Play/Stop/Volume/Cia Speed, bank guards and automatic
+page-builder host selection. Pt Sam/Raw ownership and whole-game compilation
+remain open. The direct bridge tests above remain separate from live VM evidence.

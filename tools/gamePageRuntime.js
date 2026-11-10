@@ -16,7 +16,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
     remove: name=>memory.remove(key(name)), list:name=>memory.list(key(name)), freeSpace:name=>memory.freeSpace(key(name)),
     exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
-  const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(AMOS_WEB_AUDIO.createWebAudioHost);
+  const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(settings.amcafAudio ? context=>AMOS_WEB_AUDIO_STREAM(context,AMOS_WEB_AUDIO.createWebAudioHost) : AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
   const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys } : false, gamepad: true }];
   function update() {

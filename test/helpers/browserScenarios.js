@@ -340,6 +340,10 @@ const scenarios = [
   { id: 'roller2-amos-music', capturedFrames: false, title: 'Roller II AMOS Music end tunes', description: 'Direct field-stepped playback of Over.mus and Ywon.mus; independent full-cycle PAL/NTSC traces and 25 native Web Audio instrument comparisons. Separate direct-player foundation; the VM demo adds command/lifecycle integration.', run: require('./amosMusicProbe'), check(result, assert) {
     assert.deepStrictEqual(result.traces, [3392, 3392, 5731, 5731]); assert.strictEqual(result.graphs, 25); assert.ok(result.maxDifference <= 1e-6);
   } },
+  { id: 'amcaf-vm', capturedFrames: false, title: 'AMCAF music in a compiled AMOS application', description: 'A synthetic tokenized AMOS program runs Track Load and Pt Play through the VM CIA clock while waiting for a key. The page builder supplies the streaming host automatically. Play, sound, Stop/Resume and Restart use the normal application harness; 128 opening PCM samples have independent native audio checks. No Ghostlight assets are included.', run: require('./amcafVmProbe'), check(result, assert) {
+    assert.strictEqual(result.vmTicks, 10); assert.strictEqual(result.openingSamples, 128); assert.ok(result.maxDifference < 1e-6);
+    assert.strictEqual(result.compiled, true); assert.strictEqual(result.builderStreamingHost, true);
+  } },
   { id: 'amcaf-pcm', capturedFrames: false, title: 'AMCAF streaming music preview', description: 'Stream synthetic music with arpeggio, vibrato, portamento and non-retriggering sample changes. Play, Pause/Resume and Stop control the live engine. Eight PAL/NTSC stereo comparisons plus native sample-takeover, underrun and filter checks cover the streaming host. Uses a declared 50-Hz preview clock; AMOS VM and CIA integration remain open. No Ghostlight assets are bundled.', run: require('./amcafPcmProbe'), check(result, assert) {
     assert.strictEqual(result.comparisons, 8); assert.strictEqual(result.streamingComparisons, 3); assert.ok(result.maxDifference < 1e-6);
     assert.strictEqual(result.previewTicks, 384); assert.strictEqual(result.instrumentOnlyChange, 1); assert.ok(result.notes > 2);

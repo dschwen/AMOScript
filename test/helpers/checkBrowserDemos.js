@@ -815,6 +815,24 @@ module.exports = async function checkBrowserDemos(browser) {
         assert.strictEqual(await page.locator('#repeat-controls').getAttribute('data-status'), 'stopped');
         await page.click('#repeat-detach');
       }
+      if (scenario.id === 'amcaf-vm') {
+        const app=page.frameLocator('#amcaf-vm-player');
+        await app.locator('body').evaluate(()=>{
+          window.pcmStarts=0;const start=AudioBufferSourceNode.prototype.start;
+          AudioBufferSourceNode.prototype.start=function(...args){window.pcmStarts++;return start.apply(this,args);};
+        });
+        await app.locator('#play-game').click();
+        await app.locator('body').evaluate(()=>new Promise((resolve,reject)=>{const begun=performance.now();const check=()=>{if(window.pcmStarts>=24)return resolve();if(performance.now()-begun>5000)return reject(Error('No VM PCM playback'));setTimeout(check,20);};check();}));
+        await app.locator('#game-stop').evaluate(node=>node.click());
+        const stopped=await app.locator('body').evaluate(()=>window.pcmStarts);await page.waitForTimeout(80);
+        assert.strictEqual(await app.locator('body').evaluate(()=>window.pcmStarts),stopped);
+        await app.locator('#game-resume').evaluate(node=>node.click());
+        await app.locator('body').evaluate((node,count)=>new Promise((resolve,reject)=>{const begun=performance.now();const check=()=>{if(window.pcmStarts>count)return resolve();if(performance.now()-begun>5000)return reject(Error('VM audio did not resume: '+document.getElementById('game-status').textContent));setTimeout(check,20);};check();}),stopped);
+        await app.locator('#game-restart').evaluate(node=>node.click());await page.waitForTimeout(80);
+        assert.strictEqual(await app.locator('#game-viewport').getAttribute('data-phase'),'running');
+        assert(!await app.locator('#game-status').textContent().then(text=>/error|unavailable/i.test(text)));
+        await page.evaluate(()=>AMOS_AMCAF_VM_CLEANUP());
+      }
       if (scenario.id === 'amcaf-pcm') {
         for (let i = 0; i < 2; i++) {
           await page.click('#amcaf-pcm-play');

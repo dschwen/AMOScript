@@ -23,12 +23,14 @@ generated full-game pages remain external to the public repository.
 now normalize 302/86 to 288/80 and present narrow lowres views without increasing
 DMA reads. The laced atlas's full bitmap decodes against independent Python
 hashes; existing-screen Unpack preserves all rows. Its original new-screen
-interlaced/overscan presentation and AMCAF playback remain open.
+interlaced/overscan presentation and full AMCAF/SFX game integration remain open.
 AMCAF now has a source-derived tick controller and repeat-aware PCM renderer,
 with an audible synthetic [browser preview](demos/amcaf-pcm.html). Private song
 checks reach their first loop, and the preview now uses per-voice streaming with
-Pause/Resume and bounded native audio queues. CIA timing and VM/SFX integration remain
-open, so Pt Play is still gated. See [tracker implementation](docs/amcaf-tracker.md).
+Pause/Resume and bounded native audio queues. [Pt Play/Stop/Volume/Cia Speed now run in the VM](docs/amcaf-vm.md), with
+fractional CIA/VBL wakes, bank guards and automatic page-builder audio hosting.
+The next compile blocker is Turbo Amos Pri (line 68); Pt Sam/Raw and the atlas
+presentation remain open. See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface
 

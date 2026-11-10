@@ -39,7 +39,9 @@ the cropped narrow-view fixture does not claim that combination.
 The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
 six-byte empty bank trailer. SHA-256:
 `2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8`.
-The production compiler currently rejects AMCAF `Pt Play` at line 43, byte 2084.
+At baseline the compiler rejected AMCAF Pt Play at line 43, byte 2084.
+The current compiler passes those music statements and rejects Turbo Amos Pri
+at line 68, byte 2584; see the VM progress update below.
 No complete compilation or game execution has passed yet.
 
 An independent bounded token walk finds **13 AMCAF encodings / 24 occurrences**
@@ -270,9 +272,12 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** AMCAF playback, followed by interlaced/overscan
-integration for the atlas's original new-screen Unpack. Pt Play remains the
-first production whole-file compilation blocker.
+**Next implementation task:** Turbo Amos Pri and the remaining Pt Sam/Raw
+commands, then interlaced/overscan integration for the atlas. Pt Play now has VM
+integration; Amos Pri is the next whole-file compilation blocker.
+
+The progress entries below describe successive stages; the final entry records
+the current VM support. Earlier gated statements are historical stage bounds.
 
 ### AMCAF playback progress: pitch kernel
 
@@ -322,3 +327,19 @@ filtering; see [audio streaming](audio-streaming.md). Private modules also run
 through this bridge headlessly. Driver CIA/VBL scheduling, command registration,
 bank lifetimes and actual Pt Sam/Raw ownership semantics remain next; Pt Play is
 still gated.
+
+
+### AMCAF playback progress: VM integration (2026-11-10)
+
+Base Pt Play/Stop/Volume/Cia Speed now execute through driver-owned fractional
+CIA/VBL wakes, cumulative PCM frame rounding and existing bank lifetime guards.
+The page builder selects the streaming audio host for AMCAF profiles. A synthetic
+compiled AMOS application demonstrates the ordinary Play/sound/fullscreen,
+Stop/Resume and Restart harness; its opening 128 PCM samples match independent
+bytes/phase through native Web Audio. See [AMCAF VM integration](amcaf-vm.md)
+for clock/reload rules, callback retirement, evidence and limits.
+
+This raises Ghostlight's implemented third-party encodings from 8/18 to 12/18.
+The next production compile blocker is Turbo Amos Pri, slot 12 `$0928`, line 68,
+byte 2584. Pt Sam/Raw ownership, other AMCAF commands, interlaced presentation and
+whole-game execution remain open. Private assets remain external.

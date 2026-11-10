@@ -4,7 +4,8 @@ AMCAF `Pt Play` uses a different player from AMOS `Track Play`. The implementati
 `lib/amos/amcafPitch.js` and a tick/row controller in
 `lib/amos/amcafSequencer.js`, plus a portable repeat-aware PCM renderer in
 `lib/amos/amcafPcm.js`.
-These are not registered as `Pt Play` yet and do not start sound or own timers.
+The pure helpers own no host timers. Base Pt Play/Stop/Volume/Cia Speed now
+use them through the [driver-clocked VM integration](amcaf-vm.md).
 
 ## Source and implemented pitch rules
 
@@ -44,12 +45,12 @@ Arpeggio preserves contiguous-table spill and returns `null` when the native
 37-entry search would leave the hardware period unchanged. Out-of-table reads
 reject, including speculative shifted reads made before each comparison.
 
-Still required: VM integration of the streaming adapter, CIA/VBL scheduling,
-shared voice arbitration, bank lifetime guards and browser lifecycle tests.
+Still required: Pt Sam/Raw command ownership and wider native bank/overload
+forms. Driver scheduling, bank guards and the page-builder audio host now have
+[VM integration tests](amcaf-vm.md).
 Instrument-only changes may change repeat pointers without restarting the initial
 sample; the host contract must preserve that behavior. Ghostlight's private music
-and assets remain outside the public repository. `Pt Play` remains the first
-whole-file compilation blocker.
+and assets remain outside the public repository. The next whole-file compilation blocker is now Turbo Amos Pri at line 68.
 
 A read-only scan of the supplied private modules found 145 instrument changes
 without a note in the game song (zero in the title song), and no instrument
@@ -165,7 +166,7 @@ title and 860,160 for the game. Both channels had nonzero energy and finite PCM;
 peak magnitudes were 0.3125 and 1 respectively. This is a bounded VBL-clock
 execution check, not independent musical parity, live game audio or a native
 capture. The existing AMOS Web Audio adapter and standard Track Play remain
-unchanged. The live streaming bridge is now implemented separately; VM scheduling and
-shared music/SFX command ownership remain the next integration steps. See
+unchanged. The live streaming bridge and VM scheduling are now implemented separately;
+Pt Sam/Raw command ownership remains the next audio integration step. See
 [audio streaming](audio-streaming.md) for the per-voice protocol, queue bounds,
 eleven native browser comparisons and current timing limits.
