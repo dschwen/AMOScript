@@ -80,7 +80,7 @@ pairs, and the original Mouse Key exit. The real application page also runs
 with sound/fullscreen, pause/resume and mouse exit. This is browser/source-derived
 evidence, not native captures or a full six-minute GUI replay.
 
-Protracker (the first version) advances past Hex$, Bchg and cursor strings to core Anim
-forms. Its `Data/mod.4spirits` input has been recovered from Modland (see
+Protracker (the first version) now compiles, including Hex$, Bchg, cursor strings
+and core Anim. Its runtime is blocked by tracker effects 9xx/E9x. Its `Data/mod.4spirits` input has been recovered from Modland (see
 [asset provenance](../examples/AMCAF/ASSETS.md)).
 The compiler and asset builder do not silently replace it with Hawkeye.

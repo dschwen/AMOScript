@@ -7,3 +7,8 @@
 - SHA-256: `77d3535bcbf378a2e9c06faea48bc114de2ea96bb379c98c6501c93f1a557ffd`.
 
 This is an additional recovered asset, not a change to the original AMOS source or the four originally supplied data files. The builder preloads it as both `Data/mod.4spirits` and `AMCAF_Examples:Data/mod.4spirits` (case-insensitive adapter keys). Protracker still has compilation blockers; including and decoding the module does not establish playback compatibility for that program. No additional license grant is asserted here.
+
+The recovered module uses sample-offset (9xx) and retrigger (E9x) effects. It has
+no AMCAF synchronization (effect-8) cells, so it cannot supply the text/drum cues
+expected by the original example. The music bytes are retained as downloaded;
+no synchronization events are invented. See [Anim and current playback limits](../../docs/anim.md).

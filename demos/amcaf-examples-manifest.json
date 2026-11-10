@@ -95,9 +95,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported token 0x1f52 at line 165, byte 7118"
+      "runtime": "Compiles unchanged; runtime stops at Pt Play: the recovered 4 spirits module needs unsupported 9xx sample offsets and E9x retriggers.",
+      "compiled": true
     },
     {
       "source": "Protracker2.AMOS",

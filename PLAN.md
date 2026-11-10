@@ -8,18 +8,27 @@ Current priority is the original twelve-program AMCAF collection, now preserved
 under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.md) includes every
 program and its actual build/runtime status. The unchanged quick-maths example
 runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
-2/12 programs currently compile and run. Shared IMP! decompression and file/bank loading
+3/12 programs currently compile; the quick-maths and Protracker2 originals run. Shared IMP! decompression and file/bank loading
 now pass bounded tests. Decimal/path helpers, native arithmetic shifts and raw
 Work-bank loading/saving are implemented with a standalone utility demo.
 Protracker playback, voice masks and six status/VU queries are implemented.
 Hex$ and bounded Turbo Draw/Plot/Blitter Fill/Wait now run the entire original
-Protracker2 visualizer with WebGL. The first version now compiles Bchg and cursor
-strings, stopping at unsupported core Anim. Its requested mod.4spirits asset has
+Protracker2 visualizer with WebGL. The first version now compiles unchanged, including Bchg, cursor
+strings and separate native Anim records/controls. Its Pt Play startup needs
+9xx sample-offset and E9x retrigger effects; the supplied Modland tune has no
+AMCAF effect-8 synchronization cues. A linked silent drum harness cycles its six
+original strings and untouched sprite bank with WebGL. Its requested mod.4spirits asset has
 been recovered from Modland. A declared Hawkeye harness plays the original IMP! module from a chip
 Work bank with voice control, E0 filtering and EA/EB fine volume. Other first
 blockers include Change Bank Font and core Set Tempras, Peek$, Stop and Amos Here.
-Next address the Protracker examples, then fonts, devices, file/bank utilities and intro
-effects. The protected/native AGA source has a separate format boundary.
+Next implement 9xx/E9x for the recovered Protracker1 module, then fonts,
+devices, file/bank utilities and intro effects. Native reference points are
+AMCAF LAB_048C ($931a) for sample offset and LAB_04AC ($959c) for retrigger:
+retain per-voice offset memory and mutable start/length registers, including
+9xx’s dispatch before and after note start; add checked nonzero PCM trigger
+starts without moving repeat pointers. E9x uses tick modulo and suppresses a
+duplicate row-tick retrigger when the cell already has a note. Validate these
+with independent DMA/PCM traces before removing module preflight gates. The protected/native AGA source has a separate format boundary.
 See [AMCAF example support](docs/amcaf-examples.md).
 
 ## Ghostlight: AMCAF and Turbo Plus

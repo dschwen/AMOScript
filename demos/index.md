@@ -103,9 +103,15 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (94 demos)</summary>
+<summary>Compiler and runtime checks (96 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
+
+### AMOS Anim: original AMCAF drum sequences
+
+A declared compiled harness cycles six original Protracker1 drum literals and its untouched sprite bank. Independent field/image vectors, separate Anim/AMAL records and 16 Canvas/WebGL pairs; this does not run the original music interface.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-anim.html) · [Local file](amcaf-anim.html)
 
 ### Bit toggles and keyboard cursor strings
 
@@ -664,6 +670,12 @@ The full current game and assets with a Debug menu for downloading modified sess
 The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/planet-zybex-game-debug.html) · [Local file](planet-zybex-game-debug.html)
+
+### AMCAF drums — live Anim harness
+
+Six original Protracker1 drum sequences and its embedded sprites on a declared synthetic scheduler. Anim plays live with WebGL; the original music interface still has tracker effect blockers.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-drums.html) · [Local file](amcaf-drums.html)
 
 ### AMCAF Hawkeye — packed music preview
 

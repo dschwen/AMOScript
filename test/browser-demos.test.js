@@ -11,7 +11,7 @@ const { buildBrowserDemos } = require('../tools/build_browser_demos');
 
 test('browser demos: catalogue covers every shared scenario with self-contained HTML and preview links', () => {
   const root = path.join(__dirname, '../demos'), manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json')));
-  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'amcaf-hawkeye.html', 'amcaf-examples.md', 'tutorial.md', 'compiler-examples.md', 'asm-intro.html', 'asm-intro-debug.html', 'asm-room1.html', 'asm-game.html', 'asm-game-debug.html']);
+  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'amcaf-drums.html', 'amcaf-hawkeye.html', 'amcaf-examples.md', 'tutorial.md', 'compiler-examples.md', 'asm-intro.html', 'asm-intro-debug.html', 'asm-room1.html', 'asm-game.html', 'asm-game-debug.html']);
   const index = fs.readFileSync(path.join(root, 'index.md'), 'utf8');
   assert.ok(index.indexOf('## Play the games') < index.indexOf('## Technical checks'));
   assert.match(index, /<details>\n<summary>Compiler and runtime checks/);

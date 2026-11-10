@@ -9,8 +9,8 @@ separate private project and are not part of this collection.
 **[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
-coverage are separate: currently **2/12 compile and run**, not twelve completed
-demos.
+coverage are separate: currently **3/12 compile**, and **2/12 run**. Protracker1 now compiles but
+its recovered music still needs tracker effects 9xx/E9x.
 
 ## Working example: quick maths
 
@@ -107,7 +107,7 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Core Anim `$1f52` | Hex$ and drawing now compile. Bchg and cursor strings now compile; sprite-Anim forms remain; the requested Data/mod.4spirits is now supplied from Modland (see [provenance](../examples/AMCAF/ASSETS.md)). |
+| Protracker | Complete unchanged source compiles; Pt Play runtime blocker | Core Anim/On/Off/Freeze are implemented; recovered 4 spirits needs 9xx sample-offset and E9x retrigger effects. See [Anim scope and drum demo](anim.md), including the recovered file’s absent synchronization cues. |
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
@@ -127,8 +127,8 @@ Implementation order:
    exposed blockers below. These tests do not establish full intro/music runtime compatibility.
 2. **Protracker examples.** Masks and order/row/instrument/frequency/VU/signal
    queries, Hex$ and bounded raw plane graphics are implemented. Protracker2
-   runs unchanged. Continue with the first version’s core Anim
-   gaps before claiming original music compatibility. Its recovered tune passes
+   runs unchanged. Continue with the first version’s 9xx/E9x tracker
+   effects before claiming original music compatibility. Its recovered tune passes
    the MOD decoder and is preloaded under the original filename.
 3. **Fonts and GamePorts.** Define host/owned-state contracts explicitly. Missing
    native OS libraries or parallel-port hardware must not become invented device
@@ -267,16 +267,6 @@ or consume the keyboard queue and take no arguments.
 [Bit toggles and browser cursor-string checks](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/bit-cursor.html)
 uses a compiled synthetic program and injected DOM keyboard events. It is not
 an execution of the original Protracker interface. The unchanged first example
-now stops compiling at `Anim` on line 165, byte 7118. Its finite drum-frame
-strings and `Anim On` need native channel lifecycle and VBL scheduling support
-before the original program can be counted as running.
-
-For the next Anim batch, use the native `InAnim2`/`InAnimOn1` paths rather than
-registering aliases for AMAL commands. Native `Anim` selects animation type 1
-in `AMALCre`, and `Anim On/Off/Freeze` address the animation lane with mask 2;
-this differs from the AMAL execution lane. Implement the original example’s
-finite `(image,duration)` lists first, sharing channel bindings and the existing
-VBL clock while preserving separate lane state. Test replacement during a drum
-sequence, first/last frame timing, Stop/Resume, `Amal Off` cleanup, and sprites
-0/2/6 with Canvas/WebGL before counting the first original interface as working.
-Wider numeric-bank and repeat forms should keep explicit gates until verified.
+now compiles completely, including its finite drum strings and Anim controls.
+See [AMOS Anim](anim.md) for the native record contract, live drum harness,
+independent timing vectors and remaining original-music runtime blocker.
