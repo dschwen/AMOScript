@@ -4669,6 +4669,41 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Sam Stop during Music or Track Play is not implemented');
     if(tracker){const current=tracker;current.stopVoices(mask,options.audioFieldTime());if(tracker===current)state.tracker.position=current.state;}
     else audio.stop(mask);
+    if(options.requestTrackerWake)options.requestTrackerWake();
+  }
+  function ptSamBank(value){
+    const address=bankMemory.address(integer(value));
+    state.audio.ptSampleBank=address;
+  }
+  function ptRawPlay(mask,address,length,frequency){
+    mask=integer(mask);address=integer(address);length=integer(length);frequency=integer(frequency);
+    const voiceWord=(mask<<16)>>16;
+    if(!length||!voiceWord)return;
+    if(voiceWord<0)throw new Error('Pt Raw Play automatic negative voice selection is not implemented');
+    mask &= 15;
+    if(!mask)return;
+    if(length<0)throw new Error('Pt Raw Play negative looping lengths are not implemented');
+    const bytes=length-(length%2);
+    if(bytes<2||bytes>131070)throw new Error('Pt Raw Play requires 2..131070 word-rounded bytes');
+    frequency=Math.max(400,Math.min(30000,(frequency<<16)>>16));
+    const period=Math.floor(3579545/frequency),fields=Math.floor((bytes/2)*100/frequency)+1;
+    if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Raw Play during Music or Track Play is not implemented');
+    if(address&1)throw new Error('Pt Raw Play requires an even chip-memory address');
+    const access=bankMemory.locate(address>>>0,bytes);
+    if(!access.bank||access.bank.type!=='data'||access.bank.memory!=='chip'||access.region.kind)throw new Error('Pt Raw Play requires checked generic chip-bank memory');
+    const pcm=bankMemory.read(address>>>0,bytes);
+    if(!tracker){
+      if(typeof amcafPlaybackFactory!=='function'||!options.audioFieldTime||!options.requestTrackerWake)throw new Error('Pt Raw Play requires the AMCAF runtime field clock');
+      if(state.halted)throw new Error('Cannot start Pt Raw Play in a halted program');
+      const next=amcafPlaybackFactory(null,{sequence:amcafSequencerFactory,pitch:amcafPitchFactory,pcm:amcafPcmFactory,stream:amcafStreamFactory},
+        {field:options.audioFieldTime(),vblHz:options.audioVblHz,standard:options.audioStandard,host:{command:event=>audio.command(event)}});
+      trackerRevision++;trackerKind='amcaf';tracker=next;trackerBank=null;trackerLocation=state.location&&{...state.location};
+      state.tracker.engine='amcaf';state.tracker.bank=null;state.tracker.playing=true;state.tracker.paused=state.stopped;
+      if(state.stopped)next.pause();
+    }
+    const current=tracker;current.rawPlay(mask,pcm,period,fields,options.audioFieldTime());
+    if(tracker===current)state.tracker.position=current.state;
+    options.requestTrackerWake();
   }
   function ptVolume(value){value=integer(value);ptMaster=value<0?0:Math.min(64,value&65535);if(tracker&&trackerKind==='amcaf'){tracker.setVolume(ptMaster);state.tracker.position=tracker.state;}}
   function ptCiaSpeed(value){
@@ -4678,7 +4713,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function advanceTracker(vbl) {
     if (!tracker || state.tracker.paused) return;
-    if(trackerKind==='amcaf'){const current=tracker,now=options.audioFieldTime();if(current.nextField()>now+1e-10)return;current.advance(now);if(tracker===current)state.tracker.position=current.state;return;}
+    if(trackerKind==='amcaf'){const current=tracker,now=options.audioFieldTime();if(current.nextField()==null||current.nextField()>now+1e-10)return;current.advance(now);if(tracker===current)state.tracker.position=current.state;return;}
     if (vbl - trackerNext >= 250) throw new Error('Tracker field catch-up exceeds 250 fields');
     while (tracker && trackerNext <= vbl) {
       trackerNext++;
@@ -6998,7 +7033,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     extensionAmosPriority:amosPriority,
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
-    extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,
+    extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
     extensionFastPoint: (x,y) => display.fastPoint(integer(x),integer(y)),
@@ -14760,6 +14795,41 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Sam Stop during Music or Track Play is not implemented');
     if(tracker){const current=tracker;current.stopVoices(mask,options.audioFieldTime());if(tracker===current)state.tracker.position=current.state;}
     else audio.stop(mask);
+    if(options.requestTrackerWake)options.requestTrackerWake();
+  }
+  function ptSamBank(value){
+    const address=bankMemory.address(integer(value));
+    state.audio.ptSampleBank=address;
+  }
+  function ptRawPlay(mask,address,length,frequency){
+    mask=integer(mask);address=integer(address);length=integer(length);frequency=integer(frequency);
+    const voiceWord=(mask<<16)>>16;
+    if(!length||!voiceWord)return;
+    if(voiceWord<0)throw new Error('Pt Raw Play automatic negative voice selection is not implemented');
+    mask &= 15;
+    if(!mask)return;
+    if(length<0)throw new Error('Pt Raw Play negative looping lengths are not implemented');
+    const bytes=length-(length%2);
+    if(bytes<2||bytes>131070)throw new Error('Pt Raw Play requires 2..131070 word-rounded bytes');
+    frequency=Math.max(400,Math.min(30000,(frequency<<16)>>16));
+    const period=Math.floor(3579545/frequency),fields=Math.floor((bytes/2)*100/frequency)+1;
+    if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Raw Play during Music or Track Play is not implemented');
+    if(address&1)throw new Error('Pt Raw Play requires an even chip-memory address');
+    const access=bankMemory.locate(address>>>0,bytes);
+    if(!access.bank||access.bank.type!=='data'||access.bank.memory!=='chip'||access.region.kind)throw new Error('Pt Raw Play requires checked generic chip-bank memory');
+    const pcm=bankMemory.read(address>>>0,bytes);
+    if(!tracker){
+      if(typeof amcafPlaybackFactory!=='function'||!options.audioFieldTime||!options.requestTrackerWake)throw new Error('Pt Raw Play requires the AMCAF runtime field clock');
+      if(state.halted)throw new Error('Cannot start Pt Raw Play in a halted program');
+      const next=amcafPlaybackFactory(null,{sequence:amcafSequencerFactory,pitch:amcafPitchFactory,pcm:amcafPcmFactory,stream:amcafStreamFactory},
+        {field:options.audioFieldTime(),vblHz:options.audioVblHz,standard:options.audioStandard,host:{command:event=>audio.command(event)}});
+      trackerRevision++;trackerKind='amcaf';tracker=next;trackerBank=null;trackerLocation=state.location&&{...state.location};
+      state.tracker.engine='amcaf';state.tracker.bank=null;state.tracker.playing=true;state.tracker.paused=state.stopped;
+      if(state.stopped)next.pause();
+    }
+    const current=tracker;current.rawPlay(mask,pcm,period,fields,options.audioFieldTime());
+    if(tracker===current)state.tracker.position=current.state;
+    options.requestTrackerWake();
   }
   function ptVolume(value){value=integer(value);ptMaster=value<0?0:Math.min(64,value&65535);if(tracker&&trackerKind==='amcaf'){tracker.setVolume(ptMaster);state.tracker.position=tracker.state;}}
   function ptCiaSpeed(value){
@@ -14769,7 +14839,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   }
   function advanceTracker(vbl) {
     if (!tracker || state.tracker.paused) return;
-    if(trackerKind==='amcaf'){const current=tracker,now=options.audioFieldTime();if(current.nextField()>now+1e-10)return;current.advance(now);if(tracker===current)state.tracker.position=current.state;return;}
+    if(trackerKind==='amcaf'){const current=tracker,now=options.audioFieldTime();if(current.nextField()==null||current.nextField()>now+1e-10)return;current.advance(now);if(tracker===current)state.tracker.position=current.state;return;}
     if (vbl - trackerNext >= 250) throw new Error('Tracker field catch-up exceeds 250 fields');
     while (tracker && trackerNext <= vbl) {
       trackerNext++;
@@ -17089,7 +17159,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     extensionAmosPriority:amosPriority,
     extensionSmouseKey:()=>portButtons(1),
     extensionRasterWait:rasterWait,
-    extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,
+    extensionPtPlay:ptPlay,extensionPtStop:ptStop,extensionPtVolume:ptVolume,extensionPtCiaSpeed:ptCiaSpeed,extensionPtSamStop:ptSamStop,extensionPtRawPlay:ptRawPlay,extensionPtSamBank:ptSamBank,
     extensionSetPlanes: value => display.setGraphicsPlanes(integer(value)),
     extensionFastPlot: (x,y,colour) => display.fastPlot(integer(x),integer(y),integer(colour)),
     extensionFastPoint: (x,y) => display.fastPoint(integer(x),integer(y)),

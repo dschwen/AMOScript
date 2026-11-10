@@ -45,12 +45,13 @@ Arpeggio preserves contiguous-table spill and returns `null` when the native
 37-entry search would leave the hardware period unchanged. Out-of-table reads
 reject, including speculative shifted reads made before each comparison.
 
-Still required: Pt Sam/Raw command ownership and wider native bank/overload
-forms. Driver scheduling, bank guards and the page-builder audio host now have
+[Raw-effect ownership and sample-bank selection](amcaf-raw.md) now have bounded
+implementations; wider native bank/overload forms remain open. Driver scheduling, bank guards and the page-builder audio host now have
 [VM integration tests](amcaf-vm.md).
 Instrument-only changes may change repeat pointers without restarting the initial
 sample; the host contract must preserve that behavior. Ghostlight's private music
-and assets remain outside the public repository. The next whole-file compilation blocker is now Pt Raw Play at line 1914.
+and assets remain outside the public repository. All 18 used extension encodings
+now compile; game entry stops at interlaced Unpack Screen, line 273, byte 7800.
 
 A read-only scan of the supplied private modules found 145 instrument changes
 without a note in the game song (zero in the title song), and no instrument

@@ -26,8 +26,8 @@ Mixing this command with AMOS Music or Track Play remains explicitly unsupported
 Tests cover compiled dispatch, low-bit masks, continuing driver wakes, active
 bank write protection, pause/resume, unaffected channels, and retrigger after an
 instrument-only change and portamento. The existing [compiled AMCAF demo](../demos/amcaf-vm.html)
-now accepts Q to stop voice 1 and another Q to end music. Its browser check also
+now accepts Q to stop voice 1, Q again to play a raw effect, and Q again to end music. Its browser check also
 uses a separate native OfflineAudioContext to verify selected-channel silence
 and continuing opposite-channel output. These are source-derived semantics and
-browser audio evidence, not an Amiga hardware capture. Pt Raw Play/Pt Sam Bank,
-raw sample ownership, and exact DMA timing are still open.
+browser audio evidence, not an Amiga hardware capture. [Pt Raw Play/Pt Sam Bank](amcaf-raw.md) now add bounded
+raw sample ownership. Wider forms and exact DMA timing remain open.

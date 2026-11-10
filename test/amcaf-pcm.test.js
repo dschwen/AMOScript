@@ -87,3 +87,19 @@ test('AMCAF PCM: validates complete intents before mutation, owns PCM and has te
   const standalone = vm.runInNewContext(`(${create.toString()})(bank,{sampleRate:8000})`, { bank: samples() });
   standalone.apply(begin(3)); assert.strictEqual(standalone.render(1).left[0] * 256, 8);
 });
+
+test('AMCAF PCM: owned raw effects override only selected DMA and suppress music writes until release',()=>{
+  for(const standard of ['PAL','NTSC']){
+    const p=create(samples(),{sampleRate:8000,standard});p.apply(begin(1));
+    const bytes=Uint8Array.from([128,192,0,64,127,32]);
+    p.rawPlay(1,bytes,428);bytes.fill(0);
+    p.apply(frame(2,{period:856,volume:1,triggers:[{voice:0,sample:2,length:6}]}));
+    const result=p.renderVoices(5),clock=standard==='PAL'?3546895:3579545;
+    assert.deepStrictEqual(Array.from(result.channels[0]),Array.from({length:5},(_,i)=>[-128,-64,0,64,127,32][Math.floor(i*clock/428/8000)]/256));
+    assert(result.channels[1].some(x=>x!==0));assert.strictEqual(p.state.voices[0].period,428);
+    p.render(100);assert.strictEqual(p.state.rawMask,1);assert.strictEqual(p.state.voices[0].active,false);
+    p.apply(frame(3,{triggers:[{voice:0,sample:2,length:6}]}));assert(p.renderVoices(10).channels[0].every(x=>x===0));
+    p.stopVoices(1);p.apply(frame(4,{triggers:[{voice:0,sample:2,length:6}]}));
+    assert.strictEqual(p.state.rawMask,0);assert(p.renderVoices(5).channels[0].some(x=>x!==0));
+  }
+});

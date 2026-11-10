@@ -35,9 +35,13 @@ checks reach their first loop, and the preview now uses per-voice streaming with
 Pause/Resume and bounded native audio queues. [Pt Play/Stop/Volume/Cia Speed now run in the VM](docs/amcaf-vm.md), with
 fractional CIA/VBL wakes, bank guards and automatic page-builder audio hosting.
 [Turbo Amos Pri and AMCAF Raster Wait](docs/extension-timing.md) now pass with
-portable priority intent and cooperative field-line timing. The next compile
-blocker is Pt Raw Play (line 1914). [Smouse Key](docs/smouse-key.md) now has
-second-port keyboard/gamepad input; [Pt Sam Stop](docs/amcaf-sample-stop.md) cancels selected voices while music continues. Pt Raw Play/Pt Sam Bank and atlas presentation remain open. See [tracker implementation](docs/amcaf-tracker.md).
+portable priority intent and cooperative field-line timing. [Smouse Key](docs/smouse-key.md)
+now has second-port keyboard/gamepad input. [Pt Sam Stop](docs/amcaf-sample-stop.md)
+and [Pt Raw Play/Pt Sam Bank](docs/amcaf-raw.md) finish Ghostlight's 18 extension
+encodings: the complete source compiles into its private external project.
+The browser reaches the animated title with music; starting a game stops at
+interlaced Unpack Screen, line 273, byte 7800. Atlas presentation is next.
+See [tracker implementation](docs/amcaf-tracker.md).
 
 ## Tutorial Interface
 

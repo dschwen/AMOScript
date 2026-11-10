@@ -5,6 +5,14 @@ Planning baseline: 2026-11-09, starting at `7008eb7` on
 claim. The local benchmark is `/home/daniel/Programs/ghostlight/GhostLight2.amos`.
 Implement reusable extension semantics, keeping the game source unchanged.
 
+Current milestone (2026-11-10): all 18 used third-party encodings are supported
+and the entire unchanged source compiles. The private WebGL page reaches the
+animated title with music. Starting a game exposes the next runtime gate:
+interlaced Unpack Screen at line 273, byte 7800. See [raw effects](amcaf-raw.md).
+Game source/assets/generated pages remain outside this repository.
+
+## Earlier implementation stages
+
 Implementation progress: [compile-time extension profiles](extension-profiles.md)
 now flow through the API, CLI, page builder, saved projects and desktop form.
 Separate typed extension functions/statements preserve exact internal separators.
@@ -40,10 +48,9 @@ The source is 67,810 bytes, with 2,005 physical lines, 67,784 code bytes and a
 six-byte empty bank trailer. SHA-256:
 `2c239036227fb69c28fc07863768d55085ce39a6dd577f3e31c09465f72d1ba8`.
 At baseline the compiler rejected AMCAF Pt Play at line 43, byte 2084.
-The current compiler passes those music statements, Amos Pri, Raster Wait,
-Smouse Key and Pt Sam Stop. It rejects Pt Raw Play at line 1914, byte 65598; see the latest
-progress update.
-No complete compilation or game execution has passed yet.
+The current compiler passes all 18 extension encodings and compiles the full file.
+The private title/menu boot runs; game entry stops at interlaced Unpack Screen,
+line 273, byte 7800. Complete gameplay remains open.
 
 An independent bounded token walk finds **13 AMCAF encodings / 24 occurrences**
 and **5 Turbo Plus encodings / 15 occurrences**. Standard extensions add Track
@@ -291,9 +298,9 @@ run `npm run check`; graphics/input/audio/lifecycle changes additionally require
 independent reference vectors, lifecycle/factory isolation and source-location
 failures. Keep static deductions, browser checks and actual Amiga captures distinct.
 
-**Next implementation task:** the remaining Pt Sam/Raw commands, then
-interlaced/overscan integration for the atlas. Music and second-port input have
-VM integration; Pt Raw Play is the next whole-file compilation blocker.
+**Next implementation task:** interlaced/overscan integration for the atlas,
+then the first actual level. All used extensions compile and raw effects have
+VM integration; Unpack Screen at line 273 is the next runtime blocker.
 
 The progress entries below describe successive stages; the final entry records
 the current VM support. Earlier gated statements are historical stage bounds.
@@ -407,3 +414,21 @@ The private external Ghostlight build now passes 16/18 extension encodings and
 stops at Pt Raw Play (`$1412`), line 1914, byte 65598. Pt Sam Bank and atlas
 presentation also remain open. No game source, asset or compiled game was added
 to this repository.
+
+
+### Complete compilation and raw effects (2026-11-10)
+
+Pt Raw Play now owns selected PCM channels, suppresses music hardware writes
+while its VBL lease runs, and releases them back to music independently of CIA
+tempo. It also runs without a MOD and freezes over host Stop. Pt Sam Bank selects
+a checked bank/address without inspecting a Samples header. Synthetic compiled
+programs, independent PAL/NTSC PCM vectors and 4,000 native browser samples cover
+the bounded subset; see [raw effects](amcaf-raw.md).
+
+All 18/18 encodings now pass and the full unchanged file compiles. Normal/debug
+pages and the generated module are built only in the external private project.
+An input-only browser check reaches the animated title with music; holding fire
+enters game setup and stops at interlaced Unpack Screen, line 273, byte 7800.
+The atlas flag is preserved and its presentation guard remains in place.
+No complete level or gameplay is claimed. Next implement interlaced/overscan
+atlas presentation and then validate the first raw effects in actual gameplay.

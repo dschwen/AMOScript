@@ -106,8 +106,9 @@ game tune at 48 kHz. Each tick emitted one block, bank bytes remained unchanged,
 and Stop left no pending wakes. These are original music modules in a declared
 synthetic AMOS harness, not original full-game execution or independent captures.
 
-Ghostlight now compiles past the four music statements. At that stage the next production compile blocker was Turbo Amos Pri at line 68.
-[Amos Pri and Raster Wait now pass](extension-timing.md); the current compile
-blocker is Pt Raw Play at line 1914, byte 65598.
-[Smouse Key input](smouse-key.md) and [Pt Sam Stop](amcaf-sample-stop.md) now pass; Pt Raw Play/Pt Sam Bank remain. Interlaced atlas presentation and complete original game
-execution remain separate milestones.
+The complete unchanged Ghostlight source now compiles with all 18 extension
+encodings. [Amos Pri/Raster Wait](extension-timing.md), [Smouse Key](smouse-key.md),
+[Pt Sam Stop](amcaf-sample-stop.md) and [Pt Raw Play/Pt Sam Bank](amcaf-raw.md)
+all have bounded implementations. The private WebGL page reaches the animated
+title with music; starting a game stops at interlaced Unpack Screen, line 273,
+byte 7800. Atlas presentation and complete gameplay remain separate milestones.

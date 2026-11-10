@@ -48,3 +48,28 @@ test('AMCAF clock: sample cancellation flushes partial fields without rebasing t
   assert(events.at(-1).channels[0].every(x=>x===0));assert(events.at(-1).channels[1].some(x=>x!==0));
   const before=p.state;assert.throws(()=>p.stopVoices(16,8.25),/mask/);assert.deepStrictEqual(p.state,before);p.stop();
 });
+
+test('AMCAF clock: raw leases use independent VBL deadlines, preserve song progress and freeze over host pause',()=>{
+  const events=[],p=create(moduleData(),factories,{sampleRate:8000,host:{command:e=>events.push(e)}});
+  p.advance(7.3);const before=p.state.position.sequence.ticks;
+  p.rawPlay(8,Uint8Array.from([64,128]),428,3,7.3);
+  assert.strictEqual(p.nextField(),8);p.advance(8);assert.deepStrictEqual(p.state.position.leases,[0,0,0,2]);
+  p.advance(8.1);assert(p.state.position.sequence.ticks>before);p.pause();p.advance(100);p.resume(100.2);
+  assert.strictEqual(p.nextField(),101);p.advance(101);assert.strictEqual(p.state.position.leases[3],1);
+  p.advance(102);assert.strictEqual(p.state.position.sampler.rawMask,0);assert(events.some(e=>e.type==='stop'&&e.mask===8));p.stop();
+  const raw=create(null,factories,{sampleRate:8000});assert.strictEqual(raw.nextField(),null);
+  raw.rawPlay(1,Uint8Array.from([0,127]),428,1,0.2);assert.strictEqual(raw.nextField(),1);
+  raw.advance(1);assert.strictEqual(raw.nextField(),null);assert.strictEqual(raw.state.position.sequence,null);raw.stop();
+});
+
+test('AMCAF clock: host Stop during raw takeover or VBL release defers pause until the command returns',()=>{
+  for(const stopAt of ['takeover','release']){
+    let p,armed=false;
+    p=create(null,factories,{host:{command:e=>{if(armed&&e.type==='stop'&&e.mask===8)p.pause();}}});
+    armed=stopAt==='takeover';p.rawPlay(8,Uint8Array.from([0,127]),428,1,0);
+    if(stopAt==='release'){armed=true;p.advance(1);}
+    assert.strictEqual(p.state.paused,true);assert.strictEqual(p.state.playing,true);assert.strictEqual(p.nextField(),null);
+    armed=false;p.resume(10);if(stopAt==='takeover')p.advance(11);
+    assert.strictEqual(p.state.position.sampler.rawMask,0);p.stop();
+  }
+});

@@ -86,9 +86,12 @@ probe executes the same synthetic program on a declared manual clock and checks
 its live stepping/restart controls. These are source-derived portable checks,
 not Amiga execution captures.
 
-Ghostlight now passes these encodings and [Smouse Key](smouse-key.md). Its next
-production compile blocker is Pt Raw Play at line 1914, byte 65598. [Pt Sam Stop](amcaf-sample-stop.md) now passes. The recovered Smouse Key routine
+Ghostlight now passes these encodings and [Smouse Key](smouse-key.md). [Pt Sam Stop](amcaf-sample-stop.md) and [Pt Raw Play/Pt Sam Bank](amcaf-raw.md)
+now pass, completing compilation of all 18 used extension encodings. The recovered Smouse Key routine
 reads CIA bit 7 and POTINP bits 6/4: these are the second mouse/joystick port's
 three buttons, not the main mouse's held mask. The implementation now supplies explicit portable
-second-port input. Pt Sam/Raw support, interlaced atlas presentation and
+second-port input. Wider Pt Sam/Raw forms, interlaced atlas presentation and
 whole-game execution also remain open. No private game assets are distributed.
+
+The private title/menu now runs with music; game entry stops at interlaced
+Unpack Screen, line 273, byte 7800. Full gameplay remains open.

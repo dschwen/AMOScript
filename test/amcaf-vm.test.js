@@ -85,3 +85,43 @@ test('AMCAF VM: compiled Pt Sam Stop uses low mask bits without stopping music o
   p.extensionPtStop();assert.strictEqual(clock.pending(),0);
   p.extensionPtSamStop(0x10008);assert.strictEqual(events.at(-1).mask,8);
 });
+
+test('AMCAF VM: raw sound effects preflight checked memory, retain owned bytes and use native period/word/countdown arithmetic',()=>{
+  const {p,clock,events}=start({speed:0});
+  p.reserveChipWork(5,8);
+  const at=p.bankStart(5);for(let i=0;i<8;i++)p.poke(at+i,i*30);
+  p.extensionPtSamBank(5);assert.strictEqual(p.state.audio.ptSampleBank,at);
+  p.extensionPtSamBank(at+2);assert.strictEqual(p.state.audio.ptSampleBank,at+2);
+  const before=JSON.stringify(p.state.tracker.position);
+  assert.throws(()=>p.extensionPtRawPlay(8,at+6,4,8000),/out of bounds/);
+  assert.strictEqual(JSON.stringify(p.state.tracker.position),before);
+  p.extensionPtRawPlay(8,at,7,8000);p.poke(at,255);
+  const raw=p.state.tracker.position.position;
+  assert.strictEqual(raw.sampler.voices[3].length,6);assert.strictEqual(raw.sampler.voices[3].period,447);
+  assert.deepStrictEqual(Array.from(raw.leases),[0,0,0,1]);clock.tick(20);
+  const chunks=events.filter(e=>e.type==='pcm');assert.strictEqual(chunks[0].channels[3][0],0);
+  assert.strictEqual(p.state.tracker.position.position.sampler.rawMask,0);assert.strictEqual(p.state.tracker.playing,true);
+  assert.throws(()=>p.extensionPtRawPlay(8,at+1,4,8000),/even chip/);
+  p.reserveWork(6,8);assert.throws(()=>p.extensionPtRawPlay(8,p.bankStart(6),4,8000),/generic chip/);
+  assert.throws(()=>p.extensionPtSamBank(99),/not reserved/);assert.strictEqual(p.state.audio.ptSampleBank,at+2);
+  assert.throws(()=>p.extensionPtRawPlay(-1,at,4,8000),/negative voice/);
+  assert.throws(()=>p.extensionPtRawPlay(8,at,-4,8000),/looping/);
+  assert.throws(()=>p.extensionPtRawPlay(8,at,1,8000),/word-rounded/);
+  p.extensionPtRawPlay(8,at,2,0xffff);assert.strictEqual(p.state.tracker.position.position.sampler.voices[3].period,8948);
+  p.extensionPtSamStop(8);p.stop();
+});
+
+test('AMCAF VM: compiled raw-only playback needs no MOD, releases its own wake and claims only selected channels',()=>{
+  const lines=[[t('Reserve As Chip Work'),n(5),t(','),n(4)],
+    [[w(0x21ca)],t('Start'),t('('),n(5),t(')'),t(','),n(128)],
+    [extension(0x142a),n(5)],
+    [extension(0x1412),n(8),t(','),t('Start'),t('('),n(5),t(')'),t(','),n(4),t(','),n(8000)],
+    [t('Wait Key')]];
+  const clock=createFakeTimers(),events=[],p=compile(lines)({now:clock.now,setTimeout:clock.setTimeout,clearTimeout:clock.clearTimeout,audio:{command:e=>events.push(e)}});
+  p.tick(100);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.state.tracker.position.position.sequence,null);
+  assert.strictEqual(p.state.audio.ptSampleBank,p.bankStart(5));clock.tick(20);
+  const chunk=events.find(e=>e.type==='pcm');assert.strictEqual(chunk.mask,8);assert.strictEqual(chunk.channels[3][0],-0.5);
+  assert.strictEqual(clock.pending(),0);assert.strictEqual(p.state.tracker.position.position.sampler.rawMask,0);
+  clock.tick(10000);p.extensionPtRawPlay(8,p.bankStart(5),4,8000);assert.strictEqual(clock.pending(),1);
+  p.stop();clock.tick(200);p.resume();clock.tick(20);assert.strictEqual(clock.pending(),0);p.extensionPtStop();
+});
