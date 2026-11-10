@@ -4,6 +4,11 @@ Assessment updated: 2026-11-02.
 
 ## Ghostlight: AMCAF and Turbo Plus
 
+Priority remains compiling and running Ghostlight in its separate private project.
+The twelve programs in `amcaf_examples/AMCAF_Examples` are a follow-up AMCAF
+compatibility corpus; use relevant examples to unblock Ghostlight, with broader
+example builds/support deferred until that milestone.
+
 The next extension milestone is the unchanged local GhostLight2.amos program,
 on `feature/amcaf-turbo-ghostlight`. The [implementation plan](docs/ghostlight-extension-plan.md)
 records all 13 AMCAF and 5 Turbo Plus encodings used by the game, plus the OS
