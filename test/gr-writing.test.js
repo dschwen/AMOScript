@@ -7,9 +7,9 @@ const hash=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 test('Gr Writing: original token accepts numeric conversion once, stores per-screen mode and rejects unsupported selectors atomically',()=>{
   const calls=[],{program:p}=execute(binary([[w(0x1066),t('Val'),t('('),t('Fsel$'),t('('),text('mode'),t(')'),t(')')],[t('Wait Key')]]),1000,{files:{select({path}){calls.push(path);return '1.9';}}});assert.deepStrictEqual(calls,['mode']);assert.strictEqual(p.display.screen().graphicsMode,1);
   const d=p.display,s=d.screen(),pixels=s.pixels.slice();let hooks=0;d.setDrawingHooks({before(){hooks++;},after(){hooks++;}});d.doubleBuffer();d.autoback(2);const beforeVersion=d.version;
-  for(const mode of [-1,2,3,4,5,6,7,256]){assert.throws(()=>d.grWriting(mode),/Gr Writing/);assert.strictEqual(s.graphicsMode,1);assert.deepStrictEqual(s.pixels,pixels);assert.strictEqual(d.version,beforeVersion);}assert.strictEqual(hooks,0);
+  for(const mode of [-1,3,4,5,6,7,256]){assert.throws(()=>d.grWriting(mode),/Gr Writing/);assert.strictEqual(s.graphicsMode,1);assert.deepStrictEqual(s.pixels,pixels);assert.strictEqual(d.version,beforeVersion);}assert.strictEqual(hooks,0);
   d.grWriting(0);assert.strictEqual(d.version,beforeVersion);d.open(1,16,8,8,0);assert.strictEqual(d.screen().graphicsMode,null);d.grWriting(1);d.select(0);assert.strictEqual(s.graphicsMode,0);p.resetDefault();assert.strictEqual(d.screen().graphicsMode,null);p.stop();
-  assert.throws(()=>compile(binary([[t('Gr Writing'),text('0')]])),/numeric/);assert.throws(()=>execute(binary([[t('Gr Writing'),n(2)]])),/Gr Writing.*line 1/);assert.throws(()=>execute(binary([[t('Screen Close'),n(0)],[t('Gr Writing'),n(0)]])),/not open.*line 2/);
+  assert.throws(()=>compile(binary([[t('Gr Writing'),text('0')]])),/numeric/);assert.throws(()=>execute(binary([[t('Gr Writing'),n(3)]])),/Gr Writing.*line 1/);const complement=execute(binary([[t('Gr Writing'),n(2)],[t('Wait Key')]])).program;assert.strictEqual(complement.display.screen().graphicsMode,2);complement.stop();assert.throws(()=>execute(binary([[t('Screen Close'),n(0)],[t('Gr Writing'),n(0)]])),/not open.*line 2/);
 });
 
 test('Gr Writing: Text JAM1 preserves background and JAM2 uses Ink background for every zero glyph bit',()=>{

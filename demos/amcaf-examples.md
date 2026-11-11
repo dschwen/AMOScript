@@ -2,9 +2,11 @@
 
 [Demo gallery](index.md)
 
-8/12 original programs compile. The working pages include the controller monitor, Bzoom animation, fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+9/12 original programs compile. The working pages include the controller monitor, Bzoom animation, fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
+
+[FileRequester — original graphical file browser](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-filerequester.html): open Data, select a file and click Load, then answer the two original confirmation dialogs. Abort also reaches those dialogs. The screen-to-back gadget exposes a Return to AMOS button on the page.
 
 [GamePorts — original controller monitor](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html): two browser gamepads, keyboard controls for port 1, and clearly labelled simulations for parallel joysticks and second-mouse movement. Escape exits the program after leaving fullscreen.
 
@@ -41,9 +43,9 @@
 | Program | Build | Runtime evidence / first blocker |
 | --- | --- | --- |
 | [BZoomAnimPlayer.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bzoomanimplayer.html) | Compiles | Original 42-frame ANIM, raw-bank continuation and doubled central crop loop with WebGL. |
-| [BankManager.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bankmanager.html) | Blocked | Unsupported token 0x24d0 at line 27, byte 756 |
+| [BankManager.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bankmanager.html) | Blocked | Unsupported extension 8:0x1ac (amcaf-1.50beta4) at line 100, byte 3616 |
 | [BigAmcafIntro.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bigamcafintro.html) | Blocked | Unsupported token 0x10ac at line 21, byte 704 |
-| [FileRequester.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-filerequester.html) | Blocked | Unsupported token 0x24d0 at line 251, byte 10314 |
+| [FileRequester.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-filerequester.html) | Compiles | Original graphical directory/file selection, device aliases, confirmation dialogs and foreground restore with WebGL. |
 | [Fonts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html) | Compiles | Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL. |
 | [GamePorts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html) | Compiles | Original controller monitor, seven-button gamepads, labelled parallel/secondary-mouse simulations and Escape exit. |
 | [Iff2Raw.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html) | Compiles | Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads. |

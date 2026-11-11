@@ -7,6 +7,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   touchMode.value = settings.touch || 'auto';
+  const foregroundButton=document.createElement('button');foregroundButton.type='button';foregroundButton.textContent='Return to AMOS';foregroundButton.id='game-foreground';foregroundButton.hidden=true;viewport.querySelector('.amos-fullscreen-toolbar').append(foregroundButton);foregroundButton.onclick=()=>{if(live)live.amosToFront();foregroundButton.hidden=true;if(host)host.focus();};
   let activeFactory=createProgram;
   let unlinkedRun = '';
   const diskFonts = (settings.diskFonts || []).map(font => ({ ...font, data: Uint8Array.from(font.data) }));
@@ -14,7 +15,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])), [], (settings.directories || []).map(key));
   const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes, name),
     remove: name=>memory.remove(key(name)), list:name=>memory.list(key(name)), freeSpace:name=>memory.freeSpace(key(name)),
-    stat:name=>memory.stat(key(name)), exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
+    devices:()=>memory.devices(),stat:name=>memory.stat(key(name)), exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(settings.amcafAudio ? context=>AMOS_WEB_AUDIO_STREAM(context,AMOS_WEB_AUDIO.createWebAudioHost) : AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
@@ -38,7 +39,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   function start(factory=settings.restartFromEntry?createProgram:activeFactory) {
     const inheritedFonts = (live && live.display.fontsExamined) || diskFonts.length > 0;
     if(factory===createProgram)for(const [name,bytes] of Object.entries(settings.entryFiles||{}))files.write(name,bytes);
-    activeFactory=factory;
+    activeFactory=factory;foregroundButton.hidden=true;
     revision++; const token = revision; failure = ''; unlinkedRun = '';
     if (host) host.detach(); if (live) live.stop(); releaseGpu();
     const next = document.createElement('canvas'); next.id = 'game-input'; next.tabIndex = 0; next.width = 320; next.height = 256;
@@ -50,6 +51,8 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
     live = factory({ systemInfo: settings.systemInfo, displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       system:{command(name,request){
+        if(name==='Amos To Back'){foregroundButton.hidden=false;return;}
+        if(name==='Amos To Front'||name==='Amos Lock'){foregroundButton.hidden=true;return;}
         if(name!=='Run')return;
         const nextFactory=request.filename==null?factory:Object.hasOwn(linkedPrograms,key(request.filename))?linkedPrograms[key(request.filename)]:null;
         if(typeof nextFactory!=='function') {
@@ -94,7 +97,7 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const monitor = setInterval(update, 100);
   function dispose() {
     if (disposed) return Promise.resolve(); disposed = true; revision++; launch++; clearInterval(monitor); ui.dispose();
-    if (host) host.detach(); if (live) live.stop(); releaseGpu();
+    if (host) host.detach(); if (live) live.stop(); releaseGpu();foregroundButton.remove();
     window.removeEventListener('pagehide', dispose);
     return Promise.allSettled([sound.dispose(), fullscreen.dispose()]);
   }

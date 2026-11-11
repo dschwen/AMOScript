@@ -7,6 +7,7 @@ module.exports=async function(browser){
   assert.strictEqual(manifest.programs.length,12);const catalogue=fs.readFileSync(path.join(root,'amcaf-examples.md'),'utf8');
   for(const item of manifest.programs)assert(catalogue.includes('https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+item.file));
   for(const p of manifest.programs){if(p.compiled)continue;await page.goto(pathToFileURL(path.join(root,p.file)).href);assert.strictEqual(await page.locator('pre').textContent(),p.error);assert.strictEqual(await page.locator('#play-game').count(),0);}
+  await require('./checkAmcafRequester')(page,root);
   await require('./checkAmcafDevices')(page,root);
   const fontOracle=require('../fixtures/amcaf/fonts.json'),utility=require('./amcafUtilityFixtures');
   for(const source of ['Fonts.AMOS','Iff2Raw.AMOS','SamBankFixer.AMOS']){

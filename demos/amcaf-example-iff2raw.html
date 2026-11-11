@@ -852,6 +852,7 @@ function createMemoryFiles(initial = {}, choices = [], directories = [], { capac
   const selections = choices.slice(), requests = [];
   return {
     isDirectory,
+    devices(){return [...new Set([...contents.keys(),...knownDirectories].filter(name=>name.includes(':')).map(name=>name.slice(0,name.indexOf(':')+1)))].sort().map(name=>({name,type:1}));},
     stat(name) {
       if(contents.has(name))return {size:contents.get(name).length,directory:false};
       if(isDirectory(name))return {size:0,directory:true};
@@ -878,7 +879,7 @@ function createMemoryFiles(initial = {}, choices = [], directories = [], { capac
     list(name) {
       if (!isDirectory(name)) throw Error('Directory not found: ' + name);
       const prefix = directoryPath(name), result = new Map();
-      for (const key of [...contents.keys(), ...knownDirectories]) if (key.startsWith(prefix) && key !== prefix) {
+      for (const key of [...contents.keys(), ...knownDirectories]) if (key.startsWith(prefix) && key !== prefix && (prefix.includes(':') || !key.includes(':'))) {
         const relative = key.slice(prefix.length), slash = relative.indexOf('/');
         const directory = slash >= 0 || knownDirectories.has(key), canonical = slash >= 0 ? relative.slice(0, slash) : relative;
         const shown = (displayNames.get(key) || key).slice(prefix.length).split('/')[0];
@@ -916,6 +917,7 @@ function createNodeFiles(directory = '.') {
     catch (error) { if (['ENOENT', 'ENOTDIR'].includes(error.code)) return null; throw error; }
   }
   return {
+    devices(){return [];},
     stat(name) { const entry=stat(name);if(!entry){const error=Error('File not found: '+name);error.code='ENOENT';throw error;}return {size:entry.isDirectory()?0:entry.size,directory:entry.isDirectory()}; },
     exists: name => stat(name) != null,
     isDirectory(name) { const entry = stat(name); return !!entry && entry.isDirectory(); },
@@ -3552,11 +3554,15 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const cursor=[target.gx,target.gy],old=clippingGraphics;clippingGraphics=true;
     try{return painter(...args);}finally{[target.gx,target.gy]=cursor;clippingGraphics=old;}
   }
-  let clippingGraphics=true, rasterMasks=true;
+  let clippingGraphics=true, rasterMasks=true, complementGraphics=false;
   function drawing(painter, args) {
+    const target=screen();
+    if(target.graphicsMode===2&&[plot,draw,drawTo,box,circle,ellipse,text,paint,polyline].includes(painter))throw Error('Complement graphics currently supports solid Bar only');
+    if(target.graphicsMode===2&&painter===bar&&(target.fillPattern||target.paintBorder))throw Error('Complement Bar requires solid fill without a border');
+    const previousComplement=complementGraphics;complementGraphics=target.graphicsMode===2&&painter===bar;
     const previousClip=clippingGraphics, previousMask=rasterMasks;clippingGraphics=![write,centre,clearLine,clear,clearWindow].includes(painter);
     rasterMasks=![write,centre,clearLine,clear,clearWindow,clearRect].includes(painter);
-    try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;rasterMasks=previousMask;}
+    try {return drawOwned(painter,args);}finally{clippingGraphics=previousClip;rasterMasks=previousMask;complementGraphics=previousComplement;}
   }
   function drawOwned(painter,args) {
     const target = screen();
@@ -3682,7 +3688,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function grWriting(mode) {
     const target = screen(); whole(mode);
-    if (mode !== 0 && mode !== 1) throw new Error('Unsupported Gr Writing mode (expected 0 or 1)');
+    if (![0,1,2].includes(mode)) throw new Error('Unsupported Gr Writing mode (expected 0, 1 or bounded complement 2)');
     target.graphicsMode = mode;
   }
   /* AMOS pattern resource notice:
@@ -3961,7 +3967,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const clip=clippingGraphics&&target.graphicsClip||{left:0,top:0,right:target.width,bottom:target.height};
       for (let y = Math.max(0, top,clip.top); y <= Math.min(target.height - 1, bottom,clip.bottom-1); y++) {
         if (left < clip.right && right >= clip.left) {
-          if(!target.fillPattern) {
+          if(complementGraphics){const mask=target.graphicsPlaneMask&(target.colours-1);for(let x=Math.max(0,left,clip.left);x<=Math.min(target.width-1,right,clip.right-1);x++)target.pixels[y*target.width+x]^=mask;}
+          else if(!target.fillPattern) {
             const first=Math.max(0,left,clip.left),last=Math.min(target.width-1,right,clip.right-1);
             if (!rasterMasks || (target.graphicsPlaneMask & (target.colours-1)) === target.colours-1) target.pixels.fill(colour,y*target.width+first,y*target.width+last+1);
             else for(let x=first;x<=last;x++)pixel(target,x,y,colour);
@@ -4052,6 +4059,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function polygon(points) {
     const target = screen();
+    if(target.graphicsMode===2)throw Error('Complement Polygon is not implemented');
     if (!Array.isArray(points) || points.length < 3 || points.length > 16 ||
         points.some(pair => !Array.isArray(pair) || pair.length !== 2 || pair.some(value => !Number.isInteger(value) || value < -32768 || value > 32767))) {
       throw new Error('Polygon requires 3..16 signed-word coordinate pairs');
@@ -5554,6 +5562,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       const result = request==null?options.system.command(name):options.system.command(name,request);
       if (result && typeof result.then === 'function') throw new Error('System host commands must complete synchronously');
     }
+    if (name === 'Amos To Back') state.system.amosFront = false;
+    if (name === 'Request On') state.system.requesterTarget = 'amos';
     if (name === 'Amos To Front') state.system.amosFront = true;
     if (name === 'Request Off') state.system.requesterTarget = 'off';
     if (name === 'Flush Libs') state.system.libraryFlushRequests = (state.system.libraryFlushRequests || 0) + 1;
@@ -5975,15 +5985,12 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if(!length||length>16*1024*1024)throw Error('Wsave requires 1 byte..16 MiB');
     bsave(filename,address,address+length);
   }
-  let examinedObject=null;
-  function examineObject(filename) {
-    const name=resolveFileName(filename);
-    if(!options.files||typeof options.files.stat!=='function')throw Error('Examine Object requires a synchronous files.stat adapter');
-    const metadata=options.files.stat(name);
-    if(!metadata||typeof metadata.then==='function'||!Number.isSafeInteger(metadata.size)||metadata.size<0||metadata.size>2147483647||typeof metadata.directory!=='boolean')throw Error('Invalid synchronous object metadata');
-    examinedObject=Object.freeze({name,size:metadata.size,directory:metadata.directory});
-  }
-  function objectSize(){if(!examinedObject)throw Error('Examine Object first');return examinedObject.size;}
+  let amcafDos=null;
+  function dos(){if(!amcafDos)amcafDos=amcafDosFactory({files:options.files,resolve:resolveFileName,pattern:amcafPatternFactory,devices:fileDevices});return amcafDos;}
+  function examineObject(name){dos().examine(name);}
+  function objectSize(){return dos().get().size;}
+  function fileDevices(){if(!options.files||typeof options.files.devices!=='function')throw Error('Device enumeration requires synchronous files.devices');const items=options.files.devices();if(!Array.isArray(items)||items.length>256)throw Error('Invalid device listing');const seen=new Set();return Array.from(items,e=>{if(!e||typeof e.name!=='string'||e.name.length>29||!e.name.endsWith(':')||/[\x00-\x1f\x7f\u0100-\uffff]/.test(e.name)||/[\/:]/.test(e.name.slice(0,-1))||![0,1,2].includes(e.type)||seen.has(e.name.toUpperCase()))throw Error('Invalid device metadata');seen.add(e.name.toUpperCase());return Object.freeze({name:e.name,type:e.type});});}
+  function deviceFirst(filter){if(!['','D','A','d','a'].includes(filter))throw Error('Dev First$ supports empty, D or A filters');const entries=fileDevices().filter(e=>!filter||((filter.toUpperCase()==='D')===(e.type===0))).sort((a,b)=>a.name.toUpperCase()<b.name.toUpperCase()?-1:1);directoryEntries=entries.map(e=>('*'+e.name).padEnd(30,' ')+'        ');directoryPosition=0;return directoryNext();}
   function peekString(address,length,delimiter=null) {
     address=integer(address);length=Math.min(integer(length)>>>0,0xffc0);
     if(delimiter!=null&&(typeof delimiter!=='string'||/[^\x00-\xff]/.test(delimiter)))throw Error('Peek$ delimiter requires byte characters');
@@ -7470,11 +7477,17 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
 
   return {
     amosScreenOpen,
+    amosHere:()=>state.system.amosFront?-1:0,amosToBack:()=>systemCommand('Amos To Back'),requestOn:()=>systemCommand('Request On'),
     amosToFront: () => systemCommand('Amos To Front'),
     requestOff: () => systemCommand('Request Off'),
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    deviceFirst,extensionExamineDir:name=>dos().examineDir(name),extensionExamineNext:()=>dos().next(),extensionExamineStop:()=>dos().stop(),
+    extensionObjectType:()=>dos().get().directory?2:-3,extensionObjectName:()=>dos().get().name,
+    extensionObjectDate:()=>dos().get().date,extensionObjectTime:()=>dos().get().time,extensionObjectProtection:()=>dos().get().protection,extensionObjectComment:()=>dos().get().comment,
+    extensionDateString:value=>dos().dateString(integer(value)),extensionTimeString:value=>dos().timeString(integer(value)),extensionProtectionString:value=>dos().protectionString(integer(value)),
+    extensionIoError:()=>dos().error(),extensionIoErrorString:value=>dos().errorString(integer(value)),extensionDiskType:name=>dos().diskType(name),extensionPatternMatch:(value,pattern)=>amcafPatternFactory(value,pattern),
     extensionExamineObject:examineObject,extensionObjectSize:objectSize,extensionObjectSizeNamed(name){examineObject(name);return objectSize();},
     extensionBzoom:(...args)=>display.bzoom(...args.map(integer)),
     peekString,extensionItemString:itemString,extensionPtSamPlay:ptSamPlay,
@@ -9938,6 +9951,75 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   return { decode, encode };
 };
+  const amcafPatternFactory = function matchAmcafPattern(value,pattern) {
+ const bytes=v=>typeof v==='string'&&!/[^\x01-\xff]/.test(v);
+ if(!bytes(value)||!bytes(pattern)||value.length>255||pattern.length>255)throw Error('Pattern Match requires at most 255 non-NUL byte characters');
+ const upper=v=>v.replace(/[a-z]/g,c=>String.fromCharCode(c.charCodeAt(0)-32));
+ value=upper(value);pattern=upper(pattern.replace(/\*/g,'#?')||'#?');
+ let at=0,id=0,depth=0;
+ const node=(kind,data)=>({kind,data,id:id++});
+ const fail=()=>{throw Error('Invalid DOS pattern');};
+ function sequence(){const terms=[];while(at<pattern.length&&pattern[at]!==')'&&pattern[at]!=='|')terms.push(atom());return node('sequence',terms);}
+ function choice(){const terms=[sequence()];while(pattern[at]==='|'){at++;terms.push(sequence());}return node('choice',terms);}
+ function atom(){if(++depth>32)fail();let result;const c=pattern[at++];
+  if(c==='#'||c==='~'){if(at===pattern.length)fail();result=node(c==='#'?'repeat':'not',atom());}
+  else if(c==='('){result=choice();if(pattern[at++]!==')')fail();}
+  else if(c==='?')result=node('any');
+  else if(c==='%')result=node('sequence',[]);
+  else if(c==="'"){if(at===pattern.length)fail();result=node('literal',pattern[at++]);}
+  else if(c==='['){let inverse=false;if(pattern[at]==='~'){inverse=true;at++;}const ranges=[];while(at<pattern.length&&pattern[at]!==']'){let start=pattern[at++];if(start==="'"){if(at===pattern.length)fail();start=pattern[at++];}let end=start;if(pattern[at]==='-'&&pattern[at+1]!==']'){at++;end=pattern[at++];if(end===undefined||end<start)fail();}ranges.push([start,end]);}if(pattern[at++]!==']'||!ranges.length)fail();result=node('class',{inverse,ranges});}
+  else if(c===']'||c===')'||c==='|')fail();else result=node('literal',c);
+  depth--;return result;
+ }
+ const ast=choice();if(at!==pattern.length)fail();
+ const memo=new Map();let budget=500000;
+ const spend=()=>{if(--budget<0)throw Error('Pattern Match budget exceeded');};
+ function ends(n,start){spend();const key=n.id+':'+start;if(memo.has(key))return memo.get(key);let out=new Set();
+  if(n.kind==='literal'){if(value[start]===n.data)out.add(start+1);}
+  else if(n.kind==='any'){if(start<value.length)out.add(start+1);}
+  else if(n.kind==='class'){if(start<value.length&&n.data.ranges.some(([a,b])=>value[start]>=a&&value[start]<=b)!==n.data.inverse)out.add(start+1);}
+  else if(n.kind==='choice'){for(const term of n.data)for(const end of ends(term,start)){spend();out.add(end);}}
+  else if(n.kind==='sequence'){out.add(start);for(const term of n.data){const next=new Set();for(const p of out)for(const end of ends(term,p)){spend();next.add(end);}out=next;}}
+  else if(n.kind==='not'){const denied=ends(n.data,start);for(let end=start;end<=value.length;end++)if(!denied.has(end)){spend();out.add(end);}}
+  else if(n.kind==='repeat'){out.add(start);const queue=[start];for(let i=0;i<queue.length;i++)for(const end of ends(n.data,queue[i]))if(!out.has(end)){{spend();out.add(end);}queue.push(end);}}
+  memo.set(key,out);return out;
+ }
+ return ends(ast,0).has(value.length)?-1:0;
+};
+  const amcafDosFactory = function createAmcafDos({files,resolve,pattern,devices:readDevices}) {
+ let object=null,cursor=null,ioError=0;
+ const byteString=(v,limit=255)=>typeof v==='string'&&v.length<=limit&&!/[^\x01-\xff]/.test(v);
+ function fault(error){ioError=Number.isInteger(error.ioError)?error.ioError:error.code==='ENOENT'?205:error.code==='ENOTDIR'?212:error.code==='EACCES'?224:1;throw error;}
+ function snapshot(name,m){
+  if(!m||typeof m.then==='function'||!Number.isInteger(m.size)||m.size<0||m.size>2147483647||typeof m.directory!=='boolean')throw Error('Invalid synchronous object metadata');
+  const value={name:m.name==null?name.replace(/[:/]+$/,'').split(/[:/]/).pop():m.name,size:m.size,directory:m.directory,date:m.date==null?0:m.date,time:m.time==null?0:m.time,protection:m.protection==null?0:m.protection,comment:m.comment==null?'':m.comment};
+  if(!byteString(value.name)||!byteString(value.comment,79)||!Number.isInteger(value.date)||value.date<0||value.date>44559||!Number.isInteger(value.time)||value.time<0||value.time>>>16>1439||(value.time&65535)>2999||!Number.isInteger(value.protection)||value.protection< -2147483648||value.protection>2147483647)throw Error('Invalid extended object metadata');
+  return Object.freeze(value);
+ }
+ function stat(name){if(!files||typeof files.stat!=='function')throw Error('Examine Object requires a synchronous files.stat adapter');return snapshot(name,files.stat(name));}
+ function examine(name){name=resolve(name);try{const next=stat(name);object=next;ioError=0;}catch(error){fault(error);}}
+ function stop(){cursor=null;}
+ function examineDir(name){name=resolve(name);stop();try{
+  const meta=stat(name);if(!meta.directory){const e=Error('Not a directory: '+name);e.code='ENOTDIR';throw e;}
+  if(typeof files.list!=='function')throw Error('Examine Dir requires a synchronous files.list adapter');
+  const entries=files.list(name);if(!Array.isArray(entries)||entries.length>4096)throw Error('Invalid synchronous directory listing');
+  const list=Array.from(entries,e=>{if(!e||!byteString(e.name)||!e.name||/[\/:]/.test(e.name))throw Error('Invalid directory entry');return snapshot(e.name,e);});
+  cursor={entries:list,index:0};object=meta;ioError=0;
+ }catch(error){fault(error);}}
+ function next(){if(!cursor)throw Error('Examine Dir first');if(cursor.index===cursor.entries.length){stop();ioError=232;return '';}
+  object=cursor.entries[cursor.index++];ioError=0;return object.name;
+ }
+ function get(){if(!object)throw Error('Examine Object first');return object;}
+ function devices(){return readDevices();}
+ function diskType(name){if(!byteString(name)||!name.includes(':'))throw Error('Disk Type requires a volume or assign name');const key=name.slice(0,name.indexOf(':')+1).toUpperCase(),entry=devices().find(e=>e.name.toUpperCase()===key);if(!entry){const e=Error('Object not found: '+name);e.code='ENOENT';fault(e);}return entry.type;}
+ const pad=v=>String(v).padStart(2,'0');
+ return {examine,examineDir,next,stop,get,devices,diskType,pattern,
+  error:()=>ioError,errorString:code=>({0:'No error',205:'Object not found',212:'Object is not a directory',224:'Read protected',232:'No more entries'}[code]||'I/O error '+code),
+  dateString(days){if(!Number.isInteger(days)||days<0||days>44559)throw Error('Cd Date$ supports 1978..2099');const d=new Date(Date.UTC(1978,0,1)+days*86400000);return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()]+' '+pad(d.getUTCDate())+'-'+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()]+'-'+pad(d.getUTCFullYear()%100);},
+  timeString(time){const minutes=time>>>16,ticks=time&65535;if(!Number.isInteger(time)||time<0||minutes>1439||ticks>2999)throw Error('Invalid AMCAF packed time');return pad(Math.floor(minutes/60))+':'+pad(minutes%60)+':'+pad(Math.floor(ticks/50));},
+  protectionString(value){let result='';const table='dewr----apsh';for(let bit=7;bit>=0;bit--)result+=table[bit+((value&(1<<bit))?4:0)];return result;}
+ };
+};
   const musicReaderFactory = function readMusicBank(bytes) {
   const fail = message => { throw new Error(`AMOS Music: ${message}`); };
   if (!ArrayBuffer.isView(bytes) || Object.prototype.toString.call(bytes) !== '[object Uint8Array]') fail('expected byte storage');
@@ -11945,6 +12027,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   touchMode.value = settings.touch || 'auto';
+  const foregroundButton=document.createElement('button');foregroundButton.type='button';foregroundButton.textContent='Return to AMOS';foregroundButton.id='game-foreground';foregroundButton.hidden=true;viewport.querySelector('.amos-fullscreen-toolbar').append(foregroundButton);foregroundButton.onclick=()=>{if(live)live.amosToFront();foregroundButton.hidden=true;if(host)host.focus();};
   let activeFactory=createProgram;
   let unlinkedRun = '';
   const diskFonts = (settings.diskFonts || []).map(font => ({ ...font, data: Uint8Array.from(font.data) }));
@@ -11952,7 +12035,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])), [], (settings.directories || []).map(key));
   const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes, name),
     remove: name=>memory.remove(key(name)), list:name=>memory.list(key(name)), freeSpace:name=>memory.freeSpace(key(name)),
-    stat:name=>memory.stat(key(name)), exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
+    devices:()=>memory.devices(),stat:name=>memory.stat(key(name)), exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(settings.amcafAudio ? context=>AMOS_WEB_AUDIO_STREAM(context,AMOS_WEB_AUDIO.createWebAudioHost) : AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
@@ -11976,7 +12059,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   function start(factory=settings.restartFromEntry?createProgram:activeFactory) {
     const inheritedFonts = (live && live.display.fontsExamined) || diskFonts.length > 0;
     if(factory===createProgram)for(const [name,bytes] of Object.entries(settings.entryFiles||{}))files.write(name,bytes);
-    activeFactory=factory;
+    activeFactory=factory;foregroundButton.hidden=true;
     revision++; const token = revision; failure = ''; unlinkedRun = '';
     if (host) host.detach(); if (live) live.stop(); releaseGpu();
     const next = document.createElement('canvas'); next.id = 'game-input'; next.tabIndex = 0; next.width = 320; next.height = 256;
@@ -11988,6 +12071,8 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
     const guard = fn => () => { if (!disposed && token === revision) try { fn(); } catch (error) { fail(error); } };
     live = factory({ systemInfo: settings.systemInfo, displayOptions: { diskFonts }, sleepScale: Number(speed.value), files, audio: sound.bind(), now: () => performance.now(),
       system:{command(name,request){
+        if(name==='Amos To Back'){foregroundButton.hidden=false;return;}
+        if(name==='Amos To Front'||name==='Amos Lock'){foregroundButton.hidden=true;return;}
         if(name!=='Run')return;
         const nextFactory=request.filename==null?factory:Object.hasOwn(linkedPrograms,key(request.filename))?linkedPrograms[key(request.filename)]:null;
         if(typeof nextFactory!=='function') {
@@ -12032,7 +12117,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   const monitor = setInterval(update, 100);
   function dispose() {
     if (disposed) return Promise.resolve(); disposed = true; revision++; launch++; clearInterval(monitor); ui.dispose();
-    if (host) host.detach(); if (live) live.stop(); releaseGpu();
+    if (host) host.detach(); if (live) live.stop(); releaseGpu();foregroundButton.remove();
     window.removeEventListener('pagehide', dispose);
     return Promise.allSettled([sound.dispose(), fullscreen.dispose()]);
   }

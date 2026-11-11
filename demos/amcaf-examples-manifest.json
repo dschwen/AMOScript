@@ -24,7 +24,7 @@
       },
       "runtime": "Not executed: compilation blocked.",
       "compiled": false,
-      "error": "Unsupported token 0x24d0 at line 27, byte 756"
+      "error": "Unsupported extension 8:0x1ac (amcaf-1.50beta4) at line 100, byte 3616"
     },
     {
       "source": "BigAmcafIntro.AMOS",
@@ -46,9 +46,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported token 0x24d0 at line 251, byte 10314"
+      "runtime": "Original graphical directory/file selection, device aliases, confirmation dialogs and foreground restore with WebGL.",
+      "compiled": true
     },
     {
       "source": "Fonts.AMOS",

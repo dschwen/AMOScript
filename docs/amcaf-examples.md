@@ -9,11 +9,26 @@ separate private project and are not part of this collection.
 **[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
-coverage are separate: currently **8/12 compile and run**, covering GamePorts, Bzoom animation, fonts, IFF
-conversion, sample-bank fixing, quick maths and both Protracker interfaces.
+coverage are separate: currently **9/12 compile and run**, including the original graphical FileRequester,
+GamePorts, Bzoom animation, fonts, IFF conversion, sample-bank fixing, quick maths
+and both Protracker interfaces.
 
 See the [font and converter implementation contract](amcaf-fonts.md) for native
 formats, supported bounds and lifecycle rules.
+
+## Working example: FileRequester
+
+[FileRequester](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-filerequester.html)
+runs the original graphical requester over preloaded session files. Open Data,
+select a file, press Load and answer the two original confirmation dialogs.
+The filename field supports normal typing/backspace. The screen-to-back gadget
+exposes a **Return to AMOS** control in the page toolbar; it supplies no keypress.
+The page explicitly supplies the existing read-only Exec version 39 profile.
+
+Directory enumeration and metadata use synchronous adapters, with portable epoch
+1978/date, midnight/time, empty comments and protection 0 defaults when a host
+has no such metadata. Volume aliases are explicit assigns, not detected hardware
+volumes. See [the requester contract](amcaf-requester.md).
 
 ## Working examples: GamePorts and Bzoom
 
@@ -187,8 +202,8 @@ Unknown commands are never registered as successful no-ops to get a build.
 | GamePorts | Complete original input loop, seven-button gamepads, keyboard, parallel simulations, second-mouse movement, GPU parity and Escape cleanup | Portable controller mappings and declared simulated parallel/mouse inputs; physical Amiga hardware/native captures remain open. |
 | SamBankFixer | Original load, four-voice playback, key prompt, first PCM-word fix and saved-byte download | Browser uploads and a declared synthetic sample exercise the workflow. Native audio captures remain open. |
 | Iff2Raw | Original raw/ByteRun1 conversion and exact palette/plane-major output | Bounded word-aligned, unmasked ILBM inputs tested. Arbitrary malformed files and AGA display are separate. |
-| FileRequester | Core Amos Here `$24d0` | Filename/path helpers now compile; core host metadata, patterns, directory/object metadata, IO errors, font/drawing helpers and requester interaction remain. |
-| BankManager | Core Amos Here `$24d0` | Core/standard extension gaps plus bank naming, relocation, transforms, compression and requester utilities. |
+| FileRequester | Complete original directory/file selection, filename editing, foreground restoration, confirmation dialogs and natural End | Checked adapter metadata and bounded DOS patterns; native locks, localized OS messages, arbitrary OS device lists and native captures remain open. |
+| BankManager | Bank Code Add.w `$01ac`, line 100 | Shared requester commands now compile. Bank transforms/naming/relocation, compression and additional standard-extension commands remain. |
 | BZoomAnimPlayer | Original 42-frame ANIM, raw-bank frame continuations, doubled crop, loops and Escape exit | Ninety independent application frames and six GPU comparisons; wider Bzoom alias/geometry cases remain gated. |
 | ShowAGAPic | Native code-region validation at byte 4786 | The static walk also reports an encrypted/compiled procedure. Establish a supported source representation before adding AGA display. Preserve the original; do not silently skip protected code or emulate AGA with an OCS-labelled output. |
 
