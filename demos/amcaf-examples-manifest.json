@@ -93,7 +93,7 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues.",
+      "runtime": "Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The restored original packed tune drives the drum/text synchronization cues.",
       "compiled": true
     },
     {

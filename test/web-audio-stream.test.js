@@ -69,3 +69,22 @@ test('Web Audio PCM: standalone composition rejects async native commands and cl
   const async=create(context,()=>({command:()=>Promise.resolve(),activeVoices:()=>[],dispose(){}}));
   assert.throws(()=>async.command({type:'stop',mask:15}),/synchronously/);async.dispose();
 });
+
+test('Web Audio PCM: delayed first catch-up uses production lag, discards stale blocks and preserves the current timeline',()=>{
+ const{host,context,sources}=fixture();context.currentTime=10;
+ for(let i=0;i<100;i++)host.command({...block(i*160),lag:(99-i)*.02});
+ assert(sources.length<20,'expired catch-up audio must not be replayed');assert(sources.every(s=>s.started[0]<=10.08));
+ context.currentTime=10.02;host.command(block(16000));assert(sources.at(-1).started[0]<=10.1);
+ host.command({type:'stop',mask:15});for(const lag of [-1,NaN,Infinity,5.1])assert.throws(()=>host.command({...block(),lag}),/lag/);host.dispose();
+});
+
+test('Web Audio PCM: real AMCAF playback can catch up its first two seconds without exceeding host lookahead',()=>{
+ const{host,context,sources}=fixture();context.currentTime=10;
+ const factories={stream:require('../lib/amos/amcafStream'),sequence:require('../lib/amos/amcafSequencer'),pitch:require('../lib/amos/amcafPitch'),pcm:require('../lib/amos/amcafPcm')};
+ const p=require('../lib/amos/amcafPlayback')(require('./helpers/amcafPreviewModule')(),factories,{sampleRate:8000,cia:false,host});p.advance(100);
+ assert.strictEqual(p.state.position.sequence.ticks,100);assert(sources.length<20);assert(sources.some(s=>s.buffer.data.some(Boolean)));p.stop();host.dispose();
+});
+
+test('Web Audio PCM: trimming near the time-zero boundary never passes a negative start time to Web Audio',()=>{
+ const{host,sources}=fixture();host.command({...block(0,1),lag:.060000000000000005});host.command(block(160,1));assert.strictEqual(sources.at(-1).started[0],0);host.dispose();
+});

@@ -2,7 +2,7 @@
 
 [Demo gallery](index.md)
 
-6/12 original programs compile. The working pages include fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources, four original data files and the separately recovered 4 spirits module are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+6/12 original programs compile. The working pages include fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
 
@@ -10,7 +10,7 @@
 
 [IFF to raw converter](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html) and [Sample-bank fixer](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-sambankfixer.html): upload an input file or use the synthetic sample, start the original program and download its output. The fixer waits for Space after each sample.
 
-[Protracker1 — original music interface](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html): play the recovered 4 spirits tune. Typing mode is selected. Use arrows to adjust volume/tempo and keys 1–4 to toggle voices. A mouse button on the canvas exits. The recovered tune has no drum/text synchronization cues.
+[Protracker1 — original music interface](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html): play the recovered 4 spirits tune. Typing mode is selected. Use arrows to adjust volume/tempo and keys 1–4 to toggle voices. A mouse button on the canvas exits. The restored original packed tune drives the drum/text synchronization cues.
 
 [Protracker2 — original music visualizer](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html): start the supplied Hawkeye tune, watch the frequency meters and note trail, then press a mouse button on the canvas to exit.
 
@@ -43,7 +43,7 @@
 | [Fonts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html) | Compiles | Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL. |
 | [GamePorts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html) | Blocked | Unsupported extension 8:0x15be (amcaf-1.50beta4) at line 14, byte 720 |
 | [Iff2Raw.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html) | Compiles | Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads. |
-| [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Compiles | Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues. |
+| [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Compiles | Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The restored original packed tune drives the drum/text synchronization cues. |
 | [Protracker2.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html) | Compiles | Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL. |
 | [QsinCosArcSqr.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-qsincosarcsqr.html) | Compiles | Original input loop, three mouse directions, double-buffer publication and Escape exit covered. |
 | [SamBankFixer.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-sambankfixer.html) | Compiles | Original sample-bank playback, key prompt, PCM-word fix and saved-file download. |

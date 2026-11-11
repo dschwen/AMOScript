@@ -39,7 +39,7 @@ module.exports=async function(browser){
   await page.goto(pathToFileURL(path.join(root,first.file)).href);
   await page.evaluate(()=>{
     const make=AMOS_BROWSER.createCanvasHost;
-    AMOS_BROWSER.createCanvasHost=(...args)=>{const host=make(...args);return{...host,attach(p){window.protracker1=p;return host.attach(p);}};};
+    AMOS_BROWSER.createCanvasHost=(...args)=>{const host=make(...args);return{...host,attach(p){window.protracker1=p;const tick=p.tick.bind(p);let stalled=false;p.tick=(...args)=>{const result=tick(...args);if(!stalled&&p.state.tracker.playing){stalled=true;const until=performance.now()+1300;while(performance.now()<until){} }return result;};return host.attach(p);}};};
     const start=AudioBufferSourceNode.prototype.start;window.protrackerAudibleStarts=0;
     AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer&&this.buffer.getChannelData(0).some(value=>value!==0))protrackerAudibleStarts++;return start.apply(this,args);};
   });
@@ -50,7 +50,15 @@ module.exports=async function(browser){
   for(const [key,name,value]of [['1','voi',14],['1','voi',15],['2','voi',13],['2','voi',15],['3','voi',11],['3','voi',15],['4','voi',7],['4','voi',15],['ArrowDown','vol',63],['ArrowUp','vol',64],['ArrowLeft','bpm',124],['ArrowRight','bpm',125]]){
     await page.keyboard.press(key);await page.waitForFunction(([name,value])=>protracker1.state.variables['int_'+name]===value,[name,value]);
   }
-  await page.locator('#game-stop').evaluate(node=>node.click());
+  await page.locator('.game-debug').evaluate(node=>node.open=true);
+  await page.locator('[data-debug-log]').selectText();const selectedLog=await page.locator('[data-debug-log]').textContent();
+  await page.locator('#game-stop').evaluate(node=>node.click());await page.waitForTimeout(250);
+  assert.strictEqual(await page.locator('[data-debug-log]').textContent(),selectedLog);assert.strictEqual(await page.evaluate(()=>getSelection().toString()),selectedLog);
+  await page.evaluate(()=>{Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText(text){window.copiedDebug=text;return Promise.resolve();}}});});
+  await page.locator('[data-debug-copy]').evaluate(node=>node.click());assert.strictEqual(await page.evaluate(()=>window.copiedDebug),selectedLog);
+  await page.evaluate(()=>getSelection().removeAllRanges());await page.waitForFunction(()=>document.querySelector('[data-debug-log]').textContent.includes('"phase": "stopped"'));
+  await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:undefined}));await page.locator('[data-debug-copy]').evaluate(node=>node.click());assert.strictEqual(await page.evaluate(()=>getSelection().toString()),await page.locator('[data-debug-log]').textContent());await page.evaluate(()=>getSelection().removeAllRanges());
+  await page.locator('.game-debug').evaluate(node=>node.open=false);
   const firstTick=await page.evaluate(()=>protracker1.state.tracker.position.position.sequence.ticks);
   await page.waitForTimeout(60);assert.strictEqual(await page.evaluate(()=>protracker1.state.tracker.position.position.sequence.ticks),firstTick);
   await page.locator('#game-resume').evaluate(node=>node.click());
@@ -69,7 +77,7 @@ module.exports=async function(browser){
   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());
   const music=manifest.programs.find(p=>p.source==='Protracker2.AMOS');assert(music.compiled);
   await page.goto(pathToFileURL(path.join(root,music.file)).href);
-  await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const h=make(...args);return{...h,attach(p){window.protracker2=p;return h.attach(p);}};};});
+  await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const h=make(...args);return{...h,attach(p){window.protracker2=p;const tick=p.tick.bind(p);let stalled=false;p.tick=(...args)=>{const result=tick(...args);if(!stalled&&p.state.tracker.playing){stalled=true;const until=performance.now()+1300;while(performance.now()<until){} }return result;};return h.attach(p);}};};});
   await page.click('#play-game');await page.waitForFunction(()=>window.protracker2?.state.tracker.position?.position.sequence.ticks>=12);
   assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-backend'),'webgl');assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-source-error'),'');
   await page.locator('#game-stop').evaluate(node=>node.click());const meterTick=await page.evaluate(()=>protracker2.state.tracker.position.position.sequence.ticks);await page.waitForTimeout(60);assert.strictEqual(await page.evaluate(()=>protracker2.state.tracker.position.position.sequence.ticks),meterTick);

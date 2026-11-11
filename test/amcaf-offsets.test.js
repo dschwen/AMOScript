@@ -82,7 +82,7 @@ test('AMCAF PCM offsets: shifted initial fetch reaches its original repeat and f
 });
 test('AMCAF 4 spirits: all first-wrap DMA fetches and row positions match the independent native register audit', () => {
   const oracle = require('./fixtures/amcaf/spirits.json');
-  const bytes = require('fs').readFileSync(__dirname + '/../examples/AMCAF/AMCAF_Examples/Data/mod.4spirits');
+  const bytes = require('fs').readFileSync(__dirname + '/fixtures/amcaf/modland-4spirits.mod');
   assert.strictEqual(crypto.createHash('sha256').update(bytes).digest('hex'), oracle.sha256);
   const module = require('../lib/amos/mod')(bytes), player = sequence(module, pitch), sampler = pcm(module.samples);
   const dma = crypto.createHash('sha256'), rows = crypto.createHash('sha256');

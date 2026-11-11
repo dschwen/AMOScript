@@ -139,7 +139,7 @@ without a note may retrigger at counter zero. E90 supplies no extra starts.
 Each retrigger restarts the retained fetch, restores the base period and writes
 the current repeat region. Voice masks suppress retrigger DMA.
 
-The recovered 4 spirits module completes its first wrap in 19,892 ticks and
+The separately retained Modland 4 spirits fixture completes its first wrap in 19,892 ticks and
 3,232 rows. Its 6,531 starts include 1,365 shifted starts. The independent Python
 audit in `tools/reference/check_amcaf_spirits.py` hashes every start address,
 length, instrument and channel, plus all row positions. Tests compare that
@@ -148,3 +148,15 @@ PCM followed by its original repeat region. Browser checks run the original
 interface with WebGL, audible Web Audio buffers, keyboard controls, pause/resume
 and its natural mouse exit. The headless source test also completes a music
 wrap before exiting through the original mouse condition.
+
+
+## Delayed PCM delivery
+
+AMCAF playback marks catch-up PCM blocks with their age relative to the current
+field clock. When the Web Audio host first sees a stream (also after mute or
+suspension), it subtracts that age from its audio-clock anchor. Expired samples
+are trimmed or discarded on the original timeline. A delayed first callback
+therefore does not replay seconds of old audio or overflow the bounded future
+queue. Contiguity, node limits and the one-second lookahead guard stay enforced.
+The optional lag is finite and bounded by the player's five-second catch-up
+limit. Music tempo and sequencer progress are unchanged.

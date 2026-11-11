@@ -93,3 +93,6 @@ test('AMCAF Pt Voice: pause retains the user mask; raw DMA is silenced without d
  p.setVoiceMask(0,101.5);assert.deepStrictEqual(p.state.position.leases,leases);assert.strictEqual(p.state.position.sampler.rawMask,8);assert.strictEqual(p.state.position.sampler.voices[3].active,false);
  p.advance(104);assert.strictEqual(p.state.position.sampler.rawMask,0);assert.strictEqual(p.state.position.mask,0);p.stop();
 });
+test('AMCAF clock: a delayed first advance tags each PCM block with its age instead of replaying catch-up as future audio',()=>{
+ const events=[],p=create(moduleData(),factories,{cia:false,sampleRate:8000,host:{command:e=>events.push(e)}});p.advance(100);const blocks=events.filter(e=>e.type==='pcm');assert.strictEqual(blocks.length,100);assert.strictEqual(blocks[0].lag,1.98);assert.strictEqual(blocks.at(-1).lag,undefined);assert.strictEqual(blocks.at(-1).frame,15840);p.stop();
+});

@@ -1,7 +1,7 @@
 # Original AMCAF example collection
 
 The supplied distribution now lives under `examples/AMCAF/`, preserving its
-`AMCAF_Examples` directory, twelve `.AMOS` files, four `Data` assets, Workbench
+`AMCAF_Examples` directory, twelve `.AMOS` files, eleven `Data` assets, Workbench
 metadata and original assign script. Program bytes are unchanged; the inventory
 pins their SHA-256 hashes. Ghostlight sources/assets/builds remain in their
 separate private project and are not part of this collection.
@@ -75,10 +75,10 @@ left/right change tempo, and keys 1–4 toggle the four music voices. A mouse
 button on the canvas exits. Page Stop/Resume pauses VM and music together.
 [Play Protracker1](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html).
 
-The recovered module contains no AMCAF effect-8 synchronization cells, so its
-drum sprites stay at their initial images and the text cues remain inactive.
-The linked drum harness cycles all six original frame lists. The complete
-first music wrap matches 6,531 independent sample starts over 19,892 ticks.
+The restored original IMP!-packed module contains 997 AMCAF effect-8
+synchronization cells and drives the drum/text callbacks. The previously
+recovered Modland version remains a separate, pinned test fixture: its complete
+first wrap matches 6,531 independent sample starts over 19,892 ticks.
 See [sample-offset and retrigger semantics](amcaf-vm.md#sample-offset-and-retrigger-effects).
 
 ## Working example: original Protracker2
@@ -160,7 +160,7 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Program | Current coverage / first blocker | Required follow-up |
 | --- | --- | --- |
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
-| Protracker | Complete original interface, music, controls and mouse exit | Recovered 4 spirits playback uses 9xx/E9x. The file lacks effect-8 drum/text cues. See [Anim scope and drum demo](anim.md). |
+| Protracker | Complete original interface, music, controls and mouse exit | Recovered 4 spirits playback uses 9xx/E9x. The restored original packed tune supplies effect-8 drum/text cues. See [Anim scope and drum demo](anim.md). |
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Both original key prompts, bank-font capture/restore, independent pixel regions and WebGL parity | Uses the declared AROS-compatible host Topaz font; native ROM/diskfont rendering captures remain open. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
@@ -173,8 +173,8 @@ Unknown commands are never registered as successful no-ops to get a build.
 | ShowAGAPic | Native code-region validation at byte 4786 | The static walk also reports an encrypted/compiled procedure. Establish a supported source representation before adding AGA display. Preserve the original; do not silently skip protected code or emulate AGA with an OCS-labelled output. |
 
 The missing animation is present in the [original Aminet examples archive](https://ftp.uni-erlangen.de/aminet/dev/amos/AMCAFExt140Exa.lha).
-A checked reference copy was extracted during this work; it is not yet bundled
-into the twelve-program demo build. The archive SHA-256 is
+The restored data directory now includes this original animation. Bzoom and
+metadata commands still need implementation before the player can run. The archive SHA-256 is
 `acf1d4d25487c76130c472eb920c7ff1597b5b5a2c676c9decae1ba3517973eb`;
 `AMCAF_Examples/Data/AMCAF.Anim` is 74,634 bytes with SHA-256
 `049f14b963abedd80a98befbaa1a582b055fd38faddcffcf50bb25fa90ece8a3`.

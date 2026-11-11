@@ -92,6 +92,7 @@ The complete original `Protracker.AMOS` compiles and runs with the recovered
 offsets and E9x retriggers. The interface's voice toggles, volume/tempo arrow
 controls, Stop/Resume and Mouse Key exit have browser coverage.
 
-The recovered Modland file has no AMCAF effect-8 synchronization cells, so the
-original text/drum callbacks remain inactive. The live drum harness cycles all
-six original animation lists using its synthetic scheduler.
+The restored original packed module contains 997 AMCAF effect-8 synchronization
+cells, activating the text/drum callbacks. The previously recovered Modland
+version has no such cues and is retained separately as an audited test fixture.
+The live drum harness still offers all six lists using its synthetic scheduler.

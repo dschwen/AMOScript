@@ -6,7 +6,7 @@ counter multiples, with a separate row-note guard. Input is pinned raw MOD.
 import hashlib,json,struct
 from pathlib import Path
 root=Path(__file__).resolve().parents[2]
-data=(root/'examples/AMCAF/AMCAF_Examples/Data/mod.4spirits').read_bytes()
+data=(root/'test/fixtures/amcaf/modland-4spirits.mod').read_bytes()
 digest=hashlib.sha256(data).hexdigest()
 assert digest=='77d3535bcbf378a2e9c06faea48bc114de2ea96bb379c98c6501c93f1a557ffd'
 word=lambda at:int.from_bytes(data[at:at+2],'big')

@@ -15,16 +15,16 @@ Protracker playback, voice masks and six status/VU queries are implemented.
 Hex$ and bounded Turbo Draw/Plot/Blitter Fill/Wait now run the entire original
 Protracker2 visualizer with WebGL. The first version now compiles unchanged, including Bchg, cursor
 strings and separate native Anim records/controls. Its recovered music now plays with
-9xx sample offsets and E9x retriggers; the supplied Modland tune has no
-AMCAF effect-8 synchronization cues. A linked silent drum harness cycles its six
-original strings and untouched sprite bank with WebGL. Its requested mod.4spirits asset has
-been recovered from Modland. A declared Hawkeye harness plays the original IMP! module from a chip
+9xx sample offsets and E9x retriggers. The restored original packed tune supplies
+AMCAF effect-8 synchronization cues; the earlier Modland copy remains a separate
+audited fixture. A linked silent drum harness cycles its six
+original strings and untouched sprite bank with WebGL. The original packed mod.4spirits asset has been restored. A declared Hawkeye harness plays the original IMP! module from a chip
 Work bank with voice control, E0 filtering and EA/EB fine volume. Bank-font selection/capture, raw Print fonts, named preloaded fonts, bounded Peek$,
 Stop error 9, Binexp, Itemstr$ and sample-bank playback now run the original Fonts,
 Iff2Raw and SamBankFixer examples. Upload/download pages preserve synchronous
 file selection and source-directed file changes. Remaining first blockers include
 Xfire, Set Tempras, Amos Here and Examine Object.
-All 6,531 first-wrap sample starts and 3,232 row positions in 4 spirits match
+All 6,531 first-wrap sample starts and 3,232 row positions in the Modland fixture match
 an independent native-register audit over 19,892 ticks, including 1,365 offset
 starts. Browser checks cover audible playback, all four voice toggles, arrow-key
 volume/tempo changes, Stop/Resume and Mouse Key exit. Next address devices, requester/bank-manager utilities and intro effects. The protected/native AGA

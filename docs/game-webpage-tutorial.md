@@ -422,3 +422,10 @@ restored whenever the entry factory starts, including Restart. Other session
 files retain their ordinary lifetime. A supplied bitmap font catalogue is
 enumerated before entry execution, including on a direct main-game page.
 The ASM direct-room page demonstrates this setup.
+
+
+Debug messages support text selection and normal browser copy. While part of
+the log is selected, its visible text stays stable; clearing the selection
+resumes live updates. **Copy debug messages** copies the visible log through
+the Clipboard API, falling back to selecting it if clipboard access is missing
+or refused. These controls are included only in debug builds.
