@@ -98,6 +98,12 @@ jobs:
             desktop/package-lock.json
       - run: npm ci
       - run: npm run desktop:install
+      - name: Configure Ubuntu package mirror
+        if: runner.os == 'Linux'
+        run: |
+          # Avoid the runner's Azure mirror, which can persistently fail DNS.
+          printf '%s\n' 'https://archive.ubuntu.com/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          printf '%s\n' 'Acquire::Retries "3";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' | sudo tee /etc/apt/apt.conf.d/80-amoscript-retries >/dev/null
       - name: Install Linux GUI libraries
         if: runner.os == 'Linux'
         run: node node_modules/playwright/cli.js install-deps chromium

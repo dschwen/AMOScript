@@ -97,3 +97,10 @@ checks and publication gates still apply; the existing tag is not moved.
 
 If a GitHub Release already exists, inspect it first: automatic retries do not
 overwrite published assets. This route is for a failed, unpublished release.
+
+Linux browser and desktop jobs configure the runner's APT mirror list to use
+`https://archive.ubuntu.com/ubuntu/`, with three retries and 30-second network
+timeouts. This avoids the hosted image's Azure mirror DNS failures during
+Playwright dependency installation. Package signature verification remains enabled.
+For a failed v0.3.0 run, dispatch the release workflow from `master` with tag
+`v0.3.0`; rerunning the original tag workflow retains its old mirror configuration.
