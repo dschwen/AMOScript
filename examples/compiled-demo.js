@@ -1107,7 +1107,8 @@
         if (!header || bytes[header.start] !== 5 || !chunks.DLTA) fail('expected ANIM-5 ANHD/DLTA');
         if (Object.keys(chunks).some(name => !['ANHD', 'DLTA'].includes(name))) fail('unsupported delta property');
         const h = header.start;
-        if (view.getUint16(h + 2, false) !== format.width || view.getUint16(h + 4, false) !== format.height ||
+        const deltaWidth=view.getUint16(h+2,false),deltaHeight=view.getUint16(h+4,false);
+        if ((deltaWidth && deltaWidth !== format.width) || (deltaHeight && deltaHeight !== format.height) ||
             view.getUint16(h + 6, false) || view.getUint16(h + 8, false)) fail('delta geometry differs');
         planar = frames[Math.max(0, frames.length - interleave)].planar.slice();
         const d = chunks.DLTA;
@@ -1136,7 +1137,8 @@
               }
             }
           }
-          if (cursor !== boundary && !(cursor + 1 === boundary && bytes[cursor] === 0)) fail('trailing plane stream data');
+          // Native IffDLTA consumes exactly rowBytes column streams. Plane
+          // offsets delimit reads; bytes after those columns are opaque padding.
         }
       }
       budget += planar.length + format.width * format.height + offsets.length * 5;
@@ -2587,6 +2589,22 @@
     changed();
   }
 
+  function bzoom(from,x1,y1,xEnd,yEnd,to,x2,y2,factor) {
+    const source=resolveBuffer(from),destination=resolveBuffer(to);
+    [x1,y1,xEnd,yEnd,x2,y2,factor].forEach(whole);
+    const horizontal=factor&15,vertical=(factor>>4)&15;
+    if(factor<0||factor>255||![1,2,4,8].includes(horizontal)||!vertical)throw Error('Bzoom requires horizontal 1/2/4/8 and vertical 1..15 factors');
+    if([x1,y1,xEnd,yEnd,x2,y2].some(value=>value<0||value>4095))throw Error('Bzoom requires coordinates 0..4095');
+    x1&=0xff8;xEnd&=0xff8;x2&=0xff0;
+    const width=xEnd-x1,height=yEnd-y1,dw=width*horizontal,dh=height*vertical;
+    if(width<=0||height<=0||xEnd>source.target.width||yEnd>source.target.height||x2+dw>destination.target.width||y2+dh>destination.target.height)throw Error('Invalid Bzoom rectangle');
+    if(source.pixels===destination.pixels)throw Error('Aliased Bzoom is not implemented');
+    if(destination.target.colours>source.target.colours)throw Error('Bzoom destination depth exceeds source depth');
+    const mask=destination.target.colours-1;
+    for(let y=0;y<dh;y++)for(let x=0;x<dw;x++)destination.pixels[(y2+y)*destination.target.width+x2+x]=source.pixels[(y1+Math.floor(y/vertical))*source.target.width+x1+Math.floor(x/horizontal)]&mask;
+    changed();
+  }
+
   function interfaceMeasure(value){if(graphicsFonts.has(screen())||screen().textStyle)throw Error('Interface text requires the portable default font without styles');return value.length*8;}
   function interfaceDraw(kind,args){
     const target=screen();
@@ -3509,7 +3527,7 @@
   return {
     interfaceDraw,interfaceMeasure,
     turboDraw, turboPlot, fillBitplane, waitForBlitter:()=>true,
-    clip, clearBitplane, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
+    bzoom,clip, clearBitplane, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
     defineScroll, scroll, textBase:()=>{const selected=graphicsFont();return selected?selected.baseline:7;},
     setGraphicsFontSource,setPrintFontSource,currentGraphicsFont,changeNamedFont,
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
@@ -3856,7 +3874,7 @@
     return index;
   }
   const banks = new Map((options.banks || []).map(bank => [bank.number, mutableBank(bank)]));
-  const animations = new WeakMap();
+  const animations = new WeakMap(), rawAnimations = new WeakMap();
   const blocks = new Map(), cblocks = new Map();
   let tracker = null, trackerBank = null, trackerNext = null, trackerLocation = null, trackerKind = 'amos', trackerRevision=0;
   let ptCia=true,ptMaster=64,ptVoiceMask=15,ptQueries=null;
@@ -4486,7 +4504,7 @@
   if(!state.input.portButtons)state.input.portButtons=[0,0];
   function setPortButtons(port, buttons) {
     joystickPort(port);
-    if(!Number.isInteger(buttons)||buttons<0||buttons>7)throw new Error('Invalid port button mask');
+    if(!Number.isInteger(buttons)||buttons<0||buttons>127)throw new Error('Invalid port button mask');
     state.input.portButtons[port]=buttons;
   }
   function readJoystick(port, accept = null) {
@@ -4501,6 +4519,32 @@
     port=joystickPort(integer(port));
     const mask=readJoystick(port);
     return state.input.portButtons[port]|(mask&16?1:0);
+  }
+  state.input.parallelJoysticks=[0,0];
+  const secondaryMouse=state.input.secondaryMouse={x:0,y:0,speed:1,limits:[128,48,447,303]};
+  const mouseWord=value=>(integer(value)<<16)>>16;
+  function setParallelJoystick(port,mask) {
+    port=joystickPort(integer(port));mask=integer(mask);
+    if(mask<0||mask>31)throw Error('Invalid parallel joystick mask');
+    state.input.parallelJoysticks[port]=mask;
+  }
+  function secondaryAxis(axis,value) { secondaryMouse[axis]=mouseWord(mouseWord(value)<<secondaryMouse.speed); }
+  function secondarySpeed(value) {
+    value=integer(value);if(value<0||value>4)throw Error('Smouse Speed requires 0..4');
+    const old=secondaryMouse.speed;
+    const x=mouseWord((secondaryMouse.x>>old)<<value),y=mouseWord((secondaryMouse.y>>old)<<value);
+    secondaryMouse.x=x;secondaryMouse.y=y;secondaryMouse.speed=value;
+  }
+  function secondaryLimits(...values) {
+    if(!values.length){const s=display.screen();values=[s.hardwareX&1023,s.hardwareY&1023,(s.hardwareX&1023)+s.width-1,(s.hardwareY&1023)+s.height-1];}
+    if(values.length!==4)throw Error('Limit Smouse requires four coordinates');
+    const limits=values.map(mouseWord);secondaryMouse.limits=limits;
+  }
+  function moveSecondaryMouse(dx,dy) {
+    dx=integer(dx);dy=integer(dy);if(dx< -126||dx>126||dy< -126||dy>126)throw Error('Secondary mouse deltas require -126..126');
+    const m=secondaryMouse,limits=m.limits.map(v=>mouseWord(v<<m.speed));
+    function step(value,delta,low,high){value=mouseWord(value+delta);if(value<=low)value=low;if(value>=high)value=high;return value;}
+    m.x=step(m.x,dx,limits[0],limits[2]);m.y=step(m.y,dy,limits[1],limits[3]);
   }
   function joystickInfo(name, port) {
     port = joystickPort(integer(port));
@@ -4993,6 +5037,15 @@
     if(!length||length>16*1024*1024)throw Error('Wsave requires 1 byte..16 MiB');
     bsave(filename,address,address+length);
   }
+  let examinedObject=null;
+  function examineObject(filename) {
+    const name=resolveFileName(filename);
+    if(!options.files||typeof options.files.stat!=='function')throw Error('Examine Object requires a synchronous files.stat adapter');
+    const metadata=options.files.stat(name);
+    if(!metadata||typeof metadata.then==='function'||!Number.isSafeInteger(metadata.size)||metadata.size<0||metadata.size>2147483647||typeof metadata.directory!=='boolean')throw Error('Invalid synchronous object metadata');
+    examinedObject=Object.freeze({name,size:metadata.size,directory:metadata.directory});
+  }
+  function objectSize(){if(!examinedObject)throw Error('Examine Object first');return examinedObject.size;}
   function peekString(address,length,delimiter=null) {
     address=integer(address);length=Math.min(integer(length)>>>0,0xffc0);
     if(delimiter!=null&&(typeof delimiter!=='string'||/[^\x00-\xff]/.test(delimiter)))throw Error('Peek$ delimiter requires byte characters');
@@ -6163,11 +6216,22 @@
     return decoded.raw.length;
   }
   let frameDelay = 0;
+  function rawFrameAnimation(bank) {
+    if(!bank||bank.type!=='data')throw Error('Frame Play requires a generic animation bank');
+    const data=bank.data,cached=rawAnimations.get(bank);
+    if(cached&&cached.sourceBytes.length===data.length&&data.every((v,i)=>v===cached.sourceBytes[i]))return cached;
+    if(data.length<24||String.fromCharCode(...data.subarray(0,4))!=='FORM'||String.fromCharCode(...data.subarray(8,12))!=='ANIM')throw Error('Frame Play requires a Frame Load bank or FORM ANIM file bank');
+    const end=8+data[4]*16777216+data[5]*65536+data[6]*256+data[7];
+    if(end!==data.length&&!(end===data.length-12&&String.fromCharCode(...data.subarray(end,end+4))==='FORM'&&data.subarray(end+4,end+8).every(v=>v===0)&&String.fromCharCode(...data.subarray(end+8,end+12))==='DLTA'))throw Error('Frame Play requires an exact ANIM file and optional FORM/DLTA sentinel');
+    const decoded={...animReaderFactory(data.subarray(0,end)),boundaryBase:12,sentinel:end,sourceBytes:data.slice()};
+    rawAnimations.set(bank,decoded);return decoded;
+  }
   function framePlay(selector, count, screenNumber = null) {
     if (count < 0 || count >= 32768) throw new Error('Invalid Frame Play count');
-    const address = bankMemory.address(selector), access = bankMemory.locate(address), decoded = animations.get(access.bank);
-    if (!decoded || access.bank.data.length !== decoded.raw.length || !access.bank.data.every((v, i) => v === decoded.raw[i])) throw new Error('Frame Play requires an unchanged Frame Load bank');
-    const index = decoded.frames.findIndex(frame => frame.offset === access.offset);
+    const address = bankMemory.address(selector), access = bankMemory.locate(address), loaded = animations.get(access.bank), decoded = loaded || rawFrameAnimation(access.bank);
+    if (loaded && (access.bank.data.length !== decoded.raw.length || !access.bank.data.every((v, i) => v === decoded.raw[i]))) throw new Error('Frame Play requires an unchanged Frame Load bank');
+    const boundaryBase=decoded.boundaryBase||0;
+    const index = decoded.frames.findIndex(frame => frame.offset+boundaryBase === access.offset);
     if (access.offset === decoded.sentinel) return address;
     if (index < 0) throw new Error('Frame Play address is not a frame boundary');
     const selected = decoded.frames.slice(index, index + count);
@@ -6181,7 +6245,7 @@
     display.playAnimationFrames(decoded, selected);
     frameDelay = selected[selected.length-1].delay | 0;
     const next = index + selected.length;
-    return bankMemory.start(access.bank.number) + (next < decoded.frames.length ? decoded.frames[next].offset : decoded.sentinel);
+    return bankMemory.start(access.bank.number) + (next < decoded.frames.length ? decoded.frames[next].offset+boundaryBase : decoded.sentinel);
   }
   function fileChannel(number, mode = null) {
     if (!Number.isInteger(number) || number < 1 || number > 10) throw new Error('Invalid file channel');
@@ -6473,6 +6537,8 @@
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    extensionExamineObject:examineObject,extensionObjectSize:objectSize,extensionObjectSizeNamed(name){examineObject(name);return objectSize();},
+    extensionBzoom:(...args)=>display.bzoom(...args.map(integer)),
     peekString,extensionItemString:itemString,extensionPtSamPlay:ptSamPlay,
     extensionBinexp(value){value=integer(value);if(value<0||value>31)throw Error('Binexp requires 0..31');return 1<<value;},
     extensionChangeBankFont:changeBankFont,extensionChangePrintFont:changePrintFont,extensionMakeBankFont:makeBankFont,listBanks,
@@ -6490,7 +6556,13 @@
     // has no outstanding DMA to wait on and does not invent a field delay.
     extensionBlitterWait:()=>display.waitForBlitter(),
     extensionBlitterClear:(...args)=>display.clearBitplane(...args.map(integer)),
-    extensionSmouseKey:()=>portButtons(1),
+    extensionSmouseKey:()=>portButtons(1)&7,
+    extensionXfire(port,button){port=joystickPort(integer(port));button=integer(button);if(button<0||button>6)throw Error('Xfire button requires 0..6');return portButtons(port)&(1<<button)?-1:0;},
+    extensionPjoy:port=>state.input.parallelJoysticks[joystickPort(integer(port))],
+    extensionXSmouse:()=>secondaryMouse.x>>secondaryMouse.speed,
+    extensionYSmouse:()=>secondaryMouse.y>>secondaryMouse.speed,
+    extensionSmouseX:value=>secondaryAxis('x',value),extensionSmouseY:value=>secondaryAxis('y',value),
+    extensionSmouseSpeed:secondarySpeed,extensionLimitSmouse:secondaryLimits,
     extensionRasterWait:rasterWait,
     extensionPtCpattern:()=>ptQuery('order'),extensionPtCpos:()=>ptQuery('row'),
     extensionPtCinstr:v=>ptQuery('instrument',v),extensionPtCnote:v=>ptQuery('note',v),extensionPtVu:v=>ptQuery('vu',v),extensionPtSignal:()=>ptQuery('signal'),
@@ -6636,7 +6708,7 @@
       state.input.keySpeed = Object.freeze({ delay, interval, delayMs: delay * 20, intervalMs: interval * 20 });
       if (options.resetInput) options.resetInput('key-speed');
     },
-    setJoystick, joystickInfo, setPortButtons, portButtons,
+    setJoystick, joystickInfo, setPortButtons, portButtons, setParallelJoystick, moveSecondaryMouse,
     keyState(code) {
       code = integer(code);
       if (code < 0 || code > 127) throw new Error('Key State code must be in 0..127');
@@ -8686,7 +8758,7 @@
     for (let i = 0; i < keys.length; i++) if (keys[i] && typeof keys[i] === 'object') keys[i] = keys[i].key;
   }
   function resetInput(reason = 'lifecycle') {
-    if (reason !== 'key-speed') { state.input.joysticks.fill(0); state.input.portButtons.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
+    if (reason !== 'key-speed') { state.input.joysticks.fill(0); state.input.portButtons.fill(0); if(state.input.parallelJoysticks)state.input.parallelJoysticks.fill(0); clearScanCodes(); clearKeyStates(); clearMouseButtons(); }
     for (const listener of Array.from(inputResetListeners)) {
       try { listener(reason); } catch (_) { /* cleanup must preserve source failures */ }
     }

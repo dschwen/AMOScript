@@ -14,12 +14,12 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   const memory = AMOS_FILES.createMemoryFiles(Object.fromEntries(Object.entries(encodedAssets).map(([name, bytes]) => [key(name), atob(bytes)])), [], (settings.directories || []).map(key));
   const files = { read: name => memory.read(key(name)), write: (name, bytes) => memory.write(key(name), bytes, name),
     remove: name=>memory.remove(key(name)), list:name=>memory.list(key(name)), freeSpace:name=>memory.freeSpace(key(name)),
-    exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
+    stat:name=>memory.stat(key(name)), exists: name => memory.exists(key(name)), isDirectory: name => memory.isDirectory(key(name)), select: request => memory.select(request) };
   const ui = installUI({ container: viewport, toolbar: viewport.querySelector('.amos-fullscreen-toolbar'), files: memory, debug });
   const sound = AMOS_BROWSER_AUDIO.createBrowserAudioSession(settings.amcafAudio ? context=>AMOS_WEB_AUDIO_STREAM(context,AMOS_WEB_AUDIO.createWebAudioHost) : AMOS_WEB_AUDIO.createWebAudioHost);
   const fullscreen = AMOS_FULLSCREEN.createFullscreenHost(viewport, { button: byId('game-fullscreen'), statusElement: byId('fullscreen-status'), surface: slot, getContent: () => canvas });
-  const joystickOptions = () => [{ port, keyboard: keyboardMode.value === 'game' ? { fire: fireKeys, ...(settings.amcafAudio?{fire2:['ShiftLeft','ShiftRight']}:{}) } : false,
-    gamepad:settings.amcafAudio?{buttons:{fire2:1,fire3:2}}:true }];
+  const joystickOptions = () => (settings.gamePorts?[0,1]:[port]).map(devicePort=>({ port:devicePort, keyboard: keyboardMode.value === 'game' && devicePort===port ? { fire: fireKeys, ...(settings.amcafAudio?{fire2:['ShiftLeft','ShiftRight'],...(settings.gamePorts?{fire3:['KeyY'],fire4:['KeyG'],fire5:['KeyR'],fire6:['KeyF'],fire7:['KeyP']}:{})}:{}) } : false,
+    gamepad:settings.gamePorts?{index:devicePort,buttons:{fire2:1,fire3:3,fire4:2,fire5:4,fire6:5,fire7:9}}:settings.amcafAudio?{buttons:{fire2:1,fire3:2}}:true }));
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.state === 'on' ? 'Mute sound' : audio.state === 'starting' ? 'Enabling sound…' : 'Enable sound';
     soundButton.disabled = audio.state === 'starting';

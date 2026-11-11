@@ -16,16 +16,17 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
  for(const name of fs.readdirSync(source).filter(name=>/\.amos$/i.test(name)).sort()){
   const slug=name.replace(/\.amos$/i,'').toLowerCase(),file=(repository?'amcaf-example-':'')+slug+'.html',bytes=fs.readFileSync(path.join(source,name));
   const record=inventory.find(p=>p.source===name);if(!record||record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex'))throw Error('AMCAF source inventory differs: '+name);
-  const item={source:name,file,bytes:bytes.length,sha256:record.sha256,extensions,runtime:name==='Iff2Raw.AMOS'?'Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads.':name==='SamBankFixer.AMOS'?'Original sample-bank playback, key prompt, PCM-word fix and saved-file download.':name==='Fonts.AMOS'?'Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL.':name==='Protracker.AMOS'?'Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The restored original packed tune drives the drum/text synchronization cues.':name==='Protracker2.AMOS'?'Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL.':name==='QsinCosArcSqr.AMOS'?'Original input loop, three mouse directions, double-buffer publication and Escape exit covered.':'Not yet verified in browser checks.'};
+  const item={source:name,file,bytes:bytes.length,sha256:record.sha256,extensions,runtime:name==='GamePorts.AMOS'?'Original controller monitor, seven-button gamepads, labelled parallel/secondary-mouse simulations and Escape exit.':name==='BZoomAnimPlayer.AMOS'?'Original 42-frame ANIM, raw-bank continuation and doubled central crop loop with WebGL.':name==='Iff2Raw.AMOS'?'Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads.':name==='SamBankFixer.AMOS'?'Original sample-bank playback, key prompt, PCM-word fix and saved-file download.':name==='Fonts.AMOS'?'Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL.':name==='Protracker.AMOS'?'Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The restored original packed tune drives the drum/text synchronization cues.':name==='Protracker2.AMOS'?'Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL.':name==='QsinCosArcSqr.AMOS'?'Original input loop, three mouse directions, double-buffer publication and Escape exit covered.':'Not yet verified in browser checks.'};
   const nav=`<nav><a href="${repository?github(index):index}">AMCAF examples</a> · <a href="${index}">Local catalogue</a></nav>`;
   try{
    const module=new Transpiler(bytes,{extensions}).toModule({optimize:true});
    const font= require('../examples/AMCAF/fonts/topaz-16.json');
    const diskFonts=name==='Fonts.AMOS'?[{...font,data:Uint8Array.from(Buffer.from(font.data,'base64'))}]:[];
-   let app=buildGamePage(bytes,{diskFonts,extensions,title:'AMCAF — '+name,assets,debug:true,optimize:true});
+   let app=buildGamePage(bytes,{gamePorts:name==='GamePorts.AMOS',diskFonts,extensions,title:'AMCAF — '+name,assets,debug:true,optimize:true});
    if(['Protracker.AMOS','Fonts.AMOS','Iff2Raw.AMOS','SamBankFixer.AMOS'].includes(name))app=app.replace('<option value="typing">','<option value="typing" selected>');
    if(name==='Fonts.AMOS')app=app.replace('<h1>','<p>This page supplies an AROS topaz-compatible 16-pixel font for the original named-font request. The Iva and Print fonts come from the original embedded banks. <a href="https://github.com/dschwen/AMOScript/blob/master/examples/AMCAF/fonts/README.md">Font source and APL 1.1 license</a>.</p><h1>');
    if(['Iff2Raw.AMOS','SamBankFixer.AMOS'].includes(name)){const kind=name==='Iff2Raw.AMOS'?'iff':'sample',fixture=require('../test/helpers/amcafUtilityFixtures')[kind==='iff'?'picture':'sample']();app=app.replace('</body>',`<script>(${require('./amcafUtilityPage').toString()})(${JSON.stringify(kind)},${JSON.stringify({name:kind==='iff'?'sample.iff':'sample.abk',data:fixture.input.toString('base64')})});</script></body>`);}
+   if(name==='GamePorts.AMOS')app=app.replace('</body>',`<script>(${require('./amcafGamePortsPage').toString()})();</script></body>`);
    outputs.set(file,app.replace('<h1>',nav+`<p>Original AMCAF example. ${escape(item.runtime)} Compilation and runtime compatibility are reported separately. Select Keyboard: Typing for text prompts.</p><h1>`));
    if(modules)outputs.set(slug+'.module.js',module);
    item.compiled=true;
@@ -39,9 +40,13 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
 
 ${link('Demo gallery',repository?'index.md':github('index.md'))}
 
-${count}/${programs.length} original programs compile. The working pages include fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+${count}/${programs.length} original programs compile. The working pages include the controller monitor, Bzoom animation, fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
+
+${link('GamePorts — original controller monitor',repository?preview('amcaf-example-gameports.html'):'gameports.html')}: two browser gamepads, keyboard controls for port 1, and clearly labelled simulations for parallel joysticks and second-mouse movement. Escape exits the program after leaving fullscreen.
+
+${link('Bzoom animation player',repository?preview('amcaf-example-bzoomanimplayer.html'):'bzoomanimplayer.html')}: watch the original ANIM play with a doubled central crop. Escape or a mouse button exits.
 
 ${link('Fonts — original bank-font showcase',repository?preview('amcaf-example-fonts.html'):'fonts.html')}: view the embedded Iva and Print fonts, then press Space twice to complete the font capture/restore demonstration. The page supplies a declared AROS-compatible Topaz font.
 

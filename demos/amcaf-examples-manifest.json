@@ -11,9 +11,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported extension 8:0x672 (amcaf-1.50beta4) at line 14, byte 644"
+      "runtime": "Original 42-frame ANIM, raw-bank continuation and doubled central crop loop with WebGL.",
+      "compiled": true
     },
     {
       "source": "BankManager.AMOS",
@@ -70,9 +69,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported extension 8:0x15be (amcaf-1.50beta4) at line 14, byte 720"
+      "runtime": "Original controller monitor, seven-button gamepads, labelled parallel/secondary-mouse simulations and Escape exit.",
+      "compiled": true
     },
     {
       "source": "Iff2Raw.AMOS",

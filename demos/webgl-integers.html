@@ -66,7 +66,7 @@ function createCanvasHost(canvas, options = {}) {
       if ((entry.mask & 12) === 12) entry.mask &= ~12;
     }
     for (const entry of result) {
-      if(entry.buttons!=null&&program.setPortButtons){entry.buttons=(entry.buttons&6)|(entry.mask&16?1:0);program.setPortButtons(entry.port,entry.buttons);}
+      if(entry.buttons!=null&&program.setPortButtons){entry.buttons=(entry.buttons&126)|(entry.mask&16?1:0);program.setPortButtons(entry.port,entry.buttons);}
       program.setJoystick(entry.port, entry.mask);
     }
     joystickStatus = result;
@@ -286,8 +286,8 @@ function createCanvasHost(canvas, options = {}) {
 function createJoystickInput(configurations) {
   if (!Array.isArray(configurations) || configurations.length > 2) throw new Error('Expected at most two joystick configurations');
   const ports = new Set(), keys = new Set();
-  const defaults = { up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'], fire: ['Space', 'Enter'], fire2: [], fire3: [] };
-  const bits = { up: 1, down: 2, left: 4, right: 8, fire: 16, fire2: 32, fire3: 64 };
+  const defaults = { up: ['ArrowUp'], down: ['ArrowDown'], left: ['ArrowLeft'], right: ['ArrowRight'], fire: ['Space', 'Enter'], fire2: [], fire3: [], fire4: [], fire5: [], fire6: [], fire7: [] };
+  const bits = { up: 1, down: 2, left: 4, right: 8, fire: 16, fire2: 32, fire3: 64, fire4: 128, fire5: 256, fire6: 512, fire7: 1024 };
   const configs = configurations.map(config => {
     if (!config || !Number.isInteger(config.port) || config.port < 0 || config.port > 1 || ports.has(config.port)) throw new Error('Invalid or duplicate joystick port');
     ports.add(config.port);
@@ -307,12 +307,12 @@ function createJoystickInput(configurations) {
       const supplied = config.gamepad === true ? {} : config.gamepad;
       if ([supplied.axes,supplied.buttons].some(value => value != null && (typeof value !== 'object' || Array.isArray(value)))) throw new Error('Gamepad axes/buttons must be binding objects');
       const index = supplied.index == null ? 0 : supplied.index, deadZone = supplied.deadZone == null ? 0.25 : supplied.deadZone;
-      const axes = { x: 0, y: 1, ...supplied.axes }, buttons = { up: 12, down: 13, left: 14, right: 15, fire: 0, fire2:null, fire3:null, ...supplied.buttons };
+      const axes = { x: 0, y: 1, ...supplied.axes }, buttons = { up: 12, down: 13, left: 14, right: 15, fire: 0, fire2:null, fire3:null, fire4:null, fire5:null, fire6:null, fire7:null, ...supplied.buttons };
       if (!Number.isSafeInteger(index) || index < 0 || !Number.isFinite(deadZone) || deadZone < 0 || deadZone >= 1 ||
           [...Object.values(axes), ...Object.values(buttons)].some(value => value !== null && (!Number.isSafeInteger(value) || value < 0))) throw new Error('Invalid gamepad index, dead zone or binding');
       gamepad = { index, deadZone, axes, buttons, standardOnly: supplied.standardOnly !== false };
     }
-    const extended=keyboard.some(binding=>binding.bit>31)||!!(gamepad&&(gamepad.buttons.fire2!=null||gamepad.buttons.fire3!=null));
+    const extended=keyboard.some(binding=>binding.bit>31)||!!(gamepad&&Object.keys(bits).some(action=>bits[action]>31&&gamepad.buttons[action]!=null));
     return { port: config.port, keyboard, consume: config.keyboard === true || !config.keyboard || config.keyboard.consume !== false, gamepad, extended };
   });
   function match(code) { return configs.some(config => config.keyboard.some(binding => binding.code === code)); }
@@ -347,7 +347,7 @@ function createJoystickInput(configurations) {
         if ((mask & 3) === 3) mask &= ~3;
         if ((mask & 12) === 12) mask &= ~12;
         return { port: config.port, mask, keyboard:keyboard&31, gamepad:gamepad&31, status,
-          ...(config.extended?{buttons:(raw&16?1:0)|(raw&32?2:0)|(raw&64?4:0)}:{}) };
+          ...(config.extended?{buttons:(raw>>>4)&127}:{}) };
       });
     } };
 }

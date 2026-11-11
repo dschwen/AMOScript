@@ -22,7 +22,7 @@ test('Smouse Key: reader polling, relocation, lifecycle and per-program holds re
   q.p.setPortButtons(1,4);q.p.tick(100);assert.deepStrictEqual(q.logs,[4]);
   q.p.keySpeed(10,2);assert.strictEqual(q.p.extensionSmouseKey(),4);q.p.stop();assert.strictEqual(q.p.extensionSmouseKey(),0);
   assert.strictEqual(p.extensionSmouseKey(),3);
-  for(const [port,mask]of [[-1,0],[2,0],[1,8],[1,-1],[1,1.5]])assert.throws(()=>q.p.setPortButtons(port,mask),/port|button/);
+  for(const [port,mask]of [[-1,0],[2,0],[1,128],[1,-1],[1,1.5]])assert.throws(()=>q.p.setPortButtons(port,mask),/port|button/);
 });
 
 test('Joystick extra buttons: opt-in key/gamepad mappings retain five-bit Joy masks and merge held sources',()=>{

@@ -2,9 +2,13 @@
 
 [Demo gallery](index.md)
 
-6/12 original programs compile. The working pages include fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+8/12 original programs compile. The working pages include the controller monitor, Bzoom animation, fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources and restored original data files are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
+
+[GamePorts — original controller monitor](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html): two browser gamepads, keyboard controls for port 1, and clearly labelled simulations for parallel joysticks and second-mouse movement. Escape exits the program after leaving fullscreen.
+
+[Bzoom animation player](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bzoomanimplayer.html): watch the original ANIM play with a doubled central crop. Escape or a mouse button exits.
 
 [Fonts — original bank-font showcase](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html): view the embedded Iva and Print fonts, then press Space twice to complete the font capture/restore demonstration. The page supplies a declared AROS-compatible Topaz font.
 
@@ -36,12 +40,12 @@
 
 | Program | Build | Runtime evidence / first blocker |
 | --- | --- | --- |
-| [BZoomAnimPlayer.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bzoomanimplayer.html) | Blocked | Unsupported extension 8:0x672 (amcaf-1.50beta4) at line 14, byte 644 |
+| [BZoomAnimPlayer.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bzoomanimplayer.html) | Compiles | Original 42-frame ANIM, raw-bank continuation and doubled central crop loop with WebGL. |
 | [BankManager.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bankmanager.html) | Blocked | Unsupported token 0x24d0 at line 27, byte 756 |
 | [BigAmcafIntro.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bigamcafintro.html) | Blocked | Unsupported token 0x10ac at line 21, byte 704 |
 | [FileRequester.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-filerequester.html) | Blocked | Unsupported token 0x24d0 at line 251, byte 10314 |
 | [Fonts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html) | Compiles | Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL. |
-| [GamePorts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html) | Blocked | Unsupported extension 8:0x15be (amcaf-1.50beta4) at line 14, byte 720 |
+| [GamePorts.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html) | Compiles | Original controller monitor, seven-button gamepads, labelled parallel/secondary-mouse simulations and Escape exit. |
 | [Iff2Raw.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html) | Compiles | Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads. |
 | [Protracker.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker.html) | Compiles | Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The restored original packed tune drives the drum/text synchronization cues. |
 | [Protracker2.AMOS](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-protracker2.html) | Compiles | Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL. |

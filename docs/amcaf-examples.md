@@ -9,11 +9,31 @@ separate private project and are not part of this collection.
 **[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
-coverage are separate: currently **6/12 compile and run**, covering fonts, IFF conversion, sample-bank fixing,
-quick maths and both Protracker interfaces.
+coverage are separate: currently **8/12 compile and run**, covering GamePorts, Bzoom animation, fonts, IFF
+conversion, sample-bank fixing, quick maths and both Protracker interfaces.
 
 See the [font and converter implementation contract](amcaf-fonts.md) for native
 formats, supported bounds and lifecycle rules.
+
+## Working examples: GamePorts and Bzoom
+
+[GamePorts](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-gameports.html)
+monitors both normal ports, both parallel ports and the second mouse. Browser
+gamepads 1/2 map to normal ports 0/1. Keyboard arrows and Space/Enter feed port 1;
+Shift/Y/G/R/F/P feed its remaining buttons. Typing mode releases these mappings.
+The page has clearly labelled controls simulating parallel-port joysticks and
+relative second-mouse motion; leave fullscreen to use them. It does not detect
+physical Amiga parallel adapters or distinguish two physical USB mice.
+Escape first leaves fullscreen; pressing it on the canvas again ends the source.
+
+[Bzoom animation](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-bzoomanimplayer.html)
+plays the restored 42-frame original animation, doubling its central crop on a
+second screen. Stop/Resume and natural looping work; Escape or a mouse button
+ends the source. Its first delta address and loop restart follow the original
+AMOS statements, including their `fr=1` restart logic.
+
+[Implementation bounds and evidence](amcaf-devices-bzoom.md) distinguish source-
+derived pixels, actual GPU comparisons and native hardware captures.
 
 ## Working example: fonts
 
@@ -164,17 +184,17 @@ Unknown commands are never registered as successful no-ops to get a build.
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
 | Fonts | Both original key prompts, bank-font capture/restore, independent pixel regions and WebGL parity | Uses the declared AROS-compatible host Topaz font; native ROM/diskfont rendering captures remain open. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
-| GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |
+| GamePorts | Complete original input loop, seven-button gamepads, keyboard, parallel simulations, second-mouse movement, GPU parity and Escape cleanup | Portable controller mappings and declared simulated parallel/mouse inputs; physical Amiga hardware/native captures remain open. |
 | SamBankFixer | Original load, four-voice playback, key prompt, first PCM-word fix and saved-byte download | Browser uploads and a declared synthetic sample exercise the workflow. Native audio captures remain open. |
 | Iff2Raw | Original raw/ByteRun1 conversion and exact palette/plane-major output | Bounded word-aligned, unmasked ILBM inputs tested. Arbitrary malformed files and AGA display are separate. |
 | FileRequester | Core Amos Here `$24d0` | Filename/path helpers now compile; core host metadata, patterns, directory/object metadata, IO errors, font/drawing helpers and requester interaction remain. |
 | BankManager | Core Amos Here `$24d0` | Core/standard extension gaps plus bank naming, relocation, transforms, compression and requester utilities. |
-| BZoomAnimPlayer | Examine Object `$0672` | File metadata and Bzoom animation; the original animation has now been located in the upstream archive (see below). |
+| BZoomAnimPlayer | Original 42-frame ANIM, raw-bank frame continuations, doubled crop, loops and Escape exit | Ninety independent application frames and six GPU comparisons; wider Bzoom alias/geometry cases remain gated. |
 | ShowAGAPic | Native code-region validation at byte 4786 | The static walk also reports an encrypted/compiled procedure. Establish a supported source representation before adding AGA display. Preserve the original; do not silently skip protected code or emulate AGA with an OCS-labelled output. |
 
 The missing animation is present in the [original Aminet examples archive](https://ftp.uni-erlangen.de/aminet/dev/amos/AMCAFExt140Exa.lha).
-The restored data directory now includes this original animation. Bzoom and
-metadata commands still need implementation before the player can run. The archive SHA-256 is
+The restored data directory includes this original animation, and the original
+Bzoom player now runs with it. The archive SHA-256 is
 `acf1d4d25487c76130c472eb920c7ff1597b5b5a2c676c9decae1ba3517973eb`;
 `AMCAF_Examples/Data/AMCAF.Anim` is 74,634 bytes with SHA-256
 `049f14b963abedd80a98befbaa1a582b055fd38faddcffcf50bb25fa90ece8a3`.
