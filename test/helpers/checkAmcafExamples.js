@@ -7,6 +7,34 @@ module.exports=async function(browser){
   assert.strictEqual(manifest.programs.length,12);const catalogue=fs.readFileSync(path.join(root,'amcaf-examples.md'),'utf8');
   for(const item of manifest.programs)assert(catalogue.includes('https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/'+item.file));
   for(const p of manifest.programs){if(p.compiled)continue;await page.goto(pathToFileURL(path.join(root,p.file)).href);assert.strictEqual(await page.locator('pre').textContent(),p.error);assert.strictEqual(await page.locator('#play-game').count(),0);}
+  const fontOracle=require('../fixtures/amcaf/fonts.json'),utility=require('./amcafUtilityFixtures');
+  for(const source of ['Fonts.AMOS','Iff2Raw.AMOS','SamBankFixer.AMOS']){
+   const item=manifest.programs.find(p=>p.source===source);assert(item.compiled);await page.goto(pathToFileURL(path.join(root,item.file)).href);
+   await page.evaluate(()=>{const make=AMOS_BROWSER.createCanvasHost;AMOS_BROWSER.createCanvasHost=(...args)=>{const host=make(...args);window.exampleRenderer=args[1].renderer;return{...host,attach(p){window.exampleProgram=p;return host.attach(p);}};};});
+   if(source!=='Fonts.AMOS'){assert(await page.locator('#play-game').isDisabled());await page.click('#utility-sample');}
+   await page.click('#play-game');await page.waitForFunction(()=>!!window.exampleProgram);
+   assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-backend'),'webgl');
+   if(source==='Fonts.AMOS'){
+    for(let stage=0;stage<2;stage++){await page.waitForFunction(line=>exampleProgram.state.waiting==='key'&&exampleProgram.state.location.line===line,stage?55:39);
+     const pixels=await page.evaluate(()=>Array.from(exampleProgram.display.screen().pixels));for(const r of fontOracle.regions.filter(r=>r.stage===stage))for(let row=0;row<r.height;row++)assert.deepStrictEqual(pixels.slice((r.top+row)*320,(r.top+row+1)*320),r.rows[row]);
+     assert.strictEqual(await page.evaluate(()=>{const snapshot=exampleProgram.display.snapshotDisplay(),result=exampleRenderer.render(snapshot),gpu=exampleRenderer.readPixels(),cpu=exampleProgram.display.canvasFrame();if(result.backend!=='gpu')return false;const scale=result.width/cpu.width;for(let y=0;y<cpu.height;y++)for(let x=0;x<cpu.width;x++)for(let c=0;c<4;c++)if(gpu[(y*result.width+x*scale)*4+c]!==cpu.rgba[(y*cpu.width+x)*4+c])return false;return true;}),true,'font CPU/GPU parity');
+     await page.locator('#game-input').focus();await page.keyboard.press('Space');}
+   }else if(source==='SamBankFixer.AMOS'){
+    await page.waitForFunction(()=>exampleProgram.state.waiting==='key');await page.locator('#game-input').focus();await page.keyboard.press('Space');
+   }
+   await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='ended');assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-source-error'),'');
+   if(source!=='Fonts.AMOS'){
+    await page.waitForFunction(()=>document.querySelector('#utility-downloads a'));
+    const names=source==='Iff2Raw.AMOS'?['converted.col','converted.raw']:['sample.abk'],fixture=source==='Iff2Raw.AMOS'?utility.picture():utility.sample();
+    for(const name of names){const expected=name.endsWith('.col')?fixture.col:name.endsWith('.raw')?fixture.raw:fixture.fixed;assert.deepStrictEqual(await page.evaluate(name=>Array.from(AMOS_GAME_PAGE.files.read(name),c=>c.charCodeAt(0)),name),Array.from(expected));const a=page.locator('#utility-downloads a').filter({hasText:'Download '+name});const bytes=await a.evaluate(async a=>Array.from(new Uint8Array(await(await fetch(a.href)).arrayBuffer())));assert.deepStrictEqual(bytes,Array.from(expected));}
+    if(await page.evaluate(()=>!!document.fullscreenElement)){await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.fullscreenElement);}
+    await page.setInputFiles('#utility-upload',{name:source==='Iff2Raw.AMOS'?'uploaded.iff':'uploaded.abk',mimeType:'application/octet-stream',buffer:fixture.input});await page.waitForFunction(()=>document.getElementById('utility-message').textContent.startsWith('Ready: uploaded'));await page.waitForTimeout(150);assert.match(await page.locator('#utility-message').textContent(),/^Ready: uploaded/);assert.strictEqual(await page.locator('#utility-downloads a').count(),0);
+    await page.locator('#game-restart').evaluate(node=>node.click());
+    if(source==='SamBankFixer.AMOS'){await page.waitForFunction(()=>exampleProgram.state.waiting==='key');await page.locator('#game-input').focus();await page.keyboard.press('Space');}
+    await page.waitForFunction(()=>document.getElementById('game-viewport').dataset.phase==='ended');assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-source-error'),'');
+   }
+   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());
+  }
   const first=manifest.programs.find(p=>p.source==='Protracker.AMOS');assert(first.compiled);
   await page.goto(pathToFileURL(path.join(root,first.file)).href);
   await page.evaluate(()=>{
@@ -98,6 +126,6 @@ module.exports=async function(browser){
   await page.locator('#game-sound').click();await page.waitForFunction(n=>document.getElementById('game-viewport').dataset.sound==='on'&&audioRecovery.starts>n,starts);
   assert.strictEqual(await page.evaluate(()=>audioRecovery.attempts),3);
   await page.evaluate(()=>AMOS_GAME_PAGE.dispose());assert.deepStrictEqual(errors,[]);assert.deepStrictEqual(network,[]);
-  console.log('AMCAF examples passed: 12 catalogue entries/preview links, honest blocker pages and original Protracker2 animation/pause/mouse exit and quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; one-click activation/suspension recovery passes; the original Protracker1 interface plays audible music, changes voices/volume/tempo with keyboard input, pauses/resumes and exits through Mouse Key. The live drum Anim harness starts, pauses and resumes with WebGL.');
+  console.log('AMCAF examples passed: original Fonts has two independent pixel scenes and GPU parity; Iff2Raw and SamBankFixer complete sample/upload/download workflows. 12 catalogue entries/preview links, honest blocker pages and original Protracker2 animation/pause/mouse exit and quick-maths mouse/exit/restart with WebGL. Hawkeye Work-bank music and compiled voice controls also pass; one-click activation/suspension recovery passes; the original Protracker1 interface plays audible music, changes voices/volume/tempo with keyboard input, pauses/resumes and exits through Mouse Key. The live drum Anim harness starts, pauses and resumes with WebGL.');
  }finally{await page.close();}
 };

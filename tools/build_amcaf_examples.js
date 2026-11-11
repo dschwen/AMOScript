@@ -16,12 +16,16 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
  for(const name of fs.readdirSync(source).filter(name=>/\.amos$/i.test(name)).sort()){
   const slug=name.replace(/\.amos$/i,'').toLowerCase(),file=(repository?'amcaf-example-':'')+slug+'.html',bytes=fs.readFileSync(path.join(source,name));
   const record=inventory.find(p=>p.source===name);if(!record||record.sha256!==crypto.createHash('sha256').update(bytes).digest('hex'))throw Error('AMCAF source inventory differs: '+name);
-  const item={source:name,file,bytes:bytes.length,sha256:record.sha256,extensions,runtime:name==='Protracker.AMOS'?'Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues.':name==='Protracker2.AMOS'?'Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL.':name==='QsinCosArcSqr.AMOS'?'Original input loop, three mouse directions, double-buffer publication and Escape exit covered.':'Not yet verified in browser checks.'};
+  const item={source:name,file,bytes:bytes.length,sha256:record.sha256,extensions,runtime:name==='Iff2Raw.AMOS'?'Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads.':name==='SamBankFixer.AMOS'?'Original sample-bank playback, key prompt, PCM-word fix and saved-file download.':name==='Fonts.AMOS'?'Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL.':name==='Protracker.AMOS'?'Original music interface, recovered 4 spirits playback, voice/volume/tempo controls, pause/resume and mouse exit covered with WebGL. The recovered tune has no drum synchronization cues.':name==='Protracker2.AMOS'?'Original frequency meters, note trail, packed music and mouse exit covered with Canvas/WebGL.':name==='QsinCosArcSqr.AMOS'?'Original input loop, three mouse directions, double-buffer publication and Escape exit covered.':'Not yet verified in browser checks.'};
   const nav=`<nav><a href="${repository?github(index):index}">AMCAF examples</a> · <a href="${index}">Local catalogue</a></nav>`;
   try{
    const module=new Transpiler(bytes,{extensions}).toModule({optimize:true});
-   let app=buildGamePage(bytes,{extensions,title:'AMCAF — '+name,assets,debug:true,optimize:true});
-   if(name==='Protracker.AMOS')app=app.replace('<option value="typing">','<option value="typing" selected>');
+   const font= require('../examples/AMCAF/fonts/topaz-16.json');
+   const diskFonts=name==='Fonts.AMOS'?[{...font,data:Uint8Array.from(Buffer.from(font.data,'base64'))}]:[];
+   let app=buildGamePage(bytes,{diskFonts,extensions,title:'AMCAF — '+name,assets,debug:true,optimize:true});
+   if(['Protracker.AMOS','Fonts.AMOS','Iff2Raw.AMOS','SamBankFixer.AMOS'].includes(name))app=app.replace('<option value="typing">','<option value="typing" selected>');
+   if(name==='Fonts.AMOS')app=app.replace('<h1>','<p>This page supplies an AROS topaz-compatible 16-pixel font for the original named-font request. The Iva and Print fonts come from the original embedded banks. <a href="https://github.com/dschwen/AMOScript/blob/master/examples/AMCAF/fonts/README.md">Font source and APL 1.1 license</a>.</p><h1>');
+   if(['Iff2Raw.AMOS','SamBankFixer.AMOS'].includes(name)){const kind=name==='Iff2Raw.AMOS'?'iff':'sample',fixture=require('../test/helpers/amcafUtilityFixtures')[kind==='iff'?'picture':'sample']();app=app.replace('</body>',`<script>(${require('./amcafUtilityPage').toString()})(${JSON.stringify(kind)},${JSON.stringify({name:kind==='iff'?'sample.iff':'sample.abk',data:fixture.input.toString('base64')})});</script></body>`);}
    outputs.set(file,app.replace('<h1>',nav+`<p>Original AMCAF example. ${escape(item.runtime)} Compilation and runtime compatibility are reported separately. Select Keyboard: Typing for text prompts.</p><h1>`));
    if(modules)outputs.set(slug+'.module.js',module);
    item.compiled=true;
@@ -35,9 +39,13 @@ function buildAmcafExamples({source=path.join(root,'examples/AMCAF/AMCAF_Example
 
 ${link('Demo gallery',repository?'index.md':github('index.md'))}
 
-${count}/${programs.length} original programs compile. All three compiled originals run with Canvas/WebGL: quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources, four original data files and the separately recovered 4 spirits module are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
+${count}/${programs.length} original programs compile. The working pages include fonts, two file utilities, quick maths and both Protracker interfaces. Other programs have explicit compile-blocker pages. Sources, four original data files and the separately recovered 4 spirits module are under examples/AMCAF; builds select AMCAF 1.50beta4 in slot 8.
 
 ## Try the working examples
+
+${link('Fonts — original bank-font showcase',repository?preview('amcaf-example-fonts.html'):'fonts.html')}: view the embedded Iva and Print fonts, then press Space twice to complete the font capture/restore demonstration. The page supplies a declared AROS-compatible Topaz font.
+
+${link('IFF to raw converter',repository?preview('amcaf-example-iff2raw.html'):'iff2raw.html')} and ${link('Sample-bank fixer',repository?preview('amcaf-example-sambankfixer.html'):'sambankfixer.html')}: upload an input file or use the synthetic sample, start the original program and download its output. The fixer waits for Space after each sample.
 
 ${link('Protracker1 — original music interface',repository?preview('amcaf-example-protracker.html'):'protracker.html')}: play the recovered 4 spirits tune. Typing mode is selected. Use arrows to adjust volume/tempo and keys 1–4 to toggle voices. A mouse button on the canvas exits. The recovered tune has no drum/text synchronization cues.
 

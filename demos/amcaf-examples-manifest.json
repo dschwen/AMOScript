@@ -59,9 +59,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported extension 8:0x1204 (amcaf-1.50beta4) at line 16, byte 770"
+      "runtime": "Original Iva/Print banks, declared AROS topaz-compatible host font, bank capture/restore and both key exits covered with WebGL.",
+      "compiled": true
     },
     {
       "source": "GamePorts.AMOS",
@@ -83,9 +82,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported token 0x3c0 at line 30, byte 1206"
+      "runtime": "Original raw/ByteRun1 IFF conversion with prepared synchronous selections, uploads and byte-checked downloads.",
+      "compiled": true
     },
     {
       "source": "Protracker.AMOS",
@@ -128,9 +126,8 @@
       "extensions": {
         "8": "amcaf-1.50beta4"
       },
-      "runtime": "Not executed: compilation blocked.",
-      "compiled": false,
-      "error": "Unsupported token 0x28ae at line 22, byte 882"
+      "runtime": "Original sample-bank playback, key prompt, PCM-word fix and saved-file download.",
+      "compiled": true
     },
     {
       "source": "ShowAGAPic.AMOS",

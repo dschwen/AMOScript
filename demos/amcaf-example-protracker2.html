@@ -890,6 +890,11 @@ function createMemoryFiles(initial = {}, choices = [], directories = [], { capac
       if (typeof name !== 'string') throw new Error('File selection must be a string');
       selections.push(name);
     },
+    replaceSelections(choices) {
+      if (!Array.isArray(choices) || Array.from(choices).some(name => typeof name !== 'string')) throw Error('File selections must be strings');
+      selections.length = 0;
+      for (const name of choices) selections.push(name);
+    },
     selectionRequests() { return requests.slice(); }
   };
 }
@@ -2984,6 +2989,28 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   // of indexed rendering; enumeration snapshots owned bytes before selection.
   let discFonts = null;
   const graphicsFonts = new WeakMap();
+  const printFonts = new WeakMap();
+  function graphicsFont(target = screen()) {
+    const selected = graphicsFonts.get(target);
+    return selected && selected.source ? selected.source() : selected;
+  }
+  function setGraphicsFontSource(source) { source(); graphicsFonts.set(screen(), { source }); }
+  function setPrintFontSource(source) { source(); printFonts.set(screen(), source); }
+  function currentGraphicsFont() {
+    const selected = graphicsFont();
+    if (selected) return selected;
+    const data = new Uint8Array(2048);
+    for (let code=0;code<256;code++) for(let y=0;y<8;y++) for(let x=0;x<8;x++) if(font[code*8+y]&(1<<x))data[code*8+y]|=0x80>>x;
+    return {name:'AMOS portable',width:8,height:8,baseline:7,rowBytes:1,data};
+  }
+  function changeNamedFont(name,height=8,style=0) {
+    if (typeof name !== 'string' || !Number.isInteger(height) || !Number.isInteger(style)) throw Error('Invalid named font request');
+    if (discFonts == null) getDiscFonts();
+    const normalize = value => (value.toLowerCase().endsWith('.font') ? value.toLowerCase() : value.toLowerCase()+'.font');
+    const selected = discFonts.find(entry => normalize(entry.name) === normalize(name) && entry.height === height);
+    if (!selected || style) throw Error('Named font is unavailable in the preloaded font catalogue');
+    graphicsFonts.set(screen(), selected);
+  }
   function getDiscFonts() {
     const provided = options.diskFonts;
     const supplied = provided == null ? [] : provided;
@@ -4060,15 +4087,15 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if (!Number.isInteger(size) || size < 1 || size > 255) throw new Error('Invalid tab size');
     screen().tabSize = size;
   }
-  function glyph(target, code, x, y, foreground, background = null, style = 0) {
-    if (code < 32 || (code > 127 && code < 160) || code > 255 || code * 8 + 7 >= font.length) code = 63;
+  function glyph(target, code, x, y, foreground, background = null, style = 0, bytes = font, msb = false) {
+    if (code < 32 || (!msb && code > 127 && code < 160) || code > 255 || code * 8 + 7 >= bytes.length) code = 63;
     for (let row = 0; row < 8; row++) {
-      let bits = font[code * 8 + row];
+      let bits = bytes[code * 8 + row];
       if (style & 1 && row === 7) bits = 255;
       if (style & 2) bits |= bits << 1;
       const shift = style & 4 ? (row < 4 ? 1 : 0) : 0;
       for (let col = 0; col < 8; col++) {
-        if (bits & (1 << col)) pixel(target, x + col + shift, y + row, foreground);
+        if (bits & (msb ? 0x80 >> col : 1 << col)) pixel(target, x + col + shift, y + row, foreground);
         else if (background != null) pixel(target, x + col, y + row, background);
       }
     }
@@ -4081,15 +4108,16 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     target.writingActive = mode !== 0 || parts !== 0;
   }
   function printGlyph(target, code, x, y) {
-    if (!target.writingActive) { glyph(target, code, x, y, target.pen, target.paper); return; }
+    const source = printFonts.get(target), bytes = source ? source() : font;
+    if (!target.writingActive) { glyph(target, code, x, y, target.pen, target.paper, 0, bytes, !!source); return; }
     if (writingMode === 4) return;
-    if (code < 32 || (code > 127 && code < 160) || code > 255 || code * 8 + 7 >= font.length) code = 63;
+    if (code < 32 || (!source && code > 127 && code < 160) || code > 255 || code * 8 + 7 >= bytes.length) code = 63;
     for (let row = 0; row < 8; row++) {
-      const bits = font[code * 8 + row];
+      const bits = bytes[code * 8 + row];
       for (let col = 0; col < 8; col++) {
         const px = x + col, py = y + row;
         if (px < 0 || py < 0 || px >= target.width || py >= target.height) continue;
-        const foreground = !!(bits & (1 << col));
+        const foreground = !!(bits & (source ? 0x80 >> col : 1 << col));
         const value = foreground ? (writingParts === 1 ? 0 : target.pen) : (writingParts === 2 ? 0 : target.paper);
         const at = py * target.width + px, previous = target.pixels[at];
         target.pixels[at] = (writingMode === 0 ? value : writingMode === 1 ? previous | value :
@@ -4170,7 +4198,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     return column;
   }
   function textLength(value) {
-    const selected=graphicsFonts.get(screen());let length=0;
+    const selected=graphicsFont();let length=0;
     for(let i=0;i<value.length;i++){const code=value.charCodeAt(i)<=255?value.charCodeAt(i):63;length+=selected?(selected.advances?selected.advances[code]:selected.width):8;}return length;
   }
   function clip(left=null,top=null,right=null,bottom=null) {
@@ -4183,7 +4211,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   }
   function text(x, baseline, value) {
     const target = screen(); whole(x); whole(baseline);
-    const selected = graphicsFonts.get(target);
+    const selected = graphicsFont(target);
     // Native default text drawing erases with the background pen (JAM2).
     // Gr Writing 0 explicitly selects transparent JAM1.
     const background = target.graphicsMode === 0 ? null : target.graphicsMode === 1 ? target.graphicsBackground : target.inkBackground;
@@ -4192,15 +4220,24 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     } else {
       // JAM2 erases the complete advance span, including proportional gaps.
       // Paint the background first so overlapping glyph cells cannot erase ink.
-      const advanceWidth = textLength(value);
-      if (background != null) for (let row=0;row<selected.height;row++) for(let col=0;col<advanceWidth;col++)
+      let advanceWidth = 0, left = 0, right = 0;
+      for(let i=0;i<value.length;i++){
+        const code=value.charCodeAt(i)<=255?value.charCodeAt(i):63;
+        const bearing=selected.bearings?selected.bearings[code]:0;
+        left=Math.min(left,advanceWidth+bearing);
+        right=Math.max(right,advanceWidth+bearing+(selected.widths?selected.widths[code]:selected.width));
+        advanceWidth+=selected.advances?selected.advances[code]:selected.width;
+      }
+      right=Math.max(right,advanceWidth);
+      if(!selected.widths&&!selected.bearings){left=0;right=advanceWidth;}
+      if (background != null) for (let row=0;row<selected.height;row++) for(let col=left;col<right;col++)
         pixel(target,x+col,baseline-selected.baseline+row,background);
       let cursor = x;
       for (let i = 0; i < value.length; i++) {
         const code = value.charCodeAt(i) <= 255 ? value.charCodeAt(i) : 63;
-        for (let row = 0; row < selected.height; row++) for (let col = 0; col < selected.width; col++) {
+        for (let row = 0; row < selected.height; row++) for (let col = 0; col < (selected.widths?selected.widths[code]:selected.width); col++) {
           const bits = selected.data[(code * selected.height + row) * selected.rowBytes + (col >> 3)];
-          if (bits & (0x80 >> (col & 7))) pixel(target, cursor + col, baseline - selected.baseline + row, target.ink);
+          if (bits & (0x80 >> (col & 7))) pixel(target, cursor + (selected.bearings?selected.bearings[code]:0) + col, baseline - selected.baseline + row, target.ink);
         }
         cursor += selected.advances ? selected.advances[code] : selected.width;
       }
@@ -4404,7 +4441,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     interfaceDraw,interfaceMeasure,
     turboDraw, turboPlot, fillBitplane, waitForBlitter:()=>true,
     clip, clearBitplane, textLength, checkedWindow, memory: bitmapMemory, planeBase, dualPlayfield, screenToBack, scrollOff: () => { screen().scrollEnabled = false; },
-    defineScroll, scroll, textBase:()=>{const selected=graphicsFonts.get(screen());return selected?selected.baseline:7;},
+    defineScroll, scroll, textBase:()=>{const selected=graphicsFont();return selected?selected.baseline:7;},
+    setGraphicsFontSource,setPrintFontSource,currentGraphicsFont,changeNamedFont,
     screens, screen, open, resetDefault, select, close, clone, getDiscFonts, setFont, fontName, hideScreen, showScreen, screenToFront, getPalette, setColour, setPalette, screenDisplay, screenOffset, validateAmosScreen, defaultIffWindow, canvasFrame, pointerPosition, pointerHardwarePosition,
     reserveZones, resetZone, setZone, zone, mouseZone, screenIn,
     rainbows, setRainbow, rainbow, rainbowDel, rainColour, setRain, view, setAutoView,
@@ -4880,6 +4918,18 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const address=bankMemory.address(integer(value));
     state.audio.ptSampleBank=address;
   }
+  function ptSamPlay(...args) {
+    const number=integer(args.length===1?args[0]:args[1]),mask=args.length===1?15:integer(args[0]);
+    const base=state.audio.ptSampleBank;
+    if(!base)throw Error('Pt Sam Bank must select a sample bank first');
+    const index=Math.abs(number),count=bankMemory.deek(base);
+    if(!index||index>count||index>16383)throw Error('Invalid Pt Sam Play sample number');
+    const record=base+(bankMemory.leek(base+index*4-2)>>>0);
+    bankMemory.checkRange(record,14);
+    const frequency=args.length===3?integer(args[2]):bankMemory.deek(record+8),length=bankMemory.leek(record+10)>>>0;
+    if(!length)return;
+    ptRawPlay(mask,record+14,number<0?-length:length,frequency);
+  }
   function ptRawPlay(mask,address,length,frequency){
     mask=integer(mask);address=integer(address);length=integer(length);frequency=integer(frequency);
     const voiceWord=(mask<<16)>>16;
@@ -4887,11 +4937,11 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     if(voiceWord<0)throw new Error('Pt Raw Play automatic negative voice selection is not implemented');
     mask &= 15;
     if(!mask)return;
-    if(length<0)throw new Error('Pt Raw Play negative looping lengths are not implemented');
+    const looping=length<0;length=Math.abs(length);
     const bytes=length-(length%2);
     if(bytes<2||bytes>131070)throw new Error('Pt Raw Play requires 2..131070 word-rounded bytes');
     frequency=Math.max(400,Math.min(30000,(frequency<<16)>>16));
-    const period=Math.floor(3579545/frequency),fields=Math.floor((bytes/2)*100/frequency)+1;
+    const period=Math.floor(3579545/frequency),fields=looping?-2:Math.floor((bytes/2)*100/frequency)+1;
     if(music||tracker&&trackerKind!=='amcaf')throw new Error('Pt Raw Play during Music or Track Play is not implemented');
     if(address&1)throw new Error('Pt Raw Play requires an even chip-memory address');
     const access=bankMemory.locate(address>>>0,bytes);
@@ -5873,6 +5923,45 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     const length=access.bank.data.length;
     if(!length||length>16*1024*1024)throw Error('Wsave requires 1 byte..16 MiB');
     bsave(filename,address,address+length);
+  }
+  function peekString(address,length,delimiter=null) {
+    address=integer(address);length=Math.min(integer(length)>>>0,0xffc0);
+    if(delimiter!=null&&(typeof delimiter!=='string'||/[^\x00-\xff]/.test(delimiter)))throw Error('Peek$ delimiter requires byte characters');
+    const stop=delimiter&&delimiter.length?delimiter.charCodeAt(0):-1,bytes=[];
+    for(let index=0;index<length;index++){const value=bankMemory.peek(address+index);if(value===stop)break;bytes.push(value);}
+    return String.fromCharCode(...bytes);
+  }
+  function itemString(value,index,separator='|') {
+    index=integer(index);
+    if(typeof value!=='string'||!value.length||/[^\x00-\xff]/.test(value)||typeof separator!=='string'||separator.length!==1||separator.charCodeAt(0)>255||index<0||index>65535)throw Error('Invalid Itemstr$ arguments');
+    const items=value.split(separator);
+    if(index>=items.length)throw Error('Itemstr$ item does not exist');
+    return index===0&&items.length===1?items[0].slice(0,-1):items[index];
+  }
+  function fontBank(number) {
+    number=integer(number);
+    const bank=banks.get(number);
+    if(!bank||bank.type!=='data')throw Error('Font requires a generic memory bank');
+    return bank;
+  }
+  function changeBankFont(number) {
+    const bank=fontBank(number),codec=amcafBankFontFactory();
+    const read=()=>{if(![...banks.values()].includes(bank))throw Error('Selected font bank was retired');return codec.decode(bank.data);};
+    read();display.setGraphicsFontSource(read);
+  }
+  function changePrintFont(number) {
+    const bank=fontBank(number);
+    if(bank.data.length!==2048)throw Error('Print font requires exactly 2048 bytes');
+    display.setPrintFontSource(()=>{if(![...banks.values()].includes(bank)||bank.data.length!==2048)throw Error('Selected Print font bank was retired');return bank.data;});
+  }
+  function makeBankFont(number) {
+    number=integer(number);if(number<1||number>=65536)throw Error('Invalid bank number');
+    const data=amcafBankFontFactory().encode(display.currentGraphicsFont());
+    installBanks([{number,type:'data',memory:'chip',permanent:true,name:'BnkFont ',data}]);
+  }
+  function listBanks() {
+    display.write('Bank  Length   Name\n');
+    for(const number of bankOrder){const bank=banks.get(number);if(bank)display.write(String(number).padStart(4)+' '+String(bankLength(number)).padStart(8)+' '+(bank.name||bank.type).trim()+'\n');}
   }
   function imploderLoad(filename,destination) {
     const target=imploderTarget(destination),resolved=resolveFileName(filename);
@@ -7315,6 +7404,10 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     extensionFlushLibs: () => systemCommand('Flush Libs'),
     extensionAudioLock: () => systemCommand('Audio Lock'),
     extensionAmosPriority:amosPriority,
+    peekString,extensionItemString:itemString,extensionPtSamPlay:ptSamPlay,
+    extensionBinexp(value){value=integer(value);if(value<0||value>31)throw Error('Binexp requires 0..31');return 1<<value;},
+    extensionChangeBankFont:changeBankFont,extensionChangePrintFont:changePrintFont,extensionMakeBankFont:makeBankFont,listBanks,
+    extensionChangeFont:(name,height=8,style=0)=>display.changeNamedFont(name,integer(height),integer(style)),
     extensionImploderLoad:imploderLoad,extensionImploderUnpack:imploderUnpack,
     extensionQsin:(a,r)=>amcafMath().sin(integer(a),integer(r)),
     extensionQcos:(a,r)=>amcafMath().cos(integer(a),integer(r)),
@@ -9410,13 +9503,13 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     frames += count;
     return Object.freeze(result);
   }
-  function rawPlay(mask, bytes, period) {
+  function rawPlay(mask, bytes, period, looping=false) {
     integer(mask, 0, 15, 'voice mask'); integer(period, 1, 65535, 'raw period');
     if (!bytes || bytes.length < 2 || bytes.length > 131070 || bytes.length % 2) throw new Error('AMCAF PCM: invalid raw length');
     const owned = Int8Array.from(bytes, value => { integer(value, 0, 255, 'raw byte'); return value > 127 ? value - 256 : value; });
     for (let i = 0; i < 4; i++) if (mask & (1 << i)) {
       voices[i].active = false;
-      raw[i] = { pcm: owned, period, volume: 64, offset: 0, length: owned.length, active: true, repeatLength: 0 };
+      raw[i] = { pcm: owned, period, volume: 64, offset: 0, length: owned.length, active: true, repeatLength: looping?owned.length:0, repeatSample:0, repeatStart:0 };
     }
   }
   return Object.freeze({ apply, rawPlay, render: count => render(count), renderVoices: count => render(count, true),
@@ -9490,8 +9583,8 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if (value) emit({ type: 'stop', mask: value });
     }),
     rawPlay: (value, bytes, period, fields) => run(() => {
-      if (!Number.isInteger(fields) || fields < 1 || fields > 32767) throw new Error('AMCAF stream: invalid raw lease');
-      sampler.rawPlay(value, bytes, period);
+      if (!Number.isInteger(fields) || fields!==-2&&(fields < 1 || fields > 32767)) throw new Error('AMCAF stream: invalid raw lease');
+      sampler.rawPlay(value, bytes, period, fields===-2);
       mask |= value;
       for (let i=0;i<4;i++) if(value & (1<<i)) leases[i]=fields;
       if(value) emit({ type: 'stop', mask: value });
@@ -9499,7 +9592,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     vbl: () => run(() => {
       if (paused) return;
       let released=0;
-      for(let i=0;i<4;i++) if(leases[i] && --leases[i]===0) released |= 1<<i;
+      for(let i=0;i<4;i++) if(leases[i]>0 && --leases[i]===0) released |= 1<<i;
       if(released){sampler.stopVoices(released);mask=(mask&~released)|(sequence?(voiceMask&released):0);emit({type:'stop',mask:released});}
     }),
     setTempo: value => run(() => { if (sequence) sequence.setTempo(value); }),
@@ -9688,6 +9781,82 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     let from = destination + distance;
     while (count--) output[--destination] = output[--from];
   }
+};
+  const amcafBankFontFactory = function createAmcafBankFont() {
+  function decode(bytes) {
+    const fail = message => { throw Error('Bank font: ' + message); };
+    function range(offset, size) {
+      if (!Number.isSafeInteger(offset) || !Number.isSafeInteger(size) || offset < 0 || size < 0 || offset > bytes.length - size) fail('truncated data');
+    }
+    const word = offset => { range(offset, 2); return bytes[offset] * 256 + bytes[offset + 1]; };
+    const long = offset => word(offset) * 65536 + word(offset + 2);
+    const signed = offset => (word(offset) << 16) >> 16;
+    range(0, 106);
+    if (long(0) !== 0x464f4e54) fail('expected FONT signature');
+    const height = word(44), nominalWidth = word(48), baseline = word(50);
+    const first = bytes[56], last = bytes[57], stride = word(62), style = bytes[46];
+    if (!height || height > 128 || !nominalWidth || nominalWidth > 128 || baseline >= height || first > last || !stride || (stride & 1) || (style & 0x40)) fail('unsupported TextFont geometry/style');
+    const count = last - first + 2;
+    const bitmap = long(8), locations = long(12), spaces = long(16), kerns = long(20);
+    if (!bitmap || !locations) fail('missing bitmap or character locations');
+    for (const offset of [bitmap, locations, spaces, kerns]) if (offset && offset < 106) fail('table overlaps header');
+    range(bitmap, stride * height); range(locations, count * 4);
+    if (spaces) range(spaces, count * 2);
+    if (kerns) range(kerns, count * 2);
+    const glyphs = [];
+    let width = nominalWidth;
+    for (let index = 0; index < count; index++) {
+      const start = word(locations + index * 4), size = word(locations + index * 4 + 2);
+      const bearing = kerns ? signed(kerns + index * 2) : 0;
+      const spacing = spaces ? signed(spaces + index * 2) : nominalWidth;
+      if (size > 128 || start + size > stride * 8 || bearing < -128 || bearing > 128 || spacing + bearing < 0 || spacing + bearing > 256) fail('unsupported character metrics');
+      glyphs.push({ start, size, bearing, spacing });
+      width = Math.max(width, size);
+    }
+    const rowBytes = Math.ceil(width / 8), data = new Uint8Array(256 * height * rowBytes);
+    const widths = [], bearings = [], advances = [];
+    for (let code = 0; code < 256; code++) {
+      const glyph = glyphs[code >= first && code <= last ? code - first : count - 1];
+      widths.push(glyph.size); bearings.push(glyph.bearing); advances.push(glyph.spacing + glyph.bearing);
+      for (let y = 0; y < height; y++) for (let x = 0; x < glyph.size; x++) {
+        const bit = glyph.start + x;
+        if (bytes[bitmap + y * stride + (bit >> 3)] & (0x80 >> (bit & 7))) data[(code * height + y) * rowBytes + (x >> 3)] |= 0x80 >> (x & 7);
+      }
+    }
+    const name = String.fromCharCode(...bytes.subarray(76, 106)).split('\0')[0].trim();
+    return { name, width, nominalWidth, height, baseline, rowBytes, data, widths, bearings, advances, first, last, style, defaultCode: first > 0 ? 0 : last < 255 ? 255 : 63 };
+  }
+  function encode(font) {
+    const first = font.first == null ? 32 : font.first, last = font.last == null ? 255 : font.last;
+    const codes = Array.from({ length: last - first + 2 }, (_, index) => index + first <= last ? index + first : font.defaultCode == null ? 63 : font.defaultCode);
+    const widths = codes.map(code => font.widths ? font.widths[code] : font.width);
+    const stride = Math.max(2, Math.ceil(widths.reduce((sum, width) => sum + width, 0) / 16) * 2);
+    const bitmap = 106, locations = bitmap + stride * font.height;
+    const spaces = locations + codes.length * 4, kerns = spaces + codes.length * 2;
+    const bytes = new Uint8Array(kerns + codes.length * 2);
+    const word = (offset, value) => { bytes[offset] = value >>> 8; bytes[offset + 1] = value; };
+    const long = (offset, value) => { word(offset, value >>> 16); word(offset + 2, value); };
+    long(0, 0x464f4e54); long(8, bitmap); long(12, locations); long(16, spaces); long(20, kerns);
+    word(44, font.height); bytes[46] = font.style || 0; bytes[47] = 1;
+    word(48, font.nominalWidth || font.width); word(50, font.baseline); word(52, 1); word(54, 9999);
+    bytes[56] = first; bytes[57] = last; word(62, stride);
+    const name = font.name || 'AMOS portable';
+    for (let index = 0; index < Math.min(29, name.length); index++) bytes[76 + index] = name.charCodeAt(index) & 255;
+    let start = 0;
+    codes.forEach((code, index) => {
+      const width = widths[index], bearing = font.bearings ? font.bearings[code] : 0;
+      word(locations + index * 4, start); word(locations + index * 4 + 2, width);
+      word(spaces + index * 2, (font.advances ? font.advances[code] : font.width) - bearing);
+      word(kerns + index * 2, bearing);
+      for (let y = 0; y < font.height; y++) for (let x = 0; x < width; x++) {
+        if (font.data[(code * font.height + y) * font.rowBytes + (x >> 3)] & (0x80 >> (x & 7))) bytes[bitmap + y * stride + ((start + x) >> 3)] |= 0x80 >> ((start + x) & 7);
+      }
+      start += width;
+    });
+    decode(bytes); // Validate the complete export before its caller installs it.
+    return bytes;
+  }
+  return { decode, encode };
 };
   const musicReaderFactory = function readMusicBank(bytes) {
   const fail = message => { throw new Error(`AMOS Music: ${message}`); };

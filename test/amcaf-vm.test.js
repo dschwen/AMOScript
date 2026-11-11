@@ -105,7 +105,7 @@ test('AMCAF VM: raw sound effects preflight checked memory, retain owned bytes a
   p.reserveWork(6,8);assert.throws(()=>p.extensionPtRawPlay(8,p.bankStart(6),4,8000),/generic chip/);
   assert.throws(()=>p.extensionPtSamBank(99),/not reserved/);assert.strictEqual(p.state.audio.ptSampleBank,at+2);
   assert.throws(()=>p.extensionPtRawPlay(-1,at,4,8000),/negative voice/);
-  assert.throws(()=>p.extensionPtRawPlay(8,at,-4,8000),/looping/);
+  p.extensionPtRawPlay(8,at,-4,8000);assert.strictEqual(p.state.tracker.position.position.leases[3],-2);clock.tick(100);assert.strictEqual(p.state.tracker.position.position.leases[3],-2);p.extensionPtSamStop(8);
   assert.throws(()=>p.extensionPtRawPlay(8,at,1,8000),/word-rounded/);
   p.extensionPtRawPlay(8,at,2,0xffff);assert.strictEqual(p.state.tracker.position.position.sampler.voices[3].period,8948);
   p.extensionPtSamStop(8);p.stop();

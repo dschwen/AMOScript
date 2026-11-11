@@ -1,0 +1,22 @@
+'use strict';
+const assert=require('assert'),fs=require('fs'),T=require('../lib/Transpiler'),fixtures=require('./helpers/amcafUtilityFixtures'),{createMemoryFiles}=require('../lib/amos/files'),{binary,token:t,execute}=require('./helpers/program');
+function run(name,input,choices){const m={exports:{}};new Function('module',new T(fs.readFileSync('examples/AMCAF/AMCAF_Examples/'+name+'.AMOS'),{extensions:{8:'amcaf-1.50beta4'}}).toModule())(m);const clock=require('./helpers/fakeTimers').createFakeTimers(),files=createMemoryFiles(input,choices),events=[],p=m.exports({...clock,files,print(){},audio:{command:e=>events.push(e)}});p.tick(1000000);return{p,clock,files,events};}
+test('AMCAF converters: unchanged Iff2Raw deinterleaves raw and ByteRun1 bodies and writes exact padded palette/planar files',()=>{
+ for(const compression of [0,1]){const f=fixtures.picture(compression),{p,files,clock}=run('Iff2Raw',{'input.iff':f.input.toString('latin1')},['input.iff','result']);assert(p.state.halted);assert(!p.state.error);assert.deepStrictEqual(Buffer.from(files.read('result.col'),'latin1'),f.col);assert.deepStrictEqual(Buffer.from(files.read('result.raw'),'latin1'),f.raw);assert.strictEqual(files.selectionRequests().length,2);assert.strictEqual(clock.pending(),0);}
+ const{p,files}=run('Iff2Raw',{},['']);assert(p.state.halted);assert.deepStrictEqual(files.snapshot(),{});
+});
+test('AMCAF converters: original SamBankFixer plays four voices, waits for input and saves only its source-directed PCM word fix',()=>{
+ const f=fixtures.sample(),{p,files,clock,events}=run('SamBankFixer',{'sample.abk':f.input.toString('latin1')},['sample.abk','']);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.state.tracker.position.position.sampler.rawMask,15);clock.tick(40);assert(events.some(e=>e.type==='pcm'&&e.channels.some(c=>c.some(Boolean))));
+ p.sendKey(' ');p.tick(10000);assert(p.state.halted);assert(!p.state.error);assert.deepStrictEqual(Buffer.from(files.read('sample.abk'),'latin1'),f.fixed);assert.strictEqual(clock.pending(),0);
+});
+test('AMCAF utilities: Peek$ preserves NUL, terminates before invalid memory and supports empty lengths; Itemstr$ and Binexp retain checked native forms',()=>{
+ const{program:p}=execute(binary([[t('Wait Key')]]));p.reserveWork(5,5);const a=p.bankStart(5);[65,0,66,124,67].forEach((b,i)=>p.poke(a+i,b));assert.strictEqual(p.peekString(a,5),'A\0B|C');assert.strictEqual(p.peekString(a,100,'|'),'A\0B');assert.strictEqual(p.peekString(0,0),'');assert.throws(()=>p.peekString(a,6),/bounds/);
+ assert.strictEqual(p.extensionItemString('no|rle',0),'no');assert.strictEqual(p.extensionItemString('no|rle',1),'rle');assert.strictEqual(p.extensionItemString('a,b',1,','),'b');assert.throws(()=>p.extensionItemString('a|b',2),/exist/);assert.strictEqual(p.extensionBinexp(31),-2147483648);assert.throws(()=>p.extensionBinexp(32),/0..31/);p.stop();
+});
+test('file selections: replacement validates all choices before discarding a prepared queue',()=>{const f=createMemoryFiles({},['a']);assert.throws(()=>f.replaceSelections(['b',null]));assert.throws(()=>f.replaceSelections(new Array(1)));assert.strictEqual(f.select({}),'a');f.queueSelection('old');f.replaceSelections(['new','']);assert.strictEqual(f.select({}),'new');assert.strictEqual(f.select({}),'');assert.throws(()=>f.select({}),/queued/);});
+test('core Stop: emits catchable AMOS error 9 rather than entering the resumable host Stop state',()=>{
+ const{identifier:id}=require('./helpers/program');const{program:p}=execute(binary([[t('Trap'),t('Stop')],[id('e'),t('='),t('Errtrap')],[t('Wait Key')]]));assert.strictEqual(p.state.variables.int_e,9);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.state.stopped,false);p.stop();assert.throws(()=>execute(binary([[t('Stop')]])),/AMOS error 9.*line 1/);
+});
+test('AMCAF raw sample loops: owned PCM repeats through arbitrary render blocks and retains native indefinite lease until explicit stop',()=>{
+ const stream=require('../lib/amos/amcafStream')(null,{pcm:require('../lib/amos/amcafPcm')},{sampleRate:8000,standard:'NTSC'});const bytes=Uint8Array.from([64,192]);stream.rawPlay(8,bytes,65535,-2);bytes.fill(0);stream.render(4096);for(let i=0;i<100;i++)stream.vbl();assert.strictEqual(stream.state.leases[3],-2);assert.strictEqual(stream.state.sampler.rawMask,8);stream.stopVoices(8);assert.strictEqual(stream.state.leases[3],0);assert.strictEqual(stream.state.sampler.rawMask,0);stream.stop();
+});

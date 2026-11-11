@@ -27,7 +27,9 @@ An asynchronous selector inside arbitrary expressions needs a separate evaluatio
 continuation design; ordinary function calls must not be replayed to await input.
 
 `createMemoryFiles(initial, choices)` now offers a queue-backed adapter, plus
-`queueSelection(name)` and `selectionRequests()`. A queued cancellation consumes
+`queueSelection(name)`, `replaceSelections(choices)` and `selectionRequests()`.
+Replacement validates the entire new queue before dropping old choices; utility
+pages use it to prepare a fresh upload/restart workflow. A queued cancellation consumes
 one entry. An exhausted queue throws rather than returning repeated cancellations
 or spinning indefinitely in the caller's retry loop. Requests record consumed
 choices; queues and file maps are owned by their adapter instance. A Node/custom

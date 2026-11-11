@@ -9,8 +9,47 @@ separate private project and are not part of this collection.
 **[Open the AMCAF catalogue](https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-examples.md)**
 for a page for every program, including explicit blocker pages. The catalogue is
 also in the demo gallery's “More to explore” section. Build status and runtime
-coverage are separate: currently **3/12 compile and run**, covering quick maths and both
-Protracker interfaces.
+coverage are separate: currently **6/12 compile and run**, covering fonts, IFF conversion, sample-bank fixing,
+quick maths and both Protracker interfaces.
+
+See the [font and converter implementation contract](amcaf-fonts.md) for native
+formats, supported bounds and lifecycle rules.
+
+## Working example: fonts
+
+[Play Fonts](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-fonts.html).
+The original embedded Iva font and 2,048-byte Print font draw the first screen.
+Press Space to see the captured bank font restored on a fresh screen; press
+Space again to finish. Graphics font metrics preserve character bearings and
+advances. Print-font selection affects the text writer independently.
+
+The named `topaz,16` request uses an explicitly supplied, doubled AROS Topaz8
+bitmap. This is a compatible host font, not a recovered Amiga ROM font.
+[Source, provenance and license](../examples/AMCAF/fonts/README.md) are included.
+Five independently decoded regions cover 46,720 indexed pixels. Both complete
+scenes also compare CPU output to actual WebGL readback.
+
+## Working examples: file utilities
+
+[Iff2Raw](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-iff2raw.html)
+and [SamBankFixer](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/amcaf-example-sambankfixer.html)
+have an input upload control and a **Use sample** button. Uploading completes
+before Play is enabled. The page prepares synchronous Fsel$ answers before
+starting the unchanged program. It never returns a Promise from the VM's file
+selector. Generated files remain in session memory until downloaded.
+
+For Iff2Raw, choose the output base name and download the `.col` and `.raw`
+files after completion. Tests check raw and ByteRun1 ILBM bodies against
+independent plane-major bytes and the complete padded RGB palette. The small
+synthetic input is an unmasked, word-aligned two-plane picture. This does not
+establish arbitrary ILBM/masking support or AGA rendering.
+
+For SamBankFixer, upload an AMOS sample bank or choose the synthetic tone.
+Press Space after each sample; then download the saved bank. The original
+source clears the **first PCM word**, despite its comment referring to a click
+at the end. Tests preserve that behavior and compare every saved byte.
+The page cancels the next file request after one bank so the output is easy to
+retrieve. Restart prepares a fresh input copy and fresh selection queue.
 
 ## Working example: quick maths
 
@@ -110,8 +149,8 @@ python3 tools/reference/inventory_amcaf_examples.py > examples/AMCAF/inventory.j
 python3 tools/reference/check_amcaf_math.py > test/fixtures/amcaf/math.json
 ```
 
-The eleven statically walkable programs use 155 distinct AMCAF offsets; 45 of
-those offsets are currently registered. The protected/native-code program is not
+The eleven statically walkable programs use 155 distinct AMCAF offsets; their
+implemented signatures are tracked in `lib/ExtensionProfiles.js`. The protected/native-code program is not
 included in that count. The inventory describes encoded calls, not implemented
 runtime compatibility.
 Unknown commands are never registered as successful no-ops to get a build.
@@ -123,15 +162,27 @@ Unknown commands are never registered as successful no-ops to get a build.
 | QsinCosArcSqr | Complete original loop and exit | Wider maths argument forms/native capture comparisons. |
 | Protracker | Complete original interface, music, controls and mouse exit | Recovered 4 spirits playback uses 9xx/E9x. The file lacks effect-8 drum/text cues. See [Anim scope and drum demo](anim.md). |
 | Protracker2 | Complete original visualizer loop and mouse exit | Packed Hawkeye music, negative-mask meter edges, exclusive fill, note trail, double-buffer swaps and rainbow palette run with WebGL. Wider native timing/capture comparisons remain open. |
-| Fonts | Change Bank Font `$1204` | Bank unpacking now compiles; bank fonts and print/graphics font selection remain. |
+| Fonts | Both original key prompts, bank-font capture/restore, independent pixel regions and WebGL parity | Uses the declared AROS-compatible host Topaz font; native ROM/diskfont rendering captures remain open. |
 | BigAmcafIntro | Core Set Tempras `$10ac` | Shared IMP!/raw loading, saving, strings and shifts now compile; drawing workspace, stars/splinters, vector rotation, pixel effects, blitter operations and palette/HAM effects remain. |
 | GamePorts | Xfire `$15be` | Explicit portable joypad/parallel-port readers and secondary-mouse position/limits/speed. |
-| SamBankFixer | Core Peek$ `$28ae` | Decimal formatting now compiles; bounded memory strings, sample-bank playback and meaningful prepared file selection/save remain. |
-| Iff2Raw | Core Stop `$03c0` | Lexical paths and Work-file loading/saving now compile; Stop, Binexp, Itemstr$ and supported image conversion remain. |
+| SamBankFixer | Original load, four-voice playback, key prompt, first PCM-word fix and saved-byte download | Browser uploads and a declared synthetic sample exercise the workflow. Native audio captures remain open. |
+| Iff2Raw | Original raw/ByteRun1 conversion and exact palette/plane-major output | Bounded word-aligned, unmasked ILBM inputs tested. Arbitrary malformed files and AGA display are separate. |
 | FileRequester | Core Amos Here `$24d0` | Filename/path helpers now compile; core host metadata, patterns, directory/object metadata, IO errors, font/drawing helpers and requester interaction remain. |
 | BankManager | Core Amos Here `$24d0` | Core/standard extension gaps plus bank naming, relocation, transforms, compression and requester utilities. |
-| BZoomAnimPlayer | Examine Object `$0672` | File metadata and Bzoom animation; an animation input still needs to be supplied/prepared. |
+| BZoomAnimPlayer | Examine Object `$0672` | File metadata and Bzoom animation; the original animation has now been located in the upstream archive (see below). |
 | ShowAGAPic | Native code-region validation at byte 4786 | The static walk also reports an encrypted/compiled procedure. Establish a supported source representation before adding AGA display. Preserve the original; do not silently skip protected code or emulate AGA with an OCS-labelled output. |
+
+The missing animation is present in the [original Aminet examples archive](https://ftp.uni-erlangen.de/aminet/dev/amos/AMCAFExt140Exa.lha).
+A checked reference copy was extracted during this work; it is not yet bundled
+into the twelve-program demo build. The archive SHA-256 is
+`acf1d4d25487c76130c472eb920c7ff1597b5b5a2c676c9decae1ba3517973eb`;
+`AMCAF_Examples/Data/AMCAF.Anim` is 74,634 bytes with SHA-256
+`049f14b963abedd80a98befbaa1a582b055fd38faddcffcf50bb25fa90ece8a3`.
+Its first image is a 160×128, five-plane, compressed ILBM inside ANIM.
+The archive's ShowAGAPic source has exactly the same SHA-256 as the supplied
+copy (`bf84422d1c7a91f482b1b90127662f6dee7da5d95128c049acd0df1843b24903`)
+and the same byte-4786 validation boundary. Downloading another identical
+archive copy therefore does not solve its protected/native-code representation.
 
 Implementation order:
 

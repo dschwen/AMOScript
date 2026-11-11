@@ -1,6 +1,6 @@
 # AMOScript development plan
 
-Assessment updated: 2026-11-10.
+Assessment updated: 2026-11-11.
 
 ## AMCAF example collection
 
@@ -8,7 +8,7 @@ Current priority is the original twelve-program AMCAF collection, now preserved
 under `examples/AMCAF/`. The [catalogue](demos/amcaf-examples.md) includes every
 program and its actual build/runtime status. The unchanged quick-maths example
 runs with source-derived Qsin/Qcos/Qarc/Qsqr, raw Blitter Clear and browser input;
-3/12 original programs compile and run, including quick maths and both Protracker interfaces. Shared IMP! decompression and file/bank loading
+6/12 original programs compile and run, including fonts, two file utilities, quick maths and both Protracker interfaces. Shared IMP! decompression and file/bank loading
 now pass bounded tests. Decimal/path helpers, native arithmetic shifts and raw
 Work-bank loading/saving are implemented with a standalone utility demo.
 Protracker playback, voice masks and six status/VU queries are implemented.
@@ -19,13 +19,15 @@ strings and separate native Anim records/controls. Its recovered music now plays
 AMCAF effect-8 synchronization cues. A linked silent drum harness cycles its six
 original strings and untouched sprite bank with WebGL. Its requested mod.4spirits asset has
 been recovered from Modland. A declared Hawkeye harness plays the original IMP! module from a chip
-Work bank with voice control, E0 filtering and EA/EB fine volume. Other first
-blockers include Change Bank Font and core Set Tempras, Peek$, Stop and Amos Here.
+Work bank with voice control, E0 filtering and EA/EB fine volume. Bank-font selection/capture, raw Print fonts, named preloaded fonts, bounded Peek$,
+Stop error 9, Binexp, Itemstr$ and sample-bank playback now run the original Fonts,
+Iff2Raw and SamBankFixer examples. Upload/download pages preserve synchronous
+file selection and source-directed file changes. Remaining first blockers include
+Xfire, Set Tempras, Amos Here and Examine Object.
 All 6,531 first-wrap sample starts and 3,232 row positions in 4 spirits match
 an independent native-register audit over 19,892 ticks, including 1,365 offset
 starts. Browser checks cover audible playback, all four voice toggles, arrow-key
-volume/tempo changes, Stop/Resume and Mouse Key exit. Next address bank fonts,
-then devices, file/bank utilities and intro effects. The protected/native AGA
+volume/tempo changes, Stop/Resume and Mouse Key exit. Next address devices, requester/bank-manager utilities and intro effects. The protected/native AGA
 source has a separate format boundary.
 See [AMCAF example support](docs/amcaf-examples.md).
 
