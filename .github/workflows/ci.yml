@@ -43,7 +43,8 @@ jobs:
   browser:
     name: Chromium
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # Full demo/GPU coverage takes 12–15 minutes on hosted runners.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
