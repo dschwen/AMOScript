@@ -104,3 +104,10 @@ timeouts. This avoids the hosted image's Azure mirror DNS failures during
 Playwright dependency installation. Package signature verification remains enabled.
 For a failed v0.3.0 run, dispatch the release workflow from `master` with tag
 `v0.3.0`; rerunning the original tag workflow retains its old mirror configuration.
+
+Release browser validation uses the `test/` harness from the workflow commit
+(`github.workflow_sha`), while compiler/runtime code, generated demos and shipped
+assets remain checked out at the release tag. This allows test synchronization
+fixes to validate an unchanged release. Ordinary branch CI uses its own tests.
+The v0.3.0 requester test now waits for the original AMOS Mouse Key sample and
+previous-button latch rather than assuming a 50 ms press is always observed.

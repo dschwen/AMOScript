@@ -23,6 +23,7 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       ref: ${{ format('refs/tags/{0}', inputs.tag || github.ref_name) }}
+      browser-tests-ref: ${{ github.workflow_sha }}
 
   windows:
     name: Build and test portable Windows x64 ZIP

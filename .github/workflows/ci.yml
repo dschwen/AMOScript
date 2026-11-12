@@ -11,6 +11,10 @@ on:
         description: 'Git ref to validate; defaults to the triggering ref'
         required: false
         type: string
+      browser-tests-ref:
+        description: 'Optional browser test harness ref; application stays at ref'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -54,6 +58,17 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Check out release validation harness
+        if: inputs.browser-tests-ref != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.browser-tests-ref }}
+          path: .cache/ci-browser-tests
+          sparse-checkout: test
+      - name: Use corrected browser tests with tagged application
+        if: inputs.browser-tests-ref != ''
+        run: cp -a .cache/ci-browser-tests/test/. test/
       - run: npm ci
       - name: Configure Ubuntu package mirror
         run: |
