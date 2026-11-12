@@ -103,7 +103,7 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (96 demos)</summary>
+<summary>Compiler and runtime checks (99 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
 
@@ -658,6 +658,24 @@ Frozen/pending positions, movement, hiding, palette priority, mouse reservation 
 External load/save/reload, appending, swaps, reservation, shrinking, erasure and saved Bob backgrounds.
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/banks.html) · [Local file](banks.html)
+
+### AmigaOS system memory diagnostic
+
+Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-memory-read.html) · [Local file](system-memory-read.html)
+
+### AmigaOS system memory -debug
+
+Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-memory-read-debug.html) · [Local file](system-memory-read-debug.html)
+
+### AmigaOS system memory -configured
+
+Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-memory-read-configured.html) · [Local file](system-memory-read-configured.html)
 
 ### Roller II — full game with debug enabled
 

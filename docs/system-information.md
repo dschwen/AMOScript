@@ -39,7 +39,7 @@ The desktop form exposes this as **Advanced → AmigaOS compatibility**, saved
 as `options.systemInfo` in project files. The project CLI uses the same setting;
 the direct page-builder CLI has no system-information flag. See the
 [desktop guide](desktop-builder.md#extension-slots-and-amigaos-compatibility) and
-[planned automatic diagnostics](amigaos-memory-diagnostics-plan.md).
+[runtime diagnostics](amigaos-memory-diagnostics-plan.md).
 
 ## Startup commands
 
@@ -79,3 +79,18 @@ before INIT. It completes for explicitly supplied versions 34 and 40, exercising
 the original old-version Break Off branch and Close Workbench/Flush Libs/Audio
 Lock. This was a bounded headless check, not native OS execution, full game
 compilation or a graphics/audio run. The complete game still rejects at Pt Play.
+
+## Missing-profile diagnostics
+
+With no profile, complete reads within the ExecBase pointer bytes 4..8 throw
+`AMOS_SYSTEM_INFO_REQUIRED`. A four-byte read at address 4 is a known pointer
+read; partial reads are described as possible pointer-byte reads. The error's
+`diagnostic` records operation, address, width, field, confidence and setting.
+Reads still fail; no profile or OS version is selected automatically. Other
+invalid addresses, crossing reads, retired banks and writes retain strict errors.
+
+Standalone pages explain how to configure compatibility even outside Debug mode.
+Debug details include the structured diagnostic and source location. Desktop
+previews offer a configuration action on fatal errors only; it opens Advanced
+and focuses the selector without changing the project. Handled source errors do
+not trigger this recommendation. Rebuild after choosing a version.

@@ -75,3 +75,21 @@ test('System information: standalone page opts in explicitly and validates metad
   assert.ok(buildGamePage(source,{systemInfo:{execVersion:40}}).includes('"systemInfo":{"execVersion":40}'));
   assert.throws(() => buildGamePage(source,{systemInfo:{execVersion:-1}}),/systemInfo/);
 });
+
+test('System information diagnostics: exact/partial reads are actionable; other invalid ranges and writes stay strict',()=>{
+ const m=memoryFactory(new Map());
+ for(const [operation,address,width]of [['leek',4,4],['deek',4,2],['peek',7,1]]){
+  assert.throws(()=>m[operation](address),e=>e.code==='AMOS_SYSTEM_INFO_REQUIRED'&&e.diagnostic.address===address&&e.diagnostic.width===width&&e.diagnostic.confidence===(width===4?'known':'possible'));
+ }
+ for(const run of [()=>m.leek(5),()=>m.peek(0),()=>m.peek(0x2014),()=>m.read(4,5),()=>m.read(4,0),()=>m.loke(4,0),()=>m.write(4,new Uint8Array(4)),()=>m.fill(4,8,0)])assert.throws(run,e=>!e.code);
+ assert.throws(()=>m.read(4,4),e=>e.diagnostic.operation==='read');
+ const bank={number:9,type:'data',data:new Uint8Array(8)},b=memoryFactory(new Map([[9,bank]])),address=b.start(9);
+ assert.throws(()=>b.copy(4,8,address),e=>e.code==='AMOS_SYSTEM_INFO_REQUIRED');assert.deepStrictEqual([...bank.data],Array(8).fill(0));
+ b.release(bank);assert.throws(()=>b.leek(address),e=>!e.code);
+ const p=instance(build([[t('Print'),fn('Leek',n(4))]]));assert.throws(()=>p.tick(100),e=>e.code==='AMOS_SYSTEM_INFO_REQUIRED'&&/line 1/.test(e.message));
+});
+
+test('System information diagnostics: handled reads preserve structured context and ordinary Resume Next control',()=>{
+ const p=instance(build([[t('On Error'),t('Goto'),id('handler',24)],[t('Print'),fn('Leek',n(4))],[t('Wait Key')],[id('handler',12)],[t('Resume Next')]]));
+ p.tick(100);assert.strictEqual(p.state.waiting,'key');assert.strictEqual(p.state.error.code,'AMOS_SYSTEM_INFO_REQUIRED');assert.strictEqual(p.state.error.diagnostic.address,4);assert.strictEqual(p.state.error.location.line,2);assert(!p.state.halted);p.stop();
+});

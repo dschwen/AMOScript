@@ -30,6 +30,14 @@ async function run(){
     await save(html);await page.click('#export');await page.waitForFunction(()=>!document.querySelector('#error').hidden);assert.match(await page.locator('#error').textContent(),/already exists/);assert.strictEqual(fs.readFileSync(html,'utf8'),expected);
     const bad=path.join(temp,'bad.AMOS');fs.writeFileSync(bad,'not an AMOS file');await choose(bad);await page.click('#choose-main');await page.click('#build');await page.waitForFunction(()=>!document.querySelector('#error').hidden);assert.match(await page.locator('#error').textContent(),/bad.AMOS/);
     const {binary,token,text}=require('./helpers/tokens'),missing=path.join(temp,'missing.AMOS');fs.writeFileSync(missing,binary([[token('Load'),text('MISSING:asset.abk')]]));await choose(missing);await page.click('#choose-main');next=electron.waitForEvent('window');await page.click('#build');const failed=await next;await failed.waitForSelector('#play-game');await failed.click('#play-game');await page.waitForFunction(()=>/missing:asset.abk/i.test(document.querySelector('#error').textContent),null,{timeout:15000});await failed.close();
+    const versionCheck=path.join(temp,'version-check.AMOS');fs.writeFileSync(versionCheck,require('./helpers/systemInformationFixture')());
+    await choose(versionCheck);await page.click('#choose-main');await page.selectOption('#systemInfo','');
+    next=electron.waitForEvent('window');await page.click('#build');const needsProfile=await next;await needsProfile.waitForSelector('#play-game');await needsProfile.click('#play-game');
+    await page.locator('#configure-system-info').waitFor({state:'visible'});await page.locator('#configure-system-info').click();
+    assert.strictEqual(await page.locator('#systemInfo').evaluate(n=>document.activeElement===n&&n.closest('details').open),true);
+    assert.strictEqual(await page.inputValue('#systemInfo'),'');await needsProfile.keyboard.press('Escape');await needsProfile.close();
+    await page.selectOption('#systemInfo','40');next=electron.waitForEvent('window');await page.click('#build');const fixedProfile=await next;await fixedProfile.waitForSelector('#play-game');await fixedProfile.click('#play-game');await fixedProfile.waitForFunction(()=>document.querySelector('#game-viewport').dataset.phase==='ended');await fixedProfile.close();
+    assert(await page.locator('#configure-system-info').isHidden());
     const cliOutput=path.join(temp,'CLI.html'),cli=spawnSync(process.execPath,[path.join(__dirname,'../tools/build_project.js'),projectFile,cliOutput],{encoding:'utf8'});assert.strictEqual(cli.status,0,cli.stderr);assert.strictEqual(fs.readFileSync(cliOutput,'utf8'),expected);
     console.log('Desktop smoke passed: native dialog workflow, disk import, relative save/reopen, sandboxed preview, runtime errors, exact CLI/GUI export, touch options and overwrite protection.');
   }finally{await electron.close();fs.rmSync(temp,{recursive:true,force:true});}

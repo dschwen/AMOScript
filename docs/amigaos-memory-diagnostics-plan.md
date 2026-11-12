@@ -1,7 +1,8 @@
 # Plan: actionable AmigaOS system-memory diagnostics
 
-Status: planned. The desktop compatibility selector exists; automatic detection
-and recommendations described here do not yet exist.
+Status: runtime detection, structured fatal diagnostics, standalone demos and
+the desktop configuration action are implemented in v0.3.1. The optional
+compile-time advisory remains planned.
 
 ## Outcome
 

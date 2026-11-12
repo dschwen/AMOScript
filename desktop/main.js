@@ -25,7 +25,10 @@ function previewPage(html,title){
   session.on('will-download',event=>{event.preventDefault();if(window&&!window.isDestroyed())window.webContents.send('builder:preview-error','Downloads are disabled in preview. Export HTML and open it in a browser to download modified files.');});
   preview.webContents.setWindowOpenHandler(()=>({action:'deny'}));preview.webContents.on('will-navigate',(event,target)=>{if(target!==url)event.preventDefault();});
   let polling=false;
-  const monitor=setInterval(async()=>{if(polling||preview.isDestroyed()||!window||window.isDestroyed())return;polling=true;try{const error=await preview.webContents.executeJavaScript("(()=>{const text=document.querySelector('[data-debug-log]')?.textContent;if(!text)return '';try{const data=JSON.parse(text.split('\\n\\n')[0]);return String(data.sourceError?.message||data.error||'').slice(0,4000);}catch(_){return '';}})()");if(typeof error==='string'&&error)window.webContents.send('builder:preview-error',error.slice(0,4000));}catch(_){}finally{polling=false;}},500);
+  const monitor=setInterval(async()=>{if(polling||preview.isDestroyed()||!window||window.isDestroyed())return;polling=true;try{
+    const error=await preview.webContents.executeJavaScript("(()=>{const text=document.querySelector('[data-debug-log]')?.textContent;if(!text)return null;try{const data=JSON.parse(text.split('\\n\\n')[0]);if(data.phase!=='error')return null;return {message:String(data.error||'').slice(0,4000),code:data.diagnostic?.code==='AMOS_SYSTEM_INFO_REQUIRED'?'AMOS_SYSTEM_INFO_REQUIRED':null};}catch(_){return null;}})()");
+    if(error&&typeof error.message==='string'&&error.message)window.webContents.send('builder:preview-error',{message:error.message.slice(0,4000),code:error.code==='AMOS_SYSTEM_INFO_REQUIRED'?error.code:null});
+  }catch(_){}finally{polling=false;}},500);
   preview.webContents.on('render-process-gone',(_event,details)=>{if(window&&!window.isDestroyed())window.webContents.send('builder:preview-error','Preview stopped: '+details.reason);});
   preview.on('closed',()=>{clearInterval(monitor);previews.delete(preview);session.protocol.unhandle('amos-preview');});
   preview.setMenuBarVisibility(false);preview.loadURL(url);return preview;

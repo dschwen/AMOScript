@@ -5,6 +5,7 @@
 function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}, initialMouse=null, settings={}) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
+  let diagnostic = null;
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   touchMode.value = settings.touch || 'auto';
   const foregroundButton=document.createElement('button');foregroundButton.type='button';foregroundButton.textContent='Return to AMOS';foregroundButton.id='game-foreground';foregroundButton.hidden=true;viewport.querySelector('.amos-fullscreen-toolbar').append(foregroundButton);foregroundButton.onclick=()=>{if(live)live.amosToFront();foregroundButton.hidden=true;if(host)host.focus();};
@@ -24,19 +25,20 @@ function installGamePage(createProgram, encodedAssets, createRenderer, port, fir
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.state === 'on' ? 'Mute sound' : audio.state === 'starting' ? 'Enabling sound…' : 'Enable sound';
     soundButton.disabled = audio.state === 'starting';
-    status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
+    status.textContent = (failure ? (diagnostic ? failure : 'Game stopped after an error. Restart to try again.') : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
     if (debug) {viewport.dataset.line = live && live.state.location ? String(live.state.location.line) : '';viewport.dataset.sourceError=live&&live.state.error?live.state.error.message:'';}
     viewport.dataset.keyboard = keyboardMode.value;
     viewport.dataset.sound = audio.state; viewport.dataset.backend = gpu ? 'webgl' : 'canvas';
     status.hidden = !!live && !failure && !live.state.halted && !live.state.stopped && !audio.error;
-    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, sourceError: live && live.state.error, audio, keyboard: keyboardMode.value });
+    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, diagnostic, sourceError: live && live.state.error, audio, keyboard: keyboardMode.value });
     fullscreen.refresh();
   }
-  function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
+  function fail(error) { ui.recordError(error); failure = error.message; diagnostic = error.code === 'AMOS_SYSTEM_INFO_REQUIRED' ? {code:error.code,...error.diagnostic} : null; if (live) live.stop(); if (host) host.detach(); update(); }
   function releaseGpu() { if (!gpu) return; const gl = gpu.resources.context; gpu.dispose(); gpu = null; const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   function start(factory=settings.restartFromEntry?createProgram:activeFactory) {
+    diagnostic = null;
     const inheritedFonts = (live && live.display.fontsExamined) || diskFonts.length > 0;
     if(factory===createProgram)for(const [name,bytes] of Object.entries(settings.entryFiles||{}))files.write(name,bytes);
     activeFactory=factory;foregroundButton.hidden=true;

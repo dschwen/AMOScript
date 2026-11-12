@@ -638,6 +638,24 @@
       "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/banks.html"
     },
     {
+      "file": "system-memory-read.html",
+      "title": "AmigaOS system memory diagnostic",
+      "description": "Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-memory-read.html"
+    },
+    {
+      "file": "system-memory-read-debug.html",
+      "title": "AmigaOS system memory -debug",
+      "description": "Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-memory-read-debug.html"
+    },
+    {
+      "file": "system-memory-read-configured.html",
+      "title": "AmigaOS system memory -configured",
+      "description": "Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.",
+      "preview": "https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/system-memory-read-configured.html"
+    },
+    {
       "file": "programs.html",
       "title": "Interactive programs, input and lifecycle",
       "description": "Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.",

@@ -10344,8 +10344,21 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function finishWrite(access, length) {
     if (length && access.region.kind === 'display') options.externalMemory.changed();
   }
+  function resolveRead(address, length, operation) {
+    // Classify only complete reads of the well-known ExecBase pointer island.
+    // All unrelated, malformed, stale and write ranges retain normal checks.
+    if (options.systemInfo == null && Number.isInteger(address) && address >= 4 &&
+        Number.isSafeInteger(length) && length > 0 && address + length <= 8) {
+      const confidence = address === 4 && length === 4 ? 'known' : 'possible';
+      const error = new Error(`Bank memory address out of bounds: ${confidence === 'known' ? 'AmigaOS ExecBase pointer read' : 'possible AmigaOS ExecBase byte read'} at $${address.toString(16).padStart(8,'0')}. To support Exec version checks, choose Advanced → AmigaOS compatibility in the builder, select the version expected by the program, then build and preview again. For exported pages, the project owner must set compatibility and rebuild. This supports version checks only, not AmigaOS services or arbitrary system memory.`);
+      error.code = 'AMOS_SYSTEM_INFO_REQUIRED';
+      error.diagnostic = Object.freeze({operation,address,width:length,field:'execBase',confidence,setting:'systemInfo'});
+      throw error;
+    }
+    return resolve(address, length);
+  }
   function readNumber(address, length) {
-    const access = resolve(address, length); readable(access, length);
+    const access = resolveRead(address, length, length === 1 ? 'Peek' : length === 2 ? 'Deek' : 'Leek'); readable(access, length);
     let value = 0;
     for (let index = 0; index < length; index++) value = (value << 8) | byteAt(access, index);
     return value;
@@ -10367,7 +10380,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
     },
     checkRange(address, length) { resolve(address, length); },
     read(address, length) {
-      const access = resolve(address, length); readable(access, length);
+      const access = resolveRead(address, length, 'read'); readable(access, length);
       if (!access.region.kind) return access.bank.data.slice(access.offset, access.offset + length);
       return Uint8Array.from({ length }, (_, index) => byteAt(access, index));
     },
@@ -10392,7 +10405,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
       if(variablePointer(address))address>>>=0;if(variablePointer(destination))destination>>>=0;
       const length = end - address;
       if (!Number.isSafeInteger(length) || length <= 0) throw new Error('Invalid Copy range (end must follow start)');
-      const source = resolve(address, length), target = resolve(destination, length);
+      const source = resolveRead(address, length, 'Copy'), target = resolve(destination, length);
       readable(source, length); writable(target, length);
       if (!source.region.kind && !target.region.kind) {
         // TypedArray#set snapshots overlapping sources, including either direction.
@@ -10468,7 +10481,7 @@ else globalThis.AMOS_FILES = { createMemoryFiles, createNodeFiles };
   function recoverError(error) {
     if (!errorHandler || errorFrame) return false;
     errorFrame = { ip: state.ip, stack: state.stack.slice(), frames: state.frames.slice(), locals: state.locals, data: { ...state.data } };
-    state.error = Object.freeze({ message: error.message, location: state.location && Object.freeze({...state.location}) });
+    state.error = Object.freeze({ ...(error.code==='AMOS_SYSTEM_INFO_REQUIRED'?{code:error.code,diagnostic:Object.freeze({...error.diagnostic})}:{}), message: error.message, location: state.location && Object.freeze({...state.location}) });
     inputRequest = null; inputText = '';
     cancelScheduled(); state.halted = false; state.waiting = null;
     if (errorHandler.procedure) {
@@ -11870,6 +11883,7 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
 (function installGamePage(createProgram, encodedAssets, createRenderer, port, fireKeys, debug, installUI, linkedPrograms={}, initialMouse=null, settings={}) {
   const byId = id => document.getElementById(id), viewport = byId('game-viewport'), slot = byId('game-surface');
   const play = byId('play-game'), status = byId('game-status'), soundButton = byId('game-sound'), touchMode = byId('game-touch'), speed = byId('game-speed'), keyboardMode = byId('game-keyboard');
+  let diagnostic = null;
   let canvas = byId('game-input'), host = null, gpu = null, live = null, disposed = false, revision = 0, launch = 0, failure = '';
   touchMode.value = settings.touch || 'auto';
   const foregroundButton=document.createElement('button');foregroundButton.type='button';foregroundButton.textContent='Return to AMOS';foregroundButton.id='game-foreground';foregroundButton.hidden=true;viewport.querySelector('.amos-fullscreen-toolbar').append(foregroundButton);foregroundButton.onclick=()=>{if(live)live.amosToFront();foregroundButton.hidden=true;if(host)host.focus();};
@@ -11889,19 +11903,20 @@ const createRenderer = (function createRendererFactory(snapshotModel, spriteMode
   function update() {
     const audio = sound.status(); soundButton.textContent = audio.state === 'on' ? 'Mute sound' : audio.state === 'starting' ? 'Enabling sound…' : 'Enable sound';
     soundButton.disabled = audio.state === 'starting';
-    status.textContent = (failure ? 'Game stopped after an error. Restart to try again.' : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
+    status.textContent = (failure ? (diagnostic ? failure : 'Game stopped after an error. Restart to try again.') : '') || (unlinkedRun ? `Intro complete. The next program (${unlinkedRun}) is not included in this development preview. Restart to replay.` : !live ? 'Click Play Game, then follow the game’s intro and menu prompts.' : live.state.halted ? 'Ended. Restart to play again.' : live.state.stopped ? 'Stopped.' : 'Running.') +
       (audio.error ? ` Sound unavailable: ${audio.error}` : '');
     viewport.dataset.phase = failure ? 'error' : !live ? 'idle' : live.state.halted ? 'ended' : live.state.stopped ? 'stopped' : 'running';
     if (debug) {viewport.dataset.line = live && live.state.location ? String(live.state.location.line) : '';viewport.dataset.sourceError=live&&live.state.error?live.state.error.message:'';}
     viewport.dataset.keyboard = keyboardMode.value;
     viewport.dataset.sound = audio.state; viewport.dataset.backend = gpu ? 'webgl' : 'canvas';
     status.hidden = !!live && !failure && !live.state.halted && !live.state.stopped && !audio.error;
-    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, sourceError: live && live.state.error, audio, keyboard: keyboardMode.value });
+    ui.update({ phase: viewport.dataset.phase, location: live && live.state.location, error: failure, diagnostic, sourceError: live && live.state.error, audio, keyboard: keyboardMode.value });
     fullscreen.refresh();
   }
-  function fail(error) { ui.recordError(error); failure = error.message; if (live) live.stop(); if (host) host.detach(); update(); }
+  function fail(error) { ui.recordError(error); failure = error.message; diagnostic = error.code === 'AMOS_SYSTEM_INFO_REQUIRED' ? {code:error.code,...error.diagnostic} : null; if (live) live.stop(); if (host) host.detach(); update(); }
   function releaseGpu() { if (!gpu) return; const gl = gpu.resources.context; gpu.dispose(); gpu = null; const ext = gl.getExtension('WEBGL_lose_context'); if (ext && !gl.isContextLost()) ext.loseContext(); }
   function start(factory=settings.restartFromEntry?createProgram:activeFactory) {
+    diagnostic = null;
     const inheritedFonts = (live && live.display.fontsExamined) || diskFonts.length > 0;
     if(factory===createProgram)for(const [name,bytes] of Object.entries(settings.entryFiles||{}))files.write(name,bytes);
     activeFactory=factory;foregroundButton.hidden=true;

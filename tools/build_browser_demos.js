@@ -18,6 +18,10 @@ const page = (title, body) => `<!doctype html>\n<html lang="en"><head><meta char
 
 async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const outputs = new Map();
+  for(const suffix of ['', '-debug', '-configured'])outputs.set('system-memory-read'+suffix+'.html',buildGamePage(require('../test/helpers/systemInformationFixture')(),{
+    title:'AmigaOS system memory '+(suffix==='-configured'?'configured version check':'diagnostic'),
+    debug:suffix==='-debug',systemInfo:suffix==='-configured'?{execVersion:40}:null
+  }));
   const fullscreenSource = fs.readFileSync(path.join(root, 'lib/amos/fullscreen.js'), 'utf8');
   const browserSource = fs.readFileSync(path.join(root, 'lib/amos/browser.js'), 'utf8');
   for (const scenario of scenarios) {
@@ -81,6 +85,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   outputs.set('programs.html', interactive);
   for (const [name, content] of require('./build_asm').pages()) outputs.set(name, content);
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
+  for(const suffix of ['', '-debug', '-configured'])cards.push({file:'system-memory-read'+suffix+'.html',title:'AmigaOS system memory '+(suffix||'diagnostic'),description:'Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.'});
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
   cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
   cards.push({ file: 'planet-zybex-game-debug.html', title: 'Planet Zybex — full game with debug enabled', description: 'The current game and assets at half speed, with a Debug menu for source error logs and modified session-file downloads. Use the speed selector to adjust pacing.' });

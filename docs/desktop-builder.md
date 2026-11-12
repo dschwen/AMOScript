@@ -168,4 +168,7 @@ read-only version view, not arbitrary OS memory access or an operating system.
 The choice is saved as `options.systemInfo: {"execVersion":40}` and applies to
 both preview and exported HTML. Existing projects without it retain the default.
 
-Planned automatic diagnostics are described in [AmigaOS memory-read detection](amigaos-memory-diagnostics-plan.md). They are not implemented yet.
+A failed ExecBase read now explains the compatibility setting. In desktop
+previews, **Configure AmigaOS compatibility** opens Advanced and focuses the
+selector without choosing a version. Select the version expected by the program,
+then build again. See [AmigaOS memory-read diagnostics](amigaos-memory-diagnostics-plan.md).
