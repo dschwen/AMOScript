@@ -35,8 +35,11 @@ normal bank. The low-number bank/address convention in Bload is unchanged.
 
 For custom page builders, `buildGamePage(source, {systemInfo:{execVersion:40}})`
 validates and embeds this setting, passing it to each fresh/restarted/linked VM.
-The CLI and desktop form do not yet offer a system-information setting; custom
-hosts select this compatibility policy explicitly.
+The desktop form exposes this as **Advanced → AmigaOS compatibility**, saved
+as `options.systemInfo` in project files. The project CLI uses the same setting;
+the direct page-builder CLI has no system-information flag. See the
+[desktop guide](desktop-builder.md#extension-slots-and-amigaos-compatibility) and
+[planned automatic diagnostics](amigaos-memory-diagnostics-plan.md).
 
 ## Startup commands
 
