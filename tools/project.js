@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('fs'),path=require('path'),{buildGamePage}=require('./build_game_page'),{randomUUID}=require('crypto');
 const extensionProfiles=require('../lib/ExtensionProfiles');
-const defaults=Object.freeze({extensions:Object.freeze({}),title:'My AMOS game',renderer:'webgl',port:1,fire:Object.freeze(['Space','Enter']),slowdown:1,optimize:false,debug:false,touch:'auto'});
+const defaults=Object.freeze({extensions:Object.freeze({}),systemInfo:null,title:'My AMOS game',renderer:'webgl',port:1,fire:Object.freeze(['Space','Enter']),slowdown:1,optimize:false,debug:false,touch:'auto'});
 function object(value,name){if(!value||typeof value!=='object'||Array.isArray(value))throw Error(name+' must be an object');}
 function keys(value,allowed,name){object(value,name);for(const key of Object.keys(value))if(!allowed.includes(key))throw Error('Unknown '+name+' field: '+key);}
 function filePath(value,base,name){if(typeof value!=='string'||!value.trim()||value.includes('\0'))throw Error('Choose '+name);return path.resolve(base,value);}
@@ -11,6 +11,8 @@ function normalize(project,base=process.cwd()){
   const labels=new Set(),mounts=project.mounts.map(m=>{keys(m,['label','directory'],'mount');if(typeof m.label!=='string'||(m.label!==''&&!/^[^:/\\\x00-\x1f]{1,31}:$/.test(m.label)))throw Error('Disk labels must end with a colon, for example GAME: (or be empty for relative paths)');const label=m.label.normalize('NFC').replace(/[a-z]/g,c=>c.toUpperCase());if(labels.has(label.toLowerCase()))throw Error('Duplicate disk label: '+(label||'(relative paths)'));labels.add(label.toLowerCase());return{label,directory:filePath(m.directory,base,'an asset directory')};});
   const supplied=project.options===undefined?{}:project.options;keys(supplied,Object.keys(defaults),'option');const options={...defaults,...supplied};
   options.extensions=extensionProfiles.normalize(options.extensions);
+  require('../lib/amos/bankMemory')(new Map(),{systemInfo:options.systemInfo});
+  if(options.systemInfo!=null)options.systemInfo={execVersion:options.systemInfo.execVersion};
   if(typeof options.title!=='string'||!options.title.trim()||options.title.length>200)throw Error('Enter a title (1–200 characters)');
   if(!['webgl','canvas'].includes(options.renderer))throw Error('Invalid renderer');if(![0,1].includes(options.port))throw Error('Joystick port must be 0 or 1');
   if(!Array.isArray(options.fire)||!options.fire.length||options.fire.length>8||options.fire.some(k=>typeof k!=='string'||!/^[A-Za-z][A-Za-z0-9]{0,31}$/.test(k)))throw Error('Enter keyboard fire codes such as Space, Enter or KeyZ');

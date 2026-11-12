@@ -35,6 +35,7 @@ function register(){
     if(!window||event.sender!==window.webContents||event.senderFrame!==window.webContents.mainFrame||event.senderFrame.url!==editorURL)throw Error('Untrusted builder request');
     try{return{ok:true,value:await fn(...args)};}catch(error){return{ok:false,error:error.message};}
   });
+  handle('extension-libraries',()=>Object.keys(require('../lib/ExtensionProfiles').libraries));
   handle('main',async()=>{const result=await dialog.showOpenDialog(window,{title:'Choose the main AMOS program',properties:['openFile'],filters:[{name:'AMOS programs',extensions:['AMOS','amos']},{name:'All files',extensions:['*']}]});return result.canceled?null:result.filePaths[0];});
   handle('directory',async()=>{const result=await dialog.showOpenDialog(window,{title:'Import an asset directory',properties:['openDirectory']});return result.canceled?null:result.filePaths[0];});
   handle('open',async()=>{const result=await dialog.showOpenDialog(window,{title:'Open an AMOScript project',properties:['openFile'],filters:[{name:'AMOScript project',extensions:['json']}]});if(result.canceled)return null;const filename=result.filePaths[0];return{filename,project:projects.loadProject(filename)};});

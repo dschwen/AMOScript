@@ -152,3 +152,19 @@ at a packaged executable to run the same checks against ASAR-packaged code.
 
 Electron references: [context isolation](https://www.electronjs.org/docs/latest/tutorial/context-isolation),
 [security](https://www.electronjs.org/docs/latest/tutorial/security).
+
+## Extension slots and AmigaOS compatibility
+
+Under **Advanced**, use **Add extension**, then select its library and slot.
+Use the assignments from your AMOS installation; the program does not identify
+which extension occupies each slot. For Ghostlight, select **AMCAF 1.50 beta 4**
+in slot **8** and **Turbo Plus 2.15** in slot **12**. Existing saved slot mappings
+load into the selectors unchanged. Extension support remains partial.
+
+Some programs inspect Exec's version through `Deek(Leek(4)+20)`. Choose an
+explicit **AmigaOS compatibility** profile for those programs; Ghostlight's
+private reference build uses **AmigaOS 3.1 (Exec 40)**. The default has no system
+memory profile and such reads fail. This enables only the existing bounded,
+read-only version view, not arbitrary OS memory access or an operating system.
+The choice is saved as `options.systemInfo: {"execVersion":40}` and applies to
+both preview and exported HTML. Existing projects without it retain the default.

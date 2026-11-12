@@ -24,3 +24,13 @@ test('Project builder: links are not followed, plain relative paths work and com
 test('Project builder: decomposed macOS filenames map to canonical AMOS names without changing source files',()=>fixture(({assets,p})=>{
   const name='Menu\u0308.dat';fs.writeFileSync(path.join(assets,name),'accent');const imported=project.collect({...p,mounts:[{label:'Disk 1.0:',directory:assets}]});assert.strictEqual(imported.assets['disk 1.0:menü.dat'],Buffer.from('accent').toString('base64'));assert.ok(fs.existsSync(path.join(assets,name)));
 }));
+
+test('Project builder: explicit Exec profile and extension selections round-trip and reach the emitted page',()=>fixture(({dir,p})=>{
+ p.options.extensions={8:'amcaf-1.50beta4',12:'turbo-plus-2.15'};p.options.systemInfo={execVersion:40};
+ const filename=path.join(dir,'compatibility.json');project.saveProject(filename,p);const loaded=project.loadProject(filename);
+ assert.deepStrictEqual(loaded.options.extensions,p.options.extensions);assert.deepStrictEqual(loaded.options.systemInfo,{execVersion:40});
+ assert.match(project.buildProject(loaded).html,/"systemInfo":\{"execVersion":40\}/);
+ assert.strictEqual(project.normalize({...p,options:{}}).options.systemInfo,null);
+ for(const systemInfo of [{},[],{execVersion:-1},{execVersion:40,extra:true}])assert.throws(()=>project.normalize({...p,options:{systemInfo}}),/systemInfo/);
+ const normalized=project.normalize(p);p.options.systemInfo.execVersion=1;assert.strictEqual(normalized.options.systemInfo.execVersion,40);
+}));
