@@ -22,7 +22,22 @@ function loadAssets(filename, prefix = '') {
   }
   return assets;
 }
-function buildGamePage(source, { extensions = {}, systemInfo = null, title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, minify = false, slowdown = 1, initialMouse = null, renderer = 'webgl', touch = 'auto', diskFonts = [], stopOnUnlinkedRun = false, directories = [], restartFromEntry = false, entryFiles = {}, gamePorts = false } = {}) {
+function sharedRuntimeParts(){
+  const core=Transpiler.runtimeSource();
+  const adapters=['browser','fullscreen','webAudio','webAudioStream','browserAudio','files'].map(name=>'(function(){\n'+fs.readFileSync(path.join(root,'lib/amos',name+'.js'),'utf8')+'\n})();').join('\n');
+  const host=`if(typeof window!=='undefined'&&typeof document!=='undefined'){
+${adapters}
+const model=(${require('../lib/display/model/frameState').createFrameStateModel})();const sprites=(${require('../lib/display/reference/sprites').createSpriteModel})();
+const createRenderer=(${require('../lib/display/webgl/renderer').createRendererFactory})(model,sprites,(${require('../lib/display/webgl/resources').createResourceFactory})(model),(${require('../lib/display/webgl/shaders')}),(${require('../lib/display/presentation/layout')}));
+globalThis.AMOS_PAGE=Object.freeze({id:__AMOS_PAGE_ID__,createRenderer,install:${require('./gamePageRuntime')},installUI:${require('./gamePageUI')}});
+}`;
+  const id=crypto.createHash('sha256').update(core+host).digest('hex');
+  return {id,source:core+'\n'+host.replace('__AMOS_PAGE_ID__',JSON.stringify(id))};
+}
+function buildRuntimeLibrary({minify=false}={}){if(typeof minify!=='boolean')throw Error('minify must be a boolean');const source=sharedRuntimeParts().source;return minify?require('../lib/minify')(source):source;}
+function buildGameBundle(source,options={}){return {html:buildGamePage(source,options),files:options.runtime==='shared'?{'libamoscript.js':buildRuntimeLibrary(options)}:{}};}
+function buildGamePage(source, { extensions = {}, systemInfo = null, title = 'AMOS game', assets = {}, programs = {}, port = 1, fire = ['Space', 'Enter'], optimize = false, debug = false, minify = false, runtime = 'full', slowdown = 1, initialMouse = null, renderer = 'webgl', touch = 'auto', diskFonts = [], stopOnUnlinkedRun = false, directories = [], restartFromEntry = false, entryFiles = {}, gamePorts = false } = {}) {
+  require('../lib/runtimeMode')(runtime);
   require('../lib/amos/bankMemory')(new Map(), { systemInfo });
   if(!entryFiles || typeof entryFiles!=='object' || Array.isArray(entryFiles) || Object.values(entryFiles).some(value=>typeof value!=='string' || Array.from(value).some(character=>character.charCodeAt(0)>255)))throw Error('entryFiles must map names to byte strings');
   if(typeof gamePorts!=='boolean')throw Error('gamePorts must be boolean');
@@ -43,23 +58,23 @@ function buildGamePage(source, { extensions = {}, systemInfo = null, title = 'AM
   const speedScales = [...new Set([1, 2, 3, 4, slowdown])].sort((a, b) => a - b);
   const speedOptions = speedScales.map(scale => `<option value="${scale}"${scale === slowdown ? ' selected' : ''}>Speed: ${Math.round(100 / scale)}%</option>`).join('');
   const fireLabel = [...new Set(fire.map(code => /^Control(?:Left|Right)$/.test(code) ? 'Ctrl' : /^Key[A-Z]$/.test(code) ? code.slice(3) : code))].join('/');
-  const compiled = new Transpiler(source, { extensions }).toModule({ optimize, debug });
+  const compiled = new Transpiler(source, { extensions }).toModule({ optimize, debug, runtime });
   const programNames=new Set();
   const linked=Object.entries(programs).map(([name,bytes])=>{
     const key=name.replace(/\\/g,'/').toLowerCase();if(programNames.has(key))throw Error('Duplicate linked program name: '+name);programNames.add(key);
-    return `[${json(key)},(()=>{const module={exports:{}};${new Transpiler(Buffer.from(bytes,'base64'), { extensions }).toModule({optimize,debug})}\nreturn module.exports;})()]`;
+    return `[${json(key)},(()=>{const module={exports:{}};${new Transpiler(Buffer.from(bytes,'base64'), { extensions }).toModule({optimize,debug,runtime})}\nreturn module.exports;})()]`;
   }).join(',');
   const amcafAudio=Object.values(require('../lib/ExtensionProfiles').normalize(extensions)).includes('amcaf-1.50beta4');
-  const scripts = ['browser', 'fullscreen', 'webAudio', ...(amcafAudio?['webAudioStream']:[]), 'browserAudio', 'files'].map(name => packScript(fs.readFileSync(path.join(root, 'lib/amos', `${name}.js`), 'utf8'))).join('\n');
+  const scripts = runtime==='shared'?'<script src="libamoscript.js"></script>':['browser', 'fullscreen', 'webAudio', ...(amcafAudio?['webAudioStream']:[]), 'browserAudio', 'files'].map(name => packScript(fs.readFileSync(path.join(root, 'lib/amos', `${name}.js`), 'utf8'))).join('\n');
   const model = require('../lib/display/model/frameState').createFrameStateModel;
   const sprites = require('../lib/display/reference/sprites').createSpriteModel;
   const resources = require('../lib/display/webgl/resources').createResourceFactory;
   const rendererFactory = require('../lib/display/webgl/renderer').createRendererFactory;
   const shaders = require('../lib/display/webgl/shaders'), layout = require('../lib/display/presentation/layout');
-  const runtime = `const create = (() => { const module = { exports: {} };\n${compiled}\nreturn module.exports; })();
-const model = (${model})(); const sprites = (${sprites})();
-const createRenderer = (${rendererFactory})(model, sprites, (${resources})(model), (${shaders}), (${layout}));
-(${require('./gamePageRuntime')})(create, JSON.parse(${json(JSON.stringify(assets))}), createRenderer, ${port}, ${json(fire)}, ${debug}, (${require('./gamePageUI')}), Object.fromEntries([${linked}]), ${json(initialMouse)}, ${json({ renderer, touch, ...(amcafAudio?{amcafAudio:true}:{}), ...(systemInfo == null ? {} : { systemInfo }), diskFonts: fonts, stopOnUnlinkedRun, directories, restartFromEntry, entryFiles, gamePorts })});`;
+  const initialization = `${runtime==='shared'?`if(!globalThis.AMOS_PAGE||AMOS_PAGE.id!==${json(sharedRuntimeParts().id)}){document.getElementById('game-status').textContent='Missing or incompatible libamoscript.js. Keep the matching runtime beside this HTML file.';throw Error('Missing or incompatible libamoscript.js');}`:''}const create = (() => { const module = { exports: {} };\n${compiled}\nreturn module.exports; })();
+${runtime==='shared'?'const createRenderer = AMOS_PAGE.createRenderer;':`const model = (${model})(); const sprites = (${sprites})();
+const createRenderer = (${rendererFactory})(model, sprites, (${resources})(model), (${shaders}), (${layout}));`}
+${runtime==='shared'?'AMOS_PAGE.install':`(${require('./gamePageRuntime')})`}(create, JSON.parse(${json(JSON.stringify(assets))}), createRenderer, ${port}, ${json(fire)}, ${debug}, ${runtime==='shared'?'AMOS_PAGE.installUI':`(${require('./gamePageUI')})`}, Object.fromEntries([${linked}]), ${json(initialMouse)}, ${json({ renderer, touch, ...(amcafAudio?{amcafAudio:true}:{}), ...(systemInfo == null ? {} : { systemInfo }), diskFonts: fonts, stopOnUnlinkedRun, directories, restartFromEntry, entryFiles, gamePorts })});`;
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${html(title)}</title>
 <style>body{font:16px system-ui,sans-serif;max-width:64rem;margin:1.5rem auto;padding:0 1rem;background:#101721;color:#eef2f6}button,select{font:inherit;padding:.6rem;margin:.3rem}button{cursor:pointer}#play-game{display:block;background:#c71920;color:white;border:0;border-radius:.6rem;padding:1.1rem 2.5rem;font-size:2rem;font-weight:800}canvas{display:block;image-rendering:pixelated;max-width:100%;border:0}#game-status{font-size:.9rem}h1{font-size:1.5rem}summary{cursor:pointer}body[data-playing=true] #play-game{font-size:1rem;padding:.7rem 1.3rem}#game-surface{background:#05080c;border-radius:8px;overflow:hidden}</style></head><body>
@@ -67,7 +82,7 @@ const createRenderer = (${rendererFactory})(model, sprites, (${resources})(model
 <section id="game-viewport"><div class="amos-fullscreen-toolbar"><button id="game-sound">Enable sound</button><button id="game-fullscreen">Fullscreen</button><span id="fullscreen-status" role="status"></span><button id="game-restart">Restart</button><button id="game-stop">Stop</button><button id="game-resume">Resume</button><select id="game-keyboard" aria-label="Keyboard mode"><option value="game">Keyboard: Joystick</option><option value="typing">Keyboard: Typing</option></select><select id="game-speed" aria-label="Game speed">${speedOptions}</select><select id="game-touch" aria-label="Touch joystick"><option value="auto">Touch: Auto</option><option value="always">Touch: On</option><option value="off">Touch: Off</option></select></div>
 <div id="game-surface"><canvas id="game-input" width="320" height="256" tabindex="0" aria-label="Game display"></canvas></div><p id="game-status" class="amos-fullscreen-messages" role="status"></p></section>
 ${scripts}
-${packScript(runtime)}
+${packScript(initialization)}
 </body></html>\n`;
 }
 function main(args) {
@@ -77,17 +92,17 @@ function main(args) {
       if (i + 1 === args.length) throw Error('Missing value for --extension');
       (options.extensionMappings ||= []).push(args[++i]);
     } else if (['--optimize', '--debug', '--minify'].includes(args[i])) options[args[i].slice(2)] = true;
-    else if (['--assets', '--programs', '--prefix', '--port', '--title', '--fire', '--slowdown', '--touch'].includes(args[i])) {
+    else if (['--runtime', '--assets', '--programs', '--prefix', '--port', '--title', '--fire', '--slowdown', '--touch'].includes(args[i])) {
       const name = args[i].slice(2); if (i + 1 === args.length || args[i + 1].startsWith('--')) throw new Error(`Missing value for --${name}`);
       options[name] = args[++i];
     } else if (args[i].startsWith('--')) throw new Error(`Unknown option: ${args[i]}`);
     else positional.push(args[i]);
   }
-  if (positional.length !== 2) throw new Error('Usage: node tools/build_game_page.js input.AMOS output.html [--extension SLOT=LIBRARY] [--optimize] [--debug] [--minify] [--slowdown 2] [--touch auto|always|off] [--assets manifest.json] [--programs programs.json] [--prefix RII:] [--port 1] [--fire Enter,Space] [--title "My game"]');
+  if (positional.length !== 2) throw new Error('Usage: node tools/build_game_page.js input.AMOS output.html [--extension SLOT=LIBRARY] [--optimize] [--debug] [--minify] [--runtime shared|full|minimal] [--slowdown 2] [--touch auto|always|off] [--assets manifest.json] [--programs programs.json] [--prefix RII:] [--port 1] [--fire Enter,Space] [--title "My game"]');
   const [input, output] = positional;
-  const page = buildGamePage(fs.readFileSync(input), { extensions: require('../lib/ExtensionProfiles').parseMappings(options.extensionMappings), title: options.title || path.basename(input, path.extname(input)),
-    touch: options.touch || 'auto', assets: loadAssets(options.assets, options.prefix || ''), programs:loadAssets(options.programs,options.prefix||''), port: options.port == null ? 1 : Number(options.port), fire: options.fire == null ? ['Space', 'Enter'] : options.fire.split(','), optimize: !!options.optimize, debug: !!options.debug, minify: !!options.minify, slowdown: options.slowdown == null ? 1 : Number(options.slowdown) });
-  fs.writeFileSync(output, page, { flag: 'wx' });
+  const bundle = buildGameBundle(fs.readFileSync(input), { extensions: require('../lib/ExtensionProfiles').parseMappings(options.extensionMappings), title: options.title || path.basename(input, path.extname(input)),
+    touch: options.touch || 'auto', assets: loadAssets(options.assets, options.prefix || ''), programs:loadAssets(options.programs,options.prefix||''), port: options.port == null ? 1 : Number(options.port), fire: options.fire == null ? ['Space', 'Enter'] : options.fire.split(','), optimize: !!options.optimize, debug: !!options.debug, runtime:options.runtime||'full', minify: !!options.minify, slowdown: options.slowdown == null ? 1 : Number(options.slowdown) });
+  require('../lib/writeArtifacts')(output,bundle.html,bundle.files);
 }
 if (require.main === module) try { main(process.argv.slice(2)); } catch (error) { console.error(error.message); process.exitCode = 1; }
-module.exports = { buildGamePage, loadAssets };
+module.exports = { buildGamePage, buildGameBundle, buildRuntimeLibrary, loadAssets };

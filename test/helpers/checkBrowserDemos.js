@@ -8,6 +8,7 @@ const { scenarios } = require('./browserScenarios');
 
 module.exports = async function checkBrowserDemos(browser) {
   require('./checkDemoIndexes')();
+  await require('./checkSharedRuntime')(browser);
   await require('./checkSystemInformation')(browser);
   await require('./checkTutorialDemos')(browser);
   await require('./checkAmcafExamples')(browser);

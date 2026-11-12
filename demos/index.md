@@ -103,7 +103,7 @@ Try compiled examples with graphics, image banks, moving objects, keyboard/mouse
 ## Technical checks
 
 <details>
-<summary>Compiler and runtime checks (99 demos)</summary>
+<summary>Compiler and runtime checks (100 demos)</summary>
 
 Individual commands, bounded game fixtures and rendering checks for development. Every browser test remains available here.
 
@@ -659,6 +659,12 @@ External load/save/reload, appending, swaps, reservation, shrinking, erasure and
 
 [Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/banks.html) · [Local file](banks.html)
 
+### Shared runtime and linked programs
+
+Loads adjacent libamoscript.js once, then runs two synthetic programs with WebGL. Keep both output files together.
+
+[Run demo](https://htmlpreview.github.io/?https://github.com/dschwen/AMOScript/blob/master/demos/shared-runtime.html) · [Local file](shared-runtime.html)
+
 ### AmigaOS system memory diagnostic
 
 Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.
@@ -758,4 +764,4 @@ Limited demo of ASM — Das Spiel, restricted to rooms 1–5. Later-room assets 
 
 </details>
 
-All HTML pages embed scripts and prepared fixtures. Open locally after cloning or use HTML Preview to run from GitHub; no server, Node or asset downloads are needed. WebGL requires WebGL2. Browser writes are volatile unless a demo explicitly says otherwise.
+HTML pages embed scripts and prepared fixtures except the shared-runtime example, which loads the adjacent libamoscript.js. Open locally after cloning or use HTML Preview to run from GitHub; no server, Node or asset downloads are needed. WebGL requires WebGL2. Browser writes are volatile unless a demo explicitly says otherwise.

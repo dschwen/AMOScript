@@ -11,7 +11,7 @@ const { buildBrowserDemos } = require('../tools/build_browser_demos');
 
 test('browser demos: catalogue covers every shared scenario with self-contained HTML and preview links', () => {
   const root = path.join(__dirname, '../demos'), manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json')));
-  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'system-memory-read.html', 'system-memory-read-debug.html', 'system-memory-read-configured.html', 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'amcaf-drums.html', 'amcaf-hawkeye.html', 'amcaf-examples.md', 'tutorial.md', 'compiler-examples.md', 'asm-intro.html', 'asm-intro-debug.html', 'asm-room1.html', 'asm-game.html', 'asm-game-debug.html']);
+  assert.deepStrictEqual(manifest.scenarios.map(scenario => scenario.file), [...scenarios.map(scenario => `${scenario.id}.html`), 'shared-runtime.html', 'system-memory-read.html', 'system-memory-read-debug.html', 'system-memory-read-configured.html', 'programs.html', 'roller2-game-debug.html', 'planet-zybex-game-debug.html', 'amcaf-drums.html', 'amcaf-hawkeye.html', 'amcaf-examples.md', 'tutorial.md', 'compiler-examples.md', 'asm-intro.html', 'asm-intro-debug.html', 'asm-room1.html', 'asm-game.html', 'asm-game-debug.html']);
   const index = fs.readFileSync(path.join(root, 'index.md'), 'utf8');
   assert.ok(index.indexOf('## Play the games') < index.indexOf('## Technical checks'));
   assert.match(index, /<details>\n<summary>Compiler and runtime checks/);
@@ -21,7 +21,7 @@ test('browser demos: catalogue covers every shared scenario with self-contained 
     assert.ok(index.includes(entry.preview));
     if(entry.file.endsWith('.md'))continue;
     const html = fs.readFileSync(path.join(root, entry.file), 'utf8');
-    assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=/i, `${entry.file} embeds dependencies`);
+    if(entry.file==='shared-runtime.html'){assert.match(html,/<script src="libamoscript.js"><\/script>/);assert.doesNotMatch(html.replace('<script src="libamoscript.js"></script>',''),/<script[^>]+src=|<link[^>]+href=/i);}else assert.doesNotMatch(html, /<script[^>]+src=|<link[^>]+href=/i, `${entry.file} embeds dependencies`);
     if (['roller2-game.html', 'wonderland-game.html', 'planet-zybex-game.html'].includes(entry.file)) {
       assert.match(html, /<button id="play-game" type="button">Play Game<\/button>/);
       assert.ok(html.indexOf('id="play-game"') < html.indexOf('id="demo-checks"'));

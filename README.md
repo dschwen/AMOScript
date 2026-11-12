@@ -205,3 +205,7 @@ Generated programs use the instruction-function runtime in `lib/amos/`; display
 models and WebGL resources live in `lib/display/`. `Grammar.js` and
 `RuleFunctions.js` are legacy compatibility files. See [repository guidelines](AGENTS.md)
 and [development/CI notes](docs/development.md) for verification and environment details.
+
+Choose **Shared runtime** to emit an HTML page plus `libamoscript.js`, or
+**Full bundled runtime** for one file (the default). **Minimal bundled runtime**
+is planned and disabled for now. See [runtime options and selective bundling](docs/runtime-packaging.md).

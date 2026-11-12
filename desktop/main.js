@@ -14,14 +14,18 @@ function build(project,preview){
     worker.once('message',message=>finish(message.ok?null:Error(message.error),message.result));worker.once('error',error=>finish(error));worker.once('exit',code=>{if(!settled)finish(Error('Build worker exited ('+code+')'));});
   });
 }
-function previewPage(html,title){
+function previewPage(html,title,files={}){
   for(const old of previews)if(!old.isDestroyed())old.destroy();
   const preview=new BrowserWindow({width:1000,height:760,title:'Preview — '+title,parent:window,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,webviewTag:false,partition:'preview-'+randomUUID()}});
   previews.add(preview);const session=preview.webContents.session,url='amos-preview://game/index.html';
-  session.protocol.handle('amos-preview',request=>new Response(request.url===url?html:'Not found',{status:request.url===url?200:404,headers:{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"}}));
+  const runtimeURL='amos-preview://game/libamoscript.js';
+  session.protocol.handle('amos-preview',request=>{
+    const isHTML=request.url===url,isRuntime=request.url===runtimeURL&&typeof files['libamoscript.js']==='string';
+    return new Response(isHTML?html:isRuntime?files['libamoscript.js']:'Not found',{status:isHTML||isRuntime?200:404,headers:{'Content-Type':isHTML?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Content-Security-Policy':"default-src 'none'; script-src amos-preview://game 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; media-src data: blob:; font-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'"}});
+  });
   session.setPermissionRequestHandler((_wc,permission,callback)=>callback(permission==='fullscreen'));
   session.setPermissionCheckHandler((_wc,permission)=>permission==='fullscreen');
-  session.webRequest.onBeforeRequest((details,callback)=>callback({cancel:details.url!==url&&!details.url.startsWith('data:')&&!details.url.startsWith('blob:')}));
+  session.webRequest.onBeforeRequest((details,callback)=>callback({cancel:details.url!==url&&!(details.url===runtimeURL&&typeof files['libamoscript.js']==='string')&&!details.url.startsWith('data:')&&!details.url.startsWith('blob:')}));
   session.on('will-download',event=>{event.preventDefault();if(window&&!window.isDestroyed())window.webContents.send('builder:preview-error','Downloads are disabled in preview. Export HTML and open it in a browser to download modified files.');});
   preview.webContents.setWindowOpenHandler(()=>({action:'deny'}));preview.webContents.on('will-navigate',(event,target)=>{if(target!==url)event.preventDefault();});
   let polling=false;
@@ -44,8 +48,8 @@ function register(){
   handle('open',async()=>{const result=await dialog.showOpenDialog(window,{title:'Open an AMOScript project',properties:['openFile'],filters:[{name:'AMOScript project',extensions:['json']}]});if(result.canceled)return null;const filename=result.filePaths[0];return{filename,project:projects.loadProject(filename)};});
   handle('save',async(project,filename)=>{if(filename!=null&&typeof filename!=='string')throw Error('Invalid project filename');projects.normalize(project);const chosen=await dialog.showSaveDialog(window,{title:'Save AMOScript project',defaultPath:filename||'My Game.amos-project.json',filters:[{name:'AMOScript project',extensions:['json']}]});if(chosen.canceled)return null;projects.saveProject(chosen.filePath,project);return chosen.filePath;});
   handle('dirty',value=>{if(typeof value!=='boolean')throw Error('Invalid dirty state');dirty=value;});
-  handle('build',async project=>{const normalized=projects.normalize(project),result=await build(normalized,true);previewPage(result.html,normalized.options.title);return result.stats;});
-  handle('export',async project=>{const result=await build(project,false),chosen=await dialog.showSaveDialog(window,{title:'Export HTML — choose a new filename',defaultPath:'game.html',filters:[{name:'HTML page',extensions:['html']}]});if(chosen.canceled)return null;try{projects.exportHTML(chosen.filePath,result.html);}catch(error){if(error.code==='EEXIST')throw Error('That HTML file already exists. Choose a new filename.');throw error;}return{filename:chosen.filePath,stats:result.stats};});
+  handle('build',async project=>{const normalized=projects.normalize(project),result=await build(normalized,true);previewPage(result.html,normalized.options.title,result.files);return result.stats;});
+  handle('export',async project=>{const result=await build(project,false),chosen=await dialog.showSaveDialog(window,{title:'Export game — choose a new HTML filename',defaultPath:'game.html',filters:[{name:'HTML page',extensions:['html']}]});if(chosen.canceled)return null;try{projects.exportHTML(chosen.filePath,result.html,result.files);}catch(error){if(error.code==='EEXIST')throw Error('That output file already exists. Choose a new filename.');throw error;}return{filename:chosen.filePath,files:Object.keys(result.files||{}),stats:result.stats};});
 }
 app.whenReady().then(()=>{
   register();window=new BrowserWindow({width:1150,height:850,minWidth:780,minHeight:600,title:'AMOScript Builder',icon:path.join(__dirname,'icon.png'),webPreferences:{preload:path.join(__dirname,'preload.js'),nodeIntegration:false,contextIsolation:true,sandbox:true,webviewTag:false}});

@@ -435,3 +435,9 @@ or refused. These controls are included only in debug builds.
 Use the optional Minify setting (`--minify` for CLI/page builds). Regular exports
 omit AMOS line/byte metadata; Debug builds retain it. See [size options and
 measured reductions](output-size.md) for API defaults, benchmarks and examples.
+
+## Runtime packaging
+
+Choose **Shared runtime** to emit an HTML page plus `libamoscript.js`, or
+**Full bundled runtime** for one file (the default). **Minimal bundled runtime**
+is planned and disabled for now. See [runtime options and selective bundling](runtime-packaging.md).

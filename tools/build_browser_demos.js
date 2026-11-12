@@ -18,6 +18,8 @@ const page = (title, body) => `<!doctype html>\n<html lang="en"><head><meta char
 
 async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const outputs = new Map();
+  const sharedFixture=require('../test/helpers/sharedRuntimeFixture')(),sharedBundle=require('./build_game_page').buildGameBundle(sharedFixture.source,{runtime:'shared',programs:sharedFixture.programs,minify:true,title:'Shared runtime and linked programs'});
+  outputs.set('shared-runtime.html',sharedBundle.html);outputs.set('libamoscript.js',sharedBundle.files['libamoscript.js']);
   for(const suffix of ['', '-debug', '-configured'])outputs.set('system-memory-read'+suffix+'.html',buildGamePage(require('../test/helpers/systemInformationFixture')(),{
     title:'AmigaOS system memory '+(suffix==='-configured'?'configured version check':'diagnostic'),
     debug:suffix==='-debug',minify:!!suffix,systemInfo:suffix==='-configured'?{execVersion:40}:null
@@ -85,6 +87,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   outputs.set('programs.html', interactive);
   for (const [name, content] of require('./build_asm').pages()) outputs.set(name, content);
   const cards = scenarios.map(scenario => ({ file: `${scenario.id}.html`, title: scenario.title, description: scenario.description }));
+  cards.push({file:'shared-runtime.html',title:'Shared runtime and linked programs',description:'Loads adjacent libamoscript.js once, then runs two synthetic programs with WebGL. Keep both output files together.'});
   for(const suffix of ['', '-debug', '-configured'])cards.push({file:'system-memory-read'+suffix+'.html',title:'AmigaOS system memory '+(suffix||'diagnostic'),description:'Synthetic Exec version read: actionable missing-profile error, debug metadata, and explicit Exec 40 configuration.'});
   cards.push({ file: 'programs.html', title: 'Interactive programs, input and lifecycle', description: 'Control flow, graphics, image banks, Bobs/collisions, keyboard/mouse, switching and Stop.' });
   cards.push({ file: 'roller2-game-debug.html', title: 'Roller II — full game with debug enabled', description: 'The full current game and assets with a Debug menu for downloading modified session files and inspecting source errors. Play retains the original intro; no verification replay is required.' });
@@ -161,7 +164,7 @@ ${technical.map(card).join('\n')}
 ${limited.map(card).join('\n')}
 </details>
 
-All HTML pages embed scripts and prepared fixtures. Open locally after cloning or use HTML Preview to run from GitHub; no server, Node or asset downloads are needed. WebGL requires WebGL2. Browser writes are volatile unless a demo explicitly says otherwise.
+HTML pages embed scripts and prepared fixtures except the shared-runtime example, which loads the adjacent libamoscript.js. Open locally after cloning or use HTML Preview to run from GitHub; no server, Node or asset downloads are needed. WebGL requires WebGL2. Browser writes are volatile unless a demo explicitly says otherwise.
 `);
   outputs.set('manifest.json', JSON.stringify({ version: 1, scenarios: cards.map(card => ({ ...card, preview: destination(card.file) })) }, null, 2) + '\n');
   const stale = [];
