@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('fs'),path=require('path'),{buildGamePage}=require('./build_game_page'),{randomUUID}=require('crypto');
 const extensionProfiles=require('../lib/ExtensionProfiles');
-const defaults=Object.freeze({extensions:Object.freeze({}),systemInfo:null,title:'My AMOS game',renderer:'webgl',port:1,fire:Object.freeze(['Space','Enter']),slowdown:1,optimize:false,debug:false,touch:'auto'});
+const defaults=Object.freeze({extensions:Object.freeze({}),systemInfo:null,title:'My AMOS game',renderer:'webgl',port:1,fire:Object.freeze(['Space','Enter']),slowdown:1,optimize:false,debug:false,minify:false,touch:'auto'});
 function object(value,name){if(!value||typeof value!=='object'||Array.isArray(value))throw Error(name+' must be an object');}
 function keys(value,allowed,name){object(value,name);for(const key of Object.keys(value))if(!allowed.includes(key))throw Error('Unknown '+name+' field: '+key);}
 function filePath(value,base,name){if(typeof value!=='string'||!value.trim()||value.includes('\0'))throw Error('Choose '+name);return path.resolve(base,value);}
@@ -17,7 +17,7 @@ function normalize(project,base=process.cwd()){
   if(!['webgl','canvas'].includes(options.renderer))throw Error('Invalid renderer');if(![0,1].includes(options.port))throw Error('Joystick port must be 0 or 1');
   if(!Array.isArray(options.fire)||!options.fire.length||options.fire.length>8||options.fire.some(k=>typeof k!=='string'||!/^[A-Za-z][A-Za-z0-9]{0,31}$/.test(k)))throw Error('Enter keyboard fire codes such as Space, Enter or KeyZ');
   if(!Number.isFinite(options.slowdown)||options.slowdown<1||options.slowdown>100)throw Error('Slowdown must be between 1 and 100');
-  for(const name of ['optimize','debug'])if(typeof options[name]!=='boolean')throw Error(name+' must be a boolean');
+  for(const name of ['optimize','debug','minify'])if(typeof options[name]!=='boolean')throw Error(name+' must be a boolean');
   if(!['auto','always','off'].includes(options.touch))throw Error('Invalid touch control setting');
   return{version:1,main:filePath(project.main,base,'the main .AMOS program'),mounts,options:{...options,fire:options.fire.slice()}};
 }

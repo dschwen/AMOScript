@@ -22,6 +22,7 @@
     "desktop:dist": "npm --prefix desktop run dist",
     "build:project": "node tools/build_project.js",
     "test:desktop": "node test/desktop-smoke.js",
+    "benchmark:size": "node tools/benchmark_size.js",
     "build:amcaf": "node tools/build_amcaf_examples.js"
   },
   "repository": {
@@ -37,7 +38,8 @@
   "author": "Daniel Schwen",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "binary-search-bounds": "^2.0.4"
+    "binary-search-bounds": "^2.0.4",
+    "terser": "5.51.2"
   },
   "devDependencies": {
     "playwright": "1.59.1"

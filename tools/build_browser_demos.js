@@ -20,7 +20,7 @@ async function buildBrowserDemos({ check = false, directory = root } = {}) {
   const outputs = new Map();
   for(const suffix of ['', '-debug', '-configured'])outputs.set('system-memory-read'+suffix+'.html',buildGamePage(require('../test/helpers/systemInformationFixture')(),{
     title:'AmigaOS system memory '+(suffix==='-configured'?'configured version check':'diagnostic'),
-    debug:suffix==='-debug',systemInfo:suffix==='-configured'?{execVersion:40}:null
+    debug:suffix==='-debug',minify:!!suffix,systemInfo:suffix==='-configured'?{execVersion:40}:null
   }));
   const fullscreenSource = fs.readFileSync(path.join(root, 'lib/amos/fullscreen.js'), 'utf8');
   const browserSource = fs.readFileSync(path.join(root, 'lib/amos/browser.js'), 'utf8');

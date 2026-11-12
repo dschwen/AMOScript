@@ -429,3 +429,9 @@ the log is selected, its visible text stays stable; clearing the selection
 resumes live updates. **Copy debug messages** copies the visible log through
 the Clipboard API, falling back to selecting it if clipboard access is missing
 or refused. These controls are included only in debug builds.
+
+## Smaller output
+
+Use the optional Minify setting (`--minify` for CLI/page builds). Regular exports
+omit AMOS line/byte metadata; Debug builds retain it. See [size options and
+measured reductions](output-size.md) for API defaults, benchmarks and examples.

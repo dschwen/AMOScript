@@ -1,7 +1,7 @@
 'use strict';
 const api=window.amosBuilder,$=id=>document.getElementById(id);
 let main='',mounts=[],filename=null,dirty=false,busy=false;
-const fields=['systemInfo','title','renderer','port','fire','slowdown','touch','optimize','debug'];
+const fields=['systemInfo','title','renderer','port','fire','slowdown','touch','optimize','debug','minify'];
 let extensionLibraries=[],extensions=[];
 function extensionMappings(){const result={};for(const {slot,library} of extensions){if(Object.hasOwn(result,slot))throw Error('Duplicate extension slot: '+slot);result[slot]=library;}return result;}
 function renderExtensions(){
@@ -22,7 +22,7 @@ function renderExtensions(){
 }
 $('add-extension').onclick=()=>{const library=extensionLibraries.find(name=>!extensions.some(e=>e.library===name))||extensionLibraries[0];if(!library)return;let slot=library==='amcaf-1.50beta4'?8:12;while(extensions.some(e=>e.slot===slot)&&slot<=255)slot++;if(slot>255)throw Error('No free extension slots');extensions.push({slot,library});renderExtensions();changed();};
 api.extensionLibraries().then(names=>{extensionLibraries=names;renderExtensions();}).catch(showError);
-function project(){return{version:1,main,mounts:mounts.map(m=>({...m})),options:{extensions:extensionMappings(),systemInfo:$('systemInfo').value?{execVersion:Number($('systemInfo').value)}:null,title:$('title').value,renderer:$('renderer').value,port:Number($('port').value),fire:$('fire').value.split(',').map(k=>k.trim()).filter(Boolean),slowdown:Number($('slowdown').value),touch:$('touch').value,optimize:$('optimize').checked,debug:$('debug').checked}};}
+function project(){return{version:1,main,mounts:mounts.map(m=>({...m})),options:{extensions:extensionMappings(),systemInfo:$('systemInfo').value?{execVersion:Number($('systemInfo').value)}:null,title:$('title').value,renderer:$('renderer').value,port:Number($('port').value),fire:$('fire').value.split(',').map(k=>k.trim()).filter(Boolean),slowdown:Number($('slowdown').value),touch:$('touch').value,optimize:$('optimize').checked,debug:$('debug').checked,minify:$('minify').checked}};}
 function changed(value=true){dirty=value;api.setDirty(value).catch(showError);$('project-path').textContent=(filename||'Unsaved project')+(dirty?' • modified':'');}
 function showError(error){$('configure-system-info').hidden=error.code!=='AMOS_SYSTEM_INFO_REQUIRED';$('error').hidden=false;$('error').textContent=error.message||String(error);$('status').textContent='Check the details below.';}
 function setBusy(value){busy=value;for(const control of document.querySelectorAll('button,input,select'))control.disabled=value;}

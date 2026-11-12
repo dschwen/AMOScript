@@ -8,7 +8,7 @@ versions such as `v0.0.2-rc.1` are marked prerelease on GitHub.
 ## What the workflow publishes
 
 - `AMOScript-vX.Y.Z-windows-x64.zip`: compiler, HTML page builder, four `.cmd`
-  launchers, Node 24 x64, the locked production dependency, two samples,
+  launchers, Node 24 x64, the locked production dependencies, two samples,
   quick-start instructions and license notices.
 - `SHA256SUMS.txt`: SHA-256 of that ZIP.
 - GitHub also provides the tag's ordinary source archives, for macOS/Linux and
@@ -19,7 +19,7 @@ demo, test fixture, browser binary or local upload. The assembler uses an explic
 allowlist; only `examples/Test21.AMOS` and `examples/Graphics.AMOS` are included.
 It copies the actual Node executable and its LICENSE from the official runtime
 installed by `actions/setup-node`, records its exact version in `release.json`,
-and preserves the production dependency's MIT notice. The compiler's package
+and preserves the production packages' license notices. The compiler's package
 license is GPL-3.0-or-later; the GPL text is included as `LICENSE`.
 
 ## Validation before publication

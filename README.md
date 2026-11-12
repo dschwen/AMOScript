@@ -163,6 +163,11 @@ Generated modules embed the portable runtime and require no runtime imports.
 For opt-in scalar instruction batching, use `compiler.toModule({ optimize: true })`
 or `node bin/amoscript --optimize program.AMOS program.js`.
 See [optimization and benchmarks](docs/optimization.md) for its scope and limits.
+
+Use `--minify` for smaller JavaScript or HTML output. Regular CLI/page builds
+omit AMOS line/byte metadata; `--debug` retains it. The desktop form exposes both
+options. See [output-size benchmarks](docs/output-size.md) for measured reductions
+and low-level API defaults.
 `tick(budget)` runs cooperatively; `stop()` and `resume()` control execution.
 Browser drawing, input, fullscreen and Web Audio use optional host adapters.
 File operations use synchronous adapters with preloaded browser data. Browser

@@ -11,7 +11,7 @@ module.exports=async function(browser){
    else{
     assert.strictEqual(await page.locator('#game-viewport').getAttribute('data-phase'),'error');
     assert.match(await page.locator('#game-status').textContent(),/ExecBase.*Advanced → AmigaOS compatibility/);
-    assert.match(await page.locator('#game-status').textContent(),/line 1/);
+    if(suffix)assert.match(await page.locator('#game-status').textContent(),/line 1/);else assert.doesNotMatch(await page.locator('#game-status').textContent(),/at line/);
     if(suffix){const data=JSON.parse((await page.locator('[data-debug-log]').textContent()).split('\n\n')[0]);assert.deepStrictEqual(data.diagnostic,{code:'AMOS_SYSTEM_INFO_REQUIRED',operation:'Leek',address:4,width:4,field:'execBase',confidence:'known',setting:'systemInfo'});assert.strictEqual(data.location.line,1);}
     else assert.strictEqual(await page.locator('[data-debug-log]').count(),0);
    }

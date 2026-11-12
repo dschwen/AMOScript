@@ -8,7 +8,7 @@ function stageDesktop(){
   for(const file of ['main.js','preload.js','build-worker.js','index.html','renderer.js','style.css','icon.png'])copy('desktop/'+file);
   for(const file of ['project.js','build_project.js','build_game_page.js','gamePageRuntime.js','gamePageUI.js'])copy('tools/'+file);
   copy('LICENSE');copy('docs/desktop-builder.md');
-  const dependency=path.dirname(require.resolve('binary-search-bounds/package.json'));fs.cpSync(dependency,path.join(output,'node_modules/binary-search-bounds'),{recursive:true});
+  require('../lib/stageDependencies')(root,output);
   fs.writeFileSync(path.join(output,'package.json'),JSON.stringify({name:'amoscript-builder',version:pkg.version,main:'desktop/main.js',desktopName:'org.amoscript.builder.desktop',description:'Build browser-playable AMOS programs',author:pkg.author,license:pkg.license,dependencies:pkg.dependencies},null,2)+'\n');
   console.log('Desktop app staged without games, fixtures or development dependencies: '+output);return output;
 }

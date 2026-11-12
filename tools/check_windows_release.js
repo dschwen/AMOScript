@@ -13,10 +13,10 @@ function checkRelease(directory){
     assert.ok(fs.statSync(path.join(root,'runtime/LICENSE')).size>0);assert.ok(fs.statSync(path.join(root,'LICENSE')).size>0);assert.ok(fs.statSync(path.join(root,'node_modules/binary-search-bounds/LICENSE')).size>0);
     for(const excluded of ['.git','asm_neu','demos','test','examples/ASM','examples/Roller2','node_modules/playwright'])assert.ok(!fs.existsSync(path.join(root,excluded)),excluded+' must not be bundled');
     const input=path.join(work,'sample input.AMOS'),output=path.join(work,'compiled output.js');fs.copyFileSync(path.join(root,'examples/Test21.AMOS'),input);
-    tool('amoscript',['--help']);tool('amoscript',[input,output]);
+    tool('amoscript',['--help']);tool('amoscript',[input,output,'--minify']);
     const text=run(node,['-e',`require(${JSON.stringify(output)})({ setTimeout }).tick(1000)`]).stdout.trim().split(/\r?\n/);assert.deepStrictEqual(text,['Start','One','Two','Three','End']);
     const original=fs.readFileSync(output);assert.match(tool('amoscript',[input,output],1).stderr,/Refusing to overwrite/);assert.deepStrictEqual(fs.readFileSync(output),original);
-    const html=path.join(work,'browser sample.html');tool('page',[path.join(root,'examples/Graphics.AMOS'),html,'--title','Release smoke sample']);assert.match(fs.readFileSync(html,'utf8'),/Play Game/);assert.match(fs.readFileSync(html,'utf8'),/Release smoke sample/);
+    const html=path.join(work,'browser sample.html');tool('page',[path.join(root,'examples/Graphics.AMOS'),html,'--minify','--title','Release smoke sample']);assert.match(fs.readFileSync(html,'utf8'),/Play Game/);assert.match(fs.readFileSync(html,'utf8'),/Release smoke sample/);
     const projectFile=path.join(work,'sample.amos-project.json');fs.writeFileSync(projectFile,JSON.stringify({version:1,main:path.join(root,'examples/Graphics.AMOS'),mounts:[]}));tool('project',[projectFile,path.join(work,'project.html')]);
     if(process.platform==='win32'){
       const result=run('cmd.exe',['/d','/s','/c','""'+path.join(root,'node.cmd')+'" --version"'],0,{windowsVerbatimArguments:true});assert.strictEqual(result.stdout.trim(),info.nodeVersion);

@@ -1,0 +1,253 @@
+{
+  "node": "v24.22.2",
+  "terser": "5.51.2",
+  "optimize": false,
+  "gzipLevel": 9,
+  "note": "Same source and full declared assets for every variant. Module excludes browser harness/assets. HTML includes both. Timings are single-run observations, not execution-speed benchmarks.",
+  "results": [
+    {
+      "name": "Test21",
+      "source": "examples/Test21.AMOS",
+      "sha256": "6968ba42c4a1ffef9db2f0885e572728df29f5c504b46dc508a10eee870396cd",
+      "assetFiles": 0,
+      "assetBytes": 0,
+      "variants": [
+        {
+          "name": "debug",
+          "module": {
+            "bytes": 577788,
+            "gzipBytes": 155811,
+            "buildMs": 1
+          },
+          "html": {
+            "bytes": 703399,
+            "gzipBytes": 190690,
+            "buildMs": 6
+          }
+        },
+        {
+          "name": "regular",
+          "module": {
+            "bytes": 577323,
+            "gzipBytes": 155723,
+            "buildMs": 1
+          },
+          "html": {
+            "bytes": 702935,
+            "gzipBytes": 190596,
+            "buildMs": 2
+          }
+        },
+        {
+          "name": "debug-minified",
+          "module": {
+            "bytes": 314621,
+            "gzipBytes": 106374,
+            "buildMs": 1754
+          },
+          "html": {
+            "bytes": 393709,
+            "gzipBytes": 132935,
+            "buildMs": 2227
+          }
+        },
+        {
+          "name": "regular-minified",
+          "module": {
+            "bytes": 314272,
+            "gzipBytes": 106289,
+            "buildMs": 1567
+          },
+          "html": {
+            "bytes": 393360,
+            "gzipBytes": 132846,
+            "buildMs": 2213
+          }
+        }
+      ]
+    },
+    {
+      "name": "Graphics",
+      "source": "examples/Graphics.AMOS",
+      "sha256": "77a4b19528252274374166b2f5073471b8f98e8899cd61eb9056ffe56c7ad907",
+      "assetFiles": 0,
+      "assetBytes": 0,
+      "variants": [
+        {
+          "name": "debug",
+          "module": {
+            "bytes": 582443,
+            "gzipBytes": 156401,
+            "buildMs": 1
+          },
+          "html": {
+            "bytes": 708058,
+            "gzipBytes": 191342,
+            "buildMs": 2
+          }
+        },
+        {
+          "name": "regular",
+          "module": {
+            "bytes": 581250,
+            "gzipBytes": 156189,
+            "buildMs": 1
+          },
+          "html": {
+            "bytes": 706866,
+            "gzipBytes": 191118,
+            "buildMs": 2
+          }
+        },
+        {
+          "name": "debug-minified",
+          "module": {
+            "bytes": 318204,
+            "gzipBytes": 106905,
+            "buildMs": 1495
+          },
+          "html": {
+            "bytes": 397296,
+            "gzipBytes": 133540,
+            "buildMs": 2229
+          }
+        },
+        {
+          "name": "regular-minified",
+          "module": {
+            "bytes": 317318,
+            "gzipBytes": 106690,
+            "buildMs": 1507
+          },
+          "html": {
+            "bytes": 396410,
+            "gzipBytes": 133319,
+            "buildMs": 2210
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wonderland",
+      "source": "examples/Wonderland/Wonderland.AMOS",
+      "sha256": "0ce13c006150237086c0787bfbd717c8bfa2862d2b8a61ac83d5637cb2082389",
+      "assetFiles": 7,
+      "assetBytes": 71494,
+      "variants": [
+        {
+          "name": "debug",
+          "module": {
+            "bytes": 893292,
+            "gzipBytes": 183591,
+            "buildMs": 3
+          },
+          "html": {
+            "bytes": 1114412,
+            "gzipBytes": 263691,
+            "buildMs": 12
+          }
+        },
+        {
+          "name": "regular",
+          "module": {
+            "bytes": 835807,
+            "gzipBytes": 176827,
+            "buildMs": 2
+          },
+          "html": {
+            "bytes": 1056928,
+            "gzipBytes": 256678,
+            "buildMs": 8
+          }
+        },
+        {
+          "name": "debug-minified",
+          "module": {
+            "bytes": 543724,
+            "gzipBytes": 132802,
+            "buildMs": 2324
+          },
+          "html": {
+            "bytes": 718293,
+            "gzipBytes": 204314,
+            "buildMs": 2863
+          }
+        },
+        {
+          "name": "regular-minified",
+          "module": {
+            "bytes": 499729,
+            "gzipBytes": 126186,
+            "buildMs": 1979
+          },
+          "html": {
+            "bytes": 674298,
+            "gzipBytes": 197856,
+            "buildMs": 2701
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roller II",
+      "source": "examples/Roller2/current/Roller II.AMOS",
+      "sha256": "65c99b0e31ffbe6dbc9b7ff1fc0d935ede0b4456edfa409c40e68d3484d9d6c4",
+      "assetFiles": 34,
+      "assetBytes": 460441,
+      "variants": [
+        {
+          "name": "debug",
+          "module": {
+            "bytes": 1077900,
+            "gzipBytes": 200461,
+            "buildMs": 4
+          },
+          "html": {
+            "bytes": 1818331,
+            "gzipBytes": 519888,
+            "buildMs": 38
+          }
+        },
+        {
+          "name": "regular",
+          "module": {
+            "bytes": 961352,
+            "gzipBytes": 187328,
+            "buildMs": 4
+          },
+          "html": {
+            "bytes": 1701784,
+            "gzipBytes": 506881,
+            "buildMs": 16
+          }
+        },
+        {
+          "name": "debug-minified",
+          "module": {
+            "bytes": 651906,
+            "gzipBytes": 148032,
+            "buildMs": 2510
+          },
+          "html": {
+            "bytes": 1345680,
+            "gzipBytes": 458479,
+            "buildMs": 3537
+          }
+        },
+        {
+          "name": "regular-minified",
+          "module": {
+            "bytes": 562447,
+            "gzipBytes": 135214,
+            "buildMs": 2495
+          },
+          "html": {
+            "bytes": 1256221,
+            "gzipBytes": 446012,
+            "buildMs": 3911
+          }
+        }
+      ]
+    }
+  ]
+}

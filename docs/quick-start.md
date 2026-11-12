@@ -21,7 +21,7 @@ For the graphical directory-import/project workflow, see
 | Run automated browser tests | Development dependencies plus the Playwright Chromium download. Linux may need browser system packages. |
 | Regenerate independent reference fixtures | Python 3 for the scripts in `tools/reference/`; this is a contributor task. Existing fixtures are checked in. |
 
-The compiler's production dependency is JavaScript. Visual Studio, Xcode, a C/C++
+The compiler's production dependencies are JavaScript. Visual Studio, Xcode, a C/C++
 compiler, Make, Java, Python and a global Playwright installation are not needed
 to compile or build an HTML page. A generated page contains its runtime and
 preloaded assets; people playing it do not need Node or npm.
@@ -291,4 +291,4 @@ for CI, reference tooling and generated artifacts.
 To update without Git, download a new release into a **new folder**. Keep your
 own `.AMOS` files/assets outside the old tool folder, and copy only the files you
 intend to carry forward. A source ZIP needs `npm ci --omit=dev` again; a portable
-Windows ZIP already includes its production dependency and Node runtime.
+Windows ZIP already includes its production dependencies and Node runtime.

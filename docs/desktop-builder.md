@@ -116,7 +116,7 @@ Linux AppImage execution depends on the host's AppImage/FUSE and Chromium sandbo
 support; the unpacked app can also be launched directly on a suitable system.
 
 The staging tool copies only application/compiler sources, the production
-JavaScript dependency and notices. It excludes games, fixture data, development
+JavaScript dependencies and notices. It excludes games, fixture data, development
 tools and local uploads. Root package version determines the packaged app version.
 Tagged release CI builds installers on Windows, macOS and Linux, alongside the
 portable Windows CLI ZIP, after the test gates pass. Existing release tags are
@@ -172,3 +172,9 @@ A failed ExecBase read now explains the compatibility setting. In desktop
 previews, **Configure AmigaOS compatibility** opens Advanced and focuses the
 selector without choosing a version. Select the version expected by the program,
 then build again. See [AmigaOS memory-read diagnostics](amigaos-memory-diagnostics-plan.md).
+
+## Smaller output
+
+Use the optional Minify setting (`--minify` for CLI/page builds). Regular exports
+omit AMOS line/byte metadata; Debug builds retain it. See [size options and
+measured reductions](output-size.md) for API defaults, benchmarks and examples.
